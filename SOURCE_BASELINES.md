@@ -47,3 +47,5 @@ On 2026-10-01 the user requested publication. Authenticated ownership and absenc
 rechecked, and a new **private** `wistroneq3300/pa-cycle-lab` repository was created.
 Only this new repository is configured as `origin`; the publication branch is
 `codex/neutrino-v1`. Neither source repository was modified or pushed to.
+The user subsequently requested public visibility on 2026-10-01. This new repository
+was changed to **public**, and unauthenticated access was verified.

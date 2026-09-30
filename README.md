@@ -69,7 +69,7 @@ n0 故意缺少預期 hostname，會顯示不可執行；不會猜測補值。
 
 `CYCLE_INSTANCE` 可指定此 checkout 內的相對子目錄，預設 `data`。不接受指向外部的資料目錄。
 `PA_DATA_DIR` 由 integration 強制設成這個獨立目錄，不沿用原部署環境變數。
-新 repo 的獨立 origin 為 [wistroneq3300/pa-cycle-lab](https://github.com/wistroneq3300/pa-cycle-lab)（Private），
+新 repo 的獨立 origin 為 [wistroneq3300/pa-cycle-lab](https://github.com/wistroneq3300/pa-cycle-lab)（Public），
 發布分支為 `codex/neutrino-v1`。詳細來源見 [SOURCE_BASELINES.md](SOURCE_BASELINES.md)。
 
 ## 實機設定（尚未執行）
