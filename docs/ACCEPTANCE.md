@@ -28,7 +28,7 @@ These runtime outputs are ignored by Git; this record is committed.
 | ID | Status / evidence / limit |
 | --- | --- |
 | A01 | PASS isolation: only remote read operations; no original checkout touched. No original local status was applicable. |
-| A02 | PASS offline: new Git with no remote, project venv, isolated data/runtime/artifacts, loopback port 9180. |
+| A02 | PASS offline: independent Git, project venv, isolated data/runtime/artifacts, loopback port 9180. Subsequent user-authorized publication uses only the new private `wistroneq3300/pa-cycle-lab` origin. |
 | A03 | PASS browser: Cycle Test button inside each project-management row. |
 | A04 | PASS: rejects missing, duplicate, foreign-project and unsupported targets. |
 | A05 | PASS: explicit neutrino profile, server-only selection, no browser script path/command. |

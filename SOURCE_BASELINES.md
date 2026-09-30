@@ -42,4 +42,8 @@ Old deployment scripts/docs in the copied trees are historical references, not c
 
 The target name `wistroneq3300/pa-cycle-lab` returned “Repository not found” during the
 read-only remote check; this does not prove absence of a private inaccessible repo.
-No remote was created or set and nothing was pushed. Any later publication must re-check ownership/existence.
+During the initial local delivery no remote was set and nothing was pushed.
+On 2026-10-01 the user requested publication. Authenticated ownership and absence were
+rechecked, and a new **private** `wistroneq3300/pa-cycle-lab` repository was created.
+Only this new repository is configured as `origin`; the publication branch is
+`codex/neutrino-v1`. Neither source repository was modified or pushed to.
