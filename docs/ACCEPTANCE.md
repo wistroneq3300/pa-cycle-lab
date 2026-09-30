@@ -82,3 +82,83 @@ silent test errors. No test used real SSH/IPMI transport to a hardware target.
 See [Run2 item-by-item review](RUN2_HARDENING.md) and
 [Linux acceptance procedure](LINUX_ACCEPTANCE.md). Evidence logs are local,
 Git-ignored `data/run2-integration-test.log` and `data/run2-engine-test.log`.
+
+## Cycle Live Console — 2026-10-01
+
+Based on completed Run2 `53ee74fad800c32c012369b87b501119184f68b0`, branch
+`codex/live-console`, version `0.1.2-neutrino-v1-console`. Only pa-cycle-lab changed.
+The source repositories remain untouched. Architecture/API documentation is in
+[LIVE_CONSOLE.md](LIVE_CONSOLE.md).
+
+| Validation | Final result |
+| --- | --- |
+| Cycle integration + Run2 + Console unit/regression | **74 PASS, 0 FAIL, 0 SKIP** in 133.659s: existing 58 plus 16 Console tests |
+| Vera full regression | **101 PASS, 0 FAIL, 14 SKIP**, 115 discovered, 7.888s |
+| Copied PA unit/mock pytest suite | **42 PASS, 0 FAIL, 0 SKIP**, 3.09s; two dependency deprecation warnings |
+| Total Python tests | **217 PASS, 0 FAIL, 14 SKIP** |
+| Independent process lifecycle smoke | **PASS, SYNTHETIC**: Web and scheduler replaced; worker PID unchanged, history preserved and incremental cursor valid; stop after round 2 → INCOMPLETE |
+| Edge / Playwright | **PASS, SYNTHETIC**: original flow and 25 Console checks; zero page errors |
+| Persistent long-log test | **PASS**: 100,000-row fixture, indexed 500-row tail bounded below 5s, filtered history and snapshot-limited streaming download |
+| Browser long-log test | **PASS**: 11,500 unique events plus a 500-row history page; live buffer ≤3,000 and DOM ≤2,000; no HTML execution |
+| Active-reading behavior | **PASS**: Auto Scroll OFF retains visible event within 2px during incoming pages; evicted anchor shows history-recovery notice |
+| Themes / responsive | **PASS**: 1440×1000 and 390×844, both themes, no dialog horizontal overflow; level contrast ≥5.90:1 light / ≥8.02:1 dark; placeholder 5.49:1 / 6.66:1 |
+| Security / concurrency / ordering review | No unresolved P0/P1 found in reviewed changes; field allowlist, before-write redaction, escaped UI text, secured evidence refs, append transaction ordering and terminal guards tested |
+| Syntax / whitespace | Python compile, JS syntax and `git diff --check` passed |
+| Linux/systemd and live hardware | **NOT RUN; no Hardware PASS claim** |
+
+The 14 skips remain 13 Bash fixture tests (Bash absent on this Windows host) and
+one Linux-root cross-UID test. A Vera regression using a 30ms synthetic boot
+deadline failed under simultaneous test load; the targeted test and subsequent
+complete standalone Vera suite passed. No timeout or safety gate was weakened.
+
+Corrections found and verified during this feature review:
+
+- Paused history now identifies itself as a history view.
+- Earlier history starts before the rendered window, including buffered rows
+  that were not rendered; it does not skip them.
+- A fresh UI reviewer found low dark-placeholder contrast and reading-position
+  drift at the DOM limit. Both were corrected, regression-tested and scored
+  **resolved** in a scoped **ship** verdict; this is not hardware acceptance.
+- The inherited broker HTTP fixture previously fell through to a deployment age
+  credential file despite using a fake SP-X client. Its test-only credential cache
+  now uses dummy data. No production credential handling or remote-route gate
+  changed. Missing pytest/form-parser test dependencies were installed in `.venv`.
+
+The Console tests cover SQLite reopen/refresh persistence, cursor paging, local
+and server node/error/search filters, credential/environment/header redaction,
+streamed download, unsafe artifact paths, concurrent writers, terminal ordering,
+stop-after-round, worker-loss INCOMPLETE, response-loss ambiguity, and event-write
+failure after dispatch without retry. Browser checks additionally cover paused
+view while a job completes, copied/downloaded logs, stale aborted responses,
+automatic recovery after a failed read, evidence links, and close/reopen.
+
+Reproduction (project `.venv`, no hardware):
+
+```text
+python -m unittest discover -s tests -p test_*.py -v
+# From engine/vera_cycle, using the same venv interpreter:
+python -m unittest discover -s dev/tests -v
+# From repository root:
+python -m pip install -r tests/requirements.txt
+python tests/legacy_smoke.py
+# Set PLAYWRIGHT_MODULE to the local Playwright package, then:
+python tests/process_smoke.py --browser
+```
+
+`legacy_smoke.py` confines inherited broker paths and pytest temporary files to
+this repository and denies non-loopback socket connections. Testing the copied
+broker module in isolation does not enable Legacy KVM/SSH/Terminal/AI routes in
+PA Cycle Lab. The normal Cycle integration suite still tests those route blocks.
+
+Local ignored evidence: `data/console-integration-test.log`,
+`data/console-engine-test.log`, `data/console-legacy-test.log`,
+`data/console-process-test.log`, `data/process-smoke-results.json`,
+`data/console-browser-results.json`, `data/browser-results.json`, and
+`.impeccable/review/console-{desktop,mobile}-{light,dark}.png`.
+Final process instance: `data/process-smoke-b4de3a015cdc4147807f70a83c64b1c8`.
+
+Remaining acceptance: actual Linux service restarts/SIGKILL/controller reboot,
+KillMode=process, cross-UID/service-account and credential/artifact permissions,
+real disk-full/read-only behavior, and user-designated Neutrino target identity,
+physical power/AUX scope, reboot recovery and hardware evidence. Offline fault
+injection and synthetic success do not substitute for these checks.

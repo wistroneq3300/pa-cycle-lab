@@ -17,7 +17,7 @@ CYCLE_ROUTES=(
     ('GET|POST',r'/api/projects/[^/]+/cycle/jobs'),
     ('GET',r'/api/projects/[^/]+/cycle/jobs/[^/]+'),
     ('POST',r'/api/projects/[^/]+/cycle/jobs/[^/]+/(confirm|stop)'),
-    ('GET',r'/api/projects/[^/]+/cycle/jobs/[^/]+/(events|artifacts|files/.+)'),
+    ('GET',r'/api/projects/[^/]+/cycle/jobs/[^/]+/(events(?:/download)?|artifacts|files/.+)'),
 )
 MANUAL_CONTROL_ROUTES=(
     ('POST',r'/api/machine/[^/]+/(power|reboot)'),

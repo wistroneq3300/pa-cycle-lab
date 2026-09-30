@@ -100,11 +100,18 @@ def run_job(store, job_id, transport_factory=None):
                 snap=compact(session)
                 persistence_guard()
                 try:
-                    store.update(job_id,event=dict(phase=phase,machine_id=session.machine_id,loop=snap['loop']),
+                    store.update(job_id,event=dict(phase='CYCLE',event_type='STAGE',level='INFO',message='Node stage updated',
+                                                  machine_id=session.machine_id,tray=session.target.tray,node=session.target.node,loop=snap['loop']),
                                  nodes=[compact(s) for s in sessions])
                 except sqlite3.Error as exc:
                     persistence_failed.set()
                     raise EvidencePersistenceError('Evidence persistence failure: event journal') from exc
+        def observe(session, event, secret_values):
+            try:
+                store.append_event(job_id,dict(event,machine_id=session.machine_id),secrets=secret_values)
+            except Exception as exc:
+                persistence_failed.set()
+                raise EvidencePersistenceError('Evidence persistence failure: structured event journal') from exc
         def heartbeat():
             while not done.wait(2):
                 try: persistence_guard()
@@ -132,7 +139,7 @@ def run_job(store, job_id, transport_factory=None):
             root.mkdir(exist_ok=True)
             if engine_hash()!=job['engine_hash']: raise RuntimeError('Engine changed since job creation')
             options=SimpleNamespace(**{k:v for k,v in job['config'].items() if k in {'cycle_mode','channel','boot_timeout'}},
-                                    poll_interval=0.05 if job['synthetic'] else 5,memory_min_ratio=.9)
+                                    poll_interval=0.05 if job['synthetic'] else 5,memory_min_ratio=.9,loop_limit=job['config']['limits']['loops'])
             script=(ENGINE/'neutrino_config.sh').read_bytes().replace(b'\r\n',b'\n')
             policy=(ENGINE/'issue_policy.md').read_text(encoding='utf-8')
             rules=[]  # V1 policy exceptions are explicitly inactive; PRE-relative classification only.
@@ -156,6 +163,9 @@ def run_job(store, job_id, transport_factory=None):
                                         ports={r:machine.get(r+'_port',22) for r in ('os','bmc')},cipher=machine.get('ipmi_cipher',17))
                 session=NodeSession(target,transport,root,job['run_id'],script,digest(script),options,rules)
                 session.machine_id=machine['name']
+                secret_values=tuple(v for item in secrets.values() if isinstance(item,dict) for v in item.values() if isinstance(v,str))
+                secret_values+=tuple(getattr(transport,'credentials',{}).values())
+                session.observer=lambda event,s=session,values=secret_values:observe(s,event,values)
                 session.dispatch_guard=persistence_guard
                 session.progress=lambda phase,s=session:emit(s,phase)
                 sessions.append(session)
@@ -167,6 +177,7 @@ def run_job(store, job_id, transport_factory=None):
                           policy_exceptions='NOT_ACTIVE_IN_V1',
                           nodes=[s.node for s in sessions])
             # PRE can install packages. The UI discloses this before job creation.
+            store.append_event(job_id,dict(phase='PRE',level='PRE',event_type='CONTROLLER_DEPENDENCY_CHECK',message='Checking Controller dependencies'))
             dependencies=sessions[0].transport.local_dependencies()
             atomic_write(root/'pre_orchestrator_dependencies.txt',f'Exit: {dependencies.code}\n{dependencies.output}')
             parallel('precheck',sessions)
@@ -225,6 +236,8 @@ def run_job(store, job_id, transport_factory=None):
             state='INCOMPLETE' if campaign and campaign['state']=='RUNNING' else 'ERROR'
             evidence_failure=isinstance(exc,(EvidencePersistenceError,OSError,sqlite3.Error)) or persistence_failed.is_set()
             reason=('Evidence persistence failure: ' if evidence_failure else 'Execution failed: ')+type(exc).__name__
+            try: store.append_event(job_id,dict(phase='JOB',level='ERROR',event_type='WORKER_ERROR',message='Worker execution error; no command replay',detail=reason))
+            except Exception: pass
             if evidence_failure: persistence_failed.set()
             try: atomic_write(root/'runner_error.txt',reason+'\n')
             except Exception: pass
@@ -267,6 +280,8 @@ def run_job(store, job_id, transport_factory=None):
 
 def recover(store,job):
     reason='Worker died; retained evidence, no automatic resume'
+    store.update(job['id'],event=dict(phase='WORKER_LOST',event_type='WORKER_LOST',level='ERROR',
+                                    message='Worker lost; recovery retains evidence and never replays commands'))
     try:
         root=ARTIFACTS/job['id']; journal=root/'campaign.json'
         if journal.is_file():

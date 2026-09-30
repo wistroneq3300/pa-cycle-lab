@@ -59,12 +59,18 @@ try:
     response=client.post(base+'/'+jid+'/confirm',json={'version':ready['pre']['version'],'machine_ids':ready['pre']['runnable_ids']})
     response.raise_for_status()
     wait_for(lambda:any(n['completed']>=1 for n in read_job()['nodes']))
+    console_before=client.get(base+'/'+jid+'/events').json()['events']
+    assert console_before
     terminate(web_pid);first.wait(10);pids.discard(web_pid)
     launch('run.py','web','--port',str(port))
     second_pid=wait_for(lambda:client.get('/api/cycle/status').json().get('web_pid'));pids.add(second_pid)
     assert second_pid!=web_pid
     reconnected=read_job()
     assert reconnected['worker_pid']==worker_pid
+    console_after=client.get(base+'/'+jid+'/events').json()['events']
+    assert console_after[:len(console_before)]==console_before
+    incremental=client.get(base+'/'+jid+'/events',params={'after':console_before[-1]['sequence']}).json()['events']
+    assert all(e['sequence']>console_before[-1]['sequence'] for e in incremental)
     assert reconnected['state']=='RUNNING',reconnected['state']
     # Scheduler death/restart must neither kill nor replay the independent worker.
     terminate(runner_pid);scheduler.wait(10);pids.discard(runner_pid)
@@ -82,9 +88,14 @@ try:
     assert len({n['completed'] for n in final['nodes']})==1
     pids.discard(worker_pid)
     if '--browser' in sys.argv:
-        subprocess.run(['node','tests/browser.cjs'],cwd=ROOT,
-                       env={**env,'PA_CYCLE_BASE_URL':url},check=True,creationflags=flags)
+        browser_result=subprocess.run(['node','tests/browser.cjs'],cwd=ROOT,
+                       env={**env,'PA_CYCLE_BASE_URL':url},capture_output=True,text=True,encoding='utf-8',
+                       timeout=180,creationflags=flags)
+        print(browser_result.stdout,flush=True)
+        if browser_result.returncode: print(browser_result.stderr,flush=True)
+        browser_result.check_returncode()
     result={'passed':True,'instance':instance,'job_id':jid,'web_pid_changed':True,'worker_pid_unchanged':True,
+            'console_history_survived_web_restart':True,'incremental_events_verified':True,
             'scheduler_pid_changed':True,'worker_survived_scheduler_restart':True,
             'state':final['state'],'completed_rounds':final['nodes'][0]['completed']}
     (ROOT/'data/process-smoke-results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')

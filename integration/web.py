@@ -12,8 +12,8 @@ import sys
 import sqlite3
 import time
 from urllib.parse import unquote
-from fastapi import HTTPException, Request
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi import HTTPException, Request, Query
+from fastapi.responses import JSONResponse, FileResponse, StreamingResponse
 from starlette.concurrency import run_in_threadpool
 from .settings import ROOT, DATA, MODE, ARTIFACTS, RUNTIME
 from .inventory import synchronized, mutate, local_write, validate_machine
@@ -22,6 +22,7 @@ from . import control as manual
 from .credentials import load_credentials
 from .store import Store, Conflict, SAFE_FIELDS, TERMINAL, scopes, target_reason, validate_request, fingerprint
 from cycle_core import EvidencePersistenceError
+from .events import log_line
 
 sys.path.insert(0,str(ROOT/'app'))
 import main as pa
@@ -148,9 +149,38 @@ def stop(project:str,job_id:str,request:Request):
     return store.stop(job_id,actor(request))
 
 @app.get('/api/projects/{project}/cycle/jobs/{job_id}/events')
-def events(project:str,job_id:str,after:int=0):
+def events(project:str,job_id:str,after:int=Query(0,ge=0,le=9223372036854775807),limit:int=Query(500,ge=1,le=500),
+           before:int|None=Query(None,ge=1,le=9223372036854775807),tail:bool=False,machine_id:str|None=Query(None,max_length=128),
+           errors_only:bool=False,search:str=Query('',max_length=200)):
     scoped(project,job_id)
-    return {'events':store.events(job_id,max(0,after))}
+    page=store.event_page(job_id,after,limit,before,tail,machine_id,errors_only,search)
+    for event in page['events']: secure_event_evidence(job_id,event)
+    return JSONResponse(page,headers={'Cache-Control':'no-store'})
+
+
+def secure_event_evidence(job_id,event):
+    if event.get('evidence'):
+        try: artifact_path(job_id,event['evidence'])
+        except HTTPException: event.pop('evidence',None)
+    return event
+
+
+@app.get('/api/projects/{project}/cycle/jobs/{job_id}/events/download')
+def download_events(project:str,job_id:str):
+    job=scoped(project,job_id)
+    snapshot=store.event_page(job_id,tail=True,limit=1)['next_sequence']
+    event_store=store
+    def stream():
+        yield f"Cycle Live Console | Job {job_id} | {'SYNTHETIC: no hardware operated' if job['synthetic'] else 'LIVE'} | retained events through #{snapshot}\n"
+        after=0
+        while after<snapshot:
+            page=event_store.event_page(job_id,after,until=snapshot)
+            if not page['events']: break
+            for event in page['events']: yield log_line(secure_event_evidence(job_id,event))
+            after=page['next_sequence']
+    return StreamingResponse(stream(),media_type='text/plain; charset=utf-8',
+                             headers={'Content-Disposition':f'attachment; filename="cycle-{job_id}.log"',
+                                      'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'})
 
 def public_artifact(path):
     return not any(p.startswith('.') or any(word in p.lower() for word in ('credential','password','secret','private_key','id_rsa','id_ed25519')) for p in Path(path).parts)

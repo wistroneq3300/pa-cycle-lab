@@ -11,6 +11,7 @@ import sqlite3
 import time
 import uuid
 from .settings import DATA, MODE, ENGINE, ROOT
+from .events import structured
 
 TERMINAL = {'COMPLETE', 'INCOMPLETE', 'CANCELLED', 'BLOCKED', 'ERROR'}
 SAFE_FIELDS = ('name','project','tray','node','os_ip','bmc_ip','os_hostname','bmc_hostname',
@@ -73,6 +74,8 @@ class Store:
                 CREATE TABLE IF NOT EXISTS events(seq INTEGER PRIMARY KEY AUTOINCREMENT,
                     job_id TEXT NOT NULL, at REAL NOT NULL, data TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS controls(id TEXT PRIMARY KEY, data TEXT NOT NULL);
+                CREATE INDEX IF NOT EXISTS events_job_sequence ON events(job_id,seq);
+                CREATE INDEX IF NOT EXISTS events_job_machine_sequence ON events(job_id,json_extract(data,'$.machine_id'),seq);
             ''')
 
     @contextmanager
@@ -101,8 +104,20 @@ class Store:
         db.execute('UPDATE jobs SET state=?,updated=?,data=? WHERE id=?',
                    (job['state'],job['updated_at'],encode(job),job['id']))
         if event:
-            db.execute('INSERT INTO events(job_id,at,data) VALUES(?,?,?)',
-                       (job['id'],job['updated_at'],encode(dict(job_id=job['id'],run_id=job.get('run_id'),**event))))
+            self._event(db,job['id'],job.get('run_id'),event,at=job['updated_at'])
+
+    def _event(self, db, job_id, run_id, event, at=None, secrets=()):
+        at=time.time() if at is None else at
+        payload=structured(job_id,run_id,event,at,secrets)
+        return db.execute('INSERT INTO events(job_id,at,data) VALUES(?,?,?)',(job_id,at,encode(payload))).lastrowid
+
+    def append_event(self, job_id, event, secrets=()):
+        """Append only; never rewrite Job state, snapshots, locks or heartbeat."""
+        with self.tx() as db:
+            row=db.execute('SELECT state FROM jobs WHERE id=?',(job_id,)).fetchone()
+            if row is None: raise KeyError(job_id)
+            if row['state'] in TERMINAL: return None
+            return self._event(db,job_id,'cycle-'+job_id,event,secrets=secrets)
 
     def get(self, job_id):
         with self.tx() as db:
@@ -280,6 +295,8 @@ class Store:
             elif job['state'] == 'RUNNING':
                 job['state']='STOP_REQUESTED'
             self._save(db,job,{'phase':'STOP_REQUESTED','actor':actor})
+            if job['state']=='STOP_REQUESTED':
+                self._event(db,job_id,job.get('run_id'),{'phase':'STOPPING_AFTER_ROUND'})
             return job
 
     def finish(self, job_id, state, reason='', **fields):
@@ -294,10 +311,31 @@ class Store:
             db.execute('DELETE FROM locks WHERE owner=?',(job_id,))
             return job
 
+    def event_page(self, job_id, after=0, limit=500, before=None, tail=False, machine_id=None, errors_only=False, search='', until=None):
+        """Read-only, indexed keyset pages. No writer reservation during polling/export."""
+        limit=max(1,min(500,limit))
+        db=sqlite3.connect(f'{self.path.resolve().as_uri()}?mode=ro',uri=True,timeout=5)
+        db.row_factory=sqlite3.Row
+        try:
+            clauses=['job_id=?','seq>?']; args=[job_id,max(0,after)]
+            if before is not None: clauses.append('seq<?'); args.append(before)
+            if until is not None: clauses.append('seq<=?'); args.append(until)
+            if machine_id: clauses.append("json_extract(data,'$.machine_id')=?"); args.append(machine_id)
+            if errors_only: clauses.append("(json_extract(data,'$.level') IN ('FAIL','ERROR') OR json_extract(data,'$.phase') IN ('ERROR','BLOCKED','WORKER_LOST'))")
+            if search:
+                clauses.append("instr(lower(coalesce(json_extract(data,'$.message'),'') || ' ' || coalesce(json_extract(data,'$.detail'),'')),lower(?))>0")
+                args.append(search[:200])
+            descending=tail or before is not None
+            rows=db.execute('SELECT seq,at,data FROM events WHERE '+' AND '.join(clauses)+' ORDER BY seq '+('DESC' if descending else 'ASC')+' LIMIT ?',(*args,limit+1)).fetchall()
+            more=len(rows)>limit;rows=rows[:limit]
+            if descending: rows.reverse()
+            events=[dict(sequence=r['seq'],time=r['at'],**structured(job_id,'cycle-'+job_id,json.loads(r['data']),r['at'])) for r in rows]
+            return dict(events=events,has_more=more,next_sequence=events[-1]['sequence'] if events else after,
+                        oldest_sequence=events[0]['sequence'] if events else None)
+        finally: db.close()
+
     def events(self, job_id, after):
-        with self.tx() as db:
-            return [dict(sequence=r['seq'],time=r['at'],**json.loads(r['data'])) for r in
-                    db.execute('SELECT * FROM events WHERE job_id=? AND seq>? ORDER BY seq LIMIT 500',(job_id,after))]
+        return self.event_page(job_id,after)['events']
 
 def validate_request(body):
     allowed={'machine_ids','cycle_profile','cycle_mode','channel','limits','boot_timeout','idempotency_key'}

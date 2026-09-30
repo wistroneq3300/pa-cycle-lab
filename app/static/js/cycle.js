@@ -3,6 +3,7 @@
   'use strict';
   const terminal = new Set(['COMPLETE','INCOMPLETE','CANCELLED','BLOCKED','ERROR']);
   const labels = {CREATED:'等待 runner',PRE_RUNNING:'PRE 檢查中',AWAITING_CONFIRMATION:'等待確認',RUNNING:'執行中',STOP_REQUESTED:'本輪完成後停止',COMPLETE:'已完成',INCOMPLETE:'未完成',CANCELLED:'已取消',BLOCKED:'無法執行',ERROR:'執行錯誤'};
+  let consoleView;
   let project='', targets=[], selected=new Set(), current=null, timer=null, requestKey=null, opener=null, generation=0;
   const el = id => document.getElementById(id);
   const escape = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -42,6 +43,7 @@
   function renderJob(job) {
     if(current?.id!==job.id) el('cycle-file-list').textContent='';
     current=job;
+    consoleView.setJob(job,`${base()}/jobs/${job.id}`);
     el('cycle-detail').hidden=false;
     const main=el('cycle-detail').parentElement;
     if(main.firstElementChild!==el('cycle-detail')) main.prepend(el('cycle-detail'));
@@ -49,7 +51,7 @@
     el('cycle-job-id').textContent=job.id;
     el('cycle-job-meta').textContent=`${job.config.cycle_mode} · ${job.config.channel} · ${job.targets.length} 台 · 建立 ${date(job.created_at)} · ${job.synthetic?'SYNTHETIC':'LIVE'}`;
     el('cycle-health').textContent=`健康結果：${job.health} · ${job.stop_reason || '執行完成與硬體健康分別判定'}`;
-    el('cycle-progress').innerHTML=job.nodes.map(n=>`<tr><th scope="row">${escape(n.machine_id)}</th><td>${n.loop}</td><td>${n.completed}</td><td>${escape(n.stage)}</td><td>${escape(n.health)}</td><td>${n.first_this_round===null?'待定':n.first_this_round}</td><td>${n.unique_issues}</td><td>${escape(date(n.updated_at))}<small>${escape(n.stop_reason || n.blocked.join('；'))}</small></td></tr>`).join('') || '<tr><td colspan="8">Runner 尚未回報，任務已保存。</td></tr>';
+    el('cycle-progress').innerHTML=job.nodes.map(n=>`<tr><th scope="row">${escape(n.machine_id)}</th><td>${n.loop}</td><td>${n.completed}</td><td>${n.attempts}</td><td>${escape(n.stage)}</td><td>${escape(n.health)}</td><td>${n.first_this_round===null?'待定':n.first_this_round}</td><td>${n.unique_issues}</td><td>${escape(date(n.updated_at))}<small>${escape(n.stop_reason || n.blocked.join('；'))}</small></td></tr>`).join('') || '<tr><td colspan="9">Runner 尚未回報，任務已保存。</td></tr>';
     const pre=job.pre;
     el('cycle-pre').hidden=!pre;
     if(pre) {
@@ -96,7 +98,7 @@
     renderTargets();
   }
   window.openCycleTest=async name=>{
-    generation++; project=name; selected=new Set(); current=null; requestKey=null;
+    consoleView.reset(); generation++; project=name; selected=new Set(); current=null; requestKey=null;
     const serial=generation;
     opener=document.activeElement;
     el('cycle-title').textContent=`${name} · Cycle Test`;
@@ -107,7 +109,7 @@
     if(serial!==generation)return;
     clearInterval(timer); timer=setInterval(refresh,1500);
   };
-  function close() { generation++; clearInterval(timer); el('cycle-panel').close(); opener?.focus(); }
+  function close() { consoleView.close(); generation++; clearInterval(timer); el('cycle-panel').close(); opener?.focus(); }
   function initialize() {
     const dialog=document.createElement('dialog'); dialog.id='cycle-panel';
     dialog.setAttribute('aria-labelledby','cycle-title');
@@ -131,16 +133,17 @@
           <div class="cycle-pre-notice"><strong>PRE 準備行為</strong><p>PRE 會檢查身分、收集 baseline，可能安裝缺少的 OS 工具與 ipmitool、上傳檢查腳本。正式 cycle 與 START 清除 SEL / dmesg 需在檢查結果出來後再次確認。</p></div>
           <button class="btn primary" id="cycle-create" type="submit" disabled>建立任務並執行 PRE</button></form>
         </section>
-        <section id="cycle-detail" hidden aria-labelledby="cycle-job-state"><div class="cycle-job-heading"><h2 id="cycle-job-state"></h2><a class="btn" id="cycle-report" target="_blank" rel="noopener">開啟 HTML 報告</a><button type="button" class="btn" id="cycle-artifacts">報告與證據</button></div>
+        <section id="cycle-detail" hidden aria-labelledby="cycle-job-state"><div class="cycle-job-heading"><h2 id="cycle-job-state"></h2><button type="button" class="btn" id="cycle-console-toggle" aria-expanded="false" aria-controls="cycle-console">Live Console</button><a class="btn" id="cycle-report" target="_blank" rel="noopener">開啟 HTML 報告</a><button type="button" class="btn" id="cycle-artifacts">報告與證據</button></div>
           <p id="cycle-job-meta"></p><p class="cycle-muted">Job <code id="cycle-job-id"></code></p><p id="cycle-health" role="status"></p>
           <div id="cycle-pre" hidden><h3>PRE 檢查結果</h3><p>本次可執行目標：<strong id="cycle-approved-targets"></strong></p><details open><summary>PRE findings</summary><ul id="cycle-findings"></ul></details><details><summary>被排除的節點</summary><ul id="cycle-excluded"></ul></details><p class="cycle-muted">確認版本 <code id="cycle-pre-version"></code></p></div>
           <div class="cycle-actions"><button type="button" class="btn primary" id="cycle-confirm" hidden>接受此份 PRE 與目標，開始 Cycle</button><button type="button" class="btn" id="cycle-stop" hidden>本輪完成後停止</button></div>
-          <h3>每台進度</h3><div class="cycle-table"><table><thead><tr><th scope="col">機台</th><th scope="col">目前輪次</th><th scope="col">完成輪數</th><th scope="col">階段</th><th scope="col">健康</th><th scope="col">本輪首次 issue</th><th scope="col">累積 unique</th><th scope="col">最後更新 / 原因</th></tr></thead><tbody id="cycle-progress"></tbody></table></div>
+          <div id="cycle-console" class="cycle-console" hidden></div><h3>每台進度</h3><div class="cycle-table"><table><thead><tr><th scope="col">機台</th><th scope="col">目前輪次</th><th scope="col">完成輪數</th><th scope="col">Attempts</th><th scope="col">階段</th><th scope="col">健康</th><th scope="col">本輪首次 issue</th><th scope="col">累積 unique</th><th scope="col">最後更新 / 原因</th></tr></thead><tbody id="cycle-progress"></tbody></table></div>
           <p class="cycle-muted">等待開機是 cycle 的預期階段。NEW relative to PRE 與「本輪首次 issue」的定義不同；完整分類請查看報告。</p><ul id="cycle-file-list"></ul>
         </section>
       </main><aside class="cycle-history" aria-labelledby="cycle-history-title"><h2 id="cycle-history-title">專案任務</h2><div id="cycle-history"></div></aside></div>
     </div>`;
     document.body.append(dialog);
+    consoleView=new window.CycleConsole(el("cycle-console"),el("cycle-console-toggle"));
     el('cycle-close').addEventListener('click',close);
     dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
     el('cycle-search').addEventListener('input',renderTargets);

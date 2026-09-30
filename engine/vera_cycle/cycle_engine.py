@@ -55,6 +55,9 @@ class NodeSession:
         # a NodeSession is driven directly (tests, dry-run).
         self.progress = None
         self.dispatch_guard = None
+        self.observer = None
+        self._observed_record = None
+        self._observed_issues = {}
         self.node = dict(key=target.key, target=target.__dict__, blocked=[], active=True,
                          pre=new_record("PRE"), loops=[], completed=0, attempts=0, boot_confirmed=0, valid_cycles=0, stop_reason="", stage="")
         self.baseline = None
@@ -68,6 +71,27 @@ class NodeSession:
     def safe_error(self, exc):
         redact=getattr(self.transport,'redact',None)
         return redact(str(exc)) if redact else type(exc).__name__
+
+    def event(self, record, level, kind, message, detail='', evidence='', phase=None):
+        """Optional structured observer; does not execute or retry any command."""
+        if self.observer:
+            self.observer(dict(level=level,event_type=kind,message=message,detail=detail,evidence=evidence,
+                               phase=phase or ('PRE' if record['phase']=='PRE' else 'START' if record['phase']=='START' else 'CYCLE'),
+                               loop=record.get('loop',0),tray=self.target.tray,node=self.target.node))
+
+    def issue_events(self, record):
+        if not self.observer: return
+        if self._observed_record is not record:
+            self._observed_record=record; self._observed_issues={}
+        for index,item in enumerate(record['issues']):
+            classification='PRE_EXISTING' if record['phase']=='PRE' else item.get('classification','NEW')
+            signature=(item['severity'],classification,item.get('occurrence_count',1))
+            if self._observed_issues.get(index)==signature: continue
+            self.event(record,item['severity'],'ISSUE_'+classification,
+                       f"{classification} issue: {item['code']} ({item['component']})",
+                       detail=item.get('detail',''),evidence=item.get('evidence',''),
+                       phase='PRE' if record['phase']=='PRE' else 'POST' if record.get('post_started') else 'CYCLE')
+            self._observed_issues[index]=signature
 
     def stage(self, text):
         """Report the current phase for this node so the operator can see where
@@ -105,6 +129,7 @@ class NodeSession:
         else:
             classify_against_pre(record["issues"], self.pre_issue_keys)
         write_json(self.folder(record) / ("pre_report.json" if record["phase"] == "PRE" else "report.json"), record)
+        self.issue_events(record)
 
     def finish(self, record, preserve_timing=False):
         finished = record.get("finished") if preserve_timing else None
@@ -136,6 +161,9 @@ class NodeSession:
 
     def command(self, record, stem, role, cmd, sudo=False, timeout=90, check=True,
                 save_evidence=True, record_command=True, include_output=True):
+        collection=stem in CAPTURES or stem in {'sensor','sensor_retry','sensor_confirm','sel','hardware','bmc_firmware','power','host_power'}
+        phase='POST' if record.get('post_started') else 'PRE' if record['phase']=='PRE' else 'CYCLE'
+        if collection: self.event(record,'POST' if phase=='POST' else 'PRE' if phase=='PRE' else 'INFO','COLLECTION_STARTED','Collecting '+stem,phase=phase)
         try:
             result = (self.transport.oob(self.target, cmd, timeout) if role == "oob" else
                       self.transport.ssh(self.target, role, cmd, timeout, sudo))
@@ -164,9 +192,14 @@ class NodeSession:
             self.add(record, "IPMI_REPORTED_ERROR", stem, "IPMI reported a transport/command error despite exit zero; see evidence", evidence=evidence)
             record['issues'][-1]['snippet'] = result.output[-2000:]
         self.persist(record)
+        if collection:
+            self.event(record,'INFO' if valid else 'WARN','COLLECTION_FINISHED',
+                       'Collection returned: '+stem,detail=f'exit={result.code}; state={result.state}; collection success is not hardware health',
+                       evidence=evidence,phase=phase)
         return result
 
-    def identity(self, record, role, stem=None, timeout=30, save_evidence=True, record_command=True):
+    def identity(self, record, role, stem=None, timeout=30, save_evidence=True, record_command=True, observe=True):
+        if observe: self.event(record,'INFO','IDENTITY_CHECK',role.upper()+' identity check')
         result = self.command(record, stem or (role + "_identity"), role, IDENTITY, timeout=timeout,
                               check=False, save_evidence=save_evidence, record_command=record_command)
         if result.code:
@@ -179,9 +212,11 @@ class NodeSession:
         if role == "os" and not re.fullmatch(r"[0-9a-fA-F-]{36}", values.get("BOOT_ID", "").strip()):
             raise IdentityUnsafe("OS did not provide a valid boot ID")
         record["identities"][role] = dict(hostname=actual, boot_id=values.get("BOOT_ID", "").strip())
+        if observe: self.event(record,'PASS','IDENTITY_VERIFIED',role.upper()+' identity verified',evidence=record['commands'].get(stem or role+'_identity',{}).get('evidence',''))
         return record["identities"][role]
 
     def dependencies(self, record):
+        self.event(record,'PRE','DEPENDENCY_CHECK','Checking OS dependencies')
         probe = "; ".join(f"command -v {tool} >/dev/null 2>&1 || printf 'MISSING={tool}\\n'" for tool in PACKAGES)
         result = self.command(record, "dependencies", "os", probe, check=False)
         if result.code:
@@ -201,6 +236,7 @@ class NodeSession:
         mst = self.command(record, "mst_available", "os", "command -v mst", check=False)
         if mst.code:
             self.add(record, "MST_MISSING", "MST", "mst is expected in the OS image; automatic MFT installation is disabled")
+        self.event(record,'PRE','DEPENDENCY_CHECK_COMPLETE','Dependency checks completed; findings retained in PRE',evidence=record['commands'].get('dependencies',{}).get('evidence',''))
 
     def ensure_verified_script(self, record):
         """Upload once; all later executions require the same safe file and SHA."""
@@ -242,6 +278,8 @@ class NodeSession:
             self.dmesg_seen = counts
 
     def capture(self, record, post=False):
+        self.event(record,'POST' if post else 'PRE','BASELINE_COLLECTION' if not post else 'POST_STARTED',
+                   'Collecting PRE baseline' if not post else 'POST started',phase='POST' if post else 'PRE')
         self.collect_dmesg(record, 'dmesg')
         for stem, (cmd, sudo) in CAPTURES.items():
             if stem == 'dmesg':
@@ -252,7 +290,11 @@ class NodeSession:
                 if not record["pci"]:
                     self.add(record, "PCI_EMPTY", "PCIe", "No valid full-BDF PCI inventory")
                 elif post:
-                    record["issues"] += pci_issues(self.baseline["pci"], record["pci"])
+                    findings=pci_issues(self.baseline["pci"], record["pci"])
+                    record["issues"] += findings
+                    self.event(record,'FAIL' if findings else 'PASS','PCI_COMPARISON',
+                               'PCI differs from PRE baseline' if findings else 'PCI baseline matched',
+                               evidence=record['commands']['pci']['evidence'],phase='POST')
         try:
             self.ensure_verified_script(record)
         except IdentityUnsafe:
@@ -301,6 +343,7 @@ class NodeSession:
                     self.add(record, 'SENSOR_CONFIRM_FAILED', 'sensors', 'Reread failed; sensor disappearance cannot be confirmed from a failed collection')
             if valid:
                 record["issues"] += compare_sensors(self.baseline["sensors"], record["sensors"], confirmation)
+                self.event(record,'POST','SENSOR_COMPARISON','Sensor comparison against PRE completed',phase='POST',evidence=record['commands']['sensor']['evidence'])
             else:
                 record['issues'] += sensor_issues(record['sensors'])
         else:
@@ -333,6 +376,7 @@ class NodeSession:
 
     def precheck(self):
         record = self.node["pre"]
+        self.event(record,'PRE','PRE_STARTED','PRE started')
         self.persist(record)
         try:
             for role, _, _ in self.target.endpoints():
@@ -359,6 +403,10 @@ class NodeSession:
         # PRE timing ends when the PRE capture finishes. Clearing dmesg/SEL is
         # campaign preparation and must not inflate the displayed PRE duration.
         self.finish(record, preserve_timing=True)
+        blocked=bool(self.node['blocked'])
+        self.event(record,'ERROR' if blocked else record['status'],'PRE_BLOCKED' if blocked else 'PRE_COMPLETED',
+                   'PRE BLOCKED; no cycle command permitted' if blocked else 'PRE completed; health '+record['status']+'; operator confirmation still required',
+                   evidence=(self.folder(record)/'pre_report.json').relative_to(self.root).as_posix())
         return self.node
 
     def sel_command(self, record, stem, action, **kwargs):
@@ -401,14 +449,22 @@ class NodeSession:
     def wait_boot(self, record, old_boot, deadline):
         attempts = 0
         boot_changed = False
+        offline_seen=False; began=time.monotonic()
+        self.event(record,'WAIT','WAIT_OFFLINE','Waiting for OS transition and recovery; offline may be too brief to observe',phase='RECOVERY')
         while time.monotonic() < deadline:
             attempts += 1
+            os_verified=False
             try:
                 current = self.identity(
                     record, "os", timeout=min(20, max(1, deadline - time.monotonic())),
                     save_evidence=False, record_command=False,
+                    observe=False,
                 )
+                os_verified=True
                 if current["boot_id"] != old_boot:
+                    if not boot_changed:
+                        if not offline_seen: self.event(record,'INFO','OFFLINE_NOT_OBSERVED','No offline sample observed; changed boot ID is required evidence',phase='RECOVERY')
+                        self.event(record,'PASS','BOOT_ID_CHANGED','OS boot identity changed',phase='RECOVERY')
                     boot_changed = True
                     record["recovery"].update(boot_changed=True, new_boot_id=current["boot_id"], attempts=attempts)
                     # Aux cycles can leave the BMC or Lily SSH service behind the
@@ -420,12 +476,16 @@ class NodeSession:
                             if remaining <= 0:
                                 raise ConnectionError('Recovery deadline reached')
                             self.identity(record, role, timeout=min(20, remaining),
-                                          save_evidence=False, record_command=False)
+                                          save_evidence=False, record_command=False,observe=False)
+                    self.event(record,'PASS','RECOVERY_DETECTED',f'OS recovered; selected endpoint identities verified ({time.monotonic()-began:.1f} sec)',phase='RECOVERY')
                     return True
             except IdentityUnsafe:
                 raise
             except ConnectionError:
-                pass
+                if not os_verified and not offline_seen:
+                    offline_seen=True
+                    self.event(record,'INFO','OS_UNREACHABLE','OS offline probe: SSH unreachable; this alone does not prove power state',phase='RECOVERY')
+                    self.event(record,'WAIT','WAIT_RECOVERY','Waiting for OS recovery and changed boot identity',phase='RECOVERY')
             time.sleep(min(self.options.poll_interval, max(0, deadline - time.monotonic())))
         record["recovery"].update(boot_changed=boot_changed, attempts=attempts)
         self.add(record, "BOOT_TIMEOUT", "recovery", f"Selected endpoints did not recover with a changed OS boot ID within {self.options.boot_timeout}s")
@@ -433,12 +493,14 @@ class NodeSession:
         return False
 
     def dispatch(self, record, label, role, cmd, sudo=False, timeout=30):
+        self.event(record,'INFO','ACTION_PREPARING','Preparing cycle action; verifying dispatch reservation')
         if self.dispatch_guard: self.dispatch_guard()
         # Persist durable intent before sending the one and only command.
         import json
         atomic_write(self.folder(record)/(label+'_intent.json'),
                      json.dumps(dict(command=cmd,role=role,state='DISPATCH_INTENT')), durable=True)
         record.setdefault("cycle_started", now())
+        self.event(record,'CMD','COMMAND_DISPATCHING','Dispatching once: '+cmd,detail='Intent recorded; acknowledgement pending')
         result = self.command(record, label, role, cmd, sudo=sudo, timeout=timeout, check=False)
         if record['commands'][label]['valid']:
             state = "SENT"
@@ -450,6 +512,11 @@ class NodeSession:
         if state in {"NOT_ISSUED", "COMMAND_FAILED"}:
             self.add(record, "CYCLE_COMMAND_FAILED", "cycle", f"{cmd}: {state}, exit {result.code}")
         self.persist(record)
+        if state!='NOT_ISSUED': self.event(record,'CMD','COMMAND_DISPATCHED','Command dispatch attempted once: '+cmd,detail='Dispatch is not proof of recovery')
+        self.event(record,'WARN' if state=='RESPONSE_LOST' else 'ERROR' if state in {'NOT_ISSUED','COMMAND_FAILED'} else 'INFO',
+                   state if state in {'RESPONSE_LOST','NOT_ISSUED','COMMAND_FAILED'} else 'RESPONSE_RETURNED',
+                   'Command response lost; outcome ambiguous; no retry' if state=='RESPONSE_LOST' else 'Response returned; boot and power verification still required' if state=='SENT' else 'Command '+state,
+                   evidence=record['commands'][label].get('evidence',''))
         return state
 
     def one_loop(self, number):
@@ -457,6 +524,8 @@ class NodeSession:
         record["loop"] = number
         self.node["loops"].append(record)
         self.persist(record)
+        limit=getattr(self.options,'loop_limit',0)
+        self.event(record,'INFO','LOOP_STARTED',f'Loop {number} / {limit or "time limit"} started')
         try:
             # Re-verify every selected endpoint before issuing another power action.
             for role, _, _ in self.target.endpoints():
@@ -513,6 +582,7 @@ class NodeSession:
             record['boot_confirmed'] = bool(recovered)
             self.node['boot_confirmed'] += int(recovered)
             self.stage("OS up, system check running")
+            record['post_started']=True
             self.capture(record, post=True)
             self.identity(record, 'os', 'os_after_checks')
             if record['identities']['os']['boot_id'] != post_boot:
@@ -524,6 +594,7 @@ class NodeSession:
                     if action["state"] == "RESPONSE_LOST":
                         action["state"] = "RECONCILED"
                         self.add(record, "COMMAND_RECONCILED", "cycle", "Reply lost; changed OS boot ID and power-on state confirmed recovery", "WARN")
+                        self.event(record,'WARN','COMMAND_RECONCILED','Previously ambiguous command reconciled by changed boot ID and power-on evidence',phase='POST')
             elif any(a["state"] == "RESPONSE_LOST" for a in record["action"]):
                 self.add(record, "COMMAND_UNCONFIRMED", "cycle", "Lost response could not be reconciled with boot and power evidence")
             record["post_complete"] = True
@@ -550,5 +621,10 @@ class NodeSession:
                     if isinstance(bmc_exc, EvidencePersistenceError): raise
                     self.add(record, "BMC_UNAVAILABLE", "recovery", self.safe_error(bmc_exc))
         result = self.finish(record)
+        counts={name:sum(i.get('classification')==name for i in record['issues']) for name in ('NEW','WORSENED','KNOWN')}
+        self.event(record,record['status'] if record.get('post_complete') else 'ERROR','POST_COMPLETED' if record.get('post_complete') else 'POST_INCOMPLETE',
+                   f"Loop {number} {'POST completed' if record.get('post_complete') else 'POST incomplete'}; health {record['status']}",
+                   detail='; '.join(f'{value} {name}' for name,value in counts.items()),phase='POST',
+                   evidence=(self.folder(record)/'report.json').relative_to(self.root).as_posix())
         self.stage("DONE")
         return result

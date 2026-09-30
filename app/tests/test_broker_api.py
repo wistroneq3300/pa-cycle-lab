@@ -41,6 +41,10 @@ def app():
     os.environ["SPX_PORTAL_AUTH"] = "noauth"
     # monkeypatch current_user resolution via the seam by replacing the provider
     mod._resolve_auth = lambda provider_path, h, c, q: OpPortal().authenticate(h, c, q)
+    # This is an offline HTTP contract fixture. The fake SP-X client still needs
+    # a backend credential lookup; never fall through to a deployment age file.
+    mod._store._cache = {"spx:bmc-internal-a:kvm-operator":
+                         {"username": "fixture-kvm", "password": "fixture-password"}}
     yield mod
     if orig is not None:
         os.environ["SPX_PORTAL_AUTH"] = orig
