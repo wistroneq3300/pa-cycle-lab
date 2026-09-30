@@ -1,0 +1,161 @@
+# Vera CPU Rack Cycle
+
+Run reboot, DC power-cycle and auxiliary AC-cycle campaigns from one **external Linux orchestrator**. Select nodes, review one PRE baseline, confirm the listed issues, then run all requested loops. Each POST compares to the original PRE. Failures remain visible even when the operator chooses to continue.
+
+## Quick start
+
+```bash
+python3 -m pip install -r requirements.txt
+chmod +x neutrino_config.sh naboo_config.sh stop_cycle.sh
+python3 neutrin_cycle.py
+```
+
+The wizard selects project, targets, mode, channel and limits before PRE. Enter credentials at the prompts, or set `OS_PASSWORD` and `BMC_PASSWORD` in the environment. Optional Lily credentials are `LILY_OS_PASSWORD` and `LILY_BMC_PASSWORD`. Project-prefixed variables such as `NEUTRINO_OS_PASSWORD` take precedence. Users default to root for OS/BMC, ubuntu for Lily OS, service for Lily BMC; override with `OS_USER`, `BMC_USER`, `LILY_OS_USER`, `LILY_BMC_USER`. A non-root OS account needs working sudo.
+
+First fill the real `bmc_hostname` and `os_hostname` in the inventory. The checked-in hostnames are deliberately blank: the runner will block those rows rather than invent identities. IP reachability alone is insufficient. SSH host keys are trusted on first contact within a run and pinned for that run; hostname validation is also required.
+
+Example using explicit options:
+
+```bash
+python3 neutrin_cycle.py --project neutrino \
+  --node L105-21R/n1 --node L105-21R/n2 \
+  --loops 40 --hours 12 --cycle-mode power_cycle --channel inband --cycle
+```
+
+`--project 1` is neutrino, `--project 2` is naboo. Naboo inventory is an empty template. Bare node names work only when unambiguous. Unknown or repeated selections are rejected. `--node all` means all inventory rows. A loop limit and hour limit may be combined; the first reached ends the run **after current POST**. There must be at least one positive limit. Hardware findings always continue; `--keep-going` is accepted for old callers but is redundant.
+
+Without `--cycle`, explicit-option invocation runs PRE only and discards temporary results. Normal wizard invocation enables cycling but still requires confirmation **after** PRE. There is no automatic confirmation flag. Use a persistent terminal such as tmux for long interactive campaigns; do not pipe away the confirmation prompt.
+
+## PRE and confirmation
+
+Only selected targets are checked, concurrently. The console shows identity/connectivity status, result, issue classification and short reasons, not raw command output. Full evidence is staged temporarily. A simplified display looks like:
+
+```text
+L105-21R_n1 | PRE | FAIL
+  Identity: BMC SSH OK | OS SSH OK
+  FAIL [KNOWN] BF4: Expected at least 1; detected 0
+L105-21R_n2 | PRE | FAIL
+  Identity: BMC SSH OK | OS SSH OK
+  FAIL [NEW] 000c:80:00.0: LnkSta: Speed 16GT/s (downgraded), Width x8
+Start neutrino_<cycle>_<channel>_<timestamp>_<suffix> on 2 runnable target(s), accepting the listed findings and exclusions? [y/N]:
+```
+
+Missing/wrong hostnames, inaccessible identities, overlapping endpoints, locked endpoints, an unusable PCI baseline or inability to upload the verified hardware script block a target. Sensor read/format/health failures remain visible as PRE FAIL findings, including when the whole sensor table is malformed; the operator sees the summary and decides whether to continue. Other targets may proceed only after the operator sees the exclusions and confirms. All blocked means no campaign starts. Hardware FAIL, unreadable individual sensors and dependency-install failures remain FAIL; they do not by themselves forbid an otherwise usable PRE.
+
+Missing standard OS tools are installed with apt when possible (`pciutils`, `dmidecode`, `nvme-cli`, `ipmitool`, `usbutils`, `iproute2`). Local orchestrator `ipmitool` is installed similarly. Installation output is captured; failure is reported. A full PRE capture follows the installation attempt. MFT/mst must already be in the OS image; the runner does not install it. Cancelling PRE removes local staged evidence and performs no cycle/log clearing; already installed packages remain installed. A blocked run may leave its exclusive run script under `/var/tmp` for administrator cleanup.
+
+After confirmation, evidence is promoted to the printed output directory. PRE SEL is read for collection validation but is not saved. Successfully read dmesg and SEL are cleared once at campaign start. START has a separate durable record, leaving the reviewed PRE unchanged. Each loop preserves dmesg before the action, after boot readiness and at the end of all POST checks. The final POST collection uses `dmesg -c` and saves its complete output, including events arriving during hardware checks. Findings link to the raw file containing their event; boot-aware raw-event multiplicities remove overlapping reads without collapsing distinct devices. Kernel ring-buffer overflow, unsynchronized external log clearing, and events after the final read remain limits; this is not continuous journal capture. **SEL is never cleared inside loops**. Each loop compares a snapshot immediately before its cycle action with its POST snapshot. The HTML expands only the newly added events; cumulative SEL stays in the evidence file. Inband uses OS `ipmitool sel list`; outband uses authenticated LANPlus. Empty or malformed command output is a collection failure, not zero events. `SEL has no entries` is a valid empty result. Event correctness remains manual review.
+
+## Cycle modes
+
+| Mode | Inband | Outband |
+| --- | --- | --- |
+| `reboot` | OS `reboot` | BMC `power reset` |
+| `power_cycle` | OS `ipmitool power cycle` | IPMI LAN `power cycle` |
+| `aux_cycle` | BMC `/usr/bin/stbypowerctrl.sh aux_cycle` | Same BMC controller action |
+
+Only `inband` and `outband` are supported. Aux cycle is intrinsically BMC-side regardless of the selected channel. There is no automatic fallback and no retry of an ambiguous power command. A lost response is reconciled using a changed OS boot ID and confirmed power-on state. A normal reboot/DC cycle does not require the BMC boot ID to change. `--boot-timeout` defaults to 900 seconds and includes recovery polling; evidence capture has separate bounded command timeouts.
+
+PRE and each loop verify expected hostnames before actions. During recovery, transient connections are retried until the deadline. An identity/authentication failure or a target that cannot recover is stopped and reported; other nodes continue. Hardware/FW collection failures do not remove an otherwise usable node. **COMPLETE** means the approved scope reached its requested execution limit, not that hardware passed. An early stop, crash or unrecoverable node produces **INCOMPLETE**. Reports separately list excluded targets and health.
+
+## Hardware verdicts
+
+`<project>_config.sh` owns the expected counts. The wizard automatically loads `neutrino_config.sh` or `naboo_config.sh` after the project is selected. Each script runs all selected checks, emits `ISSUE|code|component|reason`, and returns nonzero if any fail. Options `-S`, `-N`, `-B`, `-F` select shorter inventory sets; normal campaigns use the full script.
+
+- CPU at least 2, all populated processors enabled, with lscpu socket/online logical CPU cross-checks and SMBIOS thread count comparison when available. No fixed CPU SKU/core quantity is imposed. **Installed SOCAMM exactly 16**; OS MemTotal must be within 90%–100% of SMBIOS installed capacity by default. `--memory-min-ratio 0.90` adjusts the lower bound; the standalone shell accepts `MEMORY_MIN_RATIO`. Invalid ratios or unreadable capacity fail.
+- NVMe at least 2 controllers (multiple namespaces are deduplicated), unique full-BDF Vera MST endpoints at least 22 (duplicate BDFs fail), NVIDIA PCI bridges at least 20, USB controller at least 1, AST1150 at least 1.
+- BF4 exactly `BF4_EXPECTED` physical cards (currently 1 in each project config), identified only by explicit `BlueField-4` / `BlueField4` / `BF4` model text. Generic BlueField, BF3, DPU, ConnectX and arbitrary non-Vera MST devices do not qualify. An unrecognized device remains missing until actual BF4 identity can be verified; no undocumented PCI IDs are guessed. Count distinct VPD `[SN] Serial number` values across all BF4 PCI functions from `lspci -Dvvv`. Functions sharing a board serial count once. Missing/partial serial identity reports `BF4_IDENTITY_UNAVAILABLE`; the script never guesses by dividing function count by two. This requires actual hardware to expose a common board serial for the ports of one card; validate the first installed card against its physical inventory. NIC counting still uses MST. The enumeration and VPD full-BDF sets must match exactly with one identity row per function; differing snapshots fail as inventory unstable.
+- Only PCIe Express endpoints are checked for link verdicts. A `LnkSta` downgrade/degradation fails; unknown speed or width x0 fails separately. Endpoints with missing LnkSta fail. Access-denied capabilities and inconsistent enumeration/link snapshots fail as unassessed inventory. Root ports and bridges do not generate link downgrade findings; unsupported devices are explicitly labeled. This does not constitute a golden topology or required upstream-link profile. `LnkCap` being higher than `LnkSta` alone is not a failure.
+- PCI comparison uses full domain:bus:device.function plus vendor/device ID; changed, added and missing entries fail.
+- Sensors `cr/critical/nr/non-recoverable` and lower/upper critical variants fail; `nc/non-critical` warns. `ns/na/no reading` and unrecognized statuses fail for threshold sensors. `discrete` sensors use hexadecimal bit-field statuses such as `0x0100`; those bit fields remain undecoded raw evidence unless the output explicitly reports a critical/unreadable state; this is not a claim of full OEM discrete-sensor health coverage. Only precisely matched `PrMo<number>CP<number>CorUti<number>` no-value rows are ignored for health when both reading and status are unreadable. Garbled U+FFFD or control characters in names always fail before any status shortcut. Generic `na` remains FAIL. Incomplete table rows remain visible and fail with `SENSOR_MALFORMED`; a completely malformed table remains a PRE FAIL finding for operator review. Duplicate names are reported and every row evaluated. Missing rows are immediately re-read: recovered warns, still missing fails. Without globally unique sensor IDs, loss detection uses name multiplicities rather than overwriting duplicates.
+- dmesg events retain family, subtype, device/locator, native severity, boot, phase and raw line positions. CPER corrected/recoverable and corrected AER/EDAC events WARN; fatal/uncorrected and unknown/truncated error events FAIL. Adjacent and sequence-tag-interleaved APEI events stay separate. ARM SError, PCIe AER/DPC, NVMe, mlx5, kernel panic/oops/lockup and observed GPU Xid diagnostics have explicit event classes; missing GPU never fails this CPU project. These are diagnostics, not proof of hardware root cause. Complete dmesg is preserved. Firmware versions are recorded; there is no expected-version/downgrade policy yet.
+
+The selected project config script is snapshotted once as `<project>_config.snapshot.sh`, uploaded once per node with exclusive create to a unique `/var/tmp` run path. Before every PRE/POST execution, its regular-file type, non-symlink status, owner, mode 0700 and SHA-256 must match. Missing files, transfer errors or changed content block execution and stop that node; no overwrite or re-upload fallback is attempted. `/var/tmp` must survive the selected cycle. The operator-owned file and administrative account are trusted; this is not protection against a hostile root/user modifying a verified file concurrently. PRE/POST do not depend on an old shared project script. Editing the source affects later runs only.
+
+## Inventory and parallel users
+
+CSV columns are named and order-independent:
+
+```csv
+tray,node,bmc_ip,os_ip,bmc_hostname,os_hostname,lily_bmc_ip,lily_os_ip,lily_bmc_hostname,lily_os_hostname
+```
+
+Lily endpoints are optional; when supplied their expected hostnames are required. Same node labels on different trays are allowed. Duplicate tray/node or ambiguous selections are rejected. Duplicate IP endpoints in selected rows are listed and blocked. Names used in paths accept letters, digits, dots and hyphens.
+
+Run IDs include project, cycle type, channel, and the rack-lab UTC+8 local timestamp without a timezone suffix (for example `neutrino_power_cycle_inband_20260929_160000_a1b2c3`). Console and evidence timestamps use the same timezone (`+08:00`); the console states the time zone. Every target folder includes tray and node. Loop evidence uses concise names without a redundant `post_` prefix, while transient boot/identity polls are kept in the JSON recovery summary instead of producing one file per attempt. On Linux, endpoint locks are advisory file locks in `/tmp/vera-cycle-runtime` (mode `1777`); lock files are shared across users and are **not deleted on release**, avoiding inode races. A crashed process releases its OS-held locks. Failure to open or acquire a lock blocks that target; there is no fallback lock directory.
+
+All operators on the **same orchestrator** must use the same runtime path. If `/tmp` is isolated per user/service, provision a shared local directory and set `VERA_RUNTIME_DIR` consistently. Locks do not coordinate separate orchestrator machines. Registry directories are owner-only. Never remove live endpoint lock files or use independent runtime paths to bypass an active run.
+
+Open the numbered menu without typing a Run ID:
+
+```bash
+./stop_cycle.sh
+```
+
+Select `1`, `2`, etc. to choose one of the current OS user's running campaigns. The menu shows project, cycle type, channel, nodes, Run ID and start time. Press `1` to confirm the selected campaign, or `0` to go back/exit. It stops the whole selected campaign, not an individual node. A successful request is not completion: the current round (including queued targets) and POST still finish. Pending requests are labeled. Linux excludes exited processes and checks process-start identity on newly registered runs to detect PID reuse. The menu uses the same controller and `VERA_RUNTIME_DIR` as the runner.
+
+The explicit Run ID interface remains available:
+
+```bash
+./stop_cycle.sh neutrino_<cycle>_<channel>_<timestamp>_<suffix>
+# equivalent:
+python3 neutrin_cycle.py --stop neutrino_<cycle>_<channel>_<timestamp>_<suffix>
+```
+
+Only the campaign owner can request the stop. It completes current POST and starts no next loop. Ctrl+C/SIGTERM behave the same way. It never uses broad `pkill`, never kills other campaigns, and does not stop `dryrun_sim.py`. A hard kill/power loss cannot generate a final report at the moment it occurs; once the process is stopped, rebuild from the retained journal:
+
+```bash
+python3 neutrin_cycle.py --report campaigns/<run_id>
+```
+
+Do not rebuild a live campaign. A recovered unfinished journal is INCOMPLETE. Restarting always creates a new campaign; no resume path reuses an old baseline.
+
+## Reports
+
+```text
+campaigns/<run_id>/
+  console.log
+  campaign.json
+  cycle_summary.json / cycle_summary.txt
+  CYCLE_REVIEW_REPORT.html / CYCLE_REVIEW_REPORT.md
+  known_issues.md / new_issues.md
+  issue_policy.snapshot.md
+  <project>_config.snapshot.sh
+  pre_orchestrator_dependencies.txt
+  <tray>_<node>/
+    pre_report.json
+    pre_pci.txt / pre_sensor.txt / pre_dmesg.txt / ...
+    node_summary.txt
+    loop0001/
+      report.json
+      hardware.txt / sensor.txt / sensor_confirm.txt / ...
+      dmesg.txt / sel.txt / sel_delta.txt
+```
+
+There is no extra PRE directory. Loop files are always retained. All formats use the same evaluator. The HTML has overview/node/issue tabs, collapsible phases, known/new and severity filters, action/recovery records and evidence links. CSS/JS are inline; it opens offline. Keep the HTML with its sibling log folders when sharing evidence links. Text from devices is escaped, not interpreted as HTML. Sample data is labeled **SYNTHETIC**.
+
+Issue classification uses the immutable original PRE. dmesg fingerprints retain family/subtype, source and device identity while excluding timestamps and event sequence labels. A previously observed fingerprint is KNOWN; a new fingerprint is NEW; increased per-record count or severity is WORSENED. Other findings retain code/component comparison, with count/severity growth visible. Neither KNOWN nor NEW establishes cycle causation. Historical FAIL stays campaign FAIL. Recurrences retain each phase and evidence reference. `issue_policy.md` is snapshotted for compatibility but does not override PRE classification.
+
+Reports distinguish attempts, POST completions, confirmed boots and valid cycles (boot transition, stable POST identity, verified script and power-on evidence). Hardware FAIL does not suppress valid execution counting or stop other nodes; it still fails campaign health. Time limits begin after START preparation; zero exercised cycles are INCOMPLETE. Extra observed boot transitions stop that node. Per-check summaries and per-loop dmesg deltas accompany concise stage/exception console output. Graceful stop still finishes current POST.
+
+Current release: **2026.10.01** (`python3 neutrin_cycle.py --version`). See [implementation and verification](docs/IMPLEMENTATION_2026-10-01.md).
+
+## Offline development checks
+
+```bash
+python3 -m unittest discover -s dev/tests -v
+for script in neutrino_config.sh naboo_config.sh stop_cycle.sh; do bash -n "$script" || exit; done
+python3 dev/tests/make_demo.py
+```
+
+Tests use fake transports and shell PATH fixtures. They do not contact rack equipment. Hardware shell tests use Bash; set `VERA_TEST_SHELL` if it is not on PATH. For browser verification install Playwright in the development environment, then run `node dev/tests/check_report.cjs`; `VERA_TEST_BROWSER=chrome` uses an installed Chrome. A synthetic report is generated at `test-results/demo/CYCLE_REVIEW_REPORT.html`.
+
+This refactor was verified offline on Windows with Python, Git Bash and Chrome. Deployment is intended for Linux; real rack acceptance still needs actual hostnames, installed MFT, platform BMC paths, real command responses and a controlled run. Existing `dev/review/offline_review.py` documents **pre-refactor** defects and is not the current regression suite. `dev/dryrun_sim.py` is disabled before credentials/network access: its historical implementation mutated MST/SEL and was not an offline simulator. Use the offline test suite for simulation.
+
+## Shared controller operation
+
+Different OS users may run the same readable script with independent node selections, cycle modes and output directories. Use a per-user writable `--output` directory. All users on the **same controller** must use the same `VERA_RUNTIME_DIR` (default `/tmp/vera-cycle-runtime`, mode 1777). Overlapping OS/BMC endpoint addresses are locked before PRE or remote mutations. The second run shows BLOCKED with the endpoint and, when readable, the owning campaign/node/user. Disjoint targets remain eligible after the normal PRE confirmation. Different cycle modes do not bypass locks.
+
+These are controller-local locks, not distributed locks. Another controller, a different lock directory, endpoint IP aliases, or another tool issuing power actions is not coordinated by this mechanism. Do not delete active lock files. A campaign snapshots its config, so editing a project config does not alter an already running campaign.
+
+The desktop HTML uses Overview / Nodes / Issues. Nodes are searchable by name, with health filtering and a scrollable selector for large inventories. Overview always retains all selected nodes and findings. Campaign elapsed time runs from campaign start to finish; node elapsed runs from PRE to last POST; completed-loop averages use cycle-command start to POST completion. Missing evidence and failed collection are displayed explicitly. The 128-node UI test does not constitute a 128-node hardware load test.

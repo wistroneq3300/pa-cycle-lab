@@ -1,0 +1,17 @@
+[Unit]
+Description=Wistron PA Server Manager (Production / port 6969)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/user/manager/pa_manager
+Environment=PA_DATA_DIR=/srv/pa-manager-prod/data
+Environment=PORT=6969
+ExecStart=/usr/bin/python3.12 -m uvicorn main:app --host 0.0.0.0 --port 6969
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

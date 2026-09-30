@@ -1,0 +1,25 @@
+{
+  "pre_tool_use": [
+    {
+      "matcher": "file_editor",
+      "hooks": [
+        { "command": ".openhands/hooks/cjk_guard.py", "timeout": 10 }
+      ]
+    },
+    {
+      "matcher": "terminal",
+      "hooks": [
+        { "command": ".openhands/hooks/push_guard.py", "timeout": 10 },
+        { "command": ".openhands/hooks/rm_guard.py", "timeout": 10 }
+      ]
+    }
+  ],
+  "session_start": [
+    {
+      "matcher": "*",
+      "hooks": [
+        { "command": ".openhands/hooks/session_start.py", "timeout": 15 }
+      ]
+    }
+  ]
+}

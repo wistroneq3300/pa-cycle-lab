@@ -1,0 +1,16 @@
+[Unit]
+Description=PA Cycle Lab independent runner
+After=network.target
+
+[Service]
+WorkingDirectory=/srv/pa-cycle-lab
+ExecStart=/srv/pa-cycle-lab/.venv/bin/python run.py runner
+Environment=CYCLE_MODE=synthetic
+Environment=CYCLE_INSTANCE=data
+Environment=PYTHONUTF8=1
+# Preserve workers when only the scheduler is restarted. Worker OS locks prevent replay.
+KillMode=process
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

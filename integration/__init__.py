@@ -1,0 +1,1 @@
+"""Isolated PA / Vera integration."""

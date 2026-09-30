@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>6969 指派浮窗 — 語法高亮 Demo</title>
+<style>
+  body{background:#0e141b;color:#dbe4ec;font-family:system-ui,"Microsoft JhengHei",sans-serif;margin:0;padding:24px}
+  h2{font-size:15px;margin:0 0 4px}
+  .sub{color:#677684;font-size:12px;margin-bottom:16px}
+  .ar-body{background:#151d26;border:1px solid #2b3a4a;border-radius:10px;padding:14px 16px;max-width:920px}
+  .ar-pre{white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,Menlo,Consolas,monospace;
+          font-size:12px;line-height:1.6;color:#dbe4ec;margin:0}
+  .ar-pre .ar-cmt{color:#3f9e63}
+  .ar-pre .ar-var{color:#e8933a}
+  .ar-pre .ar-sec{color:#4aa3e0}
+  .ar-pre .ar-cmd{color:#3d6fd9;font-weight:600}
+  .legend{margin-top:14px;font-size:12px;color:#96a4b0}
+  .sw{display:inline-block;padding:1px 8px;border-radius:4px;font-family:ui-monospace,monospace;margin-right:6px}
+</style>
+</head>
+<body>
+<h2>指派可執行指令 · 1 個測項 · 相容性(語法高亮已启用)</h2>
+<div class="sub">深色主題(你 6969 目前的使用主題)。實際 UI 是同款 class,此頁僅示範色彩結果。</div>
+<div class="ar-body"><pre class="ar-pre" id="pre"></pre></div>
+<div class="legend">
+  <span class="sw" style="color:#3f9e63"># 註解 (ar-cmt)</span>
+  <span class="sw" style="color:#e8933a">$VAR / ${VAR:?...} (ar-var)</span>
+  <span class="sw" style="color:#4aa3e0">[global]/[test] (ar-sec)</span>
+  <span class="sw" style="color:#3d6fd9;font-weight:600">ssh / ipmitool / fio … (ar-cmd)</span>
+</div>
+<script>
+function arEscapeHl(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function arHlLine(raw) {
+  var pm = raw.match(/^\s*(?:\u2502\s*)*/);
+  if (pm && pm.length < raw.length && raw.charAt(pm.length) === "#") {
+    return arEscapeHl(raw.slice(0, pm.length)) +
+           '<span class="ar-cmt">' + arEscapeHl(raw.slice(pm.length)) + "</span>";
+  }
+  var TOK = /(\$[A-Za-z_][A-Za-z0-9_]*|\$\{[^\{\}]*\})|(\[[A-Za-z][A-Za-z0-9_.+~-]*\])|(\b(?:sshpass|ssh|sudo|ipmitool|curl|wget|fio|cat|echo|printf|grep|egrep|awk|sed|head|tail|tee|ls|cp|mv|apt-get|apt|dmesg|lscpu|lspci|dmidecode|ethtool|snmpget|jq|bash|sh|python3|python|timeout|nohup|mst|devlink|nvsm|rvs|rsmi|nvidia-smi|dcgmi|storcli|sas3ircu|ssacli|iperf3|iperf|systemctl|nvme|hdparm|smartctl|redis-cli|stress-ng|lshw|ping|ifconfig|reboot)\b)/g;
+  var out = "", last = 0, m;
+  TOK.lastIndex = 0;
+  while ((m = TOK.exec(raw)) !== null) {
+    if (m.index > last) out += arEscapeHl(raw.slice(last, m.index));
+    if (m[1] != null) out += '<span class="ar-var">' + arEscapeHl(m[1]) + "</span>";
+    else if (m[2] != null) out += '<span class="ar-sec">' + arEscapeHl(m[2]) + "</span>";
+    else if (m[3] != null) out += '<span class="ar-cmd">' + arEscapeHl(m[3]) + "</span>";
+    last = m.index + m[0].length;
+    if (m.index === TOK.lastIndex) TOK.lastIndex++;
+  }
+  out += arEscapeHl(raw.slice(last));
+  return out;
+}
+var SAMPLE = [
+  "\u76ee\u6a19\u6a5f\u53f0\uff1aEQ3300-AIAgent \u00b7 \u76f8\u5bb9\u6027 \u00b7 10.35.228.145 \u00b7 root",
+  "1. \ud83d\udfe2 FIO Mix read/write bandwidth/IOPS (70/30% read/write @ QD1, bs=512B, numjobs=1)",
+  "   \u53ef\u81ea\u52d5\u57f7\u884c\u3002",
+  "   \u250c" + "\u2500".repeat(100),
+  "   \u2502 # \ud83c\udfaf Storage-00009 | fio mixed randrw (70/30) | QD1 bs=512 | DUT host (ssh) | operator \u5be6",
+  "   \u2502 # STEP 1: stage the .fio job file on DUT (target left OUT on purpose)",
+  "   \u2502 sshpass -p \"$DUT_PASS\" ssh -o StrictHostKeyChecking=no $DUT_USER@$DUT_IP 'cat > /root/fio-mix-00009.fio' <<'EOF'",
+  "   \u2502 [global]",
+  "   \u2502 ioengine=libaio",
+  "   \u2502 direct=1",
+  "   \u2502 runtime=60",
+  "   \u2502 bs=512",
+  "   \u2502 rw=randrw",
+  "   \u2502 rwmixread=70",
+  "   \u2502 [test]",
+  "   \u2502 EOF",
+  "   \u2502 # STEP 2: operator names ONE empty volume; agent runs with --filename override",
+  "   \u2502 sshpass -p \"$DUT_PASS\" ssh $DUT_USER@$DUT_IP \\",
+  "   \u2502   'fio /root/fio-mix-00009.fio --filename=${FIO_TARGET:?one EMPTY volume, never OS/boot} 2>&1 | tee /root/fio-mix-00009.log'",
+  "   \u2514" + "\u2500".repeat(100),
+  "   \u2705 \u5224\u5b9a\u6a19\u6e96\uff1afio \u6703 show \u8b5b\u52dd\u7d50\u679c\u908f\u64fa\u53f0\u6a5f spec\u3002"
+].join("\n");
+document.getElementById("pre").innerHTML = SAMPLE.split("\n").map(arHlLine).join("\n");
+</script>
+</body>
+</html>

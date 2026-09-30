@@ -1,0 +1,9 @@
+{
+  "name": "pa-terminal-bridge",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "ssh2": "^1.17.0",
+    "ws": "^8.21.3"
+  }
+}

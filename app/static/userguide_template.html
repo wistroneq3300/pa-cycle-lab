@@ -1,0 +1,231 @@
+<script type="text/userguide-html" id="guide-tpl" style="display:none">
+<div class="ug-doc">
+  <h3 class="ug-hint-search"></h3>
+
+  <section class="ug-sec" id="ug-intro">
+    <h2>1　功能總覽</h2>
+    <p>這是 Wistron <b>PA Server Manager</b> 的 Web 主控台，專為 AI / GPU 機房打造，一頁看到全機房狀態：</p>
+    <ul>
+      <li><b>無 Agent</b> — 全程走 SSH / IPMI / Redfish / noVNC，被管機台不用裝任何東西</li>
+      <li><b>首頁（Dashboard）</b> — KPI 卡（受管 / Rack / System / 在線率 / 電源 / 離線）+ SUT Health 大數字 + 專案狀態環餅圖 + 專案卡片</li>
+      <li><b>L10 單機層級</b> — OS 資訊、硬體盤點（含 GPU / FW）、感測器、遙測、電源、KVM、網頁終端機</li>
+      <li><b>L11 機櫃層級</b> — 48U 機櫃平面圖（LED 狀態燈 + U 刻度 + 風扇口面板）、拓樸圖、依元件類型的整櫃遙測與 AI 分析</li>
+      <li><b>AI</b> — 本機 Ollama：首頁 / 機櫃 Copilot + 感測器 / 遙測 / 整櫃的簡短中文分析</li>
+    </ul>
+    <p class="ug-hint">快速導航：
+      <a href="#ug-nav">§2 導覽</a> ·
+      <a href="#ug-add">§3 新增系統</a> ·
+      <a href="#ug-l10">§4 L10 單機</a> ·
+      <a href="#ug-l11">§5 L11 機櫃</a> ·
+      <a href="#ug-broad">§6 廣播</a> ·
+      <a href="#ug-kvm">§7 KVM</a> ·
+      <a href="#ug-ai">§8 AI</a> ·
+      <a href="#ug-faq">§10 FAQ</a>
+    </p>
+  </section>
+
+  <section class="ug-sec" id="ug-nav">
+    <h2>2　導覽與深連結</h2>
+    <h3>主要視圖</h3>
+    <ul>
+      <li><b>Dashboard（首頁）</b>：全機台 KPI（在線率 / 電源 ON·OFF / 離線數）、SUT Health 大數字、專案狀態環餅圖（在線 / BMC 亮機 / 離線 / 未知）、專案卡片（點卡進專案）</li>
+      <li><b>專案卡片</b>：點開進入 L10 / L11 分頁；卡片上有 KVM 同步、系統廣播等快捷鈕</li>
+      <li><b>L11 機櫃頁</b>：平面圖 / 清單 / 整櫃 Telemetry 三種子檢視（上方 tab 切換）</li>
+      <li><b>單機詳情</b>：OS、硬體、感測器、遙測、電源、KVM、終端機</li>
+    </ul>
+    <h3>深連結網址（可直接分享 / 收藏 / F5 保持狀態）</h3>
+    <table class="ug-table">
+      <tr><td><code>#/</code></td><td>總覽 Dashboard</td></tr>
+      <tr><td><code>#/rack/proj_k</code></td><td>直接進該專案機櫃（平面圖）</td></tr>
+      <tr><td><code>#/rack/proj_k/telemetry</code></td><td>直接進整櫃遙測</td></tr>
+      <tr><td><code>#/projects/proj_k</code></td><td>首頁定位並閃光高亮該專案</td></tr>
+    </table>
+    <p>專案名<b>不分大小寫</b>（<code>MyRack</code> 與 <code>myrack</code> 同一個）。</p>
+  </section>
+
+  <section class="ug-sec" id="ug-add">
+    <h2>3　新增 / 管理系統</h2>
+    <h3>新增單機（L10）</h3>
+    <ol>
+      <li>按「＋ 新增系統」</li>
+      <li>級別選 <b>L10</b>；填 OS IP / 使用者 / 密碼 / 埠</li>
+      <li>Hostname 會透過 SSH 自動探測；可勾「自動偵測 BMC IP」（走 <code>ipmitool lan print</code>）</li>
+      <li>填專案名 → 新增，上線後即開始採集遙測</li>
+    </ol>
+    <h3>新增機櫃元件（L11）</h3>
+    <ul>
+      <li>級別選 <b>L11</b>，指定佔用 U 槽位（需連續空 U；多槽設備自動檢查衝突）</li>
+      <li>機櫃平面圖空 U 點「＋」可把<b>同專案已有的 L11 機台</b>放進來</li>
+      <li>機台行上有「📈 升 L11 / 📉 降 L10」與「✕ 移出機櫃」</li>
+    </ul>
+    <h3>專案</h3>
+    <ul>
+      <li>專案是 L10 / L11 的群組（兩者獨立）</li>
+      <li>「專案管理」可增刪改順序</li>
+    </ul>
+  </section>
+
+  <section class="ug-sec" id="ug-l10">
+    <h2>4　L10 單機功能</h2>
+
+    <h3>4.1　OS 資訊</h3>
+    <p>Hostname / OS / 內核 / CPU 核數 / 記憶體 / 磁碟 / NIC；每項可單獨「重試」，失敗顯示錯誤與上次成功時間。</p>
+
+    <h3>4.2　硬體盤點（含 GPU）</h3>
+    <ul>
+      <li><b>CPU / DIMM / SSD / NIC</b>：型號、數量、容量、MAC、速度</li>
+      <li><b>GPU（NVIDIA）</b>：<code>nvidia-smi</code> — 每卡 型號 / VRAM / 利用率 / 溫度 / 功耗，以及 <b>GPU FW（VBIOS）版本</b></li>
+      <li><b>GPU（AMD）</b>：<code>rocm-smi</code>+<code>amd-smi</code> — 解析 MI300X OAM 等，同樣顯示卡數 / 型號 / VRAM / 頻率 / <b>FW</b> / 溫度 / 功耗</li>
+      <li><b>BIOS / iBMC / GPU FW</b>：各組件韌體版本獨立卡片顯示</li>
+    </ul>
+
+    <h3>4.3　感測器 + AI 診斷</h3>
+    <ul>
+      <li>IPMI / Redfish 感測器全表：溫度、電壓、風扇、總功率等，含正常/警告/臨界色碼</li>
+      <li>「🤖 AI 診斷」— 把感測器快照送 Ollama，回一段 2~3 句繁體中文評語（本地、不外傳）</li>
+    </ul>
+
+    <h3>4.4　Telemetry（歷史 + 圖表 + AI 分析）</h3>
+    <ul>
+      <li>依子組分塊：CPU、記憶體、GPU、磁碟、網路、電源</li>
+      <li>每塊可<b>單獨收合／展開</b>；右上角「全部收合／全部展開」一次切換</li>
+      <li>時間範圍 10 分鐘 ~ 30 天；Chart.js 折線 + 每條線最新值</li>
+      <li>選範圍後<b>自動觸發 AI 分析</b>：回 2~3 句中文趨勢判斷（重複同範圍用快取，不重複打 Ollama）</li>
+    </ul>
+
+    <h3>4.5　電源 / KVM / 終端機</h3>
+    <ul>
+      <li>開機 / 關機 / 重開 / AUX：走 BMC（IPMI，新 OpenBMC 自動用 cipher 17）</li>
+      <li>BMC 狀態徽章：電源 on/off、網路連通即時色碼</li>
+      <li>「📺 KVM」：noVNC 遠端畫面（詳見 §7）</li>
+      <li>「💻 終端機」：瀏覽器內 xterm SSH 到 OS / BMC（node bridge 開真連線，帳密不出前端）</li>
+    </ul>
+  </section>
+
+  <section class="ug-sec" id="ug-l11">
+    <h2>5　L11 機櫃功能</h2>
+
+    <h3>5.1　平面圖（Floor Plan）</h3>
+    <ul>
+      <li>48U 標準機櫃，U 位由下往上編號，每 8U 一道刻度線；左側金屬 U 標籤條</li>
+      <li>每格顯示：<b>OS / BMC LED 狀態燈</b>（綠呼吸 = 在線、紅 = 離線、灰 = 未知）、元件名、類型底色</li>
+      <li>櫃頂名牌：專案名 + 「已用 X/48 U · 空 Y U」使用率統計</li>
+      <li>空 U 「＋」加入同專案 L11；佔用檢查避免重疊與非連續槽位</li>
+    </ul>
+
+    <h3>5.2　拓樸圖</h3>
+    <p>SVG 連線圖畫出 node ↔ switch / PDU / CDU 實體鏈接；支援收合（小圖模式）、「🗑 刪除全部」、限高捲動。
+    「新增拓樸 / 模擬拓樸」目前待開發（會跳提示）。</p>
+
+    <h3>5.3　整櫃 Telemetry（重點）</h3>
+    <ul>
+      <li>依<b>元件類型分塊</b>：
+        Server（CPU / RAM / GPU 功耗）· Switch（port 流量 / 溫度 / 風扇）· Power Shelf / PDU（功率 / 電壓 / 電流）· CDU（水流量 / 水溫 / 水壓）</li>
+      <li>每塊包含：<b>機台 × 指標原始數據表</b>（第一欄就是「機台」對齊）+ <b>整櫃折線圖</b></li>
+      <li>每塊標題可單獨收合／展開；頂部「全部收合／全部展開」</li>
+      <li>時間範圍 10 分鐘 ~ 24 小時</li>
+    </ul>
+
+    <h3>5.4　整櫃 AI 分析</h3>
+    <ul>
+      <li>時間範圍下方「🤖 整櫃 AI 分析」— 後端先彙整各類型最新值與整櫃聚合值，再叫 Ollama 回 2~3 句中文總結</li>
+      <li>例：「整櫃整體運作正常，無明顯異常警訊。各元件溫度與負載均在合理範圍內。」</li>
+      <li>該專案無遙測資料時會顯示原因（如機台尚未採集、皆為 L10）</li>
+    </ul>
+    <p class="ug-hint">⚠ 整櫃遙測只收 <b>level=L11</b> 的機台；L10 只進單機遙測。</p>
+  </section>
+
+  <section class="ug-sec" id="ug-broad">
+    <h2>6　廣播</h2>
+
+    <h3>6.1　系統廣播（多機同時執行指令）</h3>
+    <ol>
+      <li>專案卡片按「📡 系統廣播」</li>
+      <li>勾選同專案、有 OS 的機台（可整組勾/取消、全選）</li>
+      <li>打進指令 → 同一鍵入 fan-out 到每台 OS shell，輸出標上主機名回傳（Clusterssh 風格）</li>
+      <li>歷史只記錄<b>時間 + 指令</b>，不記目標清單（降低敏感資訊外洩面）</li>
+    </ol>
+
+    <h3>6.2　KVM 同步（同專案同螢幕同時操作）</h3>
+    <ul>
+      <li>專案卡片出現「📺 同步 KVM」= 該專案所有線上機台<b>協議一致可同步</b>（支援 OpenBMC / OneTree 等 RFB 系 BMC）</li>
+      <li>點下開啟同步畫面：一份鍵鼠輸入複製到每台；每路獨立連線（單寫者鎖）</li>
+      <li>若協議混合（如 RFB+IVTP）或含未實作同步的 IVTP 機台，按鈕會消失並可在 basecode API 看到原因</li>
+    </ul>
+  </section>
+
+  <section class="ug-sec" id="ug-kvm">
+    <h2>7　KVM 遠端畫面</h2>
+    <h3>7.1　單機 KVM</h3>
+    <ol>
+      <li>機台詳情頁按「📺 KVM」</li>
+      <li>後端用該機台 BMC 帳密直接連 BMC 的 RFB（5900 / 網頁端口），前端只走本系統代理</li>
+      <li>noVNC 渲染；可全屏</li>
+      <li>離線 / 無 BMC / 無 RFB 的機台（如 MegaRAC SP-X 無 VNC）會顯示不可用</li>
+    </ol>
+    <h3>7.2　SP-X 機台</h3>
+    <p>SP-X 無傳統 VNC，走 SP-X auto-login broker（port 18992）+ 專用 subdomain 的 KVM 通道；
+    詳見 <code>docs/spx-kvm-auto-login-*.md</code> 與 <code>deploy/</code> 部署檔。</p>
+  </section>
+
+  <section class="ug-sec" id="ug-ai">
+    <h2>8　AI 功能（本機 Ollama）</h2>
+    <table class="ug-table">
+      <tr><th>功能</th><th>位置</th></tr>
+      <tr><td>Ai Copilot（對話）</td><td>首頁右下 / 機櫃頁右欄「🤖 AI Copilot」</td></tr>
+      <tr><td>感測器 AI 診斷</td><td>L10 感測器頁</td></tr>
+      <tr><td>Telemetry AI 分析</td><td>L10 遙測頁（選範圍自動跑）</td></tr>
+      <tr><td>整櫃 AI 分析</td><td>L11 遙測頁範圍列下方</td></tr>
+      <tr><td>單機 AI 診斷</td><td>機台詳情「AI 診斷」</td></tr>
+    </table>
+    <p>全部走<b>本機 Ollama（qwen3.8:27b）</b>，資料不外傳；Ollama 未啟動時各 AI 欄位顯示「分析失敗」但<b>不影響任何監控功能</b>。</p>
+  </section>
+
+  <section class="ug-sec" id="ug-sec">
+    <h2>9　安全 & 資料</h2>
+    <ul>
+      <li><b>帳密</b>明文存於 <code>data.json</code>（已列 .gitignore，勿外傳）；<b>未上線公網前請務必加認證</b>（參考 <code>ADMIN_PERMISSION_BLUEPRINT.md</code>）</li>
+      <li><b>遙測</b>：SQLite <code>telemetry.db</code>；<code>PA_DATA_DIR</code> 可分離 trial / prod</li>
+      <li><b>備份</b>：<code>backup_prod.sh</code>（cron 每日 02:00，保留 14 份）</li>
+      <li><b>廣播歷史</b>不記目標機台；<b>KVM 帳密</b>只留後端</li>
+    </ul>
+  </section>
+
+  <section class="ug-sec" id="ug-faq">
+    <h2>10　常見問題</h2>
+    <h3>Q：KVM 按鈕是灰的 / 按了無反應？</h3>
+    <p>A：該機台 RFB 不通或 BMC 離線。用「BMC 詳情」頁的 ping / 服務檢查；SP-X 機台請改用 SP-X 專用通道。</p>
+    <h3>Q：同步 KVM 鈕沒出現？</h3>
+    <p>A：專案內協議不一致（RFB+IVTP 混合）或全 IVTP。用 <code>GET /api/kvm/basecode?project=NAME</code> 看每台偵測結果與原因。</p>
+    <h3>Q：整櫃遙測沒資料？</h3>
+    <p>A：機台須為 <b>L11</b>；且後端 SSH 採樣正常（看單機遙測是否有意圖）。L10 不會進整櫃聚合。</p>
+    <h3>Q：AI 分析空白 / 失敗？</h3>
+    <p>A：本機 Ollama 未運行或模型未拉。起 <code>ollama serve</code> + <code>ollama pull qwen3.8:27b</code> 即可，其餘功能不受影響。</p>
+    <h3>Q：網頁終端機連不上？</h3>
+    <p>A：<code>terminal_bridge</code>（node, port 6968）要running 且能讀同一 <code>PA_DATA_DIR/data.json</code>。看 <code>systemctl status pa-terminal-bridge</code>。</p>
+    <h3>Q：如何降層級？</h3>
+    <p>A：機櫃頁行上「📉 降 L10」；或重新以 L10 新增該機台並刪除 L11 條目。</p>
+  </section>
+
+  <section class="ug-sec" id="ug-key">
+    <h2>11　怎麼用、小撇步</h2>
+
+    <h3>常用快捷鍵</h3>
+    <ul>
+      <li><b>？（問號鍵）</b>：開啟這個說明窗口</li>
+      <li><b>F5</b>：重新整理頁面時，會停留在你目前的專案與分頁，不會跳回首頁</li>
+      <li><b>Esc</b>：關閉彈出的對話框（新增系統、專案設定等）</li>
+      <li><b>Ctrl + Shift + R</b>：強制重新整理（更新前端程式用，一般不用按）</li>
+    </ul>
+
+    <h3>操作小撇步</h3>
+    <ul>
+      <li><b>這個說明視窗</b>：抓上面的黑色標題列可以把它搬到畫面任何地方；拖右下角的斜紋可以改變大小；按「□」放大成整個螢幕、再按一次還原；按「–」縮成最小、按「✕」關閉。下次打開會記得你上次放的位置與大小。</li>
+      <li><b>遙測分組</b>：每一組（CPU／記憶體／GPU…）的標題可以單獨點開或收起來；右上角「全部收合 / 全部展開」可以一次切換。</li>
+      <li><b>找不到功能在哪裡？</b>：用視窗最上面的搜尋框打關鍵字（例如「KVM」、「廣播」、「遙測」），會只剩下相關的段落。</li>
+      <li><b>機台分兩種層級</b>：「L10」是單台機器，「L11」是機櫃裡面的元件。整櫃遙測只會統計 L11 的機台，所以看不到資料時先確認那台是不是 L11。</li>
+      <li><b>AI 分析空白</b>：是本機上的 Ollama 沒開或還沒下載模型，跟監控功能無關，先別擔心。</li>
+    </ul>
+  </section>
+</div>
+</script>

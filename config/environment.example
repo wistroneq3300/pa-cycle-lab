@@ -1,0 +1,6 @@
+# Copy values into this new service's environment; this file contains no real secrets.
+CYCLE_MODE=synthetic
+CYCLE_INSTANCE=data
+PYTHONUTF8=1
+# Live Web requires CYCLE_USERS_JSON, supplied securely by deployment environment.
+# Do not share PA_DATA_DIR, databases, artifacts or services with either source repo.

@@ -1,0 +1,12 @@
+.sources/
+.venv/
+__pycache__/
+*.pyc
+/data/
+/runtime/
+/artifacts/
+.env
+node_modules/
+test-results/
+.impeccable/review/
+engine/vera_cycle/test-results/

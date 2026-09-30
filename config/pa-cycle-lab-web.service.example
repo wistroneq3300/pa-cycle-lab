@@ -1,0 +1,14 @@
+[Unit]
+Description=PA Cycle Lab isolated Web
+After=network.target
+
+[Service]
+WorkingDirectory=/srv/pa-cycle-lab
+ExecStart=/srv/pa-cycle-lab/.venv/bin/python run.py web --port 9180
+Environment=CYCLE_MODE=synthetic
+Environment=CYCLE_INSTANCE=data
+Environment=PYTHONUTF8=1
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

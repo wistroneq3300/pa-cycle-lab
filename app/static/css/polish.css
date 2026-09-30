@@ -1,0 +1,71 @@
+/* ============================================================
+   視覺 / 立體感 增強（純 CSS · 不改任何功能）
+   新增於 2026-08 · 想回退就把 index.html 裡的 <link ... polish.css> 砍掉即可
+   ============================================================ */
+
+/* 1) 卡片 / 專案卡 / 統計 / 彈窗：頂部微高光 + 分層陰影（更立體）
+      只在「沒有被 hover 覆蓋」時生效，保留既有 hover 提升效果 */
+.card,
+.dash-proj,
+.stat,
+.proj-card,
+.rm-modal,
+.ug-window,
+.ar-window {
+  background-image: linear-gradient(180deg, rgba(255,255,255,.5) 0%, rgba(255,255,255,0) 32%);
+  box-shadow:
+    0 1px 2px rgba(10,37,64,.05),
+    0 4px 10px rgba(10,37,64,.045),
+    0 14px 28px rgba(10,37,64,.06);
+}
+:root[data-theme="dark"] .card,
+:root[data-theme="dark"] .dash-proj,
+:root[data-theme="dark"] .stat,
+:root[data-theme="dark"] .proj-card,
+:root[data-theme="dark"] .rm-modal,
+:root[data-theme="dark"] .ug-window,
+:root[data-theme="dark"] .ar-window {
+  background-image: linear-gradient(180deg, rgba(255,255,255,.05) 0%, rgba(255,255,255,0) 32%);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,.32),
+    0 5px 12px rgba(0,0,0,.30),
+    0 16px 34px rgba(0,0,0,.36);
+}
+
+/* 2) 按鈕：內高光(上) + 內暗(下) + 外陰影 → 有厚度；按下時「陷下去」
+      ⚠ 只用 box-shadow，**不要** 碰 background-image —— 否則會蓋掉
+      .btn.primary / .btn-good / .btn-warn / .btn-danger 的彩色底，
+      讓白色字消失（就是上一次被發現的 bug） */
+.btn {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.35),
+    inset 0 -1px 0 rgba(10,37,64,.12),
+    0 1px 2px rgba(10,37,64,.15);
+}
+:root[data-theme="dark"] .btn {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    inset 0 -1px 0 rgba(0,0,0,.26),
+    0 1px 2px rgba(0,0,0,.42);
+}
+.btn:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 5px rgba(10,37,64,.26);
+}
+:root[data-theme="dark"] .btn:active {
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.55);
+}
+
+/* 3) 表頭：底部一道淡分隔光影，視覺上把欄位「墊」起來 */
+table.t th {
+  box-shadow: inset 0 -1px 0 rgba(10,37,64,.05);
+}
+:root[data-theme="dark"] table.t th {
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,.04);
+}
+
+/* 4) 整體圓角更一致、稍圓（只調整尚未明確設定的容器） */
+.modal, .rm-modal, .ug-window, .ar-window {
+  border-radius: 14px;
+}
+

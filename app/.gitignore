@@ -1,0 +1,21 @@
+# 執行期資料（不進版本控制）
+telemetry.db
+data.json
+prod-data.json
+server.log
+server.pid
+backup/
+
+# 資料備份與暫存檔（不進版本控制）
+*.bak_*
+123.txt
+data/11.RestAPI/
+data/12.RestAPI/
+
+# Python 暫存
+__pycache__/
+*.pyc
+
+# node terminal bridge
+node_modules/
+terminal_bridge/node_modules/

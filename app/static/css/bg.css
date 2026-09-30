@@ -1,0 +1,31 @@
+/* ============================================================
+   背景圖（你的 Image.jpg → static/img/ui-bg.jpg）
+   純視覺 · 不改功能 · 想移除就砍掉 index.html 的 <link ... bg.css>
+   思路：你的圖當底層（cover、fixed），上面疊「品牌徑向漸層 + 可讀性霧面」。
+         白主題＝奶白霧（圖偏淡、文字清楚）；黑主題＝深藍霧（圖更隱、偏冷）。
+         要調「圖的明顯度」：改下面 alpha —— .80 越低越清楚、越高越淡。
+   ============================================================ */
+
+/* 白主題（default / light） */
+:root:not([data-theme="dark"]) body {
+  background-color: #eef1f4;
+  background-image:
+    linear-gradient(180deg, rgba(247,249,251,.62) 0%, rgba(247,249,251,.66) 100%),
+    url("/static/img/ui-bg.jpg");
+  background-size: auto, cover;
+  background-position: 0 0, center;
+  background-repeat: no-repeat, no-repeat;
+  background-attachment: fixed, fixed;
+}
+
+/* 黑主題 */
+:root[data-theme="dark"] body {
+  background-color: #0b1119;
+  background-image:
+    linear-gradient(180deg, rgba(11,17,25,.72) 0%, rgba(11,17,25,.78) 100%),
+    url("/static/img/ui-bg.jpg");
+  background-size: auto, cover;
+  background-position: 0 0, center;
+  background-repeat: no-repeat, no-repeat;
+  background-attachment: fixed, fixed;
+}

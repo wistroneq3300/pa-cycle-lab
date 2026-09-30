@@ -1,0 +1,35 @@
+[Unit]
+Description=SP-X KVM Auto-Login Broker (BMC dedicated-subdomain session broker)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# broker service runs as dedicated group; must own the age identity + registry
+User=portal-svc
+Group=portal-svc
+WorkingDirectory=/opt/pa-manager
+
+# --- inventory allowlist (structure + credential NAMES only; no secrets) ---
+Environment="SPX_KVM_TARGETS=[{\"server_id\":\"bmc-internal-a\",\"bmc_subdomain\":\"bmc-bmc-internal-a.kvm.lab.example.internal\",\"upstream_ip\":\"INTERNAL_IP_2\",\"kvm_operator_cred_name\":\"spx:bmc-internal-a:kvm-operator\"}]"
+Environment="SPX_SECRET_FILE=/etc/portal/secrets/spx-bmc-credentials.age"
+Environment="SPX_IDENTITY_FILE=/etc/portal/secrets/spx-bmc-identity.txt"
+Environment="SPX_REGISTRY_DB=/var/lib/portal/spx-session-registry.db"
+Environment="SPX_AUDIT_LOG=/var/log/portal/spx-kvm-broker-audit.log"
+# Portal auth provider plug-in (see rbac.py). Fail-closed if unset.
+Environment="SPX_PORTAL_AUTH=noauth"
+
+ExecStart=/usr/bin/python3.12 -m uvicorn spx_kvm_broker.app:app --host 127.0.0.1 --port 18992 --workers 1
+Restart=always
+RestartSec=5
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+# read-only secret store, identity; rw registry dir, log dir
+ReadWritePaths=/var/lib/portal /var/log/portal
+
+[Install]
+WantedBy=multi-user.target

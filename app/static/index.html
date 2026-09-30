@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PA Cycle Lab</title>
+<link rel="stylesheet" href="/static/css/style.css?v=20260918m">
+<link rel="stylesheet" href="/static/css/polish.css?v=20260906b">
+<link rel="stylesheet" href="/static/css/pro.css?v=20260918n">
+<link rel="stylesheet" href="/static/css/premium.css?v=20260918o">
+<link rel="stylesheet" href="/static/vendor/xterm/xterm.css">
+<link rel="stylesheet" href="/static/css/cycle.css">
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ===== 側欄 ===== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo-row">
+        <img class="logo-mark logo-img" src="/static/img/wistronlogo.png" alt="Wistron">
+        <div class="logo-txt">
+          <div class="l1">Wistron PA</div>
+        </div>
+      </div>
+      <div class="manager-label">SERVER MANAGER</div>
+      <div class="sub">L10 系統 · L11 機櫃 統一管理平台</div>
+    </div>
+
+    <nav class="nav" id="nav"></nav>
+
+    <div class="sidebar-foot">
+      <span>Wistron PA Server Manager</span><br>
+      <span id="mode-label">Mode: Light</span>
+    </div>
+  </aside>
+
+  <!-- ===== 主內容 ===== -->
+  <main class="main">
+    <header class="topbar">
+      <span class="page-title" id="page-title">Dashboard</span>
+      <span class="gpu-alert-ticker" id="gpu-alert-ticker"></span>
+      <span class="spacer"></span>
+
+      <button class="icon-btn guide-btn-color" id="guide-btn" type="button" title="UserGuide">
+        <svg viewBox="0 0 28 28" width="19" height="19" aria-hidden="true" style="display:inline-block;vertical-align:middle">
+<ellipse cx="14" cy="24.5" rx="11" ry="2" fill="rgba(0,0,0,.22)"/>
+<path d="M13 6.5 C10.4 4.9 7 4.4 3 4.9 L3 21.5 C7 21 10.4 21.5 13 23.1 Z" fill="#2f7d5b"/>
+<path d="M12.4 8.2 C10.2 6.9 7.4 6.5 4.4 6.9 L4.4 19.8 C7.4 19.4 10.2 19.8 12.4 21 Z" fill="#eef6f1"/>
+<path d="M15 6.5 C17.6 4.9 21 4.4 25 4.9 L25 21.5 C21 21 17.6 21.5 15 23.1 Z" fill="#2f5f8f"/>
+<path d="M15.6 8.2 C17.8 6.9 20.6 6.5 23.6 6.9 L23.6 19.8 C20.6 19.4 17.8 19.8 15.6 21 Z" fill="#eff5fb"/>
+<line x1="14" y1="6.8" x2="14" y2="22.8" stroke="#1b3d2e" stroke-width="1"/>
+<path d="M6 10 H11 M6 12.5 H11 M6 15 H11" stroke="#b9c9c0" stroke-width="0.8"/>
+<path d="M22 10 H17 M22 12.5 H17 M22 15 H17" stroke="#b6c7d8" stroke-width="0.8"/>
+</svg>
+      </button>
+
+            <a class="icon-btn gh-link" id="gh-link" href="https://github.com/wistroneq3300/pa-server-manager" target="_blank" rel="noopener noreferrer" title="原始碼：GitHub">
+        <svg viewBox="0 0 16 16" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.86 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+      </a>
+
+      <button class="icon-btn" id="theme-toggle" title="切換深淺色">🌓</button>
+
+      <div class="user"><span class="avatar">U</span> <span>Admin</span></div>
+    </header>
+
+    <div class="content" id="content">
+      <div class="card">Loading…</div>
+    </div>
+  </main>
+
+</div>
+
+<!-- 新增系統 Modal -->
+<div class="modal-backdrop" id="add-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">＋ 新增系統</div>
+      <button class="icon-btn" onclick="closeAdd()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="hint-msg">儲存時會先確認連線（都成功才新增）：<br>
+        <b>OS</b>：使用 SSH 登入並抓取 <b>hostname</b> 作為系統名稱；若填入 <b>BMC IP</b> 也會 ping 確認可連。</p>
+
+      <div class="field-row">
+        <div class="field">
+          <label>層級（Level）<span class="req">*</span></label>
+          <select id="f-level" class="input" onchange="onAddLevelChange()">
+            <option value="system">L10 · System Level（單機）</option>
+            <option value="rack">L11 · Rack Level（整櫃）</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>專案 <span class="req">*</span></label>
+          <select id="f-project" class="input">
+            <option value="">— 未分類 —</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row" id="f-rack-size-wrap" style="display:none">
+        <div class="field">
+          <label>機櫃占用高度 <span class="hint" style="font-weight:400">（L11 用，多 U 元件如 CDU/PDU/Switch）</span></label>
+          <select id="f-rack-size" class="input">
+            <option value="1" selected>1U</option>
+            <option value="2">2U</option>
+            <option value="3">3U</option>
+            <option value="4">4U</option>
+            <option value="6">6U</option>
+            <option value="8">8U</option>
+            <option value="12">12U</option>
+            <option value="16">16U</option>
+            <option value="24">24U</option>
+            <option value="32">32U</option>
+            <option value="42">42U</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>OS IP <span class="req">*</span></label>
+        <input id="f-os-ip" type="text" placeholder="例: INTERNAL_IP_18" class="input">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>OS 帳號 <span class="req">*</span></label>
+          <input id="f-os-user" type="text" placeholder="例: nvidia / root" class="input">
+        </div>
+        <div class="field">
+          <label>OS 密碼 <span class="req">*</span></label>
+          <div class="pw-wrap">
+            <input id="f-os-pass" type="password" placeholder="OS 密碼" class="input pw-input" autocomplete="new-password">
+            <button type="button" class="pw-eye" onclick="togglePw('f-os-pass', this)">👁</button>
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>OS SSH Port</label>
+          <input id="f-os-port" type="number" value="22" class="input" disabled title="固定為 22">
+        </div>
+      </div>
+
+      <div class="hr">BMC（必填，之後開/關機用）</div>
+      <div class="field-row" style="align-items:center">
+        <div class="field" style="flex:1">
+          <label>BMC IP <span class="hint" style="font-weight:400">（系統依 OS 的 ipmitool 自動帶入）</span></label>
+          <input id="f-bmc-ip" type="text" placeholder="由 ipmitool 自動抓取" class="input" disabled>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <button type="button" class="btn small" id="probe-bmc-btn" onclick="probeBmc()">🔍 依 OS 抓取 BMC IP（需 ipmitool）</button>
+        <span id="probe-bmc-dot" class="dot-sm" title="抓取 BMC IP 狀態"></span>
+        <span id="probe-bmc-msg"></span>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>BMC 帳號 <span class="req" id="bmc-user-req">*</span></label>
+          <input id="f-bmc-user" type="text" placeholder="例: root" class="input">
+        </div>
+        <div class="field">
+          <label>BMC 密碼 <span class="req" id="bmc-pass-req">*</span></label>
+          <div class="pw-wrap">
+            <input id="f-bmc-pass" type="password" placeholder="BMC 密碼" class="input pw-input" autocomplete="new-password">
+            <button type="button" class="pw-eye" onclick="togglePw('f-bmc-pass', this)">👁</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="add-err" class="error-box" style="display:none"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeAdd()">取消</button>
+      <button class="btn primary" id="save-btn" onclick="saveMachine()">儲存並連線測試</button>
+    </div>
+  </div>
+</div>
+
+<!-- 專案管理 Modal -->
+<div class="modal-backdrop" id="project-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">專案管理</div>
+      <button class="icon-btn" onclick="closeProjectModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row" style="margin-bottom:4px">
+        <div class="field" style="flex:2">
+          <label>專案名稱</label>
+          <input id="new-project-name" type="text" placeholder="例: NCP / H100 / Miramar" class="input">
+        </div>
+        <div class="field" style="flex:2">
+          <label>備註（選填）</label>
+          <input id="new-project-desc" type="text" placeholder="說明" class="input">
+        </div>
+        <button id="project-add-btn" class="btn primary" style="align-self:flex-end;margin-bottom:2px" onclick="addProject()">新增專案</button>
+      </div>
+      <div id="project-err" class="error-box" style="display:none"></div>
+      <table class="t">
+        <thead><tr><th>專案</th><th>備註</th><th>機台數</th><th></th></tr></thead>
+        <tbody id="project-list-body"></tbody>
+      </table>
+      <p class="hint-msg" style="margin-top:10px">刪除專案的條件：該專案下必須<b>沒有機台</b>。</p>
+    </div>
+  </div>
+</div>
+
+<!-- 終端機 Modal（左右雙欄：左 OS / 右 BMC；可拖曳 + 放大） -->
+<div class="modal-backdrop" id="term-modal" style="display:none">
+  <div class="modal term-modal term-drag" id="term-modal-box">
+    <div class="term-drag-handle term-head" id="term-head">
+      <div class="modal-title" id="term-title"><span class="grip">⠿</span> 終端機</div>
+      <span class="spacer"></span>
+      <button class="icon-btn term-max" id="term-max-btn" onclick="toggleTermMaximize()" title="放大 / 還原">⛶</button>
+      <button class="icon-btn" onclick="closeTerm()" title="關閉">✕</button>
+    </div>
+    <div class="term-statusbar" id="term-status">
+      <span id="term-os-status">OS 連線中…</span>
+      <div class="term-mode" id="term-mode">
+        <button class="btn small term-mode-btn" id="term-mode-both" title="OS 與 BMC 並排顯示" onclick="setTermMode('both')">◫ 並排</button>
+        <button class="btn small term-mode-btn" id="term-mode-os" title="只顯示 OS，放大佔滿" onclick="setTermMode('os')">🖥 OS 放大</button>
+        <button class="btn small term-mode-btn" id="term-mode-bmc" title="只顯示 BMC，放大佔滿" onclick="setTermMode('bmc')">🌐 BMC 放大</button>
+      </div>
+      <span id="term-bmc-status">BMC 連線中…</span>
+    </div>
+    <div class="term-body">
+      <div class="term-pane term-pane-os" id="term-os-pane">
+        <div class="term-pane-label">OS</div>
+        <div class="term-box" id="term-os"></div>
+      </div>
+      <div class="term-pane term-pane-bmc" id="term-bmc-pane">
+        <div class="term-pane-label">BMC</div>
+        <div class="term-box" id="term-bmc"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 廣播終端 Modal（同時控制多台 rack 系統，可選主機） -->
+<div class="modal-backdrop" id="bc-modal" style="display:none">
+  <div class="modal bc-modal bc-drag" id="bc-modal-box">
+    <div class="term-drag-handle bc-head" id="bc-head">
+      <div class="modal-title" id="bc-title"><span class="grip">▦</span> 📡 廣播終端 <span class="hint" id="bc-title-hint"></span></div>
+      <span class="spacer"></span>
+      <button class="icon-btn bc-max" id="bc-max-btn" onclick="toggleBcMaximize()" title="放大 / 還原">⛶</button>
+      <button class="icon-btn" onclick="closeBroadcast()" title="關閉">✕</button>
+    </div>
+    <div class="bc-topbar">
+      <div class="bc-tabs" id="bc-tabs"></div>
+      <div class="bc-ctrl">
+        <button class="btn small active" id="bc-bcast-on" onclick="bcSetBroadcast(true)" title="廣播模式">📡 廣播全部</button>
+        <button class="btn small" id="bc-bcast-off" onclick="bcSetBroadcast(false)" title="只操作目前選取主機">◈ 目前主機</button>
+      </div>
+    </div>
+    <div class="bc-body">
+      <div class="bc-panes" id="bc-panes"></div>
+      <div class="bc-hlog" id="bc-hlog"></div>
+    </div>
+    <div class="bc-statusbar" id="bc-status">
+      <div class="bc-bcastbar">
+        <span class="bc-bc-label">📡 指令列</span>
+        <input id="bc-input" type="text" placeholder="輸入指令，Enter 送出（自動加到目前主機或全部主機）" autocomplete="off" spellcheck="false">
+      </div>
+      <span class="hint" id="bc-status-txt" style="white-space:nowrap"></span>
+    </div>
+  </div>
+</div>
+
+<script src="/static/vendor/xterm/xterm.js"></script>
+<script src="/static/vendor/xterm/addon-fit.js"></script>
+<script src="/static/vendor/chartjs/chart.umd.min.js"></script>
+<script src="/static/js/app.js?v=20260918n"></script>
+<script src="/static/js/premium.js?v=20260918n"></script>
+<script src="/static/js/userguide.js?v=20260905b"></script>
+<script>
+// KVM 自動登入（Plan A）：launch_id 由 broker mint，route 是 Portal origin 提供
+// （nginx 把 /api/kvm/launch 代轉 broker）。主 app 若跑在 dev origin（127.0.0.1:6969），
+// 就用指定的 broker Portal host；正式部署時整個 app 掛在 portal host 下即自動對齊。
+window.SPX_KVM_LAUNCH_API =
+  (window.SPX_KVM_LAUNCH_API) ||
+  
+  (location.origin + "/api/kvm/launch");
+</script>
+<script type="module" src="/static/js/kvm_broadcast.js?v=20260901f"></script>
+<div id="guide-root"></div>
+
+
+<script src="/static/js/cycle.js"></script>
+</body>
+
+</html>

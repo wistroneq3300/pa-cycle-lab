@@ -1,0 +1,368 @@
+/* ============================================================
+   PREMIUM LAYER  (rollback-safe: remove <link> in index.html)
+   Design-system upgrade + product-grade polish on top of
+   existing style.css / polish.css / pro.css.
+   ============================================================ */
+
+/* ---------- 1) Typography ladder ---------- */
+:root {
+  --fs-2xs: 11.5px;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-base: 13.5px;
+  --fs-lg: 15px;
+  --fs-xl: 18px;
+  --fs-2xl: 24px;
+  --fs-hero: 34px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+body { font-size: var(--fs-base); }
+h1,h2,h3,h4 { font-weight: 700; letter-spacing: -.01em; }
+.page-title { font-size: var(--fs-xl); font-weight: 700; letter-spacing: -.01em; }
+.t.card-title { font-size: var(--fs-lg); font-weight: 700; }
+.section-h .t { font-size: var(--fs-xl); letter-spacing: -.01em; }
+.nav-btn { font-size: var(--fs-sm); }
+.btn, .btn.small { font-size: var(--fs-xs); min-height: 30px; }
+.badge { font-size: var(--fs-2xs); }
+th { font-size: var(--fs-xs) !important; white-space: nowrap; }
+td { font-size: var(--fs-sm); }
+.stat .v { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+/* ---------- 2) Semantic color utilities ---------- */
+:root {
+  --ok: #16a34a;   --ok-bg: rgba(22,163,74,.12);
+  --warn: #d97706; --warn-bg: rgba(217,119,6,.12);
+  --err: #dc2626;  --err-bg: rgba(220,38,38,.12);
+  --info: #0a6cff; --info-bg: rgba(10,108,255,.10);
+}
+.t-ok{color:var(--ok)} .t-warn{color:var(--warn)} .t-err{color:var(--err)} .t-info{color:var(--info)} .t-muted{color:var(--text-faint)}
+
+/* ---------- 3) Badge / Pill component ---------- */
+.badge { display:inline-flex; align-items:center; gap:5px; padding:2px 9px; border-radius:999px; font-weight:600; line-height:1.5; }
+.badge-sm { display:inline-flex; align-items:center; gap:4px; padding:1px 8px; border-radius:999px; font-size:var(--fs-2xs); font-weight:600; }
+.badge-system, .badge-rack { border-radius:999px; }
+.pill { display:inline-flex; align-items:center; gap:6px; padding:3px 11px; border-radius:999px; font-size:var(--fs-xs); font-weight:600; background:var(--bg-panel-2); color:var(--text-dim); border:1px solid var(--border); }
+.pill .dot{width:7px;height:7px;border-radius:50%}
+
+/* ---------- 4) Buttons / inputs: comfortable hit areas ---------- */
+.btn { border-radius: var(--radius-sm); }
+.input, select.input { min-height: 32px; border-radius: var(--radius-sm); }
+.btn.primary, .btn-good, .btn-warn, .btn-danger { font-weight: 600; }
+
+/* ---------- 5) Tables: sticky head, hover action reveal ---------- */
+.t { border-collapse: separate; border-spacing: 0; }
+.t thead th { position: sticky; top: 0; z-index: 2; background: var(--bg-panel-2); }
+.t tbody tr td { vertical-align: middle; }
+.t tbody tr .btn, .rack-actions .btn { opacity: .55; transition: opacity .15s ease; }
+.t tbody tr:hover .btn, .rack-actions:hover .btn { opacity: 1; }
+.t tbody tr:hover { box-shadow: inset 3px 0 0 var(--w-green); }
+.t-wrap { overflow-x: auto; }
+
+/* ---------- 6) Modal consistency ---------- */
+.modal, .rm-modal, .ug-window, .ar-window { max-width: min(92vw, 760px); }
+.modal-head { padding: 14px 18px; }
+.modal-title { font-size: var(--fs-lg); font-weight: 700; }
+html.lock-scroll, html.lock-scroll body { overflow: hidden; }
+
+/* ---------- 7) Toast system ---------- */
+#premium-toasts { position: fixed; top: 16px; right: 16px; z-index: 99999; display: flex; flex-direction: column; gap: 8px; width: 300px; pointer-events: none; }
+.pm-toast { pointer-events: auto; display:flex; gap:10px; align-items:flex-start; padding:11px 14px; border-radius:10px; background:var(--bg-panel); color:var(--text); border:1px solid var(--border); box-shadow:0 8px 24px rgba(10,37,64,.14); font-size:var(--fs-sm); animation: pmToastIn .18s ease-out; border-left:3px solid var(--info); }
+.pm-toast.ok{border-left-color:var(--ok)} .pm-toast.warn{border-left-color:var(--warn)} .pm-toast.err{border-left-color:var(--err)}
+@keyframes pmToastIn { from {opacity:0; transform:translateX(12px)} to {opacity:1; transform:none} }
+.pm-toast .pm-close { margin-left:auto; cursor:pointer; color:var(--text-faint); background:none; border:none; font-size:14px; }
+
+/* ---------- 8) Cmd+K command palette ---------- */
+#pm-cmdk { position: fixed; inset: 0; z-index: 99998; display:none; align-items:flex-start; justify-content:center; padding-top:12vh; background:rgba(10,15,20,.45); backdrop-filter: blur(3px); }
+#pm-cmdk.open { display:flex; }
+#pm-cmdk-box { width:min(92vw,600px); background:var(--bg-panel); border:1px solid var(--border); border-radius:14px; box-shadow:0 24px 60px rgba(10,20,30,.35); overflow:hidden; }
+#pm-cmdk-input { width:100%; padding:14px 16px; font-size:15px; background:transparent; border:none; border-bottom:1px solid var(--border); color:var(--text); outline:none; }
+#pm-cmdk-list { max-height: 46vh; overflow-y:auto; padding:6px; }
+.pm-cmdk-item { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:8px; cursor:pointer; }
+.pm-cmdk-item:hover, .pm-cmdk-item.sel { background:var(--bg-hover); }
+.pm-cmdk-item .k { width:26px; text-align:center; }
+.pm-cmdk-item .cat { margin-left:auto; font-size:11px; color:var(--text-faint); }
+.pm-cmdk-hint { padding:8px 14px 10px; font-size:11px; color:var(--text-faint); border-top:1px solid var(--border); }
+
+/* ---------- 9) Topbar global pills ---------- */
+#pm-globalpills { display:flex; align-items:center; gap:6px; margin-right:8px; }
+
+/* ---------- 11) Machine detail: status banner ---------- */
+.pm-mach-status { display:grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap:10px; margin-bottom:14px; }
+.pm-mach-tile { background: var(--bg-panel); border:1px solid var(--border); border-radius:12px; padding:12px 14px; }
+.pm-mach-tile .k { font-size:11.5px; color:var(--text-faint); margin-bottom:4px; }
+.pm-mach-tile .v { font-size:17px; font-weight:700; font-variant-numeric: tabular-nums; }
+
+/* ---------- 12) Skeleton loading shimmer ---------- */
+@keyframes pmShimmer { from { background-position: -400px 0 } to { background-position: 400px 0 } }
+.pm-skeleton { border-radius: 10px; background: linear-gradient(90deg, var(--bg-panel-2) 25%, var(--bg-hover) 40%, var(--bg-panel-2) 60%); background-size: 800px 100%; animation: pmShimmer 1.2s linear infinite; }
+
+/* ---------- 14) Print ---------- */
+@media print {
+  .sidebar, .topbar .icon-btn, .topbar .user, #pm-globalpills { display:none !important; }
+  .layout { display:block; }
+  .main { margin:0; }
+  .sidebar { width:0; }
+  body { background:#fff !important; }
+  .card, .glass-panel { box-shadow:none !important; border:1px solid #ccc !important; }
+}
+
+/* ---------- 15) Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .pm-toast, .pm-cmdk, .pm-skeleton { animation:none !important; transition:none !important; }
+}
+
+/* ===== 15) 終端機 — MobaXterm 風 ===== */
+/* 初始視窗更大，幾乎滿版但留安全邊距 */
+.term-drag{
+  width:97vw; height:92vh;
+  max-width:1880px; max-height:1080px;
+  border-radius:12px;
+  box-shadow:0 18px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04);
+  background:#17181c;
+}
+/* 標題列：深色工具列 + 左側藍色強調條（MobaXterm 的 tab 列感） */
+.term-drag-handle{
+  background:linear-gradient(180deg,#26282e,#1b1d22);
+  border-bottom:1px solid #0a0b0d;
+  padding:10px 16px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
+.term-drag-handle .modal-title{
+  font-weight:600;font-size:12.5px;letter-spacing:.3px;color:#dfe3ea;
+  background:linear-gradient(180deg,#23262e,#181b22);
+  border:1px solid rgba(255,255,255,.07);
+  border-top:1px solid rgba(0,200,255,.35);
+  border-radius:7px 7px 0 0;
+  padding:5px 14px;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.term-drag-handle .icon-btn{
+  color:#c7cdd6;background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08);
+}
+.term-drag-handle .icon-btn:hover{color:#fff;background:rgba(80,160,255,.25)}
+/* 狀態列：深色 + 頂部細藍線 */
+.term-statusbar{
+  background:linear-gradient(180deg,#1f2227,#171a1e);
+  border-bottom:1px solid #0a0b0d;
+  box-shadow:inset 0 2px 0 rgba(0,160,255,.25);
+  padding:6px 18px;
+  font-size:11.5px;
+}
+.term-statusbar .term-badge{font-size:10.5px;padding:2px 9px}
+.term-mode-btn{
+  border-radius:6px;font-size:11px;
+}
+/* 內文區：留白加大，字不再貼邊 */
+.term-body{padding:14px 16px 16px;gap:14px}
+/* 面板標籤：做成「分頁」樣式 */
+.term-pane-label{
+  font-size:11px;font-weight:700;letter-spacing:1px;
+  padding:6px 12px;
+  color:#c9d1dc;background:linear-gradient(180deg,#23262e,#181b22);
+  border:1px solid rgba(255,255,255,.07);border-bottom:none;
+  border-radius:8px 8px 0 0;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.term-pane-label::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;margin-right:8px;box-shadow:0 0 6px #22c55e55}
+/* 終端框：深黑、內頂亮線、圓角、陰影，MobaXterm 的視覺重心 */
+.term-box{
+  background:#0c0c0e;
+  border:1px solid #2a2d33;border-radius:10px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04), inset 0 0 0 1px rgba(0,0,0,.6);
+}
+.term-box .xterm{padding:14px 18px;height:100%}
+.term-box .xterm .xterm-screen{background:#0c0c0e}
+.term-box .xterm .xterm-viewport{background:#0c0c0e;border-radius:0 0 10px 10px}
+/* 捲軸：細窄、深色 */
+.term-box ::-webkit-scrollbar{width:8px}
+.term-box ::-webkit-scrollbar-thumb{background:#3a3f47;border-radius:4px;border:2px solid #0c0c0e}
+.term-box ::-webkit-scrollbar-track{background:transparent}
+
+/* 加大模式保持乾淨 */
+.term-drag.maximized .term-drag-handle{border-radius:0}
+.term-drag.maximized .term-box{border-radius:0}
+.term-drag.maximized .term-box .xterm .xterm-viewport{border-radius:0}
+
+/* ===== 16) 廣播終端 — 同風格 ===== */
+.bc-drag{border-radius:12px;box-shadow:0 18px 60px rgba(0,0,0,.55)}
+.bc-box{background:#0c0c0e;border:1px solid #2a2d33;border-radius:10px}
+.bc-box .xterm{padding:12px 16px;height:100%}
+.bc-head{background:linear-gradient(180deg,#26282e,#1b1d22);border-bottom:1px solid #0a0b0d}
+
+/* ===== 17) Premium Layer 2 — 高級科技感 ===== */
+
+/* --- A. 品牌辨識 --- */
+.sidebar .brand{
+  position:relative;
+  padding:22px 20px 16px;
+}
+.logo-txt .l1{
+  font-size:16px;font-weight:800;letter-spacing:.5px;
+  background:linear-gradient(120deg,var(--accent,#0af),#7dd3fc,var(--accent,#0af));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+[data-theme="dark"] .logo-txt .l1{
+  background:linear-gradient(120deg,#38bdf8,#a5f3fc,#38bdf8);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 0 18px rgba(56,189,248,.35);
+}
+.manager-label{
+  letter-spacing:2.2px;margin-top:5px;
+}
+.sidebar .sub{font-size:11px;color:var(--text-faint)}
+
+/* --- B. 背景氛圍（暗色 = 任務控制中心；亮色 = 乾淨科技） --- */
+[data-theme="dark"] body{
+  background:
+    radial-gradient(900px 520px at 12% -8%, rgba(34,120,255,.10), transparent 60%),
+    radial-gradient(800px 480px at 88% 0%, rgba(45,212,191,.06), transparent 55%),
+    radial-gradient(900px 600px at 50% 110%, rgba(56,120,255,.07), transparent 60%),
+    var(--bg);
+}
+[data-theme="dark"] .main{background:transparent}
+[data-theme="dark"] .sidebar{
+  background:linear-gradient(180deg,#0d1117ee,#0a0e14ee);
+}
+
+/* --- C. 卡片／面板：毛邊玻璃 + 精緻陰影 --- */
+.glass-panel,.dash-kpis .stat,.card,.dash-proj{
+  border:1px solid var(--border);
+  border-top:1px solid rgba(148,163,184,.28);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--bg-panel) 92%,#fff),var(--bg-panel));
+  box-shadow:0 1px 2px rgba(15,23,42,.04), 0 8px 24px -14px rgba(15,23,42,.14);
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+[data-theme="dark"] .glass-panel,[data-theme="dark"] .dash-kpis .stat,[data-theme="dark"] .card,[data-theme="dark"] .dash-proj{
+  background:linear-gradient(180deg,color-mix(in srgb,var(--bg-panel) 88%,#141b26),var(--bg-panel));
+  border-top:1px solid rgba(148,163,184,.12);
+  box-shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 30px -16px rgba(0,0,0,.7);
+}
+.glass-panel:hover,.dash-proj:hover,.card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 2px 4px rgba(15,23,42,.05), 0 16px 40px -18px rgba(15,23,42,.22);
+  border-color:rgba(56,189,248,.35);
+}
+[data-theme="dark"] .glass-panel:hover,[data-theme="dark"] .dash-proj:hover,[data-theme="dark"] .card:hover{
+  box-shadow:0 2px 4px rgba(0,0,0,.5), 0 18px 46px -18px rgba(0,0,0,.85), 0 0 0 1px rgba(56,189,248,.14);
+}
+
+/* --- D. KPI 統計卡：圖示晶片 + 大數字 + 頂部發光條 --- */
+.dash-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.dash-kpis .stat{
+  position:relative;border-radius:14px;padding:16px 18px 14px;overflow:hidden;
+}
+.dash-kpis .stat .k{
+  font-size:11px;font-weight:700;letter-spacing:1.1px;color:var(--text-faint);
+  text-transform:uppercase;
+}
+.dash-kpis .stat .v{
+  font-size:30px;font-weight:800;line-height:1.15;margin-top:4px;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.5px;
+}
+/* KPI 圖示晶片（由 premium.js 在 .stat 前面安的 .pm-kpi-ic） */
+.pm-kpi-ic{
+  position:absolute;right:14px;top:14px;width:30px;height:30px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(56,189,248,.12);color:#38bdf8;
+  box-shadow:inset 0 0 0 1px rgba(56,189,248,.22);
+}
+[data-theme="dark"] .pm-kpi-ic{background:rgba(56,189,248,.14);box-shadow:inset 0 0 0 1px rgba(56,189,248,.3)}
+
+/* --- E. 側欄導航：膠囊 + 漸層啟用態 + 發光 --- */
+.nav .nav-btn{
+  position:relative;border-radius:11px;margin:2px 10px;
+  transition:background .16s ease,color .16s ease,box-shadow .16s ease,transform .16s ease;
+}
+.nav .nav-btn:hover{transform:translateX(2px)}
+.nav .nav-btn.active{
+  background:linear-gradient(90deg,rgba(56,189,248,.22),rgba(56,189,248,.08));
+  box-shadow:inset 0 0 0 1px rgba(56,189,248,.35), 0 0 18px -6px rgba(56,189,248,.5);
+  color:var(--text);
+}
+.nav .nav-btn.active::before{
+  content:"";position:absolute;left:6px;top:50%;transform:translateY(-50%);
+  width:3px;height:16px;border-radius:3px;
+  background:linear-gradient(180deg,#38bdf8,#22d3ee);
+  box-shadow:0 0 8px rgba(56,189,248,.9);
+}
+
+/* --- F. 頂欄：即時時鐘 --- */
+.pm-clock{
+  font-variant-numeric:tabular-nums;
+  font-size:12px;font-weight:600;letter-spacing:.4px;color:var(--text-dim);
+  display:inline-flex;align-items:center;gap:7px;margin-right:12px;
+}
+.pm-clock::before{
+  content:"";width:8px;height:8px;border-radius:50%;
+  background:#22c55e;box-shadow:0 0 0 0 rgba(34,197,94,.5);
+  animation:pmPulse 2.2s infinite;
+}
+@keyframes pmPulse{
+  0%{box-shadow:0 0 0 0 rgba(34,197,94,.45)}
+  70%{box-shadow:0 0 0 7px rgba(34,197,94,0)}
+  100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}
+}
+
+/* --- G. 視圖進場淡化 --- */
+#content>*{animation:pmFade .28s ease both}
+@keyframes pmFade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* --- H. 按鈕微互動 --- */
+.btn{transition:transform .12s ease,box-shadow .12s ease,background .15s ease}
+.btn:active{transform:scale(.96)}
+.btn.primary{
+  background:linear-gradient(135deg,var(--accent,#0af),#0aa5e8);
+  box-shadow:0 4px 14px -6px rgba(56,189,248,.65);
+}
+.btn.primary:hover{box-shadow:0 6px 20px -6px rgba(56,189,248,.85)}
+
+/* --- I. Rack 質感：圓角 + 發光軌道 + LED 狀態 --- */
+.rm-rack{
+  border-radius:16px;box-shadow:0 16px 40px -20px rgba(0,0,0,.55);
+}
+.rm-rack::before,.rm-rack::after{
+  background:linear-gradient(180deg,rgba(56,189,248,.22),rgba(15,23,42,.2),rgba(34,211,238,.18));
+  box-shadow:0 0 14px -4px rgba(56,189,248,.4);
+}
+/* 機櫃是「硬體櫃」恆深色設計；不放 color-mix，避免 light mode 頭變淺配上白字隱形 */
+.rm-head{
+  border:1px solid rgba(255,255,255,.08);
+  border-bottom:none;
+}
+.rm-u{
+  border-radius:6px;margin:1px;
+  transition:background .15s ease,box-shadow .15s ease,transform .15s ease;
+}
+[data-theme="dark"] .rm-u{background:linear-gradient(90deg,#141b24,#1e2731 55%,#161f28)}
+.rm-u:hover{
+  transform:translateX(2px);
+  box-shadow:0 0 0 1px rgba(56,189,248,.4),0 0 16px -6px rgba(56,189,248,.6);
+}
+.rm-status.ok{text-shadow:0 0 6px rgba(34,197,94,.8)}
+.rm-status.bad{text-shadow:0 0 6px rgba(248,81,73,.7)}
+
+/* --- J. 空狀態：柔和圖示 --- */
+.empty,.empty-small{
+  position:relative;text-align:center;
+  color:var(--text-faint);
+}
+.empty::before,.empty-small::before{
+  content:"◌";
+  display:block;font-size:34px;line-height:1;margin:0 auto 10px;
+  color:rgba(56,189,248,.5);
+  filter:drop-shadow(0 0 10px rgba(56,189,248,.5));
+}
+.empty-small::before{font-size:22px;margin-bottom:6px}
+
+/* --- K. 細部質感：選擇色 / 捲軸 / 表格 hover --- */
+::selection{background:rgba(56,189,248,.28)}
+[data-theme="dark"] ::selection{background:rgba(56,189,248,.35)}
+.t tbody tr{
+  transition:background .12s ease, box-shadow .12s ease;
+}
+.t tbody tr:hover{
+  background:linear-gradient(90deg,rgba(56,189,248,.06),transparent);
+}

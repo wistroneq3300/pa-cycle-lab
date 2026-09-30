@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>系統功能交接文件 — Port 6969 × OpenHands</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#161d2e; --panel2:#1c2540; --line:#2a3550;
+    --txt:#e6ecf7; --muted:#9fb0cc; --accent:#4f8cff; --accent2:#22c58b;
+    --warn:#f5a623; --danger:#ff5d5d; --code:#0b0f1a;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
+    background:radial-gradient(1200px 600px at 70% -10%,#1c2748 0%,var(--bg) 55%);
+    color:var(--txt);line-height:1.7;font-size:15px;
+  }
+  header{
+    padding:34px 28px 20px;max-width:1180px;margin:0 auto;
+    display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  }
+  header .logo{font-size:26px;font-weight:700;letter-spacing:.5px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  header .sub{color:var(--muted);font-size:13.5px;margin-top:2px;}
+  header .badges{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;}
+  .badge{font-size:12px;padding:4px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap;}
+  .badge.ok{color:var(--accent2);border-color:#1f5c45;background:#12271f;}
+  .badge.warn{color:var(--warn);border-color:#5c4a1f;background:#271f12;}
+
+  nav.tabs{
+    max-width:1180px;margin:8px auto 0;padding:0 28px;
+    display:flex;gap:10px;border-bottom:1px solid var(--line);flex-wrap:wrap;
+  }
+  nav.tabs button{
+    background:transparent;border:none;color:var(--muted);font-size:15px;
+    padding:13px 20px;cursor:pointer;border-bottom:3px solid transparent;
+    font-family:inherit;transition:.15s;font-weight:500;
+  }
+  nav.tabs button:hover{color:var(--txt);}
+  nav.tabs button.active{color:var(--txt);border-bottom-color:var(--accent);}
+  nav.tabs button .n{font-size:11px;color:var(--accent2);opacity:.9;margin-right:6px;}
+
+  main{max-width:1180px;margin:0 auto;padding:22px 28px 60px;}
+  .panel{display:none;}
+  .panel.active{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px;margin-bottom:22px;}
+  h2.section{font-size:20px;margin:0 0 4px;display:flex;align-items:center;gap:10px;}
+  h2.section .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);display:inline-block;box-shadow:0 0 12px var(--accent);}
+  h3{font-size:16px;color:var(--txt);margin:26px 0 10px;border-left:3px solid var(--accent);padding-left:10px;}
+  .lead{color:var(--muted);font-size:14px;margin:0 0 14px;}
+  p{color:#cdd8ec;}
+  code,.cmd,.path{font-family:var(--mono);font-size:13px;background:var(--code);border:1px solid var(--line);border-radius:5px;padding:1px 7px;color:#d5e2ff;}
+  pre{
+    font-family:var(--mono);font-size:13px;background:var(--code);border:1px solid var(--line);
+    border-radius:9px;padding:14px 16px;overflow-x:auto;color:#d9e5ff;line-height:1.55;
+  }
+  pre .c{color:#7d8db0;font-style:italic;}
+  pre b{color:#ffc46b;font-weight:600;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0;}
+  th,td{text-align:left;padding:9px 12px;border:1px solid var(--line);vertical-align:top;}
+  th{background:var(--panel2);color:#cfdbf5;font-weight:600;white-space:nowrap;}
+  td code{white-space:nowrap;}
+  tr:nth-child(even) td{background:#141b2c;}
+  ul,ol{padding-left:22px;color:#cdd8ec;}
+  li{margin:4px 0;}
+  .toc{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-top:8px;}
+  .toc a{display:block;background:var(--panel2);border:1px solid var(--line);border-radius:9px;
+    padding:11px 14px;color:var(--txt);text-decoration:none;font-size:13.5px;transition:.15s;}
+  .toc a:hover{border-color:var(--accent);transform:translateY(-1px);}
+  .toc a small{display:block;color:var(--muted);font-size:12px;margin-top:2px;}
+
+  .alert{border-radius:9px;padding:12px 15px;font-size:13.5px;border:1px solid;margin:10px 0;}
+  .alert.danger{background:#2b1418;border-color:#5d2228;color:#ffb3b3;}
+  .alert.warn{background:#29200f;border-color:#5d4a1f;color:#ffd591;}
+  .alert.info{background:#101d33;border-color:#1f3a61;color:#bcd6ff;}
+  .alert b{font-weight:600;}
+
+  .cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:10px;}
+  .card{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:15px 16px;}
+  .card .t{font-weight:600;color:var(--txt);font-size:14px;margin-bottom:3px;}
+  .card .d{color:var(--muted);font-size:12.5px;}
+  .card .p{font-family:var(--mono);font-size:12px;color:#8be3c0;margin-top:8px;word-break:break-all;}
+
+  .steps{counter-reset:st;margin-top:10px;list-style:none;padding-left:0;}
+  .steps li{counter-increment:st;position:relative;padding:10px 0 10px 44px;border-left:2px solid var(--line);margin:0 0 2px 16px;color:#cdd8ec;}
+  .steps li:before{content:counter(st);position:absolute;left:-18px;top:10px;width:34px;height:34px;border-radius:50%;
+    background:var(--panel2);border:2px solid var(--accent);color:var(--accent2);font-weight:700;
+    display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .steps li:last-child{border-left:2px solid transparent;}
+
+  footer{max-width:1180px;margin:0 auto;padding:10px 28px 40px;color:var(--muted);font-size:12.5px;}
+  .kbd{background:var(--code);border:1px solid var(--line);border-bottom-width:3px;border-radius:5px;padding:1px 7px;font-family:var(--mono);font-size:12px;}
+  @media(max-width:720px){header,main,nav.tabs{padding-left:16px;padding-right:16px;} header .badges{margin-left:0;width:100%;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">系統功能交接文件 System Handover</div>
+    <div class="sub">Wistron PA Server Manager（Port 6969）× OpenHands（串接本地 Ollama）— 完整使用步驟與路徑</div>
+  </div>
+  <div class="badges">
+    <span class="badge ok">● pa-manager 運行中</span>
+    <span class="badge ok">● ollama 運行中</span>
+    <span class="badge warn">▲ 路徑版本差異需注意</span>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="active" data-t="tab1"><span class="n">01</span>總覽 / 架構</button>
+  <button data-t="tab2"><span class="n">02</span>Port 6969 PA Server Manager</button>
+  <button data-t="tab3"><span class="n">03</span>OpenHands 串接 Ollama</button>
+  <button data-t="tab4"><span class="n">04</span>Port 對照 &amp; 服務管理</button>
+  <button data-t="tab5"><span class="n">05</span>日常維運速查</button>
+</nav>
+
+<main>
+
+<!-- ============ TAB 1 : 總覽 ============ -->
+<div class="panel active" id="tab1">
+  <section>
+    <h2 class="section"><span class="dot"></span>這台機器上跑了什麼？</h2>
+    <p class="lead">本機同時運行兩套彼此獨立、但共用同一份 <code>ollama</code> 模型層的系統。</p>
+    <div class="cardgrid">
+      <div class="card"><div class="t">① PA Server Manager</div><div class="d">AI GPU 伺服器 / 機櫃 Web 管理台（本專案）</div><div class="p">http://&lt;本機IP&gt;:6969</div></div>
+      <div class="card"><div class="t">② OpenHands Agent</div><div class="d">AI 編程 Agent（就是「跟你對話、幫你寫程式的我」）</div><div class="p">http://localhost:3000</div></div>
+      <div class="card"><div class="t">③ Ollama（本地 LLM）</div><div class="d">①與②兩者皆串接此本地模型服務</div><div class="p">http://127.0.0.1:11434</div></div>
+    </div>
+    <div class="alert info" style="margin-top:16px"><b>重點：</b> 兩套系統「共用」本地 Ollama，但<u>模型不同</u>——<br>
+      &nbsp;&nbsp;• Port 6969 的 AI Copilot / AI 分析 用的是 <code>qwen3.8:27b</code><br>
+      &nbsp;&nbsp;• OpenHands（我）主用 <code>frob/deepseek-v4-flash-0731:latest</code>，另有 qwen3.8:27b、qwen3-vl:32b 可切換</div>
+  </section>
+
+  <section>
+    <h2 class="section"><span class="dot"></span>系統關係圖</h2>
+<pre>瀏覽器（你）                        瀏覽器（你）
+   │                                    │
+┌─────────────────────┐          ┌───────────────────────────────┐
+│  PA Server Manager   │          │  Agent Canvas (3000) /        │
+│  http://:6969        │          │  OpenHands UI                 │
+│  FastAPI + vanillaJS │          │  └ OpenHands Agent Server     │
+│  管理機房 / 機櫃      │          │     127.0.0.1:18000 (sdk 1.42)│
+└─────────┬───────────┘          └────────┬───────────────────────┘
+          │                               │  (OpenAI 相容 API)
+          │        ┌───────────────────┐  │
+          │        │   Ollama 服務      │◄─┘
+          │        │  localhost:11434   │
+          │        │  (OLLAMA_MODELS=   │
+          │        │   /mnt/ollama_models)
+          │        └───────────────────┘
+          │
+pa-terminal-bridge (node+ssh2):6968   ← 瀏覽器內 SSH 終端
+spx_kvm_broker (uvicorn):18992        ← SP-X / IVTP KVM 自動登入
+   │
+被監控主機 (SSH/OS, IPMI-BMC, RFB/KVM)</pre>
+    <p><code>:3000</code> 是 Agent Canvas ingress（OpenHands 入口），<u>不是</u> port 6969 的管理台，勿混淆。</p>
+  </section>
+
+  <section>
+    <h2 class="section"><span class="dot"></span>本文件各頁導覽</h2>
+    <div class="toc">
+      <a href="#tab2" data-go="tab2">Port 6969 PA Server Manager<small>啟動 / 路徑 / 功能 / Ollama 串接</small></a>
+      <a href="#tab3" data-go="tab3">OpenHands 串接 Ollama<small>架構 / 設定檔 / 模型切換 / 重啟</small></a>
+      <a href="#tab4" data-go="tab4">Port 對照 &amp; 服務管理<small>全部 port 一覽 / systemctl 指令</small></a>
+      <a href="#tab5" data-go="tab5">日常維運速查<small>Checklist / 常見問題 / 備份</small></a>
+    </div>
+  </section>
+</div>
+
+<!-- ============ TAB 2 : Port 6969 ============ -->
+<div class="panel" id="tab2">
+  <section>
+    <h2 class="section"><span class="dot"></span>Port 6969 — Wistron PA Server Manager</h2>
+    <p class="lead">AI GPU 伺服器 / 機櫃的中央 Web 管理台（L10 單機 + L11 機櫃整合，繁體中文介面，無框架 vanilla JS 前端）。</p>
+    <div class="cardgrid">
+      <div class="card"><div class="t">網址</div><div class="d">正式版入口</div><div class="p">https://github.com/wistroneq3300/pa-server-manager</div></div>
+      <div class="card"><div class="t">本機來源碼路徑</div><div class="d">Git repo（git repo 根）</div><div class="p">/root/sheng/manager/pa_manager</div></div>
+      <div class="card"><div class="t">正式版資料目錄</div><div class="d">由 systemd Environment 指定</div><div class="p">/srv/pa-manager-prod/data</div></div>
+      <div class="card"><div class="t">systemd 服務名</div><div class="d">由它管理（非手動 nohup）</div><div class="p">pa-manager.service</div></div>
+    </div>
+    <h3>連線入口</h3>
+    <p>本機：<code>http://localhost:6969</code>　／　部門同仁：<code>http://&lt;此機內網IP&gt;:6969</code></p>
+  </section>
+
+  <section>
+    <h2 class="section"><span class="dot"></span>啟動 / 停止 / 查看狀態</h2>
+    <pre><span class="c"># 服務由 systemd 管理（正式版 port 6969），改 code 後要 restart（無 --reload）</span>
+sudo systemctl restart pa-manager.service     <span class="c"># 重啟後端</span>
+sudo systemctl status  pa-manager.service     <span class="c"># 看狀態/日誌末尾</span>
+sudo systemctl is-active pa-manager.service   <span class="c"># 回傳 active</span>
+
+<span class="c"># 確認 port 是否被「正確的 service」佔用（不要有手動殘留 uvicorn）</span>
+ss -tlnp | grep 6969     <span class="c"># 應見 python3.12 (pa-manager.service)</span>
+
+<span class="c"># 看即時 log</span>
+sudo journalctl -u pa-manager.service -f</pre>
+    <div class="alert danger"><b>注意：</b>若同時有手動殘留的 uvicorn 卡住 6969，記得 <code>kill</code> 掉，只留 service 那一個，否則 port 衝突。</div>
+
+    <h3>手動試跑（開發 / 試用版 port 8788）</h3>
+    <p>repo 內有 <code>run.sh</code>，用環境變數切 port，正式版與試用版資料目錄已隔離：</p>
+<pre><span class="c"># 試用版（預設 8788，資料在 repo 內 ./data.json）</span>
+bash run.sh
+
+<span class="c"># 正式版 6969（資料在 /srv/pa-manager-prod/data）</span>
+PORT=6969 bash run.sh</pre>
+    <p>需求套件：<code>pip install -r requirements.txt</code>（fastapi / uvicorn / paramiko / websockets / requests / bcrypt / pydantic…）</p>
+  </section>
+
+  <section>
+    <h2 class="section"><span class="dot"></span>關鍵路徑對照表</h2>
+    <table>
+      <tr><th>項目</th><th>路徑</th><th>說明</th></tr>
+      <tr><td>後端主程式</td><td><code>/root/sheng/manager/pa_manager/main.py</code></td><td>FastAPI 入口（約 89KB）</td></tr>
+      <tr><td>前端靜態檔</td><td><code>…/pa_manager/static/</code></td><td>index.html + app.js + xterm.js + noVNC + userguide.js（無 build 步驟）</td></tr>
+      <tr><td>Telemetry 核心</td><td><code>…/pa_manager/telemetry_core.py</code></td><td>監控收集、rack 系列、AI 分析串接</td></tr>
+      <tr><td>KVM bridge</td><td><code>…/pa_manager/kvm_bridge.py</code></td><td>noVNC → BMC RFB proxy</td></tr>
+      <tr><td>terminal/SP-X broker</td><td><code>…/pa_manager/terminal_bridge/</code>、<code>…/pa_manager/spx_kvm_broker/</code></td><td>獨立服務</td></tr>
+      <tr><td>正式資料檔</td><td><code>/srv/pa-manager-prod/data/data.json</code></td><td>machines / projects 清單（機台憑證）</td></tr>
+      <tr><td>正式 Telemetry DB</td><td><code>/srv/pa-manager-prod/data/telemetry.db</code></td><td>SQLite 歷史監控資料（約 32MB）</td></tr>
+      <tr><td>Dev 樣本資料</td><td><code>…/pa_manager/data.json</code>、<code>…/pa_manager/telemetry.db</code></td><td>試用版用，<b>勿與 prod 混淆</b></td></tr>
+      <tr><td>systemd 範本</td><td><code>…/pa_manager/pa-manager.service</code></td><td>repo 內的範本檔</td></tr>
+      <tr><td>被安裝的 service</td><td><code>/etc/systemd/system/pa-manager.service</code></td><td>實際載入者</td></tr>
+    </table>
+    <div class="alert warn"><b>路徑版本差異（重要！）：</b>
+      repo 內範本與 <code>AGENTS.md</code> 仍寫 <code>WorkingDirectory=/root/user/manager/pa_manager</code>（舊路徑），但<u>實際載入的</u> <code>/etc/systemd/system/pa-manager.service</code> 已是 <code>/root/sheng/manager/pa_manager</code>（新路徑）。<br>交接時以「實際載入的 systemd 檔」為準；若要與 repo 對齊，記得把範本改回一致的 WorkingDirectory（可選，不影響運行，但避免接手誤導）。
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section"><span class="dot"></span>核心功能一覽</h2>
+    <div class="cardgrid">
+      <div class="card"><div class="t">總覽 Dashboard</div><div class="d">聚合所有系統：上線/離線狀態、GPU 健康、ping 燈號、依專案分組</div></div>
+      <div class="card"><div class="t">L10 單機（System）</div><div class="d">SSH/IPMI 管理單機：硬體清單、感測器、GPU(NVIDIA/AMD)、BMC 電源、AI 診斷</div></div>
+      <div class="card"><div class="t">L11 機櫃（Rack）</div><div class="d">機櫃平面圖(U 槽)、拓樸連線圖、整櫃 Telemetry(Server/Switch/PDU/CDU)、Rack AI 分析</div></div>
+      <div class="card"><div class="t">Telemetry 檢視器</div><div class="d">SQLite 歷史 + 圖表（CPU/記憶體/GPU/DIMM/SSD/NIC），可選時間窗 + Local-Ollama 繁中解讀</div></div>
+      <div class="card"><div class="t">Web Terminal (xterm)</div><div class="d">瀏覽器內 SSH OS/BMC，經 pa-terminal-bridge(node+ssh2, 6968)；密碼一律由後端 data.json 讀取，不信任前端</div></div>
+      <div class="card"><div class="t">系統廣播</div><div class="d">L10 一次送指令到多台 OS shell；bcLog 只記時間+指令，不記目標主機</div></div>
+      <div class="card"><div class="t">AI Copilot</div><div class="d"><code>/api/copilot</code> 自然語言助手，串接本地 <code>qwen3.8:27b</code></div></div>
+      <div class="card"><div class="t">AI 分析</div><div class="d">感測器診斷 / Telemetry 分析 / Rack 分析 / 診斷，全走本地 Ollama 繁中輸出</div></div>
+      <div class="card"><div class="t">KVM</div><div class="d">單台 KVM(/ws/kvm/{name} noVNC→BMC RFB) + 專案級「KVM 同步」廣播鍵鼠；SP-X/IVTP 由 broker(18992) 自動登入</div></div>
+      <div class="card"><div class="t">內建使用手冊</div><div class="d">頂欄書本圖示或按 <span class="kbd">?</span> 開啟可拖曳/縮放的全功能繁中 User Guide；深層連結 #/rack 等</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section"><span class="dot"></span>Port 6969 怎麼串到 Ollama</h2>
+    <p class="lead">此系統的「AI 功能」全部走本地 Ollama，不需對外 API key。</p>
+    <ul>
+      <li>使用模型：<code>qwen3.8:27b</code></li>
+      <li>Ollama 位址：主機 <code>localhost:11434</code>（OpenAI 相容 <code>/v1</code> 由 litellm 代理）</li>
+      <li>涵蓋端點：<code>/api/copilot</code>、<code>/api/machine/{name}/sensors/analyze</code>、<code>/api/machine/{name}/telemetry/analyze</code>、<code>/api/rack/{project}/telemetry/analyze</code>、<code>/api/machine/{name}/diagnose</code></li>
+      <li>若 Ollama 掛掉，<b>管理台本體仍正常運作</b>，僅 AI 相關欄位顯示空白。</li>
+    </ul>
+    <div class="alert info">測試 Ollama：<code>curl http://localhost:11434/api/version</code>；列出模型：<code>ollama list</code></div>
+  </section>
+
+  <section>
+    <h2 class="section"><span class="dot"></span>接手者必讀文件</h2>
+    <div class="cardgrid">
+      <div class="card"><div class="t">README.md</div><div class="d">完整部署指南 + 交接說明（本專案最完整文件）</div><div class="p">…/pa_manager/README.md</div></div>
+      <div class="card"><div class="t">AGENTS.md</div><div class="d">給 OpenHands / 接手 agent 的工作脈絡備忘（開新對話接手前先讀）</div><div class="p">…/pa_manager/AGENTS.md</div></div>
+      <div class="card"><div class="t">Progress 紀錄</div><div class="d">最近兩次開發進度</div><div class="p">…/pa_manager/PROGRESS_SESSION_*.md</div></div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ TAB 3 : OpenHands ============ -->
+<div class="panel" id="tab3">
+  <section>
+    <h2 class="section"><span class="dot"></span>OpenHands Agent — 串接本地 Ollama</h2>
+    <p class="lead">「現在跟你對話的這個我（OpenHands）」是獨立於 PA Server Manager 的 AI 編程 Agent，透過 OpenAI 相容協定串接本地 Ollama 模型。</p>
+    <div class="cardgrid">
+      <div class="card"><div class="t">Agent Canvas 入口</div><div class="d">網頁 UI</div><div class="p">http://localhost:3000</div></div>
+      <div class="card"><div class="t">OpenHands Agent Server</div><div class="d">實際上跑 Agent 的後端（sdk 1.42.1）</div><div class="p">127.0.0.1:18000</div></div>
+      <div class="card"><div class="t">Agent Canvas 前端檔</div><div class="d">靜態 build</div><div class="p">http://localhost:3001</div></div>
+      <div class="card"><div class="t">Automations 服務</div><div class="d">自動化排程</div><div class="p">127.0.0.1:18001</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section"><span class="dot"></span>架構：OpenHands ⇄ Ollama</h2>
+<pre>Agent Canvas UI (3000 / 3001)
+        │
+        ▼
+OpenHands Agent Server  (uvx openhands-agent-server==1.42.1)   127.0.0.1:18000
+        │
+        │  用 litellm 以「OpenAI 相容 /v1」方式呼叫
+        ▼
+Ollama  (ollama serve, /usr/local/bin/ollama)                 0.0.0.0:11434
+        │   OLLAMA_MODELS=/mnt/ollama_models
+        │   OLLAMA_HOST=0.0.0.0；OLLAMA_ORIGINS=*；OLLAMA_NUM_PARALLEL=8；OLLAMA_FLASH_ATTENTION=1
+        ▼
+已載入模型：frob/deepseek-v4-flash-0731:latest  (llama-server, 127.0.0.1:45699)</pre>
+  </section>
+
+  <section>
+    <h2 class="section"><span class="dot"></span>可用模型與 OpenHands 設定檔</h2>
+    <h3>本機 Ollama 已安裝模型</h3>
+    <table>
+      <tr><th>模型</th><th>大小</th><th>用途</th></tr>
+      <tr><td><code>frob/deepseek-v4-flash-0731:latest</code></td><td>155 GB</td><td>OpenHands 主用（目前 active profile）</td></tr>
+      <tr><td><code>qwen3.8:27b</code></td><td>17 GB</td><td>OpenHands 備用、Port 6969 的 AI 功能</td></tr>
+      <tr><td><code>qwen3-vl:32b</code></td><td>20 GB</td><td>OpenHands 備用（多模態 vision）</td></tr>
+    </table>
+
+    <h3>OpenHands 相關設定檔位置</h3>
+    <table>
+      <tr><th>檔案</th><th>路徑</th><th>說明</th></tr>
+      <tr><td>主設定</td><td><code>/root/.openhands/settings.json</code></td><td>目前啟用的 LLM（model, base_url, api_key, stream, 各參數）</td></tr>
+      <tr><td>模型設定檔</td><td><code>/root/.openhands/profiles/</code></td><td>deepseek-v4-fast.json / qwen3.8-27b-new.json / qwen3-vl-32b.json</td></tr>
+      <tr><td>Agent 設定</td><td><code>/root/.openhands/agent-profiles/default.json</code></td><td>綁定 profile + condenser + verification 設定</td></tr>
+      <tr><td>金鑰／密鑰</td><td><code>/root/.openhands/secrets.json</code></td><td>加密 secrets</td></tr>
+      <tr><td>Ollama 模型資料</td><td><code>/mnt/ollama_models</code></td><td>OLLAMA_MODELS 指向此（blobs/manifests）</td></tr>
+    </table>
+
+    <h3>實際的 LLM 串接組態（來自 settings.json / profiles）</h3>
+<pre><b>model</b>    : openai/frob/deepseek-v4-flash-0731:latest   (或 qwen3.8:27b / qwen3-vl:32b)
+<b>base_url</b>: http://127.0.0.1:11434/v1        <span class="c"># 就是本機 Ollama</span>
+<b>api_key</b> : 加密存放（secrets.json，本機 Ollama 實為佔位值）
+<b>auth_type</b>: api_key
+<b>api_mode</b> : auto　（litellm 自動判斷 OpenAI 相容）
+<b>stream</b>   : false　<b>drop_params</b>:true　<b>modify_params</b>:true
+<b>reasoning_effort</b>: high　<b>extended_thinking_budget</b>: 200000</pre>
+    <p>模型是「openai/」前綴 + litellm 代理 → 打 Ollama 的 <code>/v1</code> OpenAI 相容端點。</p>
+  </section>
+
+  <section>
+    <h2 class="section"><span class="dot"></span>切換模型 / LLM Profile</h2>
+    <ol class="steps">
+      <li>在對話中直接使用「切換 LLM」功能（本設定已開啟 <code>enable_switch_llm_tool</code>）。<br>
+          <span class="lead">可用 profile：<code>deepseek-v4-fast</code>（現用）／ <code>qwen3.8-27b-new</code> ／ <code>qwen3-vl-32b</code></span></li>
+      <li>或手動編輯 <code>/root/.openhands/settings.json</code> 的 <code>llm</code> 區塊，改 <code>model</code> 與 <code>base_url</code>，並把 <code>active_profile</code> 指向對應 profile。</li>
+      <li>存檔後重啟 OpenHands Agent Server（見下方）使其生效。</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2 class="section"><span class="dot"></span>OpenHands 相關服務如何啟動 / 重啟</h2>
+    <p class="lead">這些是用 <code>uvx</code>/<code>node</code> 啟動的長駐程序（非 systemd）。重啟可對應 PID 處理。</p>
+<pre><span class="c"># 目前相關程序（ps 查看）</span>
+uvx openhands-agent-server ==1.42.1  → agent-server --host 127.0.0.1 --port 18000
+uvx openhands-automation==1.7.1       → uvicorn ... --port 18001
+node .../agent-canvas/scripts/ingress.mjs --port 3000
+node .../agent-canvas/scripts/static-server.mjs --port 3001
+node server.js                        → pa-terminal-bridge (6968)
+/usr/local/bin/ollama serve           → Ollama API (11434)
+
+<span class="c"># 查看目前 PID（避免誤殺別的程序，務必用明確關鍵字）</span>
+ps aux | grep -E "agent-server|ollama serve" | grep -v grep
+
+<span class="c"># 例：重啟 ollama（需先確認無人在用，會短暫影響 6969 的 AI 與我本身）</span>
+sudo systemctl restart ollama   <span class="c"># 若是 systemd 服務；亦可用 ollama stop 再啟動</span></pre>
+    <div class="alert warn"><b>給管理者：</b>若要重啟 Ollama，會同時影響① Port 6969 的 AI 功能 ② OpenHands 自身對話。請離峰再做，並告知使用者。</div>
+  </section>
+</div>
+
+<!-- ============ TAB 4 : Port 對照 ============ -->
+<div class="panel" id="tab4">
+  <section>
+    <h2 class="section"><span class="dot"></span>本機 Port 對照總表</h2>
+    <table>
+      <tr><th>Port</th><th>綁定</th><th>服務</th><th>管理方式</th><th>說明</th></tr>
+      <tr><td><code>6969</code></td><td>0.0.0.0</td><td>PA Server Manager（正式）</td><td><code>systemctl … pa-manager.service</code></td><td>本專案管理台主入口</td></tr>
+      <tr><td><code>8788</code></td><td>0.0.0.0</td><td>PA Server Manager（試用）</td><td>手動 <code>bash run.sh</code></td><td>開發/測試用，預設未開</td></tr>
+      <tr><td><code>6968</code></td><td>0.0.0.0</td><td>pa-terminal-bridge（node+ssh2）</td><td>node server.js</td><td>瀏覽器內 SSH 終端；停掉=終端不可用，其餘正常</td></tr>
+      <tr><td><code>18992</code></td><td>127.0.0.1</td><td>spx_kvm_broker（uvicorn）</td><td>deploy/start_broker.sh + spx-broker.service</td><td>SP-X / IVTP KVM 自動登入（選用）</td></tr>
+      <tr><td><code>11434</code></td><td>0.0.0.0</td><td>Ollama API</td><td>ollama.service / 手動</td><td>本地 LLM（6969 與 OpenHands 皆串接）</td></tr>
+      <tr><td><code>45699</code></td><td>127.0.0.1</td><td>llama-server（已載入模型）</td><td>隨 ollama</td><td>deepseek-v4-flash 推理實例</td></tr>
+      <tr><td><code>8080</code></td><td>0.0.0.0</td><td>Open WebUI</td><td>pipx 安裝 open-webui serve</td><td>另一套 Ollama 聊天界面（非本專案）</td></tr>
+      <tr><td><code>3000</code></td><td>*:3000</td><td>Agent Canvas ingress（OpenHands 入口）</td><td>node ingress.mjs</td><td>/api/* 導向 18000</td></tr>
+      <tr><td><code>3001</code></td><td>—</td><td>Agent Canvas 前端靜態檔</td><td>node static-server.mjs</td><td>—</td></tr>
+      <tr><td><code>18000</code></td><td>127.0.0.1</td><td>OpenHands Agent Server</td><td>uvx agent-server</td><td>OpenHands 後端</td></tr>
+      <tr><td><code>18001</code></td><td>127.0.0.1</td><td>OpenHands Automations</td><td>uvx uvicorn</td><td>自動化排程後端</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2 class="section"><span class="dot"></span>快速分類</h2>
+    <div class="cardgrid">
+      <div class="card"><div class="t">給部門同仁用</div><div class="d">PA Server Manager 管理台</div><div class="p">:6969</div></div>
+      <div class="card"><div class="t">給開發者 / 你（AI）用</div><div class="d">OpenHands / Agent Canvas</div><div class="p">:3000</div></div>
+      <div class="card"><div class="t">共用 LLM 層</div><div class="d">Ollama（勿任意重啟）</div><div class="p">:11434</div></div>
+    </div>
+    <div class="alert info"><b>診斷小工具：</b>
+      <code>ss -tlnp | grep -E '6969|6968|18992|11434|18000|18001|3000|3001'</code> 一次看完整清單。</div>
+  </section>
+</div>
+
+<!-- ============ TAB 5 : 維運速查 ============ -->
+<div class="panel" id="tab5">
+  <section>
+    <h2 class="section"><span class="dot"></span>開機後確認 CheckList</h2>
+    <ol class="steps">
+      <li><b>管理台</b>：<code>curl -sI http://localhost:6969</code> 應回 HTTP 200。</li>
+      <li><b>服務狀態</b>：<code>systemctl is-active pa-manager.service</code> → <code>active</code>。</li>
+      <li><b>Terminal bridge</b>：<code>ss -tlnp | grep 6968</code> 有監聽（否則瀏覽器 SSH 終端不能用）。</li>
+      <li><b>Ollama</b>：<code>curl http://localhost:11434/api/version</code> 有回應；<code>ollama list</code> 模型齊。</li>
+      <li><b>OpenHands</b>：<code>curl http://localhost:18000/health</code> 正常；網頁進 <code>:3000</code>。</li>
+      <li><b>Port 無衝突</b>：<code>ss -tlnp | grep 6969</code> 只有 pa-manager.service 佔用。</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2 class="section"><span class="dot"></span>常見問題</h2>
+    <table>
+      <tr><th>症狀</th><th>可能原因 → 處理</th></tr>
+      <tr><td>6969 起不來 / port 衝突</td><td>有手動殘留 uvicorn → 找到並 <code>kill</code>，再 <code>systemctl restart pa-manager</code></td></tr>
+      <tr><td>AI 分析 / Copilot 沒文字</td><td>Ollama 沒起來或 qwen3.8 未載入 → <code>ollama list</code>、<code>curl :11434/api/version</code>；管理台其餘功能正常</td></tr>
+      <tr><td>瀏覽器 SSH 終端連不上</td><td>6968 bridge 沒跑 → 找到 node server.js 之 cwd 為 <code>…/pa_manager/terminal_bridge</code> 者並啟動</td></tr>
+      <tr><td>改 code 沒反應</td><td>後端無 <code>--reload</code> → 改完要 <code>systemctl restart pa-manager.service</code></td></tr>
+      <tr><td>資料怪怪的（機台/專案）</td><td>確認讀到的是 prod 資料 <code>/srv/pa-manager-prod/data/data.json</code>，不是 repo 內 dev 樣本</td></tr>
+      <tr><td>我要重啟 OpenHands</td><td>找 agent-server PID（uvx agent-server --port 18000）處理；重啟會中斷當前對話</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2 class="section"><span class="dot"></span>備份 / 安全提醒</h2>
+    <ul>
+      <li>正式資料與密碼集中在 <code>/srv/pa-manager-prod/data/</code>（data.json 含機台 SSH/BMC 憑證）與 <code>/root/.openhands/secrets.json</code>，備份務必加密、勿外流。</li>
+      <li>repo 內有 <code>backup_prod.sh</code>、<code>ADMIN_PERMISSION_BLUEPRINT.md</code>、<code>GIT_USAGE.md</code>，交接時建議一併讀。</li>
+      <li>Git 遠端：<code>git remote -v</code> → <code>https://github.com/wistroneq3300/pa-server-manager.git</code></li>
+    </ul>
+    <table>
+      <tr><th>GitHub Repo</th><th>本機路徑</th></tr>
+      <tr><td><code>wistroneq3300/pa-server-manager</code></td><td><code>/root/sheng/manager/pa_manager</code></td></tr>
+    </table>
+  </section>
+</div>
+
+</main>
+
+<footer>
+  本交接文件由 OpenHands（AI 代理）於 2026-08 依實際系統探查自動產生。路徑與 port 皆為即時偵測所得；若環境變動請以 <code>ss -tlnp</code> 與 <code>systemctl status</code> 為準。
+</footer>
+
+<script>
+(function(){
+  var tabBtns = document.querySelectorAll('nav.tabs button');
+  var panels = document.querySelectorAll('.panel');
+  function showTab(id){
+    panels.forEach(function(p){ p.classList.toggle('active', p.id === id); });
+    tabBtns.forEach(function(b){ b.classList.toggle('active', b.dataset.t === id); });
+  }
+  tabBtns.forEach(function(b){
+    b.addEventListener('click', function(){ showTab(b.dataset.t); });
+  });
+  // 支援 toc 錨點切頁
+  document.querySelectorAll('[data-go]').forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      var id = a.getAttribute('data-go');
+      showTab(id);
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+  // 支援 #hash 直接切頁
+  if(location.hash && location.hash.startsWith('#tab')){
+    var h = location.hash.slice(1);
+    if(document.getElementById(h)) showTab(h);
+  }
+})();
+</script>
+</body>
+</html>
