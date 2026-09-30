@@ -25,27 +25,43 @@ def now():
     """Return operator-facing timestamps in the rack lab timezone (UTC+8)."""
     return datetime.now(LOG_TIMEZONE).isoformat(timespec="seconds")
 
-def atomic_write(path, text):
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    # Windows sync/AV readers can briefly deny replacement. Retry only this local
-    # filesystem operation, never the remote command that produced the evidence.
-    with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=path.parent,
-                                     prefix=path.name+'.', suffix='.tmp', delete=False) as stream:
-        temp = Path(stream.name)
-        stream.write(text)
-        stream.flush()
+class EvidencePersistenceError(RuntimeError):
+    """Evidence could not be saved; further destructive dispatch is forbidden."""
+
+
+def atomic_write(path, text, durable=False):
     try:
+        _atomic_write(path,text,durable)
+    except OSError as exc:
+        raise EvidencePersistenceError('Evidence persistence failure: '+type(exc).__name__) from exc
+
+
+def _atomic_write(path, text, durable=False):
+    path = Path(path)
+    temp = None
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=path.parent,
+                                         prefix=path.name+'.', suffix='.tmp', delete=False) as stream:
+            temp = Path(stream.name)
+            stream.write(text)
+            stream.flush()
+            if durable: os.fsync(stream.fileno())
+        # Retry this local replace only, never the remote command that produced it.
         for attempt in range(8):
             try:
                 temp.replace(path)
+                if durable and os.name!='nt':
+                    directory=os.open(path.parent,os.O_RDONLY)
+                    try: os.fsync(directory)
+                    finally: os.close(directory)
                 return
             except PermissionError:
-                if attempt == 7:
-                    raise
+                if attempt == 7: raise
                 time.sleep(min(.02 * 2**attempt, .5))
     finally:
-        temp.unlink(missing_ok=True)
+        if temp is not None: temp.unlink(missing_ok=True)
+
 
 def write_json(path, value):
     atomic_write(path, json.dumps(value, indent=2, ensure_ascii=True) + "\n")

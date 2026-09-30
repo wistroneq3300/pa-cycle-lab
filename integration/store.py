@@ -27,8 +27,27 @@ def fingerprint(value):
     return hashlib.sha256(encode(value).encode()).hexdigest()
 
 def engine_hash():
-    return fingerprint({p.name:hashlib.sha256(p.read_bytes()).hexdigest()
-                        for p in sorted(ENGINE.iterdir()) if p.suffix in {'.py','.sh','.md'} or p.name == 'VERSION'})
+    manifest=ROOT/'RUNTIME_ENGINE_FILES.json'
+    files=json.loads(manifest.read_text(encoding='utf-8'))['RUNTIME_ENGINE_FILES']
+    # New nested runtime files cannot silently evade PRE's version guarantee.
+    discovered=set()
+    for folder in ('integration','engine/vera_cycle','app'):
+        excluded={'dev','docs','data','tests','node_modules','__pycache__'}
+        if folder=='app': excluded|={'scripts','deploy'}
+        for p in (ROOT/folder).rglob('*'):
+            relative=p.relative_to(ROOT)
+            if any(part.startswith('.') or part in excluded for part in relative.parts): continue
+            suffixes={'.py','.sh','.js','.css','.html'} | ({'.md'} if folder!='app' else set())
+            if p.is_file() and (p.suffix in suffixes or p.name=='VERSION'):
+                discovered.add(relative.as_posix())
+    if discovered-set(files): raise Conflict('Runtime manifest is missing: '+', '.join(sorted(discovered-set(files))))
+    if len(files)!=len(set(files)): raise Conflict('Duplicate runtime manifest entries')
+    hashes={'RUNTIME_ENGINE_FILES.json':hashlib.sha256(manifest.read_bytes()).hexdigest()}
+    for name in files:
+        p=(ROOT/name).resolve()
+        if not p.is_relative_to(ROOT.resolve()) or not p.is_file(): raise Conflict('Invalid runtime manifest entry: '+name)
+        hashes[name]=hashlib.sha256(p.read_bytes()).hexdigest()
+    return fingerprint(hashes)
 
 def scopes(machine):
     keys = [f'machine:{machine["name"]}']
@@ -53,6 +72,7 @@ class Store:
                 CREATE TABLE IF NOT EXISTS locks(scope TEXT PRIMARY KEY, owner TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS events(seq INTEGER PRIMARY KEY AUTOINCREMENT,
                     job_id TEXT NOT NULL, at REAL NOT NULL, data TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS controls(id TEXT PRIMARY KEY, data TEXT NOT NULL);
             ''')
 
     @contextmanager
@@ -104,8 +124,77 @@ class Store:
                 raise Conflict(f'控制範圍已被任務占用：{row[0]} ({key})')
             db.execute('INSERT OR IGNORE INTO locks VALUES(?,?)',(key,owner))
 
+    def begin_control(self, machine, action, on, actor):
+        control = dict(id='control-'+uuid.uuid4().hex, state='CONTROL_RUNNING',
+                       target={k:machine[k] for k in SAFE_FIELDS if k in machine},
+                       action=action, on=on, actor=actor, dispatched=False, created_at=time.time())
+        with self.tx() as db:
+            self.reserve(db, control['id'], scopes(machine))
+            db.execute('INSERT INTO controls VALUES(?,?)', (control['id'], encode(control)))
+        return control
+
+    def get_control(self, control_id):
+        with self.tx() as db:
+            row=db.execute('SELECT data FROM controls WHERE id=?',(control_id,)).fetchone()
+            if row is None: raise KeyError(control_id)
+            return json.loads(row[0])
+
+    def controls(self):
+        with self.tx() as db:
+            return [json.loads(r[0]) for r in db.execute('SELECT data FROM controls')]
+
+    def update_control(self, control_id, **fields):
+        with self.tx() as db:
+            row=db.execute('SELECT data FROM controls WHERE id=?',(control_id,)).fetchone()
+            if row is None: raise KeyError(control_id)
+            control=json.loads(row[0])
+            if control['state'] in {'CONTROL_COMPLETE','CONTROL_FAILED'}: return control
+            control.update(fields, updated_at=time.time())
+            db.execute('UPDATE controls SET data=? WHERE id=?',(encode(control),control_id))
+            if control['state'] in {'CONTROL_COMPLETE','CONTROL_FAILED'}:
+                db.execute('DELETE FROM locks WHERE owner=?',(control_id,))
+            return control
+
+    def assert_inventory_idle(self, db, machines=(), project=None):
+        names=set(machines)
+        for row in db.execute('SELECT data FROM jobs'):
+            job=json.loads(row[0])
+            if job['state'] not in TERMINAL and (job['project']==project or names.intersection(m['name'] for m in job['targets'])):
+                raise Conflict('Active Cycle Job prevents inventory change: '+job['id'])
+        for row in db.execute('SELECT data FROM controls'):
+            control=json.loads(row[0])
+            if control['state'] not in {'CONTROL_COMPLETE','CONTROL_FAILED'} and (control['target'].get('project')==project or control['target']['name'] in names):
+                raise Conflict('Unresolved manual control prevents inventory change: '+control['id'])
+
+    def assert_scopes_idle(self, db, machine):
+        # Incomplete imported inventory must remain repairable. Invalid old
+        # addresses cannot match a reserved canonical IP; retain all valid scopes.
+        current=dict(machine)
+        for role in ('os','bmc'):
+            try: ipaddress.ip_address(current.get(role+'_ip',''))
+            except ValueError: current.pop(role+'_ip',None)
+        for key in scopes(current):
+            row=db.execute('SELECT owner FROM locks WHERE scope=?',(key,)).fetchone()
+            if row: raise Conflict('Reserved control scope prevents inventory change: '+row[0])
+
+    def compact_events(self, before):
+        """Explicit maintenance only; preserve final event cursor and all evidence."""
+        count=0
+        with self.tx() as db:
+            for row in db.execute('SELECT id,data FROM jobs WHERE updated<?',(before,)).fetchall():
+                job=json.loads(row['data'])
+                if job['state'] not in TERMINAL: continue
+                events=db.execute('SELECT seq FROM events WHERE job_id=? ORDER BY seq',(job['id'],)).fetchall()
+                if len(events)<2: continue
+                last=events[-1][0]
+                db.execute('DELETE FROM events WHERE job_id=? AND seq<?',(job['id'],last))
+                db.execute('UPDATE events SET data=? WHERE seq=?',(encode(dict(job_id=job['id'],phase='COMPACTED',state=job['state'],removed=len(events)-1)),last))
+                count+=len(events)-1
+        return count
+
     @contextmanager
     def control(self, machine):
+        """Short reservation for non-dispatch callers only; remote control uses begin_control."""
         owner = 'control-'+uuid.uuid4().hex
         with self.tx() as db:
             self.reserve(db,owner,scopes(machine))
@@ -116,6 +205,7 @@ class Store:
                 db.execute('DELETE FROM locks WHERE owner=?',(owner,))
 
     def create(self, project, request, targets, actor, mode=MODE):
+        targets=[{k:m[k] for k in SAFE_FIELDS if k in m} for m in targets]
         request_hash = fingerprint(request)
         keys = [k for m in targets for k in scopes(m)]
         with self.tx() as db:
@@ -235,17 +325,24 @@ def validate_request(body):
 def target_reason(machine, profile, mode=MODE):
     reasons=[]
     if profile!='neutrino': reasons.append('尚未設定支援的 Neutrino profile')
+    if machine.get('cycle_profile',profile)!='neutrino': reasons.append('Machine profile 必須是 Neutrino')
     if machine.get('mgx_type','server')!='server': reasons.append('僅支援 server 節點')
     for key in ('tray','node','os_hostname','bmc_hostname'):
         if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9.-]*',str(machine.get(key,''))): reasons.append('缺少或無效：'+key)
+    for key in ('os_hostname','bmc_hostname'):
+        host=machine.get(key,'')
+        if not isinstance(host,str) or len(host)>253 or any(not re.fullmatch(r'[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?',label) for label in host.split('.')):
+            reasons.append('無效 hostname：'+key)
     for role in ('os','bmc'):
-        try: ipaddress.ip_address(machine.get(role+'_ip',''))
+        try:
+            if not isinstance(machine.get(role+'_ip'),str): raise ValueError('IP must be text')
+            ipaddress.ip_address(machine[role+'_ip'])
         except ValueError: reasons.append('缺少或無效：'+role+'_ip')
         if not machine.get(role+'_user'): reasons.append('缺少：'+role+'_user')
         port=machine.get(role+'_port',22)
         if type(port) is not int or not 1<=port<=65535: reasons.append('無效：'+role+'_port')
     if type(machine.get('ipmi_cipher',17)) is not int or not 0<=machine.get('ipmi_cipher',17)<=20: reasons.append('無效：ipmi_cipher')
-    if not machine.get('power_domain'): reasons.append('缺少 power_domain')
+    if not isinstance(machine.get('power_domain'),str) or not machine['power_domain'].strip(): reasons.append('缺少或無效 power_domain')
     if mode=='synthetic' and not machine.get('synthetic'): reasons.append('離線模式只接受 SYNTHETIC inventory')
     if mode=='live' and (machine.get('synthetic') or not machine.get('credential_ref')): reasons.append('實機模式需要真實 inventory 與 credential_ref')
     return reasons

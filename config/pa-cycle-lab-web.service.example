@@ -3,6 +3,9 @@ Description=PA Cycle Lab isolated Web
 After=network.target
 
 [Service]
+User=pa-cycle-lab
+Group=pa-cycle-lab
+UMask=0077
 WorkingDirectory=/srv/pa-cycle-lab
 ExecStart=/srv/pa-cycle-lab/.venv/bin/python run.py web --port 9180
 Environment=CYCLE_MODE=synthetic

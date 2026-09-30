@@ -8,7 +8,7 @@ const assert=require('node:assert/strict');
   const page=await browser.newPage({viewport:{width:1440,height:1000}});
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   const output=path.resolve('.impeccable/review');fs.mkdirSync(output,{recursive:true});
-  await page.goto('http://127.0.0.1:9180/');
+  await page.goto(process.env.PA_CYCLE_BASE_URL || 'http://127.0.0.1:9180/');
   await page.waitForFunction(()=>typeof openProjectModal==='function');
   await page.evaluate(()=>openProjectModal());
   await page.getByRole('button',{name:'Cycle Test',exact:true}).first().click();

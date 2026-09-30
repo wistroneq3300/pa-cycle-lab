@@ -9,13 +9,19 @@ import os
 from pathlib import Path
 import re
 import sys
+import sqlite3
 import time
 from urllib.parse import unquote
 from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse, FileResponse
 from starlette.concurrency import run_in_threadpool
 from .settings import ROOT, DATA, MODE, ARTIFACTS, RUNTIME
+from .inventory import synchronized, mutate, local_write, validate_machine
+from .boundary import category
+from . import control as manual
+from .credentials import load_credentials
 from .store import Store, Conflict, SAFE_FIELDS, TERMINAL, scopes, target_reason, validate_request, fingerprint
+from cycle_core import EvidencePersistenceError
 
 sys.path.insert(0,str(ROOT/'app'))
 import main as pa
@@ -23,6 +29,21 @@ import main as pa
 app=pa.app
 app.title='PA Cycle Lab'
 store=Store()
+
+# The copied PA inventory is process-local. Enforce one Web process per instance;
+# the independent scheduler/workers coordinate through SQLite reservations.
+@asynccontextmanager
+async def web_lifespan(app):
+    from .runner import process_lock
+    with process_lock(RUNTIME/'web-service.lock'):
+        yield
+
+app.router.lifespan_context=web_lifespan
+
+# Serialize existing local project/link/reorder writes with snapshot creation.
+for route in app.routes:
+    if getattr(route,'methods',set()) & {'POST','PATCH','DELETE'} and hasattr(route,'dependant'):
+        route.dependant.call=local_write(pa,route.dependant.call)
 
 def fail(exc):
     if isinstance(exc,Conflict): return HTTPException(409,str(exc))
@@ -69,6 +90,7 @@ def cycle_status():
 def targets(project:str): return project_targets(project)
 
 @app.post('/api/projects/{project}/cycle/jobs')
+@synchronized
 def create_job(project:str,body:dict,request:Request):
     try:
         config=validate_request(body)
@@ -130,10 +152,14 @@ def events(project:str,job_id:str,after:int=0):
     scoped(project,job_id)
     return {'events':store.events(job_id,max(0,after))}
 
+def public_artifact(path):
+    return not any(p.startswith('.') or any(word in p.lower() for word in ('credential','password','secret','private_key','id_rsa','id_ed25519')) for p in Path(path).parts)
+
+
 def artifact_path(job_id,path):
     base=(ARTIFACTS/job_id).resolve()
     candidate=(base/path).resolve()
-    if not candidate.is_relative_to(base) or any(p.startswith('.') for p in Path(path).parts) or not candidate.is_file():
+    if not candidate.is_relative_to(base) or not public_artifact(path) or not candidate.is_file():
         raise HTTPException(404,'找不到報告檔案')
     return candidate
 
@@ -142,7 +168,7 @@ def artifacts(project:str,job_id:str):
     scoped(project,job_id)
     base=ARTIFACTS/job_id
     return {'files':[p.relative_to(base).as_posix() for p in sorted(base.rglob('*')) if p.is_file()
-                     and not any(x.startswith('.') for x in p.relative_to(base).parts)
+                     and public_artifact(p.relative_to(base))
                      and p.resolve().is_relative_to(base.resolve())]}
 
 @app.get('/api/projects/{project}/cycle/jobs/{job_id}/files/{path:path}')
@@ -153,36 +179,63 @@ def download(project:str,job_id:str,path:str):
     return FileResponse(file,headers={'X-Content-Type-Options':'nosniff',
                         'Content-Security-Policy':"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; frame-ancestors 'none'"})
 
-def legacy_control(name,action,body):
+def control_transport(machine):
+    from cycle_transport import Transport
+    secrets=load_credentials()[machine['credential_ref']]
+    return Transport({r:secrets.get(r+'_password','') for r in ('os','bmc')},RUNTIME/'control-host-keys',
+                     users={r:machine[r+'_user'] for r in ('os','bmc')},
+                     ports={r:machine.get(r+'_port',22) for r in ('os','bmc')},cipher=machine.get('ipmi_cipher',17))
+
+
+@synchronized
+def prepare_control(name,action,body,operator):
+    try: manual.validate(action,body)
+    except ValueError as exc: raise fail(exc)
     if MODE!='live': raise HTTPException(409,'SYNTHETIC 模式不操作實際機台')
     if name not in pa.machines: raise HTTPException(404,'機台不存在')
     machine=dict(pa.machines[name],name=name)
     try:
-        with store.control(machine):
-            if action=='aux':
-                raise Conflict('請使用 Cycle Test 的 AUX 範圍驗證，舊 AUX fallback 已停用')
-            impacted={n for n,m in pa.machines.items() if m.get('power_domain')==machine.get('power_domain')}
-            if not machine.get('power_domain') or len(impacted)>1:
-                raise Conflict('需要已確認且獨立的 power domain')
-            reasons=target_reason(machine,'neutrino',mode='live')
-            if reasons: raise Conflict('；'.join(reasons))
-            from cycle_transport import Transport
-            from cycle_core import Target
-            from cycle_engine import IDENTITY
-            secrets=json.loads((DATA/'credentials.json').read_text(encoding='utf-8'))[machine['credential_ref']]
-            transport=Transport({r:secrets.get(r+'_password','') for r in ('os','bmc')},RUNTIME/'control-host-keys',
-                                users={r:machine[r+'_user'] for r in ('os','bmc')},
-                                ports={r:machine.get(r+'_port',22) for r in ('os','bmc')},cipher=machine.get('ipmi_cipher',17))
-            target=Target(**{k:machine[k] for k in ('tray','node','bmc_ip','os_ip','bmc_hostname','os_hostname')})
-            role='os' if action=='reboot' else 'bmc'
-            identity=transport.ssh(target,role,IDENTITY)
-            found=re.search(r'^HOSTNAME=(.*)$',identity.output,re.M)
-            if identity.code or not found or found[1].strip().lower()!=machine[role+'_hostname'].lower():
-                raise Conflict('目標身分驗證失敗，未送出控制指令')
-            result=transport.ssh(target,'os','reboot',sudo=True) if action=='reboot' else transport.oob(target,'power '+('on' if body.get('on') else 'off'))
-            return dict(ok=result.code==0,action=action,info=result.output,state=result.state,power_status='')
+        impacted={n for n,m in pa.machines.items() if m.get('power_domain')==machine.get('power_domain')}
+        if not machine.get('power_domain') or len(impacted)>1:
+            raise Conflict('需要已確認且獨立的 power domain')
+        profile=pa.projects.get(machine.get('project'),{}).get('cycle_profile')
+        reasons=target_reason(machine,profile,mode='live')
+        if reasons: raise Conflict('；'.join(reasons))
+        validate_machine(pa,name,machine)
+        transport=control_transport(machine)
+        prepared=store.begin_control(machine,action,body.get('on'),operator)
+        return machine,transport,prepared
     except ValueError as exc: raise fail(exc)
-    except (OSError,KeyError): raise HTTPException(409,'找不到此機台的後端憑證設定')
+    except (OSError,KeyError): raise HTTPException(409,'控制紀錄或後端憑證無法讀寫；未確認操作不得重送')
+
+
+def legacy_control(name,action,body,operator='local-operator'):
+    machine,transport,prepared=prepare_control(name,action,body,operator)
+    result=manual.execute(store,machine,action,body,operator,transport,prepared=prepared)
+    complete=result['state']=='CONTROL_COMPLETE'
+    return dict(ok=complete,info=f"{result['state']}: {result.get('reason','')} [{result['id']}]",
+                power_status=('ON' if action=='reboot' or body.get('on') else 'OFF') if complete else 'UNKNOWN',**result)
+
+
+@app.get('/api/cycle/controls')
+def controls(): return {'controls':store.controls()}
+
+
+@app.get('/api/cycle/controls/{control_id}')
+def get_control(control_id:str):
+    try: return store.get_control(control_id)
+    except KeyError as exc: raise fail(exc)
+
+
+@app.post('/api/cycle/controls/{control_id}/reconcile')
+def reconcile_control(control_id:str):
+    if MODE!='live': raise HTTPException(409,'Live reconciliation is disabled in synthetic mode')
+    try:
+        saved=store.get_control(control_id)
+        return manual.reconcile(store,control_id,control_transport(saved['target']))
+    except KeyError as exc: raise fail(exc)
+    except OSError: raise HTTPException(409,'Control is busy or evidence storage unavailable; reservation retained')
+
 
 # Preserve inventory/project/library operations. Arbitrary legacy SSH, KVM and terminal
 # surfaces stay disabled until they can enforce the same reservations and auth.
@@ -208,24 +261,31 @@ async def boundary(request:Request,call_next):
         origin=request.headers.get('origin')
         if origin and origin!=str(request.base_url).rstrip('/'):
             return JSONResponse({'detail':'Cross-origin write rejected'},403)
-    control=re.fullmatch(r'/api/machine/([^/]+)/(power|reboot|aux)',path)
+    route_category=category(request.method,path)
+    if route_category=='DISABLED_REMOTE_ROUTES':
+        return JSONResponse({'detail':'此舊功能尚未接入 Cycle 任務互斥；本版停用遠端操作'},409)
+    control=re.fullmatch(r'/api/machine/([^/]+)/(power|reboot)',path)
     if control and request.method=='POST':
         try:
-            body=await request.json()
-            result=await run_in_threadpool(legacy_control,unquote(control[1]),control[2],body)
+            body={} if control[2]=='reboot' and not await request.body() else await request.json()
+            result=await run_in_threadpool(legacy_control,unquote(control[1]),control[2],body,actor(request))
             return JSONResponse(result)
         except HTTPException as exc: return JSONResponse({'detail':exc.detail},exc.status_code)
         except ValueError: return JSONResponse({'detail':'Invalid request'},422)
-    allowed=path=='/' or path.startswith('/static/') or path.startswith('/api/projects') or path.startswith('/api/cycle/') or path.startswith('/api/testlibrary') or path in {'/api/machines','/api/tests','/api/links','/openapi.json','/docs','/docs/oauth2-redirect','/redoc'}
-    # Existing local metadata operations remain available, with password-safe responses.
-    if re.fullmatch(r'/api/machines/[^/]+',path) and request.method in {'PATCH','DELETE'}: allowed=True
-    if re.fullmatch(r'/api/machine/[^/]+',path) and request.method=='GET': allowed=True
-    if path=='/api/machines/reorder': allowed=True
-    # GET /api/machines is a local inventory read; additions can connect via SSH.
-    if path=='/api/machines' and request.method!='GET': allowed=False
-    if not allowed:
-        return JSONResponse({'detail':'此舊功能尚未接入 Cycle 任務互斥；本版停用遠端操作'},409)
-    return await call_next(request)
+        except (sqlite3.Error,OSError,EvidencePersistenceError):
+            return JSONResponse({'detail':'Evidence persistence failure: inspect control status; never resend an uncertain command'},503)
+    metadata=re.fullmatch(r'/api/(machines|projects)/([^/]+)',path)
+    if metadata and request.method in {'PATCH','DELETE'}:
+        try:
+            body=await request.json() if request.method=='PATCH' else {}
+            return JSONResponse(await run_in_threadpool(mutate,pa,store,metadata[1],metadata[2],request.method,body))
+        except (ValueError,KeyError) as exc:
+            error=fail(exc); return JSONResponse({'detail':error.detail},error.status_code)
+        except HTTPException as exc: return JSONResponse({'detail':exc.detail},exc.status_code)
+        except (OSError,EvidencePersistenceError,sqlite3.Error): return JSONResponse({'detail':'Evidence persistence failure: inventory was not saved'},503)
+    try: return await call_next(request)
+    except (OSError,EvidencePersistenceError,sqlite3.Error):
+        return JSONResponse({'detail':'Evidence persistence failure; inspect persisted job/control state before any further action'},503)
 
 class NoLegacyWebSockets:
     def __init__(self,app): self.inner=app

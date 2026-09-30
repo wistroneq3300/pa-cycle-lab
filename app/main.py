@@ -84,14 +84,9 @@ def _reindex_projects():
         projects[n]["order"] = i
 
 def _save_data():
-    try:
-        tmp = DATA_FILE + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump({"machines": machines, "projects": projects, "links": links, "seq": _seq}, f,
-                      ensure_ascii=False, indent=2)
-        os.replace(tmp, DATA_FILE)
-    except Exception as e:
-        print("儲存 data.json 失敗：", e)
+    from cycle_core import write_json
+    write_json(DATA_FILE, {"machines": machines, "projects": projects, "links": links, "seq": _seq})
+
 
 machines = {}    # hostname -> dict
 projects = {}    # name -> {name, desc}
@@ -810,7 +805,7 @@ def _kick_status_scan(force=False):
 
 @app.get("/api/machines")
 def list_machines(force_scan: bool = False):
-    _kick_status_scan(force=force_scan)
+    # Integration metadata reads never invoke legacy remote transport.
     safe = []
     for name in sorted(machines, key=lambda k: machines[k].get("order", 0)):
         m = machines[name]
@@ -1040,8 +1035,8 @@ def machine_get_one(name: str):
     c = dict(m)
     c["os_pass"] = "****" if c.get("os_pass") else ""
     c["bmc_pass"] = "****" if c.get("bmc_pass") else ""
-    c["os_alive"] = ping_check(m.get("os_ip"), 2)
-    c["bmc_alive"] = ping_check(m.get("bmc_ip"), 2) if m.get("bmc_ip") else None
+    c["os_alive"] = _status_cache.get(("os", name), False)
+    c["bmc_alive"] = _status_cache.get(("bmc", name), False) if m.get("bmc_ip") else None
     return {"machine": c}
 
 
@@ -2586,9 +2581,8 @@ _telemetry_thread = None
 
 @app.on_event("startup")
 def _start_telemetry():
-    global _telemetry_thread
-    if os.environ.get("CYCLE_MODE", "synthetic") == "live" and _telemetry_thread is None:
-        _telemetry_thread = telemetry_core.start_worker()
+    # Legacy telemetry uses legacy credentials/SSH. Cycle owns all live collection.
+    return
 
 
 @app.get("/api/machine/{name}/telemetry")

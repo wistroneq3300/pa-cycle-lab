@@ -26,7 +26,6 @@ from cycle_core import (
     issue,
     load_inventory,
     now,
-    parse_policy,
     select_targets,
 )
 from cycle_engine import NodeSession
@@ -182,7 +181,7 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
     try:
         script = options.config_script.read_bytes().replace(b'\r\n', b'\n')
         policy_text = options.issue_policy.read_text(encoding='utf-8')
-        rules = parse_policy(policy_text)
+        rules = []  # Policy exceptions not active in V1; PRE-relative classification only.
         console(f"Run ID: {run_id}")
         console("Time zone: UTC+8 (local time in Run ID and +08:00 in console/evidence timestamps)")
         console(f"Planned output: {output}")

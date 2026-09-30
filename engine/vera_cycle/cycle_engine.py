@@ -8,6 +8,7 @@ import time
 from pathlib import Path
 
 from cycle_core import (
+    EvidencePersistenceError,
     atomic_write,
     classify_against_pre,
     compare_sensors,
@@ -53,6 +54,7 @@ class NodeSession:
         # Optional stage reporter set by the campaign; keeps one_loop silent when
         # a NodeSession is driven directly (tests, dry-run).
         self.progress = None
+        self.dispatch_guard = None
         self.node = dict(key=target.key, target=target.__dict__, blocked=[], active=True,
                          pre=new_record("PRE"), loops=[], completed=0, attempts=0, boot_confirmed=0, valid_cycles=0, stop_reason="", stage="")
         self.baseline = None
@@ -63,13 +65,19 @@ class NodeSession:
         self.expected_boot = None
         self.cleanup_safe = True
 
+    def safe_error(self, exc):
+        redact=getattr(self.transport,'redact',None)
+        return redact(str(exc)) if redact else type(exc).__name__
+
     def stage(self, text):
         """Report the current phase for this node so the operator can see where
-        the loop is, or where it is stuck. Never raises."""
+        the loop is, or where it is stuck. Evidence failures stop execution."""
         self.node["stage"] = text
         if self.progress:
             try:
                 self.progress(f"{self.target.key} | {text}")
+            except EvidencePersistenceError:
+                raise
             except Exception:
                 pass
 
@@ -136,7 +144,7 @@ class NodeSession:
         except (ConnectionError, TimeoutError, OSError) as exc:
             if not check:
                 raise
-            result = Command(255, f'{type(exc).__name__}: {exc}', 'NOT_ISSUED')
+            result = Command(255, self.safe_error(exc), 'NOT_ISSUED')
         evidence = ""
         if save_evidence:
             filename = f"pre_{stem}.txt" if record["phase"] == "PRE" else f"{stem}.txt"
@@ -250,7 +258,8 @@ class NodeSession:
         except IdentityUnsafe:
             raise
         except Exception as exc:
-            self.add(record, 'SCRIPT_VALIDATION_FAILED', 'hardware', str(exc))
+            if isinstance(exc, EvidencePersistenceError): raise
+            self.add(record, 'SCRIPT_VALIDATION_FAILED', 'hardware', self.safe_error(exc))
             record['commands']['hardware'] = dict(valid=False, state='BLOCKED', evidence='')
             self.node.update(active=False, stop_reason='Hardware script validation failed')
             if not post:
@@ -342,10 +351,11 @@ class NodeSession:
             self.pre_issue_keys = issue_baseline(record["issues"])
             self.expected_boot = record['identities']['os']['boot_id']
         except Exception as exc:
+            if isinstance(exc, EvidencePersistenceError): raise
             if isinstance(exc, IdentityUnsafe):
                 self.cleanup_safe = False
-            self.node["blocked"].append(str(exc))
-            self.add(record, "PRE_BLOCKED", "identity", str(exc))
+            self.node["blocked"].append(self.safe_error(exc))
+            self.add(record, "PRE_BLOCKED", "identity", self.safe_error(exc))
         # PRE timing ends when the PRE capture finishes. Clearing dmesg/SEL is
         # campaign preparation and must not inflate the displayed PRE duration.
         self.finish(record, preserve_timing=True)
@@ -423,6 +433,11 @@ class NodeSession:
         return False
 
     def dispatch(self, record, label, role, cmd, sudo=False, timeout=30):
+        if self.dispatch_guard: self.dispatch_guard()
+        # Persist durable intent before sending the one and only command.
+        import json
+        atomic_write(self.folder(record)/(label+'_intent.json'),
+                     json.dumps(dict(command=cmd,role=role,state='DISPATCH_INTENT')), durable=True)
         record.setdefault("cycle_started", now())
         result = self.command(record, label, role, cmd, sudo=sudo, timeout=timeout, check=False)
         if record['commands'][label]['valid']:
@@ -517,11 +532,12 @@ class NodeSession:
             record['valid_cycle'] = bool(recovered and record.get('power_on') and self.script_verified)
             self.node['valid_cycles'] += int(record['valid_cycle'])
         except Exception as exc:
+            if isinstance(exc, EvidencePersistenceError): raise
             code = "IDENTITY_UNSAFE" if isinstance(exc, IdentityUnsafe) else "NODE_UNAVAILABLE"
             if isinstance(exc, IdentityUnsafe):
                 self.cleanup_safe = False
-            self.add(record, code, "recovery", str(exc))
-            self.node.update(active=False, stop_reason=str(exc))
+            self.add(record, code, "recovery", self.safe_error(exc))
+            self.node.update(active=False, stop_reason=self.safe_error(exc))
             record["post_complete"] = False
             # BMC evidence can still explain a failed OS recovery; never touch an
             # endpoint whose identity just failed verification.
@@ -531,7 +547,8 @@ class NodeSession:
                     self.sel_command(record, "failure_sel", "list")
                     self.command(record, "failure_power", "oob", "power status")
                 except Exception as bmc_exc:
-                    self.add(record, "BMC_UNAVAILABLE", "recovery", str(bmc_exc))
+                    if isinstance(bmc_exc, EvidencePersistenceError): raise
+                    self.add(record, "BMC_UNAVAILABLE", "recovery", self.safe_error(bmc_exc))
         result = self.finish(record)
         self.stage("DONE")
         return result

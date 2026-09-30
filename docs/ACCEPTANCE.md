@@ -59,3 +59,26 @@ These runtime outputs are ignored by Git; this record is committed.
 - No rack scale/concurrency capacity claim; worker pool bound is 32, not a hardware capacity measurement.
 - Multi-user Basic authentication is supported for trusted lab operators; per-project RBAC is not implemented.
 - Original systems remain outside the new lock guarantee; dedicated targets or coordinated exclusive use required.
+## Run2 hardening — 2026-10-01
+
+Baseline `d3240929aacbe7ecfdf358a04765ff8c6e619f6e`; branch `codex/run2-hardening`;
+version `0.1.1-neutrino-v1-run2`. Earlier acceptance above describes the initial
+integration; Run2 strengthens its active-inventory and manual-control behavior.
+
+| Validation | Actual result |
+| --- | --- |
+| Integration / Run2 unittest | **58 PASS**: existing 20 retained, 38 new regressions; 43.799s |
+| Copied engine unittest | **101 PASS, 14 SKIP**, 115 discovered; 7.989s. 13 Bash fixture skips and 1 Linux-root cross-UID skip |
+| Isolated process smoke | **PASS (SYNTHETIC)**: Web and scheduler killed/restarted; same worker PID; 3 completed rounds, graceful INCOMPLETE stop; instance `data/process-smoke-e77ee120f16948f38fe5288909a98556` |
+| Playwright / Edge | **PASS (SYNTHETIC)**: same isolated instance, job `d67fbef3d2ff4e89994c6934ca9accf0` COMPLETE; PRE/confirm/report/reload/responsive/dark checks, zero page errors |
+| Syntax / patch checks | Python compileall, browser JS syntax, git diff --check passed |
+| Actual Linux/systemd/controller reboot | **NOT RUN** |
+| Actual hardware / rack qualification | **NOT RUN; no Hardware PASS claim** |
+
+Fault-injection tests intentionally print `Evidence persistence failure` when
+SQLite terminal writes are unavailable. These are expected test scenarios, not
+silent test errors. No test used real SSH/IPMI transport to a hardware target.
+
+See [Run2 item-by-item review](RUN2_HARDENING.md) and
+[Linux acceptance procedure](LINUX_ACCEPTANCE.md). Evidence logs are local,
+Git-ignored `data/run2-integration-test.log` and `data/run2-engine-test.log`.

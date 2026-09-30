@@ -8,6 +8,7 @@ import copy
 import json
 import os
 import signal
+import sqlite3
 import subprocess
 import sys
 import threading
@@ -17,10 +18,16 @@ import uuid
 from .settings import ROOT, DATA, RUNTIME, ARTIFACTS, ENGINE, MODE
 from .store import Store, TERMINAL, fingerprint, engine_hash
 from .synthetic import SyntheticTransport
-from cycle_core import Target, digest, now, parse_policy, write_json, atomic_write
+from .credentials import load_credentials
+from cycle_core import Target, digest, now, issue_key, write_json, atomic_write, EvidencePersistenceError
 from cycle_engine import NodeSession
 from cycle_report import write_reports, status
 from cycle_transport import Transport
+
+def save_reports(root, campaign):
+    try: write_reports(root,campaign)
+    except Exception as exc:
+        raise EvidencePersistenceError('Evidence persistence failure: report generation') from exc
 
 @contextmanager
 def process_lock(path):
@@ -59,10 +66,10 @@ def alive(job_id):
 def compact(session):
     n=session.node
     records=[n['pre'],*n['loops']]
-    seen={(i['code'],i['component']) for i in n['pre']['issues']}
+    seen={issue_key(i) for i in n['pre']['issues']}
     first=0
     for record in n['loops']:
-        keys={(i['code'],i['component']) for i in record['issues']}
+        keys={issue_key(i) for i in record['issues']}
         first=len(keys-seen); seen|=keys
     record=records[-1]
     pending=not record.get('finished')
@@ -76,19 +83,32 @@ def run_job(store, job_id, transport_factory=None):
     with process_lock(RUNTIME/(job_id+'.lock')):
         job=store.claim(job_id,uuid.uuid4().hex)
         if not job: return
-        root=ARTIFACTS/job_id; root.mkdir(exist_ok=True)
+        root=ARTIFACTS/job_id
         sessions=[]; done=threading.Event(); state='ERROR'; reason='Preparation failed'; campaign=None
         # All writes for event callbacks are serialized; reports are written between rounds.
         mutex=threading.RLock()
+        persistence_failed=threading.Event()
+        def persistence_guard():
+            if persistence_failed.is_set(): raise EvidencePersistenceError('Evidence persistence failure')
+            try: store.update(job_id,heartbeat=time.time())
+            except sqlite3.Error as exc:
+                persistence_failed.set()
+                raise EvidencePersistenceError('Evidence persistence failure: SQLite') from exc
         def emit(session, phase):
             with mutex:
                 session.last_activity=time.time()
                 snap=compact(session)
-                store.update(job_id,event=dict(phase=phase,machine_id=session.machine_id,loop=snap['loop']),
-                             nodes=[compact(s) for s in sessions])
+                persistence_guard()
+                try:
+                    store.update(job_id,event=dict(phase=phase,machine_id=session.machine_id,loop=snap['loop']),
+                                 nodes=[compact(s) for s in sessions])
+                except sqlite3.Error as exc:
+                    persistence_failed.set()
+                    raise EvidencePersistenceError('Evidence persistence failure: event journal') from exc
         def heartbeat():
             while not done.wait(2):
-                store.update(job_id,heartbeat=time.time())
+                try: persistence_guard()
+                except EvidencePersistenceError: return
         thread=threading.Thread(target=heartbeat,daemon=True); thread.start()
         def stop_signal(*_): store.stop(job_id,'runner-signal')
         if threading.current_thread() is threading.main_thread():
@@ -98,6 +118,8 @@ def run_job(store, job_id, transport_factory=None):
                 session.stage(method.upper())
                 try: getattr(session,method)(*args)
                 except Exception as exc:
+                    if isinstance(exc,(EvidencePersistenceError,sqlite3.Error,OSError)):
+                        persistence_failed.set(); raise EvidencePersistenceError("Evidence persistence failure") from exc
                     session.node.update(active=False,stop_reason=f'{method}: {type(exc).__name__}')
                     record=session.node.get('start',session.node['pre'])
                     session.add(record,'EXECUTION_ERROR',method,f'{type(exc).__name__}; retained evidence')
@@ -107,19 +129,20 @@ def run_job(store, job_id, transport_factory=None):
             with ThreadPoolExecutor(max_workers=min(32,len(selected) or 1)) as pool:
                 list(pool.map(invoke,selected))
         try:
+            root.mkdir(exist_ok=True)
             if engine_hash()!=job['engine_hash']: raise RuntimeError('Engine changed since job creation')
             options=SimpleNamespace(**{k:v for k,v in job['config'].items() if k in {'cycle_mode','channel','boot_timeout'}},
                                     poll_interval=0.05 if job['synthetic'] else 5,memory_min_ratio=.9)
             script=(ENGINE/'neutrino_config.sh').read_bytes().replace(b'\r\n',b'\n')
             policy=(ENGINE/'issue_policy.md').read_text(encoding='utf-8')
-            rules=parse_policy(policy)
+            rules=[]  # V1 policy exceptions are explicitly inactive; PRE-relative classification only.
             atomic_write(root/'neutrino_config.snapshot.sh',script.decode())
             atomic_write(root/'issue_policy.snapshot.md',policy)
             write_json(root/'job_snapshot.json',job)
             secrets={}
             if not job['synthetic']:
                 if MODE!='live': raise RuntimeError('Live execution is not enabled')
-                secrets=json.loads((DATA/'credentials.json').read_text(encoding='utf-8'))
+                secrets=load_credentials()
             for machine in job['targets']:
                 target=Target(**{f.name:machine[f.name] for f in fields(Target) if f.name in machine})
                 if transport_factory:
@@ -133,6 +156,7 @@ def run_job(store, job_id, transport_factory=None):
                                         ports={r:machine.get(r+'_port',22) for r in ('os','bmc')},cipher=machine.get('ipmi_cipher',17))
                 session=NodeSession(target,transport,root,job['run_id'],script,digest(script),options,rules)
                 session.machine_id=machine['name']
+                session.dispatch_guard=persistence_guard
                 session.progress=lambda phase,s=session:emit(s,phase)
                 sessions.append(session)
             campaign=dict(run_id=job['run_id'],job_id=job_id,project='neutrino',started=now(),finished=None,
@@ -140,6 +164,7 @@ def run_job(store, job_id, transport_factory=None):
                           cycle_mode=options.cycle_mode,channel=options.channel,limits=job['config']['limits'],
                           script_sha256=digest(script),engine_hash=job['engine_hash'],synthetic=job['synthetic'],
                           source_versions=job['source_versions'],integration_version=job['integration_version'],
+                          policy_exceptions='NOT_ACTIVE_IN_V1',
                           nodes=[s.node for s in sessions])
             # PRE can install packages. The UI discloses this before job creation.
             dependencies=sessions[0].transport.local_dependencies()
@@ -155,7 +180,7 @@ def run_job(store, job_id, transport_factory=None):
             if options.cycle_mode=='aux_cycle' and len(runnable)!=len(sessions):
                 runnable=[]
                 reason='AUX scope incomplete after PRE; no power action permitted'
-            write_reports(root,campaign)
+            save_reports(root,campaign)
             if not runnable:
                 state='BLOCKED'; reason=reason if options.cycle_mode=='aux_cycle' else 'No runnable PRE targets'; return
             if store.get(job_id)['stop_requested']:
@@ -164,8 +189,9 @@ def run_job(store, job_id, transport_factory=None):
                      findings=[dict(machine_id=s.machine_id,issues=copy.deepcopy(s.node['pre']['issues'])) for s in sessions],
                      baseline_hash=fingerprint([s.node['pre'] for s in sessions]))
             store.ready(job_id,pre,[compact(s) for s in sessions])
-            campaign['state']='AWAITING_CONFIRMATION'; write_reports(root,campaign)
+            campaign['state']='AWAITING_CONFIRMATION'; save_reports(root,campaign)
             while True:
+                persistence_guard()
                 current=store.get(job_id)
                 if current['stop_requested']:
                     state='CANCELLED'; reason='Cancelled before cycle confirmation'; return
@@ -175,11 +201,12 @@ def run_job(store, job_id, transport_factory=None):
             if engine_hash()!=job['engine_hash'] or fingerprint([s.node['pre'] for s in sessions])!=pre['baseline_hash']:
                 raise RuntimeError('Reviewed PRE or engine changed')
             write_json(root/'confirmation.json',current['confirmation'])
-            campaign['state']='RUNNING'; write_reports(root,campaign)
+            campaign['state']='RUNNING'; save_reports(root,campaign)
             parallel('start',runnable)
             began=time.monotonic(); number=0
             limits=job['config']['limits']
             while True:
+                persistence_guard()
                 current=store.get(job_id)
                 active=[s for s in runnable if s.node['active']]
                 if current['stop_requested']:
@@ -192,39 +219,73 @@ def run_job(store, job_id, transport_factory=None):
                     state='INCOMPLETE'; reason='Approved targets unavailable'; break
                 number+=1
                 parallel('one_loop',active,number)
-                write_reports(root,campaign)
+                save_reports(root,campaign)
                 store.update(job_id,health=status(campaign)['health'],nodes=[compact(s) for s in sessions])
         except Exception as exc:
-            state='INCOMPLETE' if store.get(job_id).get('confirmation') else 'ERROR'
-            reason=f'{type(exc).__name__}: preparation or execution failed; inspect retained evidence'
-            atomic_write(root/'runner_error.txt',reason+'\n')
+            state='INCOMPLETE' if campaign and campaign['state']=='RUNNING' else 'ERROR'
+            evidence_failure=isinstance(exc,(EvidencePersistenceError,OSError,sqlite3.Error)) or persistence_failed.is_set()
+            reason=('Evidence persistence failure: ' if evidence_failure else 'Execution failed: ')+type(exc).__name__
+            if evidence_failure: persistence_failed.set()
+            try: atomic_write(root/'runner_error.txt',reason+'\n')
+            except Exception: pass
         finally:
-            # Cleanup precedes lock release, so a new job cannot race the old worker.
-            for s in sessions: s.cleanup_remote()
             done.set(); thread.join(timeout=3)
-            if campaign:
-                campaign.update(state=state,stop_reason=reason,finished=now())
-                try: write_reports(root,campaign)
-                except Exception: reason+='; final report generation failed, journal retained'
-            store.finish(job_id,state,reason,nodes=[compact(s) for s in sessions],
-                         health=status(campaign)['health'] if campaign else 'UNKNOWN')
-            write_json(root/'job_final.json',store.get(job_id))
+            for s in sessions: s.cleanup_remote()
+            if persistence_failed.is_set():
+                state='INCOMPLETE' if campaign and campaign['state']=='RUNNING' else 'ERROR'
+                reason='Evidence persistence failure; commands are never replayed'
+            try:
+                if campaign:
+                    campaign.update(state=state,stop_reason=reason,finished=now())
+                    save_reports(root,campaign)
+                # Evidence must be saved before terminal publication / lock release.
+                final=dict(store.get(job_id),state=state,stop_reason=reason,
+                           nodes=[compact(s) for s in sessions],health=status(campaign)['health'] if campaign else 'UNKNOWN')
+                write_json(root/'job_final.json',final)
+            except Exception:
+                state='INCOMPLETE' if campaign and campaign.get('state') in {'RUNNING','COMPLETE','INCOMPLETE'} else 'ERROR'
+                reason='Evidence persistence failure; final report/snapshot unavailable; commands are never replayed'
+                persistence_failed.set()
+                if campaign:
+                    campaign.update(state=state,stop_reason=reason)
+                    try: save_reports(root,campaign)
+                    except EvidencePersistenceError: pass
+            try:
+                store.finish(job_id,state,reason,nodes=[compact(s) for s in sessions],
+                             health='UNKNOWN' if persistence_failed.is_set() else status(campaign)['health'] if campaign else 'UNKNOWN')
+            except sqlite3.Error:
+                # Keep reservation and nonterminal DB state. Recovery never replays a claimed job.
+                print('Evidence persistence failure: SQLite finalization unavailable; reservation retained',flush=True)
+                reason='Evidence persistence failure: SQLite finalization unavailable; reservation retained; no replay'
+                if campaign:
+                    campaign.update(state='INCOMPLETE',stop_reason=reason)
+                    try:
+                        save_reports(root,campaign)
+                        write_json(root/'job_final.json',dict(id=job_id,state='INCOMPLETE',health='UNKNOWN',stop_reason=reason))
+                    except Exception: pass
+
 
 def recover(store,job):
-    root=ARTIFACTS/job['id']; journal=root/'campaign.json'
-    if journal.is_file():
-        data=json.loads(journal.read_text(encoding='utf-8'))
-        # Reconstruct newer per-node journals if the worker died mid-round.
-        for node in data['nodes']:
-            folder=root/node['key']
-            pre=folder/'pre_report.json'
-            if pre.exists(): node['pre']=json.loads(pre.read_text(encoding='utf-8'))
-            loops=[json.loads(p.read_text(encoding='utf-8')) for p in sorted(folder.glob('loop*/report.json'))]
-            if loops: node['loops']=loops
-            node['completed']=sum(bool(r.get('post_complete')) for r in node['loops'])
-        data.update(state='INCOMPLETE',finished=now(),stop_reason='Worker died; commands are never replayed')
-        write_reports(root,data)
-    store.finish(job['id'],'INCOMPLETE','Worker died; retained evidence, no automatic resume',health='UNKNOWN')
+    reason='Worker died; retained evidence, no automatic resume'
+    try:
+        root=ARTIFACTS/job['id']; journal=root/'campaign.json'
+        if journal.is_file():
+            data=json.loads(journal.read_text(encoding='utf-8'))
+            # Reconstruct newer per-node journals if the worker died mid-round.
+            for node in data['nodes']:
+                folder=root/node['key']
+                pre=folder/'pre_report.json'
+                if pre.exists(): node['pre']=json.loads(pre.read_text(encoding='utf-8'))
+                loops=[json.loads(p.read_text(encoding='utf-8')) for p in sorted(folder.glob('loop*/report.json'))]
+                if loops: node['loops']=loops
+                node['completed']=sum(bool(r.get('post_complete')) for r in node['loops'])
+            data.update(state='INCOMPLETE',finished=now(),stop_reason='Worker died; commands are never replayed')
+            save_reports(root,data)
+
+    except Exception:
+        reason='Evidence persistence failure during crash recovery; no automatic resume'
+    store.finish(job['id'],'INCOMPLETE',reason,health='UNKNOWN')
+
 
 def service():
     store=Store(); children={}

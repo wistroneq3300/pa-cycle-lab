@@ -3,6 +3,9 @@ Description=PA Cycle Lab independent runner
 After=network.target
 
 [Service]
+User=pa-cycle-lab
+Group=pa-cycle-lab
+UMask=0077
 WorkingDirectory=/srv/pa-cycle-lab
 ExecStart=/srv/pa-cycle-lab/.venv/bin/python run.py runner
 Environment=CYCLE_MODE=synthetic

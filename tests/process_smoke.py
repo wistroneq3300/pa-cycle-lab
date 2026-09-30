@@ -43,7 +43,7 @@ def terminate(pid):
 
 try:
     subprocess.run([sys.executable,'scripts/bootstrap.py'],cwd=ROOT,env=env,check=True,stdout=log,creationflags=flags)
-    launch('run.py','runner')
+    scheduler=launch('run.py','runner')
     runner_pid=wait_for(lambda:int((folder/'runtime/service-pid.txt').read_text()));pids.add(runner_pid)
     first=launch('run.py','web','--port',str(port))
     web_pid=wait_for(lambda:client.get('/api/cycle/status').json().get('web_pid'));pids.add(web_pid)
@@ -66,12 +66,26 @@ try:
     reconnected=read_job()
     assert reconnected['worker_pid']==worker_pid
     assert reconnected['state']=='RUNNING',reconnected['state']
+    # Scheduler death/restart must neither kill nor replay the independent worker.
+    terminate(runner_pid);scheduler.wait(10);pids.discard(runner_pid)
+    launch('run.py','runner')
+    def new_scheduler():
+        pid=int((folder/'runtime/service-pid.txt').read_text())
+        return pid if pid!=runner_pid else None
+    second_runner=wait_for(new_scheduler);pids.add(second_runner)
+    assert read_job()['worker_pid']==worker_pid
+    wait_for(lambda:all(n['completed']>=2 for n in read_job()['nodes']))
+    assert read_job()['worker_pid']==worker_pid
     assert client.post(base+'/'+jid+'/stop',json={}).status_code==200
     final=wait_for(lambda:at_state('INCOMPLETE'))
     assert all(n['completed']>=1 for n in final['nodes'])
     assert len({n['completed'] for n in final['nodes']})==1
     pids.discard(worker_pid)
+    if '--browser' in sys.argv:
+        subprocess.run(['node','tests/browser.cjs'],cwd=ROOT,
+                       env={**env,'PA_CYCLE_BASE_URL':url},check=True,creationflags=flags)
     result={'passed':True,'instance':instance,'job_id':jid,'web_pid_changed':True,'worker_pid_unchanged':True,
+            'scheduler_pid_changed':True,'worker_survived_scheduler_restart':True,
             'state':final['state'],'completed_rounds':final['nodes'][0]['completed']}
     (ROOT/'data/process-smoke-results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
     print(json.dumps(result))

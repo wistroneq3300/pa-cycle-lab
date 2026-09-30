@@ -4,6 +4,10 @@
 預設為 **SYNTHETIC 離線模式**，使用真正的 Vera NodeSession、PRE／POST、比較與報告程式，底層 transport 完全在記憶體模擬。
 沒有操作實際機台，也沒有修改或部署兩個原始 repo。
 
+Run2 Hardening：見 [逐項審查與測試紀錄](docs/RUN2_HARDENING.md) 與
+[Linux Controller 待驗清單](docs/LINUX_ACCEPTANCE.md)。本版為 Cycle Stability Test，
+不代表 Full NVIDIA Rack Qualification。
+
 ## 啟動（Windows）
 
 在本專案根目錄使用 Python 3.12+：
@@ -47,7 +51,7 @@ n0 故意缺少預期 hostname，會顯示不可執行；不會猜測補值。
 - 獨立 runner 服務與 worker process；Web 重啟不停止 worker。
 - PRE、待確認、執行、停止與終止狀態；PRE 取消或被擋也保留證據。
 - 相同 endpoint、power domain、AUX domain 以同一組持久鎖保護。
-- 新服務的手動 power／reboot API 與 Cycle 共用鎖；舊 AUX fallback 停用。
+- 手動 Power 只接受明確 boolean；Power／Reboot 單次派送後驗證身分、power state 與 reboot boot ID。結果不明保留持久鎖，僅能唯讀 Reconcile；舊 AUX fallback 停用。
 - 每台獨立 OS／BMC 使用者、SSH port、IPMI cipher 及 credential reference。
 - 真正 Vera PRE／POST、腳本版本驗證、身分與 boot 驗證、KNOWN／NEW／WORSENED 判定與報告。
 - 執行完成與健康分離，例如 `COMPLETE + FAIL`。未完成 POST 顯示 PENDING，首次 issue 數待定。
@@ -61,7 +65,7 @@ n0 故意缺少預期 hostname，會顯示不可執行；不會猜測補值。
 | `engine/vera_cycle/` | 固定來源版本的 Vera 副本 |
 | `integration/` | 新任務、API、runner 與 fake transport |
 | `data/data.json` | 新 inventory 與專案；與原服務無關 |
-| `data/jobs.sqlite3` | 持久化 jobs、locks、events |
+| `data/jobs.sqlite3` | 持久化 jobs、controls、locks、events |
 | `data/runtime/` | 本專案服務心跳與 OS process locks |
 | `data/artifacts/<job-id>/` | PRE、START、loop evidence、報告、設定／確認／來源快照 |
 | `data/credentials.json` | 實機模式私有憑證，未建立、不可提交 |
@@ -92,10 +96,13 @@ PRE 可能安裝 OS 工具／ipmitool 與上傳腳本；START／POST 包含既�
 - 共享 power domain／共享 AUX domain 沒有完成群組派送；遇到時明確拒絕啟動。V1 對 domain 採保守互斥，可能阻擋可安全並行的同 tray reboot。
 - 上游新版本採 `/var/tmp` 腳本只上傳一次，POST 驗證檔案與 SHA；遺失或變更會停止節點，不自動重新上傳。
 - 原有專案管理、機台列表／移動／編輯／刪除、拓樸資料與 Test Library 保留。需要 SSH 的新增／探測、終端、KVM、廣播與舊 AI 遠端操作在新 Web 暫停用，避免繞過任務範圍與互斥。原始碼副本仍在；它們不是本版已驗收功能。
-- profile、tray/node、電源域與憑證參照目前由新 inventory 檔設定；未新增這些欄位的網頁編輯器。
-- 歷史任務以提交時專案名稱保存。專案改名不改任務快照；舊名稱仍可透過原 API 路徑查詢，但改名後 UI 不自動合併舊名稱的歷史。
+- profile、tray/node、電源域與憑證參照可由受驗證的 `PATCH /api/machines/{name}` 更新；未新增網頁欄位編輯器。匯入 Inventory 檔須停服務且無 active job／unresolved control，不可繞過 API 在執行中修改檔案。
+- Active Job／未釐清的 Manual Control 期間禁止關鍵 Inventory 修改、刪除、移動與 Project Rename。終止任務仍保留舊專案名稱；改名後舊歷史可由原 API 路徑查詢。
 - Web 手動 power 請求若在程序中斷時結果不明，鎖保留給操作者查明，不能自動重送或自行清鎖。
 - 報告寫入對 Windows 暫時 sharing violation 有有限重試；永久磁碟故障仍會保留可用 journal 並顯示錯誤。
+- `issue_policy.md` 例外在 V1 不啟用；KNOWN／NEW／WORSENED 只表示相對 PRE 的變化，FAIL 不會因 Policy 變成 PASS。
+- 每個 instance 只允許一個 Web process；Web／runner 使用相同服務帳號。未知路由預設拒絕，舊背景 telemetry／remote scan 不啟動。
+- Event retention 預設關閉。`python scripts/compact_events.py --days 90` 預覽，加入 `--apply` 只壓縮舊 terminal job 的 events，不刪任何 Report／Evidence。
 
 ## 驗證
 
