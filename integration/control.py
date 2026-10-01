@@ -12,10 +12,15 @@ def validate(action, body):
         raise Conflict('Legacy AUX control is disabled')
     if not isinstance(body, dict):
         raise ValueError('Request must be an object')
-    if action == 'power' and (set(body) != {'on'} or type(body['on']) is not bool):
-        raise ValueError('Manual power requires exactly {"on": true} or {"on": false}')
-    if action == 'reboot' and body:
-        raise ValueError('Manual reboot accepts an empty object only')
+    metadata = {'node_id', 'expected_binding_revision', 'idempotency_key', 'expected_target'}
+    payload = {k:v for k,v in body.items() if k not in metadata}
+    if action == 'power' and (set(payload) != {'on'} or type(payload['on']) is not bool):
+        raise ValueError('Manual power requires a strict boolean on field')
+    if action == 'reboot' and payload:
+        raise ValueError('Manual reboot accepts target metadata only')
+    for key in metadata - {'expected_target'}:
+        if key in body and (not isinstance(body[key], str) or not 1 <= len(body[key]) <= 128):
+            raise ValueError('Invalid ' + key)
 
 
 def identity(transport, target, role):

@@ -37,11 +37,11 @@ def snapshot_target(machine):
     from .targets import public
     return public({k:machine[k] for k in SAFE_FIELDS if k in machine})
 
-def engine_hash():
+def runtime_hash(ui=False):
     manifest=ROOT/'RUNTIME_ENGINE_FILES.json'
     files=json.loads(manifest.read_text(encoding='utf-8'))['RUNTIME_ENGINE_FILES']
     # New nested runtime files cannot silently evade PRE's version guarantee.
-    discovered=set()
+    discovered={'run.py'}
     for folder in ('integration','engine/vera_cycle','app'):
         excluded={'dev','docs','data','tests','node_modules','__pycache__','qa'}
         if folder=='app': excluded|={'scripts','deploy'}
@@ -53,12 +53,21 @@ def engine_hash():
                 discovered.add(relative.as_posix())
     if discovered-set(files): raise Conflict('Runtime manifest is missing: '+', '.join(sorted(discovered-set(files))))
     if len(files)!=len(set(files)): raise Conflict('Duplicate runtime manifest entries')
-    hashes={'RUNTIME_ENGINE_FILES.json':hashlib.sha256(manifest.read_bytes()).hexdigest()}
+    hashes={}
     for name in files:
         p=(ROOT/name).resolve()
         if not p.is_relative_to(ROOT.resolve()) or not p.is_file(): raise Conflict('Invalid runtime manifest entry: '+name)
-        hashes[name]=hashlib.sha256(p.read_bytes()).hexdigest()
+        presentation=name.startswith('app/static/') or name in {'engine/vera_cycle/report.css','engine/vera_cycle/report.js'}
+        if presentation == ui:
+            hashes[name]=hashlib.sha256(p.read_bytes()).hexdigest()
     return fingerprint(hashes)
+
+def engine_hash():
+    return runtime_hash(ui=False)
+
+def ui_build_hash():
+    return runtime_hash(ui=True)
+
 
 def scopes(machine):
     keys = [f'machine:{machine["name"]}']
@@ -83,12 +92,19 @@ class Store:
                 CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY, project TEXT NOT NULL,
                     idem TEXT NOT NULL, request_hash TEXT NOT NULL, state TEXT NOT NULL,
                     updated REAL NOT NULL, data TEXT NOT NULL, UNIQUE(project,idem));
+                CREATE INDEX IF NOT EXISTS jobs_project_updated ON jobs(project,updated DESC,id);
+                CREATE INDEX IF NOT EXISTS jobs_updated ON jobs(updated DESC,id);
                 CREATE TABLE IF NOT EXISTS locks(scope TEXT PRIMARY KEY, owner TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS events(seq INTEGER PRIMARY KEY AUTOINCREMENT,
                     job_id TEXT NOT NULL, at REAL NOT NULL, data TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS node_status(job_id TEXT NOT NULL, node_id TEXT NOT NULL, data TEXT NOT NULL, PRIMARY KEY(job_id,node_id));
                 CREATE TABLE IF NOT EXISTS actions(id TEXT PRIMARY KEY, job_id TEXT NOT NULL, data TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS controls(id TEXT PRIMARY KEY, data TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS validation_profiles(project_id TEXT PRIMARY KEY, package TEXT NOT NULL, content_hash TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS observation_status(node_id TEXT PRIMARY KEY, data TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS input_sessions(id TEXT PRIMARY KEY, updated REAL NOT NULL, data TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS artifact_index(job_id TEXT NOT NULL, artifact_id TEXT NOT NULL,
+                    signature TEXT NOT NULL, data TEXT NOT NULL, PRIMARY KEY(job_id,artifact_id));
                 CREATE INDEX IF NOT EXISTS events_job_sequence ON events(job_id,seq);
                 CREATE INDEX IF NOT EXISTS events_job_machine_sequence ON events(job_id,json_extract(data,'$.machine_id'),seq);
             ''')
@@ -113,6 +129,29 @@ class Store:
         finally:
             self._transactions.db=None
             db.close()
+
+    def observation_status(self, node_id, value=None):
+        with self.tx(write=value is not None) as db:
+            if value is not None:
+                db.execute('INSERT OR REPLACE INTO observation_status VALUES(?,?)',(node_id,encode(value)))
+                return value
+            row=db.execute('SELECT data FROM observation_status WHERE node_id=?',(node_id,)).fetchone()
+            return json.loads(row[0]) if row else dict(node_id=node_id,state='NOT_CONFIGURED')
+
+    def input_session(self, owner, value=None):
+        with self.tx(write=value is not None) as db:
+            if value is not None:
+                db.execute('INSERT OR REPLACE INTO input_sessions VALUES(?,?,?)',(owner,time.time(),encode(value)))
+                return value
+            row=db.execute('SELECT data FROM input_sessions WHERE id=?',(owner,)).fetchone()
+            if row is None:raise KeyError(owner)
+            return json.loads(row[0])
+
+    def input_sessions(self):
+        with self.tx(write=False) as db:
+            # Only outstanding reservations are operational; closed history stays in SQLite.
+            return [json.loads(r[0]) for r in db.execute(
+                "SELECT data FROM input_sessions WHERE id IN (SELECT DISTINCT owner FROM locks) ORDER BY updated DESC")]
 
     def _get(self, db, job_id):
         row = db.execute('SELECT data FROM jobs WHERE id=?',(job_id,)).fetchone()
@@ -152,9 +191,35 @@ class Store:
             query = 'SELECT data FROM jobs' + (' WHERE project=?' if project is not None else '') + ' ORDER BY updated DESC'
             return [json.loads(r[0]) for r in db.execute(query,(project,) if project is not None else ())]
 
+    def history_projects(self):
+        with self.tx(write=False) as db:
+            return [r[0] for r in db.execute('SELECT DISTINCT project FROM jobs')]
+
+    def jobs_page(self, projects, offset=0, limit=25):
+        if not projects: return []
+        if offset<0 or not 1<=limit<=101: raise ValueError('Invalid history page')
+        with self.tx(write=False) as db:
+            slots=','.join('?' for _ in projects)
+            query=f'SELECT data FROM jobs WHERE project IN ({slots}) ORDER BY updated DESC,id LIMIT ? OFFSET ?'
+            return [json.loads(r[0]) for r in db.execute(query,(*projects,limit,offset))]
+
     def lock_owners(self):
         with self.tx(write=False) as db:
             return dict(db.execute('SELECT scope,owner FROM locks'))
+
+    def artifact_index(self, job_id, artifact_id=None):
+        with self.tx(write=False) as db:
+            query='SELECT artifact_id,signature,data FROM artifact_index WHERE job_id=?'
+            args=(job_id,)
+            if artifact_id is not None:
+                query+=' AND artifact_id=?';args+=(artifact_id,)
+            return {r['artifact_id']:(r['signature'],json.loads(r['data'])) for r in db.execute(query,args)}
+
+    def index_artifacts(self, job_id, entries):
+        if not entries: return
+        with self.tx() as db:
+            db.executemany('INSERT OR REPLACE INTO artifact_index VALUES(?,?,?,?)',
+                [(job_id,item['artifact_id'],signature,encode(item)) for signature,item in entries])
 
     def reserve(self, db, owner, keys):
         for key in sorted(set(keys)):
@@ -163,11 +228,19 @@ class Store:
                 raise Conflict(f'控制範圍已被任務占用：{row[0]} ({key})')
             db.execute('INSERT OR IGNORE INTO locks VALUES(?,?)',(key,owner))
 
-    def begin_control(self, machine, action, on, actor):
+    def begin_control(self, machine, action, on, actor, idempotency_key=None):
         control = dict(id='control-'+uuid.uuid4().hex, state='CONTROL_RUNNING',
                        target=snapshot_target(machine),
-                       action=action, on=on, actor=actor, dispatched=False, created_at=time.time())
+                       action=action, on=on, actor=actor, dispatched=False, created_at=time.time(),
+                       idempotency_key=idempotency_key)
         with self.tx() as db:
+            if idempotency_key:
+                row=db.execute("SELECT data FROM controls WHERE json_extract(data,'$.actor')=? AND json_extract(data,'$.idempotency_key')=?",(actor,idempotency_key)).fetchone()
+                if row:
+                    existing=json.loads(row[0])
+                    if any(existing[k]!=control[k] for k in ('target','action','on')):
+                        raise Conflict('Idempotency key already used for a different control request')
+                    return existing
             self.reserve(db, control['id'], scopes(machine))
             db.execute('INSERT INTO controls VALUES(?,?)', (control['id'], encode(control)))
         return control
@@ -243,7 +316,7 @@ class Store:
             with self.tx() as db:
                 db.execute('DELETE FROM locks WHERE owner=?',(owner,))
 
-    def create(self, project, request, targets, actor, mode=MODE):
+    def create(self, project, request, targets, actor, mode=MODE, profile_snapshot=None):
         targets=[snapshot_target(m) for m in targets]
         request_hash = fingerprint(request)
         keys = [k for m in targets for k in scopes(m)]
@@ -262,6 +335,9 @@ class Store:
                        stop_requested=False,stop_reason='',pre=None,run_id='cycle-'+job_id)
             job['source_versions']=json.loads((ROOT/'SOURCE_BASELINES.json').read_text(encoding='utf-8'))
             job['integration_version']=(ROOT/'VERSION').read_text().strip()
+            job['ui_build_hash']=ui_build_hash()
+            if profile_snapshot is not None:
+                job['profile_snapshot']=profile_snapshot
             db.execute('INSERT INTO jobs VALUES(?,?,?,?,?,?,?)',
                        (job_id,project,request['idempotency_key'],request_hash,'CREATED',time.time(),encode(job)))
             self._save(db,job,{'phase':'CREATED','actor':actor})
@@ -308,7 +384,8 @@ class Store:
     def ready(self, job_id, pre, nodes):
         with self.tx() as db:
             job = self._get(db,job_id)
-            pre['version'] = fingerprint(dict(pre=pre,targets=job['targets'],config=job['config'],engine=job['engine_hash']))
+            pre['version'] = fingerprint(dict(pre=pre,targets=job['targets'],config=job['config'],engine=job['engine_hash'],
+                profile=job.get('profile_snapshot',{}).get('content_hash')))
             job.update(pre=pre,nodes=nodes,state='AWAITING_CONFIRMATION')
             self._save(db,job,{'phase':'AWAITING_CONFIRMATION'})
 
@@ -428,7 +505,7 @@ def validate_request(body):
     ids=body.get('machine_ids')
     if not isinstance(ids,list) or not ids or len(ids)>4096 or any(not isinstance(x,str) for x in ids) or len(set(ids))!=len(ids):
         raise ValueError('請選取 1–4096 台不重複的機台')
-    if body.get('cycle_profile') != 'neutrino' or body.get('cycle_mode') not in {'reboot','power_cycle','aux_cycle'} or body.get('channel') not in {'inband','outband'}:
+    if not isinstance(body.get('cycle_profile'),str) or not re.fullmatch(r'[a-z][a-z0-9_-]{0,63}',body['cycle_profile']) or body.get('cycle_mode') not in {'reboot','power_cycle','aux_cycle'} or body.get('channel') not in {'inband','outband'}:
         raise ValueError('Profile、cycle 模式或通道無效')
     limits=body.get('limits',{})
     if not isinstance(limits,dict) or set(limits)-{'loops','hours'}:
@@ -446,10 +523,10 @@ def validate_request(body):
     if type(parallelism) is not int or not 1<=parallelism<=32: raise ValueError('parallelism must be 1..32')
     return dict(body,parallelism=parallelism,boot_timeout=timeout,limits=dict(loops=loops,hours=hours))
 
-def target_reason(machine, profile, mode=MODE):
+def target_reason(machine, profile, mode=MODE, require_profile=True):
     reasons=[]
-    if profile!='neutrino': reasons.append('尚未設定支援的 Neutrino profile')
-    if machine.get('cycle_profile',profile)!='neutrino': reasons.append('Machine profile 必須是 Neutrino')
+    if require_profile and profile!='neutrino': reasons.append('尚未設定支援的 Neutrino profile')
+    if require_profile and machine.get('cycle_profile',profile)!='neutrino': reasons.append('Machine profile 必須是 Neutrino')
     if machine.get('mgx_type','server')!='server': reasons.append('僅支援 server 節點')
     for key in ('tray','node','os_hostname','bmc_hostname'):
         if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9.-]*',str(machine.get(key,''))): reasons.append('缺少或無效：'+key)

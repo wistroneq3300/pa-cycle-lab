@@ -23,7 +23,7 @@ from .credentials import load_credentials
 from .store import Store, Conflict, SAFE_FIELDS, TERMINAL, scopes, target_reason, validate_request, fingerprint
 from cycle_core import EvidencePersistenceError
 from .events import log_line
-from .targets import inventory as node_inventory, resolve_target, public
+from .targets import inventory as node_inventory, resolve_target, resolve_control_target, public
 from .authorization import authorize, configured_provider
 from . import coordinator
 
@@ -42,10 +42,18 @@ pa._DATA_LOCK=inventory_module.MUTEX
 coordinator.install(pa,lambda:store)
 from . import legacy_observation
 legacy_observation.install(pa,lambda:store,lambda:getattr(app.state,'cycle_provider',None) or configured_provider())
+from . import project_access
+project_access.install(pa,app)
+pa._observation_status=lambda node_id:store.observation_status(node_id)
+from . import inventory as inventory_mutations
+# Snapshot creation and every original Next transaction must share the same
+# lock, including probe-then-commit routes that do not use local_write.
+inventory_mutations.MUTEX=pa._DATA_LOCK
 
 def access(request:Request):
     project=request.path_params.get('project')
-    request.state.actor=authorize(request,project,'read' if request.method=='GET' else 'operate')
+    from .authorization import authenticate
+    request.state.actor=authorize(request,project,'read' if request.method=='GET' else 'operate') if project is not None else authenticate(request)
 
 router=APIRouter(dependencies=[Depends(access)])
 
@@ -61,7 +69,9 @@ app.router.lifespan_context=web_lifespan
 
 # Serialize existing local project/link/reorder writes with snapshot creation.
 for route in app.routes:
-    if getattr(route,'methods',set()) & {'POST','PATCH','DELETE'} and hasattr(route,'dependant'):
+    local_mutation = getattr(route,'path','').startswith(('/api/projects','/api/machines')) or getattr(route,'path','') in {'/api/links','/api/rack/passive'}
+    observation = getattr(route,'path','').endswith(('/probe-bmc','/probe','/ping','/change-os-ip','/change-bmc-ip'))
+    if local_mutation and not observation and getattr(route,'methods',set()) & {'POST','PATCH','DELETE'} and hasattr(route,'dependant'):
         route.dependant.call=local_write(pa,route.dependant.call)
 
 def fail(exc):
@@ -81,13 +91,17 @@ def scoped(project,job_id):
 def project_targets(project):
     if project not in pa.projects: raise HTTPException(404,'找不到專案')
     profile=pa.projects[project].get('cycle_profile')
+    from .profiles import resolve as resolve_profile
+    with store.tx(write=False) as db:
+        frozen=resolve_profile(db,pa.projects[project].get('project_id'),profile)
+    if frozen: profile=frozen['package']['profile_id']
     owners=store.lock_owners(); rows=[]
     all_targets=node_inventory(pa)
     for m in all_targets:
         name=m['name']
         if m.get('project')!=project: continue
         safe={k:copy.deepcopy(m[k]) for k in SAFE_FIELDS if k in m}; safe['name']=name
-        reasons=target_reason(safe,profile)
+        reasons=target_reason(safe,profile,require_profile=not bool(frozen))
         if safe.get('node_id') and safe.get('mapping_status')!='confirmed': reasons.append('Physical slot/action scope mapping needs confirmation')
         for role in ('os','bmc'):
             addr=safe.get(role+'_ip')
@@ -99,7 +113,7 @@ def project_targets(project):
         rows.append(dict(**safe,machine_id=name,reasons=reasons,occupied_by=occupied,
                          os_status='SYNTHETIC' if MODE=='synthetic' else 'PRE 待驗證',
                          bmc_status='SYNTHETIC' if MODE=='synthetic' else 'PRE 待驗證'))
-    return dict(profile=profile,targets=rows,mode=MODE)
+    return dict(profile=profile,profile_detail={k:v for k,v in frozen.items() if k not in {'checker','policy'}} if frozen else None,targets=rows,mode=MODE)
 
 @router.get('/api/cycle/status')
 def cycle_status():
@@ -158,11 +172,19 @@ def create_job(project:str,body:dict,request:Request):
             domains=[m['aux_domain'] for m in chosen]
             if len(set(domains))!=len(domains) and (MODE!='synthetic' or not all(m.get('capabilities',{}).get('shared_power')=='synthetic-confirmed' for m in chosen)):
                 raise Conflict('V1 尚未驗證共享 AUX domain 的單次派送；此範圍暫不允許啟動')
-        return store.create(project,config,chosen,actor(request))
+        from .profiles import resolve as resolve_profile
+        # Activation and run creation use the same transaction; no mutable path
+        # is handed to the worker. Later activations affect only future runs.
+        with store.tx() as db:
+            project_data=pa.projects[project]
+            frozen=resolve_profile(db,project_data.get('project_id'),project_data.get('cycle_profile'))
+            if not frozen or frozen['package']['profile_id']!=config['cycle_profile']:
+                raise Conflict('Selected profile differs from the activated Project profile')
+            return store.create(project,config,chosen,actor(request),profile_snapshot=frozen)
     except (ValueError,KeyError) as exc: raise fail(exc)
 
 @router.get('/api/projects/{project}/cycle/jobs')
-def jobs(project:str,offset:int=Query(0,ge=0),limit:int=Query(50,ge=1,le=100)): return {'jobs':store.jobs(project)[offset:offset+limit]}
+def jobs(project:str,offset:int=Query(0,ge=0),limit:int=Query(50,ge=1,le=100)): return {'jobs':store.jobs_page([project],offset,limit)}
 
 @router.get('/api/projects/{project}/cycle/jobs/{job_id}')
 def get_job(project:str,job_id:str): return scoped(project,job_id)
@@ -260,20 +282,35 @@ def artifacts(project:str,job_id:str):
                      and public_artifact(p.relative_to(base))
                      and p.resolve().is_relative_to(base.resolve())]
     import hashlib
-    manifest=[]
+    indexed=store.artifact_index(job_id)
+    manifest=[];changed=[]
     for path in files:
         file=artifact_path(job_id,path)
-        sha=hashlib.sha256(file.read_bytes()).hexdigest()
-        manifest.append(dict(artifact_id=fingerprint(dict(job=job_id,path=path)),path=path,
-                             size=file.stat().st_size,sha256=sha,engine_hash=job['engine_hash'],
-                             kind='html-report' if file.suffix=='.html' else 'structured-result' if file.suffix=='.json' else 'raw-evidence'))
+        artifact_id=fingerprint(dict(job=job_id,path=path))
+        def signature():
+            stat=file.stat()
+            return str((stat.st_dev,stat.st_ino,stat.st_size,stat.st_mtime_ns,stat.st_ctime_ns))
+        before=signature()
+        cached=indexed.get(artifact_id)
+        if cached and cached[0]==before:
+            manifest.append(cached[1]);continue
+        digest=hashlib.sha256()
+        with file.open('rb') as source:
+            for chunk in iter(lambda:source.read(1024*1024),b''): digest.update(chunk)
+        if signature()!=before: raise HTTPException(409,'Evidence is being written; retry manifest')
+        item=dict(artifact_id=artifact_id,path=path,size=file.stat().st_size,sha256=digest.hexdigest(),
+                  engine_hash=job['engine_hash'],
+                  kind='html-report' if file.suffix=='.html' else 'structured-result' if file.suffix=='.json' else 'raw-evidence')
+        manifest.append(item);changed.append((before,item))
+    store.index_artifacts(job_id,changed)
     return dict(files=files,manifest=manifest)
 
 @router.get('/api/projects/{project}/cycle/jobs/{job_id}/artifact/{artifact_id}')
 def download_artifact(project:str,job_id:str,artifact_id:str):
-    item=next((a for a in artifacts(project,job_id)['manifest'] if a['artifact_id']==artifact_id),None)
-    if item is None: raise HTTPException(404,'Artifact ID not found')
-    return download(project,job_id,item['path'])
+    scoped(project,job_id)
+    indexed=store.artifact_index(job_id,artifact_id).get(artifact_id)
+    if indexed is None: raise HTTPException(404,'Artifact ID not found; load the manifest first')
+    return download(project,job_id,indexed[1]['path'])
 
 @router.get('/api/projects/{project}/cycle/jobs/{job_id}/files/{path:path}')
 def download(project:str,job_id:str,path:str):
@@ -302,9 +339,11 @@ def prepare_control(name,action,body,operator):
     try: manual.validate(action,body)
     except ValueError as exc: raise fail(exc)
     if MODE!='live': raise HTTPException(409,'SYNTHETIC 模式不操作實際機台')
-    try: machine=resolve_target(pa,name,body.get('expected_revision'))
+    try: machine=resolve_control_target(pa,name,body)
     except (KeyError,ValueError) as exc: raise fail(exc)
     try:
+        if any(t['name']!=machine['name'] and machine.get('os_ip') in (t.get('os_ip'),t.get('bmc_ip')) for t in node_inventory(pa)):
+            raise Conflict('OS endpoint is registered to more than one target')
         impacted={m['name'] for m in node_inventory(pa) if m.get('power_domain')==machine.get('power_domain')}
         if not machine.get('power_domain') or len(impacted)>1:
             raise Conflict('需要已確認且獨立的 power domain')
@@ -314,12 +353,12 @@ def prepare_control(name,action,body,operator):
             if len(peers)>1 or not machine.get('capabilities',{}).get('independent_power'):
                 raise Conflict('Manual power requires verified independent controller scope; shared selector is unavailable')
         profile=pa.projects.get(machine.get('project'),{}).get('cycle_profile')
-        reasons=target_reason(machine,profile,mode='live')
+        reasons=target_reason(machine,profile,mode='live',require_profile=False)
         if reasons: raise Conflict('；'.join(reasons))
 
         if not machine.get('parent_name'): validate_machine(pa,name,machine)
         transport=control_transport(machine)
-        prepared=store.begin_control(machine,action,body.get('on'),operator)
+        prepared=store.begin_control(machine,action,body.get('on'),operator,body['idempotency_key'])
         return machine,transport,prepared
     except ValueError as exc: raise fail(exc)
     except (OSError,KeyError): raise HTTPException(409,'控制紀錄或後端憑證無法讀寫；未確認操作不得重送')
@@ -369,7 +408,9 @@ def reconcile_control(control_id:str,request:Request):
 async def boundary(request:Request,call_next):
     path=request.url.path
     if '/cycle/' not in path and not path.startswith('/api/cycle/'):
-        try: request.state.actor=authorize(request,None,'read' if request.method=='GET' else 'operate')
+        try:
+            from .authorization import authenticate
+            request.state.actor=authenticate(request) if path.startswith('/api/') else authorize(request,None,'navigate')
         except HTTPException as exc: return JSONResponse({'detail':exc.detail},exc.status_code)
     # Browser mutations must originate at this service; no permissive upstream CORS.
     if request.method not in {'GET','HEAD','OPTIONS'}:
@@ -377,6 +418,12 @@ async def boundary(request:Request,call_next):
         if origin and origin!=str(request.base_url).rstrip('/'):
             return JSONResponse({'detail':'Cross-origin write rejected'},403)
     route_category=category(request.method,path)
+    if path.startswith('/api/') and '/cycle/' not in path and not path.startswith('/api/cycle/'):
+        try:
+            body=await request.json() if request.method in {'POST','PATCH','PUT','DELETE'} and await request.body() else {}
+            project_access.check(request,pa,body)
+        except HTTPException as exc: return JSONResponse({'detail':exc.detail},exc.status_code)
+        except ValueError: return JSONResponse({'detail':'Invalid request body'},422)
     if re.fullmatch(r'/api/machine/[^/]+/aux',path) and request.method=='POST':
         return JSONResponse({'detail':'Manual AUX requires a verified adapter; no chassis-power fallback permitted'},409)
     if route_category=='DISABLED_REMOTE_ROUTES' and MODE=='synthetic':
@@ -385,31 +432,49 @@ async def boundary(request:Request,call_next):
     if control and request.method=='POST':
         try:
             name=unquote(control[1])
-            target=next((t for t in node_inventory(pa) if t['name']==name),None)
-            if target: authorize(request,target.get('project'),'operate')
             body={} if control[2]=='reboot' and not await request.body() else await request.json()
+            manual.validate(control[2],body)
+            target=resolve_control_target(pa,name,body)
+            authorize(request,target.get('project'),'operate')
             result=await run_in_threadpool(legacy_control,unquote(control[1]),control[2],body,actor(request))
             return JSONResponse(result)
         except HTTPException as exc: return JSONResponse({'detail':exc.detail},exc.status_code)
-        except ValueError: return JSONResponse({'detail':'Invalid request'},422)
+        except (ValueError,KeyError) as exc:
+            error=fail(exc); return JSONResponse({'detail':error.detail},error.status_code)
         except (sqlite3.Error,OSError,EvidencePersistenceError):
             return JSONResponse({'detail':'Evidence persistence failure: inspect control status; never resend an uncertain command'},503)
     metadata=re.fullmatch(r'/api/(machines|projects)/([^/]+)',path)
     if metadata and request.method in {'PATCH','DELETE'}:
         try:
             body=await request.json() if request.method=='PATCH' else {}
-            return JSONResponse(await run_in_threadpool(mutate,pa,store,metadata[1],metadata[2],request.method,body))
+            return JSONResponse(await run_in_threadpool(mutate,pa,store,metadata[1],metadata[2],request.method,body,
+                lambda project,action='operate':authorize(request,project,action)))
         except (ValueError,KeyError) as exc:
             error=fail(exc); return JSONResponse({'detail':error.detail},error.status_code)
         except HTTPException as exc: return JSONResponse({'detail':exc.detail},exc.status_code)
         except (OSError,EvidencePersistenceError,sqlite3.Error): return JSONResponse({'detail':'Evidence persistence failure: inventory was not saved'},503)
     token=legacy_observation.caller.set(getattr(request.state,'actor',None))
-    try: return await call_next(request)
+    scope_token=legacy_observation.project_scope.set(
+        frozenset([body['project']]) if path=='/api/copilot' and isinstance(body,dict) and body.get('project') else None)
+    enrollment_token=None
+    from . import enrollment
+    try:
+        if request.method=='POST' and (path in {'/api/machines','/api/machines/probe-bmc'} or re.fullmatch(r'/api/machines/[^/]+/change-(os|bmc)-ip',path)):
+            plan=enrollment.request_plan(path,await request.json(),pa)
+            if plan:
+                provider=getattr(app.state,'cycle_provider',None) or configured_provider()
+                results=await run_in_threadpool(enrollment.prepare,plan,pa,store,provider,actor(request))
+                enrollment_token=enrollment.current.set(results)
+        return await call_next(request)
+    except HTTPException as exc: return JSONResponse({'detail':exc.detail},exc.status_code)
     except (ValueError,KeyError) as exc:
         error=fail(exc); return JSONResponse({"detail":error.detail},error.status_code)
     except (OSError,EvidencePersistenceError,sqlite3.Error):
         return JSONResponse({'detail':'Evidence persistence failure; inspect persisted job/control state before any further action'},503)
-    finally: legacy_observation.caller.reset(token)
+    finally:
+        if enrollment_token is not None: enrollment.current.reset(enrollment_token)
+        legacy_observation.caller.reset(token)
+        legacy_observation.project_scope.reset(scope_token)
 
 @router.get('/api/cycle/inventory')
 def native_inventory(request:Request):
@@ -441,12 +506,14 @@ def native_create(body:dict,request:Request):
 
 @router.get('/api/cycle/runs')
 def native_runs(request:Request,offset:int=Query(0,ge=0),limit:int=Query(25,ge=1,le=100)):
-    result=[]
-    for job in store.jobs():
-        try: authorize(request,job['project'],'read')
+    allowed=[]
+    for project in store.history_projects():
+        try: authorize(request,project,'read')
         except HTTPException: continue
-        result.append({k:job[k] for k in ('id','project','state','created_at','updated_at','health','synthetic')})
-    return {'runs':result[offset:offset+limit],'has_more':len(result)>offset+limit}
+        allowed.append(project)
+    page=store.jobs_page(allowed,offset,limit+1)
+    result=[{k:job[k] for k in ('id','project','state','created_at','updated_at','health','synthetic')} for job in page[:limit]]
+    return {'runs':result,'has_more':len(page)>limit}
 
 @router.get('/api/cycle/capabilities')
 def native_capabilities():
@@ -454,5 +521,40 @@ def native_capabilities():
                 note='Live requires provider, verified identity and confirmed action mapping')
 
 from .sessions import SessionReservations
+
+@router.get('/api/cycle/sessions')
+def input_sessions(request:Request):
+    from .coordinator import session_alive
+    result=[]
+    for record in store.input_sessions():
+        try:
+            for project in {t.get('project') for t in record['targets']}:authorize(request,project,'read')
+        except HTTPException:continue
+        result.append(dict(record,owner_alive=session_alive(store,record['id']),reviewed_hash=fingerprint(record)))
+    return dict(sessions=result)
+
+
+@router.post('/api/cycle/sessions/{owner}/reconcile')
+def reconcile_input_session(owner:str,body:dict,request:Request):
+    from .coordinator import session_lock_path
+    from .runner import process_lock
+    try:record=store.input_session(owner)
+    except KeyError:raise HTTPException(404,'Input session not found')
+    for project in {t.get('project') for t in record['targets']}:authorize(request,project,'reconcile')
+    if body.get('reviewed_hash')!=fingerprint(record):raise HTTPException(409,'Session evidence changed; review again')
+    reason=body.get('reason')
+    if not isinstance(reason,str) or not 10<=len(reason)<=500:raise HTTPException(422,'Reviewed reconciliation reason required')
+    try:
+        with process_lock(session_lock_path(store,owner)):
+            provider=getattr(app.state,'cycle_provider',None) or configured_provider()
+            verify=getattr(provider,'verify_session_reconciliation',None)
+            if not callable(verify) or not verify(record):
+                raise HTTPException(409,'Provider must verify the bridge, remaining subprocesses and input scope are closed')
+            with store.tx() as db:
+                if fingerprint(store.input_session(owner))!=body['reviewed_hash']:raise HTTPException(409,'Session state changed')
+                db.execute('DELETE FROM locks WHERE owner=?',(owner,))
+                return store.input_session(owner,dict(record,state='RECONCILED',reviewed_by=actor(request),reason=reason,closed_at=time.time()))
+    except (OSError,BlockingIOError):raise HTTPException(409,'Session owner is still active or storage unavailable; reservations retained')
+
 app.add_middleware(SessionReservations, pa=pa, store_getter=lambda:store, mode=MODE)
 app.include_router(router)

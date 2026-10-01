@@ -17,6 +17,7 @@ import equipment_policy
 import topology_policy
 import copy
 import tempfile
+from pathlib import Path
 from functools import wraps
 import json
 import kvm_bridge
@@ -32,7 +33,30 @@ import io
 import time
 import websockets
 import paramiko
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor as _ThreadPoolExecutor
+
+
+# Integration installs a request-identity binder. This deliberately does not
+# copy arbitrary ContextVars (such as held reservations or enrollment secrets).
+def _background_target(fn):
+    return fn
+
+
+def _machine_allowed(name, action='read'):
+    parent=machines.get(name)
+    if parent is None:
+        parent=next((m for m in machines.values() if any(e.get('node_id')==name for e in m.get('os',[]) or [])),None)
+    return parent is not None and _project_allowed(parent.get('project'), action)
+
+
+def _project_allowed(project, action='read'):
+    # Integration replaces this hook with the verified provider/context.
+    return os.environ.get('CYCLE_MODE', 'synthetic') == 'synthetic'
+
+
+class ThreadPoolExecutor(_ThreadPoolExecutor):
+    def submit(self, fn, /, *args, **kwargs):
+        return super().submit(_background_target(fn), *args, **kwargs)
 
 import telemetry_core  # System Telemetry 核心（CPU/DIMM/SSD/NIC/GPU 歷史收集）
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Request
@@ -737,9 +761,7 @@ def add_rack_passive(body: AddRackPassive):
     return {"ok": True, "machine": _bmc_safe(rec)}
 
 
-@app.patch("/api/machines/{name}")
-@_data_transaction
-def edit_machine(name: str, body: dict):
+def _machine_candidate(name: str, body: dict):
     """移動機台：可指定 project 與 order。{project, order}
     order 只在同專案內有意義；此處不重新編號，保留各機台手動排定的順序。"""
     if name not in machines:
@@ -783,31 +805,48 @@ def edit_machine(name: str, body: dict):
             m[f] = str(body[f] or "").strip()
     if "use_c17" in body:
         m["use_c17"] = bool(body["use_c17"])
-    # 機框級 BMC 帳密（IPMI 電源管理）。密碼留空 = 不更動。
-    for f in ("bmc_ip", "bmc_user"):
-        if f in body:
-            m[f] = str(body[f] or "").strip()
-    if "bmc_pass" in body and body.get("bmc_pass") and not _is_masked(body["bmc_pass"]):
-        m["bmc_pass"] = str(body["bmc_pass"])
-    if "bmc_port" in body:
-        try:
-            m["bmc_port"] = int(body["bmc_port"]) or 623
-        except Exception:
-            pass
-    bmc_changed = any(m.get(f) != machines[name].get(f) for f in ("bmc_ip", "bmc_user", "bmc_pass", "bmc_port"))
-    if bmc_changed and m.get("os"):
-        active = int(m.get("active_os") or 1) - 1
-        if not 0 <= active < len(m["os"]):
-            raise HTTPException(409, "Invalid active OS; reload equipment")
-        for f in ("bmc_ip", "bmc_user", "bmc_pass"):
-            if f in body:
-                node_identity.slot_entry(m, active + 1)[f] = m.get(f, "")
-        _sync_active_os(m)
+    connection_map = {'os_ip':'ip','os_user':'user','os_pass':'pass','os_port':'port',
+                      'bmc_ip':'bmc_ip','bmc_user':'bmc_user','bmc_pass':'bmc_pass',
+                      'bmc_port':'bmc_ssh_port','ipmi_port':'ipmi_port'}
+    updates={connection_map[k]:v for k,v in body.items() if k in connection_map}
+    for field,value in updates.items():
+        if field not in {'port','bmc_ssh_port','ipmi_port'} and not isinstance(value,str):
+            raise HTTPException(422,'Expected text connection field: '+field)
+    if updates and m.get('os') is not None:
+        nodes=[e for e in m['os'] if e.get('node_id')==body.get('expected_node_id')]
+        if len(nodes)!=1 or node_identity.binding(nodes[0])!=body.get('expected_binding_revision'):
+            raise HTTPException(409,'Explicit current node binding required; reload the node editor')
+        cur=nodes[0];previous=node_identity.binding(cur)
+        for field,value in updates.items():
+            if field in {'pass','bmc_pass'}:
+                if not value or _is_masked(value): continue
+                if value!=cur.get(field): cur['credential_version']=__import__('uuid').uuid4().hex
+            if field in {'port','bmc_ssh_port','ipmi_port'} and (type(value) is not int or not 1<=value<=65535):
+                raise HTTPException(422,'Invalid connection port')
+            if field in {'ip','bmc_ip'} and value:
+                try: ipaddress.ip_address(value)
+                except ValueError: raise HTTPException(422,'Invalid connection IP')
+            if field=='ip' and value and (conflict:=_os_conflict(name,m,value,exclude_slot=cur['slot'])):
+                raise HTTPException(409,conflict)
+            cur[field]=value
+        if previous!=node_identity.binding(cur): cur['binding_revision']=int(cur.get('binding_revision',1))+1
+        if m.get('active_os')==cur['slot']: _sync_active_os(m)
+    else:
+        for field,value in body.items():
+            if field in connection_map:
+                if field.endswith('_pass') and (not value or _is_masked(value)): continue
+                m[field]=value
     _validate_rack(m, name)
+    return m
+
+
+@app.patch("/api/machines/{name}")
+@_data_transaction
+def edit_machine(name: str, body: dict):
+    m = _machine_candidate(name, body)
     machines[name] = m
     _save_data()
-    if bmc_changed:
-        _invalidate_machine_cache(name)
+    _invalidate_machine_cache(name)
     return {"ok": True, "machine": _bmc_safe(m)}
 
 
@@ -902,7 +941,7 @@ def change_management_ip(name: str, body: dict):
     classification = equipment_policy.classify(m, name)
     if classification["kind"] in ("server", "blanking") and classification["status"] != "needs_confirmation":
         raise HTTPException(400, "Use the server IP workflow; blanking has no management IP")
-    if set(body) != {"target", "ip", "expected_ip"} or body.get("target") not in ("os", "bmc"):
+    if set(body)-{"target", "ip", "expected_ip", "expected_node_id", "expected_binding_revision"} or not {'target','ip','expected_ip'}<=set(body) or body.get("target") not in ("os", "bmc"):
         raise HTTPException(422, "Choose a management connection and IP")
     field = body["target"] + "_ip"
     if body["expected_ip"] != (m.get(field) or ""):
@@ -911,13 +950,12 @@ def change_management_ip(name: str, body: dict):
         value = str(ipaddress.ip_address(str(body["ip"]).strip()))
     except ValueError:
         raise HTTPException(422, "Enter a valid IPv4 or IPv6 address")
-    m[field] = value
-    if m.get("os"):
-        active = int(m.get("active_os") or 1) - 1
-        if not 0 <= active < len(m["os"]):
-            raise HTTPException(409, "Invalid active OS; reload equipment")
-        node_identity.slot_entry(m, active + 1)["ip" if body["target"] == "os" else "bmc_ip"] = value
-        _sync_active_os(m)
+    if m.get("os") is not None:
+        entry=_connection_node(m,body.get('expected_node_id'),body.get('expected_binding_revision'))
+        entry["ip" if body["target"] == "os" else "bmc_ip"] = value
+        entry['binding_revision']=int(entry.get('binding_revision',1))+1
+        if entry['slot']==m.get('active_os'):_sync_active_os(m)
+    else:m[field] = value
     _save_data()
     _invalidate_machine_cache(name)
     return {"ok": True, "ip": value, "target": body["target"]}
@@ -928,6 +966,8 @@ class ChangeOsIp(BaseModel):
     os_user: str = ""
     os_pass: str = ""
     os_port: int = 22
+    expected_node_id: str | None = None
+    expected_binding_revision: str | None = None
 
 
 @app.post("/api/machines/{name}/change-os-ip")
@@ -943,10 +983,11 @@ def change_os_ip(name: str, body: ChangeOsIp):
         if name not in machines:
             raise HTTPException(404, f"機台不存在: {name}")
         m = copy.deepcopy(machines[name])
+    entry = _connection_node(m,body.expected_node_id,body.expected_binding_revision)
     new_ip = (body.new_os_ip or "").strip()
     if not new_ip:
         raise HTTPException(400, "請輸入新的 OS IP")
-    if new_ip == m.get("os_ip"):
+    if new_ip == (entry.get('ip') if entry is not None else m.get("os_ip")):
         return {"ok": True, "changed": False, "msg": "IP 與原本相同，未變更。"}
     user = getattr(body, "os_user", "")
     password = getattr(body, "os_pass", "")
@@ -956,51 +997,57 @@ def change_os_ip(name: str, body: ChangeOsIp):
     if not isinstance(port, int) or not 1 <= port <= 65535:
         raise HTTPException(422, "Invalid SSH port")
 
-    # 1) ping 新 IP
-    if not ping_check(new_ip, timeout=3):
-        return {"ok": False, "changed": False,
-                "msg": f"Ping 不到新 OS IP {new_ip}，未變更。請確認該 IP 現在是線上。"}
-
-    # 2) SSH 新 IP 抓 hostname
+    # The approved bounded SSH probe is the reachability evidence; ICMP is not identity.
     hostname, rc, err = ssh_run(new_ip, user, password, port, "hostname", timeout=12)
     if rc != 0 or not hostname:
         return {"ok": False, "changed": False,
                 "msg": f"無法以 SSH 連上新 IP {new_ip}（rc={rc}，{err or '連線失敗'}）"}
 
     hostname = hostname.strip()
-    expected = node_identity.slot_entry(m, int(m.get("active_os") or 1)).get("os_hostname") if m.get("os") else name
+    expected = entry.get("os_hostname") if entry is not None else name
     if not expected or hostname != expected:
         return {"ok": False, "changed": False,
                 "msg": f"新 IP {new_ip} 的 hostname 是「{hostname}」，與本機「{name}」不符，"
                        f"判定為別的機器，拒絕變更。"}
 
-    old_ip = m.get("os_ip")
-    safe = _commit_connection(name, m, {"os_ip": new_ip, "os_user": user, "os_pass": password, "os_port": port})
+    old_ip = entry.get('ip') if entry is not None else m.get("os_ip")
+    safe = _commit_connection(name, m, {"os_ip": new_ip, "os_user": user, "os_pass": password, "os_port": port},
+                              body.expected_node_id,body.expected_binding_revision)
     return {"ok": True, "changed": True, "msg": f"已將 OS IP 由 {old_ip} 更新為 {new_ip}。",
             "machine": safe}
 
 
 class ChangeBmcIp(BaseModel):
     new_bmc_ip: str
+    bmc_user: str = ''
+    bmc_pass: str = ''
+    bmc_ssh_port: int = Field(22,strict=True,ge=1,le=65535)
+    expected_node_id: str | None = None
+    expected_binding_revision: str | None = None
 
 
 @app.post("/api/machines/{name}/change-bmc-ip")
 def change_bmc_ip(name: str, body: ChangeBmcIp):
-    """變更機台的 BMC IP。只要新 IP ping 得通就允許變更（無hostname驗證）。"""
+    """Explicit node binding and provider-approved new-endpoint credentials."""
     with _DATA_LOCK:
         if name not in machines:
             raise HTTPException(404, f"機台不存在: {name}")
         m = copy.deepcopy(machines[name])
+    entry=_connection_node(m,body.expected_node_id,body.expected_binding_revision)
     new_ip = (body.new_bmc_ip or "").strip()
     if not new_ip:
         raise HTTPException(400, "請輸入新的 BMC IP")
-    if new_ip == m.get("bmc_ip"):
+    old_ip=entry.get('bmc_ip') if entry is not None else m.get('bmc_ip')
+    if new_ip == old_ip:
         return {"ok": True, "changed": False, "msg": "IP 與原本相同，未變更。"}
-    if not ping_check(new_ip, timeout=3):
-        return {"ok": False, "changed": False,
-                "msg": f"Ping 不到新 BMC IP {new_ip}，未變更。請確認該 IP 現在是線上。"}
-    old_ip = m.get("bmc_ip")
-    safe = _commit_connection(name, m, {"bmc_ip": new_ip})
+    if not body.bmc_user or not body.bmc_pass or _is_masked(body.bmc_pass):
+        raise HTTPException(422,'Explicit credentials for the new BMC endpoint are required')
+    hostname,rc,_=ssh_run(new_ip,body.bmc_user,body.bmc_pass,body.bmc_ssh_port,'hostname',timeout=12)
+    expected=entry.get('bmc_hostname') if entry is not None else m.get('bmc_hostname')
+    if rc or not expected or hostname.strip()!=expected:
+        raise HTTPException(409,'BMC identity could not be verified; inventory unchanged')
+    safe = _commit_connection(name, m, {"bmc_ip": new_ip,'bmc_user':body.bmc_user,'bmc_pass':body.bmc_pass,
+        'bmc_port':body.bmc_ssh_port},body.expected_node_id,body.expected_binding_revision)
     return {"ok": True, "changed": True, "msg": f"已將 BMC IP 由 {old_ip} 更新為 {new_ip}。",
             "machine": safe}
 
@@ -1010,7 +1057,7 @@ class AddOs(BaseModel):
     ip: str
     user: str
     pass_: str = Field(..., alias="pass")
-    port: int = 22
+    port: int = Field(22, strict=True, ge=1, le=65535)
     label: str = ""
     # 該 OS 節點的 BMC；SSH 和 IPMI 使用獨立 ports。
     bmc_ip: str = ""
@@ -1022,6 +1069,8 @@ class AddOs(BaseModel):
 
 
 class UpdateOs(BaseModel):
+    expected_node_id: str | None = None
+    expected_binding_revision: str | None = None
     ip: str = ""
     user: str = ""
     pass_: str = Field("", alias="pass")
@@ -1069,12 +1118,16 @@ def machine_add_os(name: str, body: AddOs):
     add_bmc_pass = "" if _is_masked(body.bmc_pass) else (body.bmc_pass or "")
     if not ip or not user:
         raise HTTPException(400, "OS IP / 帳號為必填（密碼可之後再補）")
+    try:
+        ipaddress.ip_address(ip)
+        if body.bmc_ip:ipaddress.ip_address(body.bmc_ip.strip())
+    except ValueError:raise HTTPException(422,'Valid OS and BMC IP addresses required')
     port = int(body.port or 22)
     if (c := _os_conflict(name, m, ip)):
         raise HTTPException(400, f"無法新增：{c}")
     # 確保有 os 陣列；os[0] 若缺（舊單 OS 機台）先補（主 OS 允許 user 空，只要 ip 有）
     os_list = m.get("os")
-    if not os_list:
+    if os_list is None:
         primary_ip = (m.get("os_ip") or "").strip()
         if primary_ip:
             primary = {
@@ -1092,21 +1145,9 @@ def machine_add_os(name: str, body: AddOs):
         else:
             os_list = []
     else:
-        os_list = [o for o in os_list if isinstance(o, dict) and o.get("ip")]
-        # 若過濾後空掉（全是髒資料），補回主 OS
-        if not os_list:
-            primary_ip = (m.get("os_ip") or "").strip()
-            if primary_ip:
-                os_list = [{"slot": 1, "ip": primary_ip,
-                            "user": (m.get("os_user") or "").strip(),
-                            "pass": "" if _is_masked(m.get("os_pass")) else (m.get("os_pass") or ""),
-                            "port": int(m.get("os_port") or 22),
-                            "label": "OS 1",
-                            "bmc_ip": (m.get("bmc_ip") or "").strip(),
-                            "bmc_user": (m.get("bmc_user") or "").strip(),
-                            "bmc_pass": "" if _is_masked(m.get("bmc_pass")) else (m.get("bmc_pass") or "")}]
-            else:
-                os_list = []
+        if any(not isinstance(entry,dict) for entry in os_list):
+            raise HTTPException(422,'Invalid canonical node entry; repair inventory before adding a node')
+        os_list=list(os_list)  # An empty canonical chassis never resurrects parent OS fields.
     slot = next(i for i in range(1, len(os_list) + 2) if all(e.get("slot") != i for e in os_list))
     entry = _norm_os_entry({"ip": ip, "user": user, "pass": pw, "port": port,
                             "label": body.label or f"OS {slot}",
@@ -1119,7 +1160,7 @@ def machine_add_os(name: str, body: AddOs):
     os_list.append(entry)
     m["os"] = os_list
     m.update(node_identity.canonical(m))
-    if not m.get("active_os"): m["active_os"] = slot
+    m.setdefault("active_os", None)
     _sync_active_os(m)   # 同步 active（通常仍是 slot1，但若 active_os 指到新 slot 會更新）
     _save_data()
     return {"ok": True, "machine": _bmc_safe(m)}
@@ -1137,6 +1178,10 @@ def machine_update_os(name: str, slot: int, body: UpdateOs):
         raise HTTPException(404, f"OS {slot} 不存在")
     cur = node_identity.slot_entry(m, slot)
     previous_binding = node_identity.binding(cur)
+    if body.expected_node_id is not None or body.expected_binding_revision is not None:
+        if body.expected_node_id != cur.get("node_id") or body.expected_binding_revision != previous_binding:
+            raise HTTPException(409, "Node binding changed; reload before editing")
+    previous_credentials = (cur.get("pass"), cur.get("bmc_pass"))
     if body.ip:
         new_ip = body.ip.strip()
         if (c := _os_conflict(name, m, new_ip, exclude_slot=slot)):
@@ -1163,7 +1208,10 @@ def machine_update_os(name: str, slot: int, body: UpdateOs):
             value = getattr(body, field)
             if value is None: raise HTTPException(422, "Explicit port required")
             cur[field] = value
-    if slot == int(m.get("active_os") or 1):
+    if previous_credentials != (cur.get("pass"), cur.get("bmc_pass")):
+        # Version the binding without hashing or exposing password material.
+        cur["credential_version"] = __import__("uuid").uuid4().hex
+    if slot == m.get("active_os"):
         _sync_active_os(m)
     if node_identity.binding(cur) != previous_binding:
         cur["binding_revision"] = int(cur.get("binding_revision",1)) + 1
@@ -1329,7 +1377,7 @@ def _collect_power():
     now = time.time()
     targets = [
         n for n, m in machines.items()
-        if not m.get("passive")
+        if _machine_allowed(n) and not m.get("passive")
         and (m.get("bmc_ip") or m.get("os_ip"))
         and (m.get("bmc_ip") or _status_cache.get(("os", n)))
         and (n not in _POWER or (now - _POWER[n].get("t", 0)) > _POWER_TTL)
@@ -1356,6 +1404,7 @@ def _refresh_status(force=False):
         return
     hosts = set()
     for m in machines.values():
+        if not _project_allowed(m.get("project")): continue
         if m.get("os_ip"):
             hosts.add(("os", m["name"]))
         if m.get("bmc_ip"):
@@ -1381,7 +1430,7 @@ def _refresh_status(force=False):
             if name in _health_cache and (hnow - _health_cache[name][1]) < _HEALTH_TTL:
                 return
             _health_cache[name] = (_detect_health(machines[name]), hnow)
-        list(ex.map(hjob, list(machines.keys())))
+        list(ex.map(hjob, [n for n in machines if _machine_allowed(n)]))
     _STATUS_TIME = now
 
 
@@ -1413,7 +1462,7 @@ def _kick_status_scan(force=False):
             print("背景狀態掃描失敗：", e)
         finally:
             _STATUS_LOCK.release()
-    threading.Thread(target=_run, daemon=True).start()
+    threading.Thread(target=_background_target(_run), daemon=True).start()
 
 
 @app.get("/api/machines")
@@ -1422,6 +1471,7 @@ def list_machines(force_scan: bool = False):
     safe = []
     for name in sorted(machines, key=lambda k: machines[k].get("order", 0)):
         m = machines[name]
+        if not _project_allowed(m.get("project")): continue
         c = dict(m)
         c["os_pass"] = "****" if c.get("os_pass") else ""
         c["bmc_pass"] = "****" if c.get("bmc_pass") else ""
@@ -1685,21 +1735,32 @@ def _bmc_safe(m):
     return c
 
 
-def _commit_connection(name, snapshot, updates):
+def _connection_node(machine,node_id,revision):
+    if machine.get('os') is None:return None
+    matches=[e for e in machine['os'] if e.get('node_id')==node_id and not e.get('empty')]
+    if len(matches)!=1 or node_identity.binding(matches[0])!=revision:
+        raise HTTPException(409,'Explicit node and current binding revision required')
+    return matches[0]
+
+
+def _commit_connection(name, snapshot, updates, node_id=None, revision=None):
     """Compare and save after probes finish outside the inventory lock."""
     with _DATA_LOCK:
         m = machines.get(name)
         if m is None or m != snapshot:
             raise HTTPException(409, "Equipment changed during verification; reload and retry")
         try:
-            m.update(updates)
-            slots = m.get("os") or []
-            if slots:
-                slot = node_identity.slot_entry(m, int(m.get("active_os") or 1))
+            slot = _connection_node(m,node_id,revision)
+            if slot is not None:
+                if updates.get('os_ip') and (conflict:=_os_conflict(name,m,updates['os_ip'],exclude_slot=slot['slot'])):
+                    raise HTTPException(409,conflict)
                 for key, value in updates.items():
                     slot[{"os_ip": "ip", "os_user": "user", "os_pass": "pass",
-                          "os_port": "port"}.get(key, key)] = value
-                _sync_active_os(m)
+                          "os_port": "port", "bmc_port":"bmc_ssh_port"}.get(key, key)] = value
+                if 'os_pass' in updates or 'bmc_pass' in updates:slot['credential_version']=__import__('uuid').uuid4().hex
+                slot['binding_revision']=int(slot.get('binding_revision',1))+1
+                if slot['slot']==m.get('active_os'):_sync_active_os(m)
+            else:m.update(updates)
             _save_data()
         except Exception:
             m.clear()
@@ -1721,6 +1782,7 @@ def _mask_os_list(os_list):
     out = []
     for e in os_list:
         d = dict(e)
+        d["expected_binding_revision"] = node_identity.binding(e)
         d["pass"] = "****" if d.get("pass") else ""
         d["bmc_pass"] = "****" if d.get("bmc_pass") else ""
         out.append(d)
@@ -1819,7 +1881,14 @@ def _rack_ping_plan(machine, topology):
     bmc_ip = _rack_ping_ip(machine.get("bmc_ip"), name)
     targets = []
     source = "none"
-    if kind == "server":
+    canonical_nodes = node_identity.observation_nodes(machine) if kind == "server" else None
+    if canonical_nodes is not None:
+        for node in canonical_nodes:
+            ip = _rack_ping_ip(node['ip'], name + '/' + node['node_name'])
+            if ip:
+                targets.append(dict(node, ip=ip, field='host_os'))
+        source = "inventory_os_slots" if targets else "none"
+    elif kind == "server":
         topology_nodes = {}
         configured_slots = set()
         for rack in topology.get("racks") or []:
@@ -1882,7 +1951,7 @@ def rack_ping(project: str = "", name: str = ""):
         if name and name not in machines:
             raise HTTPException(404, f"\u6a5f\u53f0\u4e0d\u5b58\u5728: {name}")
         selected = [machine for key, machine in machines.items()
-                    if (not name or key == name) and (not project or machine.get("project") == project)]
+                    if _machine_allowed(key) and (not name or key == name) and (not project or machine.get("project") == project)]
         selected = [machine for machine in selected if machine.get("level") == "rack"
                     and equipment_policy.classify(machine)["kind"] != "blanking"
                     and ((isinstance(machine.get("rack_u"), int) and machine["rack_u"] > 0)
@@ -1976,6 +2045,15 @@ def _topology_ping_targets(document: dict, rack_id: str, inventory=None):
             raise HTTPException(422, f"{label}\uff1aIP \u683c\u5f0f\u7121\u6548") from exc
 
     for device in selected.get("devices", []):
+        machine = inventory.get(device.get("inventory", ""))
+        canonical_nodes = (node_identity.observation_nodes(machine)
+                           if isinstance(machine, dict) and device.get("kind") == "server" else None)
+        if canonical_nodes is not None:
+            for node in canonical_nodes:
+                ip = address(node['ip'], node['node_name'])
+                if ip:
+                    targets.append(dict(node, ip=ip, field='host_os', device_id=device.get('id','')))
+            continue
         if device.get("kind") == "server":
             saved_nodes = device.get("nodes", [])
             for node in saved_nodes:
@@ -2065,7 +2143,7 @@ def list_links():
     from legacy_links import ensure_ids
     with _DATA_LOCK:
         ensure_ids(links)
-    return {"ok": True, "links": links}
+    return {"ok": True, "links": [link for link in links if _machine_allowed(link.get("a")) and _machine_allowed(link.get("b"))]}
 
 
 @app.post("/api/links")
@@ -2087,12 +2165,12 @@ def add_link(body: dict):
     ensure_ids(links)
     candidate = {"a": a, "b": b, "type": t, "a_port": a_port or None, "b_port": b_port or None}
     if any(signature(link) == signature(candidate) for link in links):
-        return {"ok": True, "note": "Already exists", "links": links}
+        return {"ok": True, "note": "Already exists", "links": [link for link in links if _machine_allowed(link.get("a")) and _machine_allowed(link.get("b"))]}
     # 去重（無向）：同兩端且同類型視為同一條（允許 a_port/b_port 不同→多條同類型連線）
     links.append(candidate)
     ensure_ids(links)
     _save_data()
-    return {"ok": True, "links": links}
+    return {"ok": True, "links": [link for link in links if _machine_allowed(link.get("a")) and _machine_allowed(link.get("b"))]}
 
 
 @app.delete("/api/links")
@@ -2109,8 +2187,8 @@ def delete_link(body: dict):
     if candidates:
         links.pop(candidates[0])
         _save_data()
-        return {"ok": True, "links": links}
-    return {"ok": True, "note": "未找到", "links": links}
+        return {"ok": True, "links": [link for link in links if _machine_allowed(link.get("a")) and _machine_allowed(link.get("b"))]}
+    return {"ok": True, "note": "未找到", "links": [link for link in links if _machine_allowed(link.get("a")) and _machine_allowed(link.get("b"))]}
 
 
 def _operation_target(name, body):
@@ -2437,7 +2515,7 @@ def _network_identity(m, refresh=False):
                 _network_identity_cache.pop(next(iter(_network_identity_cache)))
             _network_identity_cache[key] = (time.monotonic(), result)
             _network_identity_pending.discard(key)
-    threading.Thread(target=collect, daemon=True).start()
+    threading.Thread(target=_background_target(collect), daemon=True).start()
     return {**empty, "loading": True}
 
 
@@ -2536,7 +2614,7 @@ def machine_detail(name: str, refresh: int = 0):
                     pass
                 finally:
                     _bmc_pending.discard(name)
-            threading.Thread(target=_bg, daemon=True).start()
+            threading.Thread(target=_background_target(_bg), daemon=True).start()
         # 感測器（sdr list）很慢，由前端呼叫 /sensors 非同步載入。
     out["ssh_observation"] = _os_access_cache.get(name)
     out["bmc_fetched_at"] = {"firmware": _bmc_fw_cache.get(name, (None,))[0], "power": _bmc_pwr_cache.get(name, (None,))[0]}
@@ -2593,14 +2671,14 @@ def machine_sensors(name: str, refresh: int = 0):
         with _sensors_lock:
             pending = _sensors_pending.get(name)
         if not pending:
-            th = threading.Thread(target=_fetch_sensors_async, args=(name,), daemon=True)
+            th = threading.Thread(target=_background_target(_fetch_sensors_async), args=(name,), daemon=True)
             th.start()
         return {"machine": name, "sensors": cached, "fetched_at": t, "loading": True, "cached": True, "refreshing": True}
     # 完全沒有快取：啟動背景抓取，回傳 loading
     with _sensors_lock:
         pending = _sensors_pending.get(name)
     if not pending:
-        th = threading.Thread(target=_fetch_sensors_async, args=(name,), daemon=True)
+        th = threading.Thread(target=_background_target(_fetch_sensors_async), args=(name,), daemon=True)
         th.start()
     return {"machine": name, "sensors": None, "loading": True, "cached": False}
 
@@ -2675,6 +2753,7 @@ def list_projects():
     # 依手動順序排列
     for name in sorted(projects, key=lambda k: projects[k].get("order", 0)):
         p = projects[name]
+        if not _project_allowed(name): continue
         count = sum(1 for m in machines.values() if m.get("project") == p["name"])
         result.append({**p, "machine_count": count, "index": list(projects.keys()).index(name)})
     return {"projects": result}
@@ -3059,6 +3138,7 @@ def _copilot_context(project: str = ""):
     lines = []
     names = [k for k in machines if machines[k].get("project") == project] if project else list(machines)
     for name in sorted(names, key=lambda k: machines[k].get("order", 0)):
+        if not _machine_allowed(name): continue
         m = machines[name]
         h = _health_cache.get(name, ("unknown", 0))[0]
         lines.append(
@@ -3100,8 +3180,8 @@ def _diag_allowed(cmd: str) -> bool:
 
 def _run_diag_safe(machine: str, command: str) -> str:
     """在指定機台 OS 執行白名單內的唯讀指令，回文字結果（限制長度）。"""
-    if machine not in machines:
-        return f"未知機台: {machine}"
+    if not _machine_allowed(machine):
+        return "Target unavailable or outside authorized scope"
     m = machines[machine]
     if not (m.get("os_ip") and m.get("os_user") and m.get("os_pass")):
         return f"{machine} 沒有可用的 OS SSH 連線資訊"
@@ -3116,10 +3196,11 @@ def _run_diag_safe(machine: str, command: str) -> str:
 
 def _diag_summary(machine: str, minutes: int = 15) -> str:
     """輕量回傳單機最新 OS/GPU 摘要（給 tool 用），避免直接吃整段 analyse prompt。"""
+    if not _machine_allowed(machine): return "Target unavailable or outside authorized scope"
     try:
         telemetry_core.init_db()
-        osd = telemetry_core.get_os_series(machine, minutes)
-        gpu = telemetry_core.get_gpu_series(machine, minutes)
+        observed = machine_telemetry(machine, minutes)
+        osd, gpu = observed["os"], observed["gpu"]
         os_arr = (osd.get("os") or [])
         line = []
         if os_arr:
@@ -3292,7 +3373,7 @@ def ai_logsearch(req: LogSearchReq):
     if not kw:
         kw = [q]
     names = [str(x) for x in (req.machines or [])] or \
-            [k for k in machines if machines[k].get("os_ip")]
+            [k for k in machines if _machine_allowed(k) and machines[k].get("os_ip")]
     if not names:
         return {"ok": False, "error": "沒有可查詢的機台"}
 
@@ -3649,28 +3730,39 @@ _telemetry_thread = None
 
 @app.on_event("startup")
 def _start_telemetry():
-    return  # Cycle workers own collection.
+    return  # Independent authorized service: python run.py observe; never per Web worker.
 
 
 @app.get("/api/machine/{name}/telemetry")
-def machine_telemetry(name: str, minutes: int = 60, kind: str = "all"):
+def machine_telemetry(name: str, minutes: int = 60, kind: str = "all", node_id: str = ""):
     """回傳某台機台的 System Telemetry 歷史（時間範圍由 minutes 控制）。
     kind: all=OS+GPU, os=僅 OS, gpu=僅 GPU。
     """
     if name not in machines:
         raise HTTPException(404, f"機台不存在: {name}")
     telemetry_core.init_db()
-    result = {"machine": name, "window_min": int(minutes)}
+    target=machines[name]
+    key=name
+    if target.get('os') is not None:
+        entries=[e for e in target['os'] if (e.get('node_id')==node_id if node_id else e.get('slot')==target.get('active_os'))]
+        if len(entries)!=1 or not entries[0].get('node_id'):
+            raise HTTPException(409,'Select an existing canonical node for telemetry')
+        key=entries[0]['node_id']
+    elif node_id:
+        raise HTTPException(404,'Node does not belong to this chassis')
+    result = {"machine": name, "window_min": int(minutes), "node_id":key if key!=name else None,
+              "history_source":"canonical-node" if key!=name else "legacy-machine-unattributed"}
+    result['observation']=globals().get('_observation_status',lambda key:{'state':'NOT_CONFIGURED'})(key)
     if kind in ("all", "os"):
-        result["os"] = telemetry_core.get_os_series(name, int(minutes))
+        result["os"] = telemetry_core.get_os_series(key, int(minutes))
     if kind in ("all", "gpu"):
-        result["gpu"] = telemetry_core.get_gpu_series(name, int(minutes))
+        result["gpu"] = telemetry_core.get_gpu_series(key, int(minutes))
     return result
 
 @app.get("/api/ai/gpu-alerts")
 def ai_gpu_alerts():
     """GPU 熱度快訊：回傳目前 active 的 GPU 高載／高溫 AI 造句告警。"""
-    return {"alerts": telemetry_core.get_active_gpu_alerts()}
+    return {"alerts": [a for a in telemetry_core.get_active_gpu_alerts() if _machine_allowed(a.get("machine"))]}
 
 
 @app.get("/api/rack/{project}/telemetry")
@@ -3799,14 +3891,14 @@ def _tel_latest(r):
 
 
 @app.get("/api/machine/{name}/telemetry/analyze")
-def machine_telemetry_analyze(name: str, minutes: int = 60):
+def machine_telemetry_analyze(name: str, minutes: int = 60, node_id: str = ""):
     """針對單機 Telemetry 數據，叫本機 AI 做『簡短』分析（幾句話說明是否正常）。
     避免大量文字：指令要求精簡，適合放在 telemetry 頁頂部的提示列。"""
     if name not in machines:
         raise HTTPException(404, f"機台不存在: {name}")
     telemetry_core.init_db()
-    osd = telemetry_core.get_os_series(name, int(minutes))
-    gpu = telemetry_core.get_gpu_series(name, int(minutes))
+    observed = machine_telemetry(name, int(minutes), node_id=node_id)
+    osd, gpu = observed["os"], observed["gpu"]
     os_arr = osd.get("os") or []
     if not os_arr:
         return {"ok": False, "error": "此範圍尚無 telemetry 資料，無法分析"}

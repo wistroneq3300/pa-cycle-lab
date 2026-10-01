@@ -9,7 +9,7 @@ import re
 from pathlib import Path
 from urllib.parse import quote
 
-from cycle_core import aggregate_issues, atomic_write, health, now, write_json
+from cycle_core import aggregate_issues, atomic_write, health, node_records, records_health, now, write_json
 
 ASSETS = Path(__file__).parent
 
@@ -28,7 +28,7 @@ def evidence_link(path):
 
 def status(campaign):
     items = aggregate_issues(campaign)
-    return {"health": health(items), "completion": campaign["state"],
+    return {"health": records_health(r for n in campaign["nodes"] for r in node_records(n)), "completion": campaign["state"],
             "unique_issues": len(items), "known": sum(i["classification"] == "KNOWN" for i in items),
             "new": sum(i["classification"] == "NEW" for i in items),
             "worsened": sum(i["classification"] == "WORSENED" for i in items),
@@ -123,7 +123,7 @@ def render_html(campaign, console_log=''):
     for node in sorted(nodes, key=node_order):
         i = indices[node['key']]
         node_items = [item for item in items if item['node'] == node['key']]
-        health_value = health(node_items)
+        health_value = records_health(node_records(node))
         state = 'BLOCKED' if node['blocked'] else 'STOPPED' if node['stop_reason'] else campaign['state']
         note = '; '.join(node['blocked']) or node['stop_reason'] or '; '.join(dict.fromkeys(item['component'] + ': ' + item['code'] for item in node_items)) or 'No findings'
         rows.append(f'<tr><td class="target"><a href="#node-{i}" data-panel="node-{i}">{esc(node["key"])}</a><small>{esc(node["target"]["os_ip"])}</small></td><td>{badge(health_value)}</td><td>{badge(state)}</td><td>{node["completed"]}</td><td>{esc(note)}</td></tr>')

@@ -2,6 +2,9 @@
 import re
 
 SAFE_METADATA_ROUTES=(
+    ('GET',r'/api/ai/gpu-alerts'),
+    ('GET',r'/api/machine/[^/]+/telemetry'),
+    ('GET',r'/api/rack/[^/]+/telemetry'),
     ('GET',r'/'), ('GET',r'/static/.+'),
     ('GET',r'/(openapi.json|docs|docs/oauth2-redirect|redoc)'),
     ('GET',r'/api/machines'),
@@ -26,6 +29,8 @@ CYCLE_ROUTES=(
     ('GET',r'/api/projects/[^/]+/cycle/jobs/[^/]+/(events(?:/download)?|reconciliation|artifacts|artifact/[a-f0-9]+|files/.+)'),
 )
 MANUAL_CONTROL_ROUTES=(
+    ('GET',r'/api/cycle/sessions'),
+    ('POST',r'/api/cycle/sessions/session-[a-f0-9]{32}/reconcile'),
     ('POST',r'/api/machine/[^/]+/(power|reboot)'),
     ('GET',r'/api/cycle/controls(?:/control-[a-f0-9]{32})?'),
     ('POST',r'/api/cycle/controls/control-[a-f0-9]{32}/reconcile'),
@@ -43,6 +48,7 @@ def matches(routes,method,path):
 
 
 def category(method,path):
+    if method=='GET' and path=='/api/ai/gpu-alerts':return 'SAFE_METADATA_ROUTES'
     if matches(DISABLED_REMOTE_ROUTES,method,path): return 'DISABLED_REMOTE_ROUTES'
     for label,routes in (('SAFE_METADATA_ROUTES',SAFE_METADATA_ROUTES),('CYCLE_ROUTES',CYCLE_ROUTES),('MANUAL_CONTROL_ROUTES',MANUAL_CONTROL_ROUTES)):
         if matches(routes,method,path): return label

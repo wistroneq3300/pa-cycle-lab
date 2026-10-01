@@ -193,11 +193,12 @@ class TopologyRegression(base.unittest.TestCase):
         self.assertEqual(result['summary'],
                          {'configured': 2, 'unique_ips': 2, 'alive': 1, 'down': 1})
         self.assertEqual([target['node_name'] for target in result['targets']],
-                         ['OS Slot 1', 'OS Slot 2'])
-        self.assertEqual(result['targets'][0]['node_id'], node['id'])
+                         ['N1', 'N2'])
+        self.assertNotEqual(result['targets'][0]['node_id'], node['id'])
+        self.assertEqual(result['targets'][0]['mapping_status'], 'needs_confirmation')
         self.assertEqual({target['field'] for target in result['targets']}, {'host_os'})
 
-    def test_ping_merges_saved_host_os_with_missing_inventory_slots(self):
+    def test_ping_inventory_identity_overrides_unmapped_topology_order(self):
         self.handlers()
         doc = self.doc(); server = doc['racks'][0]['devices'][0]
         server['nodes'].append(dict(id='n2', name='Node 2', bf4='BF4 #2',
@@ -210,5 +211,6 @@ class TopologyRegression(base.unittest.TestCase):
         self.s['ping_check'] = lambda ip, timeout: True
         result = self.s['ping_project_topology']('rack', {'rack_id': 'rack1'})
         self.assertEqual([target['ip'] for target in result['targets']],
-                         ['192.0.2.1', '192.0.2.12'])
-        self.assertEqual([target['node_id'] for target in result['targets']], ['n1', 'n2'])
+                         ['192.0.2.11', '192.0.2.12'])
+        self.assertTrue(all(target['node_id'] not in ('n1','n2') for target in result['targets']))
+        self.assertEqual([target['slot'] for target in result['targets']], [1,2])

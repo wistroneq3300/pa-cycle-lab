@@ -50,6 +50,15 @@ class Run2Tests(unittest.TestCase):
     def fake(self): return ManualFake({},DATA/'fake-keys')
     def machine(self): return web.pa.machines['neutrino-n1']
 
+    def control_body(self, **payload):
+        import uuid
+        from node_identity import canonical
+        from integration.targets import inventory
+        self.machine().setdefault('capabilities',{'independent_power':True})
+        self.machine().update(canonical(self.machine()))
+        target=next(t for t in inventory(web.pa) if t.get('parent_name')=='neutrino-n1')
+        return dict(payload,node_id=target['name'],expected_binding_revision=target['revision'],idempotency_key=uuid.uuid4().hex)
+
     def test_manual_power_strict_boolean_at_http_boundary(self):
         with patch.object(web,'MODE','live'),patch.dict(os.environ,{'CYCLE_USERS_JSON':'{"operator":"test"}'}),patch.object(web,'control_transport') as transport:
             for body in ({},{'on':None},{'on':'false'},{'on':0},{'on':1},[],{'on':True,'extra':1}):
@@ -72,7 +81,7 @@ class Run2Tests(unittest.TestCase):
         for on in (True,False):
             transport=self.fake()
             with patch.object(web,'MODE','live'),patch.dict(os.environ,{'CYCLE_USERS_JSON':'{"operator":"test"}'}),patch.object(web,'control_transport',return_value=transport):
-                response=self.client.post('/api/machine/neutrino-n1/power',json={'on':on},auth=('operator','test'))
+                response=self.client.post('/api/machine/neutrino-n1/power',json=self.control_body(on=on),auth=('operator','test'))
             self.assertEqual(response.status_code,200,response.text)
             self.assertTrue(response.json()['ok']);self.assertEqual([a[2] for a in actions(transport)],['power on' if on else 'power off'])
 
@@ -85,12 +94,11 @@ class Run2Tests(unittest.TestCase):
         self.assertEqual(result['state'],'CONTROL_FAILED');self.assertEqual(actions(transport),[])
         self.assertIn(job['id'],self.store.lock_owners().values())
 
-    def test_existing_manual_reboot_ui_without_body_still_verifies(self):
+    def test_manual_reboot_without_explicit_target_is_rejected(self):
         self.machine().update(synthetic=False,credential_ref='test-only');transport=self.fake()
         with patch.object(web,'MODE','live'),patch.dict(os.environ,{'CYCLE_USERS_JSON':'{"operator":"test"}'}),patch.object(web,'control_transport',return_value=transport):
             response=self.client.post('/api/machine/neutrino-n1/reboot',auth=('operator','test'))
-        self.assertEqual(response.status_code,200,response.text);self.assertEqual(len(actions(transport)),1)
-        self.assertIn('CONTROL_COMPLETE',response.json()['info'])
+        self.assertEqual(response.status_code,422,response.text);self.assertEqual(actions(transport),[])
 
     def test_manual_identity_mismatch_never_dispatches(self):
         transport=self.fake();transport.mismatch=True
@@ -100,8 +108,8 @@ class Run2Tests(unittest.TestCase):
     def test_manual_duplicate_inventory_refuses_before_transport(self):
         self.machine().update(synthetic=False,credential_ref='test-only',os_ip=web.pa.machines['neutrino-n2']['os_ip'])
         with patch.object(web,'MODE','live'),patch.dict(os.environ,{'CYCLE_USERS_JSON':'{"operator":"test"}'}),patch.object(web,'control_transport') as transport:
-            response=self.client.post('/api/machine/neutrino-n1/power',json={'on':False},auth=('operator','test'))
-        self.assertEqual(response.status_code,422,response.text);transport.assert_not_called()
+            response=self.client.post('/api/machine/neutrino-n1/power',json=self.control_body(on=False),auth=('operator','test'))
+        self.assertEqual(response.status_code,409,response.text);transport.assert_not_called()
 
     def test_cycle_lock_blocks_manual_and_manual_blocks_cycle_create(self):
         job=self.create(machine_ids=['neutrino-n1']);transport=self.fake()
@@ -400,7 +408,7 @@ class Run2Tests(unittest.TestCase):
         with patch('integration.store.engine_hash',return_value='changed'):
             with self.assertRaises(Conflict):self.store.confirm(job['id'],job['pre']['version'],job['pre']['runnable_ids'],'tester')
         manifest=json.loads((ROOT/'RUNTIME_ENGINE_FILES.json').read_text())['RUNTIME_ENGINE_FILES']
-        for name in ('engine/vera_cycle/cycle_engine.py','engine/vera_cycle/neutrino_config.sh','engine/vera_cycle/issue_policy.md','engine/vera_cycle/VERSION','integration/control.py'):
+        for name in ('run.py','engine/vera_cycle/cycle_engine.py','engine/vera_cycle/neutrino_config.sh','engine/vera_cycle/issue_policy.md','engine/vera_cycle/VERSION','integration/control.py'):
             self.assertIn(name,manifest)
 
     def test_retention_only_compacts_old_terminal_events(self):

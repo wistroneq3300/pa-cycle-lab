@@ -1,8 +1,28 @@
 # Native Next × Vera acceptance — 2026-10-01
 
+## Platform regression round — local/offline acceptance
+
+Base bb6f22c1795a79557e55b39650d859c26400b568; local changes only. The prior delivery table below must not be used as current acceptance.
+
+- Full integration suite: **137 PASS / 0 FAIL / 0 SKIP**, `data/platform-integration-verified.txt` (361.664 seconds). Subsequent user-requested multiuser tests: **3 new PASS**, `data/platform-multiuser-verified.txt`; reported separately, not a claimed 140-test full run. No backend changes after the full run.
+- Next Python QA: **109 PASS / 0 FAIL / 0 SKIP**, `data/platform-next-final.txt`. Broker: **53 PASS / 0 FAIL / 0 SKIP**, two inherited warnings, `data/platform-broker-final.txt`.
+- Vera: **101 PASS / 0 FAIL / 14 SKIP**, 115 discovered, `data/platform-vera-final.txt`. Skips remain 13 Bash fixtures and one Linux/root cross-UID case; no substitute shell used to declare these passed.
+- Four Next JavaScript suites passed: Terminal security, Terminal lifecycle, operations, equipment. Real WebSocket Terminal/KVM hard-Web-death plus separate fake bridge hard-death are three tests included in the full integration total; they use real ASGI/server processes, not real DUTs.
+- Process lifecycle PASS, `data/platform-process-release.txt`: Web and scheduler PIDs changed, Worker PID unchanged, Console history/cursor retained, stopped INCOMPLETE after two rounds. Crash injections **4 PASS**, `data/platform-crash-release.txt`: before intent zero dispatch, during command/after response/during POST one dispatch each; RECONCILIATION_REQUIRED and reservations retained.
+- Native Edge/Playwright flow PASS, `data/platform-native-browser-final.txt`: 128-node selection, one chassis/four nodes, two rounds/eight valid cycles, PRE/confirm, Console and navigation. Console load/reconnect/copy/download PASS, `data/platform-console-final.txt`; 10,500+ fixture with 3000 buffer/2000 rendered. Cycle long-name/blocked/empty/error/theme states PASS, `data/platform-ui-states-final.txt`.
+- New tests reproduce wrong-node/stale edits, credential binding versions, guarded enrollment, real background thread/pool actor propagation, historical health, fair hour admission, SQL pagination, artifact hash reuse/direct lookup, original PA project filtering and actual Copilot tool scope.
+- `tests/platform-*-browser.cjs` check real DOM/request paths for manual request identity, text-safe Copilot, stable Project links, keyed run focus, sparse/single-node edit and theme retention. They use an isolated synthetic loopback preview and bottom-layer mocks where stated.
+- `tests/platform-captures.cjs`: 40 screenshots in `docs/screenshots/platform-regression/`; dashboard, Projects, Rack, six Chassis tabs and node edit at both sizes/light-dark. `capture-results.json` records 36 principal views with no page errors or document overflow. Visual inspection also moved Cycle below general task assignment, made its button secondary, corrected AUX/AC language and distinguished unconfigured/unobserved BMC. Representative coverage, not every plugin or hardware session visual acceptance.
+- Latest selection UI: one Cycle entry per context, then explicit checkboxes; no nodes selected by default for chassis entry. Single/all/subset and search preservation pass in `tests/platform-selection-browser.cjs`. Two callers on independent nodes each reserve their own run; same-node race produces one CREATED reservation and one persisted BLOCKED attempt; shared-controller nodes also block. BLOCKED requests are audit records, not submitted power actions.
+- Migration preview: 32 chassis/128 synthetic nodes, idempotent, input unchanged (`data/platform-migration-verified.json`). Synthetic confirmed mapping is fixture data, not physical validation.
+- Before-fix failures are retained in `data/platform-permissions-before.txt`, `data/platform-metadata-before.txt`, `data/platform-metadata-binding-before.txt`. An actual Copilot route initially hung because the broad POST inventory lock waited on its observation pool; transaction wrapping is now restricted to local mutation routes. It is not a Store.tx re-entry deadlock.
+- Additional failures were not erased: the actual proxy test exposed missing Path import; a no-profile-snapshot worker failed with UnboundLocalError (`data/platform-legacy-profile-before.txt`), then passed after removal of the shadowing import (`data/platform-legacy-profile-after.txt`). First crash rerun timed out because of that worker error (`data/platform-crash-final.txt`); corrected rerun passes. A 137-test run had one hash-fixture error after adding run.py to the manifest (`data/platform-integration-release.txt`); fixture now includes and tests the entry point, and the full 137 rerun passes. Initial multiuser assertions incorrectly expected HTTP 409; the existing native contract persists HTTP 200/BLOCKED audit records. Tests now verify state, single lock owner and zero actions rather than removing that contract.
+- No current Linux/systemd/provider deployment or live hardware acceptance. User-reported N2/N3 GPIO instability is deferred, with evidence and hardware FAIL semantics retained.
+
+
 This section records the current native integration. Everything below the historical separator belongs to earlier lab deliveries and is not evidence for this build. All new execution used synthetic endpoints, fake transports and temporary storage. No real SSH/IPMI/power/AUX/package installation, field service restart or production database access was performed.
 
-## Current execution record
+## Previous delivery execution record (not this regression round)
 
 | Check | Result | Local evidence |
 |---|---|---|

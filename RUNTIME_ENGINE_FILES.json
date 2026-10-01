@@ -154,15 +154,20 @@
     "integration/coordinator.py",
     "integration/credentials.py",
     "integration/domain.py",
+    "integration/enrollment.py",
     "integration/events.py",
     "integration/inventory.py",
     "integration/legacy_observation.py",
+    "integration/observation_service.py",
+    "integration/profiles.py",
+    "integration/project_access.py",
     "integration/runner.py",
     "integration/sessions.py",
     "integration/settings.py",
     "integration/store.py",
     "integration/synthetic.py",
     "integration/targets.py",
-    "integration/web.py"
+    "integration/web.py",
+    "run.py"
   ]
 }

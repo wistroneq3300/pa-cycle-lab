@@ -163,7 +163,7 @@ class IntegrationTests(unittest.TestCase):
             self.assertEqual(self.client.get(f'{self.base}/jobs/{job["id"]}/files/{path}').status_code,404)
 
     def test_local_transport_boundaries_and_csrf(self):
-        self.assertEqual(self.client.post('/api/machine/neutrino-n1/reboot',json={}).status_code,409)
+        self.assertEqual(self.client.post('/api/machine/neutrino-n1/reboot',json={}).status_code,422)
         self.assertEqual(self.client.get('/api/machine/neutrino-n1/sensors').status_code,409)
         self.assertEqual(self.client.post(self.base+'/jobs',json=self.body(),headers={'Origin':'https://foreign.example'}).status_code,403)
 

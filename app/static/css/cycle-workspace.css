@@ -1,5 +1,10 @@
 .cycle-workspace{--cw-link:#006c93;--cw-warn:#785016;--cw-pass:#345a22;--cw-fail:#9a302b;max-width:1800px;margin:auto;color:var(--text);font-size:14px;line-height:1.6}
 .cycle-workspace{--cw-muted:#45616d}
+.cycle-workspace pre{max-height:360px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;padding:14px;background:var(--bg-panel);border:1px solid var(--border);border-radius:6px;font:12px/1.6 Consolas,monospace}
+.cycle-workspace textarea{min-height:90px;max-width:100%;background:var(--bg-panel);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:10px;font:inherit}
+#cw-reconciliation{padding:16px;border:1px solid var(--cw-warn);border-radius:6px;margin:16px 0}
+#cw-reconciliation h2{margin-top:0}
+#cw-review-body button{margin-top:12px}
 [data-theme=dark] .cycle-workspace{--cw-muted:#abc0ca}
 [data-theme=dark] .cycle-workspace{--cw-link:#b8e6f8;--cw-warn:#f3cc87;--cw-pass:#b6dfa0;--cw-fail:#ffb4ae}
 .cycle-workspace [hidden]{display:none!important}.cycle-workspace h1{font-size:28px;margin:0}.cycle-workspace h2{font-size:19px;margin:24px 0 12px}.cycle-workspace h3{font-size:15px;margin:0}.cycle-workspace p{margin:10px 0}.cycle-workspace a{color:var(--cw-link)}

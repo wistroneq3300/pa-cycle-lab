@@ -5,13 +5,16 @@ from integration.settings import ROOT, MODE
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
-    parser.add_argument('command',choices=['web','runner','demo'])
+    parser.add_argument('command',choices=['web','runner','demo','observe'])
     parser.add_argument('--port',type=int,default=9180)
     args=parser.parse_args()
     if args.command=='demo':
         if MODE!='synthetic': parser.error('demo requires CYCLE_MODE=synthetic')
         from scripts.bootstrap import bootstrap
         bootstrap()
+    elif args.command=='observe':
+        from integration.observation_service import service
+        service()
     elif args.command=='runner':
         from integration.runner import service
         service()

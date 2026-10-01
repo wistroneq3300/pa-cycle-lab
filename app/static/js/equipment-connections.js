@@ -10,11 +10,12 @@ function equipmentIpDialog(name) {
   const m=machines.find(x=>x.name===name);
   if(!m||!equipmentCanConnect(m))return;
   const snapshot={os:m.os_ip||'',bmc:m.bmc_ip||''};
+  const binding=typeof operationTarget==='function'?operationTarget(name):{};
   showDialog(`\u4fee\u6539\u7ba1\u7406 IP \u2014 ${name}`,`<div class="rm-modal-body">${equipmentTargetSelect(m)}<label>IP</label><input class="input" id="equipment-ip" value="${esc(snapshot[equipmentTargets(m)[0]])}" required><p class="hint">\u53ea\u66f4\u65b0\u672c\u7cfb\u7d71\u8a18\u9304\u7684 IP\uff1b\u4e0d\u4fee\u6539\u8a2d\u5099\u7db2\u5361\uff0c\u4e0d\u8981\u6c42 Ping \u6216 hostname \u9a57\u8b49\u3002\u5e33\u5bc6\u4fdd\u6301\u4e0d\u8b8a\u3002</p></div>`,[
     {txt:'\u53d6\u6d88',fn:()=>closeDialog()},
     {txt:'\u5132\u5b58',cls:'primary',fn:async()=>{
       const target=$('equipment-target').value,ip=$('equipment-ip').value.trim();
-      await api(`/api/machines/${encodeURIComponent(name)}/management-ip`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({target,ip,expected_ip:snapshot[target]})});
+      await api(`/api/machines/${encodeURIComponent(name)}/management-ip`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({target,ip,expected_ip:snapshot[target],...(binding.node_id?{expected_node_id:binding.node_id,expected_binding_revision:binding.expected_binding_revision}:{})})});
       await loadMachines(false);closeDialog();setView(state.view);
     }}]);
   $('equipment-target').onchange=()=>{$('equipment-ip').value=snapshot[$('equipment-target').value];};

@@ -3,7 +3,38 @@
 更新：2026-10-01。正式修改目的地是 **wistroneq3300/pa-cycle-lab**。
 來源 Next 與 Vera repo 唯讀；本次沒有 production inventory/telemetry 修改、現場電源操作或部署。
 
-## 已實作
+## 2026-10-01 全平台回歸修復（本機、離線）
+
+This local-only round supersedes the broad completion claims below. Base: bb6f22c1795a79557e55b39650d859c26400b568. No commit, push, deployment or hardware operation is authorized in this round.
+
+- User-reported N2/N3 GPIO instability is a known hardware issue and is deferred. Keep evidence and safety gates; do not relabel hardware failures as PASS.
+- F01 已修：單機/batch 共用 node、binding revision、idempotency；人工操作不要求 Cycle profile；stale/invalid body 零 dispatch，response lost 不重送。Live capability 待現場。
+- F02 已修：正式 enrollment approval、明確新 credentials、固定命令/timeout；四 slots create、N3 OS/BMC 新 IP、stale revision 經真 ASGI guard，僅底層 transport mock。Provider/資產 identity 待現場接入。
+- F03 已修：重用 Next `_machine_candidate` 與專用 placement/rack/CDU；共同 inventory lock/短 SQLite transaction；canonical binding、credential version、cache、磁碟一致；scope 型別及 immutable ID 防護。
+- F04 已修介面與權限矩陣：shell navigate 與資料 read 分離；舊/新 API、列表/快取/AI/Telemetry/history/artifacts、move source/destination 檢查；mutation 時重驗 project。非 production auth 驗收。
+- F05 已接回授權觀測：獨立 `run.py observe`、service principal、node CPU/net/disk、capability GPU 與 deterministic alerts；persistent status、scope defer、OS-lock recovery。原本為空的 passive collectors 仍未實作，不列已完成；Linux/service/provider 現場待驗。
+- F06 已修：短 thread/pool 明確傳 actor/project scope，仍重檢 guard；長期 sampler 使用受限 principal，不固定 admin。
+- F07 已修：Rack/Topology/Terminal canonical sparse slot；刪 N2 後 N3 不重標、不被 stale topology 取代。Terminal/broadcast JS regressions 通過。
+- F08: real browser Copilot send/render uses textContent; normal and malicious replies pass.
+- F09: shared Vera PRE/START/POST health keeps WARN/UNKNOWN/PENDING and historical FAIL, fingerprint semantics. Route/report agreement targeted checks pass.
+- F10 已修：domain 每輪公平排隊，START 後 whole-run 時間限制，dispatch 緊鄰 budget/stop gate；零輪 NOT_EXERCISED，不冒充 COMPLETE。四階段 crash/reconciliation/no-replay 通過。
+- F11 已修 schema 1：stable project_id Profile、export/validate/diff/activate、完整 checker/policy/action 凍結；兩 Project 數量/mock AUX 不互相污染，舊 run 不變。新增 hook 與真實 selector 未宣稱支援。
+- F12: PA navigation first, Project header secondary Cycle link with stable project ID URL; reload/back/forward and rack-only selection browser cases pass.
+- F13 已修：L10/single/sparse/null ACTIVE、三態；安全 node edit、planned create/explicit probe、空槽/退役/新資產；SSH/IPMI 分離，憑證只顯示設定狀態。
+- F14 已修：keyed progress 保留 focus/details，啟動後收合 PRE；coverage、共享 domain 排除理由、未知結果 journal/核對入口及 403/409 回饋。
+- F15 已修：DB 權限過濾/pagination，增量 artifact index/ID lookup，execution/UI hash 分離，終態停止 status poll；Console 維持 bounded/cursor/完整下載。
+- F16 已修代表性桌面流程：保存 light/dark、visible-tab keyboard navigation；主要頁/六個 chassis tabs、Cycle wizard/run/Console 的 1366/1920 驗收。非所有 plugin 視覺認證。
+
+真實 process 回歸另修復 Terminal proxy 缺 `Path` import，以及舊 job 無 Profile snapshot 時 PRE 後的 `UnboundLocalError`。Terminal/KVM Web 硬中斷保留可查 reservation；實際 loopback bridge 硬中斷使 proxy 正常收尾，Web 存活。沒有以 heartbeat 到期解鎖。
+
+最後完整 integration **137 PASS**；新增多人競爭 **3 PASS** 另列；Next **109 PASS**、Vera **101 PASS / 14 SKIP**、broker **53 PASS**。Process/四階段 crash/桌面 Console 回歸通過。詳細結果與失敗紀錄見 [ACCEPTANCE.md](docs/ACCEPTANCE.md)，不加總 targeted reruns。操作盤點見 [UI_ACTION_INVENTORY.md](UI_ACTION_INVENTORY.md)，Profile 管理、provider 契約與展示流程見 [NATIVE_INTEGRATION.md](docs/NATIVE_INTEGRATION.md)。
+
+使用者補充已實作：每個入口一個「Cycle 驗證」按鈕，進入後勾單一/多個/全部 nodes，chassis 入口預設不勾。兩位使用者同 node 原子競爭只允許一個取得 reservation；另一個保存 BLOCKED、不 dispatch。不同獨立 nodes 可分開建任務；共用 controller/domain 仍互斥。
+
+**Local：已修改；Committed：否；Pushed：否；Deployed：否。** 本輪未授權發布，沒有 hardware PASS 宣告。
+
+
+## 已實作（前輪紀錄，非本輪全平台驗收）
 
 - Next 正式桌面 UI 與原生 `#/cycle` workspace；Rack／chassis／OS slot 入口。保留 Wistron 主題與既有3D資產，未套用整份 preview。
 - Stable project/rack/chassis/physical slot/installed node identity、可重跑的純 migration preview；刪N2不重編N3/N4，单node不collapse，ACTIVE不改run目標。
@@ -18,7 +49,7 @@
 固定版本與完整來源檔案列表見 [SOURCE_BASELINES.json](SOURCE_BASELINES.json)、[SOURCE_IMPORTS.json](SOURCE_IMPORTS.json)。
 Next來源原PROJECT_STATUS保存為 [歷史唯讀紀錄](docs/NEXT_SOURCE_STATUS.md)，不當成本輪成果。
 
-## 本輪驗收
+## 前輪驗收紀錄（不代表本輪完成）
 
 最終結果：integration完整99項通過，末次port修正4項針對性檢查通過（含1個新增案例）；Next109、Vera101、broker53通過；Vera14項平台限制跳過。
 
@@ -45,4 +76,4 @@ Desktop captures（全部synthetic）：
 
 ## 交付邊界
 
-Local implementation與離線驗收在此repo。Commit/push只送pa-cycle-lab的feature與default branch，實際SHA以Git紀錄為準。**Deployed：否；live hardware validation：未執行。** 本機loopback preview不是正式部署。
+Local implementation與離線驗收只在此repo。本輪尚未 commit/push；如另獲本次明確發布授權，唯一目的地仍是 pa-cycle-lab，不 force-push、不修改來源 repos。**Deployed：否；live hardware validation：未執行。** 本機loopback preview不是正式部署。

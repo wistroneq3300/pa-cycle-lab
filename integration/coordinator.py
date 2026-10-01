@@ -2,6 +2,8 @@
 import copy
 from contextlib import contextmanager
 import uuid
+import os
+import time
 from .targets import expand, public, inventory
 from .store import Conflict, fingerprint, scopes
 
@@ -30,6 +32,12 @@ def install(pa, store_getter):
                 if len(chassis)!=len(set(chassis)): raise Conflict('Duplicate chassis identity')
                 for name in set(saved) | set(pa.machines):
                     before, after = saved.get(name), pa.machines.get(name)
+                    from .legacy_observation import caller
+                    if caller.get() is not None and before!=after:
+                        from fastapi import HTTPException
+                        for target in (before,after):
+                            if target is not None and not pa._project_allowed(target.get('project'),'operate'):
+                                raise HTTPException(403,'Inventory project permission changed before commit')
                     if before is not None and (after is None or execution(before) != execution(after)):
                         store.assert_inventory_idle(db, machines=[name])
                         for t in expand(name,before): store.assert_scopes_idle(db,t)
@@ -41,12 +49,30 @@ def install(pa, store_getter):
 
 
 @contextmanager
-def session(store, targets, holder):
+def session(store, targets, holder, kind='input'):
     owner = 'session-' + uuid.uuid4().hex
-    with store.tx() as db:
-        store.reserve(db, owner, [s for t in targets for s in scopes(t)])
-    try:
-        yield owner
-    finally:
+    from contextlib import ExitStack
+    from .runner import process_lock
+    with ExitStack() as stack:
+        if kind=='input':stack.enter_context(process_lock(session_lock_path(store,owner)))
         with store.tx() as db:
-            db.execute('DELETE FROM locks WHERE owner=?',(owner,))
+            store.reserve(db, owner, [s for t in targets for s in scopes(t)])
+            record=dict(id=owner,holder=holder,targets=public(targets),state='OPEN',created_at=time.time(),owner_pid=os.getpid())
+            if kind=='input':store.input_session(owner,record)
+        try:yield owner
+        finally:
+            with store.tx() as db:
+                db.execute('DELETE FROM locks WHERE owner=?',(owner,))
+                if kind=='input':store.input_session(owner,dict(record,state='CLOSED',closed_at=time.time()))
+
+
+def session_lock_path(store,owner):
+    from pathlib import Path
+    return Path(store.path).parent/'runtime'/(owner+'.lock')
+
+
+def session_alive(store,owner):
+    from .runner import process_lock
+    try:
+        with process_lock(session_lock_path(store,owner)):return False
+    except (OSError,BlockingIOError):return True

@@ -8,8 +8,17 @@ async function retryInventoryLoad(button) {
   catch(error){showInventoryLoadError(error);}
 }
 function operationTarget(name) {
-  const m = machines.find(x => x.name === name) || {};
-  return {active_os: Number(m.active_os) || 1, os_ip: m.os_ip || '', bmc_ip: m.bmc_ip || ''};
+  const m = machines.find(x => x.name === name || x.os?.some(n => n.node_id === name)) || {};
+  const node = (m.os || []).find(n => n.node_id === name) ||
+    (m.active_os == null ? null : (m.os || []).find(n => n.slot === Number(m.active_os)));
+  return {active_os: node?.slot ?? null, os_ip: node?.ip || '', bmc_ip: node?.bmc_ip || '',
+    node_id: node?.node_id || null, expected_binding_revision: node?.expected_binding_revision || null};
+}
+function observationViewTarget(name) {
+  const m=machines.find(x=>x.name===name)||{};
+  // This key only rejects stale read responses; it never authorizes dispatch.
+  return {target:operationTarget(name),active_os:m.active_os??null,
+    os_ip:m.os_ip||'',bmc_ip:m.bmc_ip||'',os_port:m.os_port,bmc_port:m.bmc_port};
 }
 function operationTargetText(name) {
   const t = operationTarget(name);
@@ -33,7 +42,7 @@ function showPowerBatch() {
     {txt:'\u91cd\u8a66\u5931\u6557\u9805\u76ee', id:'batch-retry', fn:async()=>{
       const failed=job.rows.filter(r=>r.state==='failed');
       if (!failed.length || !await confirmUser(failed.map(r=>operationTargetText(r.name)).join('\n\n'))) return;
-      job.rows.forEach(r=>{if(r.state==='failed'){r.state='waiting';r.target=operationTarget(r.name);}});
+      job.rows.forEach(r=>{if(r.state==='failed'){r.state='waiting';}});
       job.cancel=false; job.running=true; showPowerBatch(); void executePowerBatch(job);
     }},
     {txt:'\u95dc\u9589', id:'batch-close', fn:closeDialog}
@@ -56,7 +65,8 @@ async function executePowerBatch(job) {
     if (job.cancel) {row.state='cancelled';continue;}
     row.state='sending';renderPowerBatch();
     try {
-      const result=await api(`/api/machine/${encodeURIComponent(row.name)}/power`,{method:'POST',body:JSON.stringify({on:job.kind==='on',expected_target:row.target})});
+      row.request ||= {method:'POST',body:JSON.stringify({on:job.kind==='on',expected_target:row.target})};
+      const result=await api(`/api/machine/${encodeURIComponent(row.name)}/power`,row.request);
       row.state=result.ok?'success':'failed';row.info=result.info||'';
     } catch(error) {row.state='failed';row.info=error.message;}
     renderPowerBatch();

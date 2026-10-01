@@ -30,6 +30,11 @@ def extract(file, names, scope):
     import node_identity
     scope.setdefault("node_identity",node_identity)
     tree = ast.parse((ROOT / file).read_text(encoding='utf-8-sig'))
+    if file == 'main.py':
+        scope.setdefault('os', os)
+        names = [*names, *(n for n in ('_machine_allowed', '_project_allowed', '_machine_candidate') if n not in names)]
+        if '_invalidate_machine_cache' not in names and '_invalidate_machine_cache' not in scope:
+            names = [*names, '_invalidate_machine_cache']
     nodes = []
     for n in tree.body:
         if isinstance(n, ast.FunctionDef) and n.name in names:

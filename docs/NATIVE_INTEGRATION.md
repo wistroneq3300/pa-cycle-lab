@@ -2,6 +2,18 @@
 
 唯一修改／push 目的地是 **pa-cycle-lab**。這不是向來源 Next 部署。資料模型和正式 static UI 來自 Next；設計 preview 沒有升格成正式 UI。
 
+## Platform regression contracts (local work in progress)
+
+- Manual requests identify `node_id`, `expected_binding_revision`, `idempotency_key`. Compatibility chassis URLs must refer to that exact node; no ACTIVE/first-node fallback. Node editing uses `expected_node_id` plus the binding hash. Label-only edits preserve ports; credential changes version the binding without hashing secret material.
+- `integration/enrollment.py` requires provider `approve_enrollment(actor, plan)` and project `enroll` permission. The public plan contains explicit endpoints/users/ports/fixed commands, never supplied passwords. Probes happen before mutation and only their exact bounded results can be consumed by legacy handlers. This is an integration interface; no field identity provider has been validated.
+- `integration/project_access.py` applies project checks before copied PA routes and filters lists before counts. Moves check both projects. Copilot run project scope also constrains tool calls. Short background work propagates only actor/scope, then checks provider and reservation again. Long-running telemetry uses a separate verified service principal with project observe permission and credential references.
+- Original Next `_machine_candidate` rules are shared by metadata adapters and Next editing. Specialized rack-specification/placement/CDU routes remain. Canonical connection updates require an explicit node/binding and update its connection plus selected parent mirror; this contract is still under full regression review.
+- The scheduler admits one round per domain, requeues fairly and enforces a whole-run hour budget at admission and next to dispatch. Recovery/POST already in flight finish. A runnable node never exercised prevents COMPLETE and is reported as NOT_EXERCISED with TIME_BUDGET_EXHAUSTED where applicable.
+- Artifact manifests use a SQLite stat-signature/hash index. Unchanged evidence is not rehashed; ID downloads query the index directly and still enforce private-file/path containment checks. Hashes are integrity aids, not tamper-proof signatures.
+- Execution hash excludes static UI and Vera report CSS/JS; UI build hash is stored separately. Runtime manifest inclusion checks remain enforced.
+- Project Cycle links carry stable project IDs in URLs. Cycle history follows PA management navigation; Rack selection does not select another Rack/L10. Progress cells update by key, PRE collapses after confirmation, terminal status polling stops. Console remains read-only and independent.
+
+
 ## 來源與適用性
 
 |來源|固定 SHA|用途|
@@ -98,3 +110,48 @@ Synthetic 支援 reboot/inband、reboot/outband(IPMI reset)、DC power_cycle、A
 6. 各階段故障、response lost、Worker crash 保留未知 scope；完成只讀reconciliation，不 blind retry。另行核實 shared action/SEL，再考慮 live capability。
 
 這份功能是 Cycle Stability Test，並非 Full NVIDIA Rack Qualification。
+# Project Profile administration (current local work)
+
+Profiles are administrator-owned JSON packages, activated against **stable project_id**, not a display name. Web clients can only read the active package and select its ID; they cannot submit commands. Use the isolated `CYCLE_INSTANCE` for all commands below. They do not contact hardware or modify inventory.
+
+```powershell
+$env:CYCLE_INSTANCE='data/platform-preview-20261001'
+.venv/Scripts/python.exe scripts/validation_profile.py export --file data/profile-a.json
+.venv/Scripts/python.exe scripts/validation_profile.py validate --file data/profile-a.json
+.venv/Scripts/python.exe scripts/validation_profile.py diff --file data/profile-a.json --project-id <stable-project-id>
+.venv/Scripts/python.exe scripts/validation_profile.py activate --file data/profile-a.json --project-id <stable-project-id>
+```
+
+Edit `expectations.<measurement>.value`, `mode` (`exact` / `minimum`) and `enabled` in that file. Zero is a numeric expectation; only `enabled:false` disables the count comparison. Count configuration does not disable identity, script trust, PCIe link, memory visibility or other safety checks. `nic` measures unique Vera MST BDFs, `nvme` unique controllers, and `bf4` unique VPD board serials. Their units cannot be relabelled as interchangeable physical device counts. The shared checker functions remain in `engine/vera_cycle/neutrino_config.sh`; configuration is injected at its explicit parameter marker, not substituted for the checker.
+
+`actions.<mode>:<channel>` contains literal argv, fixed executor/endpoint role, scope, timeout and recovery contract. The current adapters retain reboot, IPMI and standby-power executable contracts; shell operators, arbitrary executors and unsupported hooks are rejected. Schema 1 exposes `hooks:[]` and rejects additional hooks rather than pretending to execute them. A new adapter/hook requires versioned implementation and regression fixtures. Changing a command is not proof of its physical scope: non-default live actions additionally require `provider.verify_action_scope(job, target, action)` and all existing controller/domain/identity gates. There is no fake Redfish/PDU adapter.
+
+Activation validates the whole package and requires increasing revision. SQLite `validation_profiles` holds the active package; each new job atomically freezes the package, full checker, policy and content hash with its resource reservations. Existing jobs continue to use their saved package after activation. Read-only wizard details show version/source/count units/actions; the profile is not a browser command editor. The two-project regression runs the real Worker/NodeSession with different mock AUX argv and counts and checks old snapshots stay unchanged.
+
+# Independent normal observation
+
+`python run.py observe` runs a separate, single-controller service guarded by an OS process lock. It requires live mode plus a provider-issued `service_principal('telemetry')`, project `observe` permission and credential references. Synthetic mode never starts this transport. Each bounded CPU/OS sample reserves its canonical node/controller/domain, releases the DB transaction before SSH, and defers occupied scope. A service pass is sequential; the configured interval is a delay after the pass, not a per-node sampling SLA.
+
+Samples use node IDs in the existing telemetry schema. Machine and Rack queries use the same canonical nodes; parent legacy history is labelled unattributed and never guessed onto a slot. CPU/network/disk collection is connected. GPU sampling is opt-in through `capabilities.telemetry_gpu` (nvidia/amd); absent capability is NOT_CONFIGURED, not a GPU failure. GPU alerts run deterministically without an LLM in the sampler transaction. Persistent observation_status records attempted/collected time, binding revision, state and GPU state.
+
+On restart, only the dedicated observation OS-lock owner can retire interrupted read-only observation reservations; Cycle and input reservations remain untouched. The ownership/retention test uses the real OS lock and stops before collection; collection tests fake only Transport._connect. Passive collectors that were empty remain unsupported. Long-running Linux cadence, real provider and hardware sensors still require field acceptance. No live observer or production database was used for this round.
+
+## Provider actions and input-session recovery
+
+`authorize(actor, None, "navigate")` opens the application shell; it does not grant global data. Legacy global operations require explicit `global.read`/`global.operate`, the test library `library.read`, project reads `read`, mutations `operate`, enrollment `enroll`, control configuration `configure_control`, and recovery `reconcile`. Project lists are filtered before counts. Copilot tools inherit the requested project scope even when the caller can access another project. No provider means live stays closed.
+
+Input sessions are persisted in SQLite `input_sessions`, with holder, canonical targets, owner PID and OS lock. `GET /api/cycle/sessions` returns only sessions whose complete project scope the caller can read. `POST /api/cycle/sessions/{id}/reconcile` needs project reconcile permission, reviewed_hash, a review reason and `provider.verify_session_reconciliation(record)`. The OS lock must be free and the journal unchanged. The provider must verify no bridge/local subprocess remains; a dead Web heartbeat alone is insufficient. Synthetic Terminal/KVM hard-Web-death tests retain locks until this explicit review. A separate fake bridge process was killed through the actual Web proxy; the normal completed session closed and released its locks without killing Web. These do not establish BMC-vendor session teardown in the field.
+
+## Reproducible isolated desktop demo
+
+Use the isolated `data/platform-preview-20261001` inventory (32 synthetic chassis / 128 nodes), or generate a fresh folder with `scripts/native_demo.py` as documented in README. Set `CYCLE_INSTANCE` to that folder and `CYCLE_MODE=synthetic`; start `python run.py web --port 9188` and `python run.py runner` in separate processes. Do not start observe in synthetic mode.
+
+Open `http://127.0.0.1:9188/#/projects`, select L11 and the Project header's **Cycle 驗證**. Select chassis-01's four nodes, run PRE, review the immutable targets/scope/findings, confirm two inband reboot rounds. Expected synthetic evidence: eight node actions/eight POST, independent health and valid-cycle counters. Open/close Console, reload, change node filters, copy/download; the same durable run remains. For ordinary management, use the chassis OS Slots tab: planned node creation makes no connection; authorized probe is a separate action. Never use a live inventory for this demonstration.
+
+Screenshots for this round are under `docs/screenshots/platform-regression`; previous `native-cycle` images are historical. N2/N3 GPIO instability remains a user-reported hardware issue, not a software suppression rule.
+
+### Single entry and concurrent users
+
+Each Chassis/Nodes context has one **Cycle 驗證** entry. It opens the Project workspace, filters that chassis and leaves checkboxes unselected. Users may select one, several or all displayed nodes before PRE. Search changes preserve the current selection.
+
+SQLite admission reserves canonical nodes, endpoints, controllers and power/AUX domains atomically. Two verified callers selecting independent nodes can create separate jobs; a simultaneous duplicate-node request produces one CREATED reservation and one persisted BLOCKED attempt, with the occupying job reference and no power dispatch. Different nodes sharing a controller are conservatively exclusive because controller evidence/SEL can interfere. No unverified independent hardware mapping is inferred. Blocked requests do not automatically start later when locks clear; the operator reviews and creates a new request. Real caller identity/provider deployment remains a field gate.

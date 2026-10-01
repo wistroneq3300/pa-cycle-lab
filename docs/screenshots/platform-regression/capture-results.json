@@ -1,0 +1,290 @@
+[
+  {
+    "view": "dashboard",
+    "width": 1366,
+    "theme": "light",
+    "actualTheme": "light",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "projects",
+    "width": 1366,
+    "theme": "light",
+    "actualTheme": "light",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "rack",
+    "width": 1366,
+    "theme": "light",
+    "actualTheme": "light",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-overview",
+    "width": 1366,
+    "theme": "light",
+    "actualTheme": "light",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-hardware",
+    "width": 1366,
+    "theme": "light",
+    "actualTheme": "light",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-sensors",
+    "width": 1366,
+    "theme": "light",
+    "actualTheme": "light",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-telemetry",
+    "width": 1366,
+    "theme": "light",
+    "actualTheme": "light",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-tasks",
+    "width": 1366,
+    "theme": "light",
+    "actualTheme": "light",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-osslots",
+    "width": 1366,
+    "theme": "light",
+    "actualTheme": "light",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "dashboard",
+    "width": 1366,
+    "theme": "dark",
+    "actualTheme": "dark",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "projects",
+    "width": 1366,
+    "theme": "dark",
+    "actualTheme": "dark",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "rack",
+    "width": 1366,
+    "theme": "dark",
+    "actualTheme": "dark",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-overview",
+    "width": 1366,
+    "theme": "dark",
+    "actualTheme": "dark",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-hardware",
+    "width": 1366,
+    "theme": "dark",
+    "actualTheme": "dark",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-sensors",
+    "width": 1366,
+    "theme": "dark",
+    "actualTheme": "dark",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-telemetry",
+    "width": 1366,
+    "theme": "dark",
+    "actualTheme": "dark",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-tasks",
+    "width": 1366,
+    "theme": "dark",
+    "actualTheme": "dark",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-osslots",
+    "width": 1366,
+    "theme": "dark",
+    "actualTheme": "dark",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "dashboard",
+    "width": 1920,
+    "theme": "light",
+    "actualTheme": "light",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "projects",
+    "width": 1920,
+    "theme": "light",
+    "actualTheme": "light",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "rack",
+    "width": 1920,
+    "theme": "light",
+    "actualTheme": "light",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-overview",
+    "width": 1920,
+    "theme": "light",
+    "actualTheme": "light",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-hardware",
+    "width": 1920,
+    "theme": "light",
+    "actualTheme": "light",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-sensors",
+    "width": 1920,
+    "theme": "light",
+    "actualTheme": "light",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-telemetry",
+    "width": 1920,
+    "theme": "light",
+    "actualTheme": "light",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-tasks",
+    "width": 1920,
+    "theme": "light",
+    "actualTheme": "light",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-osslots",
+    "width": 1920,
+    "theme": "light",
+    "actualTheme": "light",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "dashboard",
+    "width": 1920,
+    "theme": "dark",
+    "actualTheme": "dark",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "projects",
+    "width": 1920,
+    "theme": "dark",
+    "actualTheme": "dark",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "rack",
+    "width": 1920,
+    "theme": "dark",
+    "actualTheme": "dark",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-overview",
+    "width": 1920,
+    "theme": "dark",
+    "actualTheme": "dark",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-hardware",
+    "width": 1920,
+    "theme": "dark",
+    "actualTheme": "dark",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-sensors",
+    "width": 1920,
+    "theme": "dark",
+    "actualTheme": "dark",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-telemetry",
+    "width": 1920,
+    "theme": "dark",
+    "actualTheme": "dark",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-tasks",
+    "width": 1920,
+    "theme": "dark",
+    "actualTheme": "dark",
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "view": "chassis-osslots",
+    "width": 1920,
+    "theme": "dark",
+    "actualTheme": "dark",
+    "overflow": false,
+    "errors": []
+  }
+]

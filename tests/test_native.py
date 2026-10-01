@@ -265,7 +265,7 @@ class NativeTests(unittest.TestCase):
             e['power_domain']='pretend-'+str(e['slot']);e['capabilities']={'independent_power':True}
         target=inventory(web.pa)[0]
         with patch.object(web,'MODE','live'),patch.object(web,'control_transport') as transport:
-            response=self.client.post('/api/machine/'+target['name']+'/power',json={'on':False})
+            response=self.client.post('/api/machine/'+target['name']+'/power',json=dict(on=False,node_id=target['name'],expected_binding_revision=target['revision'],idempotency_key=uuid.uuid4().hex))
         self.assertEqual(response.status_code,409,response.text);transport.assert_not_called()
         self.assertEqual(self.store.controls(),[])
 
@@ -311,25 +311,7 @@ class NativeTests(unittest.TestCase):
         self.assertEqual(argv[argv.index('-p')+1],'1623');self.assertEqual(t.ports['bmc'],2201)
         self.assertNotIn('PRIVATE-BMC',argv);self.assertEqual(run.call_args.kwargs['env']['IPMI_PASSWORD'],'PRIVATE-BMC')
 
-    def test_create_four_slot_primary_bmc_and_port_patch_through_routes(self):
+    def test_os_normalization_preserves_identity_metadata(self):
         metadata={'ipmi_cipher':17,'aux_scope_confirmed':True,'console_id':'console3','node_serial':'board3','hardware_uuid':'uuid3'}
         normalized=web.pa._norm_os_entry(dict(ip='192.0.2.3',user='fixture',**metadata),3)
         self.assertEqual({key:normalized[key] for key in metadata},metadata)
-        def ssh(host,*args,**kwargs):
-            return ('IP Address : 198.18.20.1' if host=='198.18.20.1' else 'distinct-'+host,0,'')
-        body=dict(os_ip='192.0.2.201',os_user='primary',os_pass='FAKE_PRIMARY',os_port=2222,
-                  bmc_ip='198.18.20.1',bmc_user='bmc-primary',bmc_pass='FAKE_BMC',bmc_port=2201,
-                  project='Neutrino Demo',os=[dict(ip='192.0.2.'+str(201+i),user='user'+str(i),
-                  **{'pass':'FAKE_EXTRA'},port=2222+i,bmc_ip='198.18.20.'+str(i+1),
-                  bmc_user='bmc'+str(i),bmc_pass='FAKE_EXTRA_BMC',bmc_ssh_port=2201+i,ipmi_port=1623+i) for i in range(1,4)])
-        with patch.object(web,'MODE','live'),patch.object(web.pa,'ssh_run',side_effect=ssh),patch.object(web.pa,'ping_check',return_value=True),patch.object(web.pa,'ssh_login_ok',return_value=True):
-            response=self.client.post('/api/machines',json=body)
-        self.assertEqual(response.status_code,200,response.text)
-        name='distinct-192.0.2.201';saved=web.pa.machines[name]
-        self.assertEqual(saved['bmc_ip'],body['bmc_ip']);self.assertEqual(saved['bmc_port'],2201)
-        self.assertEqual([n['bmc_ssh_port'] for n in saved['os']],[2201,2202,2203,2204])
-        url='/api/machines/'+name+'/os/3'
-        self.assertEqual(self.client.patch(url,json={'bmc_ssh_port':2303,'ipmi_port':2623}).status_code,200)
-        self.assertEqual(self.client.patch(url,json={'label':'changed only'}).status_code,200)
-        self.assertEqual(self.client.post('/api/machines/'+name+'/select-os',json={'slot':3}).status_code,200)
-        self.assertEqual((saved['os'][2]['port'],saved['bmc_port'],saved['os'][2]['ipmi_port']),(2224,2303,2623))

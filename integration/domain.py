@@ -54,6 +54,9 @@ class CoordinatedSession(NodeSession):
             return result
 
     def dispatch(self, record, label, role, cmd, sudo=False, timeout=30):
+        if label=='cycle_command' and getattr(self,'profile_snapshot',None):
+            from .profiles import action
+            role,cmd,sudo,timeout=action(self.profile_snapshot,self.options.cycle_mode,self.options.channel)
         d = self.domain
         shared = d is not None and len(d.sessions) > 1
         if shared:
@@ -69,9 +72,10 @@ class CoordinatedSession(NodeSession):
             # arriving while the durable intent was being written.
             original_command = self.command
             def guarded_command(*args, **kwargs):
-                if self.store.get(self.job_id)['stop_requested']:
+                allowed=getattr(d,'dispatch_allowed',lambda:True)
+                if not allowed() or self.store.get(self.job_id)['stop_requested']:
                     self.store.action_result(action_id, 'NOT_ISSUED')
-                    raise Conflict('Stop requested before hardware dispatch')
+                    raise Conflict('Stop requested or whole-run time budget exhausted before hardware dispatch')
                 return original_command(*args, **kwargs)
             self.command = guarded_command
             try:

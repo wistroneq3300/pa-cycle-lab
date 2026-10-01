@@ -25,6 +25,13 @@ def extract(file, names, scope):
     import node_identity
     scope.setdefault("node_identity",node_identity)
     tree = ast.parse((ROOT / file).read_text(encoding='utf-8'))
+    if file == 'main.py':
+        scope.setdefault('os', os)
+        names = [*names, *(n for n in ('_machine_allowed', '_project_allowed', '_machine_candidate', '_connection_node', '_os_conflict', '_is_masked') if n not in names)]
+        if '_invalidate_machine_cache' not in names and '_invalidate_machine_cache' not in scope:
+            names = [*names, '_invalidate_machine_cache']
+    if file == 'main.py' and '_background_target' not in names:
+        names = [*names, '_background_target']
     nodes = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in names]
     assert len(nodes) == len(names)
     for n in nodes:
@@ -41,6 +48,9 @@ class Operations(unittest.TestCase):
                       bmc_ip='bmc1', bmc_user='root', bmc_pass='secretB', os=[
                           dict(slot=1, ip='old1', user='user1', **{'pass':'secret1'}, bmc_ip='bmc1'),
                           dict(slot=2, os_hostname='node', ip='old2', user='user2', **{'pass':'secret2'})])
+        import node_identity
+        self.m.update(node_identity.canonical(self.m))
+        self.m['os'][1]['bmc_hostname']='node'
         self.s = dict(machines={'node':self.m}, copy=copy, json=json, os=os, time=time,
                       telemetry_core=SimpleNamespace(kind_of=lambda m,n='':m.get('mgx_type','server')),
                       HTTPException=ApiError, _DATA_LOCK=threading.RLock(), ping_check=lambda *a, **k:True,
@@ -48,6 +58,10 @@ class Operations(unittest.TestCase):
         extract('main.py', ['_sync_active_os','_invalidate_machine_cache','_bmc_safe','_mask_os_list','_commit_connection',
                 'machine_delete_os','change_os_ip','change_bmc_ip','probe_bmc','_reboot_machine',
                 '_operation_target'], self.s)
+
+    def connection_body(self,**values):
+        e=self.m['os'][1]
+        return SimpleNamespace(expected_node_id=e['node_id'],expected_binding_revision=self.s['node_identity'].binding(e),**values)
 
     def test_missing_paired_bmc_is_cleared(self):
         self.s['_sync_active_os'](self.m)
@@ -63,7 +77,7 @@ class Operations(unittest.TestCase):
 
     def test_ip_changes_survive_resync_and_never_return_passwords(self):
         for fn,field,value in [('change_os_ip','new_os_ip','new2'),('change_bmc_ip','new_bmc_ip','newB')]:
-            result=self.s[fn]('node',SimpleNamespace(**{field:value},os_user='user2',os_pass='secret2',os_port=22))
+            result=self.s[fn]('node',self.connection_body(**{field:value},os_user='user2',os_pass='secret2',os_port=22,bmc_user='root',bmc_pass='secretB',bmc_ssh_port=22))
             self.assertTrue(result['ok'])
             self.assertNotIn('secret',json.dumps(result))
         self.s['_sync_active_os'](self.m)
@@ -104,14 +118,14 @@ class Operations(unittest.TestCase):
         before=copy.deepcopy(self.m)
         for password in ['', '****']:
             with self.assertRaises(ApiError):
-                self.s['change_os_ip']('node',SimpleNamespace(new_os_ip='new2',os_user='user2',os_pass=password))
+                self.s['change_os_ip']('node',self.connection_body(new_os_ip='new2',os_user='user2',os_pass=password))
         self.s['ping_check'].assert_not_called()
         self.s['ssh_run'].assert_not_called()
         self.s['_save_data'].assert_not_called()
         self.assertEqual(self.m,before)
 
     def test_changed_ip_saves_explicit_connection_to_active_slot(self):
-        body=SimpleNamespace(new_os_ip='new2',os_user='manual',os_pass='explicit',os_port=2222)
+        body=self.connection_body(new_os_ip='new2',os_user='manual',os_pass='explicit',os_port=2222)
         self.assertTrue(self.s['change_os_ip']('node',body)['ok'])
         self.assertEqual(self.s['ssh_run'].call_args.args[:4],('new2','manual','explicit',2222))
         self.s['_sync_active_os'](self.m)
@@ -121,12 +135,12 @@ class Operations(unittest.TestCase):
     def test_changed_ip_hostname_failure_preserves_connection(self):
         before=copy.deepcopy(self.m)
         self.s['ssh_run'].return_value=('other',0,'')
-        self.assertFalse(self.s['change_os_ip']('node',SimpleNamespace(new_os_ip='new2',os_user='manual',os_pass='explicit',os_port=22))['ok'])
+        self.assertFalse(self.s['change_os_ip']('node',self.connection_body(new_os_ip='new2',os_user='manual',os_pass='explicit',os_port=22))['ok'])
         self.assertEqual(self.m,before)
         self.s['_save_data'].assert_not_called()
 
     def test_unchanged_ip_needs_no_credentials_or_network(self):
-        self.assertFalse(self.s['change_os_ip']('node',SimpleNamespace(new_os_ip='old2'))['changed'])
+        self.assertFalse(self.s['change_os_ip']('node',self.connection_body(new_os_ip='old2'))['changed'])
         self.s['ssh_run'].assert_not_called()
 
     def test_refused_reboot_is_not_success(self):
@@ -158,9 +172,10 @@ class Operations(unittest.TestCase):
         member=scope['is_rack_member']
         base=dict(project='Rack',level='rack')
         self.assertFalse(member(base,'rack'))
-        self.assertTrue(member(dict(base,rack_u=4),'rack'))
-        self.assertTrue(member(dict(base,rack_mount='external',mgx_type='cdu'),'rack'))
-        self.assertFalse(member(dict(base,rack_u=1,mgx_type='blanking'),'rack'))
+        self.assertFalse(member(dict(base,rack_u=4),'rack'))  # Distinct authorized Project.
+        self.assertTrue(member(dict(base,rack_u=4),'Rack'))
+        self.assertTrue(member(dict(base,rack_mount='external',mgx_type='cdu'),'Rack'))
+        self.assertFalse(member(dict(base,rack_u=1,mgx_type='blanking'),'Rack'))
 
     def test_secret_cache_uses_elapsed_time(self):
         scope={}

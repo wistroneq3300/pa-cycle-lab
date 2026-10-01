@@ -9,7 +9,7 @@
 .pd-os-intro { margin-bottom: 16px; font-size: 13px; line-height: 1.6; }
 .pd-os-intro p { margin: 4px 0; }
 .pd-os-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; table-layout: fixed; }
-.pd-os-table-wrap { overflow-x: auto; margin-bottom: 16px; min-width: 1180px; }
+.pd-os-table-wrap { overflow-x: auto; margin-bottom: 16px; min-width: 0; max-width: 100%; }
 .pd-os-table th, .pd-os-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid rgba(148,163,184,.12); font-size: 13px; overflow: hidden; }
 .pd-os-table th { color: var(--p-muted, #94a3b8); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .4px; position: sticky; top: 0; background: var(--p-panel, #111b27); }
 .pd-os-row-active { background: rgba(34,197,94,.06); }
@@ -129,3 +129,10 @@
 @media(max-width:1100px){.pd-workspace .pd-inventory-summary.pd-inventory-reported{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:760px){.pd-workspace .pd-inventory-summary.pd-inventory-reported{grid-template-columns:repeat(2,minmax(0,1fr))}.pd-workspace .pd-hardware-stage.pd-neutral-chassis{width:65%;right:-15%}}
 @media(prefers-reduced-motion:reduce){.pd-workspace .pd-neutral-chassis svg{transform:none!important;transition:none!important}}
+
+.pd-node-edit { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 12px; }
+.pd-node-edit label { display: grid; gap: 6px; }
+.pd-node-edit [role="status"] { grid-column: 1 / -1; white-space: normal; }
+
+.pd-os-table { min-width: 1180px; }
+.pd-os-manage [data-node-editor] { padding: 12px; border: 1px solid var(--border); margin-bottom: 16px; }

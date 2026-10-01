@@ -22,7 +22,10 @@ class EquipmentRegression(unittest.TestCase):
         self.machine(mgx_type='server',os=[{'slot':1,'ip':'192.0.2.1','bmc_ip':'192.0.2.2','bmc_pass':'first'},
                     {'slot':2,'ip':'192.0.2.3','bmc_ip':'192.0.2.4','bmc_pass':'second'}],active_os=2)
         self.s['_sync_active_os'](self.s['machines']['node'])
-        self.s['edit_machine']('node',{'bmc_ip':'192.0.2.40','bmc_user':'changed','bmc_pass':'new-password'})
+        m=self.s['node_identity'].canonical(self.s['machines']['node']);self.s['machines']['node']=m
+        node=m['os'][1]
+        self.s['edit_machine']('node',{'bmc_ip':'192.0.2.40','bmc_user':'changed','bmc_pass':'new-password',
+            'expected_node_id':node['node_id'],'expected_binding_revision':self.s['node_identity'].binding(node)})
         m=self.s['machines']['node']
         for active in [1,2]:
             m['active_os']=active;self.s['_sync_active_os'](m)

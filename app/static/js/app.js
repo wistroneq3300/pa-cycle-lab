@@ -8,10 +8,10 @@ async function confirmUser(message) {
 "use strict";
 /* Wistron PA Server Manager - frontend */
 const NAV_ITEMS = [
-  {id:"cycle",icon:"↻",label:"Cycle 驗證",group:"驗證"},
   { id: "dashboard", icon: "🏠", label: "首頁 / Dashboard", group: "總覽" },
   { id: "projects",  icon: "🖘", label: "System Manager", group: "管理" },
   { id: "rack",      icon: "🗄", label: "Rack Manager", group: "管理" },
+  {id:"cycle",icon:"↻",label:"Cycle 執行紀錄",group:"驗證"},
 ];
 const TITLES = { cycle:"Cycle 驗證", dashboard: "首頁 / Dashboard", projects: "System Manager", rack: "Rack Manager", machine: "單機詳情" };
 const RENDERERS = { cycle:()=>window.CycleWorkspace.shell(), dashboard: pageDashboard, projects: pageProjects, rack: pageRack, machine: pageMachine };
@@ -40,10 +40,27 @@ async function api(path, options) {
   options = options || {};
   // 停用瀏覽器 HTTP 快取：確保新增/刪除/重新掃描後一定拿到伺服器最新資料，不需 Ctrl+Shift+R
   if (!("cache" in options)) options.cache = "no-store";
+  const metadata = path.match(/^\/api\/machines\/([^/]+)$/);
+  if (metadata && options.method === 'PATCH' && options.body) {
+    const body=JSON.parse(options.body);
+    if (['os_ip','os_user','os_pass','os_port','bmc_ip','bmc_user','bmc_pass','bmc_port','ipmi_port'].some(k=>k in body)) {
+      const target=operationTarget(decodeURIComponent(metadata[1]));
+      if (target.node_id) {
+        body.expected_node_id=body.expected_node_id||target.node_id;
+        body.expected_binding_revision=body.expected_binding_revision||target.expected_binding_revision;
+        options.body=JSON.stringify(body);
+      }
+    }
+  }
   const operation = path.match(/^\/api\/machine\/([^/]+)\/(power|reboot|aux)$/);
   if (operation && options.method === "POST") {
     const body = options.body ? JSON.parse(options.body) : {};
     if (!body.expected_target) body.expected_target = operationTarget(decodeURIComponent(operation[1]));
+    const target = body.expected_target;
+    if (!target.node_id || !target.expected_binding_revision) throw new Error("Select a configured node and refresh its binding before control");
+    body.node_id = body.node_id || target.node_id;
+    body.expected_binding_revision = body.expected_binding_revision || target.expected_binding_revision;
+    body.idempotency_key = body.idempotency_key || crypto.randomUUID();
     options.headers = {...options.headers, "Content-Type": "application/json"};
     options.body = JSON.stringify(body);
   }
@@ -345,14 +362,21 @@ function rackCopilotHtml() {
       </div>
     </div>`;
 }
-function rackCopAppend(role, html, raw) {
+function rackCopAppend(role, text) {
   const box = document.getElementById("rackcop-box");
   if (!box) return;
-  const av = role === "user" ? "🧑" : "🤖";
-  box.insertAdjacentHTML("beforeend", `<div class="cop-msg ${role}">
-    <span class="cop-avatar ${role}">${av}</span>
-    <div class="cop-bubble ${role}">${raw ? html : esc(html)}</div>
-  </div>`);
+  const kind = role === "user" ? "user" : "ai";
+  const row = document.createElement("div");
+  row.className = `cop-msg ${kind}`;
+  const avatar = document.createElement("span");
+  avatar.className = `cop-avatar ${kind}`;
+  avatar.textContent = kind === "user" ? "🧑" : "🤖";
+  const bubble = document.createElement("div");
+  bubble.className = `cop-bubble ${kind}`;
+  bubble.style.whiteSpace = "pre-wrap";
+  bubble.textContent = String(text ?? "");
+  row.append(avatar, bubble);
+  box.append(row);
   box.scrollTop = box.scrollHeight;
 }
 let _rackCopBusy = false;
@@ -407,7 +431,7 @@ async function rackCopSend() {
       else throw e;
     }
     rackCopTyping(false);
-    if (j.ok) rackCopAppend("ai", j.reply, true);
+    if (j.ok) rackCopAppend("ai", j.reply);
     else rackCopAppend("ai", `⨠ ${j.error || "呼叫失敗"}`);
   } catch (e) {
     rackCopTyping(false);
@@ -496,7 +520,7 @@ function rackBulkDialog(kind) {
   racks = racks.filter(m => (m.os_ip || m.bmc_ip) && mgxTypeOf(m) !== "blanking");
   if (kind === "on" || kind === "off") racks = racks.filter(m=>equipmentCanPower(m,kind==="on"));
   if (!racks.length) return notifyUser("此專案沒有可控制（具 OS/BMC IP）的整櫃機台");
-  const mode = kind === "on" ? "開機" : kind === "off" ? "關機" : kind === "reboot" ? "Reboot" : "AUX / AC cycle";
+  const mode = kind === "on" ? "開機" : kind === "off" ? "關機" : kind === "reboot" ? "Reboot" : "AUX cycle";
   const icon = kind === "on" || kind === "off" ? "⏻" : kind === "reboot" ? "⟳" : "⚡";
   const rows = racks.map(m => {
     const info = mgxInfo(m);
@@ -536,7 +560,7 @@ function racpSetAll(v) {
 }
 // 依 kind 對多台依序送出控制指令
 async function rackBulkRun(kind, names) {
-  const label = kind === "on" ? "開機" : kind === "off" ? "關機" : kind === "reboot" ? "Reboot" : "AUX / AC cycle";
+  const label = kind === "on" ? "開機" : kind === "off" ? "關機" : kind === "reboot" ? "Reboot" : "AUX cycle";
   // reboot / aux 尚未接上真實指令，目前只做多選 UI 占位，不送出控制動作
   if (kind === "reboot" || kind === "aux") {
     const namesStr = names.map(n => "\u00b7 " + n).join("\n");
@@ -567,11 +591,11 @@ async function singlePower(name, on) {
   await rackDoPower(name, on ? "poweron" : "poweroff");
 }
 async function auxCycle(name) {
-  if (!await confirmUser(`確定要對「${name}」執行 AUX / AC cycle（${name} 完整斷電重上電）嗎？`)) return;
+  if (!await confirmUser(`確定要對「${name}」執行 AUX cycle（${name} 影響範圍需由已驗證的 power mapping 確認）嗎？`)) return;
   try {
     const r = await api(`/api/machine/${encodeURIComponent(name)}/aux`, { method: "POST" });
     setView("rack");
-    setTimeout(() => notifyUser(`${name} ${r.ok ? "AUX/AC cycle 已送出 ⚡" : "操作失敗：" + (r.info||"")}`), 200);
+    setTimeout(() => notifyUser(`${name} ${r.ok ? "AUX cycle 已送出 ⚡" : "操作失敗：" + (r.info||"")}`), 200);
   } catch (e) {
     notifyUser("操作失敗：" + e.message);
   }
@@ -606,7 +630,7 @@ function machControlDialog(name) {
         <button class="btn btn-good" ${hasPower?"":"disabled"} onclick="singlePower('${esc(name)}',true)">⏻ 開機</button>
         <button class="btn btn-good" ${hasPower?"":"disabled"} onclick="singlePower('${esc(name)}',false)">⏻ 關機</button>
         <button class="btn btn-warn" ${hasPower?"":"disabled"} onclick="machineReboot('${esc(name)}')">⟳ Reboot</button>
-        <button class="btn" ${hasPower?"":"disabled"} onclick="auxCycle('${esc(name)}')">⚡ AUX / AC cycle</button>
+        <button class="btn" ${hasPower?"":"disabled"} onclick="auxCycle('${esc(name)}')">⚡ AUX cycle</button>
       </div>
       <p style="font-size:11px;color:var(--text-faint)">點上方按鈕即直接執行（會先彈確認）。開關機一律以 <code class="mono">-C 17</code> 送出。</p>
     </div>`,
@@ -1264,7 +1288,7 @@ function devicesHtml(members, pinged) {
           <button class="btn small" title="機櫃位置" onclick="rackMoveDialog('${esc(m.name)}')">${mgxTypeOf(m)==='cdu'?'CDU \u5b89\u88dd\u8a2d\u5b9a':'⇅'}</button>
           ${!equipmentIsServer(m) ? equipmentActionsHtml(m) : ""}
           ${equipmentIsServer(m) && equipmentCanConnect(m) ? `<button class="btn small" onclick="openTerm('${esc(m.name)}')">▶ Terminal</button>` : ""}
-          ${equipmentCanPower(m) ? `<button class="btn small" onclick="machControlDialog('${esc(m.name)}')" title="開關機 / Reboot / AC cycle">⏻ 開關機</button>` : ""}
+          ${equipmentCanPower(m) ? `<button class="btn small" onclick="machControlDialog('${esc(m.name)}')" title="開關機 / Reboot / AUX cycle">⏻ 開關機</button>` : ""}
           ${rackIsExternal(m) ? "" : `<button class="btn small" title="從機櫃拿掉（System Manager 的 L11 不受影響）" onclick="rackUnmount('${esc(m.name)}')">刪除</button>`}
         </td>
       </tr>`;
@@ -1859,6 +1883,7 @@ function renderProjectsList() {
             ${p.desc ? `<span class="proj-card-desc">${esc(p.desc)}</span>` : ""}
           </div>
           <span class="spacer"></span>
+          ${p.project_id ? `<a class="btn small" data-cycle-project-id="${esc(p.project_id)}" href="#/cycle/new/${encodeURIComponent(p.project_id)}">Cycle 驗證</a>` : ''}
           ${kvmCands.length ? `<button class="btn small proj-kvm-btn" onclick="event.stopPropagation();openKvmBroadcast && openKvmBroadcast('${esc(p.name)}')" title="支援 OpenBMC / OneTree 等 BMC 同步遠端">📺 同步 KVM</button>` : ""}
           <button class="btn small proj-collapse-btn" onclick="event.stopPropagation();toggleProject('${esc(p.name)}')" title="${collapsed ? "展開此專案" : "收合此專案（隱藏機台清單）"}">${collapsed ? "▼ 展開" : "▲ 收合"}</button>
         </div>
@@ -2353,7 +2378,10 @@ const aiTelCache = {};
 async function telAnalyze(name, minutes) {
   const box = $("tel-ai");
   if (!box) return;
-  const key = `${name}|${minutes}`;
+  const target=JSON.stringify(observationViewTarget(name));
+  const node=operationTarget(name).node_id;
+  const key = `${name}|${minutes}|${target}`;
+  const current=()=>_activeMachine===name && target===JSON.stringify(observationViewTarget(name)) && box.isConnected && box.dataset.k===key;
   if (aiTelCache[key] && box.dataset.k === key) {
     box.innerHTML = aiTelCache[key]; return;
   }
@@ -2361,10 +2389,11 @@ async function telAnalyze(name, minutes) {
   box.dataset.k = key;
   let d;
   try {
-    d = await apiWithTimeout(`/api/machine/${encodeURIComponent(name)}/telemetry/analyze?minutes=${minutes}`, 12000);
+    d = await apiWithTimeout(`/api/machine/${encodeURIComponent(name)}/telemetry/analyze?minutes=${minutes}${node?`&node_id=${encodeURIComponent(node)}`:""}`, 12000);
   } catch (e) {
-    box.innerHTML = `<span class="hint">🤖 趨勢分析稍後再試（AI 忙碌）</span>`; return;
+    if(current()) box.innerHTML = `<span class="hint">🤖 趨勢分析稍後再試（AI 忙碌）</span>`; return;
   }
+  if (!current()) return;
   if (d.error) { box.innerHTML = `<span class="hint">🤖 ${esc(d.error)}</span>`; return; }
   const html = `${esc(d.analysis || d.summary || "")}`;
   aiTelCache[key] = html;
@@ -2374,12 +2403,16 @@ async function telAnalyze(name, minutes) {
 async function loadTelemetry() {
   const name = _activeMachine;
   if (!name) return;
+  const target=JSON.stringify(observationViewTarget(name));
+  const node=operationTarget(name).node_id;
   const win = $("tel-window"); if (win) win.textContent = telWindowLabel(telMinutes);
   telAnalyze(name, telMinutes);   // 背景觸發簡短 AI 分析（不阻塞 telemetry 繪圖）
   let d;
   try {
-    d = await api(`/api/machine/${encodeURIComponent(name)}/telemetry?minutes=${telMinutes}`);
+    d = await api(`/api/machine/${encodeURIComponent(name)}/telemetry?minutes=${telMinutes}${node?`&node_id=${encodeURIComponent(node)}`:""}`);
   } catch (e) { return; }
+  if (_activeMachine!==name || target!==JSON.stringify(observationViewTarget(name))) return;
+  if(win) win.textContent=telWindowLabel(telMinutes)+(d.history_source==="legacy-machine-unattributed"?" · 舊 machine 歷史／未確認 node 歸屬":" · Node "+(operationTarget(name).active_os??"—"))+" · 採集 "+(d.observation?.state||"UNKNOWN");
   const os = d.os || {}, gpu = d.gpu || {};
   const oarr = os.os || [];
   const oLabels = oarr.map(r => telT(r.ts));
@@ -2504,8 +2537,8 @@ const machineSensorRequests = {};
 async function machineLoadSensors(name, refresh = false) {
   const request = (machineSensorRequests[name] || 0) + 1;
   machineSensorRequests[name] = request;
-  const target = JSON.stringify(operationTarget(name));
-  const current = () => machineSensorRequests[name] === request && _activeMachine === name && state.view === "machine" && target === JSON.stringify(operationTarget(name));
+  const target = JSON.stringify(observationViewTarget(name));
+  const current = () => machineSensorRequests[name] === request && _activeMachine === name && state.view === "machine" && target === JSON.stringify(observationViewTarget(name));
   const poll = async () => {
     if (!current()) return;
     let d;
@@ -2630,12 +2663,12 @@ const machineDetailRequests = {};
 async function machineLoadDetail(name, refresh = false) {
   const request = (machineDetailRequests[name] || 0) + 1;
   machineDetailRequests[name] = request;
-  const target = JSON.stringify(operationTarget(name));
+  const target = JSON.stringify(observationViewTarget(name));
   let result;
   try {
     result = await api(`/api/machine/${encodeURIComponent(name)}/detail${refresh ? "?refresh=1" : ""}`);
   } catch (e) { result = { error: e.message }; }
-  if (machineDetailRequests[name] !== request || target !== JSON.stringify(operationTarget(name))) return;
+  if (machineDetailRequests[name] !== request || target !== JSON.stringify(observationViewTarget(name))) return;
   machineDetailCache[name] = result;
   if (_activeMachine === name && state.view === "machine") {
     setView("machine");
@@ -2870,7 +2903,7 @@ function pageMachine() {
           <button class="btn small btn-good" onclick="machinePower('${esc(name)}',true)">⏻ 開機</button>
           <button class="btn small btn-danger" onclick="machinePower('${esc(name)}',false)">⏻ 關機</button>
           <button class="btn small btn-warn" onclick="machineRebootDetail('${esc(name)}')">⟳ Reboot</button>
-          <button class="btn small" onclick="machineAuxDetail('${esc(name)}')">⚡ AC cycle</button>
+          <button class="btn small" onclick="machineAuxDetail('${esc(name)}')">⚡ AUX cycle</button>
         </div>
         ` : ""}
       </div>
@@ -3021,10 +3054,10 @@ async function machineRebootDetail(name) {
   } catch (e) { notifyUser("操作失敗：" + e.message); }
 }
 async function machineAuxDetail(name) {
-  if (!await confirmUser(`${operationTargetText(name)}\n\n確定要對「${name}」執行 AC cycle（完整斷電重上電）嗎？`)) return;
+  if (!await confirmUser(`${operationTargetText(name)}\n\n確定要對「${name}」執行 AUX cycle（影響範圍需由已驗證的 power mapping 確認）嗎？`)) return;
   try {
     const r = await api(`/api/machine/${encodeURIComponent(name)}/aux`, { method: "POST" });
-    setTimeout(() => notifyUser(`${name} ${r.ok ? "AC cycle 已送出 ⚡" : "操作失敗：" + (r.info||"")}`), 250);
+    setTimeout(() => notifyUser(`${name} ${r.ok ? "AUX cycle 已送出 ⚡" : "操作失敗：" + (r.info||"")}`), 250);
   } catch (e) { notifyUser("操作失敗：" + e.message); }
 }
 
@@ -3535,7 +3568,7 @@ const AssignResultWin = (() => {
 // [AI AGENT 已停用]   reboot: "Reboot（OS 重新開機）",
 // [AI AGENT 已停用]   poweron: "開機（電源開啟）",
 // [AI AGENT 已停用]   poweroff: "關機（電源關閉）",
-// [AI AGENT 已停用]   aux: "AC cycle（完整斷電重上電）",
+// [AI AGENT 已停用]   aux: "AUX cycle（影響範圍需由已驗證的 power mapping 確認）",
 // [AI AGENT 已停用] };
 // [AI AGENT 已停用] function openMachineAgent(name) {
 // [AI AGENT 已停用]   _agentSession.messages = [];
@@ -3546,7 +3579,7 @@ const AssignResultWin = (() => {
 // [AI AGENT 已停用]       <div class="agent-box" id="agent-box">
 // [AI AGENT 已停用]         <div class="cop-msg ai">
 // [AI AGENT 已停用]           <span class="cop-avatar ai">🤖</span>
-// [AI AGENT 已停用]           <div class="cop-bubble ai">👋 我是這台機器的 AI Agent。你可以問我〈狀態 / 診斷〉，或請我〈重開機 / 開關機 / AC cycle〉。任何會改變狀態的操作，我會先提出提案，由你確認後才真的執行。</div>
+// [AI AGENT 已停用]           <div class="cop-bubble ai">👋 我是這台機器的 AI Agent。你可以問我〈狀態 / 診斷〉，或請我〈重開機 / 開關機 / AUX cycle〉。任何會改變狀態的操作，我會先提出提案，由你確認後才真的執行。</div>
 // [AI AGENT 已停用]         </div>
 // [AI AGENT 已停用]       </div>
 // [AI AGENT 已停用]       <div class="agent-input">
@@ -3662,7 +3695,7 @@ const AssignResultWin = (() => {
 // [AI AGENT 已停用]       method: "POST", headers: { "Content-Type": "application/json" },
 // [AI AGENT 已停用]       body: JSON.stringify({ action }),
 // [AI AGENT 已停用]     });
-// [AI AGENT 已停用]     const okText = (action === "reboot" ? "已送出 reboot" : action === "aux" ? "AC cycle 已送出" : action === "poweron" ? "已開機" : "已關機");
+// [AI AGENT 已停用]     const okText = (action === "reboot" ? "已送出 reboot" : action === "aux" ? "AUX cycle 已送出" : action === "poweron" ? "已開機" : "已關機");
 // [AI AGENT 已停用]     agentAppend("ai", r.ok
 // [AI AGENT 已停用]       ? `✅ <b>${okText}</b><br><span class="hint">${esc(r.info || "")}</span>`
 // [AI AGENT 已停用]       : `❌ 操作失敗：${esc(r.info || "")}`);
@@ -3745,7 +3778,7 @@ async function probeBmc() {
     const d = await api("/api/machines/probe-bmc", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ os_ip, os_user, os_pass, os_port: parseInt($("f-os-port").value) || 22 }),
+      body: JSON.stringify({ project:$("f-project").value, os_ip, os_user, os_pass, os_port: parseInt($("f-os-port").value) || 22 }),
     });
     if (d.ok) {
       $("f-bmc-ip").value = d.bmc_ip;
@@ -4059,20 +4092,20 @@ function openTerm(name) {
     (m.bmc_ip && m.bmc_user && m.bmc_pass) ? { host: m.bmc_ip, user: m.bmc_user, pass: m.bmc_pass, port: (m.bmc_port && m.bmc_port !== 623) ? m.bmc_port : 22 } : null);
 }
 // ⚙ 設定：變更 OS IP / BMC IP（各自獨立，未更動的欄位後端不會動）。
-// OS IP 需 ping 通 + hostname 相符；BMC IP 只要 ping 通即可。
+// Endpoint edits bind the node/revision shown when the dialog opens.
 function changeOsIp(name) {
   const equipment=machines.find(m=>m.name===name);
   if (equipment && !equipmentIsServer(equipment)) return equipmentIpDialog(name);
   const m = machines.find(x => x.name === name);
   if (!m) return;
+  const editTarget = {...operationTarget(name)};
   const curOs = m.os_ip || "";
   const curBmc = m.bmc_ip || "";
   showDialog(`⚙ 設定 — ${esc(name)}`, `
     <div class="rm-modal-body">
       <p style="font-size:12px;color:var(--text-faint);margin-bottom:8px">
         變更此機台的 IP。填了新的才會改、與原值相同會跳過。<br>
-        <b>OS IP</b>：ping 得通 + SSH 抓到的 hostname 與機台名稱相同才受理。<br>
-        <b>BMC IP</b>：ping 得通即可受理。
+        <b>OS / BMC IP</b>：需要新 endpoint 的明確帳密、授權 probe 與此 node 預期 hostname 相符；Ping 不能證明身分。
       </p>
       <label style="display:block;font-size:12px;color:var(--text-faint);margin:8px 0 4px">OS IP</label>
       <input class="input" id="new-os-ip-input" style="width:100%;padding:8px;font-family:monospace" value="${esc(curOs)}" placeholder="例如 INTERNAL_IP_10">
@@ -4086,11 +4119,14 @@ function changeOsIp(name) {
       <button class="btn small" id="osip-probe-btn" style="margin-top:8px" onclick="probeChangeOsBmc('${esc(name)}')">🔍 依新 OS 抓取 BMC IP</button>
       <label style="display:block;font-size:12px;color:var(--text-faint);margin:8px 0 4px">BMC IP</label>
       <input class="input" id="new-bmc-ip-input" style="width:100%;padding:8px;font-family:monospace" value="${esc(curBmc)}" placeholder="例如 INTERNAL_IP_11">
+      <label for="new-bmc-user-input">BMC SSH 帳號（新 endpoint）</label><input class="input" id="new-bmc-user-input" autocomplete="off">
+      <label for="new-bmc-pass-input">BMC SSH 密碼</label><input class="input" id="new-bmc-pass-input" type="password" autocomplete="new-password">
+      <label for="new-bmc-port-input">BMC SSH Port（不是 IPMI Port）</label><input class="input" id="new-bmc-port-input" type="number" min="1" max="65535" value="${Number(m.bmc_port)||22}">
       <div id="osip-msg" style="margin-top:10px;font-size:12px;white-space:pre-line"></div>
     </div>`,
     [
       { txt: "取消", cls: "", fn: () => closeDialog() },
-      { txt: "變更 IP", cls: "primary", id: "ip-submit-btn", fn: () => submitChangeOsIp(name) },
+      { txt: "變更 IP", cls: "primary", id: "ip-submit-btn", fn: () => submitChangeOsIp(name, editTarget, {os:curOs,bmc:curBmc}) },
     ]);
 }
 // New targets use explicit credentials; stored credentials stay bound to the saved IP.
@@ -4109,7 +4145,7 @@ async function probeChangeOsBmc(name) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(ip === m.os_ip
         ? { os_ip: ip, machine_name: m.name }
-        : { os_ip: ip, expected_hostname: m.name,
+        : { project:m.project, os_ip: ip, expected_hostname: (m.os||[]).find(n=>n.slot===m.active_os)?.os_hostname || m.name,
             os_user: $("new-os-user-input").value.trim(), os_pass: $("new-os-pass-input").value,
             os_port: Number($("new-os-port-input").value) }),
     });
@@ -4144,7 +4180,7 @@ function _ipSetDone() {
     foot.appendChild(ok);
   }
 }
-async function submitChangeOsIp(name) {
+async function submitChangeOsIp(name, target, original) {
   const msgEl = $("osip-msg");
   const ip = $("new-os-ip-input") ? $("new-os-ip-input").value.trim() : "";
   const bmcIp = $("new-bmc-ip-input") ? $("new-bmc-ip-input").value.trim() : "";
@@ -4153,15 +4189,16 @@ async function submitChangeOsIp(name) {
   const failed = [];
   _ipSetBusy(true);
   try {
-    if (ip) {
-      const d = await api(`/api/machines/${encodeURIComponent(name)}/change-os-ip`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ new_os_ip: ip,
+    if (ip && ip!==original.os) {
+      const d = await api(`/api/machines/${encodeURIComponent(name)}/change-os-ip`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ new_os_ip: ip, expected_node_id:target.node_id, expected_binding_revision:target.expected_binding_revision,
         os_user: $("new-os-user-input").value.trim(), os_pass: $("new-os-pass-input").value,
         os_port: Number($("new-os-port-input").value) }) });
       results.push(`OS IP：${d.msg || (d.changed === false ? "與原本相同，未變更。" : "變更成功。")}`);
       if (d.ok === false) failed.push("OS IP");
+      if(d.changed){const saved=d.machine?.os?.find(n=>n.node_id===target.node_id);if(saved)target={...target,expected_binding_revision:saved.expected_binding_revision};}
     }
-    if (bmcIp) {
-      const d = await api(`/api/machines/${encodeURIComponent(name)}/change-bmc-ip`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ new_bmc_ip: bmcIp }) });
+    if (bmcIp && bmcIp!==original.bmc) {
+      const d = await api(`/api/machines/${encodeURIComponent(name)}/change-bmc-ip`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ new_bmc_ip: bmcIp, expected_node_id:target.node_id, expected_binding_revision:target.expected_binding_revision, bmc_user:$("new-bmc-user-input").value.trim(), bmc_pass:$("new-bmc-pass-input").value, bmc_ssh_port:Number($("new-bmc-port-input").value) }) });
       results.push(`BMC IP：${d.msg || (d.changed === false ? "與原本相同，未變更。" : "變更成功。")}`);
       if (d.ok === false) failed.push("BMC IP");
     }

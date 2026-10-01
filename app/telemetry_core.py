@@ -380,7 +380,7 @@ def _queue_gpu_alert_advice(*args):
         _ALERT_ADVICE_SLOTS.release()
 
 
-def evaluate_gpu_alerts(machine):
+def evaluate_gpu_alerts(machine, enrich=True):
     """掃描最近 GPU 資料，偵測全機高載 / 單顆高溫，並維持 gpu_alerts 的 active/clear 狀態。
     高載以「全機所有 GPU 的平均 util 達到門檻」判斷（vLLM 連續批處理下單顆 util 是 0↔100
     間歇性，逐顆平均易誤判）；高溫則逐顆以最新溫度判斷。狀態轉換才呼叫 AI（避免每輪重複）。"""
@@ -433,8 +433,9 @@ def evaluate_gpu_alerts(machine):
                 if key not in now_keys and observed:
                     c.execute("UPDATE gpu_alerts SET status='clear', ts=?, resolved_at=? WHERE id=?",
                               (ats, ats, row["id"]))
-        for args in advice:
-            _queue_gpu_alert_advice(*args)
+        if enrich:
+            for args in advice:
+                _queue_gpu_alert_advice(*args)
     except Exception as e:
         print("GPU alert 評估錯誤", machine, e)
 
@@ -621,10 +622,11 @@ def _cpu_used(a, b):
     return max(0.0, min(100.0, (dt_total - dt_idle) / dt_total * 100.0))
 
 
-def collect_os(m):
+def collect_os(m, ssh=None):
+    ssh = ssh or ssh_run
     if not all([m.get("os_ip"), m.get("os_user"), m.get("os_pass")]):
         return time.time(), None, [], []
-    out, rc, err = ssh_run(m["os_ip"], m["os_user"], m["os_pass"], m.get("os_port", 22), _OS_CMD)
+    out, rc, err = ssh(m["os_ip"], m["os_user"], m["os_pass"], m.get("os_port", 22), _OS_CMD)
     ts = time.time()
     if rc != 0 or not out:
         return ts, None, [], []
@@ -841,7 +843,7 @@ def get_os_series(name, minutes):
 
 
 def is_rack_member(m, project):
-    if (m.get("project") or "").casefold() != (project or "").casefold() or m.get("level") != "rack":
+    if (m.get("project") or "") != (project or "") or m.get("level") != "rack":
         return False
     return kind_of(m) != "blanking" and ((m.get("rack_u") or 0) > 0 or
         (m.get("rack_mount") == "external" and kind_of(m) == "cdu"))
@@ -855,10 +857,21 @@ def get_rack_series(project, minutes):
     since = time.time() - min(minutes or 60, int(os.environ.get("TELEMETRY_MAX_MIN", "43200"))) * 60
     all_m = _load_machines()
     # 只撈「在此專案 Rack（L11 機櫃）平面圖上」的元件：排除 L10 單機（level=="system"）如 proj_k-app-1
-    # 專案名比對用「大小寫不敏感」（proj_k/proj_k/proj_k 都視為同一專案）
-    want = (project or "").casefold()
     members = {n: m for n, m in all_m.items()
                if is_rack_member(m, project)}
+    # Canonical node history never borrows the parent's legacy ACTIVE OS series.
+    from node_identity import observation_nodes
+    expanded = {}
+    for name, machine in members.items():
+        nodes = observation_nodes(machine) if kind_of(machine, name) == "server" else None
+        if nodes is None:
+            expanded[name] = machine
+        else:
+            for node in nodes:
+                expanded[node['node_id']] = dict(machine, node_id=node['node_id'],
+                    chassis_name=name, slot_id=node['slot_id'],
+                    display_name=name+' / '+node['node_name'])
+    members = expanded
     if not members:
         return {}
 
@@ -920,7 +933,11 @@ def get_rack_series(project, minutes):
         # 每台最新值
         for metric, by_m in metrics.items():
             for nm, pts in by_m.items():
-                machines.setdefault(nm, {"name": nm, "kind": kind})
+                member = members.get(nm, {})
+                machines.setdefault(nm, {"name": member.get('display_name',nm), "kind": kind,
+                    "node_id": member.get('node_id'), "chassis_name": member.get('chassis_name'),
+                    "slot_id": member.get('slot_id'),
+                    "history_source": 'canonical-node' if member.get('node_id') else 'legacy-machine-unattributed'})
                 if pts:
                     machines[nm][metric] = round(pts[-1][1], 2)
         # 歷史聚合：每 metric 一個時間點的「整櫃平均/總和」折線

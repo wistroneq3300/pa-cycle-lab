@@ -1,5 +1,6 @@
 """Independent service and child workers. Web restarts cannot replay power actions."""
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait as wait_futures, FIRST_COMPLETED
+from collections import deque
 from contextlib import contextmanager
 from dataclasses import fields
 from pathlib import Path
@@ -19,7 +20,7 @@ from .settings import ROOT, DATA, RUNTIME, ARTIFACTS, ENGINE, MODE
 from .store import Store, TERMINAL, fingerprint, engine_hash
 from .synthetic import SyntheticTransport
 from .credentials import load_credentials
-from cycle_core import Target, digest, now, issue_key, write_json, atomic_write, EvidencePersistenceError
+from cycle_core import Target, digest, now, issue_key, node_records, records_health, write_json, atomic_write, EvidencePersistenceError
 from .domain import CoordinatedSession as NodeSession, Domain
 from cycle_report import write_reports, status
 from cycle_transport import Transport
@@ -65,10 +66,10 @@ def alive(job_id):
 
 def compact(session):
     n=session.node
-    records=[n['pre'],*n['loops']]
+    records=node_records(n)
     seen={issue_key(i) for i in n['pre']['issues']}
     first=0
-    for record in n['loops']:
+    for record in records[1:]:
         keys={issue_key(i) for i in record['issues']}
         first=len(keys-seen); seen|=keys
     record=records[-1]
@@ -76,9 +77,11 @@ def compact(session):
     return dict(machine_id=session.machine_id,key=n['key'],stage=n['stage'] or record['phase'],
                 loop=record.get('loop',0),completed=n['completed'],attempts=n['attempts'],
                 boot_confirmed=n.get('boot_confirmed',0),valid_cycles=n.get('valid_cycles',0),
-                cumulative_health='FAIL' if any(r.get('status')=='FAIL' for r in records) else 'PASS',
+                cumulative_health=records_health(records),
                 health='PENDING' if pending else record['status'],updated_at=getattr(session,'last_activity',time.time()),
                 first_this_round=None if pending else first,unique_issues=len(seen),
+                coverage=n.get('coverage','EXERCISED' if n['attempts'] else 'NOT_EXERCISED'),
+                coverage_reason=n.get('coverage_reason',''),
                 stop_reason=n['stop_reason'],blocked=n['blocked'])
 
 def run_job(store, job_id, transport_factory=None):
@@ -143,6 +146,12 @@ def run_job(store, job_id, transport_factory=None):
             script=(ENGINE/'neutrino_config.sh').read_bytes().replace(b'\r\n',b'\n')
             policy=(ENGINE/'issue_policy.md').read_text(encoding='utf-8')
             rules=[]  # V1 policy exceptions are explicitly inactive; PRE-relative classification only.
+            frozen=job.get('profile_snapshot')
+            if frozen:
+                if fingerprint({k:v for k,v in frozen.items() if k!='content_hash'})!=frozen['content_hash']:
+                    raise RuntimeError('Frozen profile content hash mismatch')
+                script=frozen['checker'].encode('utf-8');policy=frozen['policy']
+                options.memory_min_ratio=frozen['package']['thresholds']['memory_min_ratio']
             atomic_write(root/'neutrino_config.snapshot.sh',script.decode())
             atomic_write(root/'issue_policy.snapshot.md',policy)
             write_json(root/'job_snapshot.json',job)
@@ -153,6 +162,14 @@ def run_job(store, job_id, transport_factory=None):
                 provider=configured_provider()
                 if provider is None or not provider.approve_dispatch(job): raise RuntimeError('Live provider did not authorize immutable run')
                 if not callable(getattr(provider,'verify_identity',None)): raise RuntimeError('Live provider must verify hardware identity and trust')
+                if frozen:
+                    from .profiles import default_package
+                    action_key=options.cycle_mode+':'+options.channel
+                    action=frozen['package']['actions'][action_key]
+                    if action!=default_package()['actions'][action_key]:
+                        verify=getattr(provider,'verify_action_scope',None)
+                        if not callable(verify) or not all(verify(job,m,action) for m in job['targets']):
+                            raise RuntimeError('Custom profile action requires explicit provider verification of selector and affected scope')
                 secrets={m['credential_ref']:provider.credentials(m['credential_ref'],m.get('credential_version')) for m in job['targets']}
             for machine in job['targets']:
                 target=Target(**{f.name:machine[f.name] for f in fields(Target) if f.name in machine})
@@ -169,6 +186,7 @@ def run_job(store, job_id, transport_factory=None):
                 session.machine_id=machine['name']
                 session.store=store; session.job_id=job_id; session.snapshot=machine
                 session.identity_provider=provider
+                session.profile_snapshot=frozen
                 secret_values=tuple(v for item in secrets.values() if isinstance(item,dict) for v in item.values() if isinstance(v,str))
                 secret_values+=tuple(getattr(transport,'credentials',{}).values())
                 session.observer=lambda event,s=session,values=secret_values:observe(s,event,values)
@@ -195,7 +213,7 @@ def run_job(store, job_id, transport_factory=None):
                     transport=domain.sessions[0].transport
                     transport.affected_targets=[s.target for s in domain.sessions]
                     for session in domain.sessions: session.transport=transport
-            campaign=dict(run_id=job['run_id'],job_id=job_id,project='neutrino',started=now(),finished=None,
+            campaign=dict(run_id=job['run_id'],job_id=job_id,project=job['project'],started=now(),finished=None,
                           tool_version=(ENGINE/'VERSION').read_text().strip(),state='PRE_RUNNING',stop_reason='',
                           cycle_mode=options.cycle_mode,channel=options.channel,limits=job['config']['limits'],
                           script_sha256=digest(script),engine_hash=job['engine_hash'],synthetic=job['synthetic'],
@@ -215,11 +233,17 @@ def run_job(store, job_id, transport_factory=None):
             runnable=[s for s in sessions if not s.node['blocked']]
             for d in domains:
                 if any(s not in runnable for s in d.sessions):
+                    blocked_peers=[s.snapshot.get('display_name',s.machine_id) for s in d.sessions if s not in runnable]
+                    for s in d.sessions:
+                        if not s.node['blocked']:
+                            s.node['blocked'].append('Shared action domain '+str(d.key)+' blocked by: '+', '.join(blocked_peers))
                     runnable=[s for s in runnable if s not in d.sessions]
             # AUX approval covers every target in the shared power scope: no partial continuation.
             if options.cycle_mode=='aux_cycle' and len(runnable)!=len(sessions):
                 runnable=[]
                 reason='AUX scope incomplete after PRE; no power action permitted'
+                for s in sessions:
+                    if not s.node['blocked']:s.node['blocked'].append(reason)
             save_reports(root,campaign)
 
             if store.get(job_id)['stop_requested']:
@@ -246,33 +270,57 @@ def run_job(store, job_id, transport_factory=None):
             parallel('start',runnable)
             began=time.monotonic()
             limits=job['config']['limits']
-            def drive(domain):
-                number=0
+            # Hours are a whole-run dispatch budget measured after START. Recovery
+            # and POST for an already dispatched action are allowed to finish.
+            deadline=began+limits['hours']*3600 if limits['hours'] else None
+            budget_open=lambda:deadline is None or time.monotonic()<deadline
+            rounds={d:0 for d in domains}
+            ready=deque(d for d in domains if all(s in runnable and s.node['active'] for s in d.sessions))
+            for d in domains: d.dispatch_allowed=budget_open
+            def drive_round(domain, number):
+                persistence_guard()
+                if store.get(job_id)['stop_requested'] or not budget_open(): return
                 members=domain.sessions
-                if any(s not in runnable or not s.node['active'] for s in members): return
-                while True:
-                    persistence_guard()
-                    current=store.get(job_id)
-                    if current['stop_requested']: return
-                    if (limits['loops'] and number>=limits['loops']) or (limits['hours'] and time.monotonic()-began>=limits['hours']*3600): return
-                    if not all(s.node['active'] for s in members): return
-                    number+=1; domain.new_round()
-                    if len(members)==1:
-                        members[0].one_loop(number); emit(members[0],'POST_FINISHED')
-                    else:
-                        with ThreadPoolExecutor(max_workers=len(members)) as pool:
-                            list(pool.map(lambda s:s.one_loop(number),members))
-                        for s in members: emit(s,'POST_FINISHED')
-                    try:
-                        with mutex: save_reports(root,campaign)
-                    except EvidencePersistenceError:
-                        persistence_failed.set()
-                        raise
+                if not all(s.node['active'] for s in members): return
+                domain.new_round()
+                if len(members)==1:
+                    members[0].one_loop(number); emit(members[0],'POST_FINISHED')
+                else:
+                    with ThreadPoolExecutor(max_workers=len(members)) as group:
+                        list(group.map(lambda s:s.one_loop(number),members))
+                    for s in members: emit(s,'POST_FINISHED')
+                try:
+                    with mutex: save_reports(root,campaign)
+                except EvidencePersistenceError:
+                    persistence_failed.set()
+                    raise
             with ThreadPoolExecutor(max_workers=job['config'].get('parallelism',8)) as pool:
-                list(pool.map(drive,domains))
+                running={}
+                while ready or running:
+                    current=store.get(job_id)
+                    if current['stop_requested'] or not budget_open(): ready.clear()
+                    while ready and len(running)<job['config'].get('parallelism',8):
+                        domain=ready.popleft()
+                        rounds[domain]+=1
+                        running[pool.submit(drive_round,domain,rounds[domain])]=domain
+                    if not running: break
+                    completed,_=wait_futures(running,return_when=FIRST_COMPLETED)
+                    for future in completed:
+                        domain=running.pop(future);future.result()
+                        if (budget_open() and not store.get(job_id)['stop_requested']
+                            and (not limits['loops'] or rounds[domain]<limits['loops'])
+                            and all(s.node['active'] for s in domain.sessions)):
+                            ready.append(domain)
             current=store.get(job_id)
-            state='COMPLETE' if not current['stop_requested'] and all(s.node['active'] for s in runnable) else 'INCOMPLETE'
-            reason='Requested limit reached' if state=='COMPLETE' else 'Stopped or one or more domains unavailable'
+            for session in sessions:
+                issued=any(a.get('state') not in (None,'NOT_ISSUED') for r in session.node['loops'] for a in r.get('action',[]))
+                session.node['coverage']='EXERCISED' if issued else 'NOT_EXERCISED'
+                session.node['coverage_reason']='TIME_BUDGET_EXHAUSTED' if not budget_open() else ('STOP_REQUESTED' if current['stop_requested'] else '')
+            covered=all(s.node['coverage']=='EXERCISED' for s in runnable)
+            state='COMPLETE' if not current['stop_requested'] and covered and all(s.node['active'] for s in runnable) else 'INCOMPLETE'
+            reason=('Requested whole-run limit reached' if state=='COMPLETE' else
+                    'TIME_BUDGET_EXHAUSTED; one or more targets NOT_EXERCISED' if not budget_open() and not covered else
+                    'Stopped or one or more domains unavailable')
             save_reports(root,campaign)
 
         except Exception as exc:

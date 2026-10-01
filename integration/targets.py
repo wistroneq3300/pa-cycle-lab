@@ -80,3 +80,21 @@ def public(value):
     if isinstance(value, list):
         return [public(v) for v in value]
     return value
+
+
+def resolve_control_target(pa, url_target, body):
+    """Legacy chassis URLs must bind to an explicit installed node and revision."""
+    from .store import Conflict
+    for field in ('node_id', 'expected_binding_revision', 'idempotency_key'):
+        if not isinstance(body.get(field), str) or not 1 <= len(body[field]) <= 128:
+            raise ValueError('Required control field: ' + field)
+    target = resolve_target(pa, body['node_id'])
+    if url_target not in {target['name'], target.get('parent_name')}:
+        raise Conflict('URL and requested node do not match')
+    if target.get('revision') != body['expected_binding_revision']:
+        raise Conflict('Target binding changed; review the current node before dispatch')
+    expected = body.get('expected_target')
+    if expected is not None:
+        if not isinstance(expected, dict) or expected.get('node_id') != target['node_id'] or expected.get('expected_binding_revision') != target['revision']:
+            raise Conflict('Displayed target differs from the requested binding')
+    return target

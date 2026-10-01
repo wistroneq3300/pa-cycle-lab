@@ -92,3 +92,17 @@ def migrate(document):
         out['machines'][name] = m
     out['node_schema_version'] = 1
     return out
+
+
+def observation_nodes(machine):
+    """Stable inventory targets for reachability; topology order is never identity.
+
+    An empty canonical array intentionally produces no target. A legacy scalar
+    machine is handled by its caller until migration assigns physical mapping.
+    """
+    if machine.get('os') is None:
+        return None
+    return [dict(node_id=e['node_id'], slot_id=e['slot_id'], slot=e['slot'],
+                 node_name=e.get('label') or 'N'+str(e['slot']), ip=e.get('ip',''),
+                 mapping_status=e.get('mapping_status','needs_confirmation'))
+            for e in canonical(machine)['os'] if not e.get('empty')]

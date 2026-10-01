@@ -16,15 +16,16 @@ class Concurrency(unittest.TestCase):
         fixture = operations.Operations()
         fixture.setUp()
         self.s, self.m = fixture.s, fixture.m
+        self.connection_body=fixture.connection_body
 
     def test_slow_probe_releases_inventory_lock_and_rejects_stale_commit(self):
         entered, release = threading.Event(), threading.Event()
         def probe(*args, **kwargs):
             entered.set()
             self.assertTrue(release.wait(3))
-            return True
-        self.s['ping_check'] = probe
-        body = SimpleNamespace(new_os_ip='new', os_user='manual', os_pass='explicit', os_port=22)
+            return 'node',0,''
+        self.s['ssh_run'] = probe
+        body = self.connection_body(new_os_ip='new', os_user='manual', os_pass='explicit', os_port=22)
         with ThreadPoolExecutor(1) as pool:
             future = pool.submit(self.s['change_os_ip'], 'node', body)
             try:
@@ -48,7 +49,7 @@ class Concurrency(unittest.TestCase):
         snapshot = copy.deepcopy(self.m)
         self.s['_save_data'].side_effect = OSError('synthetic storage failure')
         with self.assertRaises(OSError):
-            self.s['_commit_connection']('node', snapshot, {'os_ip': 'new', 'os_pass': 'explicit'})
+            self.s['_commit_connection']('node', snapshot, {'os_ip': 'new', 'os_pass': 'explicit'}, self.m['os'][1]['node_id'],self.s['node_identity'].binding(self.m['os'][1]))
         self.assertEqual(self.m, snapshot)
 
     def test_safe_response_uses_cache_and_never_probes(self):

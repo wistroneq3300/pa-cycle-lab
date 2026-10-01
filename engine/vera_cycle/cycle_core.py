@@ -419,12 +419,41 @@ def sel_delta(previous, current):
             result.append(line)
     return "\n".join(result) + ("\n" if result else "")
 
+def node_records(node):
+    """Execution order shared by summaries and reports, including START evidence."""
+    return [node['pre'], *([node['start']] if node.get('start') else []), *node['loops']]
+
+
+def records_health(records):
+    """Retain observed severity without treating missing evidence as a PASS.
+
+    FAIL/WARN remain visible even during pending collection. Unknown and pending
+    evidence are distinguished when no observed hardware issue takes priority.
+    """
+    records = list(records)
+    states = set()
+    for record in records:
+        issues = record.get('issues', [])
+        valid = [i for i in issues if i.get('severity') in {'FAIL','WARN'}]
+        states.add(health(valid))
+        if len(valid) != len(issues):
+            states.add('UNKNOWN')
+    for record in records:
+        value = record.get('status', 'UNKNOWN')
+        states.add(value if value in {'FAIL', 'WARN', 'UNKNOWN', 'PENDING', 'PASS'} else 'UNKNOWN')
+        if not record.get('finished'):
+            states.add('PENDING')
+    if not records:
+        return 'UNKNOWN'
+    return next(value for value in ('FAIL', 'WARN', 'UNKNOWN', 'PENDING', 'PASS') if value in states)
+
+
 def aggregate_issues(campaign):
     merged = {}
     for node in campaign["nodes"]:
         # Keep the PRE comparison separate from severity and causation.
         pre_keys = issue_baseline(node['pre']['issues'])
-        for record in [node["pre"], *([node['start']] if node.get('start') else []), *node["loops"]]:
+        for record in node_records(node):
             classified = classify_against_pre([i.copy() for i in record['issues']], pre_keys)
             for item in classified:
                 key = (node["key"], *issue_key(item))

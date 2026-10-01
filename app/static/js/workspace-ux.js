@@ -97,7 +97,7 @@
   RENDERERS.rack=function(){
     const root=document.createElement('div');root.innerHTML=rack();const hero=root.querySelector('.rack-hero');if(!hero)return root.innerHTML;
     const cycleButton=document.createElement('button');cycleButton.className='btn';cycleButton.dataset.actionGroup='validation';cycleButton.setAttribute('onclick','openCycleTest('+JSON.stringify(rackView.project)+')');cycleButton.textContent='Cycle 驗證';hero.append(cycleButton);
-    const groups=[['驗證 / Cycle','validation'],['\u914d\u7f6e','config'],['\u9023\u7dda\u8207\u8a3a\u65b7','connect'],['\u96fb\u6e90\u64cd\u4f5c','power']];
+    const groups=[['\u914d\u7f6e','config'],['\u9023\u7dda\u8207\u8a3a\u65b7','connect'],['\u96fb\u6e90\u64cd\u4f5c','power'],['Cycle 驗證','validation']];
     const containers={};const toolbar=document.createElement('div');toolbar.className='ux-rack-toolbar';
     for(const [title,key] of groups){const group=document.createElement(key==='power'?'details':'section');group.className='ux-action-group';group.innerHTML=(key==='power'?'<summary>':'<h3>')+title+(key==='power'?'</summary>':'</h3>')+'<div></div>';containers[key]=group.lastElementChild;toolbar.append(group);}
     hero.querySelectorAll(':scope > button').forEach(b=>{
@@ -190,7 +190,7 @@
     if(pendingRequests.has(key))return;
     pendingRequests.add(key);
     try{
-    const target=operationTarget(name),label=kind==='power'?(on?'\u958b\u6a5f':'\u95dc\u6a5f'):kind==='aux'?'AC cycle':'Reboot';
+    const target=operationTarget(name),label=kind==='power'?(on?'\u958b\u6a5f':'\u95dc\u6a5f'):kind==='aux'?'AUX cycle':'Reboot';
     if(!await uxConfirm(operationTargetText(name)+'\n\n'+label+' \u00b7 \u6307\u4ee4\u5c07\u9001\u81f3\u6b64\u76ee\u6a19'))return;
     const progress=uxNotify(name+' \u00b7 '+label+' \u9001\u51fa\u4e2d');
     try{

@@ -89,10 +89,10 @@ class RackPingRegression(base.unittest.TestCase):
         self.assertEqual(node['rack_ping_state'], 'partial')
         self.assertEqual(node['ping_counts'], {'configured': 2, 'alive': 1, 'down': 1})
         self.assertEqual([target['node_name'] for target in node['ping_targets']],
-                         ['OS Slot 1', 'OS Slot 2'])
+                         ['N1', 'N2'])
         self.assertNotIn(('192.0.2.99', 1), self.calls)
 
-    def test_topology_values_override_same_slot_and_inventory_fills_missing_slots(self):
+    def test_inventory_slots_do_not_borrow_positional_topology_endpoints(self):
         self.handlers()
         self.machine(os_ip='192.0.2.99', os=[
             {'slot': 1, 'ip': '192.0.2.1'},
@@ -100,10 +100,10 @@ class RackPingRegression(base.unittest.TestCase):
         ])
         self.topology(ips=['192.0.2.10', ''])
         node = self.result(project='rack')['server-1']
-        self.assertEqual(node['rack_ping_source'], 'topology_host_os+inventory_os_slots')
+        self.assertEqual(node['rack_ping_source'], 'inventory_os_slots')
         self.assertEqual([target['ip'] for target in node['ping_targets']],
-                         ['192.0.2.10', '192.0.2.2'])
-        self.assertNotIn(('192.0.2.1', 1), self.calls)
+                         ['192.0.2.1', '192.0.2.2'])
+        self.assertNotIn(('192.0.2.10', 1), self.calls)
         self.assertNotIn(('192.0.2.99', 1), self.calls)
 
     def test_powered_equipment_uses_management_ip_and_excludes_blank_l10_and_unplaced(self):
