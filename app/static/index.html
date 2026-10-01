@@ -75,7 +75,7 @@
     </header>
 
     <div class="content" id="content">
-      <div class="card">Loading…</div>
+      <div class="card pa-boot-placeholder" hidden>Loading…</div>
     </div>
   </main>
 
@@ -143,11 +143,8 @@
           </div>
         </div>
       </div>
-      <div class="field-row">
-        <div class="field">
-          <label>OS SSH Port</label>
-          <input id="f-os-port" type="number" value="22" class="input" disabled title="固定為 22">
-        </div>
+      <div class="field-row" style="display:none">
+        <input id="f-os-port" type="hidden" value="22">
       </div>
 
       <div class="hr">BMC（必填，之後開/關機用）</div>

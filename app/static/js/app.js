@@ -81,12 +81,14 @@ async function loadMachines(assignMissingU) {
   if (!Array.isArray(data.machines)) throw new Error("Invalid machine inventory response");
   machines = data.machines;
   if (data.last_scan) window.__lastScan = data.last_scan;
+  saveSnapshot();
 }
 
 async function loadProjects() {
   const data = await api("/api/projects");
   if (!Array.isArray(data.projects)) throw new Error("Invalid project inventory response");
   projects = data.projects;
+  saveSnapshot();
 }
 // BMC 電源狀態 cell（System Manager 表格用）
 function powerCell(m) {
@@ -2173,6 +2175,7 @@ function setView(view) {
     _machineRenderTimer = setTimeout(() => { _renderMachine(state.view); }, 250);
     state.view = view;
     syncHash();
+    saveSnapshot();
     return;
   }
   // 切到其他 view：取消可能尚未執行的 machine 去抖重繪
@@ -2663,6 +2666,54 @@ async function sensorAnalyze(name) {
 }
 
 const machineDetailCache = {};
+// --- F5 重載不閃爍：把清單與最近一次詳情快取寫入 sessionStorage，
+//     下次重載時同步讀回，讓畫面直接重繪上次結果，而不是先顯示 Loading 佔位。
+const SNAPSHOT_KEY = "pa_snapshot_v1";
+let _snapshotTimer = null;
+function saveSnapshot() {
+  if (_snapshotTimer) return;                       // 去抖：多個成功回應合併成一次寫入
+  _snapshotTimer = setTimeout(() => {
+    _snapshotTimer = null;
+    try {
+      const details = {};
+      for (const [k, v] of Object.entries(machineDetailCache)) {
+        if (v && !v.error) details[k] = v;   // 只存成功的詳情
+      }
+      sessionStorage.setItem(SNAPSHOT_KEY, JSON.stringify({
+        machines, projects, details,
+        view: state.view, activeMachine: _activeMachine, activeProject: _activeProject,
+      }));
+    } catch (_) { /* 配額滿或隱私模式：略過，不影響功能 */ }
+  }, 400);
+}
+function loadSnapshot() {
+  try {
+    const raw = sessionStorage.getItem(SNAPSHOT_KEY);
+    if (!raw) return false;
+    const s = JSON.parse(raw);
+    if (Array.isArray(s.machines)) machines = s.machines;
+    if (Array.isArray(s.projects)) projects = s.projects;
+    if (s.details) Object.assign(machineDetailCache, s.details);
+    if (s.view) state.view = s.view;
+    if (s.activeMachine) _activeMachine = s.activeMachine;
+    if (s.activeProject) _activeProject = s.activeProject;
+    return Array.isArray(s.machines) && s.machines.length > 0;
+  } catch (_) { return false; }
+}
+function flushSnapshot() {
+  if (_snapshotTimer) { clearTimeout(_snapshotTimer); _snapshotTimer = null; }
+  try {
+    const details = {};
+    for (const [k, v] of Object.entries(machineDetailCache)) {
+      if (v && !v.error) details[k] = v;
+    }
+    sessionStorage.setItem(SNAPSHOT_KEY, JSON.stringify({
+      machines, projects, details,
+      view: state.view, activeMachine: _activeMachine, activeProject: _activeProject,
+    }));
+  } catch (_) { /* 略過 */ }
+}
+window.addEventListener("pagehide", flushSnapshot);
 const machineDetailRequests = {};
 async function machineLoadDetail(name, refresh = false) {
   const request = (machineDetailRequests[name] || 0) + 1;
@@ -2679,6 +2730,7 @@ async function machineLoadDetail(name, refresh = false) {
     if (prior && !prior.error) result.prev = prior.prev || prior;
   }
   machineDetailCache[name] = result;
+  if (result && !result.error) saveSnapshot();
   if (_activeMachine === name && state.view === "machine") {
     setView("machine");
     if (result?.bmc_loading) setTimeout(() => {
@@ -4841,14 +4893,24 @@ function initRowMenuGuard() {
 }
 document.addEventListener("DOMContentLoaded", async () => {
   loadTheme(); buildNav(); initTermDrag(); initBcDrag(); initRowMenuGuard();
+  // 先讀上次快照（清單 + 詳情）以備立即重繪；路由仍以 URL hash 為準（後面的 parseHash 會覆蓋）。
+  const hydrated = loadSnapshot();
   parseHash();                      // 讀取 URL hash，指定初始分頁
   window.addEventListener("resize", () => { fitAll(); bcFitAll(); });
   window.addEventListener("hashchange", () => { parseHash(); setView(state.view); });
+  // 用快照立即重繪（F5 不再閃 Loading 佔位），再於背景抓最新資料覆蓋。
+  if (hydrated) {
+    try { setView(state.view); } catch (_) { /* 快照過期就等網路結果 */ }
+  } else {
+    // 沒有快照（首次載入）才顯示 Loading 佔位，避免空白頁。
+    const ph = document.querySelector("#content .pa-boot-placeholder");
+    if (ph) ph.hidden = false;
+  }
   try {
     await Promise.all([loadMachines(), loadProjects()]);
     setView(state.view);
   } catch (e) {
-    showInventoryLoadError(e);
+    if (!hydrated) showInventoryLoadError(e);   // 有快照就先沿用舊畫面，不跳錯誤頁
   }
   gpuAlertPoll();
   setInterval(gpuAlertPoll, 20000);
