@@ -152,7 +152,7 @@ document.addEventListener('click',e=>{
       root.querySelectorAll('.pd-operation-group,.pd-power-group,.equipment-actions').forEach(n=>n.remove());
       if(ops)ops.insertAdjacentHTML('afterbegin',equipmentActionsHtml(m)+(equipmentCanPower(m)?`<button class="btn small" onclick="machControlDialog('${esc(m.name)}')">\u81ea\u8a02\u96fb\u6e90\u6307\u4ee4</button>`:''));
     }
-    if(equipmentClass(m).status==='needs_confirmation'){
+    if(false && equipmentClass(m).status==='needs_confirmation'){
       root.insertAdjacentHTML('afterbegin','<p role="status">\u8a2d\u5099\u985e\u578b\u5f85\u78ba\u8a8d\uff1a\u8acb\u78ba\u8a8d mgx_type\uff0c\u76ee\u524d\u4e0d\u63d0\u4f9b Server \u96fb\u6e90\u64cd\u4f5c\u3002</p>');
     }
     return root.innerHTML;

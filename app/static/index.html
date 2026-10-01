@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Wistron PA Server Manager</title>
 <link rel="icon" type="image/svg+xml" href="/static/img/wistron-official.svg">
-<link rel="stylesheet" href="/static/css/style.css?v=20260924-guide1">
+<link rel="stylesheet" href="/static/css/style.css?v=20261001-tel-status1">
 <link rel="stylesheet" href="/static/vendor/xterm/xterm.css">
 <link rel="stylesheet" href="/static/css/product.css?v=20260924-promote-visible">
-<link rel="stylesheet" href="/static/css/product-detail.css">
+<link rel="stylesheet" href="/static/css/product-detail.css?v=20261001-sensor-fix">
 <link rel="stylesheet" href="/static/css/cinematic.css?v=20260924gb300-insertion2">
-<link rel="stylesheet" href="/static/css/workspace-cinematic.css">
+<link rel="stylesheet" href="/static/css/workspace-cinematic.css?v=20261001-sensor-fix">
 <link rel="stylesheet" href="/static/css/wistron-light.css">
 <link rel="stylesheet" href="/static/css/workspace-reliability.css">
 <link rel="stylesheet" href="/static/css/equipment-workspace.css?v=20260924-network-led2">
-<link rel="stylesheet" href="/static/css/engineering-ux.css?v=20260924">
+<link rel="stylesheet" href="/static/css/engineering-ux.css?v=20261001-noreadout1">
 <link rel="stylesheet" href="/static/css/operations-ux.css?v=20260924-review1">
-<link rel="stylesheet" href="/static/css/workspace-ux.css?v=20260924-ux1">
+<link rel="stylesheet" href="/static/css/workspace-ux.css?v=20261001-teltime1">
 <link rel="stylesheet" href="/static/css/topology.css?v=20260924-network-led2">
 <link rel="stylesheet" href="/static/css/cycle.css"><link rel="stylesheet" href="/static/css/cycle-workspace.css">
 </head>
@@ -74,9 +74,23 @@
       <div class="user"><span class="avatar">SW</span> <span>Sheng Wu</span></div>
     </header>
 
-    <div class="content" id="content">
-      <div class="card pa-boot-placeholder" hidden>Loading…</div>
-    </div>
+    <div class="content" id="content"></div>
+    <script>
+    /* F5 不閃爍：在 app.js 載入前，用上次快照把側欄與 #content 原樣貼回，
+       讓重載期間（下載 25 個 script 的空窗）維持上一眼的畫面。
+       沒有快照（首次載入）才顯示 Loading，避免空白。
+       #content 起始為空 → 瀏覽器不會先畫出「Loading…」造成閃爍。 */
+    (function () {
+      var el = document.getElementById("content");
+      try {
+        var raw = sessionStorage.getItem("pa_snapshot_v1");
+        var s = raw ? JSON.parse(raw) : null;
+        if (s && s.sidebarHtml) { var nv = document.getElementById("nav"); if (nv) nv.innerHTML = s.sidebarHtml; }
+        if (s && s.contentHtml) { if (el) el.innerHTML = s.contentHtml; return; }
+      } catch (_) { /* 快照壞掉就退回 Loading */ }
+      if (el) el.innerHTML = '<div class="card">Loading…</div>';
+    })();
+    </script>
   </main>
 
 </div>
@@ -278,7 +292,7 @@
 <script src="/static/vendor/chartjs/chart.umd.min.js"></script>
 <script src="/static/js/equipment-rules.js?v=20260924-r4"></script>
 <script src="/static/js/equipment-connections.js?v=20260924-r4"></script>
-<script src="/static/js/app.js?v=20260928-variant-contract"></script>
+<script src="/static/js/app.js?v=20261001-anticlick1"></script>
 <script src="/static/js/topology.js?v=20260924-network-led2"></script>
 <script src="/static/js/userguide.js?v=20260924-guide1"></script>
 <script>
@@ -290,18 +304,18 @@ window.SPX_KVM_LAUNCH_API =
   (location.hostname === "127.0.0.1" && "https://portal.lab.example.internal/api/kvm/launch") ||
   (location.origin + "/api/kvm/launch");
 </script>
-<script src="/static/js/product.js?v=20260924-promote-visible"></script>
-<script src="/static/js/product-detail.js?v=20260924-ops-unified"></script>
+<script src="/static/js/product.js?v=20261001-sysworkspace1"></script>
+<script src="/static/js/product-detail.js?v=20261001-sensor-oob1"></script>
 <script src="/static/js/core-scene.js?v=20260924-cooling1"></script>
 <script src="/static/js/cinematic.js?v=20260924gb300-insertion2"></script>
 <script src="/static/js/workspace-cinematic.js?v=20260924-ux2"></script>
 <script src="/static/js/hardware-visuals.js?v=20260924-power-fans"></script>
 <script src="/static/js/workspace-reliability.js?v=20260924-cooling1"></script>
 <script src="/static/js/rack-equipment-scene.js?v=20260924-network-led2"></script>
-<script src="/static/js/equipment-workspace.js?v=20260924-network-led2"></script>
-<script src="/static/js/engineering-ux.js?v=20260928-variant-contract"></script>
+<script src="/static/js/equipment-workspace.js?v=20261001-sysworkspace1"></script>
+<script src="/static/js/engineering-ux.js?v=20261001-noreadout1"></script>
 <script src="/static/js/operations-ux.js?v=20260924-ux2"></script>
-<script src="/static/js/workspace-ux.js?v=20260928-variant-contract"></script>
+<script src="/static/js/workspace-ux.js?v=20261001-sysworkspace1"></script>
 <script type="module" src="/static/js/kvm_broadcast.js?v=20260924-review1"></script>
 <div id="guide-root"></div>
 

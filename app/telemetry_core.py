@@ -329,8 +329,8 @@ def store_gpu(ts, name, rows):
 
 
 # ==================== GPU 熱度快訊（AI 主動告警） ====================
-_ALERT_LLM_URL = os.environ.get("ALERT_LLM_URL", "http://127.0.0.1:18002")
-_ALERT_LLM_MODEL = os.environ.get("ALERT_LLM_MODEL", "qwen3-coder")
+_ALERT_LLM_URL = os.environ.get("ALERT_LLM_URL", "http://127.0.0.1:8011")
+_ALERT_LLM_MODEL = os.environ.get("ALERT_LLM_MODEL", "deepseek-v41-flash")
 GPU_UTIL_ALERT = int(os.environ.get("GPU_UTIL_ALERT", "50"))   # 全機 GPU 平均 util(%) 高載門檻
 GPU_TEMP_ALERT = int(os.environ.get("GPU_TEMP_ALERT", "88"))   # temp °C 警報門檻
 GPU_ALERT_WINDOW = int(os.environ.get("GPU_ALERT_WINDOW", "2"))  # 判斷用的分鐘窗（取窗內最新 ~N 筆）
@@ -348,6 +348,7 @@ def _alert_llm(machine, gpu, kind, value, threshold):
             "model": _ALERT_LLM_MODEL,
             "messages": [{"role": "system", "content": sysp}, {"role": "user", "content": usr}],
             "temperature": 0.2, "max_tokens": 80,
+            "chat_template_kwargs": {"enable_thinking": False},
         }, timeout=30)
         r.raise_for_status()
         t = (r.json()["choices"][0]["message"]["content"] or "").strip()
@@ -840,6 +841,50 @@ def get_os_series(name, minutes):
     disk_series = [{"mount": mnt, "ts": [r["ts"] for r in rs], "pct": [r["pct"] for r in rs],
                     "used_gb": [r["used_gb"] for r in rs]} for mnt, rs in disk_by_mount.items()]
     return {"os": [dict(r) for r in os_rows], "net": net_series, "disk": disk_series}
+
+
+def os_series_any(keys, minutes):
+    """合併多個 history key（canonical node_id 與 legacy 機台名）的 OS/GPU 序列。
+    observe 收集器以 target name 寫入，web 查詢可能用 node_id 或機台名，兩者皆須可讀。
+    """
+    keys = [k for k in keys if k]
+    if not keys:
+        return get_os_series("", minutes), get_gpu_series("", minutes)
+
+    def merge(a, b):
+        if a is None:
+            return b
+        if b is None:
+            return a
+        out = dict(a)
+        out["os"] = sorted(a.get("os", []) + b.get("os", []), key=lambda r: r.get("ts") or 0)
+        for field in ("net", "disk"):
+            out[field] = (a.get(field) or []) + (b.get(field) or [])
+        # GPU series 以 gpu index 為 key 合併，避免只保留第一個 history key 的 GPU 資料。
+        a_series = {s.get("gpu"): s for s in (a.get("series") or [])}
+        b_series = {s.get("gpu"): s for s in (b.get("series") or [])}
+        merged = {}
+        for g in set(a_series) | set(b_series):
+            sa, sb = a_series.get(g), b_series.get(g)
+            if sa is None:
+                merged[g] = sb
+            elif sb is None:
+                merged[g] = sa
+            else:
+                m = dict(sa)
+                m["name"] = sb.get("name") or sa.get("name")
+                for field in ("util", "mem_used", "mem_total", "temp", "power"):
+                    m[field] = (sa.get(field) or []) + (sb.get(field) or [])
+                m["ts"] = sorted((sa.get("ts") or []) + (sb.get("ts") or []), key=lambda v: v or 0)
+                merged[g] = m
+        out["series"] = [merged[g] for g in sorted(merged, key=lambda x: (x is None, x))]
+        return out
+
+    os_res = gpu_res = None
+    for k in keys:
+        os_res = merge(os_res, get_os_series(k, minutes))
+        gpu_res = merge(gpu_res, get_gpu_series(k, minutes))
+    return os_res, gpu_res
 
 
 def is_rack_member(m, project):

@@ -114,6 +114,62 @@ function powerBadge(raw) {
   return `<span class="badge" style="background:var(--bg-panel-2);color:var(--text-faint)">未知</span>`;
 }
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+/* 輕量 Markdown → HTML：僅供 AI 報告（**粗體**、`code`、清單、標題、嚴重度標籤）使用。
+   先 esc 再組行，避免注入；僅輸出一組白名單標籤。 */
+function mdInline(s) {
+  return esc(s)
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    // 嚴重度：支援 [High] 與行首 High:/Hight: 等寫法
+    .replace(/\[(Critical|High|Hight|Medium|Low)\]/gi, (m, g) => {
+      const k = g.toLowerCase() === "hight" ? "high" : g.toLowerCase();
+      return `<span class="diag-sev diag-sev-${k}">${g.toUpperCase()}</span>`;
+    })
+    .replace(/(^|[>\s；;])(Critical|High|Hight|Medium|Low)\s*[:：]/g, (m, pre, g) => {
+      const k = g.toLowerCase() === "hight" ? "high" : g.toLowerCase();
+      return `${pre}<span class="diag-sev diag-sev-${k}">${g.toUpperCase()}</span> `;
+    });
+}
+function mdToHtml(md) {
+  const lines = String(md || "").replace(/\r\n/g, "\n").split("\n");
+  const out = [];
+  let inOl = false, inCode = false;
+  let ulDepth = 0;              // 目前已開啟的 <ul> 層數
+  const closeUl = () => { while (ulDepth > 0) { out.push("</ul>"); ulDepth--; } };
+  const closeLists = () => { if (inOl) { out.push("</ol>"); inOl = false; } closeUl(); };
+  const indentOf = (s) => s.replace(/\t/g, "  ").length;
+  for (const raw of lines) {
+    const line = raw.replace(/\s+$/, "");
+    if (/^\s*```/.test(line)) {
+      if (!inCode) { closeLists(); out.push('<pre class="diag-code"><code>'); inCode = true; }
+      else { out.push("</code></pre>"); inCode = false; }
+      continue;
+    }
+    if (inCode) { out.push(esc(raw)); continue; }
+    if (!line.trim()) { closeLists(); continue; }
+    let m;
+    if (/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(line)) { closeLists(); out.push('<hr class="diag-hr">'); continue; }
+    if ((m = line.match(/^\s*#{1,6}\s+(.*)$/))) { closeLists(); out.push(`<p class="diag-h">${mdInline(m[1])}</p>`); continue; }
+    if ((m = line.match(/^\s*(\d+)[.)]\s+\*\*(.+?)\*\*\s*$/))) { closeLists(); out.push(`<p class="diag-h">${m[1]}. ${mdInline(m[2])}</p>`); continue; }
+    if ((m = line.match(/^([ \t]*)[-*]\s+(.*)$/))) {
+      if (inOl) { out.push("</ol>"); inOl = false; }
+      const depth = Math.min(3, Math.floor(indentOf(m[1]) / 2)) + 1;
+      while (ulDepth < depth) { out.push("<ul>"); ulDepth++; }
+      while (ulDepth > depth) { out.push("</ul>"); ulDepth--; }
+      out.push(`<li>${mdInline(m[2])}</li>`); continue;
+    }
+    if ((m = line.match(/^\s*\d+[.)]\s+(.*)$/))) {
+      closeUl();
+      if (!inOl) { out.push("<ol>"); inOl = true; }
+      out.push(`<li>${mdInline(m[1])}</li>`); continue;
+    }
+    closeLists();
+    out.push(`<p>${mdInline(line)}</p>`);
+  }
+  closeLists();
+  if (inCode) out.push("</code></pre>");
+  return out.join("\n");
+}
 function projectMembers(pname) {
   return machines.filter(m => m.project === pname).sort((a, b) => (a.order||0) - (b.order||0));
 }
@@ -2370,8 +2426,10 @@ function telSet(ch, labels, series, defs) {
   ch.data.labels = labels;
   ch.data.datasets = series.map(s => {
     const d = defs[s.key] || { color: TEL_PALETTE[0] };
+    // 樣本很少（≤2）時，線圖幾乎不可見；此時改顯示資料點，讓單一採樣也看得到。
+    const few = (labels || []).length <= 2;
     return { label: d.label, data: s.data, borderColor: d.color, backgroundColor: d.color,
-             tension: .3, pointRadius: 0, borderWidth: 2, borderDash: d.dash || undefined };
+             tension: .3, pointRadius: few ? 4 : 0, pointHoverRadius: 5, borderWidth: 2, borderDash: d.dash || undefined };
   });
   ch.update();
 }
@@ -2409,16 +2467,33 @@ async function loadTelemetry() {
   const target=JSON.stringify(observationViewTarget(name));
   const node=operationTarget(name).node_id;
   const win = $("tel-window"); if (win) win.textContent = telWindowLabel(telMinutes);
+  const st = $("tel-status");
+  if (st) { st.className = "tel-status"; st.innerHTML = "⏳ 正在載入 Telemetry…"; }
   telAnalyze(name, telMinutes);   // 背景觸發簡短 AI 分析（不阻塞 telemetry 繪圖）
   let d;
   try {
     d = await api(`/api/machine/${encodeURIComponent(name)}/telemetry?minutes=${telMinutes}${node?`&node_id=${encodeURIComponent(node)}`:""}`);
-  } catch (e) { return; }
+  } catch (e) {
+    if (_activeMachine!==name || target!==JSON.stringify(observationViewTarget(name))) return;
+    if (st) { st.className = "tel-status error"; st.innerHTML = `⚠️ Telemetry 載入失敗：${esc(e.message||e)} <button class="btn" onclick="loadTelemetry()">重試</button>`; }
+    return;
+  }
   if (_activeMachine!==name || target!==JSON.stringify(observationViewTarget(name))) return;
   if(win) win.textContent=telWindowLabel(telMinutes)+(d.history_source==="legacy-machine-unattributed"?" · 舊 machine 歷史／未確認 node 歸屬":" · Node "+(operationTarget(name).active_os??"—"))+" · 採集 "+(d.observation?.state||"UNKNOWN");
   const os = d.os || {}, gpu = d.gpu || {};
   const oarr = os.os || [];
   const oLabels = oarr.map(r => telT(r.ts));
+  const obsState = d.observation?.state || "UNKNOWN";
+  if (st) {
+    if (!oarr.length) {
+      st.className = "tel-status empty";
+      st.innerHTML = `📭 此 ${{NOT_CONFIGURED:"尚未設定採集",ERROR:"上一次採集失敗",DEFERRED:"採集被延後",COLLECTING:"採集進行中"}[obsState] || obsState}：目前時間範圍內沒有 OS 採樣資料。`
+        + (obsState === "NOT_CONFIGURED" ? "（後端採集服務未執行）" : "");
+    } else {
+      st.className = "tel-status ok";
+      st.innerHTML = `✅ 已載入 ${oarr.length} 筆 OS 採樣${oarr.length < 3 ? "（樣本較少，圖表以點呈現）" : ""}`;
+    }
+  }
 
   // CPU：使用率 %
   let ch = telChart("tel-cpu", "%");
@@ -2585,6 +2660,10 @@ function machineSensorsHtml(d, base, name) {
   if (!base.bmc_alive) return `<div class="empty">BMC 目前不可連</div>`;
   if (d && d.error) return `<div class="empty">${esc(d.error)}</div>`;
   const s = (d && d.sensors) || {};
+  // 後端 sdr list 逾時/失敗：明確顯示錯誤，不要留空白框。
+  if (s.error) {
+    return `<div class="empty">⚠️ 感測器暫時讀取失敗：${esc(s.error)}<br>（BMC 忙碌或逾時，稍後會自動重試）</div>`;
+  }
   // 完全沒有資料時才顯示「抓取中」；有舊快取（refreshing）時照常顯示資料並在背景更新
   if (!d || (d.loading && !Object.keys(s).length)) {
     return `<div class="empty">🔍 感測器抓取中（sdr list 較慢，約 20 秒）…</div>`;
@@ -2670,20 +2749,31 @@ const machineDetailCache = {};
 //     下次重載時同步讀回，讓畫面直接重繪上次結果，而不是先顯示 Loading 佔位。
 const SNAPSHOT_KEY = "pa_snapshot_v1";
 let _snapshotTimer = null;
+// 快照內容：清單 + 詳情 + 目前 view +「上次 #content 的實際 HTML」。
+// 最後一項讓 F5 時可在 app.js 載入前，用 inline script 把畫面原樣貼回去，
+// 徹底消除重載期間的 Loading 閃爍（連 0.5 秒的下載空窗都不閃）。
+function _snapshotPayload() {
+  const details = {};
+  for (const [k, v] of Object.entries(machineDetailCache)) {
+    if (v && !v.error) details[k] = v;   // 只存成功的詳情
+  }
+  const content = document.getElementById("content");
+  const nav = document.getElementById("nav");
+  // 不把「Loading 過場」或空內容存成畫面快照，避免下次 F5 貼回 Loading。
+  const isPlaceholder = !content || !content.children.length || /^\s*Loading/.test(content.textContent || "");
+  return {
+    machines, projects, details,
+    view: state.view, activeMachine: _activeMachine, activeProject: _activeProject,
+    contentHtml: isPlaceholder ? null : content.innerHTML,
+    sidebarHtml: nav && nav.innerHTML ? nav.innerHTML : null,
+  };
+}
 function saveSnapshot() {
   if (_snapshotTimer) return;                       // 去抖：多個成功回應合併成一次寫入
   _snapshotTimer = setTimeout(() => {
     _snapshotTimer = null;
-    try {
-      const details = {};
-      for (const [k, v] of Object.entries(machineDetailCache)) {
-        if (v && !v.error) details[k] = v;   // 只存成功的詳情
-      }
-      sessionStorage.setItem(SNAPSHOT_KEY, JSON.stringify({
-        machines, projects, details,
-        view: state.view, activeMachine: _activeMachine, activeProject: _activeProject,
-      }));
-    } catch (_) { /* 配額滿或隱私模式：略過，不影響功能 */ }
+    try { sessionStorage.setItem(SNAPSHOT_KEY, JSON.stringify(_snapshotPayload())); }
+    catch (_) { /* 配額滿或隱私模式：略過，不影響功能 */ }
   }, 400);
 }
 function loadSnapshot() {
@@ -2702,20 +2792,13 @@ function loadSnapshot() {
 }
 function flushSnapshot() {
   if (_snapshotTimer) { clearTimeout(_snapshotTimer); _snapshotTimer = null; }
-  try {
-    const details = {};
-    for (const [k, v] of Object.entries(machineDetailCache)) {
-      if (v && !v.error) details[k] = v;
-    }
-    sessionStorage.setItem(SNAPSHOT_KEY, JSON.stringify({
-      machines, projects, details,
-      view: state.view, activeMachine: _activeMachine, activeProject: _activeProject,
-    }));
-  } catch (_) { /* 略過 */ }
+  try { sessionStorage.setItem(SNAPSHOT_KEY, JSON.stringify(_snapshotPayload())); }
+  catch (_) { /* 略過 */ }
 }
 window.addEventListener("pagehide", flushSnapshot);
 const machineDetailRequests = {};
-async function machineLoadDetail(name, refresh = false) {
+const bmcPollTries = {};   // name -> 已輪詢次數（避免 bmc_loading 無限重抓）
+async function machineLoadDetail(name, refresh = false, silent = false) {
   const request = (machineDetailRequests[name] || 0) + 1;
   machineDetailRequests[name] = request;
   const target = JSON.stringify(observationViewTarget(name));
@@ -2729,13 +2812,37 @@ async function machineLoadDetail(name, refresh = false) {
     const prior = machineDetailCache[name];
     if (prior && !prior.error) result.prev = prior.prev || prior;
   }
+  const before = machineDetailCache[name];
   machineDetailCache[name] = result;
   if (result && !result.error) saveSnapshot();
   if (_activeMachine === name && state.view === "machine") {
-    setView("machine");
-    if (result?.bmc_loading) setTimeout(() => {
-      if (_activeMachine === name && state.view === "machine" && machineDetailRequests[name] === request) machineLoadDetail(name);
-    }, 3000);
+    // 靜默輪詢（silent）→ 不重繪；只有當 BMC 資料真的變了才重繪一次。
+    if (silent) {
+      const changed = JSON.stringify(before?.fw) !== JSON.stringify(result?.fw)
+                   || JSON.stringify(before?.power) !== JSON.stringify(result?.power)
+                   || !!before?.bmc_loading !== !!result?.bmc_loading;
+      if (changed) setView("machine");
+    } else {
+      setView("machine");
+    }
+    // 後端 BMC 首次抓取仍在背景進行（bmc_loading）時，稍後再「靜默」抓一次。
+    // 整頁重繪（setView）是閃爍來源，且輪詢可能無限 → 只在資料真的變動時重繪，
+    // 並限制次數，避免每 3 秒全頁閃一次。
+    if (result?.bmc_loading) {
+      const tries = (bmcPollTries[name] || 0) + 1;
+      bmcPollTries[name] = tries;
+      if (tries <= 12) {
+        setTimeout(() => {
+          if (_activeMachine === name && state.view === "machine" && machineDetailRequests[name] === request) {
+            machineLoadDetail(name, false, true);
+          }
+        }, 3000);
+      } else {
+        delete bmcPollTries[name];
+      }
+    } else {
+      delete bmcPollTries[name];
+    }
   }
 }
 
@@ -3012,6 +3119,7 @@ function pageMachine() {
         <span class="tel-ai-hint">🤖 Telemetry AI</span>
       </div>
       <div class="tel-ai" id="tel-ai">✨ 正在分析此範圍的監控趨勢…</div>
+      <div class="tel-status" id="tel-status" role="status" aria-live="polite"></div>
       <div class="tel-grid" id="tel-grid">
         <div class="tel-block" data-open="1">
           <div class="tel-block-head"><span class="tel-label">CPU <em>（中央處理器）</em></span></div>
@@ -3055,18 +3163,26 @@ function pageMachine() {
       <div class="footer-hint">Telemetry 由後端定時透過 SSH 收集（NVIDIA nvidia-smi / AMD rocm-smi + /proc），不需在被監控機器安裝 agent。</div>
     </div>`;
 }
-// 系統診斷結果暫存（key=機台名），避免頁面 async 更新時被清掉
-const diagStore = {};   // { name: {state:'loading'|'done'|'error', html:'...'} }
+// 系統診斷結果暫存（key=機台名 + 目前選定 OS slot），避免切換 node 後仍顯示上一節點的結果
+const diagStore = {};   // { key: {state:'loading'|'done'|'error', html:'...'} }
+
+// 診斷快取鍵：同一台機框不同 node 是不同目標，必須分開存，否則切 node 會殘留上一個節點結果。
+function diagKey(name) {
+  const m = (typeof machines !== "undefined" ? machines : []).find(x => x.name === name);
+  const slot = m && m.active_os != null ? m.active_os : 1;
+  return name + "#" + slot;
+}
 
 function diagBodyFill(name) {
-  const s = diagStore[name];
+  const s = diagStore[diagKey(name)];
   if (!s) return `<div class="empty">點上方「🩺 系統診斷」按鈕，收集 dmesg / journalctl / GPU / BMC event log，並由 AI 分析問題與建議處理。</div>`;
   if (s.state === "loading") return `<div class="empty">⏳ 正在收集資料並呼叫 AI 分析（約 30~60 秒）…</div>`;
   return s.html || `<div class="empty">(無結果)</div>`;
 }
 function runDiagnose(name) {
   const btn = [...document.querySelectorAll("button")].find(b => b.textContent.includes("系統診斷") || b.textContent.includes("診斷中"));
-  diagStore[name] = { state: "loading", html: "" };
+  const key = diagKey(name);
+  diagStore[key] = { state: "loading", html: "" };
   if (btn) { btn.disabled = true; btn.textContent = "⏳ 診斷中…"; }
   const body = $("diag-body");
   if (body) body.innerHTML = diagBodyFill(name);
@@ -3074,19 +3190,19 @@ function runDiagnose(name) {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ include_bmc: true })
   }).then(d => {
     if (!d.ok) throw new Error(d.error || "分析失敗");
-    if (d.note) { diagStore[name] = { state: "done", html: `<div class="empty">${esc(d.note)}</div>` }; return; }
+    if (d.note) { diagStore[key] = { state: "done", html: `<div class="empty">${esc(d.note)}</div>` }; return; }
     const md = d.report || "(無分析結果)";
     const bmcMode = d.collect && d.collect.bmc_mode === "os_local"
       ? "本機 ipmitool（SSH 進 OS 執行）"
       : d.collect && d.collect.bmc ? "OOB lanplus" : "—";
-    diagStore[name] = { state: "done", html: `
-      <div class="diag-report"><pre class="mach-pre mono">${esc(md)}</pre></div>
+    diagStore[key] = { state: "done", html: `
+      <div class="diag-report diag-md">${mdToHtml(md)}</div>
       <details class="diag-raw"><summary>診斷原始資料（收集時間 ${esc(d.collected_at||"—")} · IPMI：${esc(bmcMode)}）</summary>
         <pre class="mach-pre mono">${esc((d.collect&&d.collect.os)||"(無 OS 資料)")}</pre>
         ${d.collect && d.collect.bmc ? `<pre class="mach-pre mono">===== BMC SEL =====\n${esc(d.collect.bmc)}</pre>` : ""}
       </details>` };
   }).catch(e => {
-    diagStore[name] = { state: "error", html: `<div class="empty" style="color:var(--danger)">診斷失敗：${esc(e.message)}</div>` };
+    diagStore[key] = { state: "error", html: `<div class="empty" style="color:var(--danger)">診斷失敗：${esc(e.message)}</div>` };
   }).finally(() => {
     const b2 = $("diag-body");
     if (b2) b2.innerHTML = diagBodyFill(name);
@@ -4851,6 +4967,7 @@ function paintGpuAlerts() {
 /* ---------- 啟動 ---------- */
 function buildNav() {
   const nav = $("nav");
+  nav.innerHTML = "";               // 清空：可能已由 F5 快照的 inline 還原貼上，避免重複
   let cur = null;
   NAV_ITEMS.forEach(it => {
     if (it.group !== cur) { cur = it.group; nav.insertAdjacentHTML("beforeend", `<div class="nav-group">${it.group}</div>`); }
@@ -4898,13 +5015,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   parseHash();                      // 讀取 URL hash，指定初始分頁
   window.addEventListener("resize", () => { fitAll(); bcFitAll(); });
   window.addEventListener("hashchange", () => { parseHash(); setView(state.view); });
-  // 用快照立即重繪（F5 不再閃 Loading 佔位），再於背景抓最新資料覆蓋。
+  // 用快照立即重繪（F5 不閃爍），再於背景抓最新資料覆蓋。
+  // 沒有快照時，inline script 已放上 Loading 佔位，這裡不需再處理。
   if (hydrated) {
     try { setView(state.view); } catch (_) { /* 快照過期就等網路結果 */ }
-  } else {
-    // 沒有快照（首次載入）才顯示 Loading 佔位，避免空白頁。
-    const ph = document.querySelector("#content .pa-boot-placeholder");
-    if (ph) ph.hidden = false;
   }
   try {
     await Promise.all([loadMachines(), loadProjects()]);

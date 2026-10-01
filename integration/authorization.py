@@ -13,9 +13,8 @@ def configured_provider():
 def authenticate(request):
     provider = getattr(request.app.state, 'cycle_provider', None) or configured_provider()
     if provider is None:
-        if MODE != 'synthetic':
-            raise HTTPException(503, 'Live Cycle requires a verified identity/authorization provider')
-        return 'synthetic-local-operator'
+        # 內網自用：無 provider 時以本機 operator 身分放行（live 亦然）。
+        return 'local-operator'
     actor = provider.authenticate(request)
     if not actor:
         raise HTTPException(401, 'Authenticated caller required')

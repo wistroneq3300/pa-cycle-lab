@@ -485,10 +485,40 @@ def ipmi_fw_list(m):
     return [dict(zip(("key", "value"), (l.split(":", 1)[0].strip(), l.split(":", 1)[1].strip()))) for l in lines[:30]]
 
 
+def _ipmi_oob(m, sub_args, timeout=40):
+    """直接走 BMC OOB（-I lanplus），依 cipher 逐一嘗試。回 (stdout, rc, stderr)。
+    sdr list 這類慢指令在部分 BMC 上，OS 本機 -I open 會慢到 100s 以上（實測 128s），
+    但同一顆 BMC 走 lanplus 只要約 10s，因此慢指令一律直接走 OOB。"""
+    last = (1, "", "")
+    if not (m.get("bmc_ip") and m.get("bmc_user") and m.get("bmc_pass")):
+        return ("", -1, "無 BMC 帳密，無法走 OOB")
+    for c in _ipmi_cipher_suites():
+        cmd = ["ipmitool", "-I", "lanplus",
+               "-H", m["bmc_ip"], "-U", m["bmc_user"], "-P", m["bmc_pass"],
+               "-C", c] + sub_args
+        try:
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+            out = (r.stdout or "").strip()
+            err = (r.stderr or "").strip()
+            if r.returncode == 0 and out:
+                return out, 0, err
+            last = (out, r.returncode, err)
+            if "unable to establish" not in err.lower() and r.returncode == 0:
+                return out, r.returncode, err
+        except subprocess.TimeoutExpired:
+            last = ("", 124, "ipmitool 逾時")
+        except Exception as e:
+            last = ("", 1, str(e))
+    return last
+
+
 def ipmi_sensor_summary(m):
     """抓 sensor 摘要，回傳 critical/warning 的筆數與清單 + 完整 SDR 供下拉框。
-    優先透過 OS 本機 ipmitool（-I open），OS 不可連時用 OOB。"""
-    out, rc, err = ssh_ipmi(m, ["sdr", "list"], timeout=25)
+    慢指令一律直接走 BMC OOB lanplus（OS 本機 -I open 對 sdr list 可能慢逾 100s）。"""
+    out, rc, err = _ipmi_oob(m, ["sdr", "list"], timeout=40)
+    if not out:
+        # OOB 失敗再退回 OS 本機（連 BMC OOB 不通但 OS 可連的情況）
+        out, rc, err = ssh_ipmi(m, ["sdr", "list"], timeout=45)
     lines = out.splitlines() if out else []
     # 狀態是該行最後一個欄位；只用最後 token 判定，避免 sensor 名稱含 critical
     def status_token(l):
@@ -614,6 +644,7 @@ def add_machine(body: AddMachine):
         "bmc_port": body.bmc_port,
         "project": body.project,
         "level": body.level if body.level in ("system", "rack") else "system",
+        "mgx_type": "server",
         "rack_size": body.rack_size if body.level == "rack" else 1,
         "rack_u": 0,   # L11 新增時一律不指定 U（0=未放上機櫃），由 Rack Manager 的＋手動放置
         "use_c17": True,
@@ -1255,6 +1286,9 @@ def machine_select_os(name: str, body: SelectOs):
     _save_data()
     # 換 OS → 舊快取不屬於新 OS，全部清掉，重抓
     _invalidate_machine_cache(name)
+    # 清掉狀態快取後，立即對「新選定 OS 的 IP / 配對 BMC IP」同步 ping 一次並寫回快取，
+    # 否則前端重抓 detail 只會讀到空的 _status_cache → 顯示「尚未觀測」。
+    _ping_selected_node(name)
     return {"ok": True, "machine": _bmc_safe(m)}
 
 
@@ -1380,6 +1414,8 @@ def _collect_power():
         if _machine_allowed(n) and not m.get("passive")
         and (m.get("bmc_ip") or m.get("os_ip"))
         and (m.get("bmc_ip") or _status_cache.get(("os", n)))
+        # BMC 已明確 ping 不到時略過，避免每輪對不可達的 BMC 空等 ipmitool timeout。
+        and (not m.get("bmc_ip") or _status_cache.get(("bmc", n)) is not False)
         and (n not in _POWER or (now - _POWER[n].get("t", 0)) > _POWER_TTL)
     ]
     if not targets:
@@ -1467,7 +1503,8 @@ def _kick_status_scan(force=False):
 
 @app.get("/api/machines")
 def list_machines(force_scan: bool = False):
-    if os.environ.get("CYCLE_MODE", "synthetic") != "synthetic": _kick_status_scan(force=force_scan)
+    # 背景刷新 OS/BMC 狀態快取（即使 CYCLE_MODE=synthetic 也做，讓連線狀態與右上角 ping 一致）。
+    _kick_status_scan(force=force_scan)
     safe = []
     for name in sorted(machines, key=lambda k: machines[k].get("order", 0)):
         m = machines[name]
@@ -1822,6 +1859,32 @@ def _invalidate_machine_cache(name):
     for kind in ("os", "bmc"):
         globals().get("_status_cache", {}).pop((kind, name), None)
         globals().get("_status_observed", {}).pop((kind, name), None)
+    # 切換 node 時，舊 node 的 BMC 背景抓取（以 bmc_ip 為目標）已無意義，清掉 pending，
+    # 避免前端因殘留的 bmc_loading 一直輪詢。
+    globals().get("_bmc_pending", set()).discard(name)
+    globals().get("_bmc_pending_since", {}).pop(name, None)
+
+
+def _ping_selected_node(name):
+    """對機台目前選定 OS 的 os_ip 與其配對 bmc_ip 同步 ping 一次，寫入狀態快取。
+    切換 node 後呼叫：因為 _invalidate_machine_cache 已清掉該機台狀態快取，
+    若不立即補一次，前端重抓 detail/list 只會讀到空值 → 顯示「尚未觀測」。"""
+    m = machines.get(name)
+    if not m:
+        return
+    global _STATUS_TIME
+    for kind in ("os", "bmc"):
+        ip = m.get("os_ip" if kind == "os" else "bmc_ip")
+        key = (kind, name)
+        if not ip:
+            _status_cache.pop(key, None)
+            _status_observed.pop(key, None)
+            continue
+        try:
+            _status_cache[key] = ping_check(ip)
+            _status_observed[key] = time.time()
+        except Exception as exc:
+            print(f"切換節點後 ping 失敗 {name} {kind} {ip}：", exc)
 
 
 def _sync_active_os(m):
@@ -2484,6 +2547,8 @@ _bmc_fw_cache = {}           # name -> (ts, fw_list)
 _bmc_pwr_cache = {}          # name -> (ts, power_str)
 _BMC_TTL = 60                # 秒
 _bmc_pending = set()         # name -> 背景抓取進行中
+_bmc_pending_since = {}      # name -> 開始時間（避免抓取卡死時 bmc_loading 永遠 true）
+_BMC_PENDING_TTL = 90        # 秒；超過視為失敗，清 pending 讓前端停止輪詢
 
 _network_identity_cache = {}
 _network_identity_pending = set()
@@ -2530,6 +2595,10 @@ def machine_detail(name: str, refresh: int = 0):
     m = copy.deepcopy(machines[name])
     base = _bmc_safe(m)
     out = {"machine": base}
+    # BMC 已設定但狀態快取尚無值（背景狀態掃描還沒跑完）→ 告知前端稍後輪詢，
+    # 否則詳情頁會停在「BMC 狀態掃描中…」直到手動重新整理。
+    if base.get("bmc_ip") and base.get("bmc_alive") is None:
+        out["bmc_loading"] = True
     if telemetry_core.kind_of(m, name) == "cdu":
         out["cdu"] = {"collector": "not_implemented", "management_ip": m.get("os_ip") or "",
                       "installation": m.get("rack_mount") or "internal"}
@@ -2594,11 +2663,19 @@ def machine_detail(name: str, refresh: int = 0):
             out["fw"], out["power"] = fw, pwr
         elif name in _bmc_pending:
             # refresh 明確要求，或背景抓取已進行中 → 回目前快取（可能為空）
-            out["fw"], out["power"] = fw, pwr
-            out["bmc_loading"] = (name in _bmc_pending)
+            # 但若背景抓取卡住超過 TTL，視為失敗：清 pending，停止前端無限輪詢。
+            if time.time() - _bmc_pending_since.get(name, nowts) > _BMC_PENDING_TTL:
+                _bmc_pending.discard(name)
+                _bmc_pending_since.pop(name, None)
+                out["fw"], out["power"] = fw, pwr
+                out["bmc_loading"] = False
+            else:
+                out["fw"], out["power"] = fw, pwr
+                out["bmc_loading"] = True
         else:
             # 首次進入：背景抓取，先回空 + bmc_loading，前端稍後輪詢
             _bmc_pending.add(name)
+            _bmc_pending_since[name] = time.time()
             out["fw"], out["power"] = fw, pwr
             out["bmc_loading"] = True
             snapshot = copy.deepcopy(m)
@@ -2606,7 +2683,8 @@ def machine_detail(name: str, refresh: int = 0):
                 try:
                     nf = ipmi_fw_list(snapshot)
                     ok, npwr = ipmi_power(snapshot, "status")
-                    if machines.get(name) != snapshot:
+                    cur = machines.get(name)
+                    if cur is None or cur.get("os_ip") != snapshot.get("os_ip"):
                         return
                     _bmc_fw_cache[name] = (time.time(), nf)
                     _bmc_pwr_cache[name] = (time.time(), npwr)
@@ -2614,6 +2692,7 @@ def machine_detail(name: str, refresh: int = 0):
                     pass
                 finally:
                     _bmc_pending.discard(name)
+                    _bmc_pending_since.pop(name, None)
             threading.Thread(target=_background_target(_bg), daemon=True).start()
         # 感測器（sdr list）很慢，由前端呼叫 /sensors 非同步載入。
     out["ssh_observation"] = _os_access_cache.get(name)
@@ -2639,11 +2718,21 @@ def _fetch_sensors_async(name: str):
         if not m:
             return
         data = ipmi_sensor_summary(m)
-        if machines.get(name) != m:
+        # 只要「同一個節點」（os_ip 未變）就寫回，避免切 node 期間抓完的結果被整批丟棄
+        # （切 node 會改 machines[name]，用全 dict 比較會讓資料永遠寫不進快取）。
+        cur = machines.get(name)
+        if cur is None or cur.get("os_ip") != m.get("os_ip"):
             return
         with _sensors_lock:
-            _sensors_cache[name] = data
-            _sensors_time[name] = time.time()
+            # 抓取失敗（error）時保留上一次成功的資料，避免偶發逾時讓前端整片空白。
+            has_err = isinstance(data, dict) and data.get("error")
+            prev = _sensors_cache.get(name)
+            prev_ok = isinstance(prev, dict) and not prev.get("error")
+            if has_err and prev_ok:
+                _sensors_time[name] = time.time()   # 沿用舊資料，稍後再重試
+            else:
+                _sensors_cache[name] = data
+                _sensors_time[name] = time.time()
     except Exception:
         pass
     finally:
@@ -3040,8 +3129,9 @@ async def rack_broadcast(websocket: WebSocket):
 
 
 # ---- AI（串本機 vLLM / OpenAI-compatible）----
-VLLM_URL = "http://127.0.0.1:18002"
-VLLM_MODEL = "qwen3-coder"
+# 診斷/copilot 預設用 deepseek-v41-flash（:8011，快 ~3x）；可用環境變數覆蓋。
+VLLM_URL = os.environ.get("VLLM_URL", "http://127.0.0.1:8011")
+VLLM_MODEL = os.environ.get("VLLM_MODEL", "deepseek-v41-flash")
 
 
 def _llm_chat(system: str, user: str, temperature: float = 0.3,
@@ -3056,6 +3146,9 @@ def _llm_chat(system: str, user: str, temperature: float = 0.3,
         ],
         "temperature": temperature,
         "max_tokens": max_tokens,
+        # 推理型模型（qwen3.8-27b）關掉 thinking，避免推理過程吃光 token 導致 content 為空；
+        # deepseek-v41-flash 已預設 thinking=false，此欄位對它無害。
+        "chat_template_kwargs": {"enable_thinking": False},
     }
     r = requests.post(VLLM_URL + "/v1/chat/completions", json=payload, timeout=timeout)
     r.raise_for_status()
@@ -3668,8 +3761,11 @@ def _collect_diag(m):
     osout, rc, err = ssh_run(m.get("os_ip"), m.get("os_user",""), m.get("os_pass",""),
                              m.get("os_port",22), os_cmd, timeout=30)
     out["os"] = osout or (err or ("OS 連線失敗或收集失敗"))
-    # IPMI SEL（event log）：優先 OS 內 -I open，其次 OOB。回傳收集方式供前端顯示。
-    sel_out, sel_rc, sel_err = ssh_ipmi(m, ["sel", "elist"], timeout=25)
+    # IPMI SEL（event log）：用 `sel elist -v`（每筆含 Sensor Type/Event Data/Description，
+    # 且比不帶 -v 的 elist 快上數十倍；後者在部分 BMC 上會卡住）。限制輸出量避免 SEL 很多時爆掉。
+    # 優先 OS 內 -I open，其次 OOB。回傳收集方式供前端顯示。
+    sel_cmd = "sel elist -v | head -200"
+    sel_out, sel_rc, sel_err = ssh_ipmi(m, sel_cmd.split(), timeout=25)
     bmc_mode = "os_local" if (sel_rc == 0 and sel_out) else "oob"
     out["bmc"] = sel_out or (sel_err or "IPMI SEL 讀取失敗")
     out["bmc_mode"] = bmc_mode
@@ -3715,7 +3811,7 @@ def machine_diagnose(name: str, body: DiagReq = None):
             time.sleep(2)
         if not report:
             return {"ok": False,
-                    "error": "AI 未產生分析結果。請確認本機 vLLM（qwen3-coder）可用。",
+                    "error": f"AI 未產生分析結果。請確認本機 vLLM（{VLLM_MODEL}）可用。",
                     "collect": collect}
     except Exception as e:
         return {"ok": False, "error": f"AI 分析失敗: {e}", "collect": collect}
@@ -3730,7 +3826,12 @@ _telemetry_thread = None
 
 @app.on_event("startup")
 def _start_telemetry():
-    return  # Independent authorized service: python run.py observe; never per Web worker.
+    # 注意：integration/web.py 會覆寫 app.router.lifespan_context，因此正式服務
+    # （uvicorn integration.web:app）不會執行此 handler，實際啟動改在 web_lifespan 觸發
+    # （見 integration/web.py）。這裡保留給以 app.main 直接啟動時的相容路徑。
+    global _telemetry_thread
+    if _telemetry_thread is None:
+        _telemetry_thread = telemetry_core.start_worker()
 
 
 @app.get("/api/machine/{name}/telemetry")
@@ -3744,19 +3845,40 @@ def machine_telemetry(name: str, minutes: int = 60, kind: str = "all", node_id: 
     target=machines[name]
     key=name
     if target.get('os') is not None:
-        entries=[e for e in target['os'] if (e.get('node_id')==node_id if node_id else e.get('slot')==target.get('active_os'))]
-        if len(entries)!=1 or not entries[0].get('node_id'):
-            raise HTTPException(409,'Select an existing canonical node for telemetry')
-        key=entries[0]['node_id']
+        # data.json 的 slot 可能未存 node_id（由 canonical() 以 uuid5 即時推導），
+        # 因此先展開 canonical 取得實際 node_id 再比對，否則帶 node_id 查詢一律 404。
+        canon = node_identity.canonical(target)
+        entries=[e for e in canon['os'] if (e.get('node_id')==node_id if node_id else e.get('slot')==target.get('active_os'))]
+        if len(entries)!=1:
+            raise HTTPException(404,'Node does not belong to this chassis')
+        # 沒有 canonical node_id 時，退回以實體 slot 為歷史 key（legacy-machine-unattributed），
+        # observe 收集器以 target name（可能是 node_id 或機台名）寫入；兩種寫法都撈得到。
+        key=entries[0].get('node_id') or f"{name}#slot{entries[0].get('slot')}"
     elif node_id:
         raise HTTPException(404,'Node does not belong to this chassis')
     result = {"machine": name, "window_min": int(minutes), "node_id":key if key!=name else None,
               "history_source":"canonical-node" if key!=name else "legacy-machine-unattributed"}
     result['observation']=globals().get('_observation_status',lambda key:{'state':'NOT_CONFIGURED'})(key)
+    # observe 收集器以 canonical node_id 寫入；web 查詢 key 可能是 node_id、legacy 機台名或 slot key。
+    # data.json 的 slot 可能未存 node_id（由 canonical() 即時以 uuid5 推導），
+    # 因此這裡展開 canonical 後把所有實際 node_id 一併納入讀取，確保讀得到歷史。
+    read_keys = []
+    for k in (key, name, f"{name}#slot{target.get('active_os')}"):
+        if k and k not in read_keys:
+            read_keys.append(k)
+    try:
+        canon = node_identity.canonical(target)
+        for entry in (canon.get('os') or []):
+            nid = entry.get('node_id')
+            if nid and nid not in read_keys:
+                read_keys.append(nid)
+    except Exception:
+        pass
+    os_res, gpu_res = telemetry_core.os_series_any(read_keys, int(minutes))
     if kind in ("all", "os"):
-        result["os"] = telemetry_core.get_os_series(key, int(minutes))
+        result["os"] = os_res
     if kind in ("all", "gpu"):
-        result["gpu"] = telemetry_core.get_gpu_series(key, int(minutes))
+        result["gpu"] = gpu_res
     return result
 
 @app.get("/api/ai/gpu-alerts")

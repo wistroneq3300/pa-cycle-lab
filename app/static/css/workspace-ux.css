@@ -91,7 +91,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,s
  #ux-notifications{right:12px;bottom:12px}
 }
 
-.ux-chart-time{display:block;color:var(--ew-muted);font-size:11px;line-height:1.5;margin:0 0 6px}.chart-box[hidden]{display:none!important}
+.ux-chart-time{display:block;color:var(--ew-muted);font-size:11px;line-height:1.5;margin:5px 0 6px}.chart-box[hidden]{display:none!important}
 
 .p-operations .btn,.p-row-menu .btn,.p-project-strip button,.p-workspace-tabs b{font-size:12px}.pd-section-heading .pd-eyebrow,.pd-ops-heading .pd-eyebrow{display:none}.ux-metrics strong{font-variant-numeric:tabular-nums}
 

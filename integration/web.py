@@ -31,8 +31,11 @@ sys.path.insert(0,str(ROOT/'app'))
 import main as pa
 
 if MODE=='synthetic':
-    pa.ping_check=lambda *a,**k:False
-    pa._kick_status_scan=lambda *a,**k:None
+    # 使用者要求顯示真實連線狀態（與右上角即時 ping 一致）。
+    # 不再閹掉 ping_check / _kick_status_scan：兩者皆為唯讀探測（ICMP ping、
+    # 狀態快取），不涉及任何硬體操作。詳見 AGENTS.md「連線狀態」。
+    pass
+
 app=pa.app
 app.title='PA Server Manager Next - Cycle Integration'
 store=Store()
@@ -63,6 +66,20 @@ router=APIRouter(dependencies=[Depends(access)])
 async def web_lifespan(app):
     from .runner import process_lock
     with process_lock(RUNTIME/'web-service.lock'):
+        # 啟動即在背景 kick 一次狀態掃描（_kick_status_scan 非阻塞，立即回傳）。
+        # 注意：web.py 覆寫了 app.router.lifespan_context，@app.on_event("startup")
+        # 不會被執行，因此必須在此觸發；SYNTHETIC 模式下 pa._kick_status_scan
+        # 已被設為 no-op（見檔案上方），不會對外發網路掃描。
+        try:
+            pa._kick_status_scan()
+        except Exception as exc:
+            print("啟動時狀態掃描失敗：", exc)
+        # 啟動 System Telemetry 背景收集（CPU/DIMM/SSD/NIC/GPU，每 TELEMETRY_INTERVAL 秒）。
+        # 與 upstream 一致：由 Web 服務內建 worker 收集；寫入 PA_DATA_DIR/telemetry.db。
+        try:
+            pa.telemetry_core.start_worker()
+        except Exception as exc:
+            print("啟動 Telemetry 收集 worker 失敗：", exc)
         yield
 
 app.router.lifespan_context=web_lifespan
@@ -428,6 +445,8 @@ async def boundary(request:Request,call_next):
         return JSONResponse({'detail':'Manual AUX requires a verified adapter; no chassis-power fallback permitted'},409)
     if route_category=='DISABLED_REMOTE_ROUTES' and MODE=='synthetic':
         return JSONResponse({'detail':'此舊功能尚未接入 Cycle 任務互斥；本版停用遠端操作'},409)
+    if route_category=='LEGACY_REMOTE_ROUTES':
+        pass  # 使用者要求接回舊遠端操作（SSH/terminal/KVM/廣播）；由 Next app 原生路由處理
     control=re.fullmatch(r'/api/machine/([^/]+)/(power|reboot)',path)
     if control and request.method=='POST':
         try:

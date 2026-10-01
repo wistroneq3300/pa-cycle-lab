@@ -93,4 +93,19 @@ input_sessions:0 列   jobs:0   controls:0
 - DB:`data/pa6969/jobs.sqlite3`
 
 ---
-*本文僅記錄狀態與處置,未改任何程式碼。cycle 未執行。*
+## 六、後續處置(branch `codex/remove-locks`,HEAD 8bb777d)
+
+依需求**移除鎖的強制(enforcement)**,保留 `locks` 表(舊 DB 仍可載入):
+
+- `integration/store.py`:`reserve()` 不再寫入、不再抛 `Conflict`;`assert_scopes_idle()` 改為 no-op;`lock_owners()` 回 `{}`。
+- `integration/coordinator.py`:`session()` 不再 `reserve`,也不再 DELETE 鎖。
+- `integration/observation_service.py`:觀測不再 reserve,owner 固定為 `observation`(前端不再因 owner 被 409)。
+- `integration/inventory.py` / `web.py` 的既有呼叫點因 no-op 而自動失效,無需改動。
+- DB 既有鎖列已清除;備份:`data/pa6969/jobs.sqlite3.bak-remove-locks-20261001-203109`。
+
+**效果**:6969 頁面不再因孤兒鎖 409(已用合成環境實證:即使植入死 session 鎖列,`lock_owners()` 仍回空、targets 無 `occupied_by`)。
+**代價**:失去跨機流程與**共用 power/AUX domain** 的互鎖;同目標可被併發操作(BMC 層本來也不擋,但 BMC 看不到共用電源關係)。
+**測試**:app/tests 53 passed;tests/ 22 failed(全為斷言鎖/409 行為的既有測試,屬預期),118 passed。
+
+---
+*本文僅記錄狀態與處置;鎖強制已於 branch `codex/remove-locks` 移除,未在 `codex/next-rack-cycle` 上變更。cycle 未執行。*

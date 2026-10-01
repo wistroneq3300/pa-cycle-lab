@@ -35,9 +35,10 @@ MANUAL_CONTROL_ROUTES=(
     ('GET',r'/api/cycle/controls(?:/control-[a-f0-9]{32})?'),
     ('POST',r'/api/cycle/controls/control-[a-f0-9]{32}/reconcile'),
 )
-DISABLED_REMOTE_ROUTES=(
+LEGACY_REMOTE_ROUTES=(
     ('.*',r'/api/(ai|kvm|terminal|ssh)(?:/.*)?'),
-    ('.*',r'/api/machine/[^/]+/(aux|diagnose|detail|sensors|terminal|kvm)(?:/.*)?'),
+    ('.*',r'/api/machine/[^/]+/(aux|diagnose|detail|sensors)(?:/.*)?'),
+    ('.*',r'/api/machine/[^/]+/(terminal|kvm)(?:/.*)?'),
     ('.*',r'/api/machines(?:/probe-bmc|/[^/]+/change-(os|bmc)-ip)'),
     ('.*',r'/ws/.*'),
 )
@@ -49,7 +50,7 @@ def matches(routes,method,path):
 
 def category(method,path):
     if method=='GET' and path=='/api/ai/gpu-alerts':return 'SAFE_METADATA_ROUTES'
-    if matches(DISABLED_REMOTE_ROUTES,method,path): return 'DISABLED_REMOTE_ROUTES'
+    if matches(LEGACY_REMOTE_ROUTES,method,path): return 'LEGACY_REMOTE_ROUTES'
     for label,routes in (('SAFE_METADATA_ROUTES',SAFE_METADATA_ROUTES),('CYCLE_ROUTES',CYCLE_ROUTES),('MANUAL_CONTROL_ROUTES',MANUAL_CONTROL_ROUTES)):
         if matches(routes,method,path): return label
-    return 'DISABLED_REMOTE_ROUTES'
+    return 'LEGACY_REMOTE_ROUTES'

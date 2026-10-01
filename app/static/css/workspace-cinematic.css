@@ -111,7 +111,7 @@
 .pd-workspace .pd-original-section .sensor-kpi>b { font-size:29px; }
 .pd-workspace .pd-original-section .alerts,.pd-workspace .pd-original-section .alerts .no-alert { font-size:12px!important; line-height:1.7; }
 .pd-workspace .pd-original-section :is(.sensor-ai,.tel-ai) { font-size:12px!important; color:#a0c5d1!important; background:#0a263240!important; border-color:#30617070!important; border-radius:6px; }
-.pd-workspace .pd-original-section .sdr-scroll { background:#0c171f!important; max-height:410px!important; border-radius:6px!important; }
+.pd-workspace .pd-original-section .sdr-scroll { background:#0c171f!important; max-height:500px!important; border-radius:6px!important; }
 .pd-workspace .pd-original-section .sdr-table td { font-size:11px!important; }
 .pd-workspace .pd-original-section .empty { font-size:12px!important; }
 .pd-workspace .pd-original-section .tel-block { background:#0a151d!important; border-radius:7px!important; }

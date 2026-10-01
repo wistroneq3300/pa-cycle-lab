@@ -71,7 +71,7 @@ class Transport:
                            username=self.users.get(role, os.environ.get(role.upper() + "_USER", USERS[role])), port=self.ports.get(role, 22),
                            password=self.credentials.get(role), timeout=timeout,
                            banner_timeout=timeout, auth_timeout=timeout,
-                           look_for_keys=not bool(self.credentials.get(role)), allow_agent=True)
+                           look_for_keys=True, allow_agent=True)
         except (paramiko.AuthenticationException, paramiko.BadHostKeyException) as exc:
             client.close()
             raise IdentityUnsafe(f"{role}: authentication or SSH host key validation failed") from exc
@@ -120,8 +120,9 @@ class Transport:
                 if time.monotonic() - start >= timeout:
                     raise TimeoutError("Command deadline exceeded")
                 time.sleep(0.05)
-        except IdentityUnsafe:
-            raise
+        except IdentityUnsafe as exc:
+            output = b"".join(chunks).decode(errors="replace")
+            return Command(255, (output + f"\n{exc}").strip(), "NOT_ISSUED" if not sent else "RESPONSE_LOST", time.monotonic() - start)
         except Exception as exc:
             output = b"".join(chunks).decode(errors="replace")
             output += f"\n{type(exc).__name__}: {exc}"

@@ -96,18 +96,13 @@
   const baseDevices=devicesHtml;
   devicesHtml=function(members,pinged){const root=document.createElement('div');root.innerHTML=baseDevices(members,pinged);root.querySelectorAll('tbody tr').forEach(row=>{const name=row.querySelector('a')?.textContent,m=members.find(m=>m.name===name);if(!m)return;const u=Number(m.rack_u),height=Number(m.rack_size)||1;row.cells[0].textContent=rackIsExternal(m)?'\u5916\u7f6e CDU / 0U':u?`${height>1?`U${u}\u2013U${u-height+1}`:`U${u}`} \u00b7 ${height}U`:'\u5c1a\u672a\u653e\u7f6e';row.querySelectorAll('button').forEach(b=>{if(b.textContent==='\u522a\u9664')b.textContent='\u79fb\u51fa\u6a5f\u6ac3';});});return root.innerHTML;};
 
-  // Add numeric summaries without changing sampling, datasets or aggregation semantics.
+  // Readout text next to charts is disabled (empty anchor only) by user request.
   if(window.Chart)Chart.register({id:'paEngineeringReadout',afterUpdate(chart){
     const canvas=chart.canvas;if(!canvas?.isConnected||!canvas.closest('.chart-box'))return;
     let panel=canvas.parentElement.querySelector('.eng-chart-readout');if(!panel){panel=document.createElement('div');panel.className='eng-chart-readout';canvas.before(panel);}
-    const values=chart.data.datasets.filter((_,i)=>chart.isDatasetVisible(i)).flatMap(ds=>ds.data.filter(finite).map(Number));
-    const latest=chart.data.datasets.filter((_,i)=>chart.isDatasetVisible(i)).map(ds=>({label:ds.label,value:ds.data.at(-1)}));
-    const format=v=>finite(v)?Number(v).toLocaleString(undefined,{maximumFractionDigits:2}):missing;
-    const text=latest.length?latest.slice(0,4).map(v=>`${v.label}: ${format(v.value)}${finite(v.value)&&chart.$paUnit?" "+chart.$paUnit:""}`).join(' \u00b7 '):'\u5c1a\u7121\u53ef\u7528\u8cc7\u6599';
-    const changed=panel.dataset.value&&panel.dataset.value!==text;
-    const bounds=values.reduce((a,v)=>[Math.min(a[0],v),Math.max(a[1],v)],[Infinity,-Infinity]);
-    panel.textContent=text+(latest.length>4?` \u00b7 +${latest.length-4}`:'');panel.title=`\u76ee\u524d\u986f\u793a\u5e8f\u5217\u7684\u7bc4\u570d: ${values.length?format(bounds[0])+' \u2013 '+format(bounds[1]):missing}`;
-    panel.dataset.value=text;if(changed){panel.classList.remove('eng-changed');void panel.offsetWidth;panel.classList.add('eng-changed');}
+    // 讀數敘述文字（例如「CPU 使用率: 0.03 %」）已停用：保留空 anchor，讓
+    // workspace-ux.js 的「最後樣本」(.ux-chart-time) 仍能接在它後面顯示。
+    panel.textContent='';panel.title='';panel.dataset.value='';
   }});
 
   // Read-only library detail panel. Original selection/copy semantics are preserved.

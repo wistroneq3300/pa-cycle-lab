@@ -40,6 +40,9 @@ def expand(name, parent):
         for key in SAFE_FIELDS:
             if key in entry:
                 target[key] = copy.deepcopy(entry[key])
+        # 實體 slot 以 'pass' 存 OS 密碼（legacy 欄位名），映射到統一安全欄位 os_password。
+        if entry.get('pass') and not target.get('os_password'):
+            target['os_password'] = entry['pass']
         target.update(name=node_id, node_id=node_id, parent_name=name,
                       chassis_id=parent.get('chassis_id') or identity(parent),
                       slot_id=entry['slot_id'], slot_key='N' + str(slot), node=entry.get('node') or 'n' + str(slot),
