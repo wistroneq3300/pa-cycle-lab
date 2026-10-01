@@ -56,13 +56,11 @@ def session(store, targets, holder, kind='input'):
     with ExitStack() as stack:
         if kind=='input':stack.enter_context(process_lock(session_lock_path(store,owner)))
         with store.tx() as db:
-            store.reserve(db, owner, [s for t in targets for s in scopes(t)])
             record=dict(id=owner,holder=holder,targets=public(targets),state='OPEN',created_at=time.time(),owner_pid=os.getpid())
             if kind=='input':store.input_session(owner,record)
         try:yield owner
         finally:
             with store.tx() as db:
-                db.execute('DELETE FROM locks WHERE owner=?',(owner,))
                 if kind=='input':store.input_session(owner,dict(record,state='CLOSED',closed_at=time.time()))
 
 

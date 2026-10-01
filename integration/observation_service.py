@@ -30,14 +30,13 @@ def collect_once(store, provider, document=None):
         if not provider.authorize(principal,target.get('project'),'observe'): continue
         result=dict(node_id=target.get('node_id',target['name']),project=target.get('project'),
                     binding_revision=target.get('revision'),attempted_at=time.time(),gpu_state='NOT_CONFIGURED')
-        owner='observation-'+__import__('uuid').uuid4().hex
+        owner='observation'
         try:
             with store.tx() as db:
                 if document is None:
                     latest=json.loads((DATA/'data.json').read_text(encoding='utf-8'))
                     current=next((t for t in inventory(SimpleNamespace(**latest)) if t['name']==target['name']),None)
                     if current!=target: raise Conflict('Binding changed before observation')
-                store.reserve(db,owner,scopes(target))
                 store.observation_status(result['node_id'],dict(result,state='COLLECTING',owner=owner))
             if not target.get('credential_ref'): raise Conflict('Credential reference is not configured')
             secrets=provider.credentials(target['credential_ref'],target.get('credential_version'))
@@ -74,7 +73,7 @@ def collect_once(store, provider, document=None):
             # Provider/transport exception objects can contain credentials.
             result.update(state='ERROR',reason='Observation or persistence failed')
         finally:
-            with store.tx() as db: db.execute('DELETE FROM locks WHERE owner=?',(owner,))
+            pass
         results.append(result)
         store.observation_status(result['node_id'],result)
     return results
@@ -91,8 +90,7 @@ def service():
         with store.tx() as db:
             for row in db.execute('SELECT node_id,data FROM observation_status').fetchall():
                 status=json.loads(row['data'])
-                if status.get('state')=='COLLECTING' and status.get('owner','').startswith('observation-'):
-                    db.execute('DELETE FROM locks WHERE owner=?',(status['owner'],))
+                if status.get('state')=='COLLECTING' and status.get('owner','').startswith('observation'):
                     status.update(state='INTERRUPTED',reason='Observation service exited during a read-only sample')
                     store.observation_status(row['node_id'],status)
         while True:

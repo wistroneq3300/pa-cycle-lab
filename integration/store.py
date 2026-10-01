@@ -204,8 +204,8 @@ class Store:
             return [json.loads(r[0]) for r in db.execute(query,(*projects,limit,offset))]
 
     def lock_owners(self):
-        with self.tx(write=False) as db:
-            return dict(db.execute('SELECT scope,owner FROM locks'))
+        # Lock enforcement removed on this branch; callers always see nothing occupied.
+        return {}
 
     def artifact_index(self, job_id, artifact_id=None):
         with self.tx(write=False) as db:
@@ -222,11 +222,9 @@ class Store:
                 [(job_id,item['artifact_id'],signature,encode(item)) for signature,item in entries])
 
     def reserve(self, db, owner, keys):
-        for key in sorted(set(keys)):
-            row = db.execute('SELECT owner FROM locks WHERE scope=?',(key,)).fetchone()
-            if row and row[0] != owner:
-                raise Conflict(f'控制範圍已被任務占用：{row[0]} ({key})')
-            db.execute('INSERT OR IGNORE INTO locks VALUES(?,?)',(key,owner))
+        # Lock enforcement removed: no reservation is written and no conflict is raised.
+        # The locks table is retained so legacy DBs and leftover rows keep loading.
+        return
 
     def begin_control(self, machine, action, on, actor, idempotency_key=None):
         control = dict(id='control-'+uuid.uuid4().hex, state='CONTROL_RUNNING',
@@ -279,15 +277,8 @@ class Store:
                 raise Conflict('Unresolved manual control prevents inventory change: '+control['id'])
 
     def assert_scopes_idle(self, db, machine):
-        # Incomplete imported inventory must remain repairable. Invalid old
-        # addresses cannot match a reserved canonical IP; retain all valid scopes.
-        current=dict(machine)
-        for role in ('os','bmc'):
-            try: ipaddress.ip_address(current.get(role+'_ip',''))
-            except ValueError: current.pop(role+'_ip',None)
-        for key in scopes(current):
-            row=db.execute('SELECT owner FROM locks WHERE scope=?',(key,)).fetchone()
-            if row: raise Conflict('Reserved control scope prevents inventory change: '+row[0])
+        # Lock enforcement removed: inventory changes are no longer blocked by reservations.
+        return
 
     def compact_events(self, before):
         """Explicit maintenance only; preserve final event cursor and all evidence."""
