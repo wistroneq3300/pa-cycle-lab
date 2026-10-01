@@ -81,14 +81,12 @@ async function loadMachines(assignMissingU) {
   if (!Array.isArray(data.machines)) throw new Error("Invalid machine inventory response");
   machines = data.machines;
   if (data.last_scan) window.__lastScan = data.last_scan;
-  saveSnapshot();
 }
 
 async function loadProjects() {
   const data = await api("/api/projects");
   if (!Array.isArray(data.projects)) throw new Error("Invalid project inventory response");
   projects = data.projects;
-  saveSnapshot();
 }
 // BMC 電源狀態 cell（System Manager 表格用）
 function powerCell(m) {
@@ -2231,7 +2229,6 @@ function setView(view) {
     _machineRenderTimer = setTimeout(() => { _renderMachine(state.view); }, 250);
     state.view = view;
     syncHash();
-    saveSnapshot();
     return;
   }
   // 切到其他 view：取消可能尚未執行的 machine 去抖重繪
@@ -2745,57 +2742,6 @@ async function sensorAnalyze(name) {
 }
 
 const machineDetailCache = {};
-// --- F5 重載不閃爍：把清單與最近一次詳情快取寫入 sessionStorage，
-//     下次重載時同步讀回，讓畫面直接重繪上次結果，而不是先顯示 Loading 佔位。
-const SNAPSHOT_KEY = "pa_snapshot_v1";
-let _snapshotTimer = null;
-// 快照內容：清單 + 詳情 + 目前 view +「上次 #content 的實際 HTML」。
-// 最後一項讓 F5 時可在 app.js 載入前，用 inline script 把畫面原樣貼回去，
-// 徹底消除重載期間的 Loading 閃爍（連 0.5 秒的下載空窗都不閃）。
-function _snapshotPayload() {
-  const details = {};
-  for (const [k, v] of Object.entries(machineDetailCache)) {
-    if (v && !v.error) details[k] = v;   // 只存成功的詳情
-  }
-  const content = document.getElementById("content");
-  const nav = document.getElementById("nav");
-  // 不把「Loading 過場」或空內容存成畫面快照，避免下次 F5 貼回 Loading。
-  const isPlaceholder = !content || !content.children.length || /^\s*Loading/.test(content.textContent || "");
-  return {
-    machines, projects, details,
-    view: state.view, activeMachine: _activeMachine, activeProject: _activeProject,
-    contentHtml: isPlaceholder ? null : content.innerHTML,
-    sidebarHtml: nav && nav.innerHTML ? nav.innerHTML : null,
-  };
-}
-function saveSnapshot() {
-  if (_snapshotTimer) return;                       // 去抖：多個成功回應合併成一次寫入
-  _snapshotTimer = setTimeout(() => {
-    _snapshotTimer = null;
-    try { sessionStorage.setItem(SNAPSHOT_KEY, JSON.stringify(_snapshotPayload())); }
-    catch (_) { /* 配額滿或隱私模式：略過，不影響功能 */ }
-  }, 400);
-}
-function loadSnapshot() {
-  try {
-    const raw = sessionStorage.getItem(SNAPSHOT_KEY);
-    if (!raw) return false;
-    const s = JSON.parse(raw);
-    if (Array.isArray(s.machines)) machines = s.machines;
-    if (Array.isArray(s.projects)) projects = s.projects;
-    if (s.details) Object.assign(machineDetailCache, s.details);
-    if (s.view) state.view = s.view;
-    if (s.activeMachine) _activeMachine = s.activeMachine;
-    if (s.activeProject) _activeProject = s.activeProject;
-    return Array.isArray(s.machines) && s.machines.length > 0;
-  } catch (_) { return false; }
-}
-function flushSnapshot() {
-  if (_snapshotTimer) { clearTimeout(_snapshotTimer); _snapshotTimer = null; }
-  try { sessionStorage.setItem(SNAPSHOT_KEY, JSON.stringify(_snapshotPayload())); }
-  catch (_) { /* 略過 */ }
-}
-window.addEventListener("pagehide", flushSnapshot);
 const machineDetailRequests = {};
 const bmcPollTries = {};   // name -> 已輪詢次數（避免 bmc_loading 無限重抓）
 async function machineLoadDetail(name, refresh = false, silent = false) {
@@ -2814,7 +2760,6 @@ async function machineLoadDetail(name, refresh = false, silent = false) {
   }
   const before = machineDetailCache[name];
   machineDetailCache[name] = result;
-  if (result && !result.error) saveSnapshot();
   if (_activeMachine === name && state.view === "machine") {
     // 靜默輪詢（silent）→ 不重繪；只有當 BMC 資料真的變了才重繪一次。
     if (silent) {
@@ -5010,22 +4955,18 @@ function initRowMenuGuard() {
 }
 document.addEventListener("DOMContentLoaded", async () => {
   loadTheme(); buildNav(); initTermDrag(); initBcDrag(); initRowMenuGuard();
-  // 先讀上次快照（清單 + 詳情）以備立即重繪；路由仍以 URL hash 為準（後面的 parseHash 會覆蓋）。
-  const hydrated = loadSnapshot();
+  // F5 / 首次載入一律乾淨重載：顯示 Wistron 轉圈，抓完資料畫完第一眼才淡出。
   parseHash();                      // 讀取 URL hash，指定初始分頁
   window.addEventListener("resize", () => { fitAll(); bcFitAll(); });
   window.addEventListener("hashchange", () => { parseHash(); setView(state.view); });
-  // 用快照立即重繪（F5 不閃爍），再於背景抓最新資料覆蓋。
-  // 沒有快照時，inline script 已放上 Loading 佔位，這裡不需再處理。
-  if (hydrated) {
-    try { setView(state.view); } catch (_) { /* 快照過期就等網路結果 */ }
-  }
   try {
     await Promise.all([loadMachines(), loadProjects()]);
     setView(state.view);
   } catch (e) {
-    if (!hydrated) showInventoryLoadError(e);   // 有快照就先沿用舊畫面，不跳錯誤頁
+    showInventoryLoadError(e);
   }
+  // 第一眼畫完 → 淡出 Wistron boot 覆蓋層。
+  if (window.hideWistronBoot) window.hideWistronBoot();
   gpuAlertPoll();
   setInterval(gpuAlertPoll, 20000);
 });

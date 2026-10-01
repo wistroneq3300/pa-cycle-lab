@@ -6,6 +6,7 @@
 <title>Wistron PA Server Manager</title>
 <link rel="icon" type="image/svg+xml" href="/static/img/wistron-official.svg">
 <link rel="stylesheet" href="/static/css/style.css?v=20261001-tel-status1">
+<link rel="stylesheet" href="/static/css/wistron-boot.css?v=20261001-boot1">
 <link rel="stylesheet" href="/static/vendor/xterm/xterm.css">
 <link rel="stylesheet" href="/static/css/product.css?v=20260924-promote-visible">
 <link rel="stylesheet" href="/static/css/product-detail.css?v=20261001-sensor-fix">
@@ -76,19 +77,28 @@
 
     <div class="content" id="content"></div>
     <script>
-    /* F5 不閃爍：在 app.js 載入前，用上次快照把側欄與 #content 原樣貼回，
-       讓重載期間（下載 25 個 script 的空窗）維持上一眼的畫面。
-       沒有快照（首次載入）才顯示 Loading，避免空白。
-       #content 起始為空 → 瀏覽器不會先畫出「Loading…」造成閃爍。 */
+    /* F5 / 首次載入：一律顯示 Wistron 轉圈 boot 覆蓋層，絕不貼回上次的舊畫面
+       （避免看到暫存/舊資料）。第一筆資料畫完後由 app.js 呼叫 hideWistronBoot() 淡出。 */
     (function () {
-      var el = document.getElementById("content");
-      try {
-        var raw = sessionStorage.getItem("pa_snapshot_v1");
-        var s = raw ? JSON.parse(raw) : null;
-        if (s && s.sidebarHtml) { var nv = document.getElementById("nav"); if (nv) nv.innerHTML = s.sidebarHtml; }
-        if (s && s.contentHtml) { if (el) el.innerHTML = s.contentHtml; return; }
-      } catch (_) { /* 快照壞掉就退回 Loading */ }
-      if (el) el.innerHTML = '<div class="card">Loading…</div>';
+      var boot = document.createElement("div");
+      boot.className = "wistron-boot";
+      boot.id = "wistron-boot";
+      boot.innerHTML =
+        '<div class="wistron-boot__ring">' +
+          '<img class="wistron-boot__logo" src="/static/img/wistronlogo.png" alt="Wistron">' +
+        '</div>' +
+        '<div class="wistron-boot__wordmark">Wistron</div>' +
+        '<div class="wistron-boot__msg">PA Server Manager 載入中…</div>';
+      document.body.appendChild(boot);
+      // 安全網：若 JS 崩潰導致 boot 永不淡出，8 秒後強制移除，避免永久白屏。
+      window.__wistronBootGuard = setTimeout(function () {
+        if (window.hideWistronBoot) window.hideWistronBoot();
+      }, 8000);
+      window.hideWistronBoot = function () {
+        var el = document.getElementById("wistron-boot");
+        if (el) { el.classList.add("is-hidden"); setTimeout(function(){ if(el && el.parentNode) el.parentNode.removeChild(el); }, 400); }
+        if (window.__wistronBootGuard) { clearTimeout(window.__wistronBootGuard); window.__wistronBootGuard = null; }
+      };
     })();
     </script>
   </main>

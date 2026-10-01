@@ -1,0 +1,63 @@
+/* Wistron boot spinner — shown on F5 / first paint, removed when first data renders.
+   Full-screen overlay so a stale page is never visible during the JS bootstrap gap. */
+.wistron-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  background: var(--bg);
+  transition: opacity .35s ease, visibility .35s ease;
+}
+.wistron-boot.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Logo ring: rotating accent ring around a calm Wistron mark */
+.wistron-boot__ring {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wistron-boot__ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 4px solid var(--border);
+  border-top-color: var(--accent-blue);
+  border-right-color: var(--accent-blue);
+  animation: wistron-spin 0.9s linear infinite;
+}
+.wistron-boot__logo {
+  width: 52px;
+  height: auto;
+  filter: drop-shadow(0 2px 6px rgba(10,37,64,.12));
+}
+
+.wistron-boot__wordmark {
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+.wistron-boot__msg {
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+@keyframes wistron-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wistron-boot__ring::before { animation-duration: 1.8s; }
+}
