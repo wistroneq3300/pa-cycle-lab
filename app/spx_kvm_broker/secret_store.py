@@ -22,7 +22,8 @@ from __future__ import annotations
 import json
 import logging
 import subprocess
-import tempfile
+import time
+import threading
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -49,7 +50,8 @@ class AgeSecretStore:
         self.secret_file = Path(secret_file)
         self.identity_file = Path(identity_file)
         self._cache: Optional[Dict[str, dict]] = None
-        self._refresh_counter = 0
+        self._refreshed_at = 0.0
+        self._lock = threading.Lock()
 
     # -- internal decryption -------------------------------------------------
     def _decrypt_payload(self) -> Dict[str, dict]:
@@ -59,16 +61,6 @@ class AgeSecretStore:
         if not self.identity_file.exists():
             raise SecretStoreError(
                 f"age identity not found: {self.identity_file}")
-        # identity is root-only; enforce.
-        # (perms checked at deploy; double-check here too.)
-        try:
-            with tempfile.NamedTemporaryFile("wb", dir="/tmp", delete=False) as tf:
-                # do NOT write secret to disk; use identity file directly.
-                pass
-        finally:
-            # no-op; we never stage the secret. Removed below.
-            pass
-
         # Decrypt the age file using the identity (subprocess, no shell).
         try:
             ctl = subprocess.run(
@@ -90,10 +82,11 @@ class AgeSecretStore:
     def _reload_if_needed(self) -> None:
         # Simple TTL cache (60s) so many broker sessions don't spawn a decrypt
         # every request, but updates to the store (rotations) propagate.
-        self._refresh_counter += 1
-        if self._cache is None or self._refresh_counter > 30:
-            self._cache = self._decrypt_payload()
-            self._refresh_counter = 0
+        with self._lock:
+            now = time.monotonic()
+            if self._cache is None or now - self._refreshed_at >= 60:
+                self._cache = self._decrypt_payload()
+                self._refreshed_at = now
 
     # -- public API ----------------------------------------------------------
     def credential(self, name: str) -> Optional[dict]:

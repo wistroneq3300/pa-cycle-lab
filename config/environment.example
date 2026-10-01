@@ -2,5 +2,9 @@
 CYCLE_MODE=synthetic
 CYCLE_INSTANCE=data
 PYTHONUTF8=1
-# Live Web requires CYCLE_USERS_JSON, supplied securely by deployment environment.
+# Live Web/Worker require the same verified server-side provider module.
+# CYCLE_PROVIDER=company_cycle_provider
+# Fixed environment usernames / CYCLE_USERS_JSON do not authenticate callers.
+# Interactive Terminal additionally requires a shared, protected gateway token file.
+# CYCLE_BRIDGE_TOKEN_FILE=/srv/pa-cycle-lab/data/runtime/bridge-token
 # Do not share PA_DATA_DIR, databases, artifacts or services with either source repo.

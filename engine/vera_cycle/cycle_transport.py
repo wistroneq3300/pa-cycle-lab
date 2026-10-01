@@ -27,10 +27,13 @@ class IdentityUnsafe(RuntimeError):
     pass
 
 class Transport:
-    def __init__(self, credentials, known_hosts, users=None, ports=None, cipher=17):
+    def __init__(self, credentials, known_hosts, users=None, ports=None, cipher=17, ipmi_port=623):
         self.users = users or {}
         self.ports = ports or {}
         self.cipher = cipher
+        if type(ipmi_port) is not int or not 1<=ipmi_port<=65535:
+            raise ValueError('Invalid IPMI port')
+        self.ipmi_port = ipmi_port
         # Treat an omitted password and an explicit None identically. SSH key
         # authentication/passwordless sudo must not fail during string encoding.
         self.credentials = {role: "" if password is None else password
@@ -153,7 +156,7 @@ class Transport:
     def oob(self, target, command, timeout=30):
         env = os.environ.copy()
         env["IPMI_PASSWORD"] = self.credentials.get("bmc", "")
-        argv = ["ipmitool", "-I", "lanplus", "-C", str(self.cipher), "-H", target.bmc_ip,
+        argv = ["ipmitool", "-I", "lanplus", "-p", str(self.ipmi_port), "-C", str(self.cipher), "-H", target.bmc_ip,
                 "-U", self.users.get("bmc", os.environ.get("BMC_USER", "root")), "-E", *shlex.split(command)]
         start = time.monotonic()
         try:

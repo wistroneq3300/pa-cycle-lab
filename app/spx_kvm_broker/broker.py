@@ -20,6 +20,7 @@ import json
 import logging
 import threading
 import time
+import anyio
 from typing import Optional, Union
 
 from fastapi import Request
@@ -91,6 +92,10 @@ class Broker:
         # A high-priority "15000" alert latch, cleared by ops runbook.
         self._max_sessions_flag: dict[str, float] = {}
         self._flag_lock = threading.Lock()
+        self._server_locks = {server_id: threading.RLock() for server_id in config.targets}
+        self._locks_guard = threading.Lock()
+        self._worker_limiter = anyio.CapacityLimiter(4)
+        self._async_server_locks = {}
 
     # =======================================================================
     # Portal backend: POST /api/kvm/launch
@@ -179,7 +184,11 @@ class Broker:
 
         # Reuse an existing active broker session for the same portal user+BMC?
         try:
-            cookies = self._reuse_or_login(target, portal_user, portal_session)
+            launch_lock = self._async_server_locks.setdefault(target.server_id, anyio.Lock())
+            async with launch_lock:
+                cookies = await anyio.to_thread.run_sync(
+                    self._reuse_or_login, target, portal_user, portal_session,
+                    limiter=self._worker_limiter)
         except MaxSessionsError as e:
             self._flag_max_sessions(target.server_id)
             self.audit.emit("login_max_sessions", server_id=target.server_id,
@@ -221,10 +230,24 @@ class Broker:
 
     def _reuse_or_login(self, target: BMCTarget, portal_user: str,
                         portal_session: str) -> dict:
+        with self._locks_guard:
+            lock = self._server_locks.setdefault(target.server_id, threading.RLock())
+        with lock:
+            return self._reuse_or_login_locked(target, portal_user, portal_session)
+
+    def _reuse_or_login_locked(self, target: BMCTarget, portal_user: str,
+                               portal_session: str) -> dict:
         """Return a fresh cookie set, reusing an existing valid session.
 
         Spec: '同一 Portal user 對同一 BMC 重複 launch 時，若 broker session 有效則重用'.
         """
+        # Clean expired/idle sessions before deciding reuse and available capacity.
+        now = time.time()
+        for session in self.reg.list_all():
+            if session.server_id == target.server_id and session.state == 'active' and (
+                    session.expires_at <= now or
+                    now - session.last_seen_at >= self.cfg.session_idle_timeout_seconds):
+                self._cleanup_session(session)
         # 1) reuse existing active session for this exact portal user+browser
         active = self.reg.active_session_for(target.server_id, portal_user,
                                              portal_session)
@@ -239,18 +262,8 @@ class Broker:
                 return cookies
 
         # 2) per-BMC cap: at most `max_broker_sessions` active broker sessions.
-        cur = self.reg.any_active_session_for_server(target.server_id)
-        if cur:
-            # different portal user already holds the slot OR same-server reuse
-            # policy: since cap=1, and this is a *different* portal_user, we must
-            # not steal blindly — but spec allows reuse of a valid session.
-            # If it's the same user it was handled above; if different user, we
-            # log out the old one (it's a single-shared BMC anyway) after
-            # respecting the fact that BMC only allows a few sessions.
-            if cur.portal_user_id != portal_user:
-                # We'll log the old session out (cleanup) so the new user can
-                # take the slot. This is the "session lifecycle" stewardship.
-                self._cleanup_session(cur)
+        if self.reg.active_session_count(target.server_id) >= target.max_broker_sessions:
+            raise MaxSessionsError("broker session capacity reached")
 
         # 3) enforce rate limit / cooldown
         wait = self.rates.acquire(target.server_id)
@@ -307,8 +320,17 @@ class Broker:
         purge used/expired launch_ids."""
         now = time.time()
         self.reg.purge_launches(now)
-        for sess in self.reg.stale_eligible(now):
-            self._cleanup_session(sess)
+        for sess in self.reg.list_all():
+            if sess.state != 'active':
+                continue
+            with self._locks_guard:
+                lock = self._server_locks.setdefault(sess.server_id, threading.RLock())
+            with lock:
+                current = self.reg.get_session(sess.broker_session_id)
+                if current and current.state == 'active' and (
+                        current.expires_at <= now or
+                        now-current.last_seen_at >= self.cfg.session_idle_timeout_seconds):
+                    self._cleanup_session(current)
 
     # -- code 15000 alert ----------------------------------------------------
     def _flag_max_sessions(self, server_id: str):

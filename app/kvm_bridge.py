@@ -12,6 +12,8 @@ import json
 import os
 import ssl
 import time
+import logging
+from urllib.parse import urlsplit
 
 import websockets
 
@@ -51,6 +53,61 @@ SPX_API_SESSION = "/api/session"
 SPX_KVM_PATH = "/kvm"
 SPX_WS_SUBPROTOCOLS = ["binary", "base64"]
 ONETREE_KVM_PATH = "/kvm/0"
+
+
+class SessionCookies(dict):
+    """Cookies plus server-only Redfish session ownership metadata."""
+    session_location = ""
+
+
+def _logout_bmc(bmc, kind, token, cookies):
+    if not token:
+        return True
+    try:
+        import requests
+        if kind == "spx":
+            from spx_kvm_broker.spx_client import SpxClient
+            return SpxClient(bmc).logout(cookies)
+        if kind == "openbmc":
+            location = urlsplit(getattr(cookies, "session_location", ""))
+            if location.netloc and (location.scheme != "https" or location.netloc != bmc):
+                return False
+            prefix = "/redfish/v1/SessionService/Sessions/"
+            resource = location.path
+            if not resource.startswith(prefix) or not resource[len(prefix):].strip('/') or location.query or location.fragment:
+                return False
+            response = requests.delete(f"https://{bmc}{resource}", headers={"X-Auth-Token": token},
+                                       verify=False, timeout=10, allow_redirects=False)
+            return response.status_code in (200, 202, 204, 404)
+        # OneTree logout varies by firmware; do not guess a destructive endpoint.
+        logging.getLogger(__name__).warning("KVM logout adapter unavailable for kind=%s", kind)
+    except Exception:
+        logging.getLogger(__name__).warning("KVM session logout failed for kind=%s", kind)
+    return False
+
+
+class OwnedKvmConnection:
+    def __init__(self, socket, bmc, kind, token, cookies):
+        self.socket = socket
+        self.session = (bmc, kind, token, cookies)
+        self._close_lock = asyncio.Lock()
+        self._closed = False
+
+    def __aiter__(self):
+        return self.socket.__aiter__()
+
+    async def send(self, data):
+        return await self.socket.send(data)
+
+    async def close(self):
+        async with self._close_lock:
+            if self._closed:
+                return
+            self._closed = True
+            try:
+                await self.socket.close()
+            finally:
+                await asyncio.to_thread(_logout_bmc, *self.session)
 
 
 def _spx_login(bmc, user, pw):
@@ -104,6 +161,8 @@ def _spx_login(bmc, user, pw):
         return "spx", csrf, cookies
     except Exception:
         pass
+    finally:
+        s.close()
     return None, None, None
 
 
@@ -138,6 +197,8 @@ def _ami_login(bmc, user, pw):
             return "ami", xsrf, ck
     except Exception:
         pass
+    finally:
+        s.close()
     return None, None, None
 
 
@@ -154,7 +215,9 @@ def _openbmc_login(bmc, user, pw):
             verify=False, timeout=12)
         tok = r.headers.get("X-Auth-Token")
         if r.status_code in (200, 201) and tok:
-            return "openbmc", tok, {}
+            cookies = SessionCookies()
+            cookies.session_location = r.headers.get("Location", "")
+            return "openbmc", tok, cookies
     except Exception:
         pass
     return None, None, None
@@ -187,8 +250,9 @@ async def _connect_kvm(bmc, user, pw):
                 max_size=None,
             )
         except Exception as e:
+            await asyncio.to_thread(_logout_bmc, bmc, kind, tok, cookies)
             return None, f"SP-X KVM 連線失敗：{e}"
-        return ws, "spx OK"
+        return OwnedKvmConnection(ws, bmc, kind, tok, cookies), "spx OK"
 
     # OneTree / OpenBMC：token 當 subprotocol，/kvm/0
     url = f"wss://{bmc}/kvm/0"
@@ -206,15 +270,16 @@ async def _connect_kvm(bmc, user, pw):
             max_size=None,
         )
     except Exception as e:
+        await asyncio.to_thread(_logout_bmc, bmc, kind, tok, cookies)
         return None, str(e)
-    return ws, f"{kind} OK"
+    return OwnedKvmConnection(ws, bmc, kind, tok, cookies), f"{kind} OK"
 
 
 async def kvm_proxy(websocket, name):
     """把前端 /ws/kvm/{name} 雙向代理到該 BMC 的 /kvm/0 RFB stream。"""
     print(f"[KVM] proxy enter name={name}", flush=True)
     await websocket.accept()
-    m = _load_machine(name)
+    m = getattr(websocket, 'scope', {}).get('cycle_bmc') or _load_machine(name)
     if not m or not m.get("bmc_ip"):
         await websocket.send_json({"type": "error", "msg": "找不到機台或無 BMC IP"})
         await websocket.close()
@@ -268,6 +333,8 @@ async def kvm_proxy(websocket, name):
             await websocket.close()
         except Exception:
             pass
+    finally:
+        await ws.close()
 
 
 # ================= basecode 自動偵測（供 /api/kvm/basecode 用） =================
@@ -307,11 +374,15 @@ def _detect_basecode_one(name):
     m = _load_machine(name)
     if not m or not m.get("bmc_ip"):
         return None
+    kind, tok, cookies = None, None, None
     try:
         u, p = _bmc_kvm_creds(m)
-        kind, tok, _cookies = _detect_bmc(m["bmc_ip"], u, p)
+        kind, tok, cookies = _detect_bmc(m["bmc_ip"], u, p)
     except Exception:
         kind, tok = None, None
+    finally:
+        if tok:
+            _logout_bmc(m["bmc_ip"], kind, tok, cookies)
     result = kind if tok else None
     try:
         _BASE_CACHE[name] = (time.time(), result)

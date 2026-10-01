@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>Rack Scene Demo — 資料驅動 48U</title>
+<style>
+  html,body{margin:0;height:100%;background:#0b0f12;color:#cfe0ea;font-family:system-ui,Segoe UI,sans-serif;overflow:hidden}
+  #wrap{display:flex;height:100vh}
+  #stage{flex:1;position:relative}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+  #side{width:320px;background:#10161b;border-left:1px solid #1f2a31;padding:16px;overflow:auto}
+  #side h3{margin:0 0 8px;color:#7fd0ff}
+  .kv{margin:4px 0;font-size:13px}
+  .kv b{display:inline-block;min-width:80px;color:#8aa7b8}
+  button{margin:4px 4px 4px 0;background:#1a2730;border:1px solid #2f4453;color:#cfe0ea;padding:6px 12px;cursor:pointer;border-radius:4px}
+  button.on{background:#1c5a7a;border-color:#2f8bbf}
+  #status{position:absolute;top:8px;left:8px;background:#000a;padding:6px 10px;border-radius:4px;font-size:12px;z-index:5}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="stage">
+    <div id="status">loading…</div>
+    <canvas id="rack"></canvas>
+  </div>
+  <div id="side">
+    <h3>Rack Scene — 資料驅動</h3>
+    <div id="panel"></div>
+    <div style="margin-top:10px">
+      <button id="btn-view" class="on">3D 檢視</button>
+      <button id="btn-edit">配置編輯</button>
+    </div>
+  </div>
+</div>
+<script src="/static/js/rack-scene.js"></script>
+<script>
+  const TYPE_ZH = { server:'運算 Server', switch:'網路 Switch(SN2000)', cdu:'液冷 CDU', powershelf:'電力模組', pdu:'PDU', storage:'Storage', blanking:'擋板' };
+  let scene = null, members = [];
+
+  function panelInfo(detail) {
+    const el = document.getElementById('panel');
+    if (!detail) { el.innerHTML = '<div class="kv" style="color:#5a7a">按一下機櫃中的元件查看細節（3D 檢視模式）</div>'; return; }
+    el.innerHTML = `
+      <div class="kv"><b>名稱</b> ${detail.name || '-'}</div>
+      <div class="kv"><b>類型</b> ${TYPE_ZH[detail._type] || detail._type} (${detail._type})</div>
+      <div class="kv"><b>U 位置</b> U${detail.rack_u} · ${detail.rack_size}U</div>
+      <div class="kv"><b>專案</b> ${detail.project || '-'}</div>
+      <div class="kv"><b>level</b> ${detail.level || '-'}</div>
+      <div class="kv"><b>mgx_type</b> ${detail.mgx_type || '-'}</div>
+      <div class="kv"><b>passive</b> ${detail.passive}</div>
+      <div class="kv"><b>rack_side</b> ${detail.rack_side || '-'}</div>`;
+  }
+
+  window.onerror = function(msg, src, line) {
+    document.getElementById('status').textContent = 'ERR: ' + msg + ' @' + line;
+  };
+
+  async function init() {
+    const res = await fetch('/api/machines');
+    const data = await res.json();
+    const machines = data.machines || [];
+    // 取 Naboo 專案（完整 48U 案例），僅含 rack_u 的元件
+    members = machines.filter(m => m.project === 'Naboo' && m.rack_u != null);
+    document.getElementById('status').textContent = `Naboo ${members.length} 台元件`;
+    scene = window.PARackScene.mount(document.getElementById('rack'), { project: 'Naboo', members });
+    document.getElementById('rack').addEventListener('rack-select', e => panelInfo(e.detail));
+  }
+
+  document.getElementById('btn-view').addEventListener('click', e => {
+    scene.setMode('view'); e.target.classList.add('on'); document.getElementById('btn-edit').classList.remove('on');
+  });
+  document.getElementById('btn-edit').addEventListener('click', e => {
+    scene.setMode('edit'); e.target.classList.add('on'); document.getElementById('btn-view').classList.remove('on');
+  });
+
+  init();
+  // 診斷：把 WebGL canvas 內容轉成 dataURL 塞進隱藏 img，供 headless dump 抓取
+  setTimeout(() => {
+    try {
+      const cv = document.getElementById('rack');
+      const url = cv.toDataURL('image/png');
+      const snap = document.createElement('img');
+      snap.id = 'webgl-snap';
+      snap.src = url;
+      document.body.appendChild(snap);
+    } catch (e) { document.getElementById('status').textContent = 'snapERR: ' + e.message; }
+  }, 1500);
+</script>
+</body>
+</html>

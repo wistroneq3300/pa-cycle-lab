@@ -3,16 +3,17 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 module.exports=async(page,id,output)=>{
-  const toggle=page.locator('#cycle-console-toggle'),log=page.locator('[data-part=log]');
+  const firstNode=await page.locator('[data-part=nodes] button').nth(1).getAttribute('data-machine');
+  const toggle=page.locator('#cw-console-toggle'),log=page.locator('[data-part=log]');
   const requests=[];page.on('request',r=>{if(r.url().includes(`/jobs/${id}/events`))requests.push(r);});
   await toggle.click();
   await page.waitForFunction(()=>document.querySelector('[data-part=log]').textContent.includes('Job COMPLETE'));
   const restored=await page.locator('.cycle-console-row').count();assert(restored>20,'Refresh restores persistent history');
   await page.locator('[data-part=pause]').click();
   const before=requests.length;
-  await page.locator('[data-machine="neutrino-n1"][aria-pressed]').click();
+  await page.locator(`[data-machine="${firstNode}"][aria-pressed]`).click();
   assert(await page.locator('.cycle-console-row').count()>0);
-  assert.equal(await page.locator('.cycle-console-row:not([data-machine="neutrino-n1"])').count(),0);
+  assert.equal(await page.locator(`.cycle-console-row:not([data-machine="${firstNode}"])`).count(),0);
   await page.locator('[data-part=search]').fill('identity');await page.waitForTimeout(180);
   assert(await page.locator('.cycle-console-row').count()>0);
   assert.equal(requests.length,before,'Local filters do not fetch');
@@ -31,7 +32,7 @@ module.exports=async(page,id,output)=>{
   await page.locator('[data-part=live]').click();await page.locator('[data-part=pause]').click();
   await toggle.click();const closedRequests=requests.length;await page.waitForTimeout(1700);
   assert.equal(requests.length,closedRequests,'Closed console stops only console polling');
-  assert.equal(await page.locator('#cycle-job-state').innerText(),'已完成');
+  assert((await page.locator('#cw-run-title').innerText()).includes('COMPLETE'));
 
   // 10,500 synthetic API events. No worker, command, or hardware is involved.
   const pattern=`**/jobs/${id}/events?*`;let sent=0,streamEnd=10500;const cursors=[];
@@ -43,8 +44,7 @@ module.exports=async(page,id,output)=>{
     });sent+=events.length;await route.fulfill({json:{events,has_more:after+events.length<streamEnd,next_sequence:after+events.length,oldest_sequence:after+1}});
   });
   // Re-select a job through a fresh dialog to discard the previous view cursor.
-  await page.keyboard.press('Escape');await page.evaluate(()=>openCycleTest('Neutrino Demo'));
-  await page.locator(`[data-job="${id}"]`).click();await toggle.click();
+  await page.reload();await page.locator('#cw-run-id').waitFor();await toggle.click();
   await page.waitForFunction(()=>document.querySelector('.cycle-console-row[data-sequence="10500"]'),{},{timeout:20000});
   await page.locator('[data-part=pause]').click();
   assert.equal(await log.getAttribute('data-buffer-count'),'3000');assert.equal(await page.locator('.cycle-console-row').count(),2000);
@@ -58,7 +58,7 @@ module.exports=async(page,id,output)=>{
   assert(await page.locator('.cycle-console-row').count()>0);
   assert.equal(await page.locator('.cycle-console-row:not([data-level=FAIL]):not([data-level=ERROR])').count(),0);
   await page.locator('[data-part=errors]').uncheck();
-  await page.locator('[data-part=auto]').click();assert.equal(await page.locator('[data-part=auto]').getAttribute('aria-pressed'),'false');
+  if(await page.locator('[data-part=auto]').getAttribute('aria-pressed')==='true')await page.locator('[data-part=auto]').click();assert.equal(await page.locator('[data-part=auto]').getAttribute('aria-pressed'),'false');
   await log.evaluate(e=>e.scrollTop=30000);
   const anchor=await log.evaluate(e=>{const row=[...e.children].find(r=>r.getBoundingClientRect().bottom>e.getBoundingClientRect().top+e.clientTop);return {sequence:row.dataset.sequence,top:row.getBoundingClientRect().top-e.getBoundingClientRect().top};});
   streamEnd=11000;await page.locator('[data-part=pause]').click();
@@ -83,10 +83,10 @@ module.exports=async(page,id,output)=>{
   for(const theme of ['light','dark']){
     await page.evaluate(t=>document.documentElement.dataset.theme=t,theme);ratios[theme]=await contrast();
     for(const value of ratios[theme])assert(value.ratio>=4.5,`${theme} ${value.level} contrast ${value.ratio}`);
-    for(const [name,width,height] of [['desktop',1440,1000],['mobile',390,844]]){
+    for(const [name,width,height] of [['desktop',1366,768],['wide',1920,1080]]){
       await page.setViewportSize({width,height});
-      await page.locator('#cycle-console').evaluate(e=>{const d=document.getElementById('cycle-panel');d.scrollTop=e.offsetTop-24;});
-      assert.equal(await page.locator('#cycle-panel').evaluate(d=>d.scrollWidth>d.clientWidth+1),false);
+      await page.locator('#cw-console').scrollIntoViewIfNeeded();
+      assert.equal(await page.locator('#cycle-workspace').evaluate(d=>d.scrollWidth>d.clientWidth+1),false);
       await page.screenshot({path:path.join(output,`console-${name}-${theme}.png`),animations:'disabled'});
     }
   }
@@ -96,11 +96,10 @@ module.exports=async(page,id,output)=>{
   const barrier=new Promise(resolve=>release=resolve),pending=new Promise(resolve=>started=resolve);
   await page.route(pattern,async route=>{started();await barrier;await route.fulfill({json:{events:[{sequence:999999,level:'ERROR',message:'STALE CONSOLE RESPONSE'}],has_more:false}});},{times:1});
   await page.locator('[data-part=pause]').click();await pending;await toggle.click();release();await page.waitForTimeout(150);
-  assert.equal(await page.locator('#cycle-console').isHidden(),true);
+  assert.equal(await page.locator('#cw-console').isHidden(),true);
   assert.equal(await page.locator('.cycle-console-row[data-sequence="999999"]').count(),0);
   // Reconnect against real persisted events after one failed read, without any POST.
-  await page.keyboard.press('Escape');await page.evaluate(()=>openCycleTest('Neutrino Demo'));
-  await page.locator(`[data-job="${id}"]`).click();
+  await page.reload();await page.locator('#cw-run-id').waitFor();
   await page.route(pattern,route=>route.abort('failed'),{times:1});await toggle.click();
   await page.locator('[data-part=error]').waitFor({state:'visible'});
   await page.waitForFunction(()=>document.querySelector('[data-part=log]').textContent.includes('Job COMPLETE'));

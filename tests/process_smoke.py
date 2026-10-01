@@ -15,6 +15,7 @@ instance='data/process-smoke-'+uuid.uuid4().hex
 folder=ROOT/instance;folder.mkdir(parents=True)
 env={**os.environ,'CYCLE_INSTANCE':instance,'CYCLE_MODE':'synthetic','PYTHONUTF8':'1'}
 env.pop('CYCLE_USERS_JSON',None)
+env.pop('PA_DATA_DIR',None)
 flags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0
 log=(folder/'process.log').open('w',encoding='utf-8')
 with socket.socket() as probe:
@@ -42,13 +43,14 @@ def terminate(pid):
     except ProcessLookupError:pass
 
 try:
-    subprocess.run([sys.executable,'scripts/bootstrap.py'],cwd=ROOT,env=env,check=True,stdout=log,creationflags=flags)
+    subprocess.run([sys.executable,'scripts/native_demo.py','--chassis','32' if '--browser' in sys.argv else '1'],cwd=ROOT,env=env,check=True,stdout=log,creationflags=flags)
     scheduler=launch('run.py','runner')
     runner_pid=wait_for(lambda:int((folder/'runtime/service-pid.txt').read_text()));pids.add(runner_pid)
     first=launch('run.py','web','--port',str(port))
     web_pid=wait_for(lambda:client.get('/api/cycle/status').json().get('web_pid'));pids.add(web_pid)
     base='/api/projects/Neutrino%20Demo/cycle/jobs'
-    body=dict(machine_ids=['neutrino-n1','neutrino-n2'],cycle_profile='neutrino',cycle_mode='reboot',channel='inband',
+    targets=client.get('/api/projects/Neutrino%20Demo/cycle/targets').json()['targets']
+    body=dict(machine_ids=[t['name'] for t in targets[:4]],cycle_profile='neutrino',cycle_mode='reboot',channel='inband',
               limits={'loops':100,'hours':0},idempotency_key=uuid.uuid4().hex)
     response=client.post(base,json=body);response.raise_for_status();job=response.json();jid=job['id']
     def read_job():return client.get(base+'/'+jid).json()
@@ -85,10 +87,10 @@ try:
     assert client.post(base+'/'+jid+'/stop',json={}).status_code==200
     final=wait_for(lambda:at_state('INCOMPLETE'))
     assert all(n['completed']>=1 for n in final['nodes'])
-    assert len({n['completed'] for n in final['nodes']})==1
+    assert all(n['completed']<=n['attempts'] for n in final['nodes'])  # independent domain barriers
     pids.discard(worker_pid)
     if '--browser' in sys.argv:
-        browser_result=subprocess.run(['node','tests/browser.cjs'],cwd=ROOT,
+        browser_result=subprocess.run(['node','tests/native-browser.cjs'],cwd=ROOT,
                        env={**env,'PA_CYCLE_BASE_URL':url},capture_output=True,text=True,encoding='utf-8',
                        timeout=180,creationflags=flags)
         print(browser_result.stdout,flush=True)

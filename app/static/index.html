@@ -1,15 +1,24 @@
 <!DOCTYPE html>
-<html lang="zh-Hant" data-theme="light">
+<html lang="zh-Hant" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PA Cycle Lab</title>
-<link rel="stylesheet" href="/static/css/style.css?v=20260918m">
-<link rel="stylesheet" href="/static/css/polish.css?v=20260906b">
-<link rel="stylesheet" href="/static/css/pro.css?v=20260918n">
-<link rel="stylesheet" href="/static/css/premium.css?v=20260918o">
+<title>Wistron PA Server Manager</title>
+<link rel="icon" type="image/svg+xml" href="/static/img/wistron-official.svg">
+<link rel="stylesheet" href="/static/css/style.css?v=20260924-guide1">
 <link rel="stylesheet" href="/static/vendor/xterm/xterm.css">
-<link rel="stylesheet" href="/static/css/cycle.css">
+<link rel="stylesheet" href="/static/css/product.css?v=20260924-promote-visible">
+<link rel="stylesheet" href="/static/css/product-detail.css">
+<link rel="stylesheet" href="/static/css/cinematic.css?v=20260924gb300-insertion2">
+<link rel="stylesheet" href="/static/css/workspace-cinematic.css">
+<link rel="stylesheet" href="/static/css/wistron-light.css">
+<link rel="stylesheet" href="/static/css/workspace-reliability.css">
+<link rel="stylesheet" href="/static/css/equipment-workspace.css?v=20260924-network-led2">
+<link rel="stylesheet" href="/static/css/engineering-ux.css?v=20260924">
+<link rel="stylesheet" href="/static/css/operations-ux.css?v=20260924-review1">
+<link rel="stylesheet" href="/static/css/workspace-ux.css?v=20260924-ux1">
+<link rel="stylesheet" href="/static/css/topology.css?v=20260924-network-led2">
+<link rel="stylesheet" href="/static/css/cycle.css"><link rel="stylesheet" href="/static/css/cycle-workspace.css">
 </head>
 <body>
 
@@ -43,7 +52,7 @@
       <span class="gpu-alert-ticker" id="gpu-alert-ticker"></span>
       <span class="spacer"></span>
 
-      <button class="icon-btn guide-btn-color" id="guide-btn" type="button" title="UserGuide">
+      <button class="icon-btn guide-btn-color" id="guide-btn" type="button" title="使用手冊" aria-label="使用手冊">
         <svg viewBox="0 0 28 28" width="19" height="19" aria-hidden="true" style="display:inline-block;vertical-align:middle">
 <ellipse cx="14" cy="24.5" rx="11" ry="2" fill="rgba(0,0,0,.22)"/>
 <path d="M13 6.5 C10.4 4.9 7 4.4 3 4.9 L3 21.5 C7 21 10.4 21.5 13 23.1 Z" fill="#2f7d5b"/>
@@ -56,13 +65,13 @@
 </svg>
       </button>
 
-            <a class="icon-btn gh-link" id="gh-link" href="https://github.com/wistroneq3300/pa-server-manager" target="_blank" rel="noopener noreferrer" title="原始碼：GitHub">
+            <a class="icon-btn gh-link" id="gh-link" href="https://github.com/wistroneq3300/pa-server-manager-next" target="_blank" rel="noopener noreferrer" title="預覽專案原始碼：GitHub">
         <svg viewBox="0 0 16 16" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.86 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
       </a>
 
       <button class="icon-btn" id="theme-toggle" title="切換深淺色">🌓</button>
 
-      <div class="user"><span class="avatar">U</span> <span>Admin</span></div>
+      <div class="user"><span class="avatar">SW</span> <span>Sheng Wu</span></div>
     </header>
 
     <div class="content" id="content">
@@ -248,6 +257,7 @@
     <div class="bc-topbar">
       <div class="bc-tabs" id="bc-tabs"></div>
       <div class="bc-ctrl">
+        <button class="btn small" id="bc-grid-btn" onclick="bcSetGrid(!bcState.grid)" title="同時顯示全部主機（方形網格，幾台就排幾格）"><span class="bc-chk-box"></span>全部顯示</button>
         <button class="btn small active" id="bc-bcast-on" onclick="bcSetBroadcast(true)" title="廣播模式">📡 廣播全部</button>
         <button class="btn small" id="bc-bcast-off" onclick="bcSetBroadcast(false)" title="只操作目前選取主機">◈ 目前主機</button>
       </div>
@@ -269,24 +279,39 @@
 <script src="/static/vendor/xterm/xterm.js"></script>
 <script src="/static/vendor/xterm/addon-fit.js"></script>
 <script src="/static/vendor/chartjs/chart.umd.min.js"></script>
-<script src="/static/js/app.js?v=20260918n"></script>
-<script src="/static/js/premium.js?v=20260918n"></script>
-<script src="/static/js/userguide.js?v=20260905b"></script>
+<script src="/static/js/equipment-rules.js?v=20260924-r4"></script>
+<script src="/static/js/equipment-connections.js?v=20260924-r4"></script>
+<script src="/static/js/app.js?v=20260928-variant-contract"></script>
+<script src="/static/js/topology.js?v=20260924-network-led2"></script>
+<script src="/static/js/userguide.js?v=20260924-guide1"></script>
 <script>
 // KVM 自動登入（Plan A）：launch_id 由 broker mint，route 是 Portal origin 提供
 // （nginx 把 /api/kvm/launch 代轉 broker）。主 app 若跑在 dev origin（127.0.0.1:6969），
 // 就用指定的 broker Portal host；正式部署時整個 app 掛在 portal host 下即自動對齊。
 window.SPX_KVM_LAUNCH_API =
   (window.SPX_KVM_LAUNCH_API) ||
-  
+  (location.hostname === "127.0.0.1" && "https://portal.lab.example.internal/api/kvm/launch") ||
   (location.origin + "/api/kvm/launch");
 </script>
-<script type="module" src="/static/js/kvm_broadcast.js?v=20260901f"></script>
+<script src="/static/js/product.js?v=20260924-promote-visible"></script>
+<script src="/static/js/product-detail.js?v=20260924-ops-unified"></script>
+<script src="/static/js/core-scene.js?v=20260924-cooling1"></script>
+<script src="/static/js/cinematic.js?v=20260924gb300-insertion2"></script>
+<script src="/static/js/workspace-cinematic.js?v=20260924-ux2"></script>
+<script src="/static/js/hardware-visuals.js?v=20260924-power-fans"></script>
+<script src="/static/js/workspace-reliability.js?v=20260924-cooling1"></script>
+<script src="/static/js/rack-equipment-scene.js?v=20260924-network-led2"></script>
+<script src="/static/js/equipment-workspace.js?v=20260924-network-led2"></script>
+<script src="/static/js/engineering-ux.js?v=20260928-variant-contract"></script>
+<script src="/static/js/operations-ux.js?v=20260924-ux2"></script>
+<script src="/static/js/workspace-ux.js?v=20260928-variant-contract"></script>
+<script type="module" src="/static/js/kvm_broadcast.js?v=20260924-review1"></script>
 <div id="guide-root"></div>
 
 
 <script src="/static/js/cycle-console.js"></script>
-<script src="/static/js/cycle.js"></script>
+<script src="/static/js/cycle-workspace.js"></script>
+
 </body>
 
 </html>

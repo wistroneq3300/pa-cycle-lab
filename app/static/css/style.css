@@ -454,10 +454,38 @@ input#f-bmc-pass:autofill{
 .bc-tab .x:hover{opacity:1;color:var(--red)}
 .bc-ctrl{display:flex;gap:6px;flex-shrink:0;align-items:center}
 .bc-ctrl .btn.small.active{background:var(--w-green);border-color:var(--w-green);color:#fff}
+.bc-ctrl #bc-grid-btn.active{background:transparent;border-color:var(--w-green);color:var(--w-green)}
+.bc-chk-box{
+  display:inline-block;
+  width:16px;
+  height:16px;
+  border:2px solid var(--w-green);
+  border-radius:3px;
+  position:relative;
+  margin-right:4px;
+  vertical-align:middle;
+}
+.bc-ctrl #bc-grid-btn.active .bc-chk-box{
+  background:var(--w-green);
+}
+.bc-ctrl #bc-grid-btn.active .bc-chk-box::after{
+  content:"✓";
+  position:absolute;
+  color:#fff;
+  font-size:12px;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+}
 .bc-body{flex:1;min-height:0;padding:10px;display:flex}
 .bc-panes{flex:1;display:flex;min-width:0;min-height:0}
 .bc-pane{display:none;flex:1;flex-direction:column;min-width:0;min-height:0}
 .bc-pane.active{display:flex}
+/* 網格「同時顯示全部」監控牆模式：幾台自動排成近似方形（4台=2x2、9台=3x3…） */
+.bc-panes.grid{display:grid;grid-template-columns:repeat(var(--bc-cols,2),1fr);gap:8px;overflow:auto;align-content:start}
+.bc-panes.grid .bc-pane{display:flex;min-height:120px}
+.bc-panes.grid .bc-pane-label{font-size:10px;padding:3px 8px}
+.bc-panes.grid .bc-box .xterm{padding:3px}
 /* 主控(host/broadcaster)指令記錄：記錄你(host)送出過的 command → 目標 */
 .bc-hlog{width:200px;min-width:180px;max-width:260px;margin-left:10px;border:1px solid var(--border);border-radius:8px;
   background:var(--bg-panel-2);overflow-y:auto;font-family:"Cascadia Mono","Consolas",monospace;font-size:10.5px;
@@ -1139,3 +1167,18 @@ tr.has-gpu-alert td{box-shadow:inset 0 2px 0 0 #ff6a3d}
   background:linear-gradient(135deg,transparent 0 50%,var(--text-faint) 50% 60%,transparent 60% 75%,var(--text-faint) 75% 85%,transparent 85%)}
 .ar-window.ar-maxed .ar-grip{display:none}
 
+
+/* Guide readability and viewport containment. */
+.ug-window{max-width:calc(100vw - 16px);max-height:calc(100vh - 16px)}
+.ug-window.ug-minimized{height:38px !important;bottom:auto !important}
+.ug-doc{overflow-wrap:anywhere}
+.ug-doc .ug-sec{margin-bottom:24px;scroll-margin-top:10px}
+.ug-doc .ug-toc{columns:2;column-gap:24px}
+.ug-doc .ug-toc li{break-inside:avoid}
+.ug-table{table-layout:fixed}
+@media(max-width:680px){
+ .ug-window{left:8px !important;top:8px !important;width:calc(100vw - 16px) !important;height:calc(100dvh - 16px)}
+ .ug-body{padding:12px 12px 24px}
+ .ug-doc .ug-toc{columns:1}
+ .ug-table td,.ug-table th{padding:6px}
+}

@@ -1,0 +1,8 @@
+.wr-empty-body,.wr-note{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 24px;color:var(--text-dim);font-size:12px;line-height:1.7}
+.wr-empty-body .btn,.wr-note .btn{flex-shrink:0}
+.wr-empty-project{border-style:dashed}
+.wr-empty-portfolio{min-height:240px}
+.wr-empty-mark{font-size:42px;font-weight:300;color:var(--w-blue,#4b9bb7);height:66px;display:flex;align-items:center}
+.wr-note{border:1px solid var(--border);border-radius:12px;margin-top:20px;background:var(--bg-panel)}
+[data-theme="light"] .wr-empty-body,[data-theme="light"] .wr-note{color:#486470}
+[data-theme="light"] .wr-empty-mark{color:#006c93}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>KVM</title>
+  <script>
+    // Match the opener and keep a separately opened console in sync with theme changes.
+    (() => {
+      let parentWindow;
+      try { parentWindow = window.opener && !window.opener.closed ? window.opener : null; } catch (_) {}
+      function setTheme(value) { document.documentElement.dataset.theme = value === 'light' ? 'light' : 'dark'; }
+      try { setTheme(parentWindow?.document.documentElement.dataset.theme || localStorage.getItem('pa_theme')); }
+      catch (_) { setTheme('dark'); }
+      const onStorage = event => { if (event.key === 'pa_theme') setTheme(event.newValue); };
+      const onTheme = event => setTheme(event.detail?.theme);
+      window.addEventListener('storage', onStorage);
+      try { parentWindow?.addEventListener('pa-theme-change', onTheme); } catch (_) {}
+      window.addEventListener('pagehide', () => {
+        window.removeEventListener('storage', onStorage);
+        try { parentWindow?.removeEventListener('pa-theme-change', onTheme); } catch (_) {}
+      }, { once: true });
+    })();
+  </script>
+  <link rel="stylesheet" href="/static/css/equipment-workspace.css?v=20260924-tc1288">
+  <link rel="stylesheet" href="/static/css/kvm-solo.css?v=20260924-ux1">
+</head>
+<body>
+  <div id="app">
+    <header id="head">
+      <span class="grip" aria-hidden="true">&#x283f;</span>
+      <span class="kvm-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg></span>
+      <div class="kvm-heading"><span class="kvm-eyebrow">REMOTE CONSOLE</span><h1>KVM <span class="kvm-separator">/</span> <span id="mname">&#x2026;</span></h1></div>
+      <div class="kvm-connection" role="status" aria-live="polite"><span class="dot" id="st-dot" aria-hidden="true"></span><span id="st-lbl">&#x9023;&#x7dda;&#x4e2d;&#x2026;</span></div>
+      <div class="kvm-actions"><button id="retry" type="button">&#x91cd;&#x65b0;&#x9023;&#x7dda;</button><button id="stop" type="button">&#x505c;&#x6b62;&#x9023;&#x7dda;</button></div>
+    </header>
+    <div id="stage">
+      <div id="screen"></div>
+      <div id="overlay" role="status" aria-live="polite">正在建立 KVM 連線…</div>
+    </div>
+    <footer id="kvm-foot"><span><i aria-hidden="true"></i>ENGINEERING WORKSPACE</span><span>&#x9ede;&#x64ca;&#x756b;&#x9762;&#x5f8c;&#x53ef;&#x4f7f;&#x7528;&#x9375;&#x76e4;&#x8207;&#x6ed1;&#x9f20;&#x64cd;&#x4f5c;</span></footer>
+  </div>
+
+  <script type="module" src="/static/js/kvm-solo.js?v=20260924-ux1"></script>
+</body>
+</html>

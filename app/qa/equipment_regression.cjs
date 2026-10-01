@@ -1,0 +1,24 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),cp=require('node:child_process');
+const app=fs.readFileSync('static/js/app.js','utf8');
+const scope={window:{},console,Set,RegExp,JSON,Number,encodeURIComponent,MGX_TYPES:Object.fromEntries(['server','blanking','cdu','pdu','switch','powershelf','storage','network','nvlink'].map(k=>[k,{label:k}]))};
+vm.createContext(scope);vm.runInContext(fs.readFileSync('static/js/equipment-rules.js','utf8'),scope);
+vm.runInContext(app.slice(app.indexOf('function equipmentClass('),app.indexOf('async function rackAssign')),scope);
+const fixtures=[...Object.keys(scope.MGX_TYPES).map(mgx_type=>({mgx_type,name:'rack-cdu-01'})),...['rack-cdu-01','rack-pdu-01','rack-sw-01','nvswitch-01','power-shelf-1','rack-cdu-switch-01','mystery','host_a'].map(name=>({name}))];
+const python=process.env.PA_PYTHON||'C:/Users/kobei/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe';
+const expected=JSON.parse(cp.execFileSync(python,['-c','import equipment_policy,json,sys; print(json.dumps([equipment_policy.classify(m) for m in json.load(sys.stdin)]))'],{input:JSON.stringify(fixtures),encoding:'utf8'}));
+assert.deepEqual(fixtures.map(m=>JSON.parse(JSON.stringify(scope.equipmentClass(m)))),expected);
+for(const kind of Object.keys(scope.MGX_TYPES))assert.equal(scope.equipmentCanPower({mgx_type:kind,os_ip:'192.0.2.1'}),kind==='server');
+scope.esc=String;scope.machines=[{name:'CDU',mgx_type:'cdu',os_ip:'192.0.2.1',bmc_ip:'192.0.2.2',os_user:'a',os_pass:'****',bmc_user:'b',bmc_pass:'****'}];
+const els={};scope.$=id=>els[id];let dialog,request,connection;
+scope.showDialog=(title,body,buttons)=>{dialog={title,body,buttons};};scope.closeDialog=()=>{};scope.loadMachines=async()=>{};scope.setView=()=>{};scope.state={view:'rack'};
+scope.api=async(path,options)=>{request={path,body:JSON.parse(options.body)};return {ok:true};};scope.openTermAt=(...args)=>{connection=args};
+vm.runInContext(fs.readFileSync('static/js/equipment-connections.js','utf8'),scope);
+(async()=>{
+ els['equipment-target']={value:'os'};els['equipment-ip']={value:'192.0.2.9'};
+ scope.equipmentIpDialog('CDU');els['equipment-target'].value='bmc';els['equipment-target'].onchange();assert.equal(els['equipment-ip'].value,'192.0.2.2');els['equipment-ip'].value='192.0.2.20';await dialog.buttons[1].fn();
+ assert.deepEqual(request.body,{target:'bmc',ip:'192.0.2.20',expected_ip:'192.0.2.2'});
+ els['equipment-ssh-fields']={};els['equipment-target'].value='bmc';scope.equipmentSshDialog('CDU');dialog.buttons[1].fn();
+ assert.equal(connection[1],null);assert.equal(connection[2].host,'192.0.2.2');assert.equal(connection[2].user,'b');
+ assert.equal(scope.equipmentActionsHtml({mgx_type:'blanking'}),'');
+ console.log('PASS: shared classification parity, capability policy, selected IP update, selected SSH target, blanking exclusion');
+})().catch(e=>{console.error(e);process.exitCode=1});

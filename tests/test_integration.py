@@ -188,8 +188,8 @@ class IntegrationTests(unittest.TestCase):
             process.wait(10)
             self.assertFalse(alive(job['id']))
             recover(self.store,self.store.get(job['id']))
-            final=self.store.get(job['id']);self.assertEqual(final['state'],'INCOMPLETE')
-            self.assertIn('no automatic resume',final['stop_reason']);self.assertEqual(self.store.lock_owners(),{})
+            final=self.store.get(job['id']);self.assertEqual(final['state'],'RECONCILIATION_REQUIRED')
+            self.assertIn('no automatic resume',final['stop_reason']);self.assertTrue(self.store.lock_owners())
             self.assertIsNone(self.store.claim(job['id'],'another-worker'))
         finally:
             if process.poll() is None:process.kill();process.wait(10)

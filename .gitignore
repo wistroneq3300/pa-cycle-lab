@@ -10,3 +10,6 @@ node_modules/
 test-results/
 .impeccable/review/
 engine/vera_cycle/test-results/
+app/qa/tmp/
+app/qa/artifacts/
+app/qa/previews/

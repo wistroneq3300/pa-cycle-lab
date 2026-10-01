@@ -19,6 +19,8 @@ def validate(action, body):
 
 
 def identity(transport, target, role):
+    check=getattr(transport,'verify_identity',None)
+    if check is not None and not check(role): raise Conflict('Provider rejected hardware identity/trust binding')
     result=transport.ssh(target, role, IDENTITY, timeout=15)
     values=dict(re.findall(r'^([A-Z_]+)=(.*)$', result.output, re.M))
     if result.code or result.state != 'RETURNED' or values.get('HOSTNAME','').strip().lower() != getattr(target, role+'_hostname').lower():

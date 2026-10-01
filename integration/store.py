@@ -10,13 +10,18 @@ import re
 import sqlite3
 import time
 import uuid
+import threading
 from .settings import DATA, MODE, ENGINE, ROOT
 from .events import structured
 
-TERMINAL = {'COMPLETE', 'INCOMPLETE', 'CANCELLED', 'BLOCKED', 'ERROR'}
+TERMINAL = {'COMPLETE', 'INCOMPLETE', 'CANCELLED', 'BLOCKED', 'ERROR', 'RECONCILIATION_REQUIRED'}
 SAFE_FIELDS = ('name','project','tray','node','os_ip','bmc_ip','os_hostname','bmc_hostname',
                'os_user','bmc_user','os_port','bmc_port','ipmi_cipher','power_domain','aux_domain',
-               'aux_scope_confirmed','credential_ref','synthetic','mgx_type','cycle_profile')
+               'aux_scope_confirmed','credential_ref','synthetic','mgx_type','cycle_profile',
+               'node_id','parent_name','chassis_id','slot_key','display_name','revision',
+               'controller_id','system_uri','console_id','node_serial','hardware_uuid',
+               'slot_id','project_id','rack_id','mapping_status','capabilities','credential_version','ipmi_port',
+               'expected_identity','trust')
 
 class Conflict(ValueError):
     pass
@@ -27,13 +32,18 @@ def encode(value):
 def fingerprint(value):
     return hashlib.sha256(encode(value).encode()).hexdigest()
 
+
+def snapshot_target(machine):
+    from .targets import public
+    return public({k:machine[k] for k in SAFE_FIELDS if k in machine})
+
 def engine_hash():
     manifest=ROOT/'RUNTIME_ENGINE_FILES.json'
     files=json.loads(manifest.read_text(encoding='utf-8'))['RUNTIME_ENGINE_FILES']
     # New nested runtime files cannot silently evade PRE's version guarantee.
     discovered=set()
     for folder in ('integration','engine/vera_cycle','app'):
-        excluded={'dev','docs','data','tests','node_modules','__pycache__'}
+        excluded={'dev','docs','data','tests','node_modules','__pycache__','qa'}
         if folder=='app': excluded|={'scripts','deploy'}
         for p in (ROOT/folder).rglob('*'):
             relative=p.relative_to(ROOT)
@@ -52,6 +62,8 @@ def engine_hash():
 
 def scopes(machine):
     keys = [f'machine:{machine["name"]}']
+    if machine.get('node_id'): keys.append('node:'+machine['node_id'])
+    if machine.get('controller_id'): keys.append('controller:'+machine['controller_id'])
     for role in ('os','bmc'):
         if machine.get(role+'_ip'):
             keys.append('endpoint:'+str(ipaddress.ip_address(machine[role+'_ip'])))
@@ -63,6 +75,7 @@ def scopes(machine):
 
 class Store:
     def __init__(self, path=None):
+        self._transactions=threading.local()
         self.path = Path(path or DATA / 'jobs.sqlite3')
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.tx() as db:
@@ -73,31 +86,42 @@ class Store:
                 CREATE TABLE IF NOT EXISTS locks(scope TEXT PRIMARY KEY, owner TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS events(seq INTEGER PRIMARY KEY AUTOINCREMENT,
                     job_id TEXT NOT NULL, at REAL NOT NULL, data TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS node_status(job_id TEXT NOT NULL, node_id TEXT NOT NULL, data TEXT NOT NULL, PRIMARY KEY(job_id,node_id));
+                CREATE TABLE IF NOT EXISTS actions(id TEXT PRIMARY KEY, job_id TEXT NOT NULL, data TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS controls(id TEXT PRIMARY KEY, data TEXT NOT NULL);
                 CREATE INDEX IF NOT EXISTS events_job_sequence ON events(job_id,seq);
                 CREATE INDEX IF NOT EXISTS events_job_machine_sequence ON events(job_id,json_extract(data,'$.machine_id'),seq);
             ''')
 
     @contextmanager
-    def tx(self):
+    def tx(self, write=True):
+        current=getattr(self._transactions,"db",None)
+        if current is not None:
+            yield current
+            return
         db = sqlite3.connect(self.path, timeout=30)
         db.row_factory = sqlite3.Row
         try:
             db.execute('PRAGMA foreign_keys=ON')
-            db.execute('BEGIN IMMEDIATE')
+            db.execute('BEGIN IMMEDIATE' if write else 'BEGIN')
+            self._transactions.db=db
             yield db
             db.commit()
         except BaseException:
             db.rollback()
             raise
         finally:
+            self._transactions.db=None
             db.close()
 
     def _get(self, db, job_id):
         row = db.execute('SELECT data FROM jobs WHERE id=?',(job_id,)).fetchone()
         if row is None:
             raise KeyError(job_id)
-        return json.loads(row['data'])
+        job=json.loads(row['data'])
+        live=[json.loads(r[0]) for r in db.execute('SELECT data FROM node_status WHERE job_id=? ORDER BY node_id',(job_id,))]
+        if live: job['nodes']=live
+        return job
 
     def _save(self, db, job, event=None):
         job['updated_at'] = time.time()
@@ -120,16 +144,16 @@ class Store:
             return self._event(db,job_id,'cycle-'+job_id,event,secrets=secrets)
 
     def get(self, job_id):
-        with self.tx() as db:
+        with self.tx(write=False) as db:
             return self._get(db,job_id)
 
     def jobs(self, project=None):
-        with self.tx() as db:
+        with self.tx(write=False) as db:
             query = 'SELECT data FROM jobs' + (' WHERE project=?' if project is not None else '') + ' ORDER BY updated DESC'
             return [json.loads(r[0]) for r in db.execute(query,(project,) if project is not None else ())]
 
     def lock_owners(self):
-        with self.tx() as db:
+        with self.tx(write=False) as db:
             return dict(db.execute('SELECT scope,owner FROM locks'))
 
     def reserve(self, db, owner, keys):
@@ -141,7 +165,7 @@ class Store:
 
     def begin_control(self, machine, action, on, actor):
         control = dict(id='control-'+uuid.uuid4().hex, state='CONTROL_RUNNING',
-                       target={k:machine[k] for k in SAFE_FIELDS if k in machine},
+                       target=snapshot_target(machine),
                        action=action, on=on, actor=actor, dispatched=False, created_at=time.time())
         with self.tx() as db:
             self.reserve(db, control['id'], scopes(machine))
@@ -149,13 +173,13 @@ class Store:
         return control
 
     def get_control(self, control_id):
-        with self.tx() as db:
+        with self.tx(write=False) as db:
             row=db.execute('SELECT data FROM controls WHERE id=?',(control_id,)).fetchone()
             if row is None: raise KeyError(control_id)
             return json.loads(row[0])
 
     def controls(self):
-        with self.tx() as db:
+        with self.tx(write=False) as db:
             return [json.loads(r[0]) for r in db.execute('SELECT data FROM controls')]
 
     def update_control(self, control_id, **fields):
@@ -174,11 +198,11 @@ class Store:
         names=set(machines)
         for row in db.execute('SELECT data FROM jobs'):
             job=json.loads(row[0])
-            if job['state'] not in TERMINAL and (job['project']==project or names.intersection(m['name'] for m in job['targets'])):
+            if (job['state'] not in TERMINAL or job['state']=='RECONCILIATION_REQUIRED') and (job['project']==project or names.intersection(n for m in job['targets'] for n in (m['name'],m.get('parent_name')))):
                 raise Conflict('Active Cycle Job prevents inventory change: '+job['id'])
         for row in db.execute('SELECT data FROM controls'):
             control=json.loads(row[0])
-            if control['state'] not in {'CONTROL_COMPLETE','CONTROL_FAILED'} and (control['target'].get('project')==project or control['target']['name'] in names):
+            if control['state'] not in {'CONTROL_COMPLETE','CONTROL_FAILED'} and (control['target'].get('project')==project or bool(names.intersection((control['target']['name'],control['target'].get('parent_name'))))):
                 raise Conflict('Unresolved manual control prevents inventory change: '+control['id'])
 
     def assert_scopes_idle(self, db, machine):
@@ -220,7 +244,7 @@ class Store:
                 db.execute('DELETE FROM locks WHERE owner=?',(owner,))
 
     def create(self, project, request, targets, actor, mode=MODE):
-        targets=[{k:m[k] for k in SAFE_FIELDS if k in m} for m in targets]
+        targets=[snapshot_target(m) for m in targets]
         request_hash = fingerprint(request)
         keys = [k for m in targets for k in scopes(m)]
         with self.tx() as db:
@@ -250,6 +274,26 @@ class Store:
                 return None
             job.update(state='PRE_RUNNING',worker=worker,worker_pid=os.getpid(),heartbeat=time.time())
             self._save(db,job,{'phase':'PRE_RUNNING'})
+            return job
+
+    def blocked(self, project, config, targets, actor, reason):
+        """Persist non-dispatchable native plans without acquiring unsafe scopes."""
+        targets=[snapshot_target(t) for t in targets]
+        with self.tx() as db:
+            prior=db.execute('SELECT data FROM jobs WHERE project=? AND idem=?',(project,config['idempotency_key'])).fetchone()
+            if prior:
+                job=json.loads(prior[0])
+                if fingerprint(job['config'])!=fingerprint(config): raise Conflict('Idempotency key already used')
+                return job
+            jid=uuid.uuid4().hex; at=time.time()
+            pre=dict(runnable_ids=[],excluded=[dict(machine_id=t['name'],reasons=[reason]) for t in targets],findings=[],baseline_hash=None)
+            pre['version']=fingerprint(pre)
+            job=dict(id=jid,run_id='cycle-'+jid,project=project,state='BLOCKED',mode=MODE,synthetic=MODE=='synthetic',config=config,
+                     targets=targets,nodes=[],created_by=actor,created_at=at,updated_at=at,finished_at=at,stop_requested=False,
+                     stop_reason=reason,health='NOT_RUN',pre=pre,engine_hash=engine_hash(),
+                     source_versions=json.loads((ROOT/'SOURCE_BASELINES.json').read_text(encoding='utf-8')))
+            db.execute('INSERT INTO jobs VALUES(?,?,?,?,?,?,?)',(jid,project,config['idempotency_key'],fingerprint(config),'BLOCKED',at,encode(job)))
+            self._event(db,jid,job['run_id'],dict(phase='BLOCKED',detail=reason))
             return job
 
     def update(self, job_id, event=None, **fields):
@@ -308,6 +352,42 @@ class Store:
                 return job
             job.update(fields,state=state,stop_reason=reason,finished_at=time.time())
             self._save(db,job,{'phase':state,'reason':reason})
+            if state!='RECONCILIATION_REQUIRED': db.execute('DELETE FROM locks WHERE owner=?',(job_id,))
+            return job
+
+    def node_update(self, job_id, node):
+        with self.tx() as db:
+            db.execute('INSERT OR REPLACE INTO node_status VALUES(?,?,?)',(job_id,node['machine_id'],encode(node)))
+
+    def touch(self, job_id):
+        with self.tx() as db:
+            db.execute("UPDATE jobs SET data=json_set(data,'$.heartbeat',?) WHERE id=?",(time.time(),job_id))
+
+    def intent(self, job_id, action):
+        with self.tx() as db:
+            job=self._get(db,job_id)
+            if job['stop_requested']: raise Conflict('Stop requested before dispatch')
+            if job['state']!='RUNNING': raise Conflict('Run is not dispatchable')
+            db.execute('INSERT INTO actions VALUES(?,?,?)',(action['action_id'],job_id,encode(action)))
+            self._event(db,job_id,job['run_id'],dict(level='CMD',phase='CYCLE',message='Action intent durably reserved',domain=action['domain']))
+
+    def action_result(self, action_id, result):
+        with self.tx() as db:
+            db.execute("UPDATE actions SET data=json_set(data,'$.outcome',?) WHERE id=?",(result,action_id))
+
+    def actions(self, job_id):
+        with self.tx(write=False) as db:
+            return [json.loads(r[0]) for r in db.execute('SELECT data FROM actions WHERE job_id=?',(job_id,))]
+
+    def reconcile(self, job_id, reviewed_hash, actor, reason):
+        with self.tx() as db:
+            job=self._get(db,job_id)
+            if job.get('reconciliation'): return job
+            actions=[json.loads(r[0]) for r in db.execute('SELECT data FROM actions WHERE job_id=?',(job_id,))]
+            if job['state']!='RECONCILIATION_REQUIRED' or fingerprint(actions)!=reviewed_hash:
+                raise Conflict('Reconciliation review is missing or stale')
+            job.update(state='INCOMPLETE',reconciliation=dict(actor=actor,reason=reason,actions_hash=reviewed_hash,at=time.time()))
+            self._save(db,job,dict(phase='INCOMPLETE',message='Explicit reconciliation completed; no replay',detail=reason))
             db.execute('DELETE FROM locks WHERE owner=?',(job_id,))
             return job
 
@@ -330,20 +410,24 @@ class Store:
             more=len(rows)>limit;rows=rows[:limit]
             if descending: rows.reverse()
             events=[dict(sequence=r['seq'],time=r['at'],**structured(job_id,'cycle-'+job_id,json.loads(r['data']),r['at'])) for r in rows]
+            bounds=db.execute('SELECT min(seq),max(seq) FROM events WHERE job_id=?',(job_id,)).fetchone()
+            compacted=db.execute("SELECT 1 FROM events WHERE job_id=? AND json_extract(data,'$.phase')='COMPACTED' LIMIT 1",(job_id,)).fetchone()
+            expired=bool(after and ((bounds[1] is not None and after>bounds[1]) or (compacted and after<(bounds[0] or 0))))
             return dict(events=events,has_more=more,next_sequence=events[-1]['sequence'] if events else after,
-                        oldest_sequence=events[0]['sequence'] if events else None)
+                        oldest_sequence=events[0]['sequence'] if events else None,cursor_reset=expired,
+                        history_compacted=bool(compacted))
         finally: db.close()
 
     def events(self, job_id, after):
         return self.event_page(job_id,after)['events']
 
 def validate_request(body):
-    allowed={'machine_ids','cycle_profile','cycle_mode','channel','limits','boot_timeout','idempotency_key'}
+    allowed={'machine_ids','cycle_profile','cycle_mode','channel','limits','boot_timeout','idempotency_key','parallelism'}
     if set(body)-allowed:
         raise ValueError('不支援的設定欄位')
     ids=body.get('machine_ids')
-    if not isinstance(ids,list) or not ids or len(ids)>32 or any(not isinstance(x,str) for x in ids) or len(set(ids))!=len(ids):
-        raise ValueError('請選取 1–32 台不重複的機台')
+    if not isinstance(ids,list) or not ids or len(ids)>4096 or any(not isinstance(x,str) for x in ids) or len(set(ids))!=len(ids):
+        raise ValueError('請選取 1–4096 台不重複的機台')
     if body.get('cycle_profile') != 'neutrino' or body.get('cycle_mode') not in {'reboot','power_cycle','aux_cycle'} or body.get('channel') not in {'inband','outband'}:
         raise ValueError('Profile、cycle 模式或通道無效')
     limits=body.get('limits',{})
@@ -358,7 +442,9 @@ def validate_request(body):
     key=body.get('idempotency_key','')
     if not isinstance(key,str) or not re.fullmatch(r'[A-Za-z0-9_-]{8,100}',key):
         raise ValueError('請提供有效的重試識別碼')
-    return dict(body,boot_timeout=timeout,limits=dict(loops=loops,hours=hours))
+    parallelism=body.get('parallelism',8)
+    if type(parallelism) is not int or not 1<=parallelism<=32: raise ValueError('parallelism must be 1..32')
+    return dict(body,parallelism=parallelism,boot_timeout=timeout,limits=dict(loops=loops,hours=hours))
 
 def target_reason(machine, profile, mode=MODE):
     reasons=[]

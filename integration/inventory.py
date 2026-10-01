@@ -31,7 +31,7 @@ def local_write(pa,fn):
 
 
 def validate_machine(pa, name, candidate):
-    for key in set(SAFE_FIELDS)-{'os_port','bmc_port','ipmi_cipher','synthetic','aux_scope_confirmed'}:
+    for key in set(SAFE_FIELDS)-{'os_port','bmc_port','ipmi_port','ipmi_cipher','synthetic','aux_scope_confirmed','capabilities','expected_identity','trust'}:
         if key in candidate and not isinstance(candidate[key],str): raise ValueError('Expected text: '+key)
     for key in ('synthetic','aux_scope_confirmed'):
         if key in candidate and type(candidate[key]) is not bool: raise ValueError('Expected boolean: '+key)
@@ -74,7 +74,7 @@ def mutate(pa, store, kind, name, method, body):
                 if method=='DELETE':
                     store.assert_inventory_idle(db,machines=[name])
                     store.assert_scopes_idle(db,pa.machines[name])
-                    del pa.machines[name]
+                    pa.delete_machine(name)
                 else:
                     if set(body)-EDITABLE: raise ValueError('Unsupported inventory field')
                     if set(body)-DECORATIVE:
@@ -84,9 +84,11 @@ def mutate(pa, store, kind, name, method, body):
                     if set(body)-DECORATIVE:
                         validate_machine(pa,name,candidate)
                         store.assert_scopes_idle(db,candidate)
+                    pa._validate_rack(candidate,name)
                     del pa.machines[name]; pa.machines[candidate['name']]=candidate
                 pa._save_data()
-                safe={k:v for k,v in pa.machines.get(body.get('name',name),{}).items() if not any(s in k.lower() for s in ('pass','secret','token'))}
+                from .targets import public
+                safe=public(pa.machines.get(body.get('name',name),{}))
                 return dict(ok=True,machine=safe)
             if kind=='projects':
                 if name not in pa.projects: raise KeyError(name)

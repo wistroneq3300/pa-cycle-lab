@@ -5,7 +5,7 @@
   const line=e=>`${e.timestamp} #${e.sequence} ${e.machine_id || 'JOB'} [${e.level}] ${e.phase} loop=${e.loop ?? 0} ${e.message}${e.detail?' — '+e.detail:''}`;
   window.CycleConsole=class {
     constructor(root,button) {
-      this.root=root;this.button=button;this.revision=0;this.buffer=[];this.history=null;this.cursor=0;this.auto=true;
+      this.root=root;this.button=button;this.revision=0;this.buffer=[];this.history=null;this.cursor=0;this.auto=true;this.unread=0;
       root.innerHTML=`<div class="cycle-console-heading"><div><h3>Live Console</h3><p data-part="meta"></p></div><span data-part="runtime"></span></div>
         <div class="cycle-console-tools"><button class="btn" data-part="auto" aria-pressed="true">Auto Scroll ON</button><button class="btn" data-part="pause">Pause View</button><button class="btn" data-part="copy">Copy visible log</button><a class="btn" data-part="download">Download Log</a></div>
         <div class="cycle-console-tools"><div data-part="nodes" class="cycle-console-nodes" aria-label="Console node filter"></div><label class="cycle-console-check"><input type="checkbox" data-part="errors">ERROR ONLY</label><label class="cycle-console-search">Search<input type="search" data-part="search" placeholder="搜尋目前視窗；歷史請按 Search history" maxlength="200"></label></div>
@@ -14,6 +14,7 @@
         <div class="cycle-console-log" data-part="log" role="log" aria-live="off" tabindex="0" aria-label="Cycle operational events"></div>
         <p class="cycle-console-note">時間 UTC。檢視最多 2,000 行，記憶體保留最新 3,000 筆。Pause / 關閉不會停止 Job。完整保留紀錄可下載；原始證據仍在報告與證據。</p>`;
       this.part=name=>root.querySelector(`[data-part="${name}"]`);
+      this.part('log').addEventListener('scroll',()=>{const log=this.part('log');if(log.scrollHeight-log.scrollTop-log.clientHeight>30){this.auto=false;this.part('auto').textContent='Auto Scroll OFF · Jump to latest';this.part('auto').setAttribute('aria-pressed','false');}});
       button.onclick=()=>this.toggle();
       this.part('auto').onclick=()=>{this.auto=!this.auto;this.part('auto').textContent=`Auto Scroll ${this.auto?'ON':'OFF'}`;this.part('auto').setAttribute('aria-pressed',this.auto);if(this.auto)this.bottom();};
       this.part('pause').onclick=()=>{this.paused=!this.paused;this.cancel();this.part('pause').textContent=this.paused?'Resume View':'Pause View';this.status();if(!this.paused&&!this.history)this.poll();};
@@ -43,7 +44,7 @@
         this.job=job;if(!this.root.hidden)this.poll();
       }
       this.job=job;
-      const end=['COMPLETE','INCOMPLETE','ERROR','BLOCKED','CANCELLED'].includes(job.state)?job.updated_at:Date.now()/1000;
+      const end=['COMPLETE','INCOMPLETE','ERROR','BLOCKED','CANCELLED','RECONCILIATION_REQUIRED'].includes(job.state)?job.updated_at:Date.now()/1000;
       const sec=Math.max(0,Math.floor(end-job.created_at));
       this.part('runtime').textContent=`Runtime: ${[Math.floor(sec/3600),Math.floor(sec/60)%60,sec%60].map(n=>String(n).padStart(2,'0')).join(':')}`;
     }
@@ -61,7 +62,8 @@
       if(this.root.hidden||this.paused||this.history||this.controller||!this.job)return;
       clearTimeout(this.timer);const revision=this.revision;let delay=1500;
       try{const data=await this.request(this.cursor?{after:this.cursor}:{tail:true});if(!data)return;
-        for(const e of data.events){if(e.sequence>this.cursor){this.buffer.push(e);this.cursor=e.sequence;}}
+        if(data.cursor_reset){this.buffer=[];this.cursor=0;this.part('log').replaceChildren();this.error('事件 cursor 已過期；重新取得 snapshot 與保留歷史。');this.job=await (await fetch(this.url,{cache:'no-store'})).json();return;}
+        for(const e of data.events){if(e.sequence>this.cursor){this.buffer.push(e);this.cursor=e.sequence;if(!this.auto)this.unread++;}}
         if(this.buffer.length>BUFFER)this.buffer.splice(0,this.buffer.length-BUFFER);
         this.error('');this.render();if(data.has_more&&data.events.length&&data.events[0].sequence>0&&this.loaded)delay=250;this.loaded=true;
       }catch(e){if(revision===this.revision)this.error('Console 連線中斷，將自動重試。Job 狀態仍由原有 polling 更新。');}
@@ -74,8 +76,8 @@
       }catch(e){if(revision===this.revision){this.error('歷史載入失敗，請重試。');if(!this.history&&!this.paused)this.timer=setTimeout(()=>this.poll(),1500);}}
     }
     visible(){const query=this.part('search').value.toLowerCase();return(this.history || this.buffer).filter(e=>(!this.node||e.machine_id===this.node)&&(!this.part('errors').checked||['FAIL','ERROR'].includes(e.level))&&(!query||`${e.message} ${e.detail || ''}`.toLowerCase().includes(query))).slice(-RENDER);}
-    status(){this.part('status').textContent=`${this.history?'歷史視窗':this.paused?'View paused':'Live · 每 1.5 秒更新'}${this.paused||this.history?' · 不影響 Job 執行':''} · 顯示 ${this.visible().length} 筆${this.history?' · 每頁最多 500 筆':''}${this.trimmed?' · 閱讀位置已移出視窗，請用 Earlier history 查看':''}`;}
-    bottom(){const log=this.part('log');log.scrollTop=log.scrollHeight;}
+    status(){this.part('status').textContent=`${this.history?'歷史視窗':this.paused?'View paused':'Live · 每 1.5 秒更新'}${this.paused||this.history?' · 不影響 Job 執行':''} · 顯示 ${this.visible().length} 筆${this.unread?' · '+this.unread+' 筆新輸出，按 Auto Scroll 跳到最新':''}${this.history?' · 每頁最多 500 筆':''}${this.trimmed?' · 閱讀位置已移出視窗，請用 Earlier history 查看':''}`;}
+    bottom(){this.unread=0;const log=this.part('log');log.scrollTop=log.scrollHeight;}
     render(force=false){
       const log=this.part('log'),events=this.visible();
       const anchor=!this.auto&&!force?[...log.children].find(row=>row.getBoundingClientRect().bottom>log.getBoundingClientRect().top+log.clientTop):null;

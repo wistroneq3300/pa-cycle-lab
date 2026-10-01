@@ -1,0 +1,100 @@
+/* Shared workspace tokens and responsive shell. */
+:root{--ux-radius:10px;--ux-gap:16px;--ux-body:13px;--ux-label:12px}
+.btn,.input,button,select,input{font-size:var(--ux-body)}
+.btn{min-height:36px;gap:7px;border-radius:7px}
+button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ew-blue);outline-offset:3px}
+.ux-icon{width:16px;height:16px;flex:none;vertical-align:middle}
+.p-ip small,.p-row-level,.pd-connection>div>span,.pd-connection>div>small,.pd-connection .pd-state,.pd-connection-foot .badge,.pd-ops-context,.pd-operation,.eng-hw-controls,.eng-section header span{font-size:12px!important}
+.p-eyebrow,.pd-eyebrow,.kvm-eyebrow,.cine-kicker{font-size:10px!important}
+.p-operations{position:sticky;top:66px;z-index:12;background:var(--ew-surface);border:1px solid var(--ew-line);border-radius:10px;padding:12px;flex-wrap:wrap}
+.proj-card{min-width:0;max-width:100%;overflow:visible}
+.proj-card table{width:100%;min-width:720px;table-layout:auto}
+.proj-card-body{overflow-x:auto;max-width:100%}
+.p-row-menu>div{z-index:20}
+.ux-overview{margin:0 0 26px}
+.ux-overview>header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}
+.ux-overview h1{font-size:28px;margin:0 0 7px}.ux-overview h2{font-size:16px;margin:0 0 14px}
+.ux-overview p{font-size:13px;color:var(--ew-muted);line-height:1.7;margin:5px 0}
+.ux-overview small{display:block;font-size:12px;color:var(--ew-muted);line-height:1.7;margin-top:12px}
+.ux-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}
+.ux-metrics>div,.ux-overview-columns>section{border:1px solid var(--ew-line);border-radius:var(--ux-radius);background:var(--ew-raised);padding:20px}
+.ux-metrics span{display:block;font-size:13px;color:var(--ew-muted)}.ux-metrics strong{display:block;font-size:32px;font-weight:600;margin-top:9px}
+.ux-overview-columns{display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+.ux-device-link{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;background:none;color:var(--ew-text);border:0;border-bottom:1px solid var(--ew-line);padding:12px 0;text-align:left;cursor:pointer;font-size:13px}
+.ux-device-link span{color:var(--ew-muted);font-size:12px}.ux-device-link:hover{color:var(--ew-blue)}
+.ux-story-toggle{margin-bottom:16px}
+#core-story[hidden]{display:none!important}
+.ux-rack-toolbar{display:flex;gap:14px;width:100%;flex-wrap:wrap;align-items:flex-start;border-top:1px solid var(--ew-line);padding-top:15px}
+.ux-action-group{margin:0;min-width:0}
+.ux-action-group h3,.ux-action-group summary{font-size:12px;color:var(--ew-muted);font-weight:500;margin:0 0 9px}
+.ux-action-group summary{cursor:pointer;border:1px solid var(--ew-line);border-radius:7px;padding:10px;color:var(--ew-text)}
+.ux-action-group>div{display:flex;gap:7px;flex-wrap:wrap}
+.ux-action-group button small{margin-left:4px;font-size:10px}
+.ux-action-group button:disabled{opacity:.48}
+.ux-field{display:grid;gap:8px;font-size:13px;margin:18px 0}
+.ux-field select{width:100%;background:var(--ew-surface);color:var(--ew-text);border:1px solid var(--ew-line);border-radius:7px;padding:10px}
+.ux-confirm-copy{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;line-height:1.8}
+.ux-spec-button{margin:14px 0;width:100%}
+.ux-identity{font-size:13px!important}
+.pd-showcase.ux-compact-showcase{min-height:160px!important;height:190px;margin-top:16px}
+.pd-showcase.ux-compact-showcase .pd-showcase-copy{padding:20px}.pd-showcase.ux-compact-showcase .pd-showcase-copy h2{font-size:22px;margin:8px 0}
+.pd-showcase.ux-compact-showcase .pd-stage{min-height:150px;height:170px}
+#ux-notifications{position:fixed;right:20px;bottom:20px;z-index:20000;display:grid;gap:8px;max-width:min(440px,calc(100vw - 24px))}
+.ux-notice{display:flex;gap:16px;align-items:center;border:1px solid var(--ew-line);border-left:3px solid var(--ew-green);border-radius:9px;background:var(--ew-raised);color:var(--ew-text);padding:15px;box-shadow:0 8px 28px #0004;font-size:13px}
+.ux-notice.is-error{border-left-color:#df796e}
+.ux-notice button{background:none;border:0;color:var(--ew-blue);cursor:pointer;flex:none}
+.ux-steps{display:flex;gap:12px;list-style:none;padding:0;counter-reset:step;flex-wrap:wrap}
+.ux-steps li{counter-increment:step;color:var(--ew-muted);font-size:12px}.ux-steps li:before{content:counter(step);display:inline-grid;place-items:center;width:22px;height:22px;border:1px solid var(--ew-line);border-radius:50%;margin-right:6px}
+.ux-steps [aria-current]{color:var(--ew-blue)}
+.ux-selection-note{font-size:12px;color:var(--ew-muted)}
+.ux-chosen{max-height:260px;overflow:auto;padding-left:22px;line-height:1.9}
+.ux-telemetry-tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:12px 0;font-size:12px}
+.ux-telemetry-tools p{margin:0;color:var(--ew-muted)}
+.eng-chart-readout{font-size:12px!important;line-height:1.7}
+@media(max-width:1050px){.pd-workspace-grid{grid-template-columns:minmax(0,1fr)!important}.pd-operations{position:static!important}.pd-main{min-width:0}.ux-overview-columns{grid-template-columns:1fr 1fr}.pd-hardware-grid{grid-template-columns:1fr!important}}
+@media(max-width:760px){
+ body .layout{flex-direction:column}
+ body .sidebar{position:static;width:100%;height:auto;min-height:0;padding:8px 10px;border-right:0;border-bottom:1px solid var(--ew-line)}
+ body .sidebar .brand,body .sidebar-foot,body .nav-group{display:none}
+ body .nav{display:flex;gap:5px;padding:0;overflow:visible}
+ body .nav-btn{flex:1;min-width:0;min-height:44px;padding:8px 5px;gap:5px;margin:0}
+ body .nav-btn b{font-size:11px;white-space:normal}
+ body .nav-btn small,body .nav-btn i,body .nav-btn:before{display:none}
+ body .main{width:100%;min-width:0;margin-left:0}
+ body .topbar{padding:0 12px;gap:7px;height:52px;min-height:52px}
+ body .p-top-label,body .topbar .user{display:none}
+ body .page-title{flex:1;min-width:0}
+ body .content{padding:16px 10px 30px;max-width:100%;min-width:0}
+ .ux-overview>header{align-items:flex-start;flex-wrap:wrap}.ux-overview h1{font-size:24px}
+ .ux-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.ux-metrics>div{padding:14px}
+ .ux-overview-columns{grid-template-columns:1fr}.ux-overview-columns>section{padding:16px}
+ .p-heading,.p-workspace-tabs,.p-operations,.proj-card-head,.pd-system-header,.pd-header-status{flex-wrap:wrap;min-width:0}
+ .p-search{min-width:0!important;width:100%}.p-search input{width:100%;min-width:0}
+ .p-workspace-tabs{gap:8px}.p-workspace-tabs>button{flex:1;min-width:0}
+ .p-project-strip{max-width:100%;overflow:auto;flex-wrap:nowrap}
+ .p-operations{position:static}.proj-card{width:100%;margin-inline:0}.proj-card-head{padding:14px}
+ .pd-workspace,.pd-workspace-grid,.pd-main,.pd-tab-panel,.pd-operations{min-width:0;max-width:100%}
+ .pd-system-title h1{overflow-wrap:anywhere;font-size:26px}
+ .pd-tabs{overflow-x:auto;max-width:100%;gap:16px}.pd-tabs button{white-space:nowrap;flex:none}
+ .pd-breadcrumb{flex-wrap:wrap;overflow-wrap:anywhere}.pd-header-status{justify-content:flex-start}
+ .pd-overview-grid,.pd-hardware-grid,.pd-connect-grid{grid-template-columns:minmax(0,1fr)!important}
+ .pd-showcase.ux-compact-showcase{height:180px}.pd-showcase-copy{max-width:55%}
+ .pd-operations{padding:16px}.operation-target pre{white-space:pre-wrap;overflow-wrap:anywhere}
+ .eng-inventory-nav{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .eng-table-scroll{overflow-x:auto;max-width:100%}
+ .modal-backdrop{padding:10px!important}.modal{max-width:100%!important;min-width:0!important;max-height:calc(100dvh - 20px)!important}
+ .modal-body{overflow:auto}.modal-foot{flex-wrap:wrap;gap:8px}.modal-foot button{min-height:40px}
+ .eng-case-layout{grid-template-columns:1fr!important}.eng-case-detail{max-height:300px}
+ .assign-sheet-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .ux-rack-toolbar{flex-direction:column}.ux-action-group{width:100%}
+ .chart-box{min-width:0}.tel-charts{grid-template-columns:1fr!important}
+ #ux-notifications{right:12px;bottom:12px}
+}
+
+.ux-chart-time{display:block;color:var(--ew-muted);font-size:11px;line-height:1.5;margin:0 0 6px}.chart-box[hidden]{display:none!important}
+
+.p-operations .btn,.p-row-menu .btn,.p-project-strip button,.p-workspace-tabs b{font-size:12px}.pd-section-heading .pd-eyebrow,.pd-ops-heading .pd-eyebrow{display:none}.ux-metrics strong{font-variant-numeric:tabular-nums}
+
+.ux-menu-label{display:grid;gap:7px;font-size:12px;padding:9px;color:var(--ew-muted)}.ux-menu-label select{width:100%;min-width:0!important}
+
+.ux-table-hint{display:none}@media(max-width:760px){.ux-table-hint{display:block;font-size:12px;color:var(--ew-muted);padding:8px 14px;margin:0}}

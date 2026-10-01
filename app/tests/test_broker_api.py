@@ -30,8 +30,17 @@ os.environ["SPX_KVM_TARGETS"] = json.dumps([
 
 
 @pytest.fixture(scope="module")
-def app():
+def app(tmp_path_factory):
+    directory = tmp_path_factory.mktemp('broker-api')
+    environment = mock.patch.dict(os.environ, {
+        'SPX_REGISTRY_DB': str(directory / 'registry.db'),
+        'SPX_AUDIT_LOG': str(directory / 'audit.log'),
+        'SPX_SECRET_FILE': str(directory / 'unused.age'),
+        'SPX_IDENTITY_FILE': str(directory / 'unused.identity'),
+    })
+    environment.start()
     import spx_kvm_broker.app as mod
+    mod._broker.store = mock.Mock(credential=lambda name: {'username': 'fixture', 'password': 'fixture-only'})
     # Force a fail-open test auth provider (operator) so launch mint is reachable.
     from spx_kvm_broker import rbac
     class OpPortal(rbac.PortalAuth):
@@ -41,14 +50,11 @@ def app():
     os.environ["SPX_PORTAL_AUTH"] = "noauth"
     # monkeypatch current_user resolution via the seam by replacing the provider
     mod._resolve_auth = lambda provider_path, h, c, q: OpPortal().authenticate(h, c, q)
-    # This is an offline HTTP contract fixture. The fake SP-X client still needs
-    # a backend credential lookup; never fall through to a deployment age file.
-    mod._store._cache = {"spx:bmc-internal-a:kvm-operator":
-                         {"username": "fixture-kvm", "password": "fixture-password"}}
     yield mod
     if orig is not None:
         os.environ["SPX_PORTAL_AUTH"] = orig
     mod._registry.close()
+    environment.stop()
 
 
 @pytest.fixture(scope="module")
@@ -162,3 +168,25 @@ def build_fake_cookies(username):
     from spx_kvm_broker.spx_client import build_cookie_set
     return build_cookie_set({"QSESSIONID": "FAKEQSESS"}, {
         "CSRFToken": "FAKECSRF", "user_id": 3, "privilege": "4"})
+
+
+def test_lifespan_starts_sweeper_and_waits_before_closing_registry(app, monkeypatch):
+    import asyncio
+    import threading
+    started = threading.Event()
+    events = []
+    def sweep():
+        events.append('sweep')
+        started.set()
+    monkeypatch.setattr(app,'_broker',mock.Mock(sweep_idle_and_expired=sweep))
+    monkeypatch.setattr(app,'_registry',mock.Mock(close=lambda:events.append('close')))
+    async def run():
+        async with app.lifespan(app.app):
+            for _ in range(100):
+                if started.is_set():
+                    break
+                await asyncio.sleep(.01)
+            assert started.is_set()
+            assert 'close' not in events
+    asyncio.run(run())
+    assert events == ['sweep','close']

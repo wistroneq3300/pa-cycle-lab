@@ -4,7 +4,7 @@ const USER_GUIDE = (() => {
 
   async function loadTemplate() {
     try {
-      const r = await fetch('/static/userguide_template.html?v=20260905a', { cache: 'no-cache' });
+      const r = await fetch('/static/userguide_template.html?v=20260924-guide1', { cache: 'no-cache' });
       if (!r.ok) throw new Error('HTTP ' + r.status);
       let t = (await r.text());
       // 檔案是被 <script type="text/userguide-html"> 包住的內嵌模板，取裡面的 HTML
@@ -38,14 +38,15 @@ const USER_GUIDE = (() => {
     win = el("div", "ug-window");
     bar = el("div", "ug-bar");
     bar.innerHTML =
-      '<span class="ug-title">📖 User Guide</span>' +
+      '<span class="ug-title">📖 使用手冊</span>' +
       '<button class="ug-btn" data-act="min" title="最小化">–</button>' +
       '<button class="ug-btn" data-act="max" title="最大化 / 縮小">□</button>' +
       '<button class="ug-btn ug-close" data-act="close" title="關閉">✕</button>';
     content = el("div", "ug-content");
     search = el("div", "ug-search");
     const si = el("input", "input");
-    si.placeholder = "🔍 搜尋…（GPU、KVM、廣播、遙測…）";
+    si.placeholder = "搜尋功能或問題（OS Slot、檢查 IP、CDU…）";
+    si.setAttribute("aria-label", "\u641c\u5c0b\u4f7f\u7528\u624b\u518a");
     search.appendChild(si);
     body = el("div", "ug-body");
     body.innerHTML = window.__ugTpl || '';  // 由 loadTemplate 填入
@@ -77,7 +78,7 @@ const USER_GUIDE = (() => {
       const a = e.target.closest('a[href^="#ug-"]'); if (!a) return;
       e.preventDefault();
       const t = body.querySelector(a.getAttribute("href"));
-      if (t) { t.scrollIntoView({ behavior: "smooth", block: "start" }); t.classList.add("ug-flash"); setTimeout(() => t.classList.remove("ug-flash"), 1500); }
+      if (t) { si.value = ""; filterSearch(); t.scrollIntoView({ behavior: "smooth", block: "start" }); t.classList.add("ug-flash"); setTimeout(() => t.classList.remove("ug-flash"), 1500); }
     });
     grip.addEventListener("mousedown", (e) => {
       e.preventDefault(); e.stopPropagation();
@@ -88,7 +89,9 @@ const USER_GUIDE = (() => {
   }
 
   function startDrag(e) {
-    if (e.target.closest(".ug-btn") || win.classList.contains("ug-maxed")) return;
+    if (e.target.closest(".ug-btn")) return;
+    if (win.classList.contains("ug-minimized")) { win.classList.remove("ug-minimized"); persist(); }
+    if (win.classList.contains("ug-maxed")) return;
     dragOffset = { x: e.clientX - win.offsetLeft, y: e.clientY - win.offsetTop };
     document.addEventListener("mousemove", onDragMove);
     document.addEventListener("mouseup", onDragEnd);
@@ -132,15 +135,13 @@ const USER_GUIDE = (() => {
   function minimize() { win.classList.add("ug-minimized"); persist(); }
   function closeAll() { win.style.display = "none"; persist(); }
   function restore() {
-    // 恢復最小化時的還原：點頂條時先解除最小化
-    bar.addEventListener("mousedown", function unmin() {
-      if (win.classList.contains("ug-minimized")) { win.classList.remove("ug-minimized"); }
-    }, { once: true });
     let st = {};
     try { st = JSON.parse(localStorage.getItem("ug-state") || "{}"); } catch (e) {}
     if (st.closed) { win.style.display = "none"; return; }
     win.style.display = "";
-    if (st.min) { win.classList.add("ug-minimized"); return; }
+    win.classList.toggle("ug-minimized", !!st.min);
+    win.classList.toggle("ug-maxed", !!st.max);
+    if (st.min) return;
     if (st.max) { win.classList.add("ug-maxed"); return; }
     win.style.left = st.x || "calc(50vw - 320px)";
     win.style.top = st.y || "14vh";

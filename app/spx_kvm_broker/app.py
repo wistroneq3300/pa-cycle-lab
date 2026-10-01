@@ -19,6 +19,8 @@ from __future__ import annotations
 import json
 import logging
 import os
+import asyncio
+import anyio
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -68,11 +70,24 @@ portal_router = None  # set below after app creation
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    yield
+    stop = asyncio.Event()
+    async def sweep():
+        while not stop.is_set():
+            try:
+                await anyio.to_thread.run_sync(_broker.sweep_idle_and_expired)
+            except Exception:
+                log.exception("broker session sweep failed")
+            try:
+                await asyncio.wait_for(stop.wait(), timeout=30)
+            except asyncio.TimeoutError:
+                pass
+    task = asyncio.create_task(sweep())
     try:
+        yield
+    finally:
+        stop.set()
+        await task
         _registry.close()
-    except Exception:
-        pass
 
 
 # Session middleware enables request.session (needed for portal_session binding).

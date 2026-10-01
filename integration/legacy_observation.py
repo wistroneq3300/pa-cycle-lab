@@ -1,0 +1,50 @@
+"""Admit legacy observations through the same canonical reservation boundary.
+
+The trusted provider approves read-only operations; this is not command-text
+classification. Destructive operations must use the durable control API.
+"""
+from contextvars import ContextVar
+from contextlib import ExitStack
+from .authorization import configured_provider
+from .coordinator import session
+from .targets import inventory
+from .store import Conflict, scopes
+
+caller = ContextVar('legacy_caller', default=None)
+held = ContextVar('legacy_observation_scopes', default=frozenset())
+
+
+def install(pa, store_getter, provider_getter=configured_provider):
+    def wrap(name, endpoints, operation):
+        original=getattr(pa,name)
+        def invoke(*args,**kwargs):
+            addresses=set(filter(None,endpoints(*args,**kwargs)))
+            with ExitStack() as stack:
+                with pa._DATA_LOCK:
+                    rows=[t for t in inventory(pa) if addresses & {t.get('os_ip'),t.get('bmc_ip')}]
+                    keys=frozenset(s for t in rows for s in scopes(t))
+                    if not keys: raise Conflict('Legacy observation needs a registered canonical target')
+                    if not keys.issubset(held.get()):
+                        provider=provider_getter();actor=caller.get()
+                        approve=getattr(provider,'approve_legacy_observation',None)
+                        if not actor or not callable(approve) or not all(provider.authorize(actor,t.get('project'),'read') for t in rows):
+                            raise Conflict('Verified observation provider/caller required')
+                        if not approve(actor,rows,operation(*args,**kwargs)):
+                            raise Conflict('Legacy command is not approved as read-only')
+                        stack.enter_context(session(store_getter(),rows,str(actor)))
+                        token=held.set(held.get()|keys);stack.callback(held.reset,token)
+                return original(*args,**kwargs)
+        setattr(pa,name,invoke)
+    endpoint=lambda m,*a,**k:(m.get('os_ip'),m.get('bmc_ip'))
+    wrap('ssh_run',lambda host,*a,**k:(host,),lambda host,user,password,port,command,*a,**k:dict(kind='ssh',host=host,port=port,command=command))
+    for name in ('ssh_ipmi','_ipmi_run_any'):
+        wrap(name,endpoint,lambda m,sub_args,*a,**k:dict(kind='ipmi',argv=list(sub_args)))
+    power=pa.ipmi_power
+    def guarded_power(machine,action):
+        if action!='status': raise Conflict('Use durable manual control; legacy power fallback is disabled')
+        return power(machine,action)
+    pa.ipmi_power=guarded_power
+    def destructive(*args,**kwargs):
+        raise Conflict('Use durable manual control; legacy destructive dispatch is disabled')
+    pa.run_control_cmd=destructive
+    pa._reboot_machine=destructive

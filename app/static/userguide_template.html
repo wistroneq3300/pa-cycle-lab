@@ -1,231 +1,241 @@
 <script type="text/userguide-html" id="guide-tpl" style="display:none">
 <div class="ug-doc">
-  <h3 class="ug-hint-search"></h3>
-
-  <section class="ug-sec" id="ug-intro">
-    <h2>1　功能總覽</h2>
-    <p>這是 Wistron <b>PA Server Manager</b> 的 Web 主控台，專為 AI / GPU 機房打造，一頁看到全機房狀態：</p>
-    <ul>
-      <li><b>無 Agent</b> — 全程走 SSH / IPMI / Redfish / noVNC，被管機台不用裝任何東西</li>
-      <li><b>首頁（Dashboard）</b> — KPI 卡（受管 / Rack / System / 在線率 / 電源 / 離線）+ SUT Health 大數字 + 專案狀態環餅圖 + 專案卡片</li>
-      <li><b>L10 單機層級</b> — OS 資訊、硬體盤點（含 GPU / FW）、感測器、遙測、電源、KVM、網頁終端機</li>
-      <li><b>L11 機櫃層級</b> — 48U 機櫃平面圖（LED 狀態燈 + U 刻度 + 風扇口面板）、拓樸圖、依元件類型的整櫃遙測與 AI 分析</li>
-      <li><b>AI</b> — 本機 Ollama：首頁 / 機櫃 Copilot + 感測器 / 遙測 / 整櫃的簡短中文分析</li>
-    </ul>
-    <p class="ug-hint">快速導航：
-      <a href="#ug-nav">§2 導覽</a> ·
-      <a href="#ug-add">§3 新增系統</a> ·
-      <a href="#ug-l10">§4 L10 單機</a> ·
-      <a href="#ug-l11">§5 L11 機櫃</a> ·
-      <a href="#ug-broad">§6 廣播</a> ·
-      <a href="#ug-kvm">§7 KVM</a> ·
-      <a href="#ug-ai">§8 AI</a> ·
-      <a href="#ug-faq">§10 FAQ</a>
-    </p>
-  </section>
-
-  <section class="ug-sec" id="ug-nav">
-    <h2>2　導覽與深連結</h2>
-    <h3>主要視圖</h3>
-    <ul>
-      <li><b>Dashboard（首頁）</b>：全機台 KPI（在線率 / 電源 ON·OFF / 離線數）、SUT Health 大數字、專案狀態環餅圖（在線 / BMC 亮機 / 離線 / 未知）、專案卡片（點卡進專案）</li>
-      <li><b>專案卡片</b>：點開進入 L10 / L11 分頁；卡片上有 KVM 同步、系統廣播等快捷鈕</li>
-      <li><b>L11 機櫃頁</b>：平面圖 / 清單 / 整櫃 Telemetry 三種子檢視（上方 tab 切換）</li>
-      <li><b>單機詳情</b>：OS、硬體、感測器、遙測、電源、KVM、終端機</li>
-    </ul>
-    <h3>深連結網址（可直接分享 / 收藏 / F5 保持狀態）</h3>
-    <table class="ug-table">
-      <tr><td><code>#/</code></td><td>總覽 Dashboard</td></tr>
-      <tr><td><code>#/rack/proj_k</code></td><td>直接進該專案機櫃（平面圖）</td></tr>
-      <tr><td><code>#/rack/proj_k/telemetry</code></td><td>直接進整櫃遙測</td></tr>
-      <tr><td><code>#/projects/proj_k</code></td><td>首頁定位並閃光高亮該專案</td></tr>
-    </table>
-    <p>專案名<b>不分大小寫</b>（<code>MyRack</code> 與 <code>myrack</code> 同一個）。</p>
-  </section>
-
-  <section class="ug-sec" id="ug-add">
-    <h2>3　新增 / 管理系統</h2>
-    <h3>新增單機（L10）</h3>
-    <ol>
-      <li>按「＋ 新增系統」</li>
-      <li>級別選 <b>L10</b>；填 OS IP / 使用者 / 密碼 / 埠</li>
-      <li>Hostname 會透過 SSH 自動探測；可勾「自動偵測 BMC IP」（走 <code>ipmitool lan print</code>）</li>
-      <li>填專案名 → 新增，上線後即開始採集遙測</li>
-    </ol>
-    <h3>新增機櫃元件（L11）</h3>
-    <ul>
-      <li>級別選 <b>L11</b>，指定佔用 U 槽位（需連續空 U；多槽設備自動檢查衝突）</li>
-      <li>機櫃平面圖空 U 點「＋」可把<b>同專案已有的 L11 機台</b>放進來</li>
-      <li>機台行上有「📈 升 L11 / 📉 降 L10」與「✕ 移出機櫃」</li>
-    </ul>
-    <h3>專案</h3>
-    <ul>
-      <li>專案是 L10 / L11 的群組（兩者獨立）</li>
-      <li>「專案管理」可增刪改順序</li>
-    </ul>
-  </section>
-
-  <section class="ug-sec" id="ug-l10">
-    <h2>4　L10 單機功能</h2>
-
-    <h3>4.1　OS 資訊</h3>
-    <p>Hostname / OS / 內核 / CPU 核數 / 記憶體 / 磁碟 / NIC；每項可單獨「重試」，失敗顯示錯誤與上次成功時間。</p>
-
-    <h3>4.2　硬體盤點（含 GPU）</h3>
-    <ul>
-      <li><b>CPU / DIMM / SSD / NIC</b>：型號、數量、容量、MAC、速度</li>
-      <li><b>GPU（NVIDIA）</b>：<code>nvidia-smi</code> — 每卡 型號 / VRAM / 利用率 / 溫度 / 功耗，以及 <b>GPU FW（VBIOS）版本</b></li>
-      <li><b>GPU（AMD）</b>：<code>rocm-smi</code>+<code>amd-smi</code> — 解析 MI300X OAM 等，同樣顯示卡數 / 型號 / VRAM / 頻率 / <b>FW</b> / 溫度 / 功耗</li>
-      <li><b>BIOS / iBMC / GPU FW</b>：各組件韌體版本獨立卡片顯示</li>
-    </ul>
-
-    <h3>4.3　感測器 + AI 診斷</h3>
-    <ul>
-      <li>IPMI / Redfish 感測器全表：溫度、電壓、風扇、總功率等，含正常/警告/臨界色碼</li>
-      <li>「🤖 AI 診斷」— 把感測器快照送 Ollama，回一段 2~3 句繁體中文評語（本地、不外傳）</li>
-    </ul>
-
-    <h3>4.4　Telemetry（歷史 + 圖表 + AI 分析）</h3>
-    <ul>
-      <li>依子組分塊：CPU、記憶體、GPU、磁碟、網路、電源</li>
-      <li>每塊可<b>單獨收合／展開</b>；右上角「全部收合／全部展開」一次切換</li>
-      <li>時間範圍 10 分鐘 ~ 30 天；Chart.js 折線 + 每條線最新值</li>
-      <li>選範圍後<b>自動觸發 AI 分析</b>：回 2~3 句中文趨勢判斷（重複同範圍用快取，不重複打 Ollama）</li>
-    </ul>
-
-    <h3>4.5　電源 / KVM / 終端機</h3>
-    <ul>
-      <li>開機 / 關機 / 重開 / AUX：走 BMC（IPMI，新 OpenBMC 自動用 cipher 17）</li>
-      <li>BMC 狀態徽章：電源 on/off、網路連通即時色碼</li>
-      <li>「📺 KVM」：noVNC 遠端畫面（詳見 §7）</li>
-      <li>「💻 終端機」：瀏覽器內 xterm SSH 到 OS / BMC（node bridge 開真連線，帳密不出前端）</li>
-    </ul>
-  </section>
-
-  <section class="ug-sec" id="ug-l11">
-    <h2>5　L11 機櫃功能</h2>
-
-    <h3>5.1　平面圖（Floor Plan）</h3>
-    <ul>
-      <li>48U 標準機櫃，U 位由下往上編號，每 8U 一道刻度線；左側金屬 U 標籤條</li>
-      <li>每格顯示：<b>OS / BMC LED 狀態燈</b>（綠呼吸 = 在線、紅 = 離線、灰 = 未知）、元件名、類型底色</li>
-      <li>櫃頂名牌：專案名 + 「已用 X/48 U · 空 Y U」使用率統計</li>
-      <li>空 U 「＋」加入同專案 L11；佔用檢查避免重疊與非連續槽位</li>
-    </ul>
-
-    <h3>5.2　拓樸圖</h3>
-    <p>SVG 連線圖畫出 node ↔ switch / PDU / CDU 實體鏈接；支援收合（小圖模式）、「🗑 刪除全部」、限高捲動。
-    「新增拓樸 / 模擬拓樸」目前待開發（會跳提示）。</p>
-
-    <h3>5.3　整櫃 Telemetry（重點）</h3>
-    <ul>
-      <li>依<b>元件類型分塊</b>：
-        Server（CPU / RAM / GPU 功耗）· Switch（port 流量 / 溫度 / 風扇）· Power Shelf / PDU（功率 / 電壓 / 電流）· CDU（水流量 / 水溫 / 水壓）</li>
-      <li>每塊包含：<b>機台 × 指標原始數據表</b>（第一欄就是「機台」對齊）+ <b>整櫃折線圖</b></li>
-      <li>每塊標題可單獨收合／展開；頂部「全部收合／全部展開」</li>
-      <li>時間範圍 10 分鐘 ~ 24 小時</li>
-    </ul>
-
-    <h3>5.4　整櫃 AI 分析</h3>
-    <ul>
-      <li>時間範圍下方「🤖 整櫃 AI 分析」— 後端先彙整各類型最新值與整櫃聚合值，再叫 Ollama 回 2~3 句中文總結</li>
-      <li>例：「整櫃整體運作正常，無明顯異常警訊。各元件溫度與負載均在合理範圍內。」</li>
-      <li>該專案無遙測資料時會顯示原因（如機台尚未採集、皆為 L10）</li>
-    </ul>
-    <p class="ug-hint">⚠ 整櫃遙測只收 <b>level=L11</b> 的機台；L10 只進單機遙測。</p>
-  </section>
-
-  <section class="ug-sec" id="ug-broad">
-    <h2>6　廣播</h2>
-
-    <h3>6.1　系統廣播（多機同時執行指令）</h3>
-    <ol>
-      <li>專案卡片按「📡 系統廣播」</li>
-      <li>勾選同專案、有 OS 的機台（可整組勾/取消、全選）</li>
-      <li>打進指令 → 同一鍵入 fan-out 到每台 OS shell，輸出標上主機名回傳（Clusterssh 風格）</li>
-      <li>歷史只記錄<b>時間 + 指令</b>，不記目標清單（降低敏感資訊外洩面）</li>
-    </ol>
-
-    <h3>6.2　KVM 同步（同專案同螢幕同時操作）</h3>
-    <ul>
-      <li>專案卡片出現「📺 同步 KVM」= 該專案所有線上機台<b>協議一致可同步</b>（支援 OpenBMC / OneTree 等 RFB 系 BMC）</li>
-      <li>點下開啟同步畫面：一份鍵鼠輸入複製到每台；每路獨立連線（單寫者鎖）</li>
-      <li>若協議混合（如 RFB+IVTP）或含未實作同步的 IVTP 機台，按鈕會消失並可在 basecode API 看到原因</li>
-    </ul>
-  </section>
-
-  <section class="ug-sec" id="ug-kvm">
-    <h2>7　KVM 遠端畫面</h2>
-    <h3>7.1　單機 KVM</h3>
-    <ol>
-      <li>機台詳情頁按「📺 KVM」</li>
-      <li>後端用該機台 BMC 帳密直接連 BMC 的 RFB（5900 / 網頁端口），前端只走本系統代理</li>
-      <li>noVNC 渲染；可全屏</li>
-      <li>離線 / 無 BMC / 無 RFB 的機台（如 MegaRAC SP-X 無 VNC）會顯示不可用</li>
-    </ol>
-    <h3>7.2　SP-X 機台</h3>
-    <p>SP-X 無傳統 VNC，走 SP-X auto-login broker（port 18992）+ 專用 subdomain 的 KVM 通道；
-    詳見 <code>docs/spx-kvm-auto-login-*.md</code> 與 <code>deploy/</code> 部署檔。</p>
-  </section>
-
-  <section class="ug-sec" id="ug-ai">
-    <h2>8　AI 功能（本機 Ollama）</h2>
-    <table class="ug-table">
-      <tr><th>功能</th><th>位置</th></tr>
-      <tr><td>Ai Copilot（對話）</td><td>首頁右下 / 機櫃頁右欄「🤖 AI Copilot」</td></tr>
-      <tr><td>感測器 AI 診斷</td><td>L10 感測器頁</td></tr>
-      <tr><td>Telemetry AI 分析</td><td>L10 遙測頁（選範圍自動跑）</td></tr>
-      <tr><td>整櫃 AI 分析</td><td>L11 遙測頁範圍列下方</td></tr>
-      <tr><td>單機 AI 診斷</td><td>機台詳情「AI 診斷」</td></tr>
-    </table>
-    <p>全部走<b>本機 Ollama（qwen3.8:27b）</b>，資料不外傳；Ollama 未啟動時各 AI 欄位顯示「分析失敗」但<b>不影響任何監控功能</b>。</p>
-  </section>
-
-  <section class="ug-sec" id="ug-sec">
-    <h2>9　安全 & 資料</h2>
-    <ul>
-      <li><b>帳密</b>明文存於 <code>data.json</code>（已列 .gitignore，勿外傳）；<b>未上線公網前請務必加認證</b>（參考 <code>ADMIN_PERMISSION_BLUEPRINT.md</code>）</li>
-      <li><b>遙測</b>：SQLite <code>telemetry.db</code>；<code>PA_DATA_DIR</code> 可分離 trial / prod</li>
-      <li><b>備份</b>：<code>backup_prod.sh</code>（cron 每日 02:00，保留 14 份）</li>
-      <li><b>廣播歷史</b>不記目標機台；<b>KVM 帳密</b>只留後端</li>
-    </ul>
-  </section>
-
-  <section class="ug-sec" id="ug-faq">
-    <h2>10　常見問題</h2>
-    <h3>Q：KVM 按鈕是灰的 / 按了無反應？</h3>
-    <p>A：該機台 RFB 不通或 BMC 離線。用「BMC 詳情」頁的 ping / 服務檢查；SP-X 機台請改用 SP-X 專用通道。</p>
-    <h3>Q：同步 KVM 鈕沒出現？</h3>
-    <p>A：專案內協議不一致（RFB+IVTP 混合）或全 IVTP。用 <code>GET /api/kvm/basecode?project=NAME</code> 看每台偵測結果與原因。</p>
-    <h3>Q：整櫃遙測沒資料？</h3>
-    <p>A：機台須為 <b>L11</b>；且後端 SSH 採樣正常（看單機遙測是否有意圖）。L10 不會進整櫃聚合。</p>
-    <h3>Q：AI 分析空白 / 失敗？</h3>
-    <p>A：本機 Ollama 未運行或模型未拉。起 <code>ollama serve</code> + <code>ollama pull qwen3.8:27b</code> 即可，其餘功能不受影響。</p>
-    <h3>Q：網頁終端機連不上？</h3>
-    <p>A：<code>terminal_bridge</code>（node, port 6968）要running 且能讀同一 <code>PA_DATA_DIR/data.json</code>。看 <code>systemctl status pa-terminal-bridge</code>。</p>
-    <h3>Q：如何降層級？</h3>
-    <p>A：機櫃頁行上「📉 降 L10」；或重新以 L10 新增該機台並刪除 L11 條目。</p>
-  </section>
-
-  <section class="ug-sec" id="ug-key">
-    <h2>11　怎麼用、小撇步</h2>
-
-    <h3>常用快捷鍵</h3>
-    <ul>
-      <li><b>？（問號鍵）</b>：開啟這個說明窗口</li>
-      <li><b>F5</b>：重新整理頁面時，會停留在你目前的專案與分頁，不會跳回首頁</li>
-      <li><b>Esc</b>：關閉彈出的對話框（新增系統、專案設定等）</li>
-      <li><b>Ctrl + Shift + R</b>：強制重新整理（更新前端程式用，一般不用按）</li>
-    </ul>
-
-    <h3>操作小撇步</h3>
-    <ul>
-      <li><b>這個說明視窗</b>：抓上面的黑色標題列可以把它搬到畫面任何地方；拖右下角的斜紋可以改變大小；按「□」放大成整個螢幕、再按一次還原；按「–」縮成最小、按「✕」關閉。下次打開會記得你上次放的位置與大小。</li>
-      <li><b>遙測分組</b>：每一組（CPU／記憶體／GPU…）的標題可以單獨點開或收起來；右上角「全部收合 / 全部展開」可以一次切換。</li>
-      <li><b>找不到功能在哪裡？</b>：用視窗最上面的搜尋框打關鍵字（例如「KVM」、「廣播」、「遙測」），會只剩下相關的段落。</li>
-      <li><b>機台分兩種層級</b>：「L10」是單台機器，「L11」是機櫃裡面的元件。整櫃遙測只會統計 L11 的機台，所以看不到資料時先確認那台是不是 L11。</li>
-      <li><b>AI 分析空白</b>：是本機上的 Ollama 沒開或還沒下載模型，跟監控功能無關，先別擔心。</li>
-    </ul>
-  </section>
+<h3 class="ug-hint-search" aria-live="polite"></h3>
+<section class="ug-sec" id="ug-intro"><h2>1. 使用方式與第一次操作</h2>
+<p>本手冊依 2026-09-24 的 PA Server Manager Next 功能編寫。從頂列書本按鈕或鍵盤 <code>?</code> 開啟；可搜尋關鍵字、拖動視窗、最大化閱讀。部署端若仍是舊版本，畫面可能不同。</p>
+<ol><li>建立專案，確認是 L10 單機測試或 L11 整櫃管理。</li>
+<li>新增設備並確認類型、OS／BMC 管理位址；多節點伺服器先整理各個 OS Slot。</li>
+<li>設定實際 U 高度，再把 L11 設備放到機櫃位置；CDU 另外選擇內置或外置。</li>
+<li>進入「網路拓樸」，匯入設備、設定節點與實體埠、配對接線，再儲存拓樸。</li>
+<li>用「檢查 IP」確認節點可達，用「Ping Rack」查看整櫃摘要及 3D 指示燈。</li>
+<li>需要操作設備時，先核對「目前操作目標」，再開 Terminal、KVM 或執行電源操作。</li></ol>
+<p><b>先分清楚：</b>規劃接線是設計；已確認連線是人工確認；Ping 是 IP 可達性；SSH 認證成功是帳號登入成功；它們都不能單獨證明設備健康或實際電源狀態。</p>
+<nav aria-label="手冊目錄"><h3>章節目錄</h3><ol class="ug-toc" start="2"><li><a href="#ug-nav">首頁、搜尋與專案管理</a></li>
+<li><a href="#ug-add">新增系統與設備分類</a></li>
+<li><a href="#ug-l10">單機詳情與操作目標</a></li>
+<li><a href="#ug-os">多節點與 OS Slot</a></li>
+<li><a href="#ug-ip">管理 IP、認證與設備能力</a></li>
+<li><a href="#ug-l11">L10 升級、設備高度與 48U 配置</a></li>
+<li><a href="#ug-cdu">CDU 內置、外置與單機外觀</a></li>
+<li><a href="#ug-scene">3D 機櫃、聚焦與走線</a></li>
+<li><a href="#ug-topology">網路拓樸：建立、草稿與儲存</a></li>
+<li><a href="#ug-nodes">拓樸節點與實體 RJ45 的關係</a></li>
+<li><a href="#ug-cables">配對連線、批次接線與顏色</a></li>
+<li><a href="#ug-naboo">Naboo 範例與新專案配置順序</a></li>
+<li><a href="#ug-ping">網路拓樸的「檢查 IP」</a></li>
+<li><a href="#ug-rack-ping">Ping Rack、失敗摘要與 3D LED</a></li>
+<li><a href="#ug-telemetry">Telemetry 遙測與整櫃彙總</a></li>
+<li><a href="#ug-sensors">感測器、硬體診斷與警示</a></li>
+<li><a href="#ug-terminal">SSH Terminal 單機操作</a></li>
+<li><a href="#ug-broad">廣播終端與多機指令</a></li>
+<li><a href="#ug-power">電源控制與批次結果</a></li>
+<li><a href="#ug-kvm">KVM 遠端畫面與同步操作</a></li>
+<li><a href="#ug-tasks">測試資料庫與指派測試任務</a></li>
+<li><a href="#ug-ai">AI Copilot 與摘要功能</a></li>
+<li><a href="#ug-sec">儲存範圍、多人協作與容量</a></li>
+<li><a href="#ug-faq">常見問題與排查順序</a></li>
+<li><a href="#ug-key">快捷鍵與閱讀提示</a></li></ol>
+</nav>
+</section>
+<section class="ug-sec" id="ug-nav"><h2>2. 首頁、搜尋與專案管理</h2>
+<p>首頁「工程工作區」整理專案與設備數量、需要優先確認的項目及最近檢視。OS 與 BMC 的可達性分開顯示；空白面板和未設定 IP 的項目不應當作離線設備。</p>
+<ol><li>在系統與專案清單選擇 L10／L11、專案或狀態條件。</li>
+<li>輸入專案名稱、設備名稱、OS IP 或 BMC IP 搜尋；找不到時先清除篩選。</li>
+<li>點設備進單機詳情，點整櫃入口進 Rack Manager。瀏覽器上一頁可回到先前頁面。</li>
+<li>利用專案管理新增、編輯與排序專案；清單可調整順序、收合及切換緊湊顯示。空專案仍可新增設備。</li></ol>
+<p>移動專案、刪除設備或專案前，先看確認視窗的對象與影響。網路拓樸保存的是設備快照，庫存更名或搬移後應一併檢查拓樸對應。頂列可切換明暗主題。</p>
+</section>
+<section class="ug-sec" id="ug-add"><h2>3. 新增系統與設備分類</h2>
+<ol><li>開啟新增系統，選擇專案及 L10／L11。</li>
+<li>伺服器填入 OS IP、SSH 使用者、密碼與連接埠；SSH 一般為 22。依需要填 BMC 資料。</li>
+<li>送出後系統會驗證 SSH 並讀取主機名稱；若提供 BMC IP，也會檢查相關連線。失敗時依錯誤修正位址或認證，不要把 Ping 成功當作 SSH 成功。</li>
+<li>確認 MGX／設備類型及機櫃規格，再完成配置。</li></ol>
+<table class="ug-table"><tr><th>類型</th><th>用途與差異</th></tr><tr><td>Server 伺服器</td><td>OS／BMC 配對、多 OS 節點、硬體資訊與伺服器操作。</td></tr><tr><td>Switch、NVLink、Network</td><td>交換器、NVLink 設備及其他網路設備；操作依能力設定。</td></tr><tr><td>Power Shelf、PDU</td><td>電源設備；管理網路與實際供電線分開處理。</td></tr><tr><td>CDU、Storage</td><td>冷卻分配設備、儲存設備；遙測取決於採集器支援。</td></tr><tr><td>Blank Panel 空白面板</td><td>佔用 U 空間的被動面板，不做 Ping、SSH、電源操作或 LED 狀態。</td></tr></table>
+<p>分類未確認時，先明確選擇類型。不可因為設備有 IP，就假設它支援伺服器的開關機指令。</p>
+</section>
+<section class="ug-sec" id="ug-l10"><h2>4. 單機詳情與操作目標</h2>
+<p>單機詳情包含概覽、硬體、感測器、遙測與測試任務；L11 另有 OS Slots。右側「系統操作」依設備能力提供 Terminal、KVM、指派測試任務、系統診斷與電源控制。</p>
+<ol><li>先看設備名稱、專案層級、元件類型及右側「目前操作目標」。</li>
+<li>多 OS 設備先選目前 OS；畫面的 OS IP、配對 BMC 與後續操作會隨目標改變。</li>
+<li>硬體頁查看 CPU、記憶體、磁碟、NIC、GPU 與韌體等實際採集資訊；空白或破折號表示未取得，不是數值零。</li>
+<li>需要最新資料時使用重新整理；記錄採集時間，分辨快取與新結果。</li></ol>
+<p>硬體與 3D 外觀是類型示意，不是即時攝影或完整料號辨識。MAC 僅在有對應觀測資料時顯示。系統診斷提供檢查結果，不會自動修復硬體。</p>
+</section>
+<section class="ug-sec" id="ug-os"><h2>5. 多節點與 OS Slot</h2>
+<p>一台實體 Server 可以有多個節點；不是每個專案都固定四個。L11 的「OS Slots」管理可操作的 OS 與各自配對的 BMC。</p>
+<ol><li>進入 L11 單機詳情的 OS Slots，保留既有 OS 1。</li>
+<li>新增 OS，填該節點 OS IP、SSH 帳號、密碼及連接埠。新增流程會驗證 SSH；失敗不會建立成功節點。</li>
+<li>檢查辨識結果與配對 BMC；未取得時編輯補齊。</li>
+<li>逐一切換目前 OS，確認右側目標的 OS／BMC 位址正確。</li>
+<li>完成節點資料後，再到網路拓樸匯入或更新節點對應。</li></ol>
+<p>編輯密碼留白會保留原值。OS 1 不能刪除；刪除其他節點後，重新確認目前操作目標。拓樸裡新增邏輯節點，不會自動建立可登入的 OS Slot。</p>
+<p>拓樸匯入可依有效 OS Slots 推定節點數；沒有資料時使用手動設定。既有拓樸是快照，新增 OS Slot 後要回拓樸核對，不會自動改掉已規劃的接線。</p>
+</section>
+<section class="ug-sec" id="ug-ip"><h2>6. 管理 IP、認證與設備能力</h2>
+<p>「修改管理 IP」更新 PA Manager 的連線紀錄，<b>不會幫設備設定固定 IP、網卡或交換器 VLAN</b>。先在設備端配置，再填入管理系統。</p>
+<ul><li>伺服器修改 OS 連線時會驗證 SSH 與主機識別；目前 OS 及其 BMC 配對必須一致。</li>
+<li>Switch、CDU、Power Shelf 等非伺服器，可更新既有管理連線；同時有 OS 與 BMC 紀錄時，選清楚要改哪一組。</li>
+<li>非伺服器修改位址會保留既有認證；要開 SSH Terminal，仍需有可用位址、帳號與密碼。</li>
+<li>IPMI 的 623 與 SSH 的 22 用途不同。BMC Terminal 會處理舊 IPMI 埠值，明確設定的 SSH 埠仍以設定為準。</li>
+<li>非伺服器電源操作取決於支援能力與已設定的自訂指令；沒有按鈕不代表單純連線故障。</li></ul>
+</section>
+<section class="ug-sec" id="ug-l11"><h2>7. L10 升級、設備高度與 48U 配置</h2>
+<ol><li>在 L10 單機右側選「升級至 L11／設定高度」，指定 L11 專案及設備實際 U 高度。</li>
+<li>升級後設備先是未上架；進 Rack Manager 的「48U 配置」，選設備與起始位置。</li>
+<li>查看放置預覽，確認沒有重疊或超出機櫃，再儲存。</li>
+<li>高度填錯時用「修正設備高度」，不要靠搬移位置改規格。</li></ol>
+<p>位置使用設備最上方 U：例如 top U 48、高度 4U，佔用 U48～U45。一般設備高度為 1～48U；外置 CDU 為特殊 0U，不佔內部空間。</p>
+<p>修正高度會檢查碰撞；內置 CDU 以底部 U1 為基準。普通拖放／移位保留既有類型與高度。機櫃摘要顯示已安裝元件、已用及可用 U，未上架或位置無效的設備需要先處理。</p>
+<p>下架與刪除是不同操作：下架保留設備紀錄。空白面板佔用 U 並持續顯示，與有沒有網路接線無關。</p>
+</section>
+<section class="ug-sec" id="ug-cdu"><h2>8. CDU 內置、外置與單機外觀</h2>
+<ol><li>選 CDU 的安裝設定，選擇機櫃內置或外置。</li>
+<li>內置要填實際高度，從 U1 向上佔用空間；先處理該範圍的設備與空白面板碰撞。</li>
+<li>外置採 0U，顯示在機櫃旁，不消耗 48U。</li>
+<li>儲存後，單機詳情外觀會依內／外置更新；同專案的 CDU 配置受數量與位置檢查限制。</li></ol>
+<p>外置 CDU 的 Cooling 藍色燈條是外觀動畫，不代表 Ping 成功。Ping 狀態看獨立的小型狀態燈。Power Shelf 的外觀則與 Rack 共用每 U 風扇的呈現方式。</p>
+</section>
+<section class="ug-sec" id="ug-scene"><h2>9. 3D 機櫃、聚焦與走線</h2>
+<p>Rack Manager 可切換 3D 機櫃、48U 配置、清單、Telemetry 與網路拓樸。3D 控制可切正面、背面或透視、縮放、重設、放大檢視、暫停動畫及顯示／隱藏走線。</p>
+<ol><li>點模型或用設備選單選取元件，查看對應資訊。</li>
+<li>使用聚焦放大設備。外置 CDU 聚焦會單獨展示櫃體，方便旋轉檢查；重設視角或選其他機櫃設備回到整櫃。</li>
+<li>先儲存網路拓樸，讓有效且已上架的設備接線呈現在 3D。</li>
+<li>線路沿左右線槽整理到交換器側邊；目前不代表精確到每一個實體插孔的位置。</li></ol>
+<p>至少一條有效可繪製接線才會顯示線槽；沒有接線不顯示線槽，<b>仍會顯示空白面板</b>。自訂設備若沒有實體庫存對應、設備未上架或端點無效，接線可能不會畫在 3D，應查看提示及拓樸設定。</p>
+<p>畫布取得焦點時，方向鍵旋轉、Shift＋方向鍵加大幅度、Home 重設、＋／－縮放；Esc 可離開展開檢視。偏好減少動態效果的環境會減少或停止動畫。</p>
+</section>
+<section class="ug-sec" id="ug-topology"><h2>10. 網路拓樸：建立、草稿與儲存</h2>
+<p>網路拓樸是同一套接線工作區，不需要再維護另一份空的機櫃拓樸。它描述設備、邏輯節點、實體埠與線路；不會自動掃描交換器或配置網路。</p>
+<ol><li>在專案的 Rack Manager 開「網路拓樸」。第一次使用按「＋ Rack」建立拓樸機櫃並命名。</li>
+<li>選「從專案加入設備」，匯入需要的伺服器、交換器、CDU、Power Shelf 等。沒有庫存紀錄時可新增自訂設備。</li>
+<li>展開設備檢查節點、管理 IP 與埠；需要時編輯。</li>
+<li>設定配對或批次接線，按「套用至草稿」。</li>
+<li>檢查結果後按「儲存拓樸」，才寫入專案並供 IP 檢查及 3D 使用。</li></ol>
+<p><b>套用至草稿不等於已儲存。</b>離開前看儲存狀態。拓樸 Rack 是專案內的規劃分組，新增它不會自動把設備放進實體 48U 配置。</p>
+<p>若其他人已修改同一份資料，版本衝突時先匯出 JSON 保留草稿，再重載核對。匯出可備份目前內容；目前沒有對應的 JSON 匯入介面。刪除拓樸設備或埠會影響依附接線，刪除節點會影響埠的節點映射；操作前先檢查。</p>
+</section>
+<section class="ug-sec" id="ug-nodes"><h2>11. 拓樸節點與實體 RJ45 的關係</h2>
+<p>節點代表可識別的 OS／DPU；埠代表實際接線孔。四個節點不一定需要四條網路線。</p>
+<ol><li>匯入時優先依有效 OS Slot 判斷每台節點數；沒有資料時手動指定 1～64 個，依各設備實際情況調整。</li>
+<li>Vera 四節點情境可配置四組 Host 與 DPU 對應；其他案子可用不同數量。</li>
+<li>填各節點 Host OS、Host BMC、DPU OS、DPU BMC 資訊。</li>
+<li>在埠設定指定該埠服務哪些節點。共享管理埠可以對應多個邏輯節點，但一個實體埠只能配一條線。</li></ol>
+<p>以目前描述的 Vera 為例：一台 Server 有四個 Host 節點、四張 BF4，各自一對一；RJ45-1 服務 Host 管理網路，RJ45-2 服務 DPU 管理網路。因此 32 台共 128 個 Host 節點，伺服器實體管理線是 64 條，不是 128 或 512 條。</p>
+<p>共享 BMC 位址可依實際設計填寫。DPU、BMC 位址可以保存作對應資料，但目前「檢查 IP」的伺服器範圍是 Host OS，不會把所有欄位都 Ping 一次。</p>
+</section>
+<section class="ug-sec" id="ug-cables"><h2>12. 配對連線、批次接線與顏色</h2>
+<ol><li>少量接線用「配對連線」，選兩端設備與實體埠，指定網路角色、規劃／已確認狀態，填線號或 VLAN 備註。</li>
+<li>大量伺服器用「批次接線」，核對勾選清單順序、Host 交換器、DPU 交換器及起始埠。</li>
+<li>確認埠數足夠且未佔用；若端點不明或埠不足，先修正再套用，避免只生成半套線。</li>
+<li>交換器互連用未使用埠另行配對；CDU 與 Power Shelf 依實際管理線加入。</li>
+<li>儲存拓樸，再看 3D 走線。</li></ol>
+<table class="ug-table"><tr><th>角色</th><th>3D 顏色／線槽側</th></tr><tr><td>Host 管理</td><td>青藍色／左側</td></tr><tr><td>DPU 管理</td><td>紫色／右側</td></tr><tr><td>Power Shelf 管理</td><td>橘色／左側</td></tr><tr><td>CDU 管理</td><td>青綠色／左側</td></tr><tr><td>交換器上行／互連</td><td>金色／右側</td></tr><tr><td>資料網路／其他</td><td>綠色／灰色，依接線設定呈現</td></tr></table>
+<p>顏色依線路角色，不是線材真實顏色，也不是 Ping 成敗。Power 類接線在這裡是電源設備的<b>管理網路線</b>，不是供電纜線。虛線代表規劃中，實線代表人工已確認；批次新增預設仍需依實際接線確認。</p>
+<p>使用網路篩選與點選設備可聚焦相關連線。確認線路時仍要核對兩端標籤，不能只靠圖上相鄰位置判斷。</p>
+</section>
+<section class="ug-sec" id="ug-naboo"><h2>13. Naboo 範例與新專案配置順序</h2>
+<p>目前 Naboo 規劃包含 32 台四節點 Server、2 台 Switch、3 台 Power Shelf 與 1 台 CDU，共 38 台設備、128 個 Host 節點、69 條管理接線。這是此專案的配置範例，不是其他專案的固定規格。</p>
+<table class="ug-table"><tr><th>交換器</th><th>埠規劃</th></tr><tr><td>Switch-2201-1</td><td>1～32：依序接 32 台 Server 的 Host 管理；33～35：三台 Power Shelf；36：CDU；48：交換器互連。</td></tr><tr><td>Switch-2201-2</td><td>1～32：依序接 32 台 Server 的 DPU 管理；48：交換器互連。</td></tr></table>
+<p>依此範例，第一台尚餘 37～47、第二台尚餘 33～47；現場若改接，請更新端點。已確認狀態代表人工紀錄，不是軟體自動證明接線正確。</p>
+<p>新專案建議依序完成：設備類型 → 各台 OS Slots → 實際管理 IP → U 高度及位置 → 拓樸匯入 → 節點與埠核對 → 批次接線 → 儲存 → 檢查 IP → Ping Rack。之後新增 CDU 或 Power Shelf，選剩餘埠配對即可，不必為每個專案改程式。</p>
+</section>
+<section class="ug-sec" id="ug-ping"><h2>14. 網路拓樸的「檢查 IP」</h2>
+<ol><li>先設定固定 IP，確認管理系統主機能到達該網段。</li>
+<li>儲存拓樸，選要檢查的拓樸 Rack，再按「檢查 IP」。</li>
+<li>查看整體結果與失敗摘要，用失敗、部分成功或未設定 IP 等條件定位設備。</li>
+<li>展開問題設備，核對節點名稱、IP 及結果，修正後重新檢查。</li></ol>
+<p>Server 檢查各 Host OS 節點；其他設備使用主要管理 IP（優先 OS 管理位址，無則使用 BMC 位址）。伺服器節點先用已儲存拓樸資料，缺少的節點資料再依庫存 OS Slots／主要 OS 紀錄補足。它不檢查 DPU OS、Host BMC 與 DPU BMC 的所有位址。</p>
+<table class="ug-table"><tr><th>結果</th><th>應如何理解</th></tr><tr><td>全部成功</td><td>本次有設定的檢查目標都有 ICMP 回應。</td></tr><tr><td>部分成功</td><td>同台有節點成功也有失敗；展開查看是哪個節點與 IP。</td></tr><tr><td>失敗／無回應</td><td>本次未收到回應；可能是路由、防火牆、ICMP 設定或設備問題。</td></tr><tr><td>未設定 IP／未檢查</td><td>沒有可用目標或尚未執行，不應判定斷線。</td></tr></table>
+<p>例如 Server 01 的 Node 1、2、4 成功、Node 3 無回應，摘要會保留設備、節點與 IP，供你找 Node 3；不會只給整櫃一個紅點。Ping 結果不會改寫人工確認的線路狀態，也不能證明某個交換器實體埠、VLAN 或那一條線正確。</p>
+</section>
+<section class="ug-sec" id="ug-rack-ping"><h2>15. Ping Rack、失敗摘要與 3D LED</h2>
+<p>Rack Manager 的「Ping Rack」檢查已上架 L11 設備，包含有效的外置 0U CDU；不包含空白面板、L10 或未上架設備。檢查 IP 的選取原則與前節相同。</p>
+<ol><li>確認 3D 與庫存位置正確，按 Ping Rack。</li>
+<li>在 3D 上方查看失敗摘要，不必遮住模型找問題。</li>
+<li>選取設備看節點、IP 與檢查時間，再針對失敗目標排查。</li></ol>
+<table class="ug-table"><tr><th>小型狀態燈</th><th>含意</th></tr><tr><td>綠色閃爍</td><td>該設備本次已設定的檢查目標全部回應。</td></tr><tr><td>紅色閃爍</td><td>至少一個目標沒有回應；四節點中只有一個失敗也會紅。</td></tr><tr><td>灰色</td><td>尚未檢查或沒有可用 IP。</td></tr></table>
+<p>指示燈位於有電設備的機身，空白面板沒有。這是<b>Ping 可達性視覺化，不是真實電源感測值</b>。作業系統關閉 ICMP 時，即使設備有電也可能紅燈。減少動態效果設定會使燈保持靜態；CDU 藍色裝飾燈條與這個狀態不同。</p>
+<p>結果是本次檢查快照，切換專案或儲存拓樸後需重新檢查，不是持續自動監控。大量目標會分批並行；失敗會重試一次。單次上限為 2048 個不重複 IP、4096 個目標欄位，最多 64 個並行探測，並非限制在 512 埠。</p>
+</section>
+<section class="ug-sec" id="ug-telemetry"><h2>16. Telemetry 遙測與整櫃彙總</h2>
+<ol><li>單機詳情開遙測，或在 Rack Manager 切到 Telemetry。</li>
+<li>選時間範圍與設備，依 CPU、記憶體、GPU、磁碟、網路等群組閱讀。</li>
+<li>使用全部／常用／資料需確認等篩選，以及展開／收合群組，減少不相關資訊。</li>
+<li>先看採樣時間與資料是否持續更新，再比較利用率、溫度、功率與趨勢。</li></ol>
+<p>整櫃彙總以該專案 L11 設備為範圍。資料缺少或最後樣本過舊會需要確認；「沒有資料」不是 0%，也不能直接判定設備壞掉。</p>
+<p><b>支援範圍：</b>欄位是否有數值取決於實際採集器、設備能力及連線。CDU 的流量、水溫、壓力等專用採集器尚未整合；Switch、PDU、Power Shelf 有類型化框架，不代表所有專用指標已接上。不要把示意畫面當成現場量測。</p>
+</section>
+<section class="ug-sec" id="ug-sensors"><h2>17. 感測器、硬體診斷與警示</h2>
+<p>感測器頁可搜尋名稱、按正常／需確認等狀態篩選，查看原始讀值、單位與採集時間。先核對原始值與設備規格，再解讀 AI 摘要。</p>
+<ol><li>確認目前 OS／BMC 目標，重新取得資料。</li>
+<li>找出異常項目及時間，分辨「真的超出範圍」與「採集失敗／未支援」。</li>
+<li>需要進一步資訊時執行系統診斷，再比對 Terminal 或設備管理介面。</li></ol>
+<p>頂列 GPU 等警示須有對應觀測資料才有意義。資料停止更新、認證失敗與硬體異常是不同問題；診斷與 AI 結論應保留來源及時間。</p>
+</section>
+<section class="ug-sec" id="ug-terminal"><h2>18. SSH Terminal 單機操作</h2>
+<ol><li>核對右側目前目標及 OS Slot，再開 Terminal。</li>
+<li>依介面選 OS、BMC 或雙視窗；非伺服器若缺認證，先補連線資料。</li>
+<li>等待連線成功後再輸入命令；可縮放或展開視窗。</li>
+<li>結束後關閉工作階段。</li></ol>
+<p>Terminal 需要 SSH 服務、有效帳密與橋接服務正常。Ping 成功但 Terminal 失敗時，先檢查 SSH 埠、帳號、權限與服務，不要直接更換拓樸線路。輸入的命令會在真實設備執行，尤其確認多 OS 的目標。</p>
+</section>
+<section class="ug-sec" id="ug-broad"><h2>19. 廣播終端與多機指令</h2>
+<ol><li>從單機／機櫃入口開廣播終端，勾選需要的設備或 OS 節點。</li>
+<li>等各面板連線就緒；多 OS 會區分到對應節點。</li>
+<li>選單機輸入或廣播模式，再次核對接收對象。</li>
+<li>先用讀取型命令確認目標，再執行真正需要的工作。</li></ol>
+<p>廣播會把輸入送往選定且連線的目標，不是模擬。歷史命令不代表目前選取範圍與上次相同；重送前重新檢查。可以關閉個別面板，斷線目標需先恢復連線。</p>
+</section>
+<section class="ug-sec" id="ug-power"><h2>20. 電源控制與批次結果</h2>
+<p>伺服器可依能力提供開機、關機、Reboot 與 AC cycle。Switch、CDU、Power Shelf 等只提供已支援或已配置的操作；空白面板沒有這些功能。</p>
+<ol><li>確認設備、目前節點配對 BMC 及將執行的動作。</li>
+<li>閱讀確認視窗；整櫃操作特別核對範圍。</li>
+<li>追蹤等待、傳送中、已受理、失敗或取消結果。</li>
+<li>失敗時先查原因，再用重試失敗項目；執行完重新確認設備狀態。</li></ol>
+<p>「已受理」只代表指令受理，不等於機器已完成開關機。取消只能阻止尚未送出的動作，不能撤回已送出的指令。Ping 狀態也不能取代 BMC 電源狀態確認。</p>
+</section>
+<section class="ug-sec" id="ug-kvm"><h2>21. KVM 遠端畫面與同步操作</h2>
+<ol><li>單機確認 BMC 配對後開 KVM；若新視窗被擋，允許此站台的彈出視窗。</li>
+<li>整櫃 KVM 會列出有 BMC 的候選設備，依協定與連線結果建立面板。</li>
+<li>需要同步時選主控畫面，分別啟用鍵盤與滑鼠同步。</li>
+<li>可使用 F2、F11、F12、Esc、Enter、Ctrl＋Alt＋Del 等工具按鍵；操作前確認主控與接收面板。</li>
+<li>可展開單一畫面或回格狀排列；結束時關閉連線。</li></ol>
+<p>候選設備數不等於已連線數。同步僅適用實際相容並已連線的 RFB 面板；不相容設備會顯示原因。目前 SP-X／MegaRAC IVTP 在此介面標示不可用，不能視為已支援。</p>
+<p>一般連線錯誤會有限次重試；認證失敗要先修正認證，手動重新連線即可。黑畫面或超時請確認 BMC、協定與 KVM 橋接服務，不代表 OS 一定離線。</p>
+</section>
+<section class="ug-sec" id="ug-tasks"><h2>22. 測試資料庫與指派測試任務</h2>
+<ol><li>從單機「指派測試任務」或任務頁開啟測試資料庫。</li>
+<li>選分類／工作表，搜尋測項並翻頁，查看自動、部分自動或手動等適用性。</li>
+<li>閱讀套件、前置條件、步驟、指令與判定標準，再勾選所需項目。</li>
+<li>產生並複製測試指令內容，核對設備、OS、路徑及待填參數。</li>
+<li>在你選定的 Terminal 或外部執行工具操作，保存輸出並依判定標準確認結果。</li></ol>
+<p><b>指派／複製不等於已執行，也不代表 PASS。</b>目前不會因點複製就自動交給 OpenHands 或其他 Agent。切換分類時選取範圍會更新，複製前再核對測項。資料庫空白或載入失敗時，請檢查部署的測試資料與後端載入狀態。</p>
+</section>
+<section class="ug-sec" id="ug-ai"><h2>23. AI Copilot 與摘要功能</h2>
+<p>AI 可協助理解首頁／整櫃情境、感測器、遙測與診斷資訊。先選正確專案或設備，再問有明確範圍的問題，例如「整理目前這櫃需要確認的設備與依據」。</p>
+<ul><li>以原始資料、採樣時間及工具輸出核對答案；沒有資料時不能要求它當成已量測。</li>
+<li>Copilot 的工具範圍以實際開放的查詢及診斷為準，不是任意自主維修或電源操作代理。</li>
+<li>目前主要對話後端使用 OpenAI 相容的 vLLM 服務；實際模型與端點由部署設定決定，不再以舊版 Ollama 說明為準。</li>
+<li>視覺、日誌搜尋與測試庫 AI 相關後端介面需要額外服務設定；不代表標準畫面都有對應按鈕。</li></ul><p>模型服務未啟動或逾時時，先用原始資料操作並請管理者檢查服務。資料是否送往外部取決於部署端點，不應一概認定所有 AI 都只在本機處理。</p>
+</section>
+<section class="ug-sec" id="ug-sec"><h2>24. 儲存範圍、多人協作與容量</h2>
+<table class="ug-table"><tr><th>資料</th><th>保存與更新方式</th></tr><tr><td>庫存、OS Slots、配置</td><td>由對應表單儲存到後端；管理 IP 紀錄不會修改設備網路設定。</td></tr><tr><td>拓樸草稿</td><td>先套用，再儲存整份拓樸；匯出 JSON 可保留規劃。</td></tr><tr><td>拓樸設備快照</td><td>庫存改名、搬移、刪除或節點變更後，需核對快照與實體對應。</td></tr><tr><td>Ping 結果</td><td>本次快照，依操作重跑；不是持續監控或接線證據。</td></tr><tr><td>手冊位置、部分顯示偏好</td><td>存在目前瀏覽器；換裝置或清除網站資料後可能重設。</td></tr></table>
+<p>每專案最多 32 個拓樸 Rack；每 Rack 最多 256 個設備與 2048 條線；每設備最多 64 個節點與 256 個埠。拓樸標籤最多 160 字元，IP 使用有效 IPv4／IPv6。超出單一 Rack 規劃容量時先分組，並留意跨組接線需求。</p>
+<p>拓樸用來保存位址與接線，不填帳號密碼。分享匯出檔或截圖前留意內部名稱與 IP。多人修改遇版本衝突時保留草稿再核對，不要直接覆蓋他人規劃。</p>
+</section>
+<section class="ug-sec" id="ug-faq"><h2>25. 常見問題與排查順序</h2>
+<h3>儲存後圖上沒有東西？</h3><p>先確認專案及拓樸 Rack，並按過「儲存拓樸」，不是只有套用草稿。3D 另需設備對應到庫存、已上架且兩端有效；自訂設備不會憑空變成實體模型。</p>
+<h3>四個節點只畫兩條線正常嗎？</h3><p>正常，若實際只有兩個共享管理 RJ45。節點數影響位址與檢查結果，不等於實體線數；請核對埠的節點映射。</p>
+<h3>Ping 成功，但 SSH、KVM 或遙測失敗？</h3><p>分別檢查 SSH／BMC 認證、協定、橋接服務及採集器。ICMP 可達不代表這些服務正常。</p>
+<h3>Ping 沒回應但設備有電？</h3><p>檢查 IP、網段路由、防火牆及 ICMP 是否允許，再查設備。LED 反映可達性，不能當電源量測。</p>
+<h3>沒有紅綠閃燈，或一直灰色？</h3><p>先執行 Ping Rack，確認設備已上架、有可用管理 IP 且不是空白面板。若顏色正確但不閃，檢查是否啟用減少動態效果、暫停動畫或頁面不在前景。</p>
+<h3>升 L11 或修正高度無法儲存？</h3><p>檢查目標專案、1～48U 範圍、碰撞與資料是否已被其他人修改。外置 CDU 用專用安裝設定，不能當一般 0U Server。</p>
+<h3>新增拓樸出現 randomUUID 錯誤？</h3><p>目前版本已處理內網 HTTP 的 UUID 相容問題；若仍出現，確認部署已更新並強制重新整理頁面，再保留錯誤訊息供排查。</p>
+<h3>Push 後畫面沒變？</h3><p>Push 只更新 Git 遠端版本。執行中的服務還需完成部署，前端可能也需重新整理。先確認部署版本，避免把舊畫面當成最新功能。</p>
+</section>
+<section class="ug-sec" id="ug-key"><h2>26. 快捷鍵與閱讀提示</h2>
+<table class="ug-table"><tr><th>操作</th><th>用途</th></tr><tr><td>?</td><td>非文字輸入狀態開啟使用手冊。</td></tr><tr><td>手冊搜尋</td><td>依整段內容篩選，例如 OS Slot、CDU、檢查 IP、已確認、KVM。清空恢復全部。</td></tr><tr><td>手冊目錄連結</td><td>跳到指定章節，不切換目前系統頁面。</td></tr><tr><td>手冊標題列與右下角</td><td>拖動位置與調整大小；最小化後點標題列還原。</td></tr><tr><td>3D 方向鍵／Shift＋方向鍵</td><td>畫布聚焦時旋轉；Home 重設，＋／－縮放。</td></tr></table>
+<p>遇問題時提供：專案、設備、目前 OS 節點、操作名稱、錯誤訊息與時間；不要附上帳密。先分辨配置問題、位址可達性、登入認證及服務整合，可更快找到原因。</p>
+</section>
 </div>
 </script>

@@ -1,5 +1,8 @@
 {
   "pa-server-manager": "499f5616ebe0d1b505b16d67e057c5cccf8ee671",
   "vera-cpu-rack-cycle": "b148a73a6a69035779d92997b240a9dcbed1f0d3",
-  "handoff-vera-reference": "259a80fa7579ef459ab0922ae4b877f56391870b"
+  "handoff-vera-reference": "259a80fa7579ef459ab0922ae4b877f56391870b",
+  "pa-server-manager-next": "a8a083beee7e48ebc9272233b7ac790f808b6d59",
+  "pa-cycle-lab-review": "d3240929aacbe7ecfdf358a04765ff8c6e619f6e",
+  "pa-cycle-lab-local-start": "1bf978e924ec739f1ebf9f929de9403071182510"
 }

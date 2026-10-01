@@ -35,7 +35,8 @@ class SyntheticTransport:
     def action(self, t):
         time.sleep(0.35)
         if not self.no_recovery and not self.fail_command:
-            self.boots[t.key] = self.boots.get(t.key, 0) + 1
+            for affected in getattr(self,'affected_targets',[t]):
+                self.boots[affected.key] = self.boots.get(affected.key, 0) + 1
         if self.on_action:
             self.on_action()
         return Command(1, 'rejected') if self.fail_command else Command(255, 'disconnected', 'RESPONSE_LOST') if self.response_lost else Command(0, 'accepted')

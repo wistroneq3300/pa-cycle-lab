@@ -1,3 +1,60 @@
+# Native Next × Vera acceptance — 2026-10-01
+
+This section records the current native integration. Everything below the historical separator belongs to earlier lab deliveries and is not evidence for this build. All new execution used synthetic endpoints, fake transports and temporary storage. No real SSH/IPMI/power/AUX/package installation, field service restart or production database access was performed.
+
+## Current execution record
+
+| Check | Result | Local evidence |
+|---|---|---|
+| Full integration/unit suite | 99 full-suite PASS / 0 FAIL / 0 SKIP; final port change: 4 targeted PASS (1 new + 3 reruns), 100 distinct integration cases | `data/native-final-99.log`, `data/native-port-routes.log` |
+| Next inherited QA | 109 PASS / 0 FAIL / 0 SKIP | `data/next-port-release.log` |
+| Vera regression | 101 PASS / 0 FAIL / 14 SKIP, 115 discovered | `data/vera-final3.log` |
+| Inherited broker/pytest fixtures | 53 PASS / 0 FAIL / 0 SKIP | `data/native-legacy-final.log` |
+| Next JavaScript regressions | 4 suites PASS: Terminal security/lifecycle, operations, equipment | `app/qa/*_regression.cjs` |
+| Actual separate Web/scheduler/worker lifecycle | PASS; Web and scheduler PID changed, same worker; persistent Console cursor; stopped INCOMPLETE | `data/native-process-release.log` |
+| Actual process crash injections | 4 PASS / 0 FAIL: before intent, during dispatch, after response, during POST; retained reservations and no replay | `data/native-crash-release.log` |
+| Native Edge/Playwright route flow | PASS: 128 targets, one chassis/four nodes, PRE-confirm, 8 valid cycles, console/reload/back/dispose | `data/native-browser-release.log` |
+| Desktop states and theme captures | PASS: 1366×768 / 1920×1080, light/dark, long names, blocked/empty/error/retry, keyboard focus after polling | `data/native-ui-release.log` |
+| Long Console and reconnect | PASS: 10,500+ event fixture, 3000 buffer/2000 rendered, cursor incremental/history, late response, text safety, filters, no job mutation | `data/native-console-release.log` |
+| Contrast | Light placeholder 6.19:1; dark 9.23:1; severity labels retained | `data/console-browser-results.json` |
+| Migration preview | 32 chassis/128 nodes idempotent; legacy two nodes both remain mapping-needs-confirmation; input unchanged | `data/native-migration-preview.json`, `data/native-legacy-migration-preview.json` |
+| Syntax/whitespace | 119 first-party Python files parsed, 6 changed JS entry points checked; diff whitespace checked | inherited offline builder escape warnings noted, not hardware tests |
+| Independent UI review / documentation | ship / documented; all four original findings resolved; 3 raster assets byte-identical to pinned Next | `.impeccable/native-documentation-review.md`, DESIGN.md |
+
+The full integration tests include route-level create-vs-binding edit serialization, idempotency, active selection, strict power boolean, shared scope and SEL collection, per-target credentials/ports, script/identity/boot blockers, response-lost ambiguity, evidence persistence fault injection, artifact traversal/symlink exclusion, nested secret redaction, and 128-node queued stop. Shared four-node/two-round fake power yields two domain actions and eight node POST records. Independent four-node/two-round reboot yields eight actions and eight POST records. These are not hardware acceptance.
+
+## Commands and harness notes
+
+Run from the repository root with `PYTHONUTF8=1`:
+
+```powershell
+.venv/Scripts/python.exe -m unittest discover -s tests -p 'test_*.py'
+.venv/Scripts/python.exe -m unittest discover -s app/qa -p '*_regression.py'
+$env:PYTHONPATH='engine/vera_cycle'
+.venv/Scripts/python.exe -m unittest discover -s engine/vera_cycle/dev/tests -p 'test_*.py'
+.venv/Scripts/python.exe tests/legacy_smoke.py
+.venv/Scripts/python.exe tests/process_smoke.py
+.venv/Scripts/python.exe tests/native_crash_smoke.py
+```
+
+For Node QA use `app` as cwd, then run `node qa/terminal_security_regression.cjs`, `terminal_lifecycle_regression.cjs`, `operations_regression.cjs`, `equipment_regression.cjs`. Playwright uses a local Edge and the isolated 32×4 demo described in README: `node tests/native-browser.cjs`, `node tests/native-ui-states.cjs`, `node tests/native-console-smoke.cjs`. Set `PLAYWRIGHT_MODULE` when Playwright is provided from a shared runtime. Tests do not contact devices. Copied AST-based Next tests remain supplementary: actual ASGI/worker/browser tests establish this integration's contracts.
+
+Failed development runs are retained locally, not relabeled as passing: the initial 128-target test's 10-second post-confirm wait expired during START collection, so it now waits for the actual dispatch signal (bounded 180 seconds). A late fixture-order failure was fixed by publishing synthetic fixture inventory through `_save_data`, as real API writes do. A Vera rerun initially omitted PYTHONPATH and could not import the engine; the correct command above passed. One Next QA rerun encountered Windows/OneDrive `PermissionError` on atomic replace, correctly failed closed; the subsequent unmodified rerun passed all 109. No safety check was removed to make these pass.
+
+## Remaining acceptance gates
+
+The 14 Vera skips are 13 Bash script fixtures (Bash absent on this Windows host) and one Linux/root cross-UID test. Run them on a prepared Linux controller. Real systemd KillMode=process, controller reboot, service account/artifact/credential permissions and field storage faults remain unverified. Actual process tests here ran on Windows; mocked disk-full/read-only tests do not establish Linux deployment acceptance.
+
+No live authentication/credential/identity provider is installed. Shared live power/AUX selector and physical mappings remain blocked pending platform evidence. Legacy per-machine telemetry is not reinterpreted as four-node history. No company SSO, production deployment, hardware PASS or full rack qualification is claimed. See [native integration guide](NATIVE_INTEGRATION.md) for the four-node field gate.
+
+## Desktop screenshots
+
+[Light wizard](screenshots/native-cycle/wizard-1366-light.png) · [Dark wizard](screenshots/native-cycle/wizard-1920-dark.png) · [Light run](screenshots/native-cycle/run-1366-light.png) · [Dark run](screenshots/native-cycle/run-1920-dark.png). All screenshots are synthetic.
+
+---
+
+# Historical lab acceptance — retained verbatim below
+
 # Neutrino V1 acceptance — 2026-10-01
 
 This is an **offline local delivery**. No SSH/IPMI/power/AUX/package installation

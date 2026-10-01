@@ -161,8 +161,8 @@ class SessionRegistry:
                 "portal_session_id,cookies_json,created_at,last_seen_at,"
                 "expires_at,state FROM broker_sessions"
                 " WHERE server_id=? AND portal_user_id=? AND portal_session_id=?"
-                " AND state='active' ORDER BY last_seen_at DESC LIMIT 1",
-                (server_id, portal_user_id, portal_session_id)).fetchone()
+                " AND state='active' AND expires_at>? ORDER BY last_seen_at DESC LIMIT 1",
+                (server_id, portal_user_id, portal_session_id, time.time())).fetchone()
         return self._row_to_session(row) if row else None
 
     def any_active_session_for_server(self, server_id: str) -> Optional[BrokerSession]:
@@ -173,8 +173,8 @@ class SessionRegistry:
                 "SELECT broker_session_id,server_id,bmc_subdomain,portal_user_id,"
                 "portal_session_id,cookies_json,created_at,last_seen_at,"
                 "expires_at,state FROM broker_sessions"
-                " WHERE server_id=? AND state='active' ORDER BY last_seen_at DESC LIMIT 1",
-                (server_id,)).fetchone()
+                " WHERE server_id=? AND state='active' AND expires_at>? ORDER BY last_seen_at DESC LIMIT 1",
+                (server_id, time.time())).fetchone()
         return self._row_to_session(row) if row else None
 
     def put_session(self, bsid: str, server_id: str, bmc_subdomain: str,
@@ -191,6 +191,12 @@ class SessionRegistry:
                 (bsid, server_id, bmc_subdomain, portal_user_id, portal_session_id,
                  cookies_json, now, now, now + ttl_seconds, ST_ACTIVE))
             self._conn.commit()
+
+    def active_session_count(self, server_id: str) -> int:
+        with self._lock:
+            return self._conn.execute(
+                "SELECT COUNT(*) FROM broker_sessions WHERE server_id=? AND state='active' AND expires_at>?",
+                (server_id, time.time())).fetchone()[0]
 
     def touch_session(self, bsid: str, extend_ttl_seconds: int | None = None) -> None:
         now = time.time()

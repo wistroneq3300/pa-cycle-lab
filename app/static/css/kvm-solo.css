@@ -1,0 +1,28 @@
+/* Shared engineering surfaces around an untouched, dark remote framebuffer. */
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;overflow:hidden}
+body{font-family:Inter,"Segoe UI",system-ui,sans-serif;background:var(--ew-surface);color:var(--ew-text);color-scheme:dark}
+:root[data-theme="light"] body{color-scheme:light}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;min-width:0;padding:20px;gap:16px}
+#head{display:flex;align-items:center;gap:14px;padding:16px 20px;min-width:0;flex-wrap:wrap;border:1px solid var(--ew-line);border-radius:12px;background:var(--ew-raised);box-shadow:0 8px 24px #00000012;cursor:move;user-select:none}
+.grip{color:var(--ew-muted);font-size:18px}
+.kvm-mark{display:grid;place-items:center;width:40px;height:40px;flex:none;border:1px solid var(--ew-line);border-radius:9px;background:var(--ew-surface);color:var(--ew-blue)}
+.kvm-mark svg{width:23px;height:23px}
+.kvm-heading{min-width:0;flex:1}
+.kvm-eyebrow{display:block;color:var(--ew-muted);font-size:9px;font-weight:650;letter-spacing:.16em;margin-bottom:5px}
+h1{margin:0;font-size:18px;font-weight:600;line-height:1.4;overflow-wrap:anywhere}
+.kvm-separator{color:var(--ew-muted);font-weight:400;margin:0 6px}
+.kvm-connection{display:flex;align-items:center;gap:8px;max-width:100%;padding:9px 12px;background:var(--ew-surface);border:1px solid var(--ew-line);border-radius:7px;color:var(--ew-muted);font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.dot{width:7px;height:7px;flex:none;border-radius:50%;background:var(--ew-muted)}
+.dot.on{background:var(--ew-green)}
+.dot.err{background:#df796e}
+#stage{flex:1;min-height:0;position:relative;overflow:hidden;border:1px solid var(--ew-line);border-radius:12px;background:#080f15;box-shadow:0 8px 24px #0000001f}
+#screen{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+#screen canvas{max-width:100%;max-height:100%}
+#overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:#a2b8c3;font-size:13px;line-height:1.8;pointer-events:none}
+#kvm-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;color:var(--ew-muted);font-size:10px;line-height:1.6}
+#kvm-foot>span:first-child{display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:.13em}
+#kvm-foot i{width:4px;height:4px;background:var(--ew-green);border-radius:50%}
+@media(max-width:560px){#app{padding:10px;gap:10px}#head{padding:12px;gap:10px}.grip{display:none}.kvm-mark{width:34px;height:34px}h1{font-size:15px}.kvm-connection{width:100%}#kvm-foot{font-size:9px}}
+
+.kvm-actions{display:flex;gap:8px}.kvm-actions button{font:inherit;font-size:12px;padding:9px 12px;border:1px solid var(--ew-line);border-radius:7px;color:var(--ew-text);background:var(--ew-surface);cursor:pointer}.kvm-actions button:disabled{opacity:.45;cursor:default}#head{cursor:default}.grip{display:none}

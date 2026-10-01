@@ -15,6 +15,7 @@ LIFECYCLE={
     'STOPPING_AFTER_ROUND':('WAIT','Stopping after current round POST; no next round'),
     'COMPLETE':('INFO','Job COMPLETE; execution completion is separate from hardware health'),
     'INCOMPLETE':('WARN','Job INCOMPLETE; commands are never replayed'),
+    'RECONCILIATION_REQUIRED':('ERROR','Outcome requires reconciliation; reservations retained; no command replay'),
     'CANCELLED':('INFO','Job cancelled before cycle execution'),
     'BLOCKED':('ERROR','Job BLOCKED by PRE safety checks'),
     'ERROR':('ERROR','Job ERROR; inspect retained evidence'),
@@ -65,7 +66,9 @@ def structured(job_id, run_id, data, at, secrets=()):
                event_type=kind if isinstance(kind,str) and re.fullmatch(r'[A-Z_]{1,64}',kind) else 'STAGE',
                level=level if isinstance(level,str) and level in LEVELS else 'INFO',
                message=redact(data.get('message',default_message),secrets,600))
-    for field in ('machine_id','tray','node'):
+    event['schema_version']=1
+    event['severity']=event['level']
+    for field in ('machine_id','tray','node','domain'):
         if data.get(field) is not None: event[field]=redact(data[field],secrets,128)
     if type(data.get('loop')) is int: event['loop']=max(0,data['loop'])
     detail=data.get('detail',data.get('reason'))

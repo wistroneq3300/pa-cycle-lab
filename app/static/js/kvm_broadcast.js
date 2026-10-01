@@ -19,8 +19,12 @@ const K = {
   broadcast: false,        // 同步開關
   kbSync: true,
   msSync: true,
+  fullscreen: false,       // 全螢幕模式
+  enlarged: false,         // 放大模式
+  solo: null,              // 單獨顯示的主機名稱
+  maximized: false,        // 是否已最大化（保留此變數以便未來擴充）
+  _ovBaseCSS: "position:fixed;right:16px;bottom:16px;width:min(56vw,760px);height:min(70vh,500px);background:#0b0e13;z-index:99999;display:flex;flex-direction:column;font-family:system-ui;color:#dfe6f0;overflow:hidden;", // 浮動窗基準 CSS
   overlay: null,
-  solo: null,              // 單獨放大顯示的 name
 };
 
 /* ---------- 小工具 ---------- */
@@ -39,16 +43,18 @@ function ensureOverlay() {
   if (K.overlay) return K.overlay;
   const ov = document.createElement("div");
   ov.id = "kvm-overlay";
-  ov.style.cssText = "position:fixed;inset:0;background:#0b0e13;z-index:99999;display:flex;flex-direction:column;font-family:system-ui;color:#dfe6f0;";
+  // 全屏 overlay：覆蓋整個畫面，保留 scaleViewport 修復
+  ov.style.cssText = "position:fixed;inset:0;background:#0b0e13;z-index:99999;display:flex;flex-direction:column;font-family:system-ui;color:#dfe6f0;overflow:hidden;";
   ov.innerHTML = `
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#141a23;border-bottom:1px solid #2a3441;flex-wrap:wrap">
-      <b>📺 KVM 廣播</b>
+    <div id="kvm-head" style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#141a23;border-bottom:1px solid #2a3441;flex-wrap:wrap;cursor:grab;user-select:none">
+      <span id="kvm-move-handle" style="cursor:grab;color:#5a6b80;font-size:14px;touch-action:none">⠿</span>
+      <b>📺 KVM</b>
       <span id="kvm-proj" style="color:#8fb0f0"></span>
       <span style="color:#5a6b80">Master：</span>
       <select id="kvm-master" style="background:#0b0e13;color:#dfe6f0;border:1px solid #2a3441;border-radius:6px;padding:4px 8px"></select>
-      <label style="color:#5a6b80;display:flex;align-items:center;gap:4px"><input type="checkbox" id="kvm-broadcast" checked> <span id="kvm-broadcast-lbl">🔊 同步廣播</span></label>
-      <label style="color:#5a6b80;display:flex;align-items:center;gap:4px"><input type="checkbox" id="kvm-kbsync" checked> 鍵盤</label>
-      <label style="color:#5a6b80;display:flex;align-items:center;gap:4px"><input type="checkbox" id="kvm-mssync" checked> 滑鼠</label>
+      <label style="color:#5a6b80;display:flex;align-items:center;gap:5px"><input type="checkbox" id="kvm-broadcast" checked style="accent-color:#a1cc56;width:15px;height:15px;cursor:pointer"> <span id="kvm-broadcast-lbl">🔊 同步廣播</span></label>
+      <label style="color:#5a6b80;display:flex;align-items:center;gap:5px"><input type="checkbox" id="kvm-kbsync" checked style="accent-color:#a1cc56;width:15px;height:15px;cursor:pointer"> 鍵盤</label>
+      <label style="color:#5a6b80;display:flex;align-items:center;gap:5px"><input type="checkbox" id="kvm-mssync" checked style="accent-color:#a1cc56;width:15px;height:15px;cursor:pointer"> 滑鼠</label>
       <span class="kvm-sep" style="width:1px;height:20px;background:#2a3441"></span>
       <button class="kvm-btn" onclick="kvmSendKey('F2', 0xffbd)">F2</button>
       <button class="kvm-btn" onclick="kvmSendKey('F11', 0xffc5)">F11</button>
@@ -61,15 +67,75 @@ function ensureOverlay() {
     </div>
     <div id="kvm-status" style="padding:4px 14px;font-size:12px;color:#6f8498;background:#10151d;border-bottom:1px solid #1d252f"></div>
     <div id="kvm-banner" style="display:none;padding:8px 14px;font-size:13px;line-height:1.7"></div>
-    <div id="kvm-grid" style="flex:1;overflow:auto;display:grid;padding:12px;gap:10px;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));align-content:start"></div>
+    <div id="kvm-grid" style="flex:1;overflow:auto;display:grid;padding:14px;gap:14px;grid-template-columns:repeat(auto-fill,minmax(560px,1fr));align-content:start"></div>
   `;
   document.body.appendChild(ov);
   K.overlay = ov;
   return ov;
 }
 
+/* ---------- 浮動窗：拖動 / 縮到標題列 / 放大 ---------- */
+function makeDraggable(ov, handle) {
+  let offX = 0, offY = 0;
+  const start = (e) => {
+    // 拖動控制項（按鈕/下拉/checkbox）時，不要觸發拖動
+    if (e.target.closest("button,select,input,label,.kvm-btn")) return;
+    const r = ov.getBoundingClientRect();
+    offX = e.clientX - r.left;
+    offY = e.clientY - r.top;
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", stop);
+    e.preventDefault();
+  };
+  const move = (e) => {
+    ov.style.left = (e.clientX - offX) + "px";
+    ov.style.top = (e.clientY - offY) + "px";
+    ov.style.right = "auto";
+    ov.style.bottom = "auto";
+  };
+  const stop = () => {
+    document.removeEventListener("mousemove", move);
+    document.removeEventListener("mouseup", stop);
+  };
+  handle.addEventListener("mousedown", start);
+}
+
+// 縮成只剩標題列（貼在角落，完全不擋主頁）；再點一次回覆原尺寸
+function kvmMinimize() {
+  const ov = K.overlay; if (!ov) return;
+  if (ov.dataset.min === "1") {
+    delete ov.dataset.min;
+    ov.style.cssText = K._ovBaseCSS;
+    ov.querySelectorAll("#kvm-status, #kvm-banner, #kvm-grid").forEach(el => el.style.display = "");
+    document.getElementById("kvm-btn-min").textContent = "🗕 縮到列";
+  } else {
+    ov.dataset.min = "1";
+    ov.querySelectorAll("#kvm-status, #kvm-banner, #kvm-grid").forEach(el => el.style.display = "none");
+    ov.style.height = "auto";
+    ov.style.minHeight = "52px";
+    document.getElementById("kvm-btn-min").textContent = "🗗 展開";
+  }
+}
+
+// 放大到整個畫面 / 還原為浮動窗
+function kvmToggleMax() {
+  const ov = K.overlay; if (!ov) return;
+  if (K.maximized) {
+    K.maximized = false;
+    ov.style.cssText = K._ovBaseCSS;
+    document.getElementById("kvm-btn-max").textContent = "⛶ 放大";
+  } else {
+    K.maximized = true;
+    ov.style.position = "fixed";
+    ov.style.inset = "0";
+    ov.style.width = "100vw"; ov.style.height = "100vh";
+    document.getElementById("kvm-btn-max").textContent = "🗗 還原";
+  }
+}
+
 /* ---------- 連線一台 ---------- */
 function connectOne(name, bmcIp) {
+  const generation = kvmGeneration;
   const grid = $("kvm-grid");
   const box = document.createElement("div");
   box.className = "kvm-box";
@@ -90,7 +156,7 @@ function connectOne(name, bmcIp) {
   head.querySelector(".kvm-bmc").textContent = bmcIp;
   const roleEl = head.querySelector(".kvm-role");
   const canvasWrap = document.createElement("div");
-  canvasWrap.style.cssText = "flex:1;background:#000;min-height:220px;";
+  canvasWrap.style.cssText = "flex:1;background:#000;min-height:220px;padding:8px;box-sizing:border-box;";
   box.appendChild(head);
   box.appendChild(canvasWrap);
   grid.appendChild(box);
@@ -114,12 +180,26 @@ function connectOne(name, bmcIp) {
   const rec = { name, rfb, box, canvasWrap, roleEl, alive: false, master: false };
   K.rfbMap.set(name, rec);
 
-  rfb.addEventListener("connect", () => { markMasterUI(); });
+  // 明確啟用 scaleViewport（setter 會觸發 _updateScale）：把完整桌面等比縮進格子，避免原始解析度塞進小格而被裁切。
+  try {
+    rfb.scaleViewport = true;
+    // 確保 _updateScale 會被呼叫（因為 noVNC 的 _updateScale 會觸發 Display.autoscale 來調整 canvas 維度）
+    // 因為 scaleViewport 設定後可能不會立即觸發 _updateScale，我們手動 poll 一次
+    setTimeout(() => {
+      try {
+        rfb._updateScale && rfb._updateScale();
+      } catch (e) {}
+    }, 100);
+  } catch (e) {}
+
+  rfb.addEventListener("connect", () => { if (generation === kvmGeneration) markMasterUI(); });
   rfb.addEventListener("disconnect", (e) => {
-    const detail = e && e.detail && e.detail.clean ? "" : "（已斷線，會自動重連）";
+    if (generation !== kvmGeneration) return;
+    const detail = e && e.detail && e.detail.clean ? "" : "\uff08\u8acb\u91cd\u65b0\u958b\u555f KVM\uff09";
     showStatus(`${name} 斷線${detail}`);
   });
   rfb.addEventListener("securityfailure", (e) => {
+    if (generation !== kvmGeneration) return;
     head.querySelector(".kvm-dot").style.background = "#ffb020";
     showStatus(`${name} 認證失敗：${e.detail ? e.detail.reason : "未知"}`);
   });
@@ -136,6 +216,7 @@ function connectOne(name, bmcIp) {
   // 不依賴 connect 事件：用輪詢讀 noVNC 真實連線狀態，作為 alive / 紅綠點判斷
   const dot = head.querySelector(".kvm-dot");
   (function poll() {
+    if (generation !== kvmGeneration) return;
     rec.pollT = setTimeout(poll, 600);
     const st = rec.rfb ? rec.rfb._rfbConnectionState : null;
     const isUp = st === "connected";
@@ -143,6 +224,11 @@ function connectOne(name, bmcIp) {
       rec.alive = isUp;
       dot.style.background = isUp ? "#3ad28b" : (st === "connecting" ? "#ffb020" : "#e05656");
       rec.aliveEl = dot;
+      showStatus(`${[...K.rfbMap.values()].filter(r => r.alive).length}/${K.rfbMap.size} \u5df2\u9023\u7dda`);
+    }
+    // 連線後持續強制等比縮放：把完整桌面 fit 進格子（noVNC 有時沒自動觸發 autoscale，導致原始解析度塞進小格子而裁切）
+    if (isUp) {
+      try { rec.rfb._updateScale && rec.rfb._updateScale(); } catch (e) {}
     }
   })();
 }
@@ -360,7 +446,10 @@ function offlineCard(name, baseLabel, ip, reason) {
 }
 
 /* ---------- 主流程：開啟 ---------- */
+let kvmGeneration = 0;
 async function openKvmBroadcast(project) {
+  closeKvmBroadcast();
+  const generation = kvmGeneration;
   const cands = kvmCandidates(project);
   if (!cands.length) {
     alert(`專案「${project}」目前沒有帶 BMC IP 的系統可開 KVM。`);
@@ -374,6 +463,10 @@ async function openKvmBroadcast(project) {
 
   const ov = ensureOverlay();
   ov.style.display = "flex";
+  K.maximized = false;
+  K.solo = null;
+  K.fullscreen = false;
+  K.enlarged = false;
   const gridEl = $("kvm-grid");
   if (!gridEl) { setBanner("KVM 廣播 overlay 元件未建立", "err"); return; }
   gridEl.innerHTML = "";
@@ -382,6 +475,7 @@ async function openKvmBroadcast(project) {
 
   // 1) 偵測
   const det = await detectProjectBasecodes(project);
+  if (generation !== kvmGeneration) return;
   const detMap = det.ok ? (det.data.machines || {}) : {};
   if (!det.ok) {
     setBanner(`⚠ 偵測失敗（${esc(det.error)}）。將以「全部當 RFB」方式嘗試（可能部分失敗）。`, "warn");
@@ -426,8 +520,8 @@ async function openKvmBroadcast(project) {
             lines + NL + NL +
             '本頁仍會開啟，但只連線可同步的 RFB 系統。');
     }
-    if (det.data.sync_ok) {
-      setBanner(`✔ 協議一致，可同步。<br>${detectDetailHTML(det.data)}`, "ok");
+    if (det.data.sync_ok && rfbCands.length) {
+      setBanner(`\u5354\u8b70\u76f8\u5bb9\uff1a${rfbCands.length} \u53f0 RFB \u5019\u9078\u3002\u5be6\u969b\u9023\u7dda\u6578\u8acb\u898b\u72c0\u614b\u5217\uff0c\u975e\u9023\u7dda\u6210\u529f\u4fdd\u8b49\u3002<br>${detectDetailHTML(det.data)}`, "warn");
     } else if ((otherCands.length || spxCands.length) && rfbCands.length) {
       setBanner(`⚠ 協議不一致，無法「全部同步」。<br>
                  <div style="color:#e88a8f">原因：${esc(det.data.reason || "")}</div>
@@ -475,6 +569,7 @@ async function openKvmBroadcast(project) {
 }
 
 function closeKvmBroadcast() {
+  kvmGeneration++;
   K.rfbMap.forEach(rec => {
     try { rec.rfb && rec.rfb.disconnect(); } catch (e) {}
     clearTimeout(rec.pollT);
@@ -513,7 +608,15 @@ function applySoloUI() {
       r.box.style.gridRow = "1 / -1";
       r.box.style.position = "sticky";
       r.box.style.top = "0";
-      r.box.style.minHeight = "calc(100vh - 140px)";
+      if (K.enlarged) {
+        // 放大模式：全螢幕大小
+        r.box.style.minHeight = "calc(100vh - 80px)";
+        r.box.style.width = "calc(100vw - 80px)";
+        r.box.style.margin = "40px";
+      } else {
+        // 正常模式：目前大小
+        r.box.style.minHeight = "calc(100vh - 140px)";
+      }
       // solo 時該格即為控制焦點，設為 master 以利 F2/鍵鼠
     });
     if (!backBtn) {
@@ -525,6 +628,18 @@ function applySoloUI() {
       document.body.appendChild(backBtn);
     }
     backBtn.style.display = "block";
+
+    // 顯示所有按鈕
+    const fullscreenBtn = $("kvm-btn-fullscreen");
+    if (fullscreenBtn) {
+      fullscreenBtn.style.display = "inline-block";
+    }
+
+    const enlargeBtn = $("kvm-btn-enlarge");
+    if (enlargeBtn) {
+      enlargeBtn.style.display = "inline-block";
+      enlargeBtn.textContent = K.enlarged ? "🗗 還原" : "⛶ 放大";
+    }
   } else {
     K.rfbMap.forEach((r) => {
       r.box.style.display = "flex";
@@ -535,14 +650,78 @@ function applySoloUI() {
       r.box.style.minHeight = "220px";
     });
     if (backBtn) backBtn.style.display = "none";
+
+    // 隱藏所有按鈕
+    const fullscreenBtn = $("kvm-btn-fullscreen");
+    if (fullscreenBtn) {
+      fullscreenBtn.style.display = "none";
+    }
+
+    const enlargeBtn = $("kvm-btn-enlarge");
+    if (enlargeBtn) {
+      enlargeBtn.style.display = "none";
+    }
   }
 }
 
-/* ---------- 給 app.js 用的全域 hooks ---------- */
+function kvmSoloToFullscreen() {
+  const ov = K.overlay;
+  if (!ov) return;
+
+  // 如果已經是全螢幕，則恢復原來大小
+  if (K.fullscreen) {
+    K.fullscreen = false;
+    ov.style.cssText = K._ovBaseCSS;
+    document.getElementById("kvm-btn-fullscreen").textContent = "⛶ 全螢幕";
+  } else {
+    // 設置為全螢幕模式
+    K.fullscreen = true;
+    ov.style.position = "fixed";
+    ov.style.inset = "0";
+    ov.style.width = "100vw";
+    ov.style.height = "100vh";
+    document.getElementById("kvm-btn-fullscreen").textContent = "🗗 還原";
+  }
+}
+
+function kvmSoloEnlarge() {
+  const ov = K.overlay;
+  if (!ov) return;
+
+  // 切換放大模式
+  K.enlarged = !K.enlarged;
+
+  // 更新按鈕文字
+  const btn = $("kvm-btn-enlarge");
+  if (btn) {
+    btn.textContent = K.enlarged ? "🗗 還原" : "⛶ 放大";
+  }
+
+  // 重新應用 UI
+  applySoloUI();
+}
+
+function openKvmSolo(machineName) {
+  // 創建獨立的 KVM 視窗（可移動 / 可縮放 / 可關閉）
+  const winFeatures = 'width=1200,height=800,scrollbars=yes,resizable=yes';
+  const newWindow = window.open('', 'KVM_solo', winFeatures);
+
+  if (!newWindow) {
+    alert('無法開啟新視窗，請檢查瀏覽器設定');
+    return;
+  }
+
+  // 使用同源 HTML 檔（獨立視窗載入 /static/kvm_solo.html），避免 about:blank 的 module/CORS 限制
+  newWindow.location.href = '/static/kvm_solo.html?m=' + encodeURIComponent(machineName);
+  newWindow.focus();
+}
 window.openKvmBroadcast = openKvmBroadcast;
+window.openKvmSolo = openKvmSolo;
 window.closeKvmBroadcast = closeKvmBroadcast;
 window.kvmSendKey = kvmSendKey;
 window.kvmSendCtrlAltDel = kvmSendCtrlAltDel;
+window.kvmSoloToFullscreen = kvmSoloToFullscreen;
+window.kvmSoloEnlarge = kvmSoloEnlarge;
 
 installInputMirror();
 // 把 module 成功載入的可見狀態寫到 document title 提示列，方便除錯（Firefox 可能看不到 console）

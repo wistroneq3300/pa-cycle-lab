@@ -282,7 +282,7 @@ class Run2Tests(unittest.TestCase):
         with patch('cycle_engine.atomic_write',side_effect=fail_intent):
             self.worker(job,lambda *_:transport);self.confirm(self.wait(job,{'AWAITING_CONFIRMATION'}))
             final=self.wait(job,TERMINAL)
-        self.assertEqual(final['state'],'INCOMPLETE');self.assertIn('Evidence persistence failure',final['stop_reason'])
+        self.assertEqual(final['state'],'RECONCILIATION_REQUIRED');self.assertIn('Evidence persistence failure',final['stop_reason'])
         self.assertEqual(actions(transport),[])
 
     def test_report_disk_failure_after_dispatch_stops_next_round(self):
@@ -293,8 +293,10 @@ class Run2Tests(unittest.TestCase):
                 return original(root,campaign)
             with patch.object(runner,'write_reports',side_effect=fail_after):
                 self.worker(job,lambda *_:transport);self.confirm(self.wait(job,{'AWAITING_CONFIRMATION'}));final=self.wait(job,TERMINAL)
-            self.assertEqual(final['state'],'INCOMPLETE');self.assertEqual(final['health'],'UNKNOWN')
+            self.assertEqual(final['state'],'RECONCILIATION_REQUIRED');self.assertEqual(final['health'],'UNKNOWN')
             self.assertIn('Evidence persistence failure',final['stop_reason']);self.assertEqual(len(actions(transport)),1)
+            self.assertTrue(self.store.lock_owners())
+            with self.store.tx() as db: db.execute('DELETE FROM locks WHERE owner=?',(job['id'],))
 
     def test_final_artifact_failure_cannot_publish_complete(self):
         job=self.create(machine_ids=['neutrino-n1'],limits={'loops':1});transport=self.fake();original=runner.write_json
@@ -303,8 +305,8 @@ class Run2Tests(unittest.TestCase):
             return original(path,value)
         with patch.object(runner,'write_json',side_effect=fail_final):
             self.worker(job,lambda *_:transport);self.confirm(self.wait(job,{'AWAITING_CONFIRMATION'}));final=self.wait(job,TERMINAL)
-        self.assertEqual(final['state'],'INCOMPLETE');self.assertEqual(len(actions(transport)),1)
-        self.assertEqual(json.loads((ARTIFACTS/job['id']/'campaign.json').read_text())['state'],'INCOMPLETE')
+        self.assertEqual(final['state'],'RECONCILIATION_REQUIRED');self.assertEqual(len(actions(transport)),1)
+        self.assertEqual(json.loads((ARTIFACTS/job['id']/'campaign.json').read_text())['state'],'RECONCILIATION_REQUIRED')
 
     def test_artifact_directory_failure_is_terminal_error(self):
         job=self.create();root=ARTIFACTS/job['id'];original=Path.mkdir;transport=self.fake()
@@ -324,7 +326,7 @@ class Run2Tests(unittest.TestCase):
         self.assertNotIn(self.store.get(job['id'])['state'],TERMINAL)
         self.assertTrue(self.store.lock_owners());self.assertIsNone(self.store.claim(job['id'],'replay'))
         runner.recover(self.store,self.store.get(job['id']))
-        self.assertEqual(self.store.get(job['id'])['state'],'INCOMPLETE');self.assertEqual(actions(transport),[])
+        self.assertEqual(self.store.get(job['id'])['state'],'RECONCILIATION_REQUIRED');self.assertEqual(actions(transport),[])
 
     def test_sqlite_commit_failure_does_not_leave_successful_report(self):
         job=self.create(machine_ids=['neutrino-n1'],limits={'loops':1});transport=self.fake()
@@ -362,11 +364,11 @@ class Run2Tests(unittest.TestCase):
         self.assertNotIn('PRIVATE-SECRET',json.dumps(self.store.get(job['id'])))
 
     def test_sqlite_event_failure_blocks_dispatch(self):
-        job=self.create(machine_ids=['neutrino-n1']);transport=self.fake();original=self.store.update
+        job=self.create(machine_ids=['neutrino-n1']);transport=self.fake();original=self.store.append_event
         def fail_event(jid,event=None,**fields):
             if event:raise sqlite3.OperationalError('database or disk is full')
             return original(jid,event=event,**fields)
-        with patch.object(self.store,'update',side_effect=fail_event):
+        with patch.object(self.store,'append_event',side_effect=fail_event):
             runner.run_job(self.store,job['id'],lambda *_:transport)
         final=self.store.get(job['id'])
         self.assertEqual(final['state'],'ERROR');self.assertIn('Evidence persistence failure',final['stop_reason'])
@@ -376,7 +378,7 @@ class Run2Tests(unittest.TestCase):
         job=self.create();self.store.claim(job['id'],'dead-worker')
         root=ARTIFACTS/job['id'];root.mkdir();(root/'campaign.json').write_text('{broken')
         runner.recover(self.store,self.store.get(job['id']))
-        final=self.store.get(job['id']);self.assertEqual(final['state'],'INCOMPLETE')
+        final=self.store.get(job['id']);self.assertEqual(final['state'],'RECONCILIATION_REQUIRED')
         self.assertIn('Evidence persistence failure',final['stop_reason']);self.assertIsNone(self.store.claim(job['id'],'replay'))
 
     def test_atomic_storage_fault_has_explicit_failure_type(self):

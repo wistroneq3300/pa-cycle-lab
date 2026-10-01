@@ -18,4 +18,7 @@ for directory in (RUNTIME, ARTIFACTS):
 MODE = os.environ.get('CYCLE_MODE', 'synthetic')
 if MODE not in {'synthetic', 'live'}:
     raise RuntimeError('CYCLE_MODE must be synthetic or live')
-os.environ['PA_DATA_DIR'] = str(DATA)
+configured_data = os.environ.get('PA_DATA_DIR')
+if configured_data and Path(configured_data).resolve() != DATA:
+    raise RuntimeError('PA_DATA_DIR must match this isolated CYCLE_INSTANCE; refusing to redirect existing inventory')
+os.environ.setdefault('PA_DATA_DIR', str(DATA))

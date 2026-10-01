@@ -125,7 +125,7 @@ class ConsoleTests(unittest.TestCase):
         job=self.create();self.store.claim(job['id'],123456)
         runner.recover(self.store,self.store.get(job['id']))
         events=self.store.events(job['id'],0)
-        self.assertEqual([e['phase'] for e in events][-2:],['WORKER_LOST','INCOMPLETE'])
+        self.assertEqual([e['phase'] for e in events][-2:],['WORKER_LOST','RECONCILIATION_REQUIRED'])
         self.assertEqual(events[-2]['level'],'ERROR');self.assertFalse(self.store.claim(job['id'],123))
 
     def test_response_lost_operational_sequence_no_false_pass(self):
@@ -162,7 +162,7 @@ class ConsoleTests(unittest.TestCase):
         job=self.create(machine_ids=['neutrino-n1'],limits=dict(loops=3,hours=0))
         with patch.object(self.store,'append_event',side_effect=append):
             self.worker(job,factory);self.confirm(self.wait(job,{'AWAITING_CONFIRMATION'}));final=self.wait(job,TERMINAL)
-        self.assertEqual(final['state'],'INCOMPLETE');self.assertIn('Evidence persistence failure',final['stop_reason'])
+        self.assertEqual(final['state'],'RECONCILIATION_REQUIRED');self.assertIn('Evidence persistence failure',final['stop_reason'])
         self.assertEqual(sum(c[2]=='reboot' for c in transports[0].calls),1)
 
     def test_large_journal_indexed_pages_and_bounded_export(self):
