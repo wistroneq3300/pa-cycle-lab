@@ -2518,13 +2518,17 @@ function machineBack() {
 function machineGo(view) {
   state.view = view;
 }
+const machineDetailRefreshing = new Set();
 async function machineRefresh() {
   const name = _activeMachine;
   if (!name) return;
-  delete machineDetailCache[name];     // 強制重抓詳情 + OS/HW（refresh=1）
+  // 保留舊畫面：不刪快取，改以 refreshing 旗標在背景重抓，抓到才覆蓋。
+  machineDetailRefreshing.add(name);
   sensorAiDone.delete(name);           // 重新整理 → 讓 Sensor AI 用最新資料重跑一次
   delete sensorAiResult[name];
+  setView("machine");                   // 立即重繪（沿用舊資料，不顯示「抓取中」過場）
   await machineLoadDetail(name, true);
+  machineDetailRefreshing.delete(name);
   // 感測器不強制重抓：TTL 內直接用快取，避免按重新整理後陷入長時間『背景抓取中』
   if (_activeMachine === name && state.view === "machine") await machineLoadSensors(name, false);
   if (_activeMachine === name && state.view === "machine") setView("machine");
@@ -2669,6 +2673,11 @@ async function machineLoadDetail(name, refresh = false) {
     result = await api(`/api/machine/${encodeURIComponent(name)}/detail${refresh ? "?refresh=1" : ""}`);
   } catch (e) { result = { error: e.message }; }
   if (machineDetailRequests[name] !== request || target !== JSON.stringify(observationViewTarget(name))) return;
+  // 失敗時保留上一筆成功資料（prev），讓畫面沿用而非跳成空白/載入失敗。
+  if (result && result.error) {
+    const prior = machineDetailCache[name];
+    if (prior && !prior.error) result.prev = prior.prev || prior;
+  }
   machineDetailCache[name] = result;
   if (_activeMachine === name && state.view === "machine") {
     setView("machine");
@@ -2802,6 +2811,7 @@ function pageMachine() {
   const m = machines.find(x => x.name === name);
   if (!m) return `<div class="card"><div class="empty">找不到機台</div></div>`;
   const d = machineDetailCache[name];
+  const refreshing = machineDetailRefreshing.has(name);
   if (!d) {
     machineLoadDetail(name);
     return `
@@ -2813,7 +2823,7 @@ function pageMachine() {
       </div>
       <div class="card"><div class="empty">正在抓取機台資訊（開機資訊需要 SSH, BMC 用 ipmitool）…</div></div>`;
   }
-  if (d.error) {
+  if (d.error && !d.prev) {
     return `
       <div class="mach-toolbar">
         <button class="btn small" onclick="machineBack()">← 返回</button>
@@ -2823,25 +2833,26 @@ function pageMachine() {
       </div>
       <div class="card"><div class="empty">載入失敗：${esc(d.error)}</div></div>`;
   }
-  const base = d.machine || {};
+  const shown = d.error && d.prev ? d.prev : d;
+  const base = shown.machine || {};
   const lvlBadge = base.level === "rack"
     ? `<span class="badge badge-rack">L11 · Rack</span>` : `<span class="badge badge-system">L10 · Sys</span>`;
   const osState = statusBadge(base.os_alive,base.os_ip,base.connectivity?.os);
   const bmcState = base.bmc_ip ? statusBadge(base.bmc_alive,base.bmc_ip,base.connectivity?.bmc) : `<span style="color:var(--text-faint)">無</span>`;
   // OS 系統資訊（可能為快取歷史值）
   // OS 系統資訊（硬體型號卡片）
-  let osInfoHtml = hwHtml(d.os_info || {});
-  if (d.os_info && d.os_info.fetched_at) osInfoHtml += `<span class="hint">抓取時間：${esc(d.os_info.fetched_at)}</span>`;
+  let osInfoHtml = hwHtml(shown.os_info || {});
+  if (shown.os_info && shown.os_info.fetched_at) osInfoHtml += `<span class="hint">抓取時間：${esc(shown.os_info.fetched_at)}</span>`;
   // BMC FW + 電源 + 感測
   let fwHtml = `<div class="empty">BMC 目前不可連，無從抓取</div>`;
   if (base.bmc_alive) {
-    const fwRows = (d.fw || []).map(f => `<tr><td class="mono">${esc(f.key)}</td><td class="mono">${esc(f.value)}</td></tr>`).join("");
+    const fwRows = (shown.fw || []).map(f => `<tr><td class="mono">${esc(f.key)}</td><td class="mono">${esc(f.value)}</td></tr>`).join("");
     fwHtml = fwRows ? `<table class="t fw-table"><tbody>${fwRows}</tbody></table>`
-                    : d.bmc_loading ? `<div class="empty">BMC 連線抓取中（Cisco CIMC 較慢約 15–30 秒）…<br><span class="mono" style="font-size:11px">稍後自動更新</span></div>`
+                    : shown.bmc_loading ? `<div class="empty">BMC 連線抓取中（Cisco CIMC 較慢約 15–30 秒）…<br><span class="mono" style="font-size:11px">稍後自動更新</span></div>`
                     : `<div class="empty">無 FW 資料</div>`;
   }
   // BIOS / Device Firmware（dmidecode + smartctl + ethtool + nvidia-smi，跨 vendor 容錯）
-  const hwFw = (d.os_info && d.os_info.hw && d.os_info.hw.firmware) || null;
+  const hwFw = (shown.os_info && shown.os_info.hw && shown.os_info.hw.firmware) || null;
   if (hwFw) {
     let fwRows = "";
     if (hwFw.bios) {
@@ -2869,18 +2880,16 @@ function pageMachine() {
   }
 
   // BMC 背景抓取進行中 → 數秒後自動重打 detail（不打 refresh，讀快取）更新
-  if (d.bmc_loading || d.network_identity?.loading) {
+  if (shown.bmc_loading || shown.network_identity?.loading) {
     setTimeout(() => {
-      if (_activeMachine === name && state.view === "machine") {
-        delete machineDetailCache[name];
-        machineLoadDetail(name);
-      }
+      if (_activeMachine === name && state.view === "machine") machineLoadDetail(name);
     }, 12000);
   }
   return `
     <div class="mach-toolbar">
       <button class="btn small" onclick="machineBack()">← 返回</button>
       <span class="mach-name">🖥 ${esc(name)} ${lvlBadge}</span>
+      ${refreshing ? `<span class="hint" role="status">⟳ 更新中…（顯示上次結果）</span>` : ""}
       <span class="spacer"></span>
       <button class="btn small" onclick="openTermDialog('${esc(name)}')">▶ Terminal</button>
       ${m.passive ? "" : `<button class="btn small" onclick="runDiagnose('${esc(name)}')">🩺 系統診斷</button>`}
@@ -2894,9 +2903,9 @@ function pageMachine() {
         <table class="t mach-info">
           <tr><td>專案</td><td>${esc(base.project || "未分類")}</td></tr>
           <tr><td>層級</td><td>${lvlBadge}</td></tr>
-          <tr><td>OS IP</td><td class="mono">${esc(base.os_ip)} (${esc(base.os_user||"")}) — <b>${osState}</b><br><span class="hint">MAC: ${esc((d.network_identity?.os?.ip === base.os_ip && d.network_identity?.os?.mac) || "\u672a\u53d6\u5f97")}</span></td></tr>
-          <tr><td>BMC IP</td><td class="mono">${esc(base.bmc_ip||"—")} (${esc(base.bmc_user||"")}) — <b>${bmcState}</b><br><span class="hint">MAC: ${esc((d.network_identity?.bmc?.ip === base.bmc_ip && d.network_identity?.bmc?.mac) || "\u672a\u53d6\u5f97")}</span></td></tr>
-          <tr><td>BMC 電源</td><td>${base.bmc_alive ? powerBadge(d.power) : "—"}</td></tr>
+          <tr><td>OS IP</td><td class="mono">${esc(base.os_ip)} (${esc(base.os_user||"")}) — <b>${osState}</b><br><span class="hint">MAC: ${esc((shown.network_identity?.os?.ip === base.os_ip && shown.network_identity?.os?.mac) || "\u672a\u53d6\u5f97")}</span></td></tr>
+          <tr><td>BMC IP</td><td class="mono">${esc(base.bmc_ip||"—")} (${esc(base.bmc_user||"")}) — <b>${bmcState}</b><br><span class="hint">MAC: ${esc((shown.network_identity?.bmc?.ip === base.bmc_ip && shown.network_identity?.bmc?.mac) || "\u672a\u53d6\u5f97")}</span></td></tr>
+          <tr><td>BMC 電源</td><td>${base.bmc_alive ? powerBadge(shown.power) : "—"}</td></tr>
         </table>
         ${base.bmc_ip ? `
         <div class="mach-power-actions">
@@ -2908,7 +2917,7 @@ function pageMachine() {
         ` : ""}
       </div>
       <div class="card">
-        <div class="card-title">OS 系統資訊 ${d.os_info && d.os_info.fetched_at ? `<span class="hint">(${d.os_info.fetched_at})</span>` : ""}</div>
+        <div class="card-title">OS 系統資訊 ${shown.os_info && shown.os_info.fetched_at ? `<span class="hint">(${shown.os_info.fetched_at})</span>` : ""}</div>
         <div class="os-scroll">${osInfoHtml}</div>
       </div>
     </div>
@@ -3818,6 +3827,7 @@ async function saveMachine() {
     bmc_pass: $("f-bmc-pass").value,
     project: $("f-project").value,
     level: $("f-level").value == "rack" ? "rack" : "system",
+    mgx_type: "server",
     rack_size: ($("f-level").value == "rack" && $("f-rack-size")) ? (parseInt($("f-rack-size").value) || 1) : undefined,
   };
   if (!body.os_ip || !body.os_user || !body.os_pass) { showErr("請填 OS IP、SSH 帳號跟密碼"); return; }
@@ -4114,14 +4124,11 @@ function changeOsIp(name) {
       <input class="input" id="new-os-user-input" autocomplete="off" style="width:100%">
       <label for="new-os-pass-input">${'SSH \u5bc6\u78bc'}</label>
       <input class="input" id="new-os-pass-input" type="password" autocomplete="new-password" style="width:100%">
-      <label for="new-os-port-input">SSH Port</label>
-      <input class="input" id="new-os-port-input" type="number" min="1" max="65535" value="${Number(m.os_port) || 22}" style="width:100%">
       <button class="btn small" id="osip-probe-btn" style="margin-top:8px" onclick="probeChangeOsBmc('${esc(name)}')">🔍 依新 OS 抓取 BMC IP</button>
       <label style="display:block;font-size:12px;color:var(--text-faint);margin:8px 0 4px">BMC IP</label>
       <input class="input" id="new-bmc-ip-input" style="width:100%;padding:8px;font-family:monospace" value="${esc(curBmc)}" placeholder="例如 INTERNAL_IP_11">
       <label for="new-bmc-user-input">BMC SSH 帳號（新 endpoint）</label><input class="input" id="new-bmc-user-input" autocomplete="off">
       <label for="new-bmc-pass-input">BMC SSH 密碼</label><input class="input" id="new-bmc-pass-input" type="password" autocomplete="new-password">
-      <label for="new-bmc-port-input">BMC SSH Port（不是 IPMI Port）</label><input class="input" id="new-bmc-port-input" type="number" min="1" max="65535" value="${Number(m.bmc_port)||22}">
       <div id="osip-msg" style="margin-top:10px;font-size:12px;white-space:pre-line"></div>
     </div>`,
     [
@@ -4147,7 +4154,7 @@ async function probeChangeOsBmc(name) {
         ? { os_ip: ip, machine_name: m.name }
         : { project:m.project, os_ip: ip, expected_hostname: (m.os||[]).find(n=>n.slot===m.active_os)?.os_hostname || m.name,
             os_user: $("new-os-user-input").value.trim(), os_pass: $("new-os-pass-input").value,
-            os_port: Number($("new-os-port-input").value) }),
+            os_port: 22 }),
     });
     if (d.ok) {
       $("new-bmc-ip-input").value = d.bmc_ip;
@@ -4192,13 +4199,13 @@ async function submitChangeOsIp(name, target, original) {
     if (ip && ip!==original.os) {
       const d = await api(`/api/machines/${encodeURIComponent(name)}/change-os-ip`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ new_os_ip: ip, expected_node_id:target.node_id, expected_binding_revision:target.expected_binding_revision,
         os_user: $("new-os-user-input").value.trim(), os_pass: $("new-os-pass-input").value,
-        os_port: Number($("new-os-port-input").value) }) });
+        os_port: 22 }) });
       results.push(`OS IP：${d.msg || (d.changed === false ? "與原本相同，未變更。" : "變更成功。")}`);
       if (d.ok === false) failed.push("OS IP");
       if(d.changed){const saved=d.machine?.os?.find(n=>n.node_id===target.node_id);if(saved)target={...target,expected_binding_revision:saved.expected_binding_revision};}
     }
     if (bmcIp && bmcIp!==original.bmc) {
-      const d = await api(`/api/machines/${encodeURIComponent(name)}/change-bmc-ip`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ new_bmc_ip: bmcIp, expected_node_id:target.node_id, expected_binding_revision:target.expected_binding_revision, bmc_user:$("new-bmc-user-input").value.trim(), bmc_pass:$("new-bmc-pass-input").value, bmc_ssh_port:Number($("new-bmc-port-input").value) }) });
+      const d = await api(`/api/machines/${encodeURIComponent(name)}/change-bmc-ip`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ new_bmc_ip: bmcIp, expected_node_id:target.node_id, expected_binding_revision:target.expected_binding_revision, bmc_user:$("new-bmc-user-input").value.trim(), bmc_pass:$("new-bmc-pass-input").value, bmc_ssh_port:22 }) });
       results.push(`BMC IP：${d.msg || (d.changed === false ? "與原本相同，未變更。" : "變更成功。")}`);
       if (d.ok === false) failed.push("BMC IP");
     }
