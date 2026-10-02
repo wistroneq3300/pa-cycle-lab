@@ -3,12 +3,16 @@
   'use strict';
     const BUFFER=3000, RENDER=2000, LEVELS=new Set(['INFO','CMD','WAIT','PASS','WARN','FAIL','ERROR','PRE','POST']);
     const PHASE_LABELS={
-      COMMAND_DISPATCHING:'aux cycle sent', COMMAND_DISPATCHED:'aux cycle sent',
       RESPONSE_RETURNED:'command returned; verifying boot',
       WAIT_OFFLINE:'waiting OS boot', OS_UNREACHABLE:'waiting OS boot', WAIT_RECOVERY:'waiting OS boot',
       BOOT_ID_CHANGED:'OS up, system check running', RECOVERY_DETECTED:'OS up, system check running',
       POST_STARTED:'system check running', POST_COMPLETED:'system check done'
     };
+    // Short label for the active cycle mode, used for the "<label> sent" stage
+    // line. Unknown -> neutral "cycle", never AUX. Taken from the job's
+    // structured config, never guessed from the run id or log text.
+    const MODE_LABELS={reboot:'reboot',power_cycle:'DC Power Cycle',aux_cycle:'aux cycle'};
+    const modeLabel=mode=>MODE_LABELS[String(mode??'').trim().toLowerCase()]||'cycle';
     const CONTROLLER_EVENTS={
       CREATED:'Job created; targets and configuration reserved',
       PRE_STARTED:'PRE started; every target is probed for identity and baseline',
@@ -113,11 +117,18 @@
       // "Collecting X / Collection returned: X" pairing; phase repeats collapse to
       // one line per node; issues and FAIL/WARN always survive.
       const out=[];const seenStage=new Map();const seenLoop=new Set();
+      const mode=modeLabel(this.job?.config?.cycle_mode);
       for(const e of events){
         const type=e.event_type||'';const level=e.level;
         const controller=CONTROLLER_EVENTS[type];
         if(controller){out.push({...e,message:controller});continue;}
         if(type==='LOOP_STARTED'){const loop=e.loop;if(seenLoop.has(loop))continue;seenLoop.add(loop);out.push({...e,message:e.message||`Loop ${loop} started`});continue;}
+        // One line per node, matching vera's "<mode> sent"; the attempt is not a
+        // confirmed reboot (recovery is proven later by the boot-ID change).
+        if(type==='COMMAND_DISPATCHING'||type==='COMMAND_DISPATCHED'){
+          const stage=`${mode} sent`;
+          if(seenStage.get(e.machine_id)===stage)continue;seenStage.set(e.machine_id,stage);out.push({...e,message:stage,detail:''});continue;
+        }
         const stage=PHASE_LABELS[type];
         if(stage){if(seenStage.get(e.machine_id)===stage)continue;seenStage.set(e.machine_id,stage);out.push({...e,message:stage,detail:''});continue;}
         if(FOLDED.has(type))continue;

@@ -18,9 +18,10 @@ from pathlib import Path
 # Events that carry operator meaning. Everything else is either noise
 # (COLLECTION_STARTED/FINISHED for a successful collection) or already
 # summarised by the per-loop result block.
+# COMMAND_DISPATCHING/DISPATCHED are handled separately because the wording
+# depends on the job's cycle_mode (reboot / power_cycle / aux_cycle), not on a
+# fixed label -- a reboot must never read as "aux cycle".
 _PHASE_LABELS = {
-    "COMMAND_DISPATCHING": "aux cycle sent",
-    "COMMAND_DISPATCHED": "aux cycle sent",
     "RESPONSE_RETURNED": "command returned; verifying boot",
     "WAIT_OFFLINE": "waiting OS boot",
     "OS_UNREACHABLE": "waiting OS boot",
@@ -50,6 +51,20 @@ _CONTROLLER_EVENTS = {
     "STOPPING_AFTER_ROUND": "Stopping after the current round",
 }
 
+# Operator-facing short label per cycle mode, used for the "<label> sent" stage
+# line. reboot/aux mirror vera-cycle; power_cycle uses the UI's own wording
+# ("DC Power Cycle"). Unknown/missing modes fall back to a neutral "cycle" so
+# nothing is silently presented as AUX.
+_MODE_LABELS = {
+    "aux_cycle": "aux cycle",
+    "reboot": "reboot",
+    "power_cycle": "DC Power Cycle",
+}
+
+
+def _mode_label(cycle_mode: str | None) -> str:
+    return _MODE_LABELS.get(str(cycle_mode or "").strip().lower(), "cycle")
+
 
 def _stamp(timestamp: str | None) -> str:
     """Render the journal timestamp as UTC+8 wall clock, matching evidence files."""
@@ -78,9 +93,11 @@ class ConsoleLog:
         self._lock = threading.Lock()
         self._seen_stage: dict[str, str] = {}
         self._seen_loop: set = set()
+        self._mode = "cycle"
 
     # -- public API -------------------------------------------------------
     def header(self, campaign: dict) -> None:
+        self._mode = _mode_label(campaign.get("cycle_mode"))
         limits = campaign.get("limits") or {}
         self._write("\n".join([
             f"Run ID: {campaign.get('run_id', '')}",
@@ -108,6 +125,13 @@ class ConsoleLog:
                 return
             self._seen_loop.add(loop)
             self._line(event, event.get("message") or f"Loop {loop} started")
+            return
+
+        if key in ("COMMAND_DISPATCHING", "COMMAND_DISPATCHED"):
+            # One stage line per node, matching vera's "<mode> sent". "sent"
+            # records the attempt, not a confirmed reboot; recovery is proven
+            # separately by the boot-ID change.
+            self._stage(event, node, f"{self._mode} sent")
             return
 
         stage = _PHASE_LABELS.get(key, "")
