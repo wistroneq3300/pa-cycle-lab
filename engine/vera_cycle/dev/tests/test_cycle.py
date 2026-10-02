@@ -19,6 +19,13 @@ from cycle_transport import Command, IdentityUnsafe
 from neutrin_cycle import BASE, Console, campaign, main
 
 PCI = '0000:01:00.0 Ethernet controller [0200]: Example [1234:5678]\n0001:01:00.0 PCI bridge [0604]: Fabric [10de:2f95]\n'
+PCI_VERBOSE = ('0000:01:00.0 Ethernet controller\n'
+               '\tCapabilities: [80] Express (v2) Endpoint\n'
+               '\tLnkCap: Speed 8GT/s, Width x2\n'
+               '\tLnkSta: Speed 8GT/s, Width x2\n'
+               '0001:01:00.0 PCI bridge\n'
+               '\tCapabilities: [80] Express (v2) Root Port\n'
+               '\tLnkSta: Speed 16GT/s, Width x16\n')
 SENSORS = 'Temp | 30 | degrees C | ok | na\nFan | 12000 | RPM | ok | na\n'
 
 def target(node='n1', tray='tray1', offset=0):
@@ -110,6 +117,8 @@ class FakeTransport:
             return self.action(t)
         if cmd == 'lspci -Dnn':
             return Command(0, '' if self.empty_baseline else PCI.splitlines()[0] if self.pci_drift and self.boots.get(t.key) == 1 else PCI)
+        if cmd == 'lspci -Dvvv':
+            return Command(0, PCI_VERBOSE)
         if (cmd.startswith('bash ') or cmd.startswith('MEMORY_MIN_RATIO=')):
             return Command(1, 'ISSUE|BF4_MISSING|BF4|Expected at least 1; detected 0\nRESULT|FAIL\n') if self.hardware_failure else Command(0, 'RESULT|PASS\n')
         if cmd == '/usr/bin/powerctrl.sh power_status':
@@ -412,6 +421,17 @@ class EngineTests(unittest.TestCase):
         self.assertFalse(self.session.node['blocked'])
         self.session.start()
 
+    def test_capture_populates_pci_endpoint_devices(self):
+        self.ready()
+        record = self.session.one_loop(1)
+        devices = record.get('pci_devices') or {}
+        self.assertEqual(sorted(devices), ['0000:01:00.0', '0001:01:00.0'])
+        endpoint = devices['0000:01:00.0']
+        self.assertEqual(endpoint.get('link_current'), 'Speed 8GT/s, Width x2')
+        self.assertEqual(endpoint.get('link_result'), 'PASS')
+        # The bridge exposes a Root Port link, not an end-device Endpoint link.
+        self.assertEqual(devices['0001:01:00.0'].get('pcie_type'), 'Root Port')
+
     def test_sel_uses_before_snapshot_not_previous_post(self):
         self.ready()
         old = '1 | 09/30/2026 | 10:00:00 | Old event | Asserted\n'
@@ -682,8 +702,12 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(data['summary']['health'],'FAIL')
         self.assertEqual(data['nodes'][0]['completed'],2)
         self.assertEqual(len(data['summary']['issues']),1)
-        data['nodes'][0]['pre']['issues'][0]['detail']='<script>alert(1)</script>'
-        page=render_html(data)
+        # The summary is a portable overview: loop bodies stay in the journal.
+        self.assertNotIn('loops', data['nodes'][0])
+        self.assertNotIn('pre', data['nodes'][0])
+        campaign = json.loads((output/'campaign.json').read_text())
+        campaign['nodes'][0]['pre']['issues'][0]['detail']='<script>alert(1)</script>'
+        page=render_html(campaign)
         self.assertNotIn('<script>alert(1)</script>',page)
         self.assertIn('&lt;script&gt;alert(1)&lt;/script&gt;',page)
         self.assertIn('KNOWN',page)
