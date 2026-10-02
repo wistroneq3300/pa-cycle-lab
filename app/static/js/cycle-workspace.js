@@ -127,7 +127,7 @@
   function paint(url){
     const j=current;$('cw-run-title').textContent=j.project+' · '+stateLabel(j.state);$('cw-run-id').textContent=j.id;
     $('cw-environment').textContent=j.synthetic?'SYNTHETIC · 未操作真實硬體':'LIVE';
-    $('cw-stop').disabled=end.has(j.state)||j.stop_requested;$('cw-stop').textContent=j.stop_requested&&!end.has(j.state)?'STOP_REQUESTED · 已派送者正在收尾':'停止：不再派送新動作';
+    $('cw-stop').disabled=end.has(j.state)||j.stop_requested;$('cw-stop').textContent=j.stop_requested&&!end.has(j.state)?'Stop requested · 已派送者正在收尾':'停止：不再派送新動作';
     const age=j.heartbeat?Math.max(0,Math.round(Date.now()/1000-j.heartbeat)):null;
     $('cw-freshness').textContent=`畫面更新 ${new Date().toLocaleTimeString()} · Worker ${end.has(j.state)?'任務已終止':age===null?'尚未取得 heartbeat':age>10?'資料過期，不能據此判斷 Worker 死亡':age+' 秒前'} · ${j.stop_reason||''}`;
     $('cw-summary').textContent=`Lifecycle ${stateLabel(j.state)} · 累積健康 ${stateLabel(j.health)} · 覆蓋 ${j.nodes.filter(n=>n.coverage==='EXERCISED'||(n.coverage===undefined&&n.attempts>0)).length} / ${j.targets.length} nodes · COMPLETE 不等於 PASS`;
