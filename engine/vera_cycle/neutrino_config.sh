@@ -108,7 +108,8 @@ nic_bf4_check() {
     if [[ "$PCI_VALID" != true ]]; then return; fi
     bf4_ports=$(printf '%s\n' "$PCI" | awk '/^[[:xdigit:]]{4}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\.[0-7]/ && /(^|[^[:alnum:]])(BlueField[ -]?4|BF4)([^[:alnum:]]|$)/ {n++} END {print n+0}')
     if ((bf4_ports == 0)); then
-        expected_count BF4 0 "$BF4_EXPECTED" exact BF4_MISSING
+        printf 'CHECK|BF4|actual=0|exact=%s|pci_functions=0\n' "$BF4_EXPECTED"
+        if ((BF4_EXPECTED != 0)); then fail BF4_MISSING BF4 "Expected exactly $BF4_EXPECTED physical card(s); detected 0"; fi
         return
     fi
     local verbose identities identified
