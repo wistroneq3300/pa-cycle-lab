@@ -1,5 +1,21 @@
 # PROJECT_STATUS — PA Cycle Lab native Next integration
 
+## 2026-10-03 Cycle 建立頁與歷史導覽精修
+
+基準 `5bfa628d040097d06589264177fb97c7589a2417`；同分支 `codex/next-rack-cycle`，使用者明確授權 commit/push。
+
+- 建立頁改為三步流程提示、設定與即時摘要並列、獨立 node 選取區、正常文件流的 PRE 送出列，不再遮住小螢幕內容。全部原欄位、API payload、單／多 node 選取與安全流程保留。
+- Wistron 藍綠、深淺材質、清楚的已選節點邊線與輕量互動；執行中的動態指示與 reduced-motion 保留。未動舊 PA 頁面或品牌外殼。
+- 歷史列表增加可讀狀態（保留原 enum）、時間層級、頁碼與空狀態，繼續使用後端 25 筆分頁。
+- 證據增加目標、階段／輪次、檔名篩選及結果數；全部原有安全下載 URL 保留。沒有引入另一份資料來源。
+- 停止原因提供已知原因的中文說明，原文保留於 title；未知原因原樣呈現。未命名 Rack 明示未命名，未猜測實體位置。
+- 新 browser regression 先在舊 sticky 列重現 FAIL，再修復。七個 browser workflows 最終 PASS，包含 128 node 選取、一台四 nodes、八次 synthetic valid cycles、Console 25 checks。沒有以 targeted rerun 重複累計。
+- 截圖：`docs/screenshots/cycle-premium/`（9 張）；既有 `cycle-refinement/` 更新為本次畫面。驗收命令與限制見 `docs/ACCEPTANCE.md`。
+
+Local：完成；Committed/Pushed：以本輪 Git 提交與遠端核對為準；Deployed：否。未執行真機／Linux systemd 驗收，N2/N3 GPIO 問題維持原始證據。
+
+桌面 UI 自評 **38/40**（主觀設計評估，不是外部認證）：狀態可見4、語意貼近操作4、控制自由4、一致性4、錯誤預防4、辨識負擔4、操作效率3、視覺層級4、錯誤恢復4、說明引導3（各4分）。尚保留長期歷史跨頁檢索及大量 evidence DOM 虛擬化的改善空間；本輪沒有新增後端搜尋 API。
+
 ## 2026-10-03 Cycle 桌面精緻化（目前交付）
 
 基準 `611941216a5d186fb989113320c89b93a2787de9`，分支 `codex/next-rack-cycle`。

@@ -56,3 +56,12 @@ Input-session recovery is an authenticated API workflow (`GET /api/cycle/session
 Multiuser conflict: distinct independent nodes can have separate runs. Duplicate nodes or shared controller/power/AUX resources cannot be reserved twice. The later request persists as BLOCKED with the occupying run reference, no actions and no automatic replay after release. This is backend transactional admission, not merely a disabled checkbox.
 
 Visual evidence: `docs/screenshots/platform-regression/capture-results.json`, 36 principal view/size/theme combinations plus node-edit captures. Cycle long-name/blocked/disconnected/error and 10,500-event fixtures are recorded separately in `docs/ACCEPTANCE.md`. Unavailable operation never means successful action.
+# Cycle refinement · 2026-10-03
+
+| 位置 | 操作／層級 | Scope / API | 回饋 |
+|---|---|---|---|
+| 建立Cycle設定區 | 專案／模式／通道／limits | 原 `/api/cycle/inventory`，原create payload | 即時本次摘要；Profile唯讀 |
+| Node選取區 | 勾選／全選搜尋／全選Rack／取消 | canonical node IDs；Rack只影響Rack批次選取 | 已選與可見數分開，搜尋保留選取 |
+| 建立頁底部 | 執行PRE／primary | 原 POST `/api/cycle/runs`、idempotency key | 無選取disabled；API錯誤原樣顯示；送出列不遮擋 |
+| 歷史頁 | 上／下一頁／secondary | GET `/api/cycle/runs?offset=`，25筆 | 頁碼、首尾disabled、狀態與health分開 |
+| 證據區 | 目標／階段／檔名篩選／secondary | 已取得manifest的唯讀篩選 | 可見／全部數量，0結果說明，完整原下載links保留 |

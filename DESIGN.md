@@ -484,3 +484,10 @@ Creation, PRE approval, running, graceful stop, and terminal states control the 
 
 ````
 </details>
+# Cycle creation refinement · 2026-10-03
+
+Cycle限定的Wistron藍綠工程介面：建立頁以三步提示解釋設定→PRE→審閱，使用並列的設定／即時摘要，再進入獨立node選擇區。PRE按鈕位於正常文件流，避免1366×768遮擋。選取態使用藍色內框與checkbox，不只靠顏色；目前步驟有aria-current，資料更新不重建控制項。
+
+歷史頁顯示人類可讀狀態並保留enum，health獨立。證據用node／phase／filename篩選，保留所有原始路徑及安全下載。動畫僅用於真實執行中狀態和短暫hover轉場，尊重reduced-motion；不以閃動暗示硬體PASS。
+
+桌面尺寸1366×768、1920×1080及深淺主題有本輪截圖。沒有改PA全域theme、框架、API或執行引擎。自評38/40為主觀設計檢核，非實際使用者研究分數；大量歷史／證據的服務端搜尋仍是後續項目。

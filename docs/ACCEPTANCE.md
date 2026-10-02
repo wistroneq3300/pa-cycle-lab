@@ -273,3 +273,26 @@ KillMode=process, cross-UID/service-account and credential/artifact permissions,
 real disk-full/read-only behavior, and user-designated Neutrino target identity,
 physical power/AUX scope, reboot recovery and hardware evidence. Offline fault
 injection and synthetic success do not substitute for these checks.
+# 2026-10-03 Cycle 建立頁精修驗收
+
+環境：Windows、headless Edge、隔離 synthetic Web/Worker `127.0.0.1:9188`。先 GET `/api/cycle/capabilities` 確认 `mode=synthetic`。
+
+設定 `PA_CYCLE_BASE_URL=http://127.0.0.1:9188` 及本機 `PLAYWRIGHT_MODULE` 後執行：
+
+| 指令 | 本輪最終結果 |
+|---|---|
+| `node tests/cycle-premium-browser.cjs` | PASS：4種尺寸／主題、設定摘要、搜尋保留選取、不遮擋、證據篩選、theme reload、後端offset 0→25→0 |
+| `node tests/platform-selection-browser.cjs` | PASS：單一入口、單node／全部／子集 |
+| `node tests/platform-run-browser.cjs` | PASS：keyed DOM、focus、終態poll停止、待核對狀態 |
+| `node tests/native-browser.cjs` | PASS：128選取、真UI/ASGI、四node PRE/confirm、8次有效synthetic cycle |
+| `node tests/native-ui-states.cjs` | PASS：長名稱、blocked、空搜尋、error/retry、1366/1920深淺無水平溢出 |
+| `node tests/native-console-smoke.cjs` | PASS：25項Console checks，包括bounded buffer、重連、文字安全與contrast |
+| `node tests/cycle-refinement-browser.cjs` | PASS：全部artifact links保留、4組桌面畫面、reduced motion |
+
+七個 workflows 最終 7 PASS / 0 FAIL / 0 SKIP；Console子項不再重複加總。首次 premium 測試在舊版 `sticky !== static` 失敗，修正後通過。三個舊測試曾因未設定 base URL 而連不到預設9187，設定9188後重跑通過；不是產品failure。
+
+`node --check app/static/js/cycle-workspace.js`、`git diff --check` 通過；impeccable detector輸出 `[]`，僅作輔助，不替代視覺驗收。實際檢視建立頁1366 light／1920 dark及歷史1366 light；其餘組合有瀏覽器截圖及互動檢查。
+
+本轮只改 UI；未重跑 Python/Vera/Terminal/broker 全套，不把上一輪42個Python PASS算成本輪。沒有 production、現場硬體、Linux/systemd 或部署驗收。
+
+重現展示：`#/cycle/new` → 搜尋 `chassis-01` → 勾選任意N1–N4 → 調整limits並看摘要 → 建立PRE → 審閱後確認。完成run的「證據與報告」可按目標／階段／檔名尋找原始檔。截图在 `docs/screenshots/cycle-premium/`。
