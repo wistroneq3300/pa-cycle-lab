@@ -52,17 +52,24 @@ cpu_check() {
     collect data CPU dmidecode -t processor || return
     qty=$(printf '%s\n' "$data" | awk '/^[[:space:]]*Status:.*Populated/ && !/Unpopulated/ {n++} END {print n+0}')
     minimum CPU "$qty" "$CPU_MIN"
-    local enabled topology sockets total online threads
+    local enabled topology sockets total online threads row_errors missing_socket
     enabled=$(printf '%s\n' "$data" | awk '/Status:.*Populated/ && /Enabled/ && !/Unpopulated/ {n++} END {print n+0}')
     if ((enabled != qty)); then fail CPU_DISABLED CPU "Only $enabled of $qty populated CPUs are enabled"; fi
     threads=$(printf '%s\n' "$data" | awk '/^[[:space:]]*Thread Count:/ {n+=$3} END {print n+0}')
     collect topology CPU-online lscpu --all -p=CPU,SOCKET,ONLINE || return
-    read -r sockets total online <<< "$(printf '%s\n' "$topology" | awk -F, '
-      !/^#/ && $1 ~ /^[0-9]+$/ && $2 ~ /^[0-9]+$/ {s[$2]=1; n++; if ($3=="Y") on++}
-      END {for (v in s) ns++; print ns+0, n+0, on+0}')"
-    printf 'CHECK|CPU_ONLINE|sockets=%s|logical=%s|online=%s|smbios_threads=%s\n' "$sockets" "$total" "$online" "$threads"
-    if ((sockets != enabled || total == 0 || online != total || (threads > 0 && threads != total))); then
-        fail CPU_TOPOLOGY CPU "SMBIOS enabled=$enabled threads=$threads; lscpu sockets=$sockets logical=$total online=$online"
+    # Reject a malformed lscpu row instead of silently undercounting CPUs:
+    # rows must have exactly three clean fields and a unique CPU id.
+    read -r sockets total online row_errors missing_socket <<< "$(printf '%s\n' "$topology" | awk -F, '
+      /^[[:space:]]*#/ || /^[[:space:]]*$/ {next}
+      {for (i=1;i<=NF;i++) gsub(/^[[:space:]]+|[[:space:]]+$/, "", $i)
+       if (NF!=3 || $1 !~ /^[0-9]+$/) {bad++; next}
+       if (seen[$1]++) {bad++; next}
+       n++; if ($3=="Y") on++; else if ($3!="N") bad++
+       if ($2 ~ /^[0-9]+$/) s[$2]=1; else missing++}
+      END {for (v in s) ns++; print ns+0, n+0, on+0, bad+0, missing+0}')"
+    printf 'CHECK|CPU_ONLINE|sockets=%s|logical=%s|online=%s|smbios_threads=%s|row_errors=%s|missing_socket=%s\n' "$sockets" "$total" "$online" "$threads" "$row_errors" "$missing_socket"
+    if ((row_errors > 0 || missing_socket > 0 || sockets != enabled || total == 0 || online != total || (threads > 0 && threads != total))); then
+        fail CPU_TOPOLOGY CPU "SMBIOS enabled=$enabled threads=$threads; lscpu sockets=$sockets logical=$total online=$online row_errors=$row_errors missing_socket=$missing_socket"
     fi
 }
 dimm_check() {
@@ -108,7 +115,10 @@ nic_bf4_check() {
     if [[ "$PCI_VALID" != true ]]; then return; fi
     bf4_ports=$(printf '%s\n' "$PCI" | awk '/^[[:xdigit:]]{4}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\.[0-7]/ && /(^|[^[:alnum:]])(BlueField[ -]?4|BF4)([^[:alnum:]]|$)/ {n++} END {print n+0}')
     if ((bf4_ports == 0)); then
-        expected_count BF4 0 "$BF4_EXPECTED" exact BF4_MISSING
+        printf 'CHECK|BF4|actual=0|exact=%s|pci_functions=0\n' "$BF4_EXPECTED"
+        if [[ "${PROFILE_BF4_ENABLED:-1}" != 0 ]] && ((BF4_EXPECTED != 0)); then
+            fail BF4_MISSING BF4 "Expected exactly $BF4_EXPECTED physical card(s); detected 0"
+        fi
         return
     fi
     local verbose identities identified
@@ -138,7 +148,11 @@ nic_bf4_check() {
     fi
     bf4_cards=$(printf '%s\n' "$identities" | cut -d '|' -f2 | sort -u | awk 'END {print NR}')
     printf 'CHECK|BF4|actual=%s|exact=%s|pci_functions=%s|source=lspci VPD board serial\n' "$bf4_cards" "$BF4_EXPECTED" "$bf4_ports"
-    expected_count BF4 "$bf4_cards" "$BF4_EXPECTED" exact BF4_COUNT
+    # Physical card count, not PCI function count: honour the BF4 profile switch,
+    # then compare the VPD-serial-derived card count exactly.
+    if [[ "${PROFILE_BF4_ENABLED:-1}" != 0 ]] && (( bf4_cards != BF4_EXPECTED )); then
+        fail BF4_COUNT BF4 "Expected exactly $BF4_EXPECTED physical card(s); detected $bf4_cards from $bf4_ports PCI functions"
+    fi
 }
 pci_count() {
     local component="$1" pattern="$2" expected="$3" qty
