@@ -24,6 +24,7 @@ from cycle_core import Target, digest, now, issue_key, node_records, records_hea
 from .domain import CoordinatedSession as NodeSession, Domain
 from cycle_report import write_reports, status
 from cycle_transport import Transport
+from console_log import ConsoleLog
 
 def save_reports(root, campaign):
     try: write_reports(root,campaign)
@@ -104,6 +105,8 @@ def run_job(store, job_id, transport_factory=None):
         if not job: return
         root=ARTIFACTS/job_id
         sessions=[]; done=threading.Event(); state='ERROR'; reason='Preparation failed'; campaign=None
+        # Set once the campaign and its target list are known; observe() writes through it.
+        console=None
         # All writes for event callbacks are serialized; reports are written between rounds.
         mutex=threading.RLock()
         persistence_failed=threading.Event()
@@ -129,6 +132,16 @@ def run_job(store, job_id, transport_factory=None):
             except Exception as exc:
                 persistence_failed.set()
                 raise EvidencePersistenceError('Evidence persistence failure: structured event journal') from exc
+            # The transcript is derived from the same event; it never gates the journal.
+            if console is not None:
+                try:
+                    record=dict(event,machine_id=session.machine_id)
+                    if record.get('machine_id') or record.get('node'):
+                        console.node_event(record)
+                    else:
+                        console.job_event(record)
+                except Exception:
+                    pass
         def heartbeat():
             while not done.wait(2):
                 try: persistence_guard()
@@ -248,6 +261,14 @@ def run_job(store, job_id, transport_factory=None):
                           source_versions=job['source_versions'],integration_version=job['integration_version'],
                           policy_exceptions='NOT_ACTIVE_IN_V1',
                           nodes=[s.node for s in sessions])
+            # Start the operator transcript now that targets are known. The report
+            # renders this file in its Console panel.
+            try:
+                targets=[s.node.get('display_name') or s.node.get('key') for s in sessions]
+                console=ConsoleLog(root/'console.log',targets)
+                console.header(campaign)
+            except Exception:
+                console=None
             # PRE can install packages. The UI discloses this before job creation.
             store.append_event(job_id,dict(phase='PRE',level='PRE',event_type='CONTROLLER_DEPENDENCY_CHECK',message='Checking Controller dependencies'))
             dependencies=sessions[0].transport.local_dependencies()
@@ -317,6 +338,13 @@ def run_job(store, job_id, transport_factory=None):
                     with ThreadPoolExecutor(max_workers=len(members)) as group:
                         list(group.map(lambda s:s.one_loop(number),members))
                     for s in members: emit(s,'POST_FINISHED')
+                if console is not None:
+                    for s in members:
+                        try:
+                            loops=s.node.get('loops') or []
+                            if loops: console.loop_result(s.node.get('display_name') or s.node.get('key'),loops[-1])
+                        except Exception:
+                            pass
                 try:
                     with mutex: save_reports(root,campaign)
                 except EvidencePersistenceError:
@@ -332,7 +360,13 @@ def run_job(store, job_id, transport_factory=None):
                         rounds[domain]+=1
                         running[pool.submit(drive_round,domain,rounds[domain])]=domain
                     if not running: break
-                    completed,_=wait_futures(running,return_when=FIRST_COMPLETED)
+                    completed,_=wait_futures(running,timeout=30,return_when=FIRST_COMPLETED)
+                    if not completed:
+                        # A long silence must be attributable to a phase, never
+                        # mistaken for a hang. Print where each node currently is.
+                        if console is not None:
+                            console.still_running()
+                        continue
                     for future in completed:
                         domain=running.pop(future);future.result()
                         if (budget_open() and not store.get(job_id)['stop_requested']

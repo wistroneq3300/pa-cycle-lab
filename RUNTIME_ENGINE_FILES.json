@@ -135,6 +135,7 @@
     "app/topology_policy.py",
     "engine/vera_cycle/README.md",
     "engine/vera_cycle/VERSION",
+    "engine/vera_cycle/console_log.py",
     "engine/vera_cycle/cycle_core.py",
     "engine/vera_cycle/cycle_dmesg.py",
     "engine/vera_cycle/cycle_engine.py",
