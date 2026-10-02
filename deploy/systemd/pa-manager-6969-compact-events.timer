@@ -1,0 +1,13 @@
+[Unit]
+Description=PA Manager 6969 — run Cycle event retention every 2 weeks
+
+[Timer]
+# Twice a month (1st and 15th, nearest Monday) ≈ every 2 weeks.
+# Adjust the day list or the ExecStart --days window in the .service if needed.
+OnCalendar=*-*-1,15 04:30
+Persistent=true
+RandomizedDelaySec=1800
+Unit=pa-manager-6969-compact-events.service
+
+[Install]
+WantedBy=timers.target
