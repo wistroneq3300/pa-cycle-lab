@@ -105,10 +105,12 @@ def freeze(package, source, project_name=None):
     if path is None:
         raise CheckerMissing(checker_missing_message(project_name))
     script = path.read_text(encoding='utf-8').replace('\r\n', '\n')
+    # Counts come from the project's own checker (<project>_config.sh): the profile no
+    # longer injects CPU_MIN/DIMM_EXPECTED/... . Only the enable/mode switches are frozen.
     parameters=[]
     for key,spec in MEASUREMENTS.items():
         e=p['expectations'][key]
-        parameters.extend([f'{spec[0]}={e["value"]}',f'PROFILE_{spec[5]}_ENABLED={int(e["enabled"])}',f'PROFILE_{spec[5]}_MODE={e["mode"]}'])
+        parameters.extend([f'PROFILE_{spec[5]}_ENABLED={int(e["enabled"])}',f'PROFILE_{spec[5]}_MODE={e["mode"]}'])
     parameters.append('MEMORY_MIN_RATIO='+str(p['thresholds']['memory_min_ratio']))
     marker='# PROFILE_PARAMETERS'
     if script.count(marker)!=1:raise ValueError('Checker does not expose the reviewed profile parameter contract')

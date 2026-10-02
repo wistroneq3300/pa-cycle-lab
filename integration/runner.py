@@ -175,7 +175,8 @@ def run_job(store, job_id, transport_factory=None):
                         verify=getattr(provider,'verify_action_scope',None)
                         if not callable(verify) or not all(verify(job,m,action) for m in job['targets']):
                             raise RuntimeError('Custom profile action requires explicit provider verification of selector and affected scope')
-                secrets={m['credential_ref']:provider.credentials(m['credential_ref'],m.get('credential_version')) for m in job['targets']}
+                # Credentials come straight from inventory (internal lab): no credential_ref indirection.
+                secrets={m['name']:{'os_password':m.get('os_password',''),'bmc_password':m.get('bmc_password','')} for m in job['targets']}
             for machine in job['targets']:
                 target=Target(**{f.name:machine[f.name] for f in fields(Target) if f.name in machine})
                 if transport_factory:
@@ -183,7 +184,7 @@ def run_job(store, job_id, transport_factory=None):
                 elif job['synthetic']:
                     transport=SyntheticTransport({},root/'.ssh')
                 else:
-                    credentials=secrets[machine['credential_ref']]
+                    credentials=secrets[machine['name']]
                     transport=Transport({r:credentials.get(r+'_password','') for r in ('os','bmc')},root/'.ssh',
                                         users={r:machine[r+'_user'] for r in ('os','bmc')},
                                         ports={r:machine.get(r+'_port',22) for r in ('os','bmc')},cipher=machine.get('ipmi_cipher',17),ipmi_port=machine.get('ipmi_port',623))

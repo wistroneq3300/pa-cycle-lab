@@ -22,7 +22,7 @@ SAFE_FIELDS = ('name','project','tray','node','os_ip','bmc_ip','os_hostname','bm
                'node_id','parent_name','chassis_id','slot_key','display_name','revision',
                'controller_id','system_uri','console_id','node_serial','hardware_uuid',
                'slot_id','project_id','rack_id','mapping_status','capabilities','credential_version','ipmi_port',
-               'expected_identity','trust','os_password')
+               'expected_identity','trust','os_password','bmc_password')
 
 class Conflict(ValueError):
     pass
@@ -539,5 +539,5 @@ def target_reason(machine, profile, mode=MODE, require_profile=True):
     if type(machine.get('ipmi_cipher',17)) is not int or not 0<=machine.get('ipmi_cipher',17)<=20: reasons.append('無效：ipmi_cipher')
     if not isinstance(machine.get('power_domain'),str) or not machine['power_domain'].strip(): reasons.append('缺少或無效 power_domain')
     if mode=='synthetic' and not machine.get('synthetic'): reasons.append('離線模式只接受 SYNTHETIC inventory')
-    if mode=='live' and (machine.get('synthetic') or not machine.get('credential_ref')): reasons.append('實機模式需要真實 inventory 與 credential_ref')
+    if mode=='live' and machine.get('synthetic'): reasons.append('實機模式需要真實 inventory')
     return reasons
