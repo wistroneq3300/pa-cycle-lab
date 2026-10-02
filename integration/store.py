@@ -44,7 +44,7 @@ def runtime_hash(ui=False):
     # New nested runtime files cannot silently evade PRE's version guarantee.
     discovered={'run.py'}
     for folder in ('integration','engine/vera_cycle','app'):
-        excluded={'dev','docs','data','tests','node_modules','__pycache__','qa'}
+        excluded={'dev','docs','data','tests','node_modules','__pycache__','qa','test-results'}
         if folder=='app': excluded|={'scripts','deploy'}
         for p in (ROOT/folder).rglob('*'):
             relative=p.relative_to(ROOT)
