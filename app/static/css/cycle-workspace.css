@@ -12,31 +12,132 @@
 .cw-environment{font-weight:600;color:var(--cw-warn)}.cw-form-grid{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:16px;margin:22px 0}.cycle-workspace label{display:flex;flex-direction:column;gap:6px}.cycle-workspace input:not([type=checkbox]),.cycle-workspace select{background:var(--bg-panel);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:9px;font:inherit;min-height:40px}.cycle-workspace input[type=checkbox]{width:18px;height:18px;accent-color:var(--cw-link)}.cycle-workspace :focus-visible{outline:2px solid var(--cw-link);outline-offset:3px}.cw-search{flex:1;min-width:240px}
 .cw-matrix{max-height:48vh;overflow:auto;scrollbar-gutter:stable;border-block:1px solid var(--border)}.cw-chassis{display:grid;grid-template-columns:160px minmax(0,1fr);gap:14px;padding:16px 0;border-bottom:1px solid var(--border)}.cw-nodes{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.cw-node{padding:12px;background:var(--bg-panel);border:1px solid var(--border);border-radius:6px;overflow-wrap:anywhere}.cw-node:has(input:checked){border-color:var(--cw-link)}.cw-node.has-blocker small{color:var(--cw-warn)}.cw-node span,.cw-node small{font-size:12px}.cw-actions{margin:16px 0}.cw-summary{padding:14px;background:var(--bg-panel);border:1px solid var(--border);border-radius:6px;font-weight:600}.cw-scroll{overflow:auto;max-height:58vh;scrollbar-gutter:stable}.cycle-workspace table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}.cycle-workspace th,.cycle-workspace td{padding:12px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}.cycle-workspace thead th{position:sticky;top:0;background:var(--bg-panel);z-index:1}.cycle-workspace code{overflow-wrap:anywhere}.cycle-workspace #cw-error{color:var(--cw-fail);padding:12px;border:1px solid currentColor}.cycle-workspace .cycle-console{margin-top:22px}.cycle-workspace .cycle-console-nodes{max-height:100px;overflow:auto}.cycle-workspace ::selection{background:var(--cw-link);color:var(--bg)}
 
-#cycle-workspace .cycle-console { --log-pass:#18713d; --log-info:#006c91; --log-wait:#855300; --log-fail:#bc2635; --log-phase:#7545a9; margin-top:24px; padding:18px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; }
-:root[data-theme="dark"] #cycle-workspace .cycle-console { --log-pass:#72dfa0; --log-info:#72d4f4; --log-wait:#f4c56a; --log-fail:#ff939d; --log-phase:#c7a7fa; }
-#cycle-workspace .cycle-console-heading { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:8px 20px; }
-#cycle-workspace .cycle-console-heading h3 { margin:0; font-size:18px; }
-#cycle-workspace .cycle-console-heading p { margin:6px 0 16px; font-size:12px; overflow-wrap:anywhere; }
-#cycle-workspace .cycle-console-heading>span { font:13px Consolas,monospace; font-variant-numeric:tabular-nums; }
-#cycle-workspace .cycle-console-tools,.cycle-console-nodes { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:10px; }
-#cycle-workspace .cycle-console-nodes { margin:0; }
-#cycle-workspace .cycle-console-tools .btn[aria-pressed="true"] { border-color:var(--cw-link); box-shadow:inset 0 -2px var(--cw-link); }
-#cycle-workspace label.cycle-console-check { flex-direction:row; align-items:center; min-height:40px; margin:0 6px; }
-#cycle-workspace .cycle-console-search { flex:1; min-width:200px; }
-#cycle-workspace .cycle-console-search input::placeholder { color:var(--cw-muted)!important; opacity:1; }
-#cycle-workspace .cycle-console-status,#cycle-workspace .cycle-console-note { color:var(--cw-muted); font-size:12px; line-height:1.6; margin:12px 0; }
-#cycle-workspace .cycle-console-log { height:400px; overflow:auto; scrollbar-gutter:stable; border-block:1px solid var(--border); font:12px/1.65 Consolas,'Courier New',monospace; overflow-wrap:anywhere; contain:layout style; }
-#cycle-workspace .cycle-console-row { display:grid; grid-template-columns:62px 78px 45px minmax(0,1fr); gap:10px; padding:7px 4px; border-bottom:1px solid var(--border); }
-#cycle-workspace .cycle-console-time,#cycle-workspace .cycle-console-node { color:var(--cw-muted); }
-#cycle-workspace .cycle-console-level { color:var(--log-info); font-weight:bold; }
-#cycle-workspace [data-level="PASS"] .cycle-console-level { color:var(--log-pass); }
-#cycle-workspace [data-level="WAIT"] .cycle-console-level,#cycle-workspace [data-level="WARN"] .cycle-console-level { color:var(--log-wait); }
-#cycle-workspace [data-level="FAIL"] .cycle-console-level,#cycle-workspace [data-level="ERROR"] .cycle-console-level { color:var(--log-fail); }
-#cycle-workspace [data-level="PRE"] .cycle-console-level,#cycle-workspace [data-level="POST"] .cycle-console-level { color:var(--log-phase); }
-#cycle-workspace .cycle-console-message small { display:block; color:var(--cw-muted); font:inherit; font-size:11px; }
-#cycle-workspace .cycle-console-message a { display:inline-block; padding:5px 0; }
-#cycle-workspace .cycle-console [data-part="error"] { color:var(--log-fail); font-size:13px; }
-@media (max-width:540px) { #cycle-workspace .cycle-console { padding:12px; } #cycle-workspace .cycle-console-row { grid-template-columns:62px minmax(0,1fr) 50px; gap:4px 8px; } #cycle-workspace .cycle-console-message { grid-column:1/-1; } #cycle-workspace .cycle-console-log { height:360px; } }
+/* ===== Live Console: raised instrument panel + hacker terminal styling ===== */
+#cycle-workspace { --lc-mono:"Cascadia Mono","JetBrains Mono","Fira Code",Consolas,"SF Mono","DejaVu Sans Mono",monospace; }
+#cycle-workspace .live-console {
+  --lc-radius:14px;
+  --log-pass:#5fce8f; --log-info:#5cc7ee; --log-wait:#e9b95a; --log-fail:#ff8089; --log-phase:#c7a7fa;
+  margin-top:24px; padding:0; overflow:hidden;
+  border-radius:var(--lc-radius);
+  background:linear-gradient(180deg, color-mix(in srgb, var(--bg-panel-2) 92%, #fff 8%) 0%, var(--bg-panel) 120px);
+  border:1px solid var(--border);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 -18px 34px -26px rgba(0,0,0,.55) inset,
+    0 10px 22px -10px rgba(0,0,0,.55),
+    0 26px 48px -24px rgba(0,0,0,.55);
+}
+:root:not([data-theme="dark"]) #cycle-workspace .live-console {
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 10px 22px -12px rgba(16,40,70,.28),
+    0 26px 46px -26px rgba(16,40,70,.34);
+}
+#cycle-workspace .live-console-head { display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid var(--border); }
+#cycle-workspace .live-console-head h3 { margin:0; font-family:var(--lc-mono); font-size:15px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--text); text-shadow:0 0 10px color-mix(in srgb, var(--w-green) 45%, transparent); }
+#cycle-workspace .live-console-head h3::before { content:"\258D"; color:var(--w-green); margin-right:6px; text-shadow:0 0 8px var(--w-green); }
+#cycle-workspace .live-console-head h3::after { content:"_"; color:var(--w-green); animation:lc-caret 1s steps(1) infinite; }
+#cycle-workspace .live-console-head .lc-job { margin-left:auto; color:var(--text-dim); font:12px var(--lc-mono); }
+#cycle-workspace .live-console-head .lc-dot { width:9px; height:9px; border-radius:50%; background:var(--w-green-bright); box-shadow:0 0 0 4px color-mix(in srgb, var(--w-green) 22%, transparent); animation:lc-pulse 1.8s ease-in-out infinite; }
+#cycle-workspace .live-console-head .lc-dot.lc-idle { background:var(--text-dim); animation:none; box-shadow:0 0 0 4px color-mix(in srgb, var(--text-dim) 18%, transparent); }
+@keyframes lc-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+@keyframes lc-caret { 0%,50%{opacity:1} 51%,100%{opacity:0} }
+
+#cycle-workspace .live-console-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:10px 18px; border-bottom:1px solid var(--border); background:color-mix(in srgb, var(--bg-panel-2) 55%, transparent); }
+#cycle-workspace .live-console-bar .btn { min-height:32px; padding:4px 12px; font-size:13px; }
+#cycle-workspace .live-console-bar .btn.on,#cycle-workspace .live-console-bar .btn[aria-pressed="true"] { border-color:var(--w-green); color:var(--w-green); background:color-mix(in srgb, var(--w-green) 12%, transparent); }
+#cycle-workspace .lc-seg { display:inline-flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+#cycle-workspace .lc-seg .btn { border:0; border-radius:0; min-height:30px; }
+#cycle-workspace .lc-seg .btn + .btn { border-left:1px solid var(--border); }
+#cycle-workspace .lc-seg .btn[aria-pressed="true"] { background:var(--w-green); color:#fff; }
+#cycle-workspace .live-console-bar .lc-search { flex:1; min-width:160px; min-height:32px; border:1px solid var(--border); border-radius:8px; background:var(--bg-panel); color:var(--text); padding:4px 10px; font:13px inherit; }
+#cycle-workspace .live-console-bar .lc-search::placeholder { color:var(--text-dim); opacity:1; }
+#cycle-workspace .lc-icon { width:34px; min-height:32px; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--border); border-radius:8px; background:var(--bg-panel); color:var(--text); cursor:pointer; font-size:15px; line-height:1; text-decoration:none; }
+#cycle-workspace .lc-icon:hover { background:var(--bg-hover); }
+#cycle-workspace .lc-icon[aria-pressed="true"] { border-color:var(--w-green); color:var(--w-green); background:color-mix(in srgb, var(--w-green) 12%, transparent); }
+#cycle-workspace .lc-icon:disabled { opacity:.45; cursor:not-allowed; }
+
+#cycle-workspace .live-console-view {
+  margin:16px 18px 0; height:500px; overflow:auto; scrollbar-gutter:stable;
+  border-radius:10px;
+  background:#0b141d;
+  background-image:repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 3px);
+  border:1px solid #000;
+  font:13px/1.7 Consolas,Menlo,monospace; font-weight:400; overflow-wrap:anywhere; contain:layout style;
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,.55),
+    inset 0 -1px 0 rgba(255,255,255,.05),
+    0 1px 0 rgba(255,255,255,.07),
+    0 14px 26px -12px rgba(0,0,0,.6);
+}
+/* Light theme: follow the page — light terminal panel, dark text. */
+:root:not([data-theme="dark"]) #cycle-workspace .live-console-view {
+  background:#f7f9fb;
+  background-image:repeating-linear-gradient(0deg, rgba(0,0,0,.018) 0 1px, transparent 1px 3px);
+  border:1px solid var(--border);
+  box-shadow:inset 0 2px 6px rgba(16,40,70,.12),inset 0 -1px 0 rgba(255,255,255,.7),0 14px 26px -14px rgba(16,40,70,.4);
+}
+#cycle-workspace .live-console-view::selection { background:color-mix(in srgb, var(--w-green) 45%, transparent); }
+
+#cycle-workspace .live-console-view .cycle-console-row {
+  display:grid; grid-template-columns:78px 66px 58px minmax(0,1fr);
+  gap:14px; padding:7px 14px 7px 12px;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  border-left:3px solid transparent;
+  font-variant-numeric:tabular-nums;
+}
+#cycle-workspace .live-console-view .cycle-console-time { color:#6f8598; letter-spacing:.3px; font-weight:500; }
+#cycle-workspace .live-console-view .cycle-console-node { color:#9fb4c8; font-weight:600; }
+#cycle-workspace .live-console-view .cycle-console-level { align-self:start; font-size:10px; font-weight:700; letter-spacing:.6px; text-align:center; line-height:16px; border-radius:4px; padding:0 2px; background:rgba(255,255,255,.06); color:var(--lc,#5cc7ee); }
+#cycle-workspace .live-console-view .cycle-console-message { color:#eef4fb; letter-spacing:.1px; text-shadow:0 0 1px rgba(255,255,255,.14); }
+#cycle-workspace .live-console-view .cycle-console-message small { display:block; margin-top:2px; color:#7f93a8; font:inherit; font-size:11px; letter-spacing:.2px; }
+#cycle-workspace .live-console-view .cycle-console-message a { display:inline-block; padding:5px 0; color:var(--cycle-link); }
+#cycle-workspace .live-console-view .cycle-console-row:hover { background:rgba(255,255,255,.04); }
+#cycle-workspace .live-console-view [data-level="PASS"]  { --lc:#5fce8f; border-left-color:#5fce8f; }
+#cycle-workspace .live-console-view [data-level="INFO"]  { --lc:#5cc7ee; border-left-color:#3aa9d6; }
+#cycle-workspace .live-console-view [data-level="CMD"]   { --lc:#5cc7ee; border-left-color:#3aa9d6; }
+#cycle-workspace .live-console-view [data-level="WAIT"]  { --lc:#e9b95a; border-left-color:#e9b95a; }
+#cycle-workspace .live-console-view [data-level="WARN"]  { --lc:#e9b95a; border-left-color:#e9b95a; }
+#cycle-workspace .live-console-view [data-level="FAIL"]  { --lc:#ff8089; border-left-color:#ff5f6e; background:rgba(255,95,110,.06); }
+#cycle-workspace .live-console-view [data-level="ERROR"] { --lc:#ff8089; border-left-color:#ff5f6e; background:rgba(255,95,110,.06); }
+#cycle-workspace .live-console-view [data-level="PRE"]   { --lc:#c7a7fa; border-left-color:#a981f0; }
+#cycle-workspace .live-console-view [data-level="POST"]  { --lc:#c7a7fa; border-left-color:#a981f0; }
+
+/* Light theme: flip row text to dark-on-light. */
+:root:not([data-theme="dark"]) #cycle-workspace .live-console-view .cycle-console-time { color:#5c7183; }
+:root:not([data-theme="dark"]) #cycle-workspace .live-console-view .cycle-console-node { color:#3d5566; }
+:root:not([data-theme="dark"]) #cycle-workspace .live-console-view .cycle-console-message { color:#1b2833; text-shadow:none; }
+:root:not([data-theme="dark"]) #cycle-workspace .live-console-view .cycle-console-message small { color:#67788a; }
+:root:not([data-theme="dark"]) #cycle-workspace .live-console-view .cycle-console-level { background:rgba(0,0,0,.06); }
+:root:not([data-theme="dark"]) #cycle-workspace .live-console-view .cycle-console-row { border-bottom-color:rgba(0,0,0,.07); }
+:root:not([data-theme="dark"]) #cycle-workspace .live-console-view .cycle-console-row:hover { background:rgba(0,0,0,.035); }
+:root:not([data-theme="dark"]) #cycle-workspace .live-console-view [data-level="PASS"]  { --lc:#1c7a44; }
+:root:not([data-theme="dark"]) #cycle-workspace .live-console-view [data-level="INFO"],
+:root:not([data-theme="dark"]) #cycle-workspace .live-console-view [data-level="CMD"]   { --lc:#0d6a8c; }
+:root:not([data-theme="dark"]) #cycle-workspace .live-console-view [data-level="WAIT"],
+:root:not([data-theme="dark"]) #cycle-workspace .live-console-view [data-level="WARN"]  { --lc:#8a5a00; }
+:root:not([data-theme="dark"]) #cycle-workspace .live-console-view [data-level="FAIL"],
+:root:not([data-theme="dark"]) #cycle-workspace .live-console-view [data-level="ERROR"] { --lc:#b3222f; background:rgba(200,40,60,.07); }
+:root:not([data-theme="dark"]) #cycle-workspace .live-console-view [data-level="PRE"],
+:root:not([data-theme="dark"]) #cycle-workspace .live-console-view [data-level="POST"]  { --lc:#6a3fbf; }
+
+/* newest line: typed-in reveal + glowing live caret */
+#cycle-workspace .live-console-view .cycle-console-row.lc-newest { animation:lc-reveal .32s ease-out; background:linear-gradient(90deg, color-mix(in srgb, var(--w-green) 14%, transparent), transparent 60%); box-shadow:inset 0 -1px 0 color-mix(in srgb, var(--w-green) 40%, transparent); }
+#cycle-workspace .live-console-view .cycle-console-row.lc-newest .cycle-console-message::after { content:"\258B"; margin-left:3px; color:var(--w-green-bright); text-shadow:0 0 8px var(--w-green); animation:lc-caret 1s steps(1) infinite; }
+@keyframes lc-reveal { from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+
+#cycle-workspace .live-console-foot { display:flex; align-items:center; gap:14px; padding:10px 18px 12px; color:var(--text-dim); font-size:12px; }
+#cycle-workspace .live-console-foot .lc-count { margin-left:auto; font-variant-numeric:tabular-nums; }
+#cycle-workspace .live-console-note { margin:0 18px 16px; color:var(--text-dim); font-size:12px; line-height:1.6; }
+#cycle-workspace .live-console [data-part="error"] { margin:12px 18px 0; color:var(--log-fail); font-size:13px; }
+@media (max-width:540px) {
+  #cycle-workspace .live-console-view { height:360px; margin:12px 12px 0; }
+  #cycle-workspace .live-console-view .cycle-console-row { grid-template-columns:66px minmax(0,1fr) 50px; gap:4px 8px; }
+  #cycle-workspace .live-console-view .cycle-console-message { grid-column:1/-1; }
+  #cycle-workspace .live-console-head,#cycle-workspace .live-console-bar,#cycle-workspace .live-console-foot { padding-left:12px; padding-right:12px; }
+  #cycle-workspace .live-console-note { margin-left:12px; margin-right:12px; }
+}
+
 #cycle-workspace .cw-findings{display:grid;gap:12px;margin:12px 0}
 #cycle-workspace .cw-finding{background:var(--bg-panel);border:1px solid var(--border);border-radius:6px;padding:10px 14px}
 #cycle-workspace .cw-finding-blocked{border-color:var(--cw-fail)}
