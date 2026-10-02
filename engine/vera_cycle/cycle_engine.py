@@ -46,7 +46,11 @@ CAPTURES = {
 
 def new_record(phase):
     return dict(phase=phase, started=now(), finished=None, status="PENDING", issues=[],
-                evidence=[], commands={}, identities={}, pci={}, sensors=[], action=[], recovery={})
+                evidence=[], commands={}, identities={}, pci={}, pci_devices={}, sensors=[], action=[], recovery={},
+                # Marks records written by the SEL evidence-aware schema. The
+                # renderer uses this to distinguish an unfinished new record
+                # from an old record that never retained SEL metadata.
+                sel_evidence_schema=1)
 
 class NodeSession:
     def __init__(self, target, transport, root, run_id, script, script_hash, options, rules):
@@ -199,7 +203,7 @@ class NodeSession:
         ipmi_error = (role == "oob" or cmd.startswith("ipmitool ")) and bool(re.search(r"(?:Get .+ command failed|Unable to establish|Error:|No response from|Invalid command)", result.output, re.I))
         valid = result.code == 0 and not ipmi_error
         if record_command:
-            record["commands"][stem] = {"code": result.code, "state": result.state, "evidence": evidence, "valid": valid, "output_excerpt": result.output[-2000:] if not valid else ""}
+            record["commands"][stem] = {"command": cmd, "role": role, "code": result.code, "state": result.state, "evidence": evidence, "valid": valid, "output_excerpt": result.output[-2000:] if not valid else ""}
         if check and result.code != 0:
             self.add(record, "COLLECTION_FAILED", stem, f"Exit {result.code} ({result.state}); see evidence", evidence=evidence)
             record['issues'][-1]['snippet'] = result.output[-2000:]
@@ -371,7 +375,12 @@ class NodeSession:
                 record['issues'] += sensor_issues(record['sensors'])
         else:
             record["issues"] += sensor_issues(record["sensors"])
-        sel = self.sel_command(record, "sel", "list", save_evidence=post)
+        sel = self.sel_command(record, "sel", "list", save_evidence=True)
+        sel_meta = self._sel_metadata(record, 'sel', sel.output, 'POST' if post else 'PRE')
+        if post:
+            record['sel_post_meta'] = sel_meta
+        else:
+            record['sel_collection'] = sel_meta
         if post:
             valid = record['commands']['sel']['valid'] and record.get('sel_before_valid', False)
             record['sel_status'] = 'REVIEW REQUIRED' if valid else 'COLLECTION FAILED'
@@ -380,6 +389,16 @@ class NodeSession:
                 path = self.folder(record) / "sel_delta.txt"
                 atomic_write(path, "\n".join(record['sel_events']) or "No new SEL records.\n")
                 record['evidence'].append(path.relative_to(self.root).as_posix())
+                record['sel_delta_meta'] = dict(phase='LOOP', status='COMPARED', valid=True,
+                                                new_event_count=len(record['sel_events']),
+                                                evidence=path.relative_to(self.root).as_posix(),
+                                                reason='Before-cycle and POST SEL snapshots were valid')
+            else:
+                reason = 'Before-cycle SEL collection was unavailable'
+                if not record['commands']['sel'].get('valid', False):
+                    reason = 'POST SEL collection was unavailable or malformed'
+                record['sel_delta_meta'] = dict(phase='LOOP', status='UNAVAILABLE', valid=False,
+                                                new_event_count=None, evidence='', reason=reason)
             record.pop('sel_before', None)
         # Redfish EventLog/SEL: collection failure is a finding, but an absent
         # service (merged build) or a benign entry is not. Verdict is by worst
@@ -664,6 +683,17 @@ class NodeSession:
                 self.persist(record)
         return result
 
+    def _sel_metadata(self, record, stem, output, phase):
+        command = record.get('commands', {}).get(stem, {})
+        lines = [line.strip() for line in output.splitlines() if line.strip()]
+        event_count = sum(1 for line in lines if '|' in line and re.match(r'^[0-9a-f]+\s*\|', line, re.I))
+        valid = bool(command.get('valid'))
+        return dict(phase=phase, status='COLLECTED' if valid else 'FAILED', valid=valid,
+                    command=command.get('command', ('ipmitool sel list' if self.options.channel == 'inband' else 'sel list')),
+                    state=command.get('state', 'UNKNOWN'), code=command.get('code'),
+                    evidence=command.get('evidence', ''), event_count=event_count if valid else None,
+                    reason='' if valid else 'SEL command failed or returned an unrecognized format')
+
     def start(self):
         record = new_record('START')
         self.node['start'] = record
@@ -767,9 +797,10 @@ class NodeSession:
             if self.expected_boot and record['identities']['os']['boot_id'] != self.expected_boot:
                 raise IdentityUnsafe('Unexpected OS boot transition between captures')
             self.collect_dmesg(record, 'before_action_dmesg')
-            before = self.sel_command(record, 'sel_before', 'list', save_evidence=False)
+            before = self.sel_command(record, 'sel_before', 'list', save_evidence=True)
             record['sel_before_valid'] = record['commands']['sel_before']['valid']
             record['sel_before'] = before.output if record['sel_before_valid'] else ''
+            record['sel_before_meta'] = self._sel_metadata(record, 'sel_before', before.output, 'BEFORE_CYCLE')
             self._redfish_before_snapshot(record)
             old_boot = record["identities"]["os"]["boot_id"]
             record["recovery"]["old_boot_id"] = old_boot
