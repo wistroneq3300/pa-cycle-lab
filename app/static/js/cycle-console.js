@@ -1,15 +1,32 @@
 /* Read-only view of the persistent event stream. Never dispatches job actions. */
 (() => {
   'use strict';
-  const BUFFER=3000, RENDER=2000, LEVELS=new Set(['INFO','CMD','WAIT','PASS','WARN','FAIL','ERROR','PRE','POST']);
+    const BUFFER=3000, RENDER=2000, LEVELS=new Set(['INFO','CMD','WAIT','PASS','WARN','FAIL','ERROR','PRE','POST']);
+    const PHASE_LABELS={
+      COMMAND_DISPATCHING:'aux cycle sent', COMMAND_DISPATCHED:'aux cycle sent',
+      RESPONSE_RETURNED:'command returned; verifying boot',
+      WAIT_OFFLINE:'waiting OS boot', OS_UNREACHABLE:'waiting OS boot', WAIT_RECOVERY:'waiting OS boot',
+      BOOT_ID_CHANGED:'OS up, system check running', RECOVERY_DETECTED:'OS up, system check running',
+      POST_STARTED:'system check running', POST_COMPLETED:'system check done'
+    };
+    const CONTROLLER_EVENTS={
+      CREATED:'Job created; targets and configuration reserved',
+      PRE_STARTED:'PRE started; every target is probed for identity and baseline',
+      AWAITING_CONFIRMATION:'PRE finished; waiting for operator confirmation',
+      CONFIRMED:'Operator confirmed; campaign is now RUNNING',
+      STOP_REQUESTED:'Stop requested; no new action will be dispatched',
+      STOPPING_AFTER_ROUND:'Stopping after the current round'
+    };
+    const FOLDED=new Set(['COLLECTION_STARTED','COLLECTION_FINISHED','IDENTITY_CHECK','IDENTITY_VERIFIED','PCI_COMPARISON','SENSOR_COMPARISON','ACTION_PREPARING','DEPENDENCY_CHECK','DEPENDENCY_CHECK_COMPLETE','BASELINE_COLLECTION']);
   window.CycleConsole=class {
     constructor(root,button) {
-      this.root=root;this.button=button;this.revision=0;this.buffer=[];this.history=null;this.cursor=0;this.auto=true;this.unread=0;
+      this.root=root;this.button=button;this.revision=0;this.buffer=[];this.history=null;this.cursor=0;this.auto=true;this.unread=0;this.summary=true;
       root.classList.add('live-console');
       root.innerHTML=`<div class="live-console-head"><span class="lc-dot" aria-hidden="true"></span><h3>Live Console</h3><span class="lc-job" data-part="job"></span></div>
         <div class="live-console-bar">
           <span class="lc-seg" data-part="nodes" role="group" aria-label="Console node filter"></span>
           <button class="btn" data-part="auto" aria-pressed="true" title="自動捲到最新">Auto-scroll</button>
+          <button class="btn" data-part="density" aria-pressed="true" title="摘要 / 完整原始事件">Summary</button>
           <button class="btn" data-part="pause" title="暫停檢視（不影響 Job）">Pause</button>
           <input class="lc-search" type="search" data-part="search" placeholder="搜尋日誌…" maxlength="200" aria-label="搜尋目前視窗">
           <button class="lc-icon" data-part="errors" aria-pressed="false" title="只顯示錯誤" aria-label="只顯示錯誤">!</button>
@@ -21,12 +38,13 @@
         <p hidden data-part="error" role="alert"></p>
         <div class="live-console-view" data-part="log" role="log" aria-live="off" tabindex="0" aria-label="Cycle operational events"></div>
         <div class="live-console-foot"><span class="lc-mode" data-part="status" role="status"></span><span class="lc-count" data-part="count"></span></div>
-        <p class="live-console-note">時間 UTC。檢視最多 2,000 行，記憶體保留最新 3,000 筆。Pause / 關閉不會停止 Job。完整保留紀錄可下載；原始證據仍在報告與證據。</p>`;
+        <p class="live-console-note">時間 UTC。檢視最多 2,000 行，記憶體保留最新 3,000 筆。Summary 是重點摘要、Full 是完整原始事件（可切換）。Pause / 關閉不會停止 Job。完整保留紀錄可下載；原始證據仍在報告與證據。</p>`;
       this.part=name=>root.querySelector(`[data-part="${name}"]`);
       this.part('log').addEventListener('scroll',()=>{const log=this.part('log');if(log.scrollHeight-log.scrollTop-log.clientHeight>30){this.auto=false;this.part('auto').classList.remove('on');this.part('auto').textContent='Auto-scroll (off)';this.part('auto').setAttribute('aria-pressed','false');}});
       button.onclick=()=>this.toggle();
       this.part('auto').onclick=()=>{this.auto=!this.auto;this.part('auto').textContent=this.auto?'Auto-scroll':'Auto-scroll (off)';this.part('auto').classList.toggle('on',this.auto);this.part('auto').setAttribute('aria-pressed',this.auto);if(this.auto)this.bottom();};
       this.part('pause').onclick=()=>{this.paused=!this.paused;this.cancel();this.part('pause').textContent=this.paused?'Resume':'Pause';this.part('pause').classList.toggle('on',this.paused);this.part('pause').setAttribute('aria-pressed',this.paused);this.status();if(!this.paused&&!this.history)this.poll();};
+      this.part('density').onclick=()=>{this.summary=!this.summary;this.part('density').textContent=this.summary?'Summary':'Full';this.part('density').setAttribute('aria-pressed',this.summary);this.render(true);};
       this.part('errors').onclick=()=>{this.part('errors').setAttribute('aria-pressed',this.part('errors').getAttribute('aria-pressed')!=='true');this.render(true);};
       this.part('search').oninput=()=>{clearTimeout(this.searchTimer);this.searchTimer=setTimeout(()=>this.render(true),150);};
       this.part('history').onclick=()=>this.loadHistory();
@@ -40,12 +58,13 @@
       if(this.job?.id!==job.id){
         this.cancel();this.buffer=[];this.history=null;this.cursor=0;this.node='';this.paused=false;this.loaded=false;this.url=url;
         this.part('pause').textContent='Pause';this.part('pause').classList.remove('on');this.part('pause').setAttribute('aria-pressed','false');
+        this.summary=true;this.part('density').textContent='Summary';this.part('density').setAttribute('aria-pressed','true');this.part('density').classList.remove('on');
         this.part('live').hidden=true;this.part('older').hidden=true;this.part('search').value='';
         this.part('errors').setAttribute('aria-pressed','false');
         this.part('nodes').replaceChildren();
         for(const target of [{name:'',node:'ALL'},...job.targets]){
           const b=document.createElement('button');b.type='button';b.className='btn';b.dataset.machine=target.name;
-          b.textContent=target.name?`${target.tray || ''}/${target.node || target.name}`:'ALL';b.title=target.name || 'All nodes';b.setAttribute('aria-pressed',!target.name);
+          b.textContent=target.name?[target.tray,target.node||target.name].filter(Boolean).join('/'):'ALL';b.title=target.name || 'All nodes';b.setAttribute('aria-pressed',!target.name);
           b.onclick=()=>{this.node=target.name;this.part('nodes').querySelectorAll('button').forEach(n=>n.setAttribute('aria-pressed',n.dataset.machine===this.node));this.render(true);};
           this.part('nodes').append(b);
         }
@@ -88,7 +107,26 @@
       }catch(e){if(revision===this.revision){this.error('歷史載入失敗，請重試。');if(!this.history&&!this.paused)this.timer=setTimeout(()=>this.poll(),1500);}}
     }
     errorsOnly(){return this.part('errors').getAttribute('aria-pressed')==='true';}
-    visible(){const query=this.part('search').value.toLowerCase();return(this.history || this.buffer).filter(e=>(!this.node||e.machine_id===this.node)&&(!this.errorsOnly()||['FAIL','ERROR'].includes(e.level))&&(!query||`${e.message} ${e.detail || ''}`.toLowerCase().includes(query))).slice(-RENDER);}
+    fold(events){
+      // Summary view: mirror the console.log transcript. Derive (never mutate) the
+      // shown rows so switching back to Full is lossless. Dropped noise is the
+      // "Collecting X / Collection returned: X" pairing; phase repeats collapse to
+      // one line per node; issues and FAIL/WARN always survive.
+      const out=[];const seenStage=new Map();const seenLoop=new Set();
+      for(const e of events){
+        const type=e.event_type||'';const level=e.level;
+        const controller=CONTROLLER_EVENTS[type];
+        if(controller){out.push({...e,message:controller});continue;}
+        if(type==='LOOP_STARTED'){const loop=e.loop;if(seenLoop.has(loop))continue;seenLoop.add(loop);out.push({...e,message:e.message||`Loop ${loop} started`});continue;}
+        const stage=PHASE_LABELS[type];
+        if(stage){if(seenStage.get(e.machine_id)===stage)continue;seenStage.set(e.machine_id,stage);out.push({...e,message:stage,detail:''});continue;}
+        if(FOLDED.has(type))continue;
+        if(type.startsWith('ISSUE_')||level==='FAIL'||level==='WARN'||level==='ERROR'||['PASS','CMD','WAIT'].includes(level)){out.push(e);continue;}
+        out.push(e);
+      }
+      return out;
+    }
+    visible(){const query=this.part('search').value.toLowerCase(),base=this.summary?this.fold(this.history || this.buffer):(this.history || this.buffer);return base.filter(e=>(!this.node||e.machine_id===this.node)&&(!this.errorsOnly()||['FAIL','ERROR'].includes(e.level))&&(!query||`${e.message} ${e.detail || ''}`.toLowerCase().includes(query))).slice(-RENDER);}
     status(){const mode=this.history?'歷史視窗':this.paused?'View paused · 不影響 Job':'LIVE · 每 1.5 秒更新';this.part('status').textContent=`${mode}${this.unread?' · '+this.unread+' 筆新輸出，按 Auto-scroll 跳到最新':''}${this.history?' · 每頁最多 500 筆':''}${this.trimmed?' · 閱讀位置已移出視窗，請用 ☰ 歷史查看':''}`;this.part('count').textContent=`Showing ${this.visible().length} of ${(this.history || this.buffer).length}`;}
     bottom(){this.unread=0;const log=this.part('log');log.scrollTop=log.scrollHeight;}
     render(force=false){
@@ -105,7 +143,7 @@
         const row=document.createElement('div');row.className='cycle-console-row';row.dataset.sequence=e.sequence;row.dataset.machine=e.machine_id || '';row.dataset.level=LEVELS.has(e.level)?e.level:'INFO';
         for(const [cls,value] of [['time',e.timestamp?.slice(11,19) || '—'],['node',e.machine_id?(e.node || e.machine_id):'JOB'],['level',row.dataset.level]]){const cell=document.createElement('span');cell.className=`cycle-console-${cls}`;cell.textContent=value;cell.title=cls==='node'?`${e.machine_id || 'Job'} · ${e.tray || ''}/${e.node || ''}`:e.timestamp || '';row.append(cell);}
         const content=document.createElement('span');content.className='cycle-console-message';content.textContent=e.message;
-        const context=document.createElement('small');context.textContent=`${e.phase} · Loop ${e.loop ?? 0}${e.detail?' · '+e.detail:''}`;content.append(context);
+        const context=document.createElement('small');context.textContent=[e.phase,e.loop!=null?`Loop ${e.loop}`:null,e.detail].filter(Boolean).join(' · ');if(!context.textContent)context.hidden=true;content.append(context);
         if(e.evidence&&!/[:\\%?#]/.test(e.evidence)&&!e.evidence.split('/').some(p=>!p||p.startsWith('.'))){const link=document.createElement('a');link.textContent='View Evidence';link.href=`${this.url}/files/${e.evidence.split('/').map(encodeURIComponent).join('/')}`;link.target='_blank';link.rel='noopener';content.append(link);}
         row.append(content);fragment.append(row);newest=row;
       }
