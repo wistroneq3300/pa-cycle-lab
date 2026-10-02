@@ -163,5 +163,36 @@ NOTE: TWO cycle UIs coexist — `cycle.js` (old modal) and `cycle-workspace.js`
 (Next-style hash router, active). This duplication is the source of the confusion
 and is worth consolidating later.
 
+## L11 system broadcast + slot label fix (2026-10-02)
+
+- Added a second "📡 系統廣播" button next to "＋ 新增至機櫃" on the L11 (rack) tab
+  of the System/Projects page (`app/static/js/app.js`). `systemBroadcastDialog(level)`
+  is now level-aware: `level="system"` (L10) lists non-rack machines; `level="rack"`
+  (L11) lists rack machines, expanding multi-OS chassis into per-node keys
+  (`name#slot`) like the in-rack dialog. `setProjectLevelFilter()` toggles both
+  `sys-btn-broadcast` (L10) and `sys-btn-broadcast-rack` (L11).
+- Fixed Neutrino broadcast list showing "OS 1": slot 1's `label` was empty in
+  `data/pa6969/data.json`, so the UI fell back to `e.label || ('OS '+slot)` = "OS 1".
+  Set slot 1 label = `neutrino-n1` (matches its os_hostname). data.json is
+  gitignored, so this fix is local-only.
+
+## BMC log sources differ by vendor — SEL vs Event (2026-10-02)
+
+When reading BMC logs, the IPMI SEL and the Redfish Event log are DIFFERENT
+sources, and which one carries cycle-relevant events depends on the BMC vendor:
+- **NVIDIA (VR200 NVL, e.g. 10.35.228.155, FW 26.09)**: `ipmitool sel` = real
+  hardware SEL (was empty/0 entries); cycle events (Host0 powered on, BMC boot,
+  CPLD/BlueField errors) live in the **Redfish Event log**
+  (`/redfish/v1/Systems/System_0/LogServices/EventLog/Entries`, 22 entries incl.
+  2 Critical + 1 Warning). → **For NVIDIA, watch the Event log (SEL is empty).**
+- **Wistron (e.g. 10.35.228.145, FW 3.08)**: `ipmitool sel` content is effectively
+  the OpenBMC event (sel ≈ event). Uses standard Redfish ids `system`/`bmc`
+  (not `System_0`/`BMC_0`), and has NO SEL LogService (has EventLog + Journal).
+- Redfish base differs per vendor → always discover ids via
+  `GET /redfish/v1/Systems` and `GET /redfish/v1/Managers`; never hardcode.
+- Cycle engine currently diffs SEL per loop; for NVIDIA targets that delta will be
+  empty, so an **Event-log delta** would be needed (not yet implemented).
+
+
 
 
