@@ -143,15 +143,20 @@ def run_job(store, job_id, transport_factory=None):
             if engine_hash()!=job['engine_hash']: raise RuntimeError('Engine changed since job creation')
             options=SimpleNamespace(**{k:v for k,v in job['config'].items() if k in {'cycle_mode','channel','boot_timeout'}},
                                     poll_interval=0.05 if job['synthetic'] else 5,memory_min_ratio=.9,loop_limit=job['config']['limits']['loops'])
-            script=(ENGINE/'neutrino_config.sh').read_bytes().replace(b'\r\n',b'\n')
-            policy=(ENGINE/'issue_policy.md').read_text(encoding='utf-8')
-            rules=[]  # V1 policy exceptions are explicitly inactive; PRE-relative classification only.
             frozen=job.get('profile_snapshot')
+            rules=[]  # V1 policy exceptions are explicitly inactive; PRE-relative classification only.
             if frozen:
                 if fingerprint({k:v for k,v in frozen.items() if k!='content_hash'})!=frozen['content_hash']:
                     raise RuntimeError('Frozen profile content hash mismatch')
                 script=frozen['checker'].encode('utf-8');policy=frozen['policy']
                 options.memory_min_ratio=frozen['package']['thresholds']['memory_min_ratio']
+            else:
+                # No frozen snapshot: select this project's checker script; never fall back.
+                from .profiles import checker_script_path, CheckerMissing, checker_missing_message
+                path=checker_script_path(job.get('project'))
+                if path is None: raise CheckerMissing(checker_missing_message(job.get('project')))
+                script=path.read_bytes().replace(b'\r\n',b'\n')
+                policy=(ENGINE/'issue_policy.md').read_text(encoding='utf-8')
             atomic_write(root/'neutrino_config.snapshot.sh',script.decode())
             atomic_write(root/'issue_policy.snapshot.md',policy)
             write_json(root/'job_snapshot.json',job)

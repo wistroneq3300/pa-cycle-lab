@@ -584,6 +584,7 @@ def add_machine(body: AddMachine):
         raise HTTPException(400, f"OS 連線失敗（SSH）：{err or '無法登入'}")
 
     # 2) BMC：若有填 BMC IP → ping + SSH 登入 + 在 BMC 內跑 ipmitool lan print 確認 IP 無誤
+    bmc_hostname = ""
     if body.bmc_ip:
         if not ping_check(body.bmc_ip):
             raise HTTPException(400, f"BMC 連線失敗（{body.bmc_ip} ping 不到）")
@@ -605,6 +606,11 @@ def add_machine(body: AddMachine):
                     f"BMC IP 不符：你填的是 {body.bmc_ip}，但 BMC（{body.bmc_user}@{body.bmc_ip}）"
                     f"回報自己的 IP 是 {reported_ip}。請確認填對 BMC 管理網卡。")
             # reported_ip 為 None = BMC 內無 ipmitool 或取不到，不阻擋（2a 已驗證帳密可登入）
+            # 2c) 順便抓 BMC 自己的 hostname（best-effort；抓不到就留空，不阻擋新增）
+            bmc_hn, bmc_hn_rc, _ = ssh_run(body.bmc_ip, body.bmc_user, body.bmc_pass,
+                                           body.bmc_port, "hostname", timeout=12)
+            if bmc_hn_rc == 0 and bmc_hn:
+                bmc_hostname = bmc_hn.strip()
 
     if body.project and body.project not in projects:
         raise HTTPException(400, f"專案不存在: {body.project}")
@@ -645,6 +651,10 @@ def add_machine(body: AddMachine):
         "project": body.project,
         "level": body.level if body.level in ("system", "rack") else "system",
         "mgx_type": "server",
+        # Cycle PRE/POST 需要機器的 OS/BMC hostname 做身份驗證（不只比 IP）。
+        # 加系統時已 SSH 進 OS 抓到 hostname，這裡順便留在對應欄位；BMC hostname 為 best-effort。
+        "os_hostname": hostname,
+        "bmc_hostname": bmc_hostname,
         "rack_size": body.rack_size if body.level == "rack" else 1,
         "rack_u": 0,   # L11 新增時一律不指定 U（0=未放上機櫃），由 Rack Manager 的＋手動放置
         "use_c17": True,
@@ -654,7 +664,8 @@ def add_machine(body: AddMachine):
 
     # 多 OS 機框：把 os[0]=主 OS（=os_ip）+ 額外 OS 組成 os 陣列，並驗證每個額外 OS
     os_list = _norm_os_entry({"ip": body.os_ip, "user": body.os_user, "pass": body.os_pass,
-                              "port": body.os_port, "label": "OS 1", "bmc_ip": body.bmc_ip, "bmc_user": body.bmc_user, "bmc_pass": body.bmc_pass, "bmc_ssh_port": 22 if body.bmc_port == 623 else body.bmc_port}, 1)
+                              "port": body.os_port, "label": "OS 1", "bmc_ip": body.bmc_ip, "bmc_user": body.bmc_user, "bmc_pass": body.bmc_pass, "bmc_ssh_port": 22 if body.bmc_port == 623 else body.bmc_port,
+                              "os_hostname": hostname, "bmc_hostname": bmc_hostname}, 1)
     if os_list:
         os_list = [os_list]
         for i, eo in enumerate(body.os or [], start=2):
@@ -666,6 +677,8 @@ def add_machine(body: AddMachine):
             h2, rc2, err2 = ssh_run(entry["ip"], entry["user"], entry["pass"], entry["port"], "hostname")
             if rc2 != 0:
                 raise HTTPException(400, f"OS {i}（{entry['ip']}）SSH 連線失敗：{err2 or '無法登入'}")
+            if h2:
+                entry["os_hostname"] = h2.strip()
             os_list.append(entry)
         if len(os_list) > 1:
             rec["os"] = os_list

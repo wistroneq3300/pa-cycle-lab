@@ -35,7 +35,9 @@
     const g=generation,data=await api('/api/cycle/inventory');if(g!==generation)return;
     inventory=data.projects;selected=new Set();key=null;
     if(route[0]){
-      const project=inventory.find(p=>p.project_id===route[0]);
+      // route[0] is a project_id from the URL, but many projects have no project_id.
+      // Fall back to matching the project NAME so a stale/empty id never blocks entry.
+      const project=inventory.find(p=>p.project_id===route[0])||inventory.find(p=>p.name===route[0]);
       if(!project)throw Error('Project unavailable or access denied');
       preselect={project:project.name,chassis:route[1],node:route[2]};
     }
@@ -141,6 +143,14 @@
     }
   }
   window.CycleWorkspace={shell,mount,dispose};
-  window.openCycleTest=project=>{preselect={project};const p=projects.find(p=>p.name===project);link('new'+(p?.project_id?'/'+encodeURIComponent(p.project_id):''));};
-  window.openChassisCycle=(project,chassis,node)=>{preselect={project,chassis,node};const p=projects.find(p=>p.name===project);link('new'+(p?.project_id?'/'+encodeURIComponent(p.project_id)+'/'+encodeURIComponent(chassis)+(node?'/'+encodeURIComponent(node):''):''));};
+  window.openCycleTest=project=>{
+    preselect={project};
+    const p=projects.find(x=>x.name===project);
+    const target='new'+(p?.project_id?'/'+encodeURIComponent(p.project_id):'/'+encodeURIComponent(project));
+    // If the hash is unchanged, the router will not fire hashchange, so force a
+    // re-mount; otherwise a stale project_id in the URL would show the wrong project.
+    if(location.hash==='#/cycle/'+target){mount();}
+    else{link(target);}
+  };
+  window.openChassisCycle=(project,chassis,node)=>{preselect={project,chassis,node};const p=projects.find(x=>x.name===project);const seg=p?.project_id?encodeURIComponent(p.project_id):encodeURIComponent(project);const target='new/'+seg+'/'+encodeURIComponent(chassis)+(node?'/'+encodeURIComponent(node):'');if(location.hash==='#/cycle/'+target){mount();}else{link(target);}};
 })();

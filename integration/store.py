@@ -13,6 +13,7 @@ import uuid
 import threading
 from .settings import DATA, MODE, ENGINE, ROOT
 from .events import structured
+from .profiles import checker_script_path, checker_missing_message
 
 TERMINAL = {'COMPLETE', 'INCOMPLETE', 'CANCELLED', 'BLOCKED', 'ERROR', 'RECONCILIATION_REQUIRED'}
 SAFE_FIELDS = ('name','project','tray','node','os_ip','bmc_ip','os_hostname','bmc_hostname',
@@ -516,8 +517,10 @@ def validate_request(body):
 
 def target_reason(machine, profile, mode=MODE, require_profile=True):
     reasons=[]
-    if require_profile and profile!='neutrino': reasons.append('尚未設定支援的 Neutrino profile')
-    if require_profile and machine.get('cycle_profile',profile)!='neutrino': reasons.append('Machine profile 必須是 Neutrino')
+    # A project may run its own <project>_config.sh (lowercase). We no longer gate on
+    # profile == 'neutrino'; instead we require that the project's checker script exists.
+    if require_profile and checker_script_path(machine.get('project')) is None:
+        reasons.append(checker_missing_message(machine.get('project') or '(unknown)'))
     if machine.get('mgx_type','server')!='server': reasons.append('僅支援 server 節點')
     for key in ('tray','node','os_hostname','bmc_hostname'):
         if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9.-]*',str(machine.get(key,''))): reasons.append('缺少或無效：'+key)

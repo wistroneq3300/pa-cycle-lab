@@ -1893,8 +1893,10 @@ function setProjectLevelFilter(v) {
   projectLevelFilter.val = v;
   document.querySelectorAll(".lvl-tab").forEach(b => b.classList.toggle("active", b.dataset.lvl === v));
   const bb = document.getElementById("sys-btn-broadcast");
+  const bbr = document.getElementById("sys-btn-broadcast-rack");
   const bc = document.getElementById("sys-btn-addcomp");
-  if (bb) bb.style.display = (v === "system") ? "" : "none";   // 📡 系統廣播 只在 L10
+  if (bb) bb.style.display = (v === "system") ? "" : "none";   // 📡 系統廣播 (L10) 只在 L10
+  if (bbr) bbr.style.display = (v === "rack") ? "" : "none";   // 📡 系統廣播 (L11) 只在 L11
   if (bc) bc.style.display = (v === "rack") ? "" : "none";     // ＋ 新增元件 只在 L11
   const holder = $("proj-sort-list");
   if (holder) { holder.outerHTML = renderProjectsList(); initProjectDrag(); }
@@ -1982,7 +1984,8 @@ function pageProjects() {
       <button class="btn" onclick="refreshStatus()" id="refresh-btn">⟳ 重新掃描</button>
       <button class="btn primary" onclick="openAdd()">＋ 新增系統</button>
       <button class="btn" id="sys-btn-addcomp" style="display:${projectLevelFilter.val==="rack"?"":"none"}" onclick="addRackComponentDialog()" title="新增可放入機櫃的元件（switch / power shelf / CDU / PDU 等），會加入選定的整櫃專案">＋ 新增至機櫃</button>
-      <button class="btn" id="sys-btn-broadcast" style="display:${projectLevelFilter.val==="system"?"":"none"}" onclick="systemBroadcastDialog()" title="對多台 L10 系統同時下指令（廣播終端）">📡 系統廣播</button>
+      <button class="btn" id="sys-btn-broadcast-rack" style="display:${projectLevelFilter.val==="rack"?"":"none"}" onclick="systemBroadcastDialog('rack')" title="對多台 L11 機櫃節點同時下指令（廣播終端）">📡 系統廣播</button>
+      <button class="btn" id="sys-btn-broadcast" style="display:${projectLevelFilter.val==="system"?"":"none"}" onclick="systemBroadcastDialog('system')" title="對多台 L10 系統同時下指令（廣播終端）">📡 系統廣播</button>
     </div>
     ${renderProjectsList()}
   `;
@@ -4458,43 +4461,55 @@ function bcSetMachineAll(root, on) {
   const el = $("bc-sel-count"); if (el) el.textContent = document.querySelectorAll(".bc-chk:checked").length;
 }
 
-// System Manager 的「📡 系統廣播」：依專案把帶 OS 的 L10 系統分組列出，勾選後開啟廣播。
-function systemBroadcastDialog() {
-  const cands = machines.filter(m => m.os_ip && !isRackItem(m));
-  const anyCands = machines.filter(m => m.os_ip);
-  if (!cands.length) {
+// System Manager 的「📡 系統廣播」：依專案把帶 OS 的系統分組列出，勾選後開啟廣播。
+// level="system"(L10，預設) 只列非機櫃機台；level="rack"(L11) 只列機櫃機台，
+// 多 OS 機框展開成每個節點（key="name#slot"），與機櫃內頁廣播一致。
+function systemBroadcastDialog(level) {
+  level = level || "system";
+  const wantRack = level === "rack";
+  const matchLevel = m => wantRack ? m.level === "rack" : !isRackItem(m);
+  const lvLabel = wantRack ? "L11 機櫃" : "L10 系統";
+  const cands = machines.filter(m => m.os_ip && matchLevel(m));
+  // L11 需展開多 OS 節點；每個候選是一筆「廣播目標」
+  const entries = [];
+  cands.forEach(m => {
+    if (wantRack) { bcNodes(m).forEach(n => entries.push({ ...n, proj: m.project || "(未分類)" })); }
+    else { entries.push({ key: m.name, label: m.name, ip: m.os_ip, nm: m.name, proj: m.project || "(未分類)", node: false }); }
+  });
+  const anyCands = machines.filter(m => m.os_ip && matchLevel(m));
+  if (!entries.length) {
     if (anyCands.length) {
-      showDialog("📡 系統廣播", `<div class="empty">目前沒有帶 OS IP 的 L10 系統可廣播。\n有 OS 連線資訊的機台：<br>${esc(anyCands.map(m=>m.name).join("、"))}</div>`);
+      showDialog("📡 系統廣播", `<div class="empty">目前沒有帶 OS IP 的 ${esc(lvLabel)} 可廣播。\n有 OS 連線資訊的機台：<br>${esc(anyCands.map(m=>m.name).join("、"))}</div>`);
     } else {
-      showDialog("📡 系統廣播", `<div class="empty">目前沒有任何帶 OS 連線資訊的系統可用。</div>`);
+      showDialog("📡 系統廣播", `<div class="empty">目前沒有任何帶 OS 連線資訊的 ${esc(lvLabel)} 可用。</div>`);
     }
     return;
   }
   // 依專案分組
   const groups = {};
-  cands.forEach(m => { const p = m.project || "(未分類)"; (groups[p] = groups[p] || []).push(m); });
+  entries.forEach(e => { (groups[e.proj] = groups[e.proj] || []).push(e); });
   const html = Object.entries(groups).map(([proj, list]) => `
     <div style="margin-bottom:10px">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-        <b>${esc(proj)}</b><span class="hint">${list.length} 台</span>
+        <b>${esc(proj)}</b><span class="hint">${list.length} ${wantRack?'節點':'台'}</span>
         <span style="margin-left:auto"><button class="btn small" onclick="systemBroadcastSetGroup('${esc(proj)}', true)">☑</button>
         <button class="btn small" onclick="systemBroadcastSetGroup('${esc(proj)}', false)">☐</button></span>
       </div>
-      ${list.map(m => `<label class="bc-check" style="display:block;padding:6px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:4px;cursor:pointer">
-         <input type="checkbox" class="bc-chk" value="${esc(m.name)}" data-proj="${esc(proj)}" checked>
-         <b>${esc(m.name)}</b> <span class="mono" style="color:var(--text-dim)">${esc(m.os_ip)}</span>
+      ${list.map(e => `<label class="bc-check" style="display:block;padding:6px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:4px;cursor:pointer">
+         <input type="checkbox" class="bc-chk" value="${esc(e.key)}" data-proj="${esc(proj)}" checked>
+         <b>${esc(e.node ? bcRootLabel(e.key) : e.label)}</b> <span class="mono" style="color:var(--text-dim)">${esc(e.ip)}</span>
        </label>`).join("")}
     </div>`).join("");
 
-  showDialog("📡 系統廣播 — 依專案選擇要同時控制的主機", `
+  showDialog(`📡 系統廣播 — 依專案選擇要同時控制的${wantRack?'機櫃節點':'主機'}`, `
     <label style="display:block;font-size:12px;color:var(--text-faint);margin-bottom:10px">
-      勾選要同步下指令的系統（一次指令同時送到所有勾選主機的 OS shell）。依專案分組。
+      勾選要同步下指令的${wantRack?'節點':'系統'}（一次指令同時送到所有勾選目標的 OS shell）。依專案分組。
     </label>
     <div class="table-scroll" style="max-height:52vh;overflow:auto;margin-bottom:12px;scrollbar-gutter:stable;padding-right:10px;box-sizing:border-box">${html}</div>
     <div style="display:flex;gap:8px">
       <button class="btn small" onclick="bcSetAll(true)">☑ 全選</button>
       <button class="btn small" onclick="bcSetAll(false)">☐ 全不選</button>
-      <span class="spacer"></span><span class="hint">已選 <span id="bc-sel-count">${cands.length}</span> 台</span>
+      <span class="spacer"></span><span class="hint">已選 <span id="bc-sel-count">${entries.length}</span> ${wantRack?'節點':'台'}</span>
     </div>`,
     [
       { txt: "取消", cls: "", fn: () => closeDialog() },

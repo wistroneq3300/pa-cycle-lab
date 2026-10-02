@@ -68,10 +68,43 @@ def validate(package):
     return p
 
 
-def freeze(package,source):
+def checker_slug(project_name):
+    """Project name -> filesystem-safe slug (case-insensitive) used to pick the checker script.
+
+    Spaces / punctuation collapse to a single '_'; e.g. 'L11 Test' -> 'l11_test',
+    'Drogan Curv' -> 'drogan_curv', 'Vader-OTS' -> 'vader-ots'.
+    """
+    return re.sub(r'[^a-z0-9_-]', '_', str(project_name or '').lower()).strip('_')
+
+
+def checker_script_path(project_name):
+    """Return the per-project checker script Path for a project name, or None if absent.
+
+    Never falls back to another project's script: a missing file means the caller must
+    surface an explicit error rather than silently run the wrong expectations.
+    """
+    if not project_name:
+        return None
+    path = ENGINE / (checker_slug(project_name) + '_config.sh')
+    return path if path.is_file() else None
+
+
+def checker_missing_message(project_name):
+    slug = checker_slug(project_name)
+    return f'找不到 checker 腳本 {ENGINE}/{slug}_config.sh，請先放置該專案的 {slug}_config.sh'
+
+
+class CheckerMissing(ValueError):
+    """The selected project has no <project>_config.sh; surfaced as HTTP 404, never a fallback."""
+
+
+def freeze(package, source, project_name=None):
     from .store import fingerprint
-    p=validate(package)
-    script=(ENGINE/'neutrino_config.sh').read_text(encoding='utf-8').replace('\r\n','\n')
+    p = validate(package)
+    path = checker_script_path(project_name)
+    if path is None:
+        raise CheckerMissing(checker_missing_message(project_name))
+    script = path.read_text(encoding='utf-8').replace('\r\n', '\n')
     parameters=[]
     for key,spec in MEASUREMENTS.items():
         e=p['expectations'][key]
@@ -98,10 +131,10 @@ def activate(store,project_id,package):
     return p
 
 
-def resolve(db,project_id,legacy_profile=None):
+def resolve(db,project_id,legacy_profile=None,project_name=None):
     row=db.execute('SELECT package FROM validation_profiles WHERE project_id=?',(project_id,)).fetchone() if project_id else None
-    if row:return freeze(json.loads(row[0]),'activated:'+project_id)
-    if legacy_profile=='neutrino':return freeze(default_package(),'bundled:neutrino')
+    if row:return freeze(json.loads(row[0]),'activated:'+project_id,project_name)
+    if legacy_profile=='neutrino':return freeze(default_package(),'bundled:neutrino',project_name)
     return None
 
 

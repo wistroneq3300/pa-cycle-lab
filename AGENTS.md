@@ -83,3 +83,85 @@ EQ3300): connection status, Overview flicker, sensor polling, diagnostics.
 See `docs/HANDOFF-20261001-multinode-telemetry.md` for full context.
 Still OPEN: multi-node BMC capture slow/failing (`bmc_loading` stuck), and the
 select-os race. Connection-status "尚未觀測" root causes are documented there.
+
+## Cycle command per-project (esp. aux) — TODO, not started (2026-10-02)
+
+User requirement: cycle power/reboot commands should be **per-project**, because
+projects differ mainly in **aux_cycle** (some use BMC standby controller, others
+hook a **PDU**). Current state (all projects share ONE table; aux is hardcoded):
+
+- Actions come from `integration/profiles.py` `default_package()` — the same 6
+  actions for every project: `reboot:inband`(`['reboot']`), `reboot:outband`
+  (ipmi `['power','reset']`), `power_cycle:inband`(`['ipmitool','power','cycle']`),
+  `power_cycle:outband`(ipmi `['power','cycle']`), and `aux_cycle:inband/outband`
+  = `['/usr/bin/stbypowerctrl.sh','aux_cycle']` (executor=ssh, role=bmc).
+- **aux is hardcoded in TWO places**: `integration/profiles.py:30` (argv) AND
+  `engine/vera_cycle/cycle_engine.py:550`
+  (`self.dispatch(record,"cycle_command","bmc","/usr/bin/stbypowerctrl.sh aux_cycle")`).
+  Both assume aux == BMC standby controller, so a PDU-based aux project cannot run.
+- `validate()` (profiles.py) currently **locks** executor to `ipmi`/`ssh` and
+  forces ipmi argv to equal the default byte-for-byte (anti-injection). Supporting
+  a PDU aux requires relaxing this — security-relevant, needs explicit user OK.
+
+Plan (agreed so far, confirm before building):
+1. Make ONLY `aux_cycle` per-project-configurable; keep reboot/power_cycle shared.
+2. Prefer a structured `<project>_commands.json` (schema-validated) over free txt.
+3. Variables already exist for the "OOB needs `-C 17` + creds" pain: `ipmi_cipher`
+   (`-C 17`), `credential_ref` (creds, not plaintext), `os_ip/bmc_ip/*_hostname`.
+   BMC IP is read from OS via `ipmitool lan print`; BMC hostname needs SSH to BMC.
+
+OPEN questions to ask the user before implementing:
+- Which aux variants to support (BMC standby / PDU-over-ssh / PDU-over-ipmi)? Need
+  1–2 concrete examples (exact command, transport, whether `-C 17`).
+- OK to relax `validate()` for the aux action? (enables arbitrary-argv risk)
+- Format: `<project>_commands.json` (recommended) vs plain txt.
+- Order: this vs. the "hostname 精緻版" (on job-create, probe os/bmc hostname,
+  write back to the node's own `os[slot]` in `data/pa6969/data.json`, block run if
+  probe fails) — see that item below.
+
+## Hostname live-probe on job create ("精緻版") — TODO, partially done (2026-10-02)
+
+User wants: when building a cycle job, **live-probe each selected node** and fill
+`os_hostname` / `bmc_hostname` into that node's OWN slot in `data/pa6969/data.json`
+(overwrite). If the probe fails for any selected node, **block the run** (no start).
+Decision: (c) probe at job-create time; "打勾哪個抓哪個"; simplest-but-pretty UI.
+
+Probe steps per node: SSH OS `hostname` → `os_hostname`; OS `ipmitool lan print`
+→ BMC IP (verify); SSH BMC `hostname` → `bmc_hostname`.
+
+DONE already (code): `app/main.py add_machine` now stores the SSH-grabbed OS
+hostname into `os_hostname` (machine-level + primary slot) and best-effort BMC
+hostname into `bmc_hostname`. Filled Neutrino `data.json` slots 1/2/3
+(os=n1/n2/n3, bmc=vc-256-bmc-n1 / vc-256-bmc-n3 / vc-256-bmc-n3; n2==n3 BMC name
+flagged to confirm — possibly a shared BMC). Backup:
+`data/pa6969/data.json.bak-20261002-014948`.
+
+STILL TODO: the on-job-create probe API + frontend status/error display + block.
+Multi-OS machines store hostnames at SLOT level (`os[i]`), not machine level —
+must locate the node via `node_id`. Cycle UI (cycle.js) ALREADY has mode/channel/
+loops/hours/timeout form; only the hostname probe column/status is new.
+
+## Cycle UI project routing bug — FIXED (2026-10-02)
+
+Symptom: clicking "Verification Cycle" on the Neutrino project showed another
+project's error (e.g. `找不到 checker 腳本 .../eq3300_config.sh`) — a stale/wrong
+project. Root cause was in `app/static/js/cycle-workspace.js` (the active cycle
+view; it overrides `cycle.js`'s `openCycleTest` because it loads last):
+1. `openCycleTest`/`openChassisCycle` built the hash from `project_id` only; many
+   projects have no `project_id`, so the URL carried a stale/empty id.
+2. `wizard()` matched `inventory.find(p=>p.project_id===route[0])` and threw
+   "Project unavailable" when there was no project_id.
+3. When the new hash equalled the current hash, `hashchange` did not fire, so the
+   view never re-mounted and the previous project stayed on screen.
+
+Fixed: route now falls back to the project NAME when there is no project_id;
+`wizard()` also falls back to matching by name; `openCycleTest`/`openChassisCycle`
+force `mount()` when the hash is unchanged. Bumped cache-buster in `index.html` to
+`cycle-workspace.js?v=20261002-projroute1`. `node --check` passes; web restarted.
+
+NOTE: TWO cycle UIs coexist — `cycle.js` (old modal) and `cycle-workspace.js`
+(Next-style hash router, active). This duplication is the source of the confusion
+and is worth consolidating later.
+
+
+

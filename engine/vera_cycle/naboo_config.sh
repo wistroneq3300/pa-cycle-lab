@@ -12,6 +12,7 @@ PCIEFAB_MIN=20
 USB_MIN=1
 BMC_MIN=1
 MEMORY_MIN_RATIO="${MEMORY_MIN_RATIO:-0.90}"
+# PROFILE_PARAMETERS
 FAILURES=0
 fail() {
     printf 'ISSUE|%s|%s|%s\n' "$1" "$2" "$3"
@@ -19,8 +20,22 @@ fail() {
 }
 minimum() {
     local component="$1" actual="$2" expected="$3" code="${4:-DEVICE_MISSING}"
-    printf 'CHECK|%s|actual=%s|minimum=%s\n' "$component" "$actual" "$expected"
-    if ((actual < expected)); then fail "$code" "$component" "Expected at least $expected; detected $actual"; fi
+    expected_count "$component" "$actual" "$expected" minimum "$code"
+}
+expected_count() {
+    local component="$1" actual="$2" expected="$3" mode="$4" code="$5"
+    local enabled_key="PROFILE_${component}_ENABLED" mode_key="PROFILE_${component}_MODE"
+    if [[ "${!enabled_key:-1}" == 0 ]]; then
+        printf 'CHECK|%s|state=disabled|actual=%s\n' "$component" "$actual"
+        return
+    fi
+    mode="${!mode_key:-$mode}"
+    printf 'CHECK|%s|actual=%s|%s=%s\n' "$component" "$actual" "$mode" "$expected"
+    if [[ "$mode" == exact ]] && ((actual != expected)); then
+        fail "$code" "$component" "Expected exactly $expected; detected $actual"
+    elif [[ "$mode" == minimum ]] && ((actual < expected)); then
+        fail "$code" "$component" "Expected at least $expected; detected $actual"
+    fi
 }
 collect() {
     local variable="$1" component="$2"
@@ -54,8 +69,7 @@ dimm_check() {
     local data qty
     collect data DIMM dmidecode -t memory || return
     qty=$(printf '%s\n' "$data" | awk '/^[[:space:]]*Size:[[:space:]]+[0-9]+[[:space:]]+(MB|GB|TB)/ {if ($2+0>0) n++} END {print n+0}')
-    printf 'CHECK|DIMM|actual=%s|exact=%s\n' "$qty" "$DIMM_EXPECTED"
-    if ((qty != DIMM_EXPECTED)); then fail DIMM_COUNT DIMM "Expected exactly $DIMM_EXPECTED installed SOCAMM devices; detected $qty"; fi
+    expected_count DIMM "$qty" "$DIMM_EXPECTED" exact DIMM_COUNT
     local installed meminfo visible
     installed=$(printf '%s\n' "$data" | awk '/^[[:space:]]*Size:[[:space:]]+[0-9]+[[:space:]]+(MB|GB|TB)/ {
       factor=($3=="TB" ? 1073741824 : ($3=="GB" ? 1048576 : 1024)); n+=$2*factor} END {printf "%.0f", n}')
@@ -94,8 +108,7 @@ nic_bf4_check() {
     if [[ "$PCI_VALID" != true ]]; then return; fi
     bf4_ports=$(printf '%s\n' "$PCI" | awk '/^[[:xdigit:]]{4}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\.[0-7]/ && /(^|[^[:alnum:]])(BlueField[ -]?4|BF4)([^[:alnum:]]|$)/ {n++} END {print n+0}')
     if ((bf4_ports == 0)); then
-        printf 'CHECK|BF4|actual=0|exact=%s|pci_functions=0\n' "$BF4_EXPECTED"
-        if ((BF4_EXPECTED != 0)); then fail BF4_MISSING BF4 "Expected exactly $BF4_EXPECTED physical card(s); detected 0"; fi
+        expected_count BF4 0 "$BF4_EXPECTED" exact BF4_MISSING
         return
     fi
     local verbose identities identified
@@ -125,9 +138,7 @@ nic_bf4_check() {
     fi
     bf4_cards=$(printf '%s\n' "$identities" | cut -d '|' -f2 | sort -u | awk 'END {print NR}')
     printf 'CHECK|BF4|actual=%s|exact=%s|pci_functions=%s|source=lspci VPD board serial\n' "$bf4_cards" "$BF4_EXPECTED" "$bf4_ports"
-    if ((bf4_cards != BF4_EXPECTED)); then
-        fail BF4_COUNT BF4 "Expected exactly $BF4_EXPECTED physical card(s); detected $bf4_cards from $bf4_ports PCI functions"
-    fi
+    expected_count BF4 "$bf4_cards" "$BF4_EXPECTED" exact BF4_COUNT
 }
 pci_count() {
     local component="$1" pattern="$2" expected="$3" qty

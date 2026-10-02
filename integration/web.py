@@ -25,6 +25,7 @@ from cycle_core import EvidencePersistenceError
 from .events import log_line
 from .targets import inventory as node_inventory, resolve_target, resolve_control_target, public
 from .authorization import authorize, configured_provider
+from .profiles import CheckerMissing
 from . import coordinator
 
 sys.path.insert(0,str(ROOT/'app'))
@@ -92,6 +93,8 @@ for route in app.routes:
         route.dependant.call=local_write(pa,route.dependant.call)
 
 def fail(exc):
+    from .profiles import CheckerMissing
+    if isinstance(exc,CheckerMissing): return HTTPException(404,str(exc))
     if isinstance(exc,Conflict): return HTTPException(409,str(exc))
     if isinstance(exc,KeyError): return HTTPException(404,'找不到專案、機台或任務')
     return HTTPException(422,str(exc))
@@ -107,10 +110,12 @@ def scoped(project,job_id):
 
 def project_targets(project):
     if project not in pa.projects: raise HTTPException(404,'找不到專案')
+    from .profiles import checker_script_path, checker_missing_message
+    if checker_script_path(project) is None: raise HTTPException(404,checker_missing_message(project))
     profile=pa.projects[project].get('cycle_profile')
     from .profiles import resolve as resolve_profile
     with store.tx(write=False) as db:
-        frozen=resolve_profile(db,pa.projects[project].get('project_id'),profile)
+        frozen=resolve_profile(db,pa.projects[project].get('project_id'),profile,project_name=project)
     if frozen: profile=frozen['package']['profile_id']
     owners=store.lock_owners(); rows=[]
     all_targets=node_inventory(pa)
@@ -147,6 +152,10 @@ def targets(project:str): return project_targets(project)
 def create_job(project:str,body:dict,request:Request):
     try:
         config=validate_request(body)
+        # Missing per-project checker script is a 404 surface the UI before any job is created.
+        from .profiles import checker_script_path, checker_missing_message
+        if project not in pa.projects: raise KeyError(project)
+        if checker_script_path(project) is None: raise CheckerMissing(checker_missing_message(project))
         # Resolve idempotent retries before mutable inventory / lock checks.
         for existing in store.jobs(project):
             if existing['config']['idempotency_key']==config['idempotency_key']:
@@ -194,7 +203,7 @@ def create_job(project:str,body:dict,request:Request):
         # is handed to the worker. Later activations affect only future runs.
         with store.tx() as db:
             project_data=pa.projects[project]
-            frozen=resolve_profile(db,project_data.get('project_id'),project_data.get('cycle_profile'))
+            frozen=resolve_profile(db,project_data.get('project_id'),project_data.get('cycle_profile'),project_name=project)
             if not frozen or frozen['package']['profile_id']!=config['cycle_profile']:
                 raise Conflict('Selected profile differs from the activated Project profile')
             return store.create(project,config,chosen,actor(request),profile_snapshot=frozen)
