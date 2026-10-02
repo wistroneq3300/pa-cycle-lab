@@ -556,6 +556,33 @@ def config_issues(text, code):
                 items.append(issue(link_code, bdf, line.strip(), snippet=line.strip()))
     return items
 
+def parse_hardware_checks(text, findings):
+    """Parse ``CHECK|`` lines into (checks, details).
+
+    ``checks`` keeps the PASS/FAIL/UNSUPPORTED state per check key (what the
+    report badges); ``details`` keeps the measured key=value pairs and the raw
+    line so the report's "Measured detail" column can render them. A check whose
+    component (or a related component such as CPU for CPU_ONLINE) already has a
+    finding is downgraded to FAIL.
+    """
+    checks = {}
+    details = {}
+    for line in text.splitlines():
+        if not line.startswith('CHECK|'):
+            continue
+        cells = line.split('|')
+        name = cells[1]
+        values = dict(c.split('=', 1) for c in cells[2:] if '=' in c)
+        component = values.get('bdf', name)
+        state = 'UNSUPPORTED' if values.get('state') == 'unsupported' else 'PASS'
+        related = {'CPU_ONLINE': 'CPU', 'MEMORY_VISIBLE': 'DIMM', 'BF4_IDENTITIES': 'BF4'}.get(name, component)
+        if any(i['component'] in {component, related} for i in findings):
+            state = 'FAIL'
+        key = f'{name}/{component}' if 'bdf' in values else name
+        checks[key] = state
+        details[key] = dict(name=name, values=values, raw=line, status=state)
+    return checks, details
+
 def sel_delta(previous, current):
     # Complete record text includes record ID and timestamp; reused IDs remain visible.
     old = Counter(line.strip() for line in previous.splitlines() if "|" in line)

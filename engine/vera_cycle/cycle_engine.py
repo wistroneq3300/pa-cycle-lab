@@ -23,6 +23,7 @@ from cycle_core import (
     merge_pci_devices,
     parse_pci,
     parse_pci_verbose,
+    parse_hardware_checks,
     parse_sensors,
     pci_issues,
     redfish_delta,
@@ -363,19 +364,7 @@ class NodeSession:
             config = self.command(record, "hardware", "os", f"MEMORY_MIN_RATIO={ratio} bash " + shlex.quote(self.remote), sudo=True, timeout=180, check=False)
             findings = config_issues(config.output, config.code)
             record["issues"] += findings
-            record['hardware_checks'] = {}
-            for line in config.output.splitlines():
-                if line.startswith('CHECK|'):
-                    cells = line.split('|')
-                    name = cells[1]
-                    values = dict(c.split('=', 1) for c in cells[2:] if '=' in c)
-                    component = values.get('bdf', name)
-                    state = 'UNSUPPORTED' if values.get('state') == 'unsupported' else 'PASS'
-                    related = {'CPU_ONLINE': 'CPU', 'MEMORY_VISIBLE': 'DIMM', 'BF4_IDENTITIES': 'BF4'}.get(name, component)
-                    if any(i['component'] in {component, related} for i in findings):
-                        state = 'FAIL'
-                    key = f'{name}/{component}' if 'bdf' in values else name
-                    record['hardware_checks'][key] = state
+            record['hardware_checks'], record['hardware_check_details'] = parse_hardware_checks(config.output, findings)
         sensor = self.command(record, "sensor", "oob", "sensor list")
         record["sensors"] = parse_sensors(sensor.output) if record['commands']['sensor']['valid'] else []
         if post:
@@ -551,7 +540,10 @@ class NodeSession:
         self.persist(record)
 
     def _write_redfish_evidence(self, record, stem, name, result, entries, valid, verdict, counts):
-        path = self.folder(record) / (f"pre_{stem}.json" if record['phase'] == 'PRE' else f"{stem}.json")
+        # Plain-text transcript (header + one line per entry), not JSON: keep a
+        # .txt suffix so the file is served as text/plain rather than parsed as
+        # application/json by the browser's JSON viewer.
+        path = self.folder(record) / (f"pre_{stem}.txt" if record['phase'] == 'PRE' else f"{stem}.txt")
         lines = [f"UTC+8: {now()}", "Role: oob", f"Source: Redfish {name}",
                  f"Exit: {result.code}", f"State: {result.state}",
                  f"Entries: {len(entries)}", f"Verdict: {verdict}",

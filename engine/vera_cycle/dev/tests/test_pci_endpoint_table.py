@@ -7,9 +7,9 @@ a fabricated PASS.
 """
 import unittest
 
-from cycle_core import merge_pci_devices, parse_pci, parse_pci_verbose
+from cycle_core import merge_pci_devices, parse_hardware_checks, parse_pci, parse_pci_verbose
 from cycle_engine import new_record
-from cycle_report import _pci_summary, _render_pci_group
+from cycle_report import _hardware_detail, _pci_summary, _render_pci_group
 
 
 PCI = """0002:02:00.0 VGA compatible controller [0300]: ASPEED Technology, Inc. ASPEED Graphics Family [1a03:2000]
@@ -125,6 +125,46 @@ class PciEndpointTableTests(unittest.TestCase):
  Kernel driver in use: ast
 """)
         self.assertEqual(vga['0000:04:00.0']['link_result'], 'UNKNOWN')
+
+
+class HardwareCheckDetailTests(unittest.TestCase):
+    """CHECK| parsing must keep the measured values, not just the state.
+
+    The HTML report's "Measured detail" column reads hardware_check_details;
+    if parsing drops it every hardware row renders as "—" (the regression this
+    pins).
+    """
+
+    TEXT = (
+        'CHECK|CPU|actual=2|minimum=2\n'
+        'CHECK|CPU_ONLINE|logical=352|online=352|sockets=2|row_errors=0|missing_socket=0\n'
+        'CHECK|MEMORY_VISIBLE|installed_kib=1610612736|visible_kib=1599501312|minimum_ratio=0.9\n'
+        'CHECK|BF4|actual=0|exact=1|pci_functions=0\n'
+        'CHECK|PCIE_LINK|bdf=0004:01:00.0|state=evaluated|lnksta=LnkSta: Speed 32GT/s, Width x4\n'
+    )
+
+    def test_details_kept_for_every_check(self):
+        checks, details = parse_hardware_checks(self.TEXT, [])
+        for key in ('CPU', 'CPU_ONLINE', 'MEMORY_VISIBLE', 'BF4', 'PCIE_LINK/0004:01:00.0'):
+            self.assertIn(key, checks)
+            self.assertIn(key, details)
+            self.assertIn('values', details[key])
+            self.assertTrue(details[key]['values'])
+            self.assertEqual(details[key]['status'], checks[key])
+
+    def test_report_renders_measured_detail_from_parsed_values(self):
+        _, details = parse_hardware_checks(self.TEXT, [])
+        record = {'hardware_check_details': details, 'hardware_checks': {}, 'commands': {}}
+        self.assertEqual(_hardware_detail(record, 'CPU'), 'actual=2 · minimum=2')
+        self.assertIn('visible_kib=', _hardware_detail(record, 'MEMORY_VISIBLE'))
+        self.assertIn('pci_functions=0', _hardware_detail(record, 'BF4'))
+
+    def test_finding_downgrades_state_but_keeps_values(self):
+        findings = [{'component': 'BF4', 'severity': 'FAIL'}]
+        checks, details = parse_hardware_checks(self.TEXT, findings)
+        self.assertEqual(checks['BF4'], 'FAIL')
+        self.assertEqual(details['BF4']['status'], 'FAIL')
+        self.assertEqual(details['BF4']['values']['actual'], '0')
 
 
 if __name__ == '__main__':
