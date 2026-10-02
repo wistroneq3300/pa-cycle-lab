@@ -6,6 +6,10 @@
   // Title-case status labels (RECONCILIATION_REQUIRED -> Reconciliation Required); the raw
   // state string is still used for logic, this is display only.
   const stateLabel=state=>String(state??'').split('_').map(w=>w?w[0].toUpperCase()+w.slice(1).toLowerCase():w).join(' ');
+  // Readable run ids look like "<project>_<mode>_<channel>_<date>_<time>_<hex>"; the
+  // project is shown in its own column, so the list shows the id with that prefix
+  // stripped (older hex-only ids have no prefix and are shown as-is).
+  const runSuffix=j=>{const id=String(j.id||'');const p=String(j.project||'').toLowerCase();const slug=p.replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');return slug&&id.startsWith(slug+'_')?id.slice(slug.length+1):id;};
   // Colour a value by its meaning: PASS/OK green, WARN/amber, FAIL/BLOCKED red,
   // anything in-flight/neutral muted. Used for the progress table badges.
   const HEALTH_CLASS=v=>{const s=String(v??'').toUpperCase();return s==='PASS'||s==='OK'||s==='EXERCISED'?'cw-ok':s==='WARN'?'cw-warn':s==='FAIL'||s==='BLOCKED'||s==='ERROR'?'cw-fail':s==='DONE'||s==='COMPLETE'?'cw-done':'cw-idle';};
@@ -46,12 +50,12 @@
   async function history(){
     const g=generation;const data=await api('/api/cycle/runs?offset='+offset);if(g!==generation)return;
     const done=new Set(['COMPLETE','INCOMPLETE','CANCELLED','BLOCKED','ERROR','RECONCILIATION_REQUIRED']);
-    $('cw-body').innerHTML=`<h2>持久化任務紀錄</h2><p>COMPLETE 表示流程達到限制，硬體健康另列。停止與中斷的任務仍保留證據。</p><div class="cw-scroll"><table><thead><tr><th>Run / 專案</th><th>執行狀態</th><th>累積健康</th><th>環境</th><th>建立時間</th><th></th></tr></thead><tbody>${data.runs.map(j=>`<tr><td><a href="#/cycle/runs/${j.id}">${esc(j.project)} · ${j.id.slice(0,10)}</a></td><td>${esc(stateLabel(j.state))}</td><td>${esc(stateLabel(j.health))}</td><td>${j.synthetic?'SYNTHETIC':'LIVE'}</td><td>${new Date(j.created_at*1000).toLocaleString()}</td><td><button class="btn cw-del" data-id="${esc(j.id)}" data-project="${esc(j.project)}" ${done.has(j.state)?'':'disabled title="執行中或等待確認的任務無法刪除"'}>刪除</button></td></tr>`).join('')||'<tr><td colspan="6">尚無任務。從 Rack 或此頁建立 Cycle。</td></tr>'}</tbody></table></div><div class="cw-actions"><button class="btn" id="cw-prev" ${offset?'':'disabled'}>上一頁</button><button class="btn" id="cw-next" ${data.has_more?'':'disabled'}>下一頁</button></div>`;
+    $('cw-body').innerHTML=`<h2>持久化任務紀錄</h2><p>COMPLETE 表示流程達到限制，硬體健康另列。停止與中斷的任務仍保留證據。</p><div class="cw-scroll"><table><thead><tr><th>Run / 專案</th><th>執行狀態</th><th>累積健康</th><th>環境</th><th>建立時間</th><th></th></tr></thead><tbody>${data.runs.map(j=>`<tr><td><a href="#/cycle/runs/${j.id}">${esc(j.project)} · ${esc(runSuffix(j))}</a></td><td>${esc(stateLabel(j.state))}</td><td>${esc(stateLabel(j.health))}</td><td>${j.synthetic?'SYNTHETIC':'LIVE'}</td><td>${new Date(j.created_at*1000).toLocaleString()}</td><td><button class="btn cw-del" data-id="${esc(j.id)}" data-project="${esc(j.project)}" ${done.has(j.state)?'':'disabled title="執行中或等待確認的任務無法刪除"'}>刪除</button></td></tr>`).join('')||'<tr><td colspan="6">尚無任務。從 Rack 或此頁建立 Cycle。</td></tr>'}</tbody></table></div><div class="cw-actions"><button class="btn" id="cw-prev" ${offset?'':'disabled'}>上一頁</button><button class="btn" id="cw-next" ${data.has_more?'':'disabled'}>下一頁</button></div>`;
     $('cw-prev').onclick=()=>{offset=Math.max(0,offset-25);history().catch(error);};$('cw-next').onclick=()=>{offset+=25;history().catch(error);};
     $('cw-body').querySelectorAll('.cw-del').forEach(b=>b.onclick=()=>deleteRun(b.dataset.id,b.dataset.project,b));
   }
   async function deleteRun(id,project,button){
-    if(!confirm(`確定刪除任務 ${project} · ${id.slice(0,10)}？\n此動作會一併刪除該任務的證據與 log 資料夾，無法復原。`))return;
+    if(!confirm(`確定刪除任務 ${project} · ${runSuffix({id,project})}？\n此動作會一併刪除該任務的證據與 log 資料夾，無法復原。`))return;
     button.disabled=true;
     try{
       const r=await fetch('/api/cycle/runs/'+encodeURIComponent(id),{method:'DELETE',cache:'no-store',signal:controller?.signal});

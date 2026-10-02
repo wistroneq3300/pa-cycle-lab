@@ -1,5 +1,6 @@
 """Transactional job state and control-scope reservations shared by Web and runner."""
 from contextlib import contextmanager
+from datetime import datetime
 from pathlib import Path
 import hashlib
 import ipaddress
@@ -14,6 +15,7 @@ import threading
 from .settings import DATA, MODE, ENGINE, ROOT
 from .events import structured
 from .profiles import checker_script_path, checker_missing_message
+from cycle_core import LOG_TIMEZONE
 
 TERMINAL = {'COMPLETE', 'INCOMPLETE', 'CANCELLED', 'BLOCKED', 'ERROR', 'RECONCILIATION_REQUIRED'}
 SAFE_FIELDS = ('name','project','tray','node','os_ip','bmc_ip','os_hostname','bmc_hostname',
@@ -32,6 +34,18 @@ def encode(value):
 
 def fingerprint(value):
     return hashlib.sha256(encode(value).encode()).hexdigest()
+
+def readable_job_id(project, config):
+    """Human-readable run id: <project>_<mode>_<channel>_<UTC+8 date>_<time>_<6hex>.
+
+    Mirrors the vera-cycle campaign naming so an artifact directory can be read at
+    a glance. The trailing hex keeps ids unique and the whole string URL/filesystem
+    safe (only [a-z0-9_-])."""
+    slug=re.sub(r'[^a-z0-9]+','_',str(project).lower()).strip('_') or 'run'
+    stamp=datetime.now(LOG_TIMEZONE).strftime('%Y%m%d_%H%M%S')
+    mode=re.sub(r'[^a-z0-9]+','_',str(config.get('cycle_mode','')).lower()).strip('_') or 'cycle'
+    channel=re.sub(r'[^a-z0-9]+','_',str(config.get('channel','')).lower()).strip('_') or 'inband'
+    return f"{slug}_{mode}_{channel}_{stamp}_{uuid.uuid4().hex[:6]}"
 
 
 def snapshot_target(machine):
@@ -331,7 +345,7 @@ class Store:
                 if row['request_hash'] != request_hash:
                     raise Conflict('重試識別碼已用於不同設定')
                 return self._get(db,row['id'])
-            job_id = uuid.uuid4().hex
+            job_id = readable_job_id(project, request)
             self.reserve(db,job_id,keys)
             job = dict(id=job_id,project=project,state='CREATED',mode=mode,synthetic=mode=='synthetic',
                        config=request,targets=targets,created_by=actor,created_at=time.time(),
@@ -365,7 +379,7 @@ class Store:
                 job=json.loads(prior[0])
                 if fingerprint(job['config'])!=fingerprint(config): raise Conflict('Idempotency key already used')
                 return job
-            jid=uuid.uuid4().hex; at=time.time()
+            jid=readable_job_id(project, config); at=time.time()
             pre=dict(runnable_ids=[],excluded=[dict(machine_id=t['name'],reasons=[reason]) for t in targets],findings=[],baseline_hash=None)
             pre['version']=fingerprint(pre)
             job=dict(id=jid,run_id='cycle-'+jid,project=project,state='BLOCKED',mode=MODE,synthetic=MODE=='synthetic',config=config,
