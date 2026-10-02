@@ -196,3 +196,19 @@ sources, and which one carries cycle-relevant events depends on the BMC vendor:
 
 
 
+
+## PENDING work (2026-10-02, second round) - READ docs/HANDOFF-20261002b-cycle-ui-and-pending.md
+
+Cycle per-project checker works; Neutrino enters the wizard but still cannot RUN. Pending:
+(1) tray bound to project name (targets/control), (2) power_domain per-node (each independent),
+(3) credential_ref - cycle uses provider.credentials() not data.json, and
+local_provider._credentials() returns {} (stub); needs (P) credentials.json or (Q) read
+data.json, both require editing local_provider.py, (4) mapping_status=confirmed (only via
+data.json; node_id auto-regenerated, cannot be hidden), (5) drop Profile quantities from
+freeze() so config.sh is the single source of expectations, (6) aux per-project (PDU),
+(7) hostname live-probe on job create. This round also: removed Profile field from cycle UI
+(hidden input kept), replaced loop/hour limits with a single limit-type menu (loop N run /
+hr N hours, no default), hid parallel-domain cap (parallelism now backend default 8), fixed
+/api/cycle/inventory so a project without a checker no longer 404s the whole list (shows the
+project with a missing-file error), and fixed naboo-01's colliding BMC IPs in data.json.
+NOT COMMITTED yet.

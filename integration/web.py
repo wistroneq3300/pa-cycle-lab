@@ -506,11 +506,25 @@ async def boundary(request:Request,call_next):
 
 @router.get('/api/cycle/inventory')
 def native_inventory(request:Request):
+    from .profiles import checker_script_path, checker_missing_message
     result=[]
     for project in pa.projects:
         try: authorize(request,project,'read')
         except HTTPException: continue
-        result.append(dict(name=project,project_id=pa.projects[project].get('project_id'),**project_targets(project)))
+        # A project without a checker script stays in the list (so the user sees it
+        # and learns what is missing) but carries no targets and an error message;
+        # a per-project failure must not take down the whole inventory.
+        if checker_script_path(project) is None:
+            result.append(dict(name=project,project_id=pa.projects[project].get('project_id'),
+                               targets=[],profile=None,profile_detail=None,
+                               error=checker_missing_message(project)))
+            continue
+        try: entry=dict(name=project,project_id=pa.projects[project].get('project_id'),**project_targets(project))
+        except HTTPException as exc:
+            result.append(dict(name=project,project_id=pa.projects[project].get('project_id'),
+                               targets=[],profile=None,profile_detail=None,error=str(exc.detail)))
+            continue
+        result.append(entry)
     return {'projects':result,'mode':MODE,'live_enabled':False if MODE=='synthetic' else bool(getattr(app.state,'cycle_provider',None))}
 
 @router.get('/api/cycle/runs/{job_id}')

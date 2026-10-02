@@ -93,7 +93,6 @@
     const serial=generation, data=await api(`${base()}/targets`);
     if(serial!==generation)return;
     targets=data.targets;
-    el('cycle-profile').textContent=data.profile || '尚未支援';
     el('cycle-environment').textContent=data.mode==='synthetic'?'SYNTHETIC · 離線模擬，沒有操作實際機台':'LIVE · 操作已登錄的實際機台';
     renderTargets();
   }
@@ -115,7 +114,7 @@
     dialog.setAttribute('aria-labelledby','cycle-title');
     dialog.innerHTML=`<div class="cycle-shell">
       <header class="cycle-header"><div><h1 id="cycle-title">Cycle Test</h1><p id="cycle-environment"></p></div><button type="button" class="btn" id="cycle-close">返回專案</button></header>
-      <div class="cycle-service"><span>Profile：<strong id="cycle-profile">—</strong></span><span id="cycle-runner" role="status">正在連線…</span><span>關閉頁面不會取消任務</span></div>
+      <div class="cycle-service"><span id="cycle-runner" role="status">正在連線…</span><span>關閉頁面不會取消任務</span></div>
       <p id="cycle-error" class="cycle-error" role="alert" hidden></p>
       <div class="cycle-layout"><main class="cycle-main">
         <section aria-labelledby="cycle-select-title"><h2 id="cycle-select-title">選取專案機台</h2>

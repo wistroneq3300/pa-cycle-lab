@@ -41,14 +41,19 @@
       if(!project)throw Error('Project unavailable or access denied');
       preselect={project:project.name,chassis:route[1],node:route[2]};
     }
-    $('cw-body').innerHTML=`<p class="cw-environment">${data.mode==='synthetic'?'SYNTHETIC · fake transport，不連接硬體':'LIVE · PRE 可能安裝依賴與上傳 script'}</p><form id="cw-form"><div class="cw-form-grid"><label>專案 / Rack<select id="cw-project">${inventory.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('')}</select></label><label>Profile<input id="cw-profile" readonly aria-label="Activated Project Profile"></label><label>模式<select id="cw-mode"><option value="reboot">OS / BMC Reboot</option><option value="power_cycle">DC Power Cycle</option><option value="aux_cycle">AUX Cycle（需已確認範圍）</option></select></label><label>通道<select id="cw-channel"><option value="inband">Inband</option><option value="outband">Outband</option></select></label><label>Loop 上限<input id="cw-loops" type="number" min="0" max="1000000" value="2"></label><label>小時上限<input id="cw-hours" type="number" min="0" step="0.1" value="0"></label><label>並行 domain 上限<input id="cw-parallel" type="number" min="1" max="32" value="4"></label></div><details id="cw-profile-detail"><summary>Profile 版本、數量與 action（唯讀）</summary><pre id="cw-profile-content"></pre></details><p>Inband 仍需 BMC 採集與身分驗證。Power / AUX 的共享範圍必須完整選取；未確認的 live selector 不可執行。</p><div class="cw-actions"><label>Rack<select id="cw-rack" aria-label="Rack scope"></select></label><label class="cw-search">搜尋 chassis / node / endpoint<input id="cw-search" type="search"></label><button class="btn" type="button" id="cw-visible">全選搜尋結果</button><button class="btn" type="button" id="cw-all">全選 Rack</button><button class="btn" type="button" id="cw-none">取消選取</button></div><p id="cw-count" role="status"></p><div id="cw-matrix" class="cw-matrix"></div><div class="cw-actions"><button class="btn primary" id="cw-create">建立持久任務並執行 PRE</button><span>有 blocker 的選取不會被靜默略過。</span></div></form>`;
+    $('cw-body').innerHTML=`<p class="cw-environment">${data.mode==='synthetic'?'SYNTHETIC · fake transport，不連接硬體':'LIVE · PRE 可能安裝依賴與上傳 script'}</p><form id="cw-form"><input type="hidden" id="cw-profile"><div class="cw-form-grid"><label>專案 / Rack<select id="cw-project">${inventory.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('')}</select></label><label>模式<select id="cw-mode"><option value="reboot">OS / BMC Reboot</option><option value="power_cycle">DC Power Cycle</option><option value="aux_cycle">AUX Cycle（需已確認範圍）</option></select></label><label>通道<select id="cw-channel"><option value="inband">Inband</option><option value="outband">Outband</option></select></label><label>限制方式<select id="cw-limit-kind"><option value="" selected>請選擇…</option><option value="loops">loop 幾 run</option><option value="hours">hr 幾小時</option></select></label><label>數值<input id="cw-limit-value" type="number" min="0" step="any"></label></div><p id="cw-project-error" class="cw-project-error" role="alert" hidden></p><p>Inband 仍需 BMC 採集與身分驗證。Power / AUX 的共享範圍必須完整選取；未確認的 live selector 不可執行。</p><div class="cw-actions"><label>Rack<select id="cw-rack" aria-label="Rack scope"></select></label><label class="cw-search">搜尋 chassis / node / endpoint<input id="cw-search" type="search"></label><button class="btn" type="button" id="cw-visible">全選搜尋結果</button><button class="btn" type="button" id="cw-all">全選 Rack</button><button class="btn" type="button" id="cw-none">取消選取</button></div><p id="cw-count" role="status"></p><div id="cw-matrix" class="cw-matrix"></div><div class="cw-actions"><button class="btn primary" id="cw-create">建立持久任務並執行 PRE</button><span>有 blocker 的選取不會被靜默略過。</span></div></form>`;
     if(preselect.project&&inventory.some(p=>p.name===preselect.project))$('cw-project').value=preselect.project;
     const targets=()=>inventory.find(p=>p.name===$('cw-project').value)?.targets||[];
     const isRack=t=>(t.level||machines.find(m=>m.name===(t.parent_name||t.name))?.level)==='rack';
     function profileInfo(){
       const p=inventory.find(p=>p.name===$('cw-project').value);
-      $('cw-profile').value=p?.profile||'';
-      $('cw-profile-content').textContent=p?.profile_detail?JSON.stringify(p.profile_detail,null,2):'尚未設定 Cycle Profile；一般 PA 管理功能仍可使用。';
+      // Profile 欄位已從 UI 移除；仍以 hidden input 帶後端解析出的 profile_id，
+      // 讓 create_job 的 profile 一致性檢查照常運作。
+      const pv=$('cw-profile'); if(pv) pv.value=p?.profile||'neutrino';
+      // Surface a per-project error (e.g. missing <project>_config.sh -> explicit 404 msg)
+      // so a project with no checker is visible rather than silently empty.
+      const errEl=$('cw-project-error');
+      if(errEl){errEl.textContent=p?.error||'';errEl.hidden=!p?.error;}
     }
     function racks(){
       profileInfo();
@@ -70,7 +75,13 @@
     preselect={};racks();draw();$('cw-rack').onchange=()=>{$('cw-all').disabled=!$('cw-rack').value;};$('cw-search').oninput=draw;$('cw-project').onchange=()=>{selected.clear();key=null;const p=inventory.find(p=>p.name===$('cw-project').value);if(p?.project_id)window.history.replaceState(null,'','#/cycle/new/'+encodeURIComponent(p.project_id));racks();draw();};
     $('cw-visible').onclick=()=>{visible().forEach(t=>selected.add(t.name));key=null;draw();};$('cw-all').onclick=()=>{rackTargets().forEach(t=>selected.add(t.name));key=null;draw();};$('cw-none').onclick=()=>{selected.clear();key=null;draw();};
     $('cw-form').oninput=()=>{key=null;};
-    $('cw-form').onsubmit=async e=>{e.preventDefault();error();$('cw-create').disabled=true;try{key||=crypto.randomUUID();const j=await api('/api/cycle/runs',{project:$('cw-project').value,machine_ids:[...selected],cycle_profile:$('cw-profile').value,cycle_mode:$('cw-mode').value,channel:$('cw-channel').value,limits:{loops:Number($('cw-loops').value),hours:Number($('cw-hours').value)},parallelism:Number($('cw-parallel').value),idempotency_key:key});if(g===generation)link('runs/'+j.id);}catch(e){if(g===generation){error(e);count();}}};
+    $('cw-form').onsubmit=async e=>{e.preventDefault();error();
+      const kind=$('cw-limit-kind').value, raw=$('cw-limit-value').value;
+      if(!kind){error(new Error('請選擇限制方式（loop 幾 run 或 hr 幾小時）'));return;}
+      const num=Number(raw);
+      if(!raw || !isFinite(num) || num<=0 || (kind==='loops'&&!Number.isInteger(num))){error(new Error('請輸入有效的'+(kind==='loops'?'run 數（正整數）':'小時數（正數）')));return;}
+      const limits=kind==='loops'?{loops:num,hours:0}:{loops:0,hours:num};
+      $('cw-create').disabled=true;try{key||=crypto.randomUUID();const j=await api('/api/cycle/runs',{project:$('cw-project').value,machine_ids:[...selected],cycle_profile:$('cw-profile').value,cycle_mode:$('cw-mode').value,channel:$('cw-channel').value,limits,idempotency_key:key});if(g===generation)link('runs/'+j.id);}catch(e){if(g===generation){error(e);count();}}};
   }
   async function run(id){
     const g=generation;current=await api('/api/cycle/runs/'+encodeURIComponent(id));if(g!==generation)return;
