@@ -1,5 +1,18 @@
 # PROJECT_STATUS — PA Cycle Lab native Next integration
 
+## 2026-10-03 UI adaptation on the correct live branch
+
+Base: `1a51f2a4e4b00bc68890e3e6343abae69609100a`, branch `cycle/live-neutrino-redfish-hostname`. User authorized scoped UI adaptation and push. The earlier UI commits on `codex/next-rack-cycle` are **not merged** into this branch.
+
+- Adapted Cycle creation layout to this branch's five existing controls. Preserved hidden Profile, empty initial limits, loop/hour exclusive selection, backend-default parallelism, hostname labels/probe notice, project-name route fallback and insecure-context idempotency-key fallback.
+- Kept history deletion/confirmation, readable run IDs, PRE finding cards/confirmation, all action request payloads and Console Summary/Full. `cycle-console.js`, `integration/`, `engine/` and `app/main.py` remain byte-identical to the base.
+- Progress keeps current loop/valid/health prominent; attempts, POST, boot, first/unique issues and coverage remain in keyed node disclosures with existing verdict colours. Evidence groups/filters retain every original secured link.
+- Wistron blue/green desktop layout, explicit selection summary, no sticky submit overlay; scoped reduced-motion applies to pseudo-elements too. Only Cycle assets and their two cache versions change at runtime.
+- Acceptance: `tests/cycle-ui-compat-browser.cjs` compares baseline/current UI requests for loop/hour create, confirm, stop and confirmed/cancelled deletion. It also checks input rejection, selection persistence, unchanged Console code and Summary/Full controls, keyed focus/counters, artifact link count/filter, 1366/1920 light/dark and reduced motion. All mutating requests are intercepted; **no hardware or worker dispatch**.
+- Screenshots: `docs/screenshots/live-branch-ui/`. Detailed limitations and command: `docs/ACCEPTANCE.md`.
+
+Local: UI adaptation; committed/pushed: see final commit and remote verification. Deployed: no. No production service restart or inventory changes; Windows isolated browser preview only. N2/N3 GPIO remains a hardware issue, with evidence unchanged.
+
 更新：2026-10-01。正式修改目的地是 **wistroneq3300/pa-cycle-lab**。
 來源 Next 與 Vera repo 唯讀；本次沒有 production inventory/telemetry 修改、現場電源操作或部署。
 

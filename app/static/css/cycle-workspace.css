@@ -186,3 +186,109 @@
 [data-theme=dark] #cycle-workspace .cw-cell.cw-warn{color:#f0c072}
 [data-theme=dark] #cycle-workspace .cw-cell.cw-fail{color:#ff8a84}
 [data-theme=dark] #cycle-workspace .cw-cell.cw-done{color:#7fb6ea}
+
+/* UI adaptation on the live branch: no Console selectors or behavior replaced. */
+#cycle-workspace{--cw-green:#356519;--cw-tint:#e6eef0}
+[data-theme=dark] #cycle-workspace{--cw-green:#b6dfa0;--cw-tint:#1d2c35}
+#cycle-workspace .cw-section-intro,#cycle-workspace .cw-section-note{font-size:13px;color:var(--cw-muted)}
+#cycle-workspace .cw-scope-summary{display:flex;align-items:center;gap:16px;background:var(--cw-tint);margin:16px 0}
+#cycle-workspace .cw-scope-summary-label{font-size:11px;color:var(--cw-muted)}
+#cycle-workspace .cw-scope-summary-value{margin:4px 0;font-weight:600}
+#cycle-workspace .cw-submit-actions{position:static;justify-content:space-between;border-top:1px solid var(--border);padding:22px 0}
+#cycle-workspace .cw-scope-actions{align-items:flex-end}
+#cycle-workspace .cw-progress-table{table-layout:fixed}
+#cycle-workspace .cw-progress-table th:nth-child(1){width:15%}
+#cycle-workspace .cw-progress-table th:nth-child(2){width:35%}
+#cycle-workspace .cw-progress-table th:nth-child(3),#cycle-workspace .cw-progress-table th:nth-child(4){width:12%}
+#cycle-workspace .cw-progress-table td{overflow-wrap:anywhere}
+#cycle-workspace .cw-progress-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px;border-top:1px solid var(--border);padding-top:14px}
+#cycle-workspace .cw-progress-detail-grid dt{font-size:11px;color:var(--cw-muted)}
+#cycle-workspace .cw-progress-detail-grid dd{font-size:12px;margin:6px 0}
+#cycle-workspace .cw-progress-detail-grid>div:last-child{grid-column:1/-1}
+#cycle-workspace .cw-progress-glossary{font-size:12px;color:var(--cw-muted)}
+#cycle-workspace .cw-artifacts{margin-top:24px;border-block:1px solid var(--border);padding:16px 0}
+#cycle-workspace #cw-files{padding:0;list-style:none}
+#cycle-workspace .cw-artifact-group{border-bottom:1px solid var(--border);list-style:none;padding:10px 0}
+#cycle-workspace .cw-artifact-group-list{padding:12px 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;list-style:none}
+#cycle-workspace .cw-artifact-item a{display:block;padding:10px;overflow-wrap:anywhere}
+#cycle-workspace .cw-artifact-title{display:block;font-size:13px}
+#cycle-workspace .cw-artifact-path{display:block;font-size:11px;color:var(--cw-muted);margin-top:5px}
+#cycle-workspace .cw-artifact-report{background:var(--cw-tint);border-radius:5px}
+/* Project validation: Wistron blue/green, editorial spacing, explicit review. */
+#cycle-workspace .cw-eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;color:var(--cw-link)}
+#cycle-workspace .cw-create-intro,#cycle-workspace .cw-history-heading{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:30px 0 22px}
+#cycle-workspace .cw-create-intro h2,#cycle-workspace .cw-history-heading h2{font-size:26px;line-height:1.4;letter-spacing:-.025em;margin:8px 0}
+#cycle-workspace .cw-create-intro p,#cycle-workspace .cw-history-heading p{color:var(--cw-muted);margin:6px 0;font-size:13px}
+#cycle-workspace .cw-create-intro .cw-environment{padding:8px 12px;border:1px solid var(--border);border-radius:4px;font-size:11px;white-space:nowrap;color:var(--cw-warn)}
+#cycle-workspace .cw-workflow{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);margin:0 0 28px;padding:0;border-block:1px solid var(--border)}
+#cycle-workspace .cw-workflow li{display:flex;align-items:center;gap:14px;padding:16px 20px;border-right:1px solid var(--border);color:var(--cw-muted)}
+#cycle-workspace .cw-workflow li:last-child{border-right:0}
+#cycle-workspace .cw-workflow li[aria-current]{background:var(--cw-tint);box-shadow:inset 0 -2px var(--cw-link);color:var(--text)}
+#cycle-workspace .cw-workflow li>span{font-size:22px;font-weight:300;font-variant-numeric:tabular-nums;color:var(--cw-link)}
+#cycle-workspace .cw-workflow strong,#cycle-workspace .cw-workflow small{display:block}
+#cycle-workspace .cw-workflow strong{font-size:13px;font-weight:600}
+#cycle-workspace .cw-workflow small{font-size:11px;color:var(--cw-muted)}
+#cycle-workspace .cw-setup-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:40px;align-items:start;margin-bottom:32px}
+#cycle-workspace .cw-config-section{border:0;padding:0}
+#cycle-workspace .cw-section-heading{display:flex;align-items:baseline;gap:16px}
+#cycle-workspace .cw-section-number{color:var(--cw-link);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+#cycle-workspace .cw-section-heading h2{margin:0;font-size:20px}
+#cycle-workspace .cw-section-heading p{margin:6px 0 0}
+#cycle-workspace .cw-config-section .cw-form-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 24px;margin:22px 0}
+#cycle-workspace .cw-config-section .cw-limit-grid{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px}
+#cycle-workspace .cw-form-grid label{font-size:12px;font-weight:600;min-width:0}
+#cycle-workspace .cw-form-grid input,#cycle-workspace .cw-form-grid select{width:100%;box-sizing:border-box;font-size:14px;font-weight:400}
+#cycle-workspace .cw-form-grid small{font-size:11px;color:var(--cw-muted);font-weight:400}
+#cycle-workspace .cw-limits-heading{font-size:13px;font-weight:600;padding-top:18px;border-top:1px solid var(--border)}
+#cycle-workspace .cw-limits-heading span{font-size:11px;font-weight:400;color:var(--cw-muted);margin-left:12px}
+#cycle-workspace #cw-profile-detail{font-size:12px;color:var(--cw-muted)}
+#cycle-workspace .cw-review{padding:24px;background:var(--bg-panel);border:1px solid var(--border);border-top:3px solid var(--cw-green);border-radius:0 0 8px 8px}
+#cycle-workspace .cw-review h3{font-size:20px;margin:8px 0 18px}
+#cycle-workspace .cw-review dl{margin:0}
+#cycle-workspace .cw-review dl>div{padding:12px 0;border-bottom:1px solid var(--border)}
+#cycle-workspace .cw-review dt{font-size:11px;color:var(--cw-muted)}
+#cycle-workspace .cw-review dd{font-size:14px;margin:5px 0 0;font-weight:600;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+#cycle-workspace .cw-review-guidance{font-size:12px;color:var(--cw-link);padding-block:10px}
+#cycle-workspace .cw-review-safety{padding-top:16px;border-top:1px solid var(--border);font-size:12px}
+#cycle-workspace .cw-review-safety strong{font-weight:600}
+#cycle-workspace .cw-review-safety p{font-size:11px;color:var(--cw-muted);line-height:1.8}
+#cycle-workspace .cw-scope-section{padding-top:28px;border-top:1px solid var(--border)}
+#cycle-workspace .cw-scope-actions{gap:10px;margin-top:22px}
+#cycle-workspace .cw-scope-actions label{font-size:11px}
+#cycle-workspace .cw-scope-actions .btn{font-size:12px;min-height:40px}
+#cycle-workspace .cw-scope-summary{justify-content:space-between;border-left:3px solid var(--cw-green);border-radius:0;padding:12px 16px;margin-bottom:0}
+#cycle-workspace #cw-visible-count{font-size:12px;color:var(--cw-muted);font-variant-numeric:tabular-nums}
+#cycle-workspace .cw-matrix{max-height:480px;padding-right:6px}
+#cycle-workspace .cw-chassis{grid-template-columns:145px minmax(0,1fr);padding:20px 0;gap:20px}
+#cycle-workspace .cw-chassis-heading{padding:6px 0}
+#cycle-workspace .cw-chassis-heading>span{font-size:10px;letter-spacing:.12em;color:var(--cw-muted)}
+#cycle-workspace .cw-chassis-heading h3{font-size:14px;margin:6px 0;overflow-wrap:anywhere}
+#cycle-workspace .cw-chassis-heading small{font-size:11px;color:var(--cw-muted)}
+#cycle-workspace .cw-node{display:grid;grid-template-columns:20px minmax(0,1fr);gap:7px 10px;padding:14px;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s}
+#cycle-workspace .cw-node input{margin:2px 0 0}
+#cycle-workspace .cw-node strong{font-size:13px;line-height:1.5}
+#cycle-workspace .cw-node span,#cycle-workspace .cw-node small{grid-column:2;font-size:11px;line-height:1.6}
+#cycle-workspace .cw-node:hover{border-color:var(--cw-link)}
+#cycle-workspace .cw-node:has(input:checked){background:var(--cw-tint);box-shadow:inset 3px 0 var(--cw-link)}
+#cycle-workspace .cw-submit-actions strong{font-size:14px;font-weight:600}
+#cycle-workspace .cw-submit-actions p{font-size:12px;color:var(--cw-muted);margin:5px 0}
+#cycle-workspace #cw-create{padding:13px 22px!important;min-height:46px;font-size:13px}
+#cycle-workspace .cw-history-table{border-top:1px solid var(--border);max-height:65vh}
+#cycle-workspace .cw-history-table td{padding-block:18px;vertical-align:middle}
+#cycle-workspace .cw-history-table small,#cycle-workspace .cw-history-table code{display:block;font-size:11px;color:var(--cw-muted);margin-top:5px}
+#cycle-workspace .cw-history-project{font-size:15px;font-weight:600;text-decoration:none}
+#cycle-workspace .cw-history-project:hover{text-decoration:underline}
+#cycle-workspace .cw-history-project span{margin-left:10px;font-weight:400}
+#cycle-workspace .cw-history-state{font-weight:600;font-size:13px}
+#cycle-workspace .cw-history-state[data-state=RUNNING]::before{content:'';display:inline-block;width:6px;height:6px;background:var(--cw-link);border-radius:50%;margin-right:8px;animation:cw-breathe 2.8s ease-in-out infinite}
+#cycle-workspace .cw-history-mode,#cycle-workspace .cw-page-marker{font-size:11px;color:var(--cw-muted);white-space:nowrap}
+#cycle-workspace .cw-history-pagination>span{margin-right:auto;color:var(--cw-muted);font-size:12px}
+#cycle-workspace .cw-empty{padding:40px;text-align:center}
+#cycle-workspace .cw-evidence-filters{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin:18px 0;padding:16px;background:var(--cw-tint)}
+#cycle-workspace .cw-evidence-filters label{font-size:12px;min-width:160px}
+#cycle-workspace #cw-evidence-count{flex-basis:100%;font-size:12px;margin:0;color:var(--cw-muted)}
+@media(max-width:1450px){#cycle-workspace .cw-setup-layout{grid-template-columns:minmax(0,1fr) 270px;gap:26px}#cycle-workspace .cw-review{padding:20px}#cycle-workspace .cw-create-intro h2{font-size:23px}#cycle-workspace .cw-nodes{grid-template-columns:repeat(2,minmax(0,1fr))}#cycle-workspace .cw-scope-actions .cw-search{min-width:220px}#cycle-workspace .cw-scope-actions>label:first-child{max-width:230px}#cycle-workspace .cw-matrix{max-height:420px}}
+
+@media(prefers-reduced-motion:reduce){#cycle-workspace *,#cycle-workspace *::before,#cycle-workspace *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+#cycle-workspace .cw-config-section label:has(#cw-project){grid-column:1/-1}
+#cycle-workspace .cw-scope-actions .cw-search{flex:1}

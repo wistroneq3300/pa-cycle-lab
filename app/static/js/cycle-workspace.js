@@ -50,7 +50,7 @@
   async function history(){
     const g=generation;const data=await api('/api/cycle/runs?offset='+offset);if(g!==generation)return;
     const done=new Set(['COMPLETE','INCOMPLETE','CANCELLED','BLOCKED','ERROR','RECONCILIATION_REQUIRED']);
-    $('cw-body').innerHTML=`<h2>持久化任務紀錄</h2><p>COMPLETE 表示流程達到限制，硬體健康另列。停止與中斷的任務仍保留證據。</p><div class="cw-scroll"><table><thead><tr><th>Run / 專案</th><th>執行狀態</th><th>累積健康</th><th>環境</th><th>建立時間</th><th></th></tr></thead><tbody>${data.runs.map(j=>`<tr><td><a href="#/cycle/runs/${j.id}">${esc(j.project)} · ${esc(runSuffix(j))}</a></td><td>${esc(stateLabel(j.state))}</td><td>${esc(stateLabel(j.health))}</td><td>${j.synthetic?'SYNTHETIC':'LIVE'}</td><td>${new Date(j.created_at*1000).toLocaleString()}</td><td><button class="btn cw-del" data-id="${esc(j.id)}" data-project="${esc(j.project)}" ${done.has(j.state)?'':'disabled title="執行中或等待確認的任務無法刪除"'}>刪除</button></td></tr>`).join('')||'<tr><td colspan="6">尚無任務。從 Rack 或此頁建立 Cycle。</td></tr>'}</tbody></table></div><div class="cw-actions"><button class="btn" id="cw-prev" ${offset?'':'disabled'}>上一頁</button><button class="btn" id="cw-next" ${data.has_more?'':'disabled'}>下一頁</button></div>`;
+    $('cw-body').innerHTML=`<h2>持久化任務紀錄</h2><p>COMPLETE 表示流程達到限制，硬體健康另列。停止與中斷的任務仍保留證據。</p><div class="cw-scroll cw-history-table"><table><thead><tr><th>Run / 專案</th><th>執行狀態</th><th>累積健康</th><th>環境</th><th>建立時間</th><th></th></tr></thead><tbody>${data.runs.map(j=>`<tr><td><a class="cw-history-project" href="#/cycle/runs/${esc(j.id)}">${esc(j.project)}</a><code>${esc(runSuffix(j))}</code></td><td><span class="cw-history-state">${esc(stateLabel(j.state))}</span></td><td>${esc(stateLabel(j.health))}</td><td>${j.synthetic?'SYNTHETIC':'LIVE'}</td><td>${new Date(j.created_at*1000).toLocaleString()}</td><td><button class="btn cw-del" data-id="${esc(j.id)}" data-project="${esc(j.project)}" ${done.has(j.state)?'':'disabled title="執行中或等待確認的任務無法刪除"'}>刪除</button></td></tr>`).join('')||'<tr><td colspan="6">尚無任務。從 Rack 或此頁建立 Cycle。</td></tr>'}</tbody></table></div><div class="cw-actions"><button class="btn" id="cw-prev" ${offset?'':'disabled'}>上一頁</button><button class="btn" id="cw-next" ${data.has_more?'':'disabled'}>下一頁</button></div>`;
     $('cw-prev').onclick=()=>{offset=Math.max(0,offset-25);history().catch(error);};$('cw-next').onclick=()=>{offset+=25;history().catch(error);};
     $('cw-body').querySelectorAll('.cw-del').forEach(b=>b.onclick=()=>deleteRun(b.dataset.id,b.dataset.project,b));
   }
@@ -74,7 +74,7 @@
       if(!project)throw Error('Project unavailable or access denied');
       preselect={project:project.name,chassis:route[1],node:route[2]};
     }
-    $('cw-body').innerHTML=`<p class="cw-environment">${data.mode==='synthetic'?'SYNTHETIC · fake transport，不連接硬體':'LIVE'}</p><form id="cw-form"><input type="hidden" id="cw-profile"><div class="cw-form-grid"><label>專案 / Rack<select id="cw-project">${inventory.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('')}</select></label><label>模式<select id="cw-mode"><option value="reboot">Reboot</option><option value="power_cycle">DC Power Cycle</option><option value="aux_cycle">AUX Cycle（需已確認範圍）</option></select></label><label>通道<select id="cw-channel"><option value="inband">Inband</option><option value="outband">Outband</option></select></label><label>執行方式<select id="cw-limit-kind"><option value="" selected>請選擇…</option><option value="loops">loop 幾 run</option><option value="hours">hr 幾小時</option></select></label><label>次數 / 時數<input id="cw-limit-value" type="number" min="0" step="any" placeholder="例如 10 = 執行 10 個 run，或 2 = 執行 2 小時後停止"></label></div><p id="cw-project-error" class="cw-project-error" role="alert" hidden></p><p>執行前系統會先連線檢查每台主機的 OS / BMC hostname。</p><div class="cw-actions"><label class="cw-search">搜尋 chassis / node / endpoint<input id="cw-search" type="search"></label><button class="btn" type="button" id="cw-visible">全選搜尋結果</button><button class="btn" type="button" id="cw-none">取消選取</button></div><p id="cw-count" role="status"></p><div id="cw-matrix" class="cw-matrix"></div><div class="cw-actions"><button class="btn primary" id="cw-create">建立持久任務並執行 PRE</button><span>有 blocker 的選取不會被靜默略過。</span></div></form>`;
+    $('cw-body').innerHTML=`<div class="cw-create-intro"><div><span class="cw-eyebrow">PROJECT VALIDATION</span><h2>讓每一輪驗證，從正確的目標開始。</h2><p>選擇節點、建立 PRE，再由你確認完整影響範圍。</p></div><p class="cw-environment" data-cw-region="environment">${data.mode==='synthetic'?'SYNTHETIC · 不連接硬體':'LIVE · 會連接硬體'}</p></div><ol class="cw-workflow" aria-label="Cycle 建立流程"><li aria-current="step"><span>01</span><div><strong>設定與選擇</strong><small>目前步驟</small></div></li><li><span>02</span><div><strong>執行 PRE</strong><small>保存檢查與影響範圍</small></div></li><li><span>03</span><div><strong>審閱後啟動</strong><small>確認同一份 PRE</small></div></li></ol><form id="cw-form"><div class="cw-setup-layout"><section class="cw-config-section" data-cw-section="settings" aria-labelledby="cw-settings-title"><div class="cw-section-heading"><span class="cw-section-number">01</span><div><h2 id="cw-settings-title">執行設定</h2><p class="cw-section-intro">確認專案、模式與通道，再設定本次執行的輪次或時數。</p></div></div><input type="hidden" id="cw-profile"><div class="cw-form-grid"><label>專案<select id="cw-project">${inventory.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('')}</select></label><label>驗證模式<select id="cw-mode"><option value="reboot">Reboot</option><option value="power_cycle">DC Power Cycle</option><option value="aux_cycle">AUX Cycle（需已確認範圍）</option></select></label><label>執行通道<select id="cw-channel"><option value="inband">Inband</option><option value="outband">Outband</option></select></label></div><div class="cw-limits-heading">執行限制 <span>輪次與時數擇一，請依本次驗證需求設定</span></div><div class="cw-form-grid"><label>執行方式<select id="cw-limit-kind"><option value="" selected>請選擇…</option><option value="loops">loop 幾 run</option><option value="hours">hr 幾小時</option></select></label><label>次數 / 時數<input id="cw-limit-value" type="number" min="0" step="any" placeholder="請輸入輪次或小時數"><small>輪次為正整數；時數可使用小數</small></label></div><p id="cw-project-error" class="cw-project-error" role="alert" hidden></p><p class="cw-section-note">執行前系統會先連線檢查每台主機的 OS / BMC hostname。</p></section><aside class="cw-review" aria-label="本次設定摘要"><span class="cw-eyebrow">RUN BRIEF</span><h3>本次驗證</h3><dl><div><dt>選取範圍</dt><dd id="cw-review-selection">尚未選擇節點</dd></div><div><dt>模式與通道</dt><dd id="cw-review-mode"></dd></div><div><dt>執行限制</dt><dd id="cw-review-limits"></dd></div></dl><p class="cw-review-guidance" id="cw-review-guidance">在下方勾選這次要驗證的節點。</p><div class="cw-review-safety"><strong>先檢查，再確認啟動</strong><p>PRE 會保存檢查結果。Live PRE 可能安裝依賴、上傳 script；不代表硬體已通過。</p><p>Inband 仍需 BMC 採集。Power / AUX 必須包含完整共享範圍，未確認 selector 不可執行。</p></div></aside></div><section class="cw-scope-section" data-cw-section="scope" aria-labelledby="cw-scope-title"><div class="cw-section-heading"><span class="cw-section-number">02</span><div><h2 id="cw-scope-title">選擇測試節點</h2><p class="cw-section-intro">勾選單一或多個 node；搜尋只改變畫面，不會清除已選目標。</p></div></div><div class="cw-actions cw-scope-actions"><label class="cw-search">搜尋 chassis / node / endpoint<input id="cw-search" type="search" placeholder="輸入名稱或 IP，快速找到節點"></label><button class="btn" type="button" id="cw-visible">全選搜尋結果</button><button class="btn" type="button" id="cw-none">取消選取</button></div><div class="cw-scope-summary" aria-live="polite"><div><span class="cw-scope-summary-label">本次選取</span><p id="cw-count" class="cw-scope-summary-value" role="status"></p></div><span id="cw-visible-count"></span></div><div id="cw-matrix" class="cw-matrix" tabindex="0" role="region" aria-label="可選節點，捲動查看其他 chassis"></div></section><div class="cw-actions cw-submit-actions"><div><strong>下一步：保存並執行 PRE</strong><p>檢查完成後仍需審閱與確認。有 blocker 的節點不會被靜默略過。</p></div><button class="btn primary" id="cw-create">建立持久任務並執行 PRE →</button></div></form>`;
     if(preselect.project&&inventory.some(p=>p.name===preselect.project))$('cw-project').value=preselect.project;
     const targets=()=>inventory.find(p=>p.name===$('cw-project').value)?.targets||[];
     function profileInfo(){
@@ -90,15 +90,23 @@
     const visible=()=>targets().filter(t=>[t.display_name,t.name,t.parent_name,t.os_ip,t.slot_key].join(' ').toLowerCase().includes($('cw-search').value.toLowerCase()));
     function draw(){
       const groups=new Map();for(const t of visible()){const chassis=t.parent_name||t.name;if(!groups.has(chassis))groups.set(chassis,[]);groups.get(chassis).push(t);}
-      $('cw-matrix').innerHTML=[...groups].map(([chassis,ts])=>`<section class="cw-chassis"><h3>${esc(chassis)}</h3><div class="cw-nodes">${ts.map(t=>`<label class="cw-node ${t.reasons.length?'has-blocker':''}"><input type="checkbox" value="${esc(t.name)}" ${selected.has(t.name)?'checked':''}><strong>${esc(t.os_hostname||t.node||t.name)}</strong><span>${esc(t.os_ip)}:${esc(t.os_port||22)}</span><small>${esc(t.reasons.join('；')||'可進入 PRE；硬體尚未驗證')}</small></label>`).join('')}</div></section>`).join('')||'<p>沒有符合搜尋條件的節點。選取仍保留。</p>';
+      $('cw-matrix').innerHTML=[...groups].map(([chassis,ts])=>`<section class="cw-chassis"><div class="cw-chassis-heading"><span>CHASSIS</span><h3>${esc(chassis)}</h3><small>${ts.length} 個搜尋結果</small></div><div class="cw-nodes">${ts.map(t=>`<label class="cw-node ${t.reasons.length?'has-blocker':''}"><input type="checkbox" value="${esc(t.name)}" ${selected.has(t.name)?'checked':''}><strong>${esc(t.os_hostname||t.node||t.name)}</strong><span>${esc(t.os_ip)}:${esc(t.os_port||22)}</span><small>${esc(t.reasons.join('；')||'可進入 PRE；硬體尚未驗證')}</small></label>`).join('')}</div></section>`).join('')||'<p>沒有符合搜尋條件的節點。選取仍保留。</p>';
       $('cw-matrix').querySelectorAll('input').forEach(e=>e.onchange=()=>{e.checked?selected.add(e.value):selected.delete(e.value);key=null;count();});count();
     }
-    function count(){const ts=targets().filter(t=>selected.has(t.name));$('cw-count').textContent=`已選 ${new Set(ts.map(t=>t.parent_name||t.name)).size} chassis / ${ts.length} nodes · ${ts.filter(t=>t.reasons.length).length} 個目標有缺失`;$('cw-create').disabled=!ts.length;}
+    function count(){const ts=targets().filter(t=>selected.has(t.name));$('cw-count').textContent=`已選 ${new Set(ts.map(t=>t.parent_name||t.name)).size} chassis / ${ts.length} nodes · ${ts.filter(t=>t.reasons.length).length} 個目標有缺失`;$('cw-create').disabled=!ts.length;
+      $('cw-review-selection').textContent=ts.length?`${new Set(ts.map(t=>t.parent_name||t.name)).size} chassis / ${ts.length} nodes`:'尚未選擇節點';
+      $('cw-review-mode').textContent=$('cw-mode').selectedOptions[0].textContent+' · '+$('cw-channel').value;
+      const kind=$('cw-limit-kind').value,value=$('cw-limit-value').value;
+      $('cw-review-limits').textContent=kind&&value?`${value} ${kind==='loops'?'輪':'小時'}`:'尚未設定';
+      const missing=ts.filter(t=>t.reasons.length).length;
+      $('cw-review-guidance').textContent=missing?`${missing} 個目標有缺失，請於 PRE 審閱原因。`:ts.length?'已選目標將進入 PRE；仍需審閱確認後才會啟動。':'在下方勾選這次要驗證的節點。';
+      $('cw-visible-count').textContent=`顯示 ${visible().length} / ${targets().length} nodes`;
+    }
     if(preselect.chassis)$('cw-search').value=preselect.chassis;
     for(const t of targets())if(preselect.node&&t.name===preselect.node&&(!preselect.chassis||t.parent_name===preselect.chassis))selected.add(t.name);
     preselect={};profileInfo();draw();$('cw-search').oninput=draw;$('cw-project').onchange=()=>{selected.clear();key=null;const p=inventory.find(p=>p.name===$('cw-project').value);if(p?.project_id)window.history.replaceState(null,'','#/cycle/new/'+encodeURIComponent(p.project_id));profileInfo();draw();};
     $('cw-visible').onclick=()=>{visible().forEach(t=>selected.add(t.name));key=null;draw();};$('cw-none').onclick=()=>{selected.clear();key=null;draw();};
-    $('cw-form').oninput=()=>{key=null;};
+    $('cw-form').oninput=()=>{key=null;count();};
     $('cw-form').onsubmit=async e=>{e.preventDefault();error();
       const kind=$('cw-limit-kind').value, raw=$('cw-limit-value').value;
       if(!kind){error(new Error('請選擇執行方式（loop 幾 run 或 hr 幾小時）'));return;}
@@ -109,10 +117,51 @@
   }
   async function run(id){
     const g=generation;current=await api('/api/cycle/runs/'+encodeURIComponent(id));if(g!==generation)return;
-    $('cw-body').innerHTML=`<p id="cw-environment" class="cw-environment"></p><div class="cw-run-head"><div><h2 id="cw-run-title"></h2><code id="cw-run-id"></code></div><div class="cw-actions"><button class="btn" id="cw-stop">停止：不再派送新動作</button><button class="btn" id="cw-console-toggle" aria-expanded="false">Live Console</button></div></div><p id="cw-freshness" role="status"></p><div id="cw-summary" class="cw-summary"></div><section id="cw-reconciliation" hidden><h2>結果未知／待核對／相關資源仍占用</h2><p>核對動作 journal、殘存程序與實際影響範圍後，才能釋放資源。不會重新送出電源命令。</p><button class="btn" id="cw-review-action">檢視待核對動作</button><div id="cw-review-body"></div></section><details id="cw-pre-shell"><summary>PRE / reviewed findings and scope</summary><section id="cw-pre"></section></details><div id="cw-console" class="cycle-console" hidden></div><h2>Chassis / Node 執行進度</h2><div id="cw-progress" class="cw-scroll"></div><details><summary>test report</summary><button class="btn" id="cw-evidence">test report</button><ul id="cw-files"></ul></details>`;
+    $('cw-body').innerHTML=`<p id="cw-environment" class="cw-environment"></p><div class="cw-run-head"><div><h2 id="cw-run-title"></h2><code id="cw-run-id"></code></div><div class="cw-actions"><button class="btn" id="cw-stop">停止：不再派送新動作</button><button class="btn" id="cw-console-toggle" aria-expanded="false">Live Console</button></div></div><p id="cw-freshness" role="status"></p><div id="cw-summary" class="cw-summary"></div><section id="cw-reconciliation" hidden><h2>結果未知／待核對／相關資源仍占用</h2><p>核對動作 journal、殘存程序與實際影響範圍後，才能釋放資源。不會重新送出電源命令。</p><button class="btn" id="cw-review-action">檢視待核對動作</button><div id="cw-review-body"></div></section><details id="cw-pre-shell"><summary>PRE / reviewed findings and scope</summary><section id="cw-pre"></section></details><div id="cw-console" class="cycle-console" hidden></div><h2>Chassis / Node 執行進度</h2><p class="cw-progress-glossary">目前輪次、有效輪數與硬體健康分開呈現。展開節點可查看嘗試、POST、Boot、問題數與覆蓋；COMPLETE 不等於 PASS。</p><div id="cw-progress" class="cw-scroll"></div><details class="cw-artifacts"><summary>證據與報告</summary><button class="btn" id="cw-evidence">載入證據清單</button><ul id="cw-files"></ul></details>`;
     consoleView=new CycleConsole($('cw-console'),$('cw-console-toggle'));const url=`/api/projects/${encodeURIComponent(current.project)}/cycle/jobs/${id}`;
     $('cw-stop').onclick=async()=>{try{current=await api(url+'/stop',{});if(g===generation)paint(url);}catch(e){if(g===generation)error(e);}};
-    $('cw-evidence').onclick=async()=>{try{const result=await api(url+'/artifacts');if(g!==generation)return;$('cw-files').replaceChildren();for(const path of result.files){const li=document.createElement('li'),a=document.createElement('a');a.textContent=path;a.href=url+'/files/'+path.split('/').map(encodeURIComponent).join('/');a.target='_blank';a.rel='noopener';li.append(a);$('cw-files').append(li);}}catch(e){if(g===generation)error(e);}};
+    $('cw-evidence').onclick=async()=>{try{const result=await api(url+'/artifacts');if(g!==generation)return;
+      const reportPattern=/(^|\/)(CYCLE_REVIEW_REPORT|cycle_summary|job_final|known_issues|new_issues|worsened_issues|report|summary)(?:[._-]|\/|$)/i;
+      const manifest=new Map((Array.isArray(result.manifest)?result.manifest:[]).map(item=>[String(item.path||''),item]));
+      const friendlyName=file=>({
+        'CYCLE_REVIEW_REPORT.html':'Cycle Review 報告 · HTML','CYCLE_REVIEW_REPORT.md':'Cycle Review 報告 · Markdown',
+        'cycle_summary.json':'Cycle 摘要 · JSON','cycle_summary.txt':'Cycle 摘要 · 文字','job_final.json':'最終執行結果 · JSON',
+        'known_issues.md':'已知問題 · Markdown','new_issues.md':'新增問題 · Markdown','worsened_issues.md':'惡化問題 · Markdown',
+        'report.json':'輪次結果 · JSON','node_summary.txt':'節點摘要 · 文字'
+      }[file]||file);
+      const artifactStage=parts=>{const part=parts[1]||'';if(/^loop\d+$/i.test(part))return part.toUpperCase();if(/^start$/i.test(part))return 'START';if(/^pre(?:[_\-.]|$)/i.test(part))return 'PRE';if(/^node_summary/i.test(part))return 'SUMMARY';return parts.length>2?'EVIDENCE':'';};
+      const groups=new Map(),files=Array.isArray(result.files)?result.files:[];
+      files.forEach((rawPath,index)=>{
+        const path=String(rawPath??''),parts=path.split('/').filter(Boolean),file=parts.at(-1)||path,entry=manifest.get(path),isReport=parts.length===1&&(entry?.kind==='html-report'||reportPattern.test(file)),isTarget=parts.length>1&&/^(tray|chassis|rack|node|machine)(?:[-_]|\d)/i.test(parts[0]),stage=isTarget?artifactStage(parts):'';
+        const key=isReport?'reports':parts.length<2?'run':isTarget?`target:${parts[0]}:${stage||'root'}`:`evidence:${parts[0]}`;
+        const title=isReport?'報告與摘要':parts.length<2?'執行紀錄':isTarget?`目標 / ${parts[0]}${stage?' · '+stage:''}`:`證據 / ${parts[0]}`;
+        if(!groups.has(key))groups.set(key,{key,title,order:isReport?0:parts.length<2?1:2,first:index,files:[]});
+        groups.get(key).files.push({path,file,isReport});
+      });
+      const list=$('cw-files');list.replaceChildren();
+      [...groups.values()].sort((a,b)=>a.order-b.order||a.first-b.first).forEach(group=>{
+        const groupItem=document.createElement('li'),disclosure=document.createElement('details'),summary=document.createElement('summary'),groupList=document.createElement('ul');
+        groupItem.className='cw-artifact-group';disclosure.className='cw-artifact-group-details';disclosure.open=group.order===0;summary.className='cw-artifact-group-summary';summary.textContent=`${group.title} · ${group.files.length}`;groupList.className='cw-artifact-group-list';
+        group.files.forEach(({path,file,isReport})=>{const item=document.createElement('li'),a=document.createElement('a'),name=document.createElement('span'),pathLabel=document.createElement('small');item.className='cw-artifact-item';a.className=isReport?'cw-artifact-report':'cw-artifact-link';name.className='cw-artifact-title';pathLabel.className='cw-artifact-path';name.textContent=friendlyName(file);pathLabel.textContent=path;a.title=path;a.href=url+'/files/'+path.split('/').map(encodeURIComponent).join('/');a.target='_blank';a.rel='noopener';a.append(name,pathLabel);item.append(a);groupList.append(item);});
+        disclosure.append(summary,groupList);groupItem.append(disclosure);list.append(groupItem);
+      });
+      // Filters use manifest paths, never construct a new download target.
+      $('cw-evidence-filters')?.remove();
+      const filters=document.createElement('div');filters.id='cw-evidence-filters';filters.className='cw-evidence-filters';
+      filters.innerHTML='<label>目標<select id="cw-evidence-node"><option value="">全部目標與 Run 報告</option></select></label><label>階段 / 輪次<select id="cw-evidence-phase"><option value="">全部階段</option></select></label><label class="cw-search">搜尋檔名或路徑<input id="cw-evidence-search" type="search" placeholder="例如 dmesg、sensor、report"></label><p id="cw-evidence-count" role="status" aria-live="polite"></p>';
+      list.before(filters);
+      const items=[...list.querySelectorAll('.cw-artifact-item')].map(item=>{const path=item.querySelector('a').title,parts=path.split('/');return {item,path,node:parts.length>1?parts[0]:'Run 報告',phase:artifactStage(parts)||'執行摘要'};});
+      const nodeSelect=$('cw-evidence-node'),phaseSelect=$('cw-evidence-phase');
+      [...new Set(items.map(i=>i.node))].sort().forEach(v=>nodeSelect.add(new Option(v,v)));
+      const filterFiles=()=>{
+        const node=nodeSelect.value,phase=phaseSelect.value,q=$('cw-evidence-search').value.toLowerCase();let count=0;
+        items.forEach(i=>{i.item.hidden=!!((node&&node!==i.node)||(phase&&phase!==i.phase)||(q&&!i.path.toLowerCase().includes(q)));if(!i.item.hidden)count++;});
+        list.querySelectorAll('.cw-artifact-group').forEach(group=>{group.hidden=![...group.querySelectorAll('.cw-artifact-item')].some(i=>!i.hidden);if(node||phase||q)group.querySelector('details').open=!group.hidden;});
+        $('cw-evidence-count').textContent=`${count} / ${items.length} 份證據${count?'':' · 沒有符合的檔案，請調整篩選'}`;
+      };
+      const phases=()=>{const old=phaseSelect.value;phaseSelect.replaceChildren(new Option('全部階段',''),...[...new Set(items.filter(i=>!nodeSelect.value||i.node===nodeSelect.value).map(i=>i.phase))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).map(v=>new Option(v,v)));if([...phaseSelect.options].some(o=>o.value===old))phaseSelect.value=old;};
+      nodeSelect.onchange=()=>{phases();filterFiles();};phaseSelect.onchange=filterFiles;$('cw-evidence-search').oninput=filterFiles;phases();filterFiles();
+    }catch(e){if(g===generation)error(e);}};
     $('cw-review-action').onclick=async()=>{
       try{
         const review=await api(url+'/reconciliation');if(g!==generation)return;
@@ -157,8 +206,8 @@
     const signature=j.targets.map(t=>t.name).join('|');
     if(progressSignature!==signature){
       progressSignature=signature;progressRows.clear();
-      const table=document.createElement('table');
-      table.innerHTML='<thead><tr><th>Chassis</th><th>Node / phase</th><th>Loop</th><th>Attempts</th><th>POST</th><th>Boot</th><th>Valid</th><th>Current / cumulative health</th><th>First / unique issues</th><th>Coverage</th></tr></thead><tbody></tbody>';
+      const table=document.createElement('table');table.className='cw-progress-table';
+      table.innerHTML='<thead><tr><th>Chassis</th><th>Node / phase</th><th>目前輪次</th><th>有效輪數</th><th>本輪 / 累積健康</th></tr></thead><tbody></tbody>';
       const body=table.lastElementChild;
       const groups=new Map();for(const t of j.targets){const key=t.parent_name||t.name;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(t);}
       for(const group of groups.values())for(const [index,t] of group.entries()){
@@ -170,7 +219,9 @@
         const label=document.createElement('span');label.className='cw-rowlabel';
         summary.append(stage,label);
         detail.append(summary,endpoint,identity,reason);cell.append(detail);
-        const cells=Array.from({length:8},()=>{const td=document.createElement('td');row.append(td);return td;});
+        const detailGrid=document.createElement('dl');detailGrid.className='cw-progress-detail-grid';detail.append(detailGrid);
+        const detailLabels={1:'Attempts · 嘗試次數',2:'POST · 完成採集',3:'Boot · 開機確認',6:'First / unique · 本輪首次 / 累積問題',7:'Coverage · 執行覆蓋'};
+        const cells=Array.from({length:8},(_,i)=>{if([0,4,5].includes(i)){const td=document.createElement('td');row.append(td);return td;}const group=document.createElement('div'),label=document.createElement('dt'),value=document.createElement('dd');label.textContent=detailLabels[i];group.append(label,value);detailGrid.append(group);return value;});
         body.append(row);progressRows.set(t.name,{summary,label,reason,cells,stage});
       }
       $('cw-progress').replaceChildren(table);
