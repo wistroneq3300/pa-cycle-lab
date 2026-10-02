@@ -281,8 +281,14 @@ class Store:
         # Lock enforcement removed: inventory changes are no longer blocked by reservations.
         return
 
-    def compact_events(self, before):
-        """Explicit maintenance only; preserve final event cursor and all evidence."""
+    def compact_events(self, before, vacuum=False):
+        """Explicit maintenance only; preserve final event cursor and all evidence.
+
+        Deleting rows leaves free pages inside the SQLite file, so the file does
+        not shrink until ``VACUUM`` rewrites it. ``vacuum`` runs that rewrite on
+        a separate connection (SQLite forbids VACUUM inside a transaction) after
+        the compaction commits.
+        """
         count=0
         with self.tx() as db:
             for row in db.execute('SELECT id,data FROM jobs WHERE updated<?',(before,)).fetchall():
@@ -294,6 +300,12 @@ class Store:
                 db.execute('DELETE FROM events WHERE job_id=? AND seq<?',(job['id'],last))
                 db.execute('UPDATE events SET data=? WHERE seq=?',(encode(dict(job_id=job['id'],phase='COMPACTED',state=job['state'],removed=len(events)-1)),last))
                 count+=len(events)-1
+        if vacuum:
+            db=sqlite3.connect(self.path, timeout=60)
+            try:
+                db.execute('VACUUM')
+            finally:
+                db.close()
         return count
 
     @contextmanager
