@@ -3895,7 +3895,7 @@ function renderProjectList() {
     const systems = machines.filter(m => m.project === p.name && !isRackItem(m)).length;
     return `<tr><td><b>${esc(p.name)}</b></td><td>${esc(p.desc || "")}</td><td>${p.machine_count}（R${racks}/S${systems}）</td>
       <td style="white-space:nowrap">
-        <button class="btn small" data-cycle-project="${encodeURIComponent(p.name)}">Cycle Test</button>
+        <button class="btn small" data-cycle-project="${encodeURIComponent(p.name)}">Cycle 驗證</button>
         <button class="btn small" onclick="editProjectStart('${esc(p.name)}')">編輯</button>
         <button class="btn small${canDelete ? "" : " disabled"}" title="${canDelete ? "刪除" : "此專案還有機台，無法刪除"}" ${canDelete ? `onclick="deleteProject('${esc(p.name)}')"` : "disabled"}>刪除</button>
       </td></tr>`;

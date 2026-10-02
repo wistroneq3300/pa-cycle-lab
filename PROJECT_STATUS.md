@@ -1,5 +1,21 @@
 # PROJECT_STATUS — PA Cycle Lab native Next integration
 
+## 2026-10-03 Cycle 桌面精緻化（目前交付）
+
+基準 `611941216a5d186fb989113320c89b93a2787de9`，分支 `codex/next-rack-cycle`。
+使用者已明確授權本輪修改、commit、push；下方較早的「尚未授權／未提交」為歷史紀錄。
+
+- 修改限定 Cycle workspace、Console 與 scoped CSS；保留舊 PA Next 外殼、Rack 3D、API、Worker、PRE／Stop／reservation 邏輯。
+- 進度主表保留五欄：Chassis、Node／階段、目前輪次／上限、有效輪數、健康（本輪／累積）。其餘計數保留在 keyed node 明細，不刪數據。
+- 執行摘要分清 lifecycle、health、coverage、environment、Worker；未知結果仍明示待核對與資源保留。
+- Console 工具分組、欄位導引、篩選選取態、無結果回饋、清除篩選與輔助閱讀欄位標籤。保留3,000筆buffer／2,000行DOM、cursor、GET-only與所有原有功能。
+- Wistron藍綠與深淺材質；執行中小型呼吸指示、待核對有限次提示。reduced-motion停用動畫，不用動態暗示hardware PASS。
+- 根報告優先，原始證據按Node／階段分組；所有原下載連結保留。
+- 本輪離線 Python：Console 16 PASS、Native 26 PASS。六個瀏覽器流程通過，含原Console 25 checks、四node八次valid-cycle synthetic流程及1366／1920深淺主題。
+- 截圖：`docs/screenshots/cycle-refinement/`；重現：`tests/cycle-refinement-browser.cjs`。具體命令見 `docs/ACCEPTANCE.md`。
+
+Local：完成；本輪以同分支一般commit/push交付（最終SHA見Git歷史與交付訊息）。Deployed：否。未操作真實硬體；N2/N3 GPIO仍為已知現場硬體問題，不隱藏或改判定。
+
 更新：2026-10-01。正式修改目的地是 **wistroneq3300/pa-cycle-lab**。
 來源 Next 與 Vera repo 唯讀；本次沒有 production inventory/telemetry 修改、現場電源操作或部署。
 

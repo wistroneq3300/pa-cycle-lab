@@ -1,5 +1,39 @@
 # Native Next × Vera acceptance — 2026-10-01
 
+## Cycle presentation refinement — 2026-10-03
+
+Base `611941216a5d186fb989113320c89b93a2787de9`. UI-only changes in the
+Cycle workspace, Console and scoped CSS. User authorized commit/push; no deployment.
+
+Actual checks, using temporary storage/fake transport or the existing isolated
+synthetic service at `http://127.0.0.1:9188`:
+
+- `.venv/Scripts/python.exe -m unittest discover -s tests -p test_console.py -q`: **16 PASS**.
+- `.venv/Scripts/python.exe -m unittest discover -s tests -p test_native.py -q`: **26 PASS** (existing Pydantic alias warning).
+- `node tests/platform-selection-browser.cjs`: PASS; single entry, explicit node selection and search retention.
+- `node tests/platform-run-browser.cjs`: PASS; keyed progress/focus, PRE collapse, stopped terminal polling and denied reconciliation.
+- `node tests/native-browser.cjs`: PASS; 128-target selection, one chassis/four nodes, PRE and eight synthetic valid cycles, navigation, Console actions and themes.
+- `node tests/native-ui-states.cjs`: PASS; long labels, blocked/empty/error/retry, desktop overflow and focus.
+- `node tests/native-console-smoke.cjs`: **25 browser checks PASS**; persistent history, incremental reconnect, pause/filter/copy/download, safe text, bounded buffer and scroll anchor.
+- `node tests/cycle-refinement-browser.cjs`: PASS; 1366×768 and 1920×1080 light/dark, no-match recovery, artifact completeness, active-state animation and reduced motion. Running screenshot uses a labelled response fixture and dispatches no command.
+- Scoped Impeccable detector on the two modified JS sources: `[]`. Syntax and `git diff --check`: PASS.
+
+Browser commands use `PA_CYCLE_BASE_URL=http://127.0.0.1:9188` and the local
+`PLAYWRIGHT_MODULE`. The Console test delivered 12,000 rows including history;
+11,500 were unique live-fixture events. Client caps remain 3,000/2,000. Measured
+severity/placeholder contrast against the Console surface: light minimum 5.54:1,
+dark minimum 8.22:1. These are not whole-product accessibility certification.
+
+Initial refinement capture failed because its test clicked a collapsed evidence
+section; the test now opens the real disclosure. The Console scroll fixture's
+fixed 30,000px position selected an event evicted after the typography change;
+it now anchors sequence 9500 and keeps the same <2px position assertion. Final
+runs above pass; retries are not added to test totals.
+
+Screenshots: `docs/screenshots/cycle-refinement/`. Full Vera/broker/Linux/systemd
+suites were not rerun for this presentation-only change. No engine/backend file
+was changed, no production inventory was used and no live hardware PASS is claimed.
+
 ## Platform regression round — local/offline acceptance
 
 Base bb6f22c1795a79557e55b39650d859c26400b568; local changes only. The prior delivery table below must not be used as current acceptance.

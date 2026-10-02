@@ -178,6 +178,25 @@ in both themes, and focus has an offset outline rather than color alone.
 
 ## Components
 
+### Cycle refinement, October 2026
+
+Cycle keeps the Next shell and Wistron palette. The run summary separates
+execution, cumulative health, exercised coverage, environment and Worker status.
+The progress table shows five primary columns; each node disclosure retains
+attempts, POST, boot, issue and coverage details. Updates retain the same DOM
+nodes and focus. Loop position and valid cycles remain separate measurements.
+
+Console uses grouped view/output, filters and history controls, aligned column
+guides and 13px event text. Empty, filtered, paused, disconnected and completed
+views have explicit wording. A small 2.8-second breathing indicator marks an
+active stream; a reconciliation indicator repeats only three times. Reduced
+motion disables these effects. No animation indicates hardware PASS.
+
+Evidence starts with named root reports; node and phase disclosures retain every
+original download link and filename. The create action stays reachable at the
+bottom of the selection workspace. All styling is scoped to `#cycle-workspace`.
+Acceptance screenshots: `docs/screenshots/cycle-refinement/` (synthetic only).
+
 ### Buttons and fields
 
 Native `.btn` and `.btn.primary` keep Next's gradients, minimum 36px button height,

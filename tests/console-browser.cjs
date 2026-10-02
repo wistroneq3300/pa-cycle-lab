@@ -59,7 +59,8 @@ module.exports=async(page,id,output)=>{
   assert.equal(await page.locator('.cycle-console-row:not([data-level=FAIL]):not([data-level=ERROR])').count(),0);
   await page.locator('[data-part=errors]').uncheck();
   if(await page.locator('[data-part=auto]').getAttribute('aria-pressed')==='true')await page.locator('[data-part=auto]').click();assert.equal(await page.locator('[data-part=auto]').getAttribute('aria-pressed'),'false');
-  await log.evaluate(e=>e.scrollTop=30000);
+  // Anchor to a retained event, independent of typography and row height.
+  await log.evaluate(e=>{const row=e.querySelector('[data-sequence="9500"]');e.scrollTop+=row.getBoundingClientRect().top-e.getBoundingClientRect().top-e.clientTop;});
   const anchor=await log.evaluate(e=>{const row=[...e.children].find(r=>r.getBoundingClientRect().bottom>e.getBoundingClientRect().top+e.clientTop);return {sequence:row.dataset.sequence,top:row.getBoundingClientRect().top-e.getBoundingClientRect().top};});
   streamEnd=11000;await page.locator('[data-part=pause]').click();
   await page.waitForFunction(()=>document.querySelector('.cycle-console-row[data-sequence="11000"]'));
