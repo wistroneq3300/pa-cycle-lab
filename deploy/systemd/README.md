@@ -49,3 +49,9 @@ systemctl disable --now pa-manager-6969-compact-events.timer # stop the schedule
   `CYCLE_INSTANCE`/bridge token paths if you deploy elsewhere.
 - `CYCLE_INSTANCE=data/pa6969` is what makes `settings.py` resolve the DB at
   `data/pa6969/jobs.sqlite3`. Omitting it points maintenance at the wrong DB.
+- `CYCLE_ARTIFACTS_DIR=CycleTest` moves only the run evidence directory (the
+  per-run report/console/loop folders) to `<checkout>/CycleTest`, so outputs are
+  easy to find. Inventory, credentials and `runtime/` stay under `CYCLE_INSTANCE`;
+  leave the variable unset to keep artifacts at `<CYCLE_INSTANCE>/artifacts`.
+  Set it on **both** the web and runner units — the runner writes the evidence
+  the web serves.

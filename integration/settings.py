@@ -12,9 +12,18 @@ if relative.is_absolute() or not DATA.is_relative_to(ROOT) or DATA == ROOT:
     raise RuntimeError('CYCLE_INSTANCE must be a subdirectory of pa-cycle-lab')
 DATA.mkdir(parents=True, exist_ok=True)
 RUNTIME = DATA / 'runtime'
-ARTIFACTS = DATA / 'artifacts'
+# Artifacts can live outside DATA so run outputs are easy to find without digging
+# through the instance dir. Inventory/credentials/runtime stay under DATA; only the
+# evidence directory moves. A relative path is resolved under ROOT.
+_artifacts_dir = os.environ.get('CYCLE_ARTIFACTS_DIR')
+if _artifacts_dir:
+    ARTIFACTS = (ROOT / _artifacts_dir).resolve()
+    if not ARTIFACTS.is_relative_to(ROOT) or ARTIFACTS == ROOT:
+        raise RuntimeError('CYCLE_ARTIFACTS_DIR must be a subdirectory of the checkout')
+else:
+    ARTIFACTS = DATA / 'artifacts'
 for directory in (RUNTIME, ARTIFACTS):
-    directory.mkdir(exist_ok=True)
+    directory.mkdir(parents=True, exist_ok=True)
 MODE = os.environ.get('CYCLE_MODE', 'synthetic')
 if MODE not in {'synthetic', 'live'}:
     raise RuntimeError('CYCLE_MODE must be synthetic or live')

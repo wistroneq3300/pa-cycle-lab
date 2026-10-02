@@ -9,6 +9,7 @@ User=root
 WorkingDirectory=/root/sheng/PA-manager-6969
 Environment=CYCLE_MODE=live
 Environment=CYCLE_INSTANCE=data/pa6969
+Environment=CYCLE_ARTIFACTS_DIR=CycleTest
 Environment=CYCLE_PROVIDER=integration.local_provider
 Environment=PYTHONUTF8=1
 ExecStart=/root/sheng/PA-manager-6969/.venv/bin/python run.py runner
