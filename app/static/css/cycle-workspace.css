@@ -151,3 +151,38 @@
 #cycle-workspace .cw-code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--cw-link)}
 #cycle-workspace .cw-detail{flex:1 1 240px;overflow-wrap:anywhere}
 #cycle-workspace .cw-pre-nodes{margin-top:10px;font-size:13px;color:var(--text-2,#888)}
+
+/* Immutable PRE: make "waiting for your confirmation" unmistakable. */
+#cycle-workspace #cw-pre-shell.cw-awaiting{border:1px solid var(--cw-warn);border-radius:10px;padding:12px 16px 16px;background:color-mix(in srgb, var(--cw-warn) 6%, transparent);box-shadow:0 0 0 1px color-mix(in srgb, var(--cw-warn) 18%, transparent),0 12px 26px -18px color-mix(in srgb, var(--cw-warn) 70%, transparent)}
+#cycle-workspace.cw-awaiting #cw-pre-shell>summary,#cycle-workspace #cw-pre-shell.cw-awaiting>summary{font-weight:700;letter-spacing:.02em}
+#cycle-workspace .cw-confirm-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;padding:14px 16px;border:1px solid var(--cw-warn);border-radius:10px;background:color-mix(in srgb, var(--w-green,var(--cw-warn)) 8%, var(--bg-panel))}
+#cycle-workspace .cw-confirm-hint{font-weight:600;letter-spacing:.01em}
+#cycle-workspace .cw-confirm-bar .btn.primary{margin-left:auto}
+#cycle-workspace .cw-confirm-dot{width:10px;height:10px;border-radius:50%;background:var(--w-green-bright,var(--cw-warn));box-shadow:0 0 0 4px color-mix(in srgb, var(--cw-warn) 22%, transparent);animation:lc-pulse 1.8s ease-in-out infinite;flex:0 0 auto}
+@media (prefers-reduced-motion:reduce){#cycle-workspace .cw-confirm-dot{animation:none}}
+
+/* ===== Chassis / Node progress table: raised panel + verdict colours ===== */
+#cycle-workspace #cw-progress,#cycle-workspace .cw-progress{border:1px solid var(--border);border-radius:12px;background:var(--bg-panel);box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 12px 28px -20px rgba(0,0,0,.6);margin-top:6px}
+#cycle-workspace #cw-progress table,#cycle-workspace .cw-progress table{margin:0}
+#cycle-workspace #cw-progress thead th,#cycle-workspace .cw-progress thead th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-2,var(--cw-muted));font-weight:700;border-bottom:1px solid var(--border)}
+#cycle-workspace #cw-progress tbody tr,#cycle-workspace .cw-progress tbody tr{transition:background .15s ease}
+#cycle-workspace #cw-progress tbody tr:hover,#cycle-workspace .cw-progress tbody tr:hover{background:color-mix(in srgb, var(--cw-link) 6%, transparent)}
+#cycle-workspace #cw-progress th[scope=rowgroup],#cycle-workspace .cw-progress th[scope=rowgroup]{font-weight:700;color:var(--text-2,var(--cw-muted));vertical-align:top}
+#cycle-workspace .cw-rowstage{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;flex:0 0 auto;background:var(--text-dim,var(--cw-muted))}
+#cycle-workspace summary>.cw-rowstage{vertical-align:middle}
+#cycle-workspace .cw-rowstage.cw-ok{background:#3fae63;box-shadow:0 0 0 3px color-mix(in srgb,#3fae63 22%,transparent)}
+#cycle-workspace .cw-rowstage.cw-warn{background:#d79a2b;box-shadow:0 0 0 3px color-mix(in srgb,#d79a2b 22%,transparent)}
+#cycle-workspace .cw-rowstage.cw-fail{background:#e0534d;box-shadow:0 0 0 3px color-mix(in srgb,#e0534d 24%,transparent)}
+#cycle-workspace .cw-rowstage.cw-done{background:#4f8fd0}
+/* verdict "badge" cells: a left accent bar + tinted text, no pill soup */
+#cycle-workspace .cw-cell{position:relative;font-weight:600}
+#cycle-workspace .cw-cell.cw-ok{color:#2f9e57}
+#cycle-workspace .cw-cell.cw-warn{color:#b8860b}
+#cycle-workspace .cw-cell.cw-fail{color:#cf3f39}
+#cycle-workspace .cw-cell.cw-done{color:#3d7fbf}
+#cycle-workspace .cw-cell.cw-idle{color:var(--text-2,var(--cw-muted));font-weight:500}
+#cycle-workspace .cw-cell.cw-ok,#cycle-workspace .cw-cell.cw-warn,#cycle-workspace .cw-cell.cw-fail,#cycle-workspace .cw-cell.cw-done{border-left:3px solid currentColor;padding-left:10px}
+[data-theme=dark] #cycle-workspace .cw-cell.cw-ok{color:#6adf9b}
+[data-theme=dark] #cycle-workspace .cw-cell.cw-warn{color:#f0c072}
+[data-theme=dark] #cycle-workspace .cw-cell.cw-fail{color:#ff8a84}
+[data-theme=dark] #cycle-workspace .cw-cell.cw-done{color:#7fb6ea}

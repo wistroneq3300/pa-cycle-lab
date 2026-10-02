@@ -6,6 +6,9 @@
   // Title-case status labels (RECONCILIATION_REQUIRED -> Reconciliation Required); the raw
   // state string is still used for logic, this is display only.
   const stateLabel=state=>String(state??'').split('_').map(w=>w?w[0].toUpperCase()+w.slice(1).toLowerCase():w).join(' ');
+  // Colour a value by its meaning: PASS/OK green, WARN/amber, FAIL/BLOCKED red,
+  // anything in-flight/neutral muted. Used for the progress table badges.
+  const HEALTH_CLASS=v=>{const s=String(v??'').toUpperCase();return s==='PASS'||s==='OK'||s==='EXERCISED'?'cw-ok':s==='WARN'?'cw-warn':s==='FAIL'||s==='BLOCKED'||s==='ERROR'?'cw-fail':s==='DONE'||s==='COMPLETE'?'cw-done':'cw-idle';};
   let root, generation=0, controller, timer, consoleView, selected=new Set(), inventory=[], current, preselect={}, offset=0, key, progressRows=new Map(), progressSignature="";
   const $=id=>root?.querySelector('#'+id);
   // crypto.randomUUID is only defined in secure contexts (HTTPS / localhost); fall back
@@ -67,7 +70,7 @@
       if(!project)throw Error('Project unavailable or access denied');
       preselect={project:project.name,chassis:route[1],node:route[2]};
     }
-    $('cw-body').innerHTML=`<p class="cw-environment">${data.mode==='synthetic'?'SYNTHETIC · fake transport，不連接硬體':'LIVE · PRE 可能安裝依賴與上傳 script'}</p><form id="cw-form"><input type="hidden" id="cw-profile"><div class="cw-form-grid"><label>專案 / Rack<select id="cw-project">${inventory.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('')}</select></label><label>模式<select id="cw-mode"><option value="reboot">Reboot</option><option value="power_cycle">DC Power Cycle</option><option value="aux_cycle">AUX Cycle（需已確認範圍）</option></select></label><label>通道<select id="cw-channel"><option value="inband">Inband</option><option value="outband">Outband</option></select></label><label>執行方式<select id="cw-limit-kind"><option value="" selected>請選擇…</option><option value="loops">loop 幾 run</option><option value="hours">hr 幾小時</option></select></label><label>次數 / 時數<input id="cw-limit-value" type="number" min="0" step="any" placeholder="例如 10 = 執行 10 個 run，或 2 = 執行 2 小時後停止"></label></div><p id="cw-project-error" class="cw-project-error" role="alert" hidden></p><p>執行前系統會先連線檢查每台主機的 OS / BMC hostname。</p><div class="cw-actions"><label class="cw-search">搜尋 chassis / node / endpoint<input id="cw-search" type="search"></label><button class="btn" type="button" id="cw-visible">全選搜尋結果</button><button class="btn" type="button" id="cw-none">取消選取</button></div><p id="cw-count" role="status"></p><div id="cw-matrix" class="cw-matrix"></div><div class="cw-actions"><button class="btn primary" id="cw-create">建立持久任務並執行 PRE</button><span>有 blocker 的選取不會被靜默略過。</span></div></form>`;
+    $('cw-body').innerHTML=`<p class="cw-environment">${data.mode==='synthetic'?'SYNTHETIC · fake transport，不連接硬體':'LIVE'}</p><form id="cw-form"><input type="hidden" id="cw-profile"><div class="cw-form-grid"><label>專案 / Rack<select id="cw-project">${inventory.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('')}</select></label><label>模式<select id="cw-mode"><option value="reboot">Reboot</option><option value="power_cycle">DC Power Cycle</option><option value="aux_cycle">AUX Cycle（需已確認範圍）</option></select></label><label>通道<select id="cw-channel"><option value="inband">Inband</option><option value="outband">Outband</option></select></label><label>執行方式<select id="cw-limit-kind"><option value="" selected>請選擇…</option><option value="loops">loop 幾 run</option><option value="hours">hr 幾小時</option></select></label><label>次數 / 時數<input id="cw-limit-value" type="number" min="0" step="any" placeholder="例如 10 = 執行 10 個 run，或 2 = 執行 2 小時後停止"></label></div><p id="cw-project-error" class="cw-project-error" role="alert" hidden></p><p>執行前系統會先連線檢查每台主機的 OS / BMC hostname。</p><div class="cw-actions"><label class="cw-search">搜尋 chassis / node / endpoint<input id="cw-search" type="search"></label><button class="btn" type="button" id="cw-visible">全選搜尋結果</button><button class="btn" type="button" id="cw-none">取消選取</button></div><p id="cw-count" role="status"></p><div id="cw-matrix" class="cw-matrix"></div><div class="cw-actions"><button class="btn primary" id="cw-create">建立持久任務並執行 PRE</button><span>有 blocker 的選取不會被靜默略過。</span></div></form>`;
     if(preselect.project&&inventory.some(p=>p.name===preselect.project))$('cw-project').value=preselect.project;
     const targets=()=>inventory.find(p=>p.name===$('cw-project').value)?.targets||[];
     function profileInfo(){
@@ -135,10 +138,12 @@
       const nameOf=id=>j.targets.find(t=>t.name===id)?.display_name||id;
       const findingCards=j.pre.findings.filter(f=>f.issues.length).map(f=>`<article class="cw-finding"><h4>${esc(nameOf(f.machine_id))}</h4><ul>${f.issues.map(i=>`<li class="cw-issue cw-issue-${esc(String(i.severity).toLowerCase())}"><span class="cw-sev">${esc(i.severity)}</span><span class="cw-code">${esc(i.code)}</span><span class="cw-detail">${esc(i.detail)}</span></li>`).join('')}</ul></article>`).join('')||'<p>無 finding。</p>';
       const excludedCards=j.pre.excluded.map(e=>`<article class="cw-finding cw-finding-blocked"><h4>${esc(nameOf(e.machine_id))} <span class="cw-sev cw-sev-fail">BLOCKED</span></h4><ul>${e.reasons.map(r=>`<li class="cw-issue cw-issue-fail"><span class="cw-detail">${esc(r)}</span></li>`).join('')}</ul></article>`).join('');
-      $('cw-pre').innerHTML=`<h2>不可變 PRE</h2><p>版本 <code>${esc(j.pre.version)}</code></p><p>本次確認的目標 ${j.pre.runnable_ids.length} / ${j.targets.length}。PRE 在 live 可能上傳 script / 安裝依賴。</p><details open><summary>Findings / 排除原因 / 影響範圍</summary><div class="cw-findings">${findingCards}${excludedCards}</div><p class="cw-pre-nodes">已納入範圍：${j.targets.map(t=>esc(t.display_name||t.name)).join('、')}</p></details><button class="btn primary" id="cw-confirm">確認這份 PRE 與完整影響範圍，開始執行</button>`;
+      $('cw-pre').innerHTML=`<h2>不可變 PRE</h2><p>版本 <code>${esc(j.pre.version)}</code></p><p>本次確認的目標 ${j.pre.runnable_ids.length} / ${j.targets.length}。</p><details open><summary>Findings / 排除原因 / 影響範圍</summary><div class="cw-findings">${findingCards}${excludedCards}</div><p class="cw-pre-nodes">已納入範圍：${j.targets.map(t=>esc(t.display_name||t.name)).join('、')}</p></details><div class="cw-confirm-bar"><span class="cw-confirm-dot" aria-hidden="true"></span><span class="cw-confirm-hint">PRE 已完成，等待你確認後才會開始執行</span><button class="btn primary" id="cw-confirm">確認這份 PRE 與完整影響範圍，開始執行</button></div>`;
       $('cw-confirm').onclick=async()=>{const version=j.pre.version,ids=j.pre.runnable_ids,g=generation;try{$('cw-confirm').disabled=true;const next=await api(url+'/confirm',{version,machine_ids:ids});if(g===generation){current=next;paint(url);}}catch(e){if(g===generation){error(e);$('cw-confirm').disabled=false;}}};}
     if($('cw-confirm'))$('cw-confirm').hidden=j.state!=='AWAITING_CONFIRMATION';
+    const confirmBar=$('cw-pre').querySelector('.cw-confirm-bar');if(confirmBar)confirmBar.hidden=j.state!=='AWAITING_CONFIRMATION';
     const preShell=$('cw-pre-shell');if(preShell.dataset.state!==j.state){preShell.open=j.state==='AWAITING_CONFIRMATION';preShell.dataset.state=j.state;}
+    $('cw-pre-shell').classList.toggle('cw-awaiting',j.state==='AWAITING_CONFIRMATION');
     if(j.state==='RECONCILIATION_REQUIRED')$('cw-freshness').textContent+=' · 結果未知／待核對／相關資源仍占用';
     $('cw-reconciliation').hidden=j.state!=='RECONCILIATION_REQUIRED';
     paintProgress(j);
@@ -157,21 +162,32 @@
         chassis.scope='rowgroup';chassis.rowSpan=group.length;chassis.textContent=t.parent_name||t.name;if(index===0)row.append(chassis);row.append(cell);
         const detail=document.createElement('details'),summary=document.createElement('summary'),endpoint=document.createElement('p'),identity=document.createElement('code'),reason=document.createElement('p');
         detail.dataset.node=t.name;endpoint.textContent=(t.os_hostname||'')+' · '+t.os_ip+':'+(t.os_port||22);identity.textContent=t.node_id||t.name;
+        const stage=document.createElement('span');stage.className='cw-rowstage cw-idle';stage.setAttribute('aria-hidden','true');
+        const label=document.createElement('span');label.className='cw-rowlabel';
+        summary.append(stage,label);
         detail.append(summary,endpoint,identity,reason);cell.append(detail);
         const cells=Array.from({length:8},()=>{const td=document.createElement('td');row.append(td);return td;});
-        body.append(row);progressRows.set(t.name,{summary,reason,cells});
+        body.append(row);progressRows.set(t.name,{summary,label,reason,cells,stage});
       }
       $('cw-progress').replaceChildren(table);
     }
     const nodes=new Map(j.nodes.map(n=>[n.machine_id,n]));
     const text=(element,value)=>{value=String(value);if(element.textContent!==value)element.textContent=value;};
+    const badge=(element,value,cls)=>{value=String(value);if(element.textContent!==value)element.textContent=value;const c='cw-cell '+cls;if(element.className!==c)element.className=c;};
     for(const t of j.targets){
       const n=nodes.get(t.name)||{},row=progressRows.get(t.name);
-      text(row.summary,(t.node||t.slot_key)+' · '+stateLabel(n.stage||j.state));text(row.reason,n.stop_reason||'');
+      row.label.textContent=(t.node||t.slot_key)+' · '+stateLabel(n.stage||j.state);
+      text(row.reason,n.stop_reason||'');
       const values=[n.loop||0,n.attempts||0,n.completed||0,n.boot_confirmed||0,n.valid_cycles||0,
         stateLabel(n.health||'UNKNOWN')+' / '+stateLabel(n.cumulative_health||'UNKNOWN'),(n.first_this_round??'—')+' / '+(n.unique_issues||0),
         stateLabel(n.coverage||(n.attempts?'EXERCISED':'NOT_EXERCISED'))+(n.coverage_reason?' · '+n.coverage_reason:'')];
       values.forEach((value,i)=>text(row.cells[i],value));
+      // Health (idx 5), issues (idx 6) and coverage (idx 7) carry a verdict, so
+      // colour them; loop counters stay plain numbers.
+      badge(row.cells[5],values[5],HEALTH_CLASS(n.cumulative_health||n.health));
+      badge(row.cells[6],values[6],(n.unique_issues||n.first_this_round)?'cw-fail':'cw-ok');
+      badge(row.cells[7],values[7],HEALTH_CLASS(n.coverage||(n.attempts?'EXERCISED':'NOT_EXERCISED')));
+      row.stage.textContent='';row.stage.className='cw-rowstage '+HEALTH_CLASS(n.cumulative_health||n.health);
     }
   }
   window.CycleWorkspace={shell,mount,dispose};
