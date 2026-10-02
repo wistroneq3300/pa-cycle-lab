@@ -1,3 +1,14 @@
+// crypto.randomUUID exists only in secure contexts (HTTPS / localhost); plain http://<ip>
+// must still be able to generate idempotency keys.
+function uuidv4() {
+  if (globalThis.crypto && typeof globalThis.crypto.randomUUID === "function") return globalThis.crypto.randomUUID();
+  const b = new Uint8Array(16);
+  if (globalThis.crypto && globalThis.crypto.getRandomValues) globalThis.crypto.getRandomValues(b);
+  else for (let i = 0; i < 16; i++) b[i] = Math.floor(Math.random() * 256);
+  b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;
+  const h = [...b].map(x => x.toString(16).padStart(2, "0")).join("");
+  return h.slice(0,8)+"-"+h.slice(8,12)+"-"+h.slice(12,16)+"-"+h.slice(16,20)+"-"+h.slice(20);
+}
 function notifyUser(message) {
   if (typeof window.uxNotify === "function") window.uxNotify(String(message), /\u5931\u6557|\u932f\u8aa4|failed|error/i.test(String(message)));
   else window.alert(message);
@@ -60,7 +71,7 @@ async function api(path, options) {
     if (!target.node_id || !target.expected_binding_revision) throw new Error("Select a configured node and refresh its binding before control");
     body.node_id = body.node_id || target.node_id;
     body.expected_binding_revision = body.expected_binding_revision || target.expected_binding_revision;
-    body.idempotency_key = body.idempotency_key || crypto.randomUUID();
+    body.idempotency_key = body.idempotency_key || uuidv4();
     options.headers = {...options.headers, "Content-Type": "application/json"};
     options.body = JSON.stringify(body);
   }

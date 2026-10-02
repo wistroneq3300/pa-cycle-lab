@@ -136,7 +136,9 @@ def activate(store,project_id,package):
 def resolve(db,project_id,legacy_profile=None,project_name=None):
     row=db.execute('SELECT package FROM validation_profiles WHERE project_id=?',(project_id,)).fetchone() if project_id else None
     if row:return freeze(json.loads(row[0]),'activated:'+project_id,project_name)
-    if legacy_profile=='neutrino':return freeze(default_package(),'bundled:neutrino',project_name)
+    # An unset cycle_profile means "use the built-in Neutrino package" (this instance's
+    # platform default), matching the UI, which offers no profile picker.
+    if legacy_profile in (None,'neutrino'):return freeze(default_package(),'bundled:neutrino',project_name)
     return None
 
 

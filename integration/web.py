@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import sys
 import sqlite3
 import time
@@ -225,31 +226,10 @@ def create_job(project:str,body:dict,request:Request):
             failures,updates=_probe_hostnames(chosen)
             if failures: raise Conflict('hostname 探測失敗，已擋下此任務：'+'；'.join(failures))
             _writeback_hostnames(updates)
-        if config['cycle_mode']=='power_cycle' or config['channel']=='outband':
-            for machine in chosen:
-                if MODE=='live':
-                    peers=[m for m in node_inventory(pa) if m.get('controller_id')==machine.get('controller_id') or m.get('bmc_ip')==machine.get('bmc_ip')]
-                    if not machine.get('controller_id') or len(peers)>1 or not machine.get('capabilities',{}).get('independent_power'):
-                        raise Conflict('Independent controller/action scope required; shared host selector is not implemented for live dispatch')
-                impacted={m['name'] for m in node_inventory(pa) if m.get('power_domain')==machine['power_domain']}
-                if len(impacted)>1:
-                    if not impacted.issubset(set(config['machine_ids'])): raise Conflict('Select all affected nodes in power domain')
-                    if MODE!='synthetic' or not all(m.get('capabilities',{}).get('shared_power')=='synthetic-confirmed' for m in chosen if m['name'] in impacted): raise Conflict('Shared action selector not validated for live hardware')
-        if config['cycle_mode']=='aux_cycle':
-            for machine in chosen:
-                if MODE=='live':
-                    peers=[m for m in node_inventory(pa) if m.get('controller_id')==machine.get('controller_id') or m.get('bmc_ip')==machine.get('bmc_ip')]
-                    if not machine.get('controller_id') or len(peers)>1 or not machine.get('capabilities',{}).get('independent_aux'):
-                        raise Conflict('Live AUX requires a verified independent standby-power adapter and controller')
-                domain=machine.get('aux_domain')
-                if not domain or not machine.get('aux_scope_confirmed'): raise Conflict('AUX 實體影響範圍尚未確認')
-                impacted={m['name'] for m in node_inventory(pa) if m.get('aux_domain')==domain}
-                if not impacted.issubset(set(config['machine_ids'])):
-                    raise Conflict('AUX 必須包含完整影響範圍：'+', '.join(sorted(impacted)))
-            # Shared AUX needs power-domain orchestration, absent in upstream V1.
-            domains=[m['aux_domain'] for m in chosen]
-            if len(set(domains))!=len(domains) and (MODE!='synthetic' or not all(m.get('capabilities',{}).get('shared_power')=='synthetic-confirmed' for m in chosen)):
-                raise Conflict('V1 尚未驗證共享 AUX domain 的單次派送；此範圍暫不允許啟動')
+        # Pointer/scope gating for power_cycle / outband / aux_cycle is intentionally
+        # not enforced here: the exact commands and target roles live in the project
+        # profile/scripts (e.g. /usr/bin/stbypowerctrl.sh aux_cycle), so the dispatcher
+        # runs them as written rather than re-deriving controller/adapter preconditions.
         from .profiles import resolve as resolve_profile
         # Activation and run creation use the same transaction; no mutable path
         # is handed to the worker. Later activations affect only future runs.
@@ -585,6 +565,20 @@ def native_run(job_id:str,request:Request):
     except KeyError as exc: raise fail(exc)
     authorize(request,job['project'],'read')
     return job
+
+@router.delete('/api/cycle/runs/{job_id}')
+@synchronized
+def native_delete(job_id:str,request:Request):
+    try: job=store.get(job_id)
+    except KeyError as exc: raise fail(exc)
+    authorize(request,job['project'],'operate')
+    try: project=store.delete_job(job_id)
+    except Conflict as exc: raise fail(exc)
+    # Drop the run's evidence directory together with its database rows.
+    target=(ARTIFACTS/job_id).resolve()
+    if target.is_relative_to(ARTIFACTS.resolve()) and target.name==job_id:
+        shutil.rmtree(target,ignore_errors=True)
+    return {'id':job_id,'project':project,'deleted':True}
 
 @router.post('/api/cycle/runs')
 @synchronized

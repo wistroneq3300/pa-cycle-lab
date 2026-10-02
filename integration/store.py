@@ -460,6 +460,22 @@ class Store:
             db.execute('DELETE FROM locks WHERE owner=?',(job_id,))
             return job
 
+    def delete_job(self, job_id):
+        """Permanently remove a terminal job and every row keyed to it.
+
+        Only terminal jobs may be deleted; an active reservation must be stopped first.
+        Returns the removed project name so the caller can drop the artifact directory."""
+        with self.tx() as db:
+            job=self._get(db,job_id)
+            if job['state'] not in TERMINAL:
+                raise Conflict('Only stopped or finished runs can be deleted')
+            project=job['project']
+            for table in ('events','node_status','actions','artifact_index'):
+                db.execute(f'DELETE FROM {table} WHERE job_id=?',(job_id,))
+            db.execute('DELETE FROM locks WHERE owner=?',(job_id,))
+            db.execute('DELETE FROM jobs WHERE id=?',(job_id,))
+            return project
+
     def event_page(self, job_id, after=0, limit=500, before=None, tail=False, machine_id=None, errors_only=False, search='', until=None):
         """Read-only, indexed keyset pages. No writer reservation during polling/export."""
         limit=max(1,min(500,limit))

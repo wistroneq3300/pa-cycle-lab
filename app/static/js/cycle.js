@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const terminal = new Set(['COMPLETE','INCOMPLETE','CANCELLED','BLOCKED','ERROR']);
-  const labels = {CREATED:'等待 runner',PRE_RUNNING:'PRE 檢查中',AWAITING_CONFIRMATION:'等待確認',RUNNING:'執行中',STOP_REQUESTED:'本輪完成後停止',COMPLETE:'已完成',INCOMPLETE:'未完成',CANCELLED:'已取消',BLOCKED:'無法執行',ERROR:'執行錯誤'};
+  const labels = {CREATED:'等待 runner',PRE_RUNNING:'PRE 檢查中',AWAITING_CONFIRMATION:'等待確認',RUNNING:'執行中',STOP_REQUESTED:'本輪完成後停止',COMPLETE:'已完成',INCOMPLETE:'未完成',CANCELLED:'已取消',BLOCKED:'無法執行',ERROR:'執行錯誤',RECONCILIATION_REQUIRED:'待核對'};
   let consoleView;
   let project='', targets=[], selected=new Set(), current=null, timer=null, requestKey=null, opener=null, generation=0;
   const el = id => document.getElementById(id);
@@ -156,7 +156,7 @@
       const loops=Number(el('cycle-loops').value || 0),hours=Number(el('cycle-hours').value || 0);
       try {
         if(!selected.size || !(loops || hours)) throw new Error('請選取機台，並設定次數或時間限制');
-        requestKey ||= crypto.randomUUID();
+        requestKey ||= (typeof uuidv4 === 'function' ? uuidv4() : crypto.randomUUID());
         const job=await api(`${url}/jobs`,{machine_ids:[...selected],cycle_profile:'neutrino',cycle_mode:el('cycle-mode').value,channel:el('cycle-channel').value,limits:{loops,hours},boot_timeout:Number(el('cycle-timeout').value),idempotency_key:requestKey});
         if(serial!==generation)return;
         renderJob(job); await refresh(); await reloadTargets();

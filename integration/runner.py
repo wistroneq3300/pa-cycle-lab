@@ -84,6 +84,20 @@ def compact(session):
                 coverage_reason=n.get('coverage_reason',''),
                 stop_reason=n['stop_reason'],blocked=n['blocked'])
 
+def _inventory_secrets(names):
+    """Return {name: {os_password, bmc_password}} from the live data.json inventory.
+
+    Job snapshots are redacted by snapshot_target(), so the worker must re-derive
+    secrets from the same source the web tier used, not from the stored job."""
+    from .targets import inventory
+    raw=json.loads((DATA/'data.json').read_text(encoding='utf-8'))
+    shim=SimpleNamespace(machines=raw.get('machines',{}),projects=raw.get('projects',{}))
+    by_name={t['name']:t for t in inventory(shim)}
+    wanted=set(names)
+    return {t['name']:{'os_password':t.get('os_password',''),'bmc_password':t.get('bmc_password','')}
+            for t in by_name.values() if t['name'] in wanted}
+
+
 def run_job(store, job_id, transport_factory=None):
     with process_lock(RUNTIME/(job_id+'.lock')):
         job=store.claim(job_id,uuid.uuid4().hex)
@@ -175,8 +189,10 @@ def run_job(store, job_id, transport_factory=None):
                         verify=getattr(provider,'verify_action_scope',None)
                         if not callable(verify) or not all(verify(job,m,action) for m in job['targets']):
                             raise RuntimeError('Custom profile action requires explicit provider verification of selector and affected scope')
-                # Credentials come straight from inventory (internal lab): no credential_ref indirection.
-                secrets={m['name']:{'os_password':m.get('os_password',''),'bmc_password':m.get('bmc_password','')} for m in job['targets']}
+                # Credentials come straight from inventory (internal lab): no credential_ref
+                # indirection. The persisted job targets are redacted by snapshot_target(),
+                # so re-read passwords from data.json here instead of trusting job['targets'].
+                secrets=_inventory_secrets(m['name'] for m in job['targets'])
             for machine in job['targets']:
                 target=Target(**{f.name:machine[f.name] for f in fields(Target) if f.name in machine})
                 if transport_factory:
@@ -202,7 +218,13 @@ def run_job(store, job_id, transport_factory=None):
             groups={}
             for session in sessions:
                 m=session.snapshot
-                key=m['name'] if options.cycle_mode=='reboot' and options.channel=='inband' else m.get('aux_domain') if options.cycle_mode=='aux_cycle' else m.get('power_domain')
+                # Every node is independently powered: no shared power/aux domain
+                # coordination. Grouping each node under its own unique name keeps
+                # each node its own leader so every node dispatches to its own BMC.
+                # (Previously an unset aux_domain/power_domain collapsed all nodes
+                # into one group, so only the leader dispatched and peers silently
+                # skipped their own power action.)
+                key=m['name']
                 groups.setdefault(key,[]).append(session)
             domains=[Domain(key, members, store, job_id) for key,members in groups.items()]
             controllers={}

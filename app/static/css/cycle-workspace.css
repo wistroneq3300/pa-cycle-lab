@@ -37,3 +37,16 @@
 #cycle-workspace .cycle-console-message a { display:inline-block; padding:5px 0; }
 #cycle-workspace .cycle-console [data-part="error"] { color:var(--log-fail); font-size:13px; }
 @media (max-width:540px) { #cycle-workspace .cycle-console { padding:12px; } #cycle-workspace .cycle-console-row { grid-template-columns:62px minmax(0,1fr) 50px; gap:4px 8px; } #cycle-workspace .cycle-console-message { grid-column:1/-1; } #cycle-workspace .cycle-console-log { height:360px; } }
+#cycle-workspace .cw-findings{display:grid;gap:12px;margin:12px 0}
+#cycle-workspace .cw-finding{background:var(--bg-panel);border:1px solid var(--border);border-radius:6px;padding:10px 14px}
+#cycle-workspace .cw-finding-blocked{border-color:var(--cw-fail)}
+#cycle-workspace .cw-finding h4{margin:0 0 8px;font-size:14px;display:flex;align-items:center;gap:8px}
+#cycle-workspace .cw-finding ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+#cycle-workspace .cw-issue{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;font-size:13px}
+#cycle-workspace .cw-sev{font-weight:700;font-size:11px;letter-spacing:.03em;padding:1px 6px;border-radius:4px;background:var(--bg);color:var(--text)}
+#cycle-workspace .cw-issue-warn .cw-sev,#cycle-workspace .cw-sev-warn{color:var(--cw-warn)}
+#cycle-workspace .cw-issue-fail .cw-sev,#cycle-workspace .cw-sev-fail{color:var(--cw-fail)}
+#cycle-workspace .cw-issue-info .cw-sev,#cycle-workspace .cw-sev-info{color:var(--cw-link)}
+#cycle-workspace .cw-code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--cw-link)}
+#cycle-workspace .cw-detail{flex:1 1 240px;overflow-wrap:anywhere}
+#cycle-workspace .cw-pre-nodes{margin-top:10px;font-size:13px;color:var(--text-2,#888)}
