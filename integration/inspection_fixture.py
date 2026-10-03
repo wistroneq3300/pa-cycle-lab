@@ -31,7 +31,8 @@ class FixtureTransport:
             boot=self.scenario.get('boot_id','00000000-0000-0000-0000-000000000001')
             return Command(0,'HOSTNAME='+self.scenario.get('hostname',self.target.get('os_hostname','fixture'))+'\nBOOT_ID='+boot+'\n')
         if role=='bmc' and command=='hostname':
-            return Command(0,self.scenario.get('bmc_hostname','fixture-bmc'))
+            if 'bmc_ssh' in self.scenario.get('failed',[]): return Command(124,'Fixture BMC SSH timeout')
+            return Command(0,self.scenario.get('bmc_hostname',self.target.get('bmc_hostname') or 'fixture-bmc'))
         if command.startswith('bash -o pipefail -c '):
             rows=self.scenario.get('journal',[])
             if '--after-cursor=' in command:

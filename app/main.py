@@ -1838,9 +1838,9 @@ def _commit_connection(name, snapshot, updates, node_id=None, revision=None):
         return _bmc_safe(m)
 
 _ALLOWED_CAPABILITIES = {
-    # BMC hostname 查詢方式：ssh_hostname = 走 BMC SSH 執行 hostname，
-    # 其他/未設定 = 走 Redfish /Managers/<x>/HostName。
-    "bmc_hostname_query": {"ssh_hostname"},
+    # BMC hostname 查詢方式：auto(預設) = 先試 SSH，失敗退回 Redfish；
+    # ssh_hostname = 只用 SSH；redfish = 跳過 SSH 直接用 Redfish。
+    "bmc_hostname_query": {"auto", "ssh_hostname", "redfish"},
 }
 
 

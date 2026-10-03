@@ -29,6 +29,11 @@ class Identity(unittest.TestCase):
         self.sync=IdentitySync(self.pa);self.scenario={};self.calls=[]
     def tearDown(self): self.tmp.cleanup()
     def target(self,i=0): return dict(inventory(self.pa)[i],binding_revision=self.pa.machines['box']['os'][i]['binding_revision'])
+    def pin_redfish(self,i=0):
+        # These cases exercise the Redfish transport; pin it so auto mode does not
+        # route through the (also-faked) BMC SSH path first.
+        node=self.pa.machines['box']['os'][i];node['capabilities']={'bmc_hostname_query':'redfish'}
+        node['binding_revision']=int(node.get('binding_revision',1))+1
     def observe(self,t=None):
         t=t or self.target();transport=FixtureTransport(t,self.scenario,self.calls)
         return collect_identity(Collector(transport,Target('t','n',t['os_ip'],t['bmc_ip']),clock=lambda:1000),t)
@@ -41,15 +46,18 @@ class Identity(unittest.TestCase):
         self.assertEqual(after['chassis_id'],t['chassis_id']);self.assertEqual(after['os_hostname'],'new.example')
         self.assertEqual(result['events'][0]['severity'],'INFO');self.assertTrue(self.file.exists())
     def test_bmc_redfish_hostname(self):
+        self.pin_redfish()
         self.scenario['bmc_hostname']='new-bmc';self.sync(self.target(),self.observe())
         self.assertEqual(self.target()['bmc_hostname'],'new-bmc')
     def test_bmc_unsupported_does_not_block_os(self):
+        self.pin_redfish()
         self.scenario['hostname']='new';obs=self.observe();self.assertEqual(obs['bmc_status'],'NOT_SUPPORTED')
         self.sync(self.target(),obs);self.assertEqual(self.target()['os_hostname'],'new')
     def test_os_failure_keeps_name(self):
         self.scenario['failed']=['identity'];obs=self.observe();self.assertEqual(obs['os_status'],'UNAVAILABLE')
         self.sync(self.target(),obs);self.assertEqual(self.target()['os_hostname'],'n1')
     def test_bmc_failure_keeps_name(self):
+        self.pin_redfish()
         self.scenario['failed']=['redfish'];obs=self.observe();self.assertEqual(obs['bmc_status'],'UNAVAILABLE')
         self.sync(self.target(),obs);self.assertEqual(self.target()['bmc_hostname'],'b1')
     def test_concurrent_binding_edit_rejected(self):
@@ -155,6 +163,7 @@ class Identity(unittest.TestCase):
 
     def test_redfish_display_name_is_not_hostname_and_auth_is_distinct(self):
         from cycle_transport import Command
+        self.pin_redfish()
         t=self.target();transport=FixtureTransport(t)
         transport.redfish_get=lambda target,path,token,timeout=30:Command(0,json.dumps({'Members':[{'@odata.id':'/redfish/v1/Managers/a'}]} if path.endswith('Managers') else {'Name':'BMC display','Id':'a'}))
         collector=Collector(transport,Target('t','n',t['os_ip'],t['bmc_ip']))

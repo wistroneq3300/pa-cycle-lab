@@ -46,28 +46,46 @@ def collect_identity(collector, binding, include_bmc=True):
         result['asset_status']=asset['collection_status']
     if not include_bmc or not binding.get('bmc_ip'): return result
     transport=collector.transport; target=collector.target
-    if binding.get('capabilities',{}).get('bmc_hostname_query')=='ssh_hostname':
-        try:
-            response=transport.ssh(target,'bmc','hostname',20,False)
-            raw=response.output; name=normalize_hostname(raw)
-            result.update(bmc_hostname=name,bmc_hostname_raw=raw,bmc_status=('SUCCESS' if name else 'MISSING_DATA') if response.code==0 else failure_status(response.code,raw),bmc_source='bmc_ssh_hostname')
-        except Exception as exc: result.update(bmc_status=failure_status(255,type(exc).__name__))
-        return result
+    mode=(binding.get('capabilities') or {}).get('bmc_hostname_query') or 'auto'
+    # Auto is the system default: BMC hostname is read over SSH, and a BMC that
+    # cannot answer `hostname` over SSH falls back to Redfish. A per-node
+    # capability can pin the transport (ssh_hostname / redfish) when needed.
+    if mode in ('auto','ssh_hostname'):
+        if _bmc_via_ssh(transport,target,result) or mode=='ssh_hostname': return result
+    _bmc_via_redfish(transport,target,binding,result)
+    return result
+
+
+def _bmc_via_ssh(transport,target,result):
+    """Try `hostname` over BMC SSH. Returns True when it yielded a usable answer."""
+    try:
+        response=transport.ssh(target,'bmc','hostname',20,False)
+        raw=response.output; name=normalize_hostname(raw)
+        if response.code==0 and name:
+            result.update(bmc_hostname=name,bmc_hostname_raw=raw,bmc_status='SUCCESS',bmc_source='bmc_ssh_hostname')
+            return True
+        result.update(bmc_hostname_raw=raw,bmc_status=failure_status(response.code,raw),bmc_source='bmc_ssh_hostname')
+    except Exception as exc:
+        result.update(bmc_status=failure_status(255,type(exc).__name__),bmc_source='bmc_ssh_hostname')
+    return False
+
+
+def _bmc_via_redfish(transport,target,binding,result):
     token=None
     try:
         token=transport.redfish_login(target)
         if not token:
-            result['bmc_status']='UNAVAILABLE'; return result
+            result['bmc_status']='UNAVAILABLE'; return
         response=transport.redfish_get(target,'/redfish/v1/Managers',token,20)
         if response.code:
-            result['bmc_status']=failure_status(response.code,response.output); return result
+            result['bmc_status']=failure_status(response.code,response.output); return
         members=json.loads(response.output).get('Members',[])
         paths=[m.get('@odata.id') for m in members if isinstance(m,dict)]
         configured=binding.get('manager_uri')
         path=configured if configured in paths else paths[0] if len(paths)==1 else None
-        if not path or not re.fullmatch(r'/redfish/v1/Managers/[A-Za-z0-9_.-]+',path): return result
+        if not path or not re.fullmatch(r'/redfish/v1/Managers/[A-Za-z0-9_.-]+',path): return
         response=transport.redfish_get(target,path,token,20)
-        if response.code: result['bmc_status']=failure_status(response.code,response.output); return result
+        if response.code: result['bmc_status']=failure_status(response.code,response.output); return
         raw=json.loads(response.output).get('HostName')
         name=normalize_hostname(raw)
         result.update(bmc_hostname=name,bmc_hostname_raw=raw,bmc_status='SUCCESS' if name else 'NOT_SUPPORTED',bmc_source=path+'/HostName')
@@ -76,4 +94,3 @@ def collect_identity(collector, binding, include_bmc=True):
         if token and hasattr(transport,'redfish_logout'):
             try: transport.redfish_logout(target,token)
             except Exception: pass
-    return result

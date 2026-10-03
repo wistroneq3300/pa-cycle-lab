@@ -83,6 +83,11 @@ class OsCapabilities(unittest.TestCase):
         self.assertEqual(self.patch({"capabilities": {"bmc_hostname_query": "nope"}}).status_code, 422)
         self.assertNotIn("capabilities", self.node())
 
+    def test_accepts_redfish_and_auto_modes(self):
+        for value in ("auto", "redfish", "ssh_hostname"):
+            self.assertEqual(self.patch({"capabilities": {"bmc_hostname_query": value}}).status_code, 200, value)
+            self.assertEqual(self.node()["capabilities"], {"bmc_hostname_query": value})
+
     def test_stale_revision_conflicts(self):
         response = self.patch({"expected_node_id": self.node()["node_id"],
                                "expected_binding_revision": "deadbeef",
@@ -99,19 +104,29 @@ class OsCapabilities(unittest.TestCase):
 
 
 class SshHostnameObservation(unittest.TestCase):
-    def test_ssh_branch_used_and_no_redfish(self):
+    def _collect(self, capability=None, ssh_ok=True):
         from engine.vera_cycle.validation_identity import collect_identity
-
         calls = []
 
         class Transport:
             def ssh(self, target, role, command, timeout, strict):
                 calls.append(("ssh", role, command))
+                if not ssh_ok:
+                    return type("R", (), {"code": 255, "output": "connection refused"})
                 return type("R", (), {"code": 0, "output": "bmc.example\n"})
 
             def redfish_login(self, target):
                 calls.append(("redfish",))
-                return None
+                return "tok"
+
+            def redfish_get(self, target, path, token, timeout):
+                calls.append(("redfish_get", path))
+                if path == "/redfish/v1/Managers":
+                    return type("R", (), {"code": 0, "output": '{"Members":[{"@odata.id":"/redfish/v1/Managers/bmc"}]}'})
+                return type("R", (), {"code": 0, "output": '{"HostName":"rf.example"}'})
+
+            def redfish_logout(self, target, token):
+                calls.append(("redfish_logout",))
 
         class Collector:
             transport = Transport()
@@ -122,12 +137,35 @@ class SshHostnameObservation(unittest.TestCase):
                         "collection_status": "SUCCESS", "collected_at": "2026-10-04T00:00:00Z"}
 
         binding = {"node_id": "n1", "chassis_id": "c1", "revision": "r1", "os_ip": "10.0.0.1",
-                   "bmc_ip": "10.0.1.1", "capabilities": {"bmc_hostname_query": "ssh_hostname"}}
-        result = collect_identity(Collector(), binding)
+                   "bmc_ip": "10.0.1.1"}
+        if capability is not None:
+            binding["capabilities"] = {"bmc_hostname_query": capability}
+        return collect_identity(Collector(), binding), calls
+
+    def test_default_auto_prefers_ssh(self):
+        result, calls = self._collect()
         self.assertEqual(result["bmc_hostname"], "bmc.example")
         self.assertEqual(result["bmc_status"], "SUCCESS")
         self.assertEqual(result["bmc_source"], "bmc_ssh_hostname")
         self.assertEqual(calls, [("ssh", "bmc", "hostname")])
+
+    def test_auto_falls_back_to_redfish_when_ssh_fails(self):
+        result, calls = self._collect(ssh_ok=False)
+        self.assertEqual(result["bmc_hostname"], "rf.example")
+        self.assertEqual(result["bmc_status"], "SUCCESS")
+        self.assertEqual(result["bmc_source"], "/redfish/v1/Managers/bmc/HostName")
+        self.assertEqual(calls[0], ("ssh", "bmc", "hostname"))
+        self.assertIn(("redfish",), calls)
+
+    def test_explicit_redfish_skips_ssh(self):
+        result, calls = self._collect(capability="redfish")
+        self.assertEqual(result["bmc_source"], "/redfish/v1/Managers/bmc/HostName")
+        self.assertFalse(any(c[0] == "ssh" for c in calls))
+
+    def test_pinned_ssh_does_not_fall_back(self):
+        result, calls = self._collect(capability="ssh_hostname", ssh_ok=False)
+        self.assertIsNone(result["bmc_hostname"])
+        self.assertFalse(any(c[0] == "redfish" for c in calls))
 
 
 if __name__ == "__main__":
