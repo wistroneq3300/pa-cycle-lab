@@ -127,10 +127,12 @@
         const controller=CONTROLLER_EVENTS[type];
         if(controller){out.push({...e,message:controller});continue;}
         if(type==='LOOP_STARTED'){const loop=e.loop;if(seenLoop.has(loop))continue;seenLoop.add(loop);out.push({...e,message:e.message||`Loop ${loop} started`});continue;}
-        // One line per node, matching vera's "<mode> sent"; the attempt is not a
-        // confirmed reboot (recovery is proven later by the boot-ID change).
+        // One line per node, matching vera's "<mode> sent". Both the dispatch
+        // intent and the submitted command collapse to the same string so the
+        // operator sees a single line; a sent command is still not a confirmed
+        // reboot (recovery is proven later by the boot-ID change).
         if(type==='COMMAND_DISPATCHING'||type==='COMMAND_DISPATCHED'){
-          const stage=e.event_type==='COMMAND_DISPATCHING'?`Preparing ${mode} dispatch`:`${mode} dispatched; outcome verification pending`;
+          const stage=`${mode} sent`;
           if(seenStage.get(e.machine_id)===stage)continue;seenStage.set(e.machine_id,stage);out.push({...e,message:stage,detail:''});continue;
         }
         const stage=PHASE_LABELS[type];
