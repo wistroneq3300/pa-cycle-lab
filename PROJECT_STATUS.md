@@ -1,5 +1,17 @@
 # PROJECT_STATUS — PA Cycle Lab native Next integration
 
+## 2026-10-03 System inspection + detail controls (isolated branch)
+
+Base `6eba3a2a706203df6484ff1dcacdc3ea95774799`, branch `codex/system-inspection-ux`; independent worktree. Live branch remains unchanged.
+
+- Added per-system opt-in inspection over **already collected local evidence**, durable issues/cursors/history, bounded scheduler/AI queue, existing provider/project checks, and a scoped detail-page inspection view. Default interval 120 seconds; high utilization is Warning, never hardware FAIL solely for load.
+- Node identity, deduplication, fresh-sample recovery/hysteresis, recurrence, acknowledgement/known/mute markers and independent coverage/freshness are preserved across restart. AI is advisory and cannot change severity; synthetic never calls the live LLM.
+- Current sources: canonical-node Telemetry usage and completed native Cycle dmesg findings. Machine-name-only history, ambiguous Sensor/SEL/controller data, and live connectivity/expected-offline ingestion remain explicitly **not covered**. No new hardware collection or invented four-node coverage.
+- Removed only the duplicate sidebar diagnosis action; retained overview manual diagnosis/results. Existing equipment settings and power buttons are grouped in native disclosures; Terminal, KVM, test assignment, refresh, hardware cards and six tabs remain. Original action handlers and payloads unchanged.
+- New targeted suite: **17 PASS**; browser: **16 state/viewport/theme cases PASS**. Vera **113 PASS / 16 SKIP**; legacy PA/broker **53 PASS**; 3 existing operations/Terminal JS scripts PASS. The paired 138-case inherited comparison has the **same 121 nonpassing test IDs** as baseline; no claim of an all-green repository suite. Windows bridge process baseline also timed out. See report for exact counts and exclusions.
+- [Implementation, limitations, test results and rollback](docs/SYSTEM_INSPECTION.md), [before/after and state screenshots](docs/screenshots/system-inspection/), [updated control inventory](UI_ACTION_INVENTORY.md).
+- Local development and new-branch push only. **Not deployed; no production service restart, production-data write or hardware operation.** The delivery response records the final commit SHA.
+
 ## 2026-10-03 Production UI copy review
 
 Baseline `4e21a03b2f9895b6b8cdfcd3fb64bde4f20841aa`, existing branch `cycle/live-neutrino-redfish-hostname`. First-pass report was written before UI edits; second-pass review includes decoded string matches and actual production render owners.

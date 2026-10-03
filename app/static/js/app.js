@@ -2249,6 +2249,7 @@ function setView(view) {
 }
 function _renderMachine(view) {
   window.CycleWorkspace?.dispose();
+  window.SystemInspection?.dispose();
   state.view = view;
   document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.view === view));
   $("page-title").textContent = TITLES[view] || TITLES.machine;
@@ -2269,7 +2270,7 @@ function _renderMachine(view) {
     }
   }
   if (view === "dashboard") bindCopilot();
-  if (view === "machine") initTelemetry();
+  if (view === "machine") { initTelemetry(); window.SystemInspection?.mount(_activeMachine); }
   if (view === "rack") {
     setTimeout(() => { bindRackCopilot(); if (devicesView === "telemetry") initRackTelemetry(); }, 0);
   }

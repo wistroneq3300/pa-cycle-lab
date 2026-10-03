@@ -18,6 +18,7 @@ SAFE_METADATA_ROUTES=(
     ('PATCH|DELETE',r'/api/projects/[^/]+'),
     ('GET',r'/api/testlibrary(?:/meta|/export)?'),
     ('GET|POST|DELETE',r'/api/links'),
+    ('GET|PATCH|POST',r'/api/machine/[^/]+/inspection(?:/.*)?'),
 )
 CYCLE_ROUTES=(
     ('POST',r'/api/cycle/runs'),

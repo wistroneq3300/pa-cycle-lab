@@ -1,5 +1,23 @@
 # Desktop action inventory — 2026-10-01
 
+## 2026-10-03 — System detail changes on `codex/system-inspection-ux`
+
+This dated section supersedes only the corresponding detail-page entries below; other historical entries are unchanged.
+
+| Location | Action / priority | Scope and actual API | Availability / feedback |
+|---|---|---|---|
+| Overview inspection | View issues / primary | Current chassis, all canonical nodes; GET inspection + paged issues | Coverage separate from FAIL/Warning; local read only. |
+| Overview inspection | Inspect now / secondary | POST `/api/machine/{name}/inspection/run` | Existing evidence evaluation, not full diagnosis; 409 on bounded capacity. |
+| Overview inspection | Settings / secondary | PATCH same prefix `/settings` | Per-system enable, interval, thresholds, recovery, AI; default off, permission checked. |
+| Issue details | Acknowledge / known / mute / secondary | PATCH `/inspection/issues/{id}` | Does not resolve the issue or delete evidence. |
+| Issue details | Analyze / secondary | POST `/inspection/issues/{id}/analyze` | Existing LLM, advisory; synthetic/unavailable or full queue clearly rejected. |
+| Overview diagnosis | Execute system diagnosis / secondary | Original `runDiagnose(name)` and original diagnose endpoint | Manual capability and report preserved; duplicate right-side button removed. |
+| Right-side operations | Terminal / KVM / assign test | Original handlers and target selection | Direct visible entries retained. |
+| Right-side equipment settings | Height / level / secondary | Original `uxRackSpecification` | Moved inside native disclosure; same validation and data flow. |
+| Right-side power operations | On/off/Reboot/AUX / destructive | Original four handlers, APIs, payloads and confirmation | Disclosure only; opening/focusing it dispatches nothing. Current target card retained. |
+| Right-side footer | Refresh / secondary | Original `machineRefresh` | Visible text retained. |
+| Hardware cards / tabs | Original navigation | No new device operation | Cards and all six existing server tabs retained. |
+
 Scope: pa-cycle-lab Next copy, base bb6f22c. Desktop targets: 1366×768 and 1920×1080, light/dark. Representative synthetic acceptance, not live availability or every plugin's visual certification. No production or hardware action was executed. Browser-only actions have no API.
 
 | Location | Visible action | Priority / scope | API or route | Current contract / feedback |

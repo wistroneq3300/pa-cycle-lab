@@ -1,0 +1,104 @@
+{
+  "results": [
+    {
+      "theme": "light",
+      "width": 1366,
+      "state": "disabled",
+      "passed": true
+    },
+    {
+      "theme": "light",
+      "width": 1366,
+      "state": "warning",
+      "passed": true
+    },
+    {
+      "theme": "light",
+      "width": 1366,
+      "state": "fail",
+      "passed": true
+    },
+    {
+      "theme": "light",
+      "width": 1366,
+      "state": "stale",
+      "passed": true
+    },
+    {
+      "theme": "light",
+      "width": 1920,
+      "state": "disabled",
+      "passed": true
+    },
+    {
+      "theme": "light",
+      "width": 1920,
+      "state": "warning",
+      "passed": true
+    },
+    {
+      "theme": "light",
+      "width": 1920,
+      "state": "fail",
+      "passed": true
+    },
+    {
+      "theme": "light",
+      "width": 1920,
+      "state": "stale",
+      "passed": true
+    },
+    {
+      "theme": "dark",
+      "width": 1366,
+      "state": "disabled",
+      "passed": true
+    },
+    {
+      "theme": "dark",
+      "width": 1366,
+      "state": "warning",
+      "passed": true
+    },
+    {
+      "theme": "dark",
+      "width": 1366,
+      "state": "fail",
+      "passed": true
+    },
+    {
+      "theme": "dark",
+      "width": 1366,
+      "state": "stale",
+      "passed": true
+    },
+    {
+      "theme": "dark",
+      "width": 1920,
+      "state": "disabled",
+      "passed": true
+    },
+    {
+      "theme": "dark",
+      "width": 1920,
+      "state": "warning",
+      "passed": true
+    },
+    {
+      "theme": "dark",
+      "width": 1920,
+      "state": "fail",
+      "passed": true
+    },
+    {
+      "theme": "dark",
+      "width": 1920,
+      "state": "stale",
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "hardware_dispatches": 0,
+  "baseline": "6eba3a2a",
+  "note": "Production DOM with intercepted browser data; not hardware acceptance."
+}

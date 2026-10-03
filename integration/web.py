@@ -82,7 +82,17 @@ async def web_lifespan(app):
             pa.telemetry_core.start_worker()
         except Exception as exc:
             print("啟動 Telemetry 收集 worker 失敗：", exc)
-        yield
+        inspection = None
+        try:
+            inspection = inspection_service()
+            inspection.start()
+        except Exception as exc:
+            print('巡檢服務未啟動：', type(exc).__name__)
+        try:
+            yield
+        finally:
+            if inspection is not None:
+                inspection.close()
 
 app.router.lifespan_context=web_lifespan
 
@@ -646,3 +656,7 @@ def reconcile_input_session(owner:str,body:dict,request:Request):
 
 app.add_middleware(SessionReservations, pa=pa, store_getter=lambda:store, mode=MODE)
 app.include_router(router)
+
+# Local evidence-only service; existing collectors and Cycle workers are unchanged.
+from .inspection_routes import install as install_inspection
+inspection_service = install_inspection(app, pa, lambda: store)
