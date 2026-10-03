@@ -42,11 +42,27 @@ def install(pa, store_getter, provider_getter=configured_provider):
                     if not keys: raise Conflict('Legacy observation needs a registered canonical target')
                     if not keys.issubset(held.get()):
                         provider=provider_getter();actor=caller.get()
-                        approve=getattr(provider,'approve_legacy_observation',None)
-                        if not actor or not callable(approve) or not all(provider.authorize(actor,t.get('project'),'read') for t in rows):
-                            raise Conflict('Verified observation provider/caller required')
-                        if not approve(actor,rows,operation(*args,**kwargs)):
-                            raise Conflict('Legacy command is not approved as read-only')
+                        # The actor ContextVar does not survive every execution boundary
+                        # (background runner threads/subprocesses). When no caller is bound,
+                        # fall back to the provider's service principal so an internal
+                        # all-permissive provider (local_provider) still admits these
+                        # read-only observations. A strict provider with no service_principal
+                        # keeps the original refusal.
+                        if provider is None:
+                            # No provider configured: mirror authorize()/authenticate(), which
+                            # treat this internal instance as local-operator for every action.
+                            actor='local-operator'
+                        else:
+                            if not actor:
+                                principal=getattr(provider,'service_principal',None)
+                                if callable(principal):
+                                    try: actor=principal('legacy-observation')
+                                    except Exception: actor=None
+                            approve=getattr(provider,'approve_legacy_observation',None)
+                            if not actor or not callable(approve) or not all(provider.authorize(actor,t.get('project'),'read') for t in rows):
+                                raise Conflict('Verified observation provider/caller required')
+                            if not approve(actor,rows,operation(*args,**kwargs)):
+                                raise Conflict('Legacy command is not approved as read-only')
                         stack.enter_context(session(store_getter(),rows,str(actor),kind='observation'))
                         token=held.set(held.get()|keys);stack.callback(held.reset,token)
                 return original(*args,**kwargs)

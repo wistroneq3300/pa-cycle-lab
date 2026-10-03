@@ -19,6 +19,13 @@ from cycle_transport import Command, IdentityUnsafe
 from neutrin_cycle import BASE, Console, campaign, main
 
 PCI = '0000:01:00.0 Ethernet controller [0200]: Example [1234:5678]\n0001:01:00.0 PCI bridge [0604]: Fabric [10de:2f95]\n'
+PCI_VERBOSE = ('0000:01:00.0 Ethernet controller\n'
+               '\tCapabilities: [80] Express (v2) Endpoint\n'
+               '\tLnkCap: Speed 8GT/s, Width x2\n'
+               '\tLnkSta: Speed 8GT/s, Width x2\n'
+               '0001:01:00.0 PCI bridge\n'
+               '\tCapabilities: [80] Express (v2) Root Port\n'
+               '\tLnkSta: Speed 16GT/s, Width x16\n')
 SENSORS = 'Temp | 30 | degrees C | ok | na\nFan | 12000 | RPM | ok | na\n'
 
 def target(node='n1', tray='tray1', offset=0):
@@ -49,6 +56,39 @@ class FakeTransport:
     def upload(self, target, data, remote):
         self.uploaded[target.key] = data
 
+    # --- Redfish fake -----------------------------------------------------
+    # A merged-style BMC: EventLog exists, no separate SEL service.
+    redfish_eventlog = [{"Id": "1", "Severity": "OK", "Created": "2000-01-03T04:44:02Z",
+                         "Message": "xyz.openbmc_project.Logging.Cleared"}]
+    redfish_sel_present = False
+    redfish_fail = False
+
+    def redfish_login(self, target, timeout=20):
+        if self.redfish_fail:
+            raise RuntimeError('redfish login failed (fake)')
+        return 'FAKETOKEN'
+
+    def redfish_get(self, target, path, token, timeout=30):
+        self.calls.append((target.key, 'redfish', path))
+        if self.redfish_fail:
+            return Command(255, 'unreachable', 'NOT_ISSUED')
+        if path == '/redfish/v1/Systems':
+            return Command(0, json.dumps({"Members": [{"@odata.id": "/redfish/v1/Systems/System_0"}]}))
+        if path == '/redfish/v1/Systems/System_0/LogServices':
+            members = [{"@odata.id": "/redfish/v1/Systems/System_0/LogServices/EventLog"}]
+            if self.redfish_sel_present:
+                members.append({"@odata.id": "/redfish/v1/Systems/System_0/LogServices/SEL"})
+            return Command(0, json.dumps({"Members": members}))
+        if path.endswith('/EventLog/Entries'):
+            return Command(0, json.dumps({"Members": self.redfish_eventlog}))
+        if path.endswith('/SEL/Entries'):
+            return Command(0, json.dumps({"Members": []}))
+        return Command(127, 'Unsupported fake Redfish path: ' + path)
+
+    def redfish_clear(self, target, path, token, timeout=30):
+        self.calls.append((target.key, 'redfish-clear', path))
+        return Command(0, 'OK')
+
     def action(self, t):
         if not self.no_recovery and not self.fail_command:
             self.boots[t.key] = self.boots.get(t.key, 0) + 1
@@ -77,6 +117,8 @@ class FakeTransport:
             return self.action(t)
         if cmd == 'lspci -Dnn':
             return Command(0, '' if self.empty_baseline else PCI.splitlines()[0] if self.pci_drift and self.boots.get(t.key) == 1 else PCI)
+        if cmd == 'lspci -Dvvv':
+            return Command(0, PCI_VERBOSE)
         if (cmd.startswith('bash ') or cmd.startswith('MEMORY_MIN_RATIO=')):
             return Command(1, 'ISSUE|BF4_MISSING|BF4|Expected at least 1; detected 0\nRESULT|FAIL\n') if self.hardware_failure else Command(0, 'RESULT|PASS\n')
         if cmd == '/usr/bin/powerctrl.sh power_status':
@@ -379,6 +421,17 @@ class EngineTests(unittest.TestCase):
         self.assertFalse(self.session.node['blocked'])
         self.session.start()
 
+    def test_capture_populates_pci_endpoint_devices(self):
+        self.ready()
+        record = self.session.one_loop(1)
+        devices = record.get('pci_devices') or {}
+        self.assertEqual(sorted(devices), ['0000:01:00.0', '0001:01:00.0'])
+        endpoint = devices['0000:01:00.0']
+        self.assertEqual(endpoint.get('link_current'), 'Speed 8GT/s, Width x2')
+        self.assertEqual(endpoint.get('link_result'), 'PASS')
+        # The bridge exposes a Root Port link, not an end-device Endpoint link.
+        self.assertEqual(devices['0001:01:00.0'].get('pcie_type'), 'Root Port')
+
     def test_sel_uses_before_snapshot_not_previous_post(self):
         self.ready()
         old = '1 | 09/30/2026 | 10:00:00 | Old event | Asserted\n'
@@ -392,9 +445,14 @@ class EngineTests(unittest.TestCase):
         record = self.session.one_loop(1)
         self.assertEqual(record['sel_events'], [fresh.strip()])
         self.assertNotIn('sel_before', record)
-        self.assertFalse(list((self.root/'tray1_n1').glob('pre_sel*')))
-        self.assertFalse((self.root/'tray1_n1'/'loop0001'/'sel_before.txt').exists())
+        self.assertTrue((self.root/'tray1_n1'/'pre_sel.txt').exists())
+        self.assertTrue((self.root/'tray1_n1'/'loop0001'/'sel_before.txt').exists())
         self.assertTrue((self.root/'tray1_n1'/'loop0001'/'sel.txt').exists())
+        self.assertTrue((self.root/'tray1_n1'/'loop0001'/'sel_delta.txt').exists())
+        self.assertTrue(self.session.node['pre']['sel_collection']['valid'])
+        self.assertEqual(self.session.node['pre']['commands']['pre_sel_clear']['command'], 'ipmitool sel clear')
+        self.assertEqual(record['sel_before_meta']['phase'], 'BEFORE_CYCLE')
+        self.assertEqual(record['sel_post_meta']['phase'], 'POST')
         self.assertGreaterEqual(record['duration_seconds'], 0)
 
     def test_sel_channel_and_clear_once(self):
@@ -496,7 +554,7 @@ class EngineTests(unittest.TestCase):
         self.fake.oob=oob
         self.ready()
         self.assertFalse(any(cmd=='sel clear' for _,_,cmd in self.fake.calls))
-        self.assertIn('CLEAR_SKIPPED',[i['code'] for i in self.session.node['start']['issues']])
+        self.assertIn('CLEAR_SKIPPED',[i['code'] for i in self.session.node['pre']['issues']])
 
     def test_all_cycle_modes_and_channels(self):
         self.ready()
@@ -525,15 +583,17 @@ class EngineTests(unittest.TestCase):
             self.assertIn('SENSOR_MALFORMED',[i['code'] for i in session.node['pre']['issues']])
 
     def test_failed_dmesg_clear_still_attempts_sel_without_key_error(self):
-        self.session.precheck()
         original=self.fake.ssh
         def ssh(t,role,cmd,timeout=60,sudo=False):
             return Command(1,'permission denied') if cmd=='dmesg -c' else original(t,role,cmd,timeout,sudo)
         self.fake.ssh=ssh
-        self.session.start()
-        self.assertFalse(self.session.node['start']['commands']['start_dmesg_clear']['valid'])
-        self.assertTrue(self.session.node['start']['commands']['start_sel_clear']['valid'])
+        self.session.precheck()
+        # Clean-start clearing lives in PRE now: a failed dmesg clear must not
+        # stop SEL from being cleared, and the run still reaches a usable PRE.
+        self.assertFalse(self.session.node['pre']['commands']['pre_dmesg_clear']['valid'])
+        self.assertTrue(self.session.node['pre']['commands']['pre_sel_clear']['valid'])
         self.assertEqual(sum(cmd=='sel clear' for _,_,cmd in self.fake.calls),1)
+        self.assertFalse(self.session.node['blocked'])
 
     def test_dispatch_not_issued_and_exception_paths(self):
         record=self.session.node['pre']
@@ -611,7 +671,9 @@ class EngineTests(unittest.TestCase):
     def test_cancel_discards_pre_and_sends_no_cycle(self):
         self.assertEqual(self.run_campaign(confirm=lambda _: 'no'),0)
         self.assertFalse(list(self.options.output.iterdir()))
-        self.assertFalse(any(cmd in ('dmesg -c','sel clear','ipmitool power cycle') for _,_,cmd in self.fake.calls))
+        # Clean-start policy: PRE prepares the node (clears dmesg/SEL/logs) so the
+        # baseline is clean, but no power/cycle command is ever sent on cancel.
+        self.assertFalse(any(cmd in ('reboot','ipmitool power cycle','/usr/bin/stbypowerctrl.sh aux_cycle') for _,_,cmd in self.fake.calls))
 
     def test_messages_between_dmesg_read_and_clear_are_preserved(self):
         self.ready()
@@ -634,8 +696,12 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(data['summary']['health'],'FAIL')
         self.assertEqual(data['nodes'][0]['completed'],2)
         self.assertEqual(len(data['summary']['issues']),1)
-        data['nodes'][0]['pre']['issues'][0]['detail']='<script>alert(1)</script>'
-        page=render_html(data)
+        # The summary is a portable overview: loop bodies stay in the journal.
+        self.assertNotIn('loops', data['nodes'][0])
+        self.assertNotIn('pre', data['nodes'][0])
+        campaign = json.loads((output/'campaign.json').read_text())
+        campaign['nodes'][0]['pre']['issues'][0]['detail']='<script>alert(1)</script>'
+        page=render_html(campaign)
         self.assertNotIn('<script>alert(1)</script>',page)
         self.assertIn('&lt;script&gt;alert(1)&lt;/script&gt;',page)
         self.assertIn('KNOWN',page)

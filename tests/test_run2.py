@@ -411,6 +411,19 @@ class Run2Tests(unittest.TestCase):
         for name in ('run.py','engine/vera_cycle/cycle_engine.py','engine/vera_cycle/neutrino_config.sh','engine/vera_cycle/issue_policy.md','engine/vera_cycle/VERSION','integration/control.py'):
             self.assertIn(name,manifest)
 
+    def test_test_results_artifacts_do_not_break_engine_hash(self):
+        # Demo/test output under test-results/ is local, gitignored, and must not
+        # be treated as a runtime file or engine_hash() raises Conflict and the
+        # runner cannot start a job.
+        original=engine_hash();folder=ROOT/'engine'/'vera_cycle'/'test-results'/'_run2_probe';folder.mkdir(parents=True)
+        try:
+            (folder/'CYCLE_REVIEW_REPORT.html').write_text('<html></html>')
+            (folder/'known_issues.md').write_text('# issues\n')
+            self.assertEqual(engine_hash(),original)
+        finally:
+            for child in folder.iterdir(): child.unlink()
+            folder.rmdir()
+
     def test_retention_only_compacts_old_terminal_events(self):
         job=self.create();self.store.stop(job['id'],'tester');root=ARTIFACTS/job['id'];root.mkdir();(root/'evidence.txt').write_text('keep')
         active=self.create();before=self.store.events(active['id'],0)

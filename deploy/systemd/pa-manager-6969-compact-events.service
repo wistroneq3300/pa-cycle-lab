@@ -1,0 +1,21 @@
+[Unit]
+Description=PA Manager 6969 — compact old terminal Cycle events (retention)
+Documentation=man:scripts/compact_events.py
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/root/sheng/PA-manager-6969
+Environment=CYCLE_MODE=live
+Environment=CYCLE_INSTANCE=data/pa6969
+Environment=CYCLE_PROVIDER=integration.local_provider
+Environment=PYTHONUTF8=1
+# Keep 30 days of full event history; compact every terminal job older than that.
+# Each job collapses to a single COMPACTED row. --vacuum then rewrites the DB so
+# the space freed by the deletes is actually returned to disk. Reports and
+# evidence are never touched.
+ExecStart=/root/sheng/PA-manager-6969/.venv/bin/python scripts/compact_events.py --days 30 --apply --vacuum
+Nice=10
+IOSchedulingClass=idle

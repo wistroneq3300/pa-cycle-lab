@@ -1,5 +1,19 @@
 # Native Next × Vera acceptance — 2026-10-01
 
+## 2026-10-03 UI compatibility on `cycle/live-neutrino-redfish-hostname`
+
+Baseline `1a51f2a`; earlier UI branch was not merged. Runtime diff limited to `app/static/js/cycle-workspace.js`, `app/static/css/cycle-workspace.css` and two cache-busters in `app/static/index.html`.
+
+Run `node tests/cycle-ui-compat-browser.cjs` with `PLAYWRIGHT_MODULE` pointing at installed Playwright and `PA_CYCLE_BASE_URL=http://127.0.0.1:9188`. This requires the isolated synthetic preview with inventory and a completed synthetic job; the test first verifies synthetic capabilities. It serves this branch's real HTML/static files, compares the baseline and current workspace, and intercepts every mutation. Existing synthetic GET responses supply fixtures. This is browser/UI contract acceptance, **not a new backend or hardware run**.
+
+Checks: loop/hour payload parity; no implicit defaults; invalid input sends no create; explicit node selection survives search; confirm version/targets unchanged; stop unchanged; deletion cancellation sends nothing and approval sends the same DELETE; Summary/Full remains functional with unchanged Console source; hidden Profile and absence of parallel control retained; keyed details/focus survive polling; all secondary counters retained; artifact link count unchanged and search works; four desktop/theme screenshots and reduced-motion.
+
+Before implementation the new summary assertion failed on the old UI. Visual verification also caught reduced-motion handling of console pseudo-elements; scoped CSS was extended. Screenshot captures explicitly reset scroll to avoid fixed-header artifacts in full-page captures.
+
+Final result: **1 browser comparison workflow PASS / 0 FAIL / 0 SKIP** (multiple assertions, not counted as separate tests). JavaScript syntax and whitespace checks PASS. Eight current-branch screenshots captured; creation light and run dark inspected directly. No previous-branch PASS totals are reused here.
+
+`git diff --exit-code 1a51f2a -- integration engine app/main.py app/static/js/cycle-console.js` verifies no backend, engine or Console logic change. No full Python/Vera suite, live provider, Linux/systemd or hardware acceptance is claimed in this UI-only round. Earlier test totals are historical and are not added to this round.
+
 ## Platform regression round — local/offline acceptance
 
 Base bb6f22c1795a79557e55b39650d859c26400b568; local changes only. The prior delivery table below must not be used as current acceptance.

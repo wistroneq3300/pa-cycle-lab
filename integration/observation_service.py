@@ -39,11 +39,8 @@ def collect_once(store, provider, document=None):
                     if current!=target: raise Conflict('Binding changed before observation')
                 store.observation_status(result['node_id'],dict(result,state='COLLECTING',owner=owner))
             os_password=target.get('os_password','')
-            if target.get('credential_ref'):
-                secrets=provider.credentials(target['credential_ref'],target.get('credential_version')) or {}
-                os_password=secrets.get('os_password') or os_password
             if not (target.get('os_ip') and target.get('os_user') and os_password):
-                raise Conflict('Credential reference is not configured')
+                raise Conflict('OS credentials are not configured in inventory')
             transport=Transport({'os':os_password},RUNTIME/'observation-host-keys',
                                 users={'os':target.get('os_user','')},ports={'os':target.get('os_port',22)})
             node=Target(tray=target.get('tray',''),node=target.get('node',''),

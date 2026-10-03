@@ -77,10 +77,10 @@
     const unknown=machines.filter(m=>m.mgx_type!=='blanking'&&((m.os_ip&&m.os_alive==null)||(m.bmc_ip&&m.bmc_alive==null)));
     const recent=read('pa_recent_devices',[]).filter(name=>machines.some(m=>m.name===name)).slice(0,4);
     const metrics=[['\u5c08\u6848',projects.length],['\u8a2d\u5099\uff0f\u5143\u4ef6',machines.length],['Ping \u672a\u56de\u61c9',attention.length],['\u5f85\u89c0\u6e2c',unknown.length]];
-    const summary='<section class="ux-overview" aria-label="\u5de5\u7a0b\u72c0\u614b\u6458\u8981"><header><div><h1>\u7cfb\u7d71\u5de5\u4f5c\u5340</h1><p>\u5f9e\u72c0\u614b\u5230\u64cd\u4f5c\uff0c\u5feb\u901f\u627e\u5230\u4e0b\u4e00\u6b65\u3002</p></div><button class="btn primary" onclick="productLevel(\'system\')">\u7ba1\u7406\u8a2d\u5099</button></header>'+
+    const summary='<section class="ux-overview" aria-label="設備狀態摘要"><header><div><h1>系統架構總覽</h1><p>查看設備狀態、最近使用設備與專案。</p></div><button class="btn primary" onclick="productLevel(\'system\')">\u7ba1\u7406\u8a2d\u5099</button></header>'+
       '<div class="ux-metrics">'+metrics.map(([label,value])=>'<div><span>'+label+'</span><strong>'+value+'</strong></div>').join('')+'</div>'+
       '<div class="ux-overview-columns"><section><h2>\u512a\u5148\u78ba\u8a8d</h2>'+(attention.length?attention.slice(0,4).map(m=>'<button class="ux-device-link" onclick="openMachine('+q(m.name)+')"><b>'+esc(m.name)+'</b><span>'+(m.os_alive===false&&m.os_ip?'OS ':'')+(m.bmc_alive===false&&m.bmc_ip?'BMC ':'')+'Ping \u672a\u56de\u61c9 \u2192</span></button>').join(''):'<p>\u76ee\u524d\u6c92\u6709 Ping \u672a\u56de\u61c9\u7684\u8a2d\u5099\u3002</p>')+'<small>OS '+os.online+'/'+os.total+' \u53ef\u9054 \u00b7 BMC '+bmc.online+'/'+bmc.total+' \u53ef\u9054\uff1b\u4e0d\u4ee3\u8868\u786c\u9ad4\u5065\u5eb7\u6216\u8a8d\u8b49\u6210\u529f\u3002</small></section>'+
-      '<section><h2>\u6700\u8fd1\u6aa2\u8996</h2>'+(recent.length?recent.map(name=>'<button class="ux-device-link" onclick="openMachine('+q(name)+')">'+esc(name)+'<span>\u958b\u555f \u2192</span></button>').join(''):'<p>\u958b\u555f\u8a2d\u5099\u5f8c\uff0c\u53ef\u5728\u6b64\u5feb\u901f\u8fd4\u56de\u3002</p>')+'<p class="ux-task-note">'+(typeof powerBatch!=='undefined'&&powerBatch?.running?'\u96fb\u6e90\u6279\u6b21\u8655\u7406\u4e2d':'\u672c\u9801\u7121\u57f7\u884c\u4e2d\u7684\u96fb\u6e90\u6279\u6b21')+' \u00b7 \u6e2c\u8a66\u57f7\u884c\u72c0\u614b\u672a\u63a5\u5165</p></section></div></section>';
+      '<section><h2>\u6700\u8fd1\u6aa2\u8996</h2>'+(recent.length?recent.map(name=>'<button class="ux-device-link" onclick="openMachine('+q(name)+')">'+esc(name)+'<span>\u958b\u555f \u2192</span></button>').join(''):'<p>\u958b\u555f\u8a2d\u5099\u5f8c\uff0c\u53ef\u5728\u6b64\u5feb\u901f\u8fd4\u56de\u3002</p>')+'<p class="ux-task-note">'+(typeof powerBatch!=='undefined'&&powerBatch?.running?'\u96fb\u6e90\u6279\u6b21\u8655\u7406\u4e2d':'\u672c\u9801\u7121\u57f7\u884c\u4e2d\u7684\u96fb\u6e90\u6279\u6b21')+'</p></section></div></section>';
     root.querySelector('.cine-page-intro')?.remove();
     root.insertAdjacentHTML('afterbegin',summary);
     const story=root.querySelector('#core-story');
@@ -104,7 +104,7 @@
       const action=b.getAttribute('onclick')||'',key=b.dataset.actionGroup||(/Power|Reboot|Aux/.test(action)?'power':/Ping|Broadcast/.test(action)?'connect':'config');
       b.textContent=b.textContent.replace(/^[^\p{L}\p{N}]+/u,'').trim();
       b.insertAdjacentHTML('afterbegin',icon(key));
-      if(/topoTodo|rackBulkReboot|rackBulkAux/.test(action)){b.disabled=true;b.title='\u529f\u80fd\u5c1a\u672a\u63a5\u5165';b.insertAdjacentHTML('beforeend','<small>\u672a\u63a5\u5165</small>');}
+      if(/topoTodo|rackBulkReboot|rackBulkAux/.test(action)){b.remove();return;}
       containers[key].append(b);
     });
     const title=hero.querySelector('.rack-hero-title');if(title)title.textContent='Rack Manager';

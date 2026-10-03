@@ -53,28 +53,129 @@ html:has(#cycle-panel[open]),body:has(#cycle-panel[open]) { height:100dvh; max-w
 #cycle-panel ::selection { color:var(--bg-panel); background:var(--text); }
 @media (max-width:900px) { .cycle-layout { grid-template-columns:minmax(0,1fr); gap:0; } .cycle-history { border-top:1px solid var(--border); } .cycle-fields { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width:540px) { #cycle-panel { width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0; } .cycle-shell { padding:16px; } .cycle-header { flex-direction:column;gap:12px; } .cycle-header h1 { font-size:22px; } .cycle-fields { grid-template-columns:1fr; } .cycle-service { gap:10px; } .cycle-table table { min-width:620px; } }
-#cycle-panel .cycle-console { --log-pass:#18713d; --log-info:#006c91; --log-wait:#855300; --log-fail:#bc2635; --log-phase:#7545a9; margin-top:24px; padding:18px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; }
-:root[data-theme="dark"] #cycle-panel .cycle-console { --log-pass:#72dfa0; --log-info:#72d4f4; --log-wait:#f4c56a; --log-fail:#ff939d; --log-phase:#c7a7fa; }
-#cycle-panel .cycle-console-heading { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:8px 20px; }
-#cycle-panel .cycle-console-heading h3 { margin:0; font-size:18px; }
-#cycle-panel .cycle-console-heading p { margin:6px 0 16px; font-size:12px; overflow-wrap:anywhere; }
-#cycle-panel .cycle-console-heading>span { font:13px Consolas,monospace; font-variant-numeric:tabular-nums; }
-#cycle-panel .cycle-console-tools,.cycle-console-nodes { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:10px; }
-#cycle-panel .cycle-console-nodes { margin:0; }
-#cycle-panel .cycle-console-tools .btn[aria-pressed="true"] { border-color:var(--cycle-notice); box-shadow:inset 0 -2px var(--cycle-notice); }
-#cycle-panel label.cycle-console-check { flex-direction:row; align-items:center; min-height:40px; margin:0 6px; }
-#cycle-panel .cycle-console-search { flex:1; min-width:200px; }
-#cycle-panel .cycle-console-search input::placeholder { color:var(--text-dim); opacity:1; }
-#cycle-panel .cycle-console-status,#cycle-panel .cycle-console-note { color:var(--text-dim); font-size:12px; line-height:1.6; margin:12px 0; }
-#cycle-panel .cycle-console-log { height:400px; overflow:auto; scrollbar-gutter:stable; border-block:1px solid var(--border); font:12px/1.65 Consolas,'Courier New',monospace; overflow-wrap:anywhere; contain:layout style; }
-#cycle-panel .cycle-console-row { display:grid; grid-template-columns:62px 78px 45px minmax(0,1fr); gap:10px; padding:7px 4px; border-bottom:1px solid var(--border); }
-#cycle-panel .cycle-console-time,#cycle-panel .cycle-console-node { color:var(--text-dim); }
-#cycle-panel .cycle-console-level { color:var(--log-info); font-weight:bold; }
-#cycle-panel [data-level="PASS"] .cycle-console-level { color:var(--log-pass); }
-#cycle-panel [data-level="WAIT"] .cycle-console-level,#cycle-panel [data-level="WARN"] .cycle-console-level { color:var(--log-wait); }
-#cycle-panel [data-level="FAIL"] .cycle-console-level,#cycle-panel [data-level="ERROR"] .cycle-console-level { color:var(--log-fail); }
-#cycle-panel [data-level="PRE"] .cycle-console-level,#cycle-panel [data-level="POST"] .cycle-console-level { color:var(--log-phase); }
-#cycle-panel .cycle-console-message small { display:block; color:var(--text-dim); font:inherit; font-size:11px; }
-#cycle-panel .cycle-console-message a { display:inline-block; padding:5px 0; }
-#cycle-panel .cycle-console [data-part="error"] { color:var(--log-fail); font-size:13px; }
-@media (max-width:540px) { #cycle-panel .cycle-console { padding:12px; } #cycle-panel .cycle-console-row { grid-template-columns:62px minmax(0,1fr) 50px; gap:4px 8px; } #cycle-panel .cycle-console-message { grid-column:1/-1; } #cycle-panel .cycle-console-log { height:360px; } }
+
+/* ===== Live Console: raised instrument panel + hacker terminal styling ===== */
+#cycle-panel { --lc-mono:"Cascadia Mono","JetBrains Mono","Fira Code",Consolas,"SF Mono","DejaVu Sans Mono",monospace; }
+#cycle-panel .live-console {
+  --lc-radius:14px;
+  --log-pass:#5fce8f; --log-info:#5cc7ee; --log-wait:#e9b95a; --log-fail:#ff8089; --log-phase:#c7a7fa;
+  margin-top:24px; padding:0; overflow:hidden;
+  border-radius:var(--lc-radius);
+  background:linear-gradient(180deg, color-mix(in srgb, var(--bg-panel-2) 92%, #fff 8%) 0%, var(--bg-panel) 120px);
+  border:1px solid var(--border);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 -18px 34px -26px rgba(0,0,0,.55) inset,
+    0 10px 22px -10px rgba(0,0,0,.55),
+    0 26px 48px -24px rgba(0,0,0,.55);
+}
+:root:not([data-theme="dark"]) #cycle-panel .live-console {
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 10px 22px -12px rgba(16,40,70,.28),
+    0 26px 46px -26px rgba(16,40,70,.34);
+}
+#cycle-panel .live-console-head { display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid var(--border); }
+#cycle-panel .live-console-head h3 { margin:0; font-family:var(--lc-mono); font-size:15px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--text); text-shadow:0 0 10px color-mix(in srgb, var(--w-green) 45%, transparent); }
+#cycle-panel .live-console-head h3::before { content:"\258D"; color:var(--w-green); margin-right:6px; text-shadow:0 0 8px var(--w-green); }
+#cycle-panel .live-console-head h3::after { content:"_"; color:var(--w-green); animation:lc-caret 1s steps(1) infinite; }
+#cycle-panel .live-console-head .lc-job { margin-left:auto; color:var(--text-dim); font:12px var(--lc-mono); }
+#cycle-panel .live-console-head .lc-dot { width:9px; height:9px; border-radius:50%; background:var(--w-green-bright); box-shadow:0 0 0 4px color-mix(in srgb, var(--w-green) 22%, transparent); animation:lc-pulse 1.8s ease-in-out infinite; }
+#cycle-panel .live-console-head .lc-dot.lc-idle { background:var(--text-dim); animation:none; box-shadow:0 0 0 4px color-mix(in srgb, var(--text-dim) 18%, transparent); }
+@keyframes lc-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+@keyframes lc-caret { 0%,50%{opacity:1} 51%,100%{opacity:0} }
+
+#cycle-panel .live-console-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:10px 18px; border-bottom:1px solid var(--border); background:color-mix(in srgb, var(--bg-panel-2) 55%, transparent); }
+#cycle-panel .live-console-bar .btn { min-height:32px; padding:4px 12px; font-size:13px; }
+#cycle-panel .live-console-bar .btn.on,#cycle-panel .live-console-bar .btn[aria-pressed="true"] { border-color:var(--w-green); color:var(--w-green); background:color-mix(in srgb, var(--w-green) 12%, transparent); }
+#cycle-panel .lc-seg { display:inline-flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+#cycle-panel .lc-seg .btn { border:0; border-radius:0; min-height:30px; }
+#cycle-panel .lc-seg .btn + .btn { border-left:1px solid var(--border); }
+#cycle-panel .lc-seg .btn[aria-pressed="true"] { background:var(--w-green); color:#fff; }
+#cycle-panel .live-console-bar .lc-search { flex:1; min-width:160px; min-height:32px; border:1px solid var(--border); border-radius:8px; background:var(--bg-panel); color:var(--text); padding:4px 10px; font:13px inherit; }
+#cycle-panel .live-console-bar .lc-search::placeholder { color:var(--text-dim); opacity:1; }
+#cycle-panel .lc-icon { width:34px; min-height:32px; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--border); border-radius:8px; background:var(--bg-panel); color:var(--text); cursor:pointer; font-size:15px; line-height:1; text-decoration:none; }
+#cycle-panel .lc-icon:hover { background:var(--bg-hover); }
+#cycle-panel .lc-icon[aria-pressed="true"] { border-color:var(--w-green); color:var(--w-green); background:color-mix(in srgb, var(--w-green) 12%, transparent); }
+#cycle-panel .lc-icon:disabled { opacity:.45; cursor:not-allowed; }
+
+#cycle-panel .live-console-view {
+  margin:16px 18px 0; height:500px; overflow:auto; scrollbar-gutter:stable;
+  border-radius:10px;
+  background:#0b141d;
+  background-image:repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 3px);
+  border:1px solid #000;
+  font:13px/1.7 Consolas,Menlo,monospace; font-weight:400; overflow-wrap:anywhere; contain:layout style;
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,.55),
+    inset 0 -1px 0 rgba(255,255,255,.05),
+    0 1px 0 rgba(255,255,255,.07),
+    0 14px 26px -12px rgba(0,0,0,.6);
+}
+/* Light theme: follow the page — light terminal panel, dark text. */
+:root:not([data-theme="dark"]) #cycle-panel .live-console-view {
+  background:#f7f9fb;
+  background-image:repeating-linear-gradient(0deg, rgba(0,0,0,.018) 0 1px, transparent 1px 3px);
+  border:1px solid var(--border);
+  box-shadow:inset 0 2px 6px rgba(16,40,70,.12),inset 0 -1px 0 rgba(255,255,255,.7),0 14px 26px -14px rgba(16,40,70,.4);
+}
+#cycle-panel .live-console-view::selection { background:color-mix(in srgb, var(--w-green) 45%, transparent); }
+
+#cycle-panel .live-console-view .cycle-console-row {
+  display:grid; grid-template-columns:78px 66px 58px minmax(0,1fr);
+  gap:14px; padding:7px 14px 7px 12px;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  border-left:3px solid transparent;
+  font-variant-numeric:tabular-nums;
+}
+#cycle-panel .live-console-view .cycle-console-time { color:#6f8598; letter-spacing:.3px; font-weight:500; }
+#cycle-panel .live-console-view .cycle-console-node { color:#9fb4c8; font-weight:600; }
+#cycle-panel .live-console-view .cycle-console-level { align-self:start; font-size:10px; font-weight:700; letter-spacing:.6px; text-align:center; line-height:16px; border-radius:4px; padding:0 2px; background:rgba(255,255,255,.06); color:var(--lc,#5cc7ee); }
+#cycle-panel .live-console-view .cycle-console-message { color:#eef4fb; letter-spacing:.1px; text-shadow:0 0 1px rgba(255,255,255,.14); }
+#cycle-panel .live-console-view .cycle-console-message small { display:block; margin-top:2px; color:#7f93a8; font:inherit; font-size:11px; letter-spacing:.2px; }
+#cycle-panel .live-console-view .cycle-console-message a { display:inline-block; padding:5px 0; color:var(--cycle-link); }
+#cycle-panel .live-console-view .cycle-console-row:hover { background:rgba(255,255,255,.04); }
+#cycle-panel .live-console-view [data-level="PASS"]  { --lc:#5fce8f; border-left-color:#5fce8f; }
+#cycle-panel .live-console-view [data-level="INFO"]  { --lc:#5cc7ee; border-left-color:#3aa9d6; }
+#cycle-panel .live-console-view [data-level="CMD"]   { --lc:#5cc7ee; border-left-color:#3aa9d6; }
+#cycle-panel .live-console-view [data-level="WAIT"]  { --lc:#e9b95a; border-left-color:#e9b95a; }
+#cycle-panel .live-console-view [data-level="WARN"]  { --lc:#e9b95a; border-left-color:#e9b95a; }
+#cycle-panel .live-console-view [data-level="FAIL"]  { --lc:#ff8089; border-left-color:#ff5f6e; background:rgba(255,95,110,.06); }
+#cycle-panel .live-console-view [data-level="ERROR"] { --lc:#ff8089; border-left-color:#ff5f6e; background:rgba(255,95,110,.06); }
+#cycle-panel .live-console-view [data-level="PRE"]   { --lc:#c7a7fa; border-left-color:#a981f0; }
+#cycle-panel .live-console-view [data-level="POST"]  { --lc:#c7a7fa; border-left-color:#a981f0; }
+
+/* Light theme: flip row text to dark-on-light. */
+:root:not([data-theme="dark"]) #cycle-panel .live-console-view .cycle-console-time { color:#5c7183; }
+:root:not([data-theme="dark"]) #cycle-panel .live-console-view .cycle-console-node { color:#3d5566; }
+:root:not([data-theme="dark"]) #cycle-panel .live-console-view .cycle-console-message { color:#1b2833; text-shadow:none; }
+:root:not([data-theme="dark"]) #cycle-panel .live-console-view .cycle-console-message small { color:#67788a; }
+:root:not([data-theme="dark"]) #cycle-panel .live-console-view .cycle-console-level { background:rgba(0,0,0,.06); }
+:root:not([data-theme="dark"]) #cycle-panel .live-console-view .cycle-console-row { border-bottom-color:rgba(0,0,0,.07); }
+:root:not([data-theme="dark"]) #cycle-panel .live-console-view .cycle-console-row:hover { background:rgba(0,0,0,.035); }
+:root:not([data-theme="dark"]) #cycle-panel .live-console-view [data-level="PASS"]  { --lc:#1c7a44; }
+:root:not([data-theme="dark"]) #cycle-panel .live-console-view [data-level="INFO"],
+:root:not([data-theme="dark"]) #cycle-panel .live-console-view [data-level="CMD"]   { --lc:#0d6a8c; }
+:root:not([data-theme="dark"]) #cycle-panel .live-console-view [data-level="WAIT"],
+:root:not([data-theme="dark"]) #cycle-panel .live-console-view [data-level="WARN"]  { --lc:#8a5a00; }
+:root:not([data-theme="dark"]) #cycle-panel .live-console-view [data-level="FAIL"],
+:root:not([data-theme="dark"]) #cycle-panel .live-console-view [data-level="ERROR"] { --lc:#b3222f; background:rgba(200,40,60,.07); }
+:root:not([data-theme="dark"]) #cycle-panel .live-console-view [data-level="PRE"],
+:root:not([data-theme="dark"]) #cycle-panel .live-console-view [data-level="POST"]  { --lc:#6a3fbf; }
+
+/* newest line: typed-in reveal + glowing live caret */
+#cycle-panel .live-console-view .cycle-console-row.lc-newest { animation:lc-reveal .32s ease-out; background:linear-gradient(90deg, color-mix(in srgb, var(--w-green) 14%, transparent), transparent 60%); box-shadow:inset 0 -1px 0 color-mix(in srgb, var(--w-green) 40%, transparent); }
+#cycle-panel .live-console-view .cycle-console-row.lc-newest .cycle-console-message::after { content:"\258B"; margin-left:3px; color:var(--w-green-bright); text-shadow:0 0 8px var(--w-green); animation:lc-caret 1s steps(1) infinite; }
+@keyframes lc-reveal { from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+
+#cycle-panel .live-console-foot { display:flex; align-items:center; gap:14px; padding:10px 18px 12px; color:var(--text-dim); font-size:12px; }
+#cycle-panel .live-console-foot .lc-count { margin-left:auto; font-variant-numeric:tabular-nums; }
+#cycle-panel .live-console-note { margin:0 18px 16px; color:var(--text-dim); font-size:12px; line-height:1.6; }
+#cycle-panel .live-console [data-part="error"] { margin:12px 18px 0; color:var(--log-fail); font-size:13px; }
+@media (max-width:540px) {
+  #cycle-panel .live-console-view { height:360px; margin:12px 12px 0; }
+  #cycle-panel .live-console-view .cycle-console-row { grid-template-columns:66px minmax(0,1fr) 50px; gap:4px 8px; }
+  #cycle-panel .live-console-view .cycle-console-message { grid-column:1/-1; }
+  #cycle-panel .live-console-head,#cycle-panel .live-console-bar,#cycle-panel .live-console-foot { padding-left:12px; padding-right:12px; }
+  #cycle-panel .live-console-note { margin-left:12px; margin-right:12px; }
+}

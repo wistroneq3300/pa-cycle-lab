@@ -105,10 +105,12 @@ def freeze(package, source, project_name=None):
     if path is None:
         raise CheckerMissing(checker_missing_message(project_name))
     script = path.read_text(encoding='utf-8').replace('\r\n', '\n')
+    # Counts come from the project's own checker (<project>_config.sh): the profile no
+    # longer injects CPU_MIN/DIMM_EXPECTED/... . Only the enable/mode switches are frozen.
     parameters=[]
     for key,spec in MEASUREMENTS.items():
         e=p['expectations'][key]
-        parameters.extend([f'{spec[0]}={e["value"]}',f'PROFILE_{spec[5]}_ENABLED={int(e["enabled"])}',f'PROFILE_{spec[5]}_MODE={e["mode"]}'])
+        parameters.extend([f'PROFILE_{spec[5]}_ENABLED={int(e["enabled"])}',f'PROFILE_{spec[5]}_MODE={e["mode"]}'])
     parameters.append('MEMORY_MIN_RATIO='+str(p['thresholds']['memory_min_ratio']))
     marker='# PROFILE_PARAMETERS'
     if script.count(marker)!=1:raise ValueError('Checker does not expose the reviewed profile parameter contract')
@@ -134,7 +136,9 @@ def activate(store,project_id,package):
 def resolve(db,project_id,legacy_profile=None,project_name=None):
     row=db.execute('SELECT package FROM validation_profiles WHERE project_id=?',(project_id,)).fetchone() if project_id else None
     if row:return freeze(json.loads(row[0]),'activated:'+project_id,project_name)
-    if legacy_profile=='neutrino':return freeze(default_package(),'bundled:neutrino',project_name)
+    # An unset cycle_profile means "use the built-in Neutrino package" (this instance's
+    # platform default), matching the UI, which offers no profile picker.
+    if legacy_profile in (None,'neutrino'):return freeze(default_package(),'bundled:neutrino',project_name)
     return None
 
 

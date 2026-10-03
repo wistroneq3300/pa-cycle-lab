@@ -1,5 +1,6 @@
 """Transactional job state and control-scope reservations shared by Web and runner."""
 from contextlib import contextmanager
+from datetime import datetime
 from pathlib import Path
 import hashlib
 import ipaddress
@@ -14,6 +15,7 @@ import threading
 from .settings import DATA, MODE, ENGINE, ROOT
 from .events import structured
 from .profiles import checker_script_path, checker_missing_message
+from cycle_core import LOG_TIMEZONE
 
 TERMINAL = {'COMPLETE', 'INCOMPLETE', 'CANCELLED', 'BLOCKED', 'ERROR', 'RECONCILIATION_REQUIRED'}
 SAFE_FIELDS = ('name','project','tray','node','os_ip','bmc_ip','os_hostname','bmc_hostname',
@@ -22,7 +24,7 @@ SAFE_FIELDS = ('name','project','tray','node','os_ip','bmc_ip','os_hostname','bm
                'node_id','parent_name','chassis_id','slot_key','display_name','revision',
                'controller_id','system_uri','console_id','node_serial','hardware_uuid',
                'slot_id','project_id','rack_id','mapping_status','capabilities','credential_version','ipmi_port',
-               'expected_identity','trust','os_password')
+               'expected_identity','trust','os_password','bmc_password')
 
 class Conflict(ValueError):
     pass
@@ -32,6 +34,18 @@ def encode(value):
 
 def fingerprint(value):
     return hashlib.sha256(encode(value).encode()).hexdigest()
+
+def readable_job_id(project, config):
+    """Human-readable run id: <project>_<mode>_<channel>_<UTC+8 date>_<time>_<6hex>.
+
+    Mirrors the vera-cycle campaign naming so an artifact directory can be read at
+    a glance. The trailing hex keeps ids unique and the whole string URL/filesystem
+    safe (only [a-z0-9_-])."""
+    slug=re.sub(r'[^a-z0-9]+','_',str(project).lower()).strip('_') or 'run'
+    stamp=datetime.now(LOG_TIMEZONE).strftime('%Y%m%d_%H%M%S')
+    mode=re.sub(r'[^a-z0-9]+','_',str(config.get('cycle_mode','')).lower()).strip('_') or 'cycle'
+    channel=re.sub(r'[^a-z0-9]+','_',str(config.get('channel','')).lower()).strip('_') or 'inband'
+    return f"{slug}_{mode}_{channel}_{stamp}_{uuid.uuid4().hex[:6]}"
 
 
 def snapshot_target(machine):
@@ -44,7 +58,7 @@ def runtime_hash(ui=False):
     # New nested runtime files cannot silently evade PRE's version guarantee.
     discovered={'run.py'}
     for folder in ('integration','engine/vera_cycle','app'):
-        excluded={'dev','docs','data','tests','node_modules','__pycache__','qa'}
+        excluded={'dev','docs','data','tests','node_modules','__pycache__','qa','test-results'}
         if folder=='app': excluded|={'scripts','deploy'}
         for p in (ROOT/folder).rglob('*'):
             relative=p.relative_to(ROOT)
@@ -281,8 +295,14 @@ class Store:
         # Lock enforcement removed: inventory changes are no longer blocked by reservations.
         return
 
-    def compact_events(self, before):
-        """Explicit maintenance only; preserve final event cursor and all evidence."""
+    def compact_events(self, before, vacuum=False):
+        """Explicit maintenance only; preserve final event cursor and all evidence.
+
+        Deleting rows leaves free pages inside the SQLite file, so the file does
+        not shrink until ``VACUUM`` rewrites it. ``vacuum`` runs that rewrite on
+        a separate connection (SQLite forbids VACUUM inside a transaction) after
+        the compaction commits.
+        """
         count=0
         with self.tx() as db:
             for row in db.execute('SELECT id,data FROM jobs WHERE updated<?',(before,)).fetchall():
@@ -294,6 +314,12 @@ class Store:
                 db.execute('DELETE FROM events WHERE job_id=? AND seq<?',(job['id'],last))
                 db.execute('UPDATE events SET data=? WHERE seq=?',(encode(dict(job_id=job['id'],phase='COMPACTED',state=job['state'],removed=len(events)-1)),last))
                 count+=len(events)-1
+        if vacuum:
+            db=sqlite3.connect(self.path, timeout=60)
+            try:
+                db.execute('VACUUM')
+            finally:
+                db.close()
         return count
 
     @contextmanager
@@ -319,7 +345,7 @@ class Store:
                 if row['request_hash'] != request_hash:
                     raise Conflict('重試識別碼已用於不同設定')
                 return self._get(db,row['id'])
-            job_id = uuid.uuid4().hex
+            job_id = readable_job_id(project, request)
             self.reserve(db,job_id,keys)
             job = dict(id=job_id,project=project,state='CREATED',mode=mode,synthetic=mode=='synthetic',
                        config=request,targets=targets,created_by=actor,created_at=time.time(),
@@ -353,7 +379,7 @@ class Store:
                 job=json.loads(prior[0])
                 if fingerprint(job['config'])!=fingerprint(config): raise Conflict('Idempotency key already used')
                 return job
-            jid=uuid.uuid4().hex; at=time.time()
+            jid=readable_job_id(project, config); at=time.time()
             pre=dict(runnable_ids=[],excluded=[dict(machine_id=t['name'],reasons=[reason]) for t in targets],findings=[],baseline_hash=None)
             pre['version']=fingerprint(pre)
             job=dict(id=jid,run_id='cycle-'+jid,project=project,state='BLOCKED',mode=MODE,synthetic=MODE=='synthetic',config=config,
@@ -460,6 +486,22 @@ class Store:
             db.execute('DELETE FROM locks WHERE owner=?',(job_id,))
             return job
 
+    def delete_job(self, job_id):
+        """Permanently remove a terminal job and every row keyed to it.
+
+        Only terminal jobs may be deleted; an active reservation must be stopped first.
+        Returns the removed project name so the caller can drop the artifact directory."""
+        with self.tx() as db:
+            job=self._get(db,job_id)
+            if job['state'] not in TERMINAL:
+                raise Conflict('Only stopped or finished runs can be deleted')
+            project=job['project']
+            for table in ('events','node_status','actions','artifact_index'):
+                db.execute(f'DELETE FROM {table} WHERE job_id=?',(job_id,))
+            db.execute('DELETE FROM locks WHERE owner=?',(job_id,))
+            db.execute('DELETE FROM jobs WHERE id=?',(job_id,))
+            return project
+
     def event_page(self, job_id, after=0, limit=500, before=None, tail=False, machine_id=None, errors_only=False, search='', until=None):
         """Read-only, indexed keyset pages. No writer reservation during polling/export."""
         limit=max(1,min(500,limit))
@@ -539,5 +581,5 @@ def target_reason(machine, profile, mode=MODE, require_profile=True):
     if type(machine.get('ipmi_cipher',17)) is not int or not 0<=machine.get('ipmi_cipher',17)<=20: reasons.append('無效：ipmi_cipher')
     if not isinstance(machine.get('power_domain'),str) or not machine['power_domain'].strip(): reasons.append('缺少或無效 power_domain')
     if mode=='synthetic' and not machine.get('synthetic'): reasons.append('離線模式只接受 SYNTHETIC inventory')
-    if mode=='live' and (machine.get('synthetic') or not machine.get('credential_ref')): reasons.append('實機模式需要真實 inventory 與 credential_ref')
+    if mode=='live' and machine.get('synthetic'): reasons.append('實機模式需要真實 inventory')
     return reasons

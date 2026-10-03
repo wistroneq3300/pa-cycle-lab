@@ -1,0 +1,22 @@
+[Unit]
+Description=PA Manager 6969 (codex/next-rack-cycle) isolated Web
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/sheng/PA-manager-6969
+Environment=CYCLE_MODE=live
+Environment=CYCLE_INSTANCE=data/pa6969
+Environment=CYCLE_ARTIFACTS_DIR=CycleTest
+Environment=CYCLE_PROVIDER=integration.local_provider
+Environment=PYTHONUTF8=1
+Environment=TERM_BRIDGE_PORT=7002
+Environment=CYCLE_BRIDGE_TOKEN_FILE=/root/sheng/PA-manager-6969/data/pa6969/runtime/bridge-token
+ExecStart=/root/sheng/PA-manager-6969/.venv/bin/python -m uvicorn integration.web:app --host 0.0.0.0 --port 6969
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

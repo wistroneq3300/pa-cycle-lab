@@ -17,8 +17,16 @@ class HardwareTests(unittest.TestCase):
             serials = ['CARD-A'] * functions if serials is None else serials
             identities = '\n'.join(f"0000:0{i+4}:00.0 Ethernet controller: Mellanox {bf4}\n Capabilities: [54] Vital Product Data\n [SN] Serial number: {serial}" for i, serial in enumerate(serials))
             pci_functions = '\n'.join(f"0000:0{i+4}:00.0 Ethernet controller [0200]: Mellanox {bf4} [15b3:a2dc]" for i in range(functions))
-            pci_inventory = '\n'.join(f'0000:{i:02x}:00.0 PCI bridge [0604]: NVIDIA bridge [10de:2f95]' for i in [1, *range(16, 35)]) + '\n' + pci_functions + '\n0000:02:00.0 USB controller [0c03]: controller [1234:5678]\n0000:03:00.0 PCI bridge [0604]: ASPEED AST1150 [1234:9876]'
-            link_inventory = pci_inventory.replace('0000:01:00.0 PCI bridge [0604]: NVIDIA bridge [10de:2f95]', f"0000:01:00.0 Controller\n Capabilities: [80] Express (v2) {'Endpoint' if endpoint else 'Root Port'}\n LnkSta: Speed {'unknown, Width x0' if unavailable else '16GT/s, Width x8'} {'(downgraded)' if downgrade else ''}")
+            pci_inventory = '\n'.join(f'0000:{i:02x}:00.0 PCI bridge [0604]: NVIDIA bridge [10de:2f95]' for i in range(16, 36)) + '\n' + pci_functions + '\n0000:02:00.0 USB controller [0c03]: controller [1234:5678]\n0000:03:00.0 PCI bridge [0604]: ASPEED AST1150 [1234:9876]\n0000:01:00.0 Ethernet controller [0200]: Mellanox ConnectX test endpoint'
+            link_inventory = pci_inventory.replace('0000:01:00.0 Ethernet controller [0200]: Mellanox ConnectX test endpoint', f"0000:01:00.0 Ethernet controller [0200]: Mellanox ConnectX test endpoint\n Capabilities: [80] Express (v2) {'Endpoint' if endpoint else 'Root Port'}\n LnkSta: Speed {'unknown, Width x0' if unavailable else '16GT/s, Width x8'} {'(downgraded)' if downgrade else ''}")
+            # ``lspci -Dvv -nn`` carries link status AND VPD serials in one dump,
+            # so the fixtures feed BF4 blocks through the same verbose output the
+            # checks now share instead of a separate ``-Dvvv`` capture.
+            verbose_inventory = link_inventory
+            for i, serial in enumerate(serials):
+                verbose_inventory = verbose_inventory.replace(
+                    f"0000:0{i+4}:00.0 Ethernet controller [0200]: Mellanox {bf4} [15b3:a2dc]",
+                    f"0000:0{i+4}:00.0 Ethernet controller [0200]: Mellanox {bf4} [15b3:a2dc]\n Capabilities: [54] Vital Product Data\n [SN] Serial number: {serial}")
             tools={
               'dmidecode':f'''case "$*" in
                 '-t processor') printf 'Status: Populated, Enabled\\nStatus: Populated, Enabled\\n';;
@@ -30,8 +38,9 @@ class HardwareTests(unittest.TestCase):
               'mst':f'''i=1; while [ "$i" -le 22 ]; do printf 'Vera(rev:0) /dev/mst/device %04x:01:00.0\\n' "$i"; i=$((i+1)); done
                         echo '{bf4}(rev:0) /dev/mst/dpu 0000:02:00.0' ''',
               'lspci':f'''case "$1" in
+                    -Dvv) printf '%s\\n' '{verbose_inventory}';;
                     -Dvvv) printf '%s\\n' '{identities}';;
-                    -Dvv) printf '%s\\n' '{link_inventory}';;
+                    -Dnn) printf '%s\\n' '{pci_inventory}';;
                     *) printf '%s\\n' '{pci_inventory}';;
                   esac''',
               'ipmitool':"echo 'Firmware Revision: example'"}
@@ -75,6 +84,18 @@ class HardwareTests(unittest.TestCase):
         self.assertEqual(result.returncode,0,result.stdout+result.stderr)
         self.assertIn('CHECK|BF4|actual=1|exact=1|pci_functions=2',result.stdout)
 
+    def test_bf4_fail_names_function_count(self):
+        # Two functions with distinct VPD serials are two physical cards when one
+        # is expected; the failure must name the card count and the function count.
+        result=self.run_fixture(bf4='BlueField-4',functions=2,serials=['CARD-A','CARD-B'])
+        self.assertEqual(result.returncode,1,result.stdout+result.stderr)
+        self.assertIn('Expected exactly 1 physical card(s); detected 2 from 2 PCI functions',result.stdout)
+
+    def test_bf4_missing_names_zero_functions(self):
+        result=self.run_fixture(bf4='BlueField-4',functions=0)
+        self.assertEqual(result.returncode,1,result.stdout+result.stderr)
+        self.assertIn('Expected exactly 1 physical card(s); detected 0',result.stdout)
+
     def test_downgrade_is_failure_with_bdf(self):
         result=self.run_fixture(downgrade=True)
         self.assertEqual(result.returncode,1,result.stdout+result.stderr)
@@ -111,7 +132,10 @@ class HardwareTests(unittest.TestCase):
             ({'mst': "i=0; while [ $i -lt 22 ]; do echo 'Vera(rev:0) /dev/mst/device 0001:01:00.0'; i=$((i+1)); done"}, 'DUPLICATE_BDF'),
             ({'lspci': lambda s: s.replace(' LnkSta: Speed 16GT/s, Width x8 ', ' LnkCap: Speed 16GT/s, Width x8 ')}, 'PCIE_LINK_UNAVAILABLE'),
             ({'lspci': lambda s: s.replace(' Capabilities: [80] Express (v2) Endpoint', ' Capabilities: <access denied>')}, 'PCIE_LINK_UNAVAILABLE'),
-            ({'lspci': lambda s: s.replace('0000:04:00.0 Ethernet controller: Mellanox', '0000:09:00.0 Ethernet controller: Mellanox')}, 'BF4_INVENTORY_UNSTABLE'),
+            # A BF4 function whose VPD serial is blank cannot confirm a physical
+            # card count; the shared verbose capture carries both link and serial
+            # data, so the identity guard is exercised through that same dump.
+            ({'lspci': lambda s: s.replace(' [SN] Serial number: CARD-A', ' [SN] Serial number:')}, 'BF4_IDENTITY_UNAVAILABLE'),
         ]
         for project in ('neutrino', 'naboo'):
             for overrides, code in scenarios:

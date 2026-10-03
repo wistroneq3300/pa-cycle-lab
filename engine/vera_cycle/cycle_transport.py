@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import re
 import shlex
 import shutil
 import socket
@@ -67,11 +68,15 @@ class Transport:
         watchdog.daemon = True
         watchdog.start()
         try:
+            # BMCs only accept password auth; offering the local SSH key first can trip
+            # their login limits and fail the whole connection. OS hosts keep the key/agent
+            # fallback.
+            password_only = role == "bmc"
             client.connect(getattr(target, role + "_ip"),
                            username=self.users.get(role, os.environ.get(role.upper() + "_USER", USERS[role])), port=self.ports.get(role, 22),
                            password=self.credentials.get(role), timeout=timeout,
                            banner_timeout=timeout, auth_timeout=timeout,
-                           look_for_keys=True, allow_agent=True)
+                           look_for_keys=not password_only, allow_agent=not password_only)
         except (paramiko.AuthenticationException, paramiko.BadHostKeyException) as exc:
             client.close()
             raise IdentityUnsafe(f"{role}: authentication or SSH host key validation failed") from exc
@@ -115,6 +120,19 @@ class Transport:
                     if time.monotonic() - start >= timeout:
                         raise TimeoutError("Command deadline exceeded")
                 if channel.exit_status_ready() and not channel.recv_ready():
+                    # The exit status can become ready before the channel has
+                    # flushed all of stdout, so a large output (for example
+                    # lspci -vv) may lose its tail and any final RESULT| marker.
+                    # Drain with a bounded idle grace: keep reading while data
+                    # arrives, and stop after one second of silence. The outer
+                    # command deadline still caps the total wait.
+                    idle = time.monotonic() + 1.0
+                    while time.monotonic() < idle and time.monotonic() - start < timeout:
+                        if channel.recv_ready():
+                            chunks.append(channel.recv(65536))
+                            idle = time.monotonic() + 1.0
+                        else:
+                            time.sleep(0.02)
                     code = channel.recv_exit_status()
                     return Command(code, self.redact(b"".join(chunks).decode(errors="replace")), "RETURNED" if code >= 0 else "RESPONSE_LOST", time.monotonic() - start)
                 if time.monotonic() - start >= timeout:
@@ -168,6 +186,60 @@ class Transport:
             return Command(124, self.redact(data.decode(errors="replace") if isinstance(data, bytes) else data), "RESPONSE_LOST", time.monotonic() - start)
         except OSError as exc:
             return Command(127, self.redact(str(exc)), "NOT_ISSUED", time.monotonic() - start)
+
+    # --- Redfish (BMC log services) -------------------------------------
+    # Sessions expire, so every capture logs in again. Credentials stay out of
+    # argv and evidence: the login body is piped on stdin, and every response is
+    # redacted before it can reach evidence.
+
+    def _redfish(self, args, timeout):
+        start = time.monotonic()
+        if not shutil.which("curl"):
+            return Command(127, "curl is unavailable on the orchestrator", "NOT_ISSUED")
+        try:
+            result = subprocess.run(["curl", "-sk", "-m", str(int(timeout)), *args],
+                                    capture_output=True, text=True, timeout=timeout + 5, check=False)
+            return Command(result.returncode, self.redact(result.stdout + result.stderr), duration=time.monotonic() - start)
+        except subprocess.TimeoutExpired as exc:
+            data = (exc.stdout or b"") + (exc.stderr or b"")
+            return Command(124, self.redact(data.decode(errors="replace") if isinstance(data, bytes) else data), "RESPONSE_LOST", time.monotonic() - start)
+        except OSError as exc:
+            return Command(127, self.redact(str(exc)), "NOT_ISSUED", time.monotonic() - start)
+
+    def redfish_login(self, target, timeout=20):
+        """Return an X-Auth-Token string, raising on any login failure.
+
+        The token never touches evidence; callers treat absence as a collection
+        failure. ``login`` is used by our own separate HTTP path in cycle_engine.
+        """
+        import json as _json
+        body = _json.dumps({"UserName": self.users.get("bmc", os.environ.get("BMC_USER", "root")),
+                            "Password": self.credentials.get("bmc", "")})
+        url = f"https://{target.bmc_ip}/redfish/v1/SessionService/Sessions"
+        if not shutil.which("curl"):
+            raise RuntimeError("curl is unavailable on the orchestrator")
+        # -D - prints headers; capture them to read X-Auth-Token.
+        try:
+            result = subprocess.run(["curl", "-sk", "-m", str(int(timeout)), "-X", "POST",
+                                     "-H", "Content-Type: application/json", "--data-binary", "@-",
+                                     "-D", "-", "-o", "/dev/null", url],
+                                    input=body, capture_output=True, text=True, timeout=timeout + 5, check=False)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise RuntimeError(f"redfish login failed: {exc}") from exc
+        headers = result.stdout + result.stderr
+        match = re.search(r'^x-auth-token:\s*(\S+)', headers, re.I | re.M)
+        if not match:
+            raise RuntimeError("redfish login returned no X-Auth-Token")
+        return match.group(1)
+
+    def redfish_get(self, target, path, token, timeout=30):
+        url = f"https://{target.bmc_ip}{path}"
+        return self._redfish(["-H", f"X-Auth-Token: {token}", url], timeout)
+
+    def redfish_clear(self, target, path, token, timeout=30):
+        url = f"https://{target.bmc_ip}{path}"
+        return self._redfish(["-X", "POST", "-H", f"X-Auth-Token: {token}",
+                              "-H", "Content-Type: application/json", url], timeout)
 
     def local_dependencies(self):
         if shutil.which("ipmitool"):

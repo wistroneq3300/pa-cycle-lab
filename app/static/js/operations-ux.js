@@ -22,7 +22,7 @@ function observationViewTarget(name) {
 }
 function operationTargetText(name) {
   const t = operationTarget(name);
-  return `${name} / OS ${t.active_os}\nOS: ${t.os_ip || '\u672a\u8a2d\u5b9a'}\nBMC: ${t.bmc_ip || '\u672a\u914d\u5c0d'}`;
+  return `${name} / OS ${t.active_os ?? "尚未選取"}\nOS: ${t.os_ip || '\u672a\u8a2d\u5b9a'}\nBMC: ${t.bmc_ip || '\u672a\u914d\u5c0d'}`;
 }
 function operationTargetHtml(name) {
   return `<section class="operation-target" aria-label="\u76ee\u524d\u64cd\u4f5c\u76ee\u6a19"><strong>\u76ee\u524d\u64cd\u4f5c\u76ee\u6a19</strong><pre>${esc(operationTargetText(name))}</pre></section>`;
@@ -54,7 +54,7 @@ function renderPowerBatch() {
   if (!panel || !job) return;
   const labels={waiting:'\u7b49\u5f85',sending:'\u9001\u51fa\u4e2d',success:'\u6307\u4ee4\u5df2\u63a5\u53d7',failed:'\u5931\u6557\uff0f\u672a\u78ba\u8a8d',cancelled:'\u672a\u9001\u51fa'};
   const completed=job.rows.filter(r=>!['waiting','sending'].includes(r.state)).length;
-  panel.innerHTML=`<p>${completed} / ${job.rows.length} \u5df2\u8655\u7406${job.cancel?' \u00b7 \u505c\u6b62\u5f8c\u7e8c\u9001\u51fa':''}</p><progress value="${completed}" max="${job.rows.length||1}"></progress><p class="hint">\u6307\u4ee4\u63a5\u53d7\u4e0d\u4ee3\u8868\u958b\u95dc\u6a5f\u5df2\u5b8c\u6210\u3002</p>${job.rows.map(r=>`<div class="batch-row" data-state="${r.state}"><strong>${esc(r.name)}</strong><span>${labels[r.state]}</span><small>OS ${r.target.active_os} \u00b7 ${esc(r.target.os_ip)} \u00b7 BMC ${esc(r.target.bmc_ip)}</small><small>${esc(r.info)}</small></div>`).join('')}`;
+  panel.innerHTML=`<p>${completed} / ${job.rows.length} \u5df2\u8655\u7406${job.cancel?' \u00b7 \u505c\u6b62\u5f8c\u7e8c\u9001\u51fa':''}</p><progress value="${completed}" max="${job.rows.length||1}"></progress><p class="hint">\u6307\u4ee4\u63a5\u53d7\u4e0d\u4ee3\u8868\u958b\u95dc\u6a5f\u5df2\u5b8c\u6210\u3002</p>${job.rows.map(r=>`<div class="batch-row" data-state="${r.state}"><strong>${esc(r.name)}</strong><span>${labels[r.state]}</span><small>OS ${r.target.active_os ?? "尚未選取"} \u00b7 ${esc(r.target.os_ip)} \u00b7 BMC ${esc(r.target.bmc_ip)}</small><small>${esc(r.info)}</small></div>`).join('')}`;
   document.getElementById('batch-cancel').disabled=!job.running||job.cancel;
   document.getElementById('batch-retry').disabled=job.running||!job.rows.some(r=>r.state==='failed');
   document.getElementById('batch-close').disabled=job.running;
@@ -137,16 +137,16 @@ document.addEventListener('click',e=>{
     if(mgxTypeOf(m)==='cdu'){
       root.querySelectorAll('.pd-operation-group,.pd-power-group,.operation-target').forEach(n=>n.remove());
       const placement=rackIsExternal(m)?'\u6a5f\u6ac3\u53f3\u5074\uff08\u5916\u7f6e\uff09':Number(m.rack_u)>0?`U${m.rack_u}\u2013U1 / ${m.rack_size}U`:'\u5c1a\u672a\u653e\u7f6e';
-      if(ops)ops.insertAdjacentHTML('afterbegin',`<section class="operation-target"><strong>CDU</strong><p>\u7ba1\u7406 IP\uff1a${esc(m.bmc_ip||m.os_ip||'\u672a\u8a2d\u5b9a')}</p><p>${placement}</p><p>\u6c34\u6eab\u3001\u6d41\u91cf\u3001\u6c34\u58d3\uff1a\u5c1a\u672a\u6574\u5408\u63a1\u96c6\u5668</p></section>`);
+      if(ops)ops.insertAdjacentHTML('afterbegin',`<section class="operation-target"><strong>CDU</strong><p>\u7ba1\u7406 IP\uff1a${esc(m.bmc_ip||m.os_ip||'\u672a\u8a2d\u5b9a')}</p><p>${placement}</p><p>\u6c34\u6eab\u3001\u6d41\u91cf\u3001\u6c34\u58d3\uff1a不提供量測資料</p></section>`);
       const connections=root.querySelector('.pd-connect-panel');
-      if(connections)connections.innerHTML=`<div class="operation-target"><strong>\u7ba1\u7406 IP</strong><p>${esc(m.bmc_ip||m.os_ip||'\u672a\u8a2d\u5b9a')}</p><p>\u5b89\u88dd\u4f4d\u7f6e\uff1a${placement}</p><p>\u5c1a\u672a\u6574\u5408 CDU \u63a1\u96c6\u5668</p></div>`;
+      if(connections)connections.innerHTML=`<div class="operation-target"><strong>\u7ba1\u7406 IP</strong><p>${esc(m.bmc_ip||m.os_ip||'\u672a\u8a2d\u5b9a')}</p><p>\u5b89\u88dd\u4f4d\u7f6e\uff1a${placement}</p><p>此類 CDU 不提供遙測資料</p></div>`;
       root.querySelectorAll('.pd-diagnostic,.pd-showcase-copy button').forEach(n=>n.remove());
       const telemetry=root.querySelector('#pd-panel-telemetry');
-      if(telemetry)telemetry.innerHTML='<section class="operation-target"><h2>CDU \u76e3\u63a7</h2><p>\u6d41\u91cf (L/min) / \u9032\u51fa\u6c34\u6eab / \u6c34\u58d3</p><p>\u5c1a\u672a\u6574\u5408\u63a1\u96c6\u5668\uff0c\u76ee\u524d\u7121\u5373\u6642\u91cf\u6e2c\u503c\u3002</p></section>';
-      const caption=root.querySelector('.pd-stage-caption');if(caption)caption.textContent=rackIsExternal(m)?'TC1288 \u5916\u7f6e CDU \u5916\u89c0\u53c3\u8003 \u00b7 \u975e\u672c\u6a5f\u5be6\u969b\u5916\u89c0':'\u6ac3\u5167\u6a6b\u5f0f CDU \u5916\u89c0\u793a\u610f \u00b7 \u975e\u672c\u6a5f\u5be6\u969b\u5916\u89c0';
+      if(telemetry)telemetry.innerHTML='<section class="operation-target"><h2>CDU \u76e3\u63a7</h2><p>\u6d41\u91cf (L/min) / \u9032\u51fa\u6c34\u6eab / \u6c34\u58d3</p><p>此類設備不提供即時量測值。</p></section>';
+      const caption=root.querySelector('.pd-stage-caption');if(caption)caption.textContent=rackIsExternal(m)?'外置 CDU 設備視圖':'機架式 CDU 設備視圖';
       const heading=root.querySelector('.pd-ops-heading h2');if(heading)heading.textContent='\u8a2d\u5099\u8cc7\u8a0a';
       const context=root.querySelector('.pd-ops-context');if(context)context.textContent=`${m.project||''} / CDU / ${placement}`;
-      if(info)info.textContent=`\u7ba1\u7406 IP: ${m.bmc_ip||m.os_ip||'\u672a\u8a2d\u5b9a'} / \u76e3\u63a7\u5c1a\u672a\u6574\u5408`;
+      if(info)info.textContent=`\u7ba1\u7406 IP: ${m.bmc_ip||m.os_ip||'\u672a\u8a2d\u5b9a'} / 不提供遙測資料`;
     }
     if(!equipmentIsServer(m)){
       root.querySelectorAll('.pd-operation-group,.pd-power-group,.equipment-actions').forEach(n=>n.remove());

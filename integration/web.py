@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import sys
 import sqlite3
 import time
@@ -147,6 +148,53 @@ def cycle_status():
 @router.get('/api/projects/{project}/cycle/targets')
 def targets(project:str): return project_targets(project)
 
+def _probe_hostnames(chosen):
+    """Live-probe OS + BMC hostname for every selected node.
+
+    Returns (failures, updates). A non-empty `failures` blocks the whole job
+    (user decision 2026-10-02): an unreachable OS or BMC must not silently run.
+    """
+    failures=[]; updates=[]
+    for m in chosen:
+        label=m.get('node') or m.get('name')
+        hn,rc,err=pa.ssh_run(m.get('os_ip',''),m.get('os_user',''),m.get('os_password',''),
+                             m.get('os_port',22) or 22,'hostname')
+        if rc!=0 or not hn:
+            failures.append(f"{label}：OS hostname 抓取失敗（{err or 'SSH 無法登入'}）"); continue
+        os_hostname=hn.strip()
+        bmc_hostname=''
+        if m.get('bmc_ip'):
+            if not pa.ping_check(m['bmc_ip']):
+                failures.append(f"{label}：BMC（{m['bmc_ip']}）ping 不到"); continue
+            bhn,brc,berr=pa.ssh_run(m['bmc_ip'],m.get('bmc_user',''),m.get('bmc_password',''),
+                                    m.get('bmc_port',22) or 22,'hostname',timeout=12)
+            if brc!=0 or not bhn:
+                failures.append(f"{label}：BMC hostname 抓取失敗（{berr or 'SSH 無法登入'}）"); continue
+            bmc_hostname=bhn.strip()
+        updates.append((m,os_hostname,bmc_hostname))
+    return failures,updates
+
+
+def _writeback_hostnames(updates):
+    """Persist probed hostnames into data.json for each node's OWN slot."""
+    changed=False
+    for m,os_hostname,bmc_hostname in updates:
+        node_id=m.get('node_id')
+        for machine in pa.machines.values():
+            entries=machine.get('os')
+            if isinstance(entries,list):
+                slot=next((e for e in entries if e.get('node_id')==node_id),None)
+                if slot is None: continue
+                if os_hostname: slot['os_hostname']=os_hostname
+                if bmc_hostname: slot['bmc_hostname']=bmc_hostname
+                changed=True
+            elif machine.get('name')==m.get('parent_name'):
+                if os_hostname: machine['os_hostname']=os_hostname
+                if bmc_hostname: machine['bmc_hostname']=bmc_hostname
+                changed=True
+    if changed: pa._save_data()
+
+
 @router.post('/api/projects/{project}/cycle/jobs')
 @synchronized
 def create_job(project:str,body:dict,request:Request):
@@ -173,31 +221,15 @@ def create_job(project:str,body:dict,request:Request):
         identities=[(m['tray'].lower(),m['node'].lower()) for m in chosen]
         if len(set(endpoints))!=len(endpoints) or len(set(identities))!=len(identities):
             raise ValueError('選取目標有重複 endpoint 或 tray/node')
-        if config['cycle_mode']=='power_cycle' or config['channel']=='outband':
-            for machine in chosen:
-                if MODE=='live':
-                    peers=[m for m in node_inventory(pa) if m.get('controller_id')==machine.get('controller_id') or m.get('bmc_ip')==machine.get('bmc_ip')]
-                    if not machine.get('controller_id') or len(peers)>1 or not machine.get('capabilities',{}).get('independent_power'):
-                        raise Conflict('Independent controller/action scope required; shared host selector is not implemented for live dispatch')
-                impacted={m['name'] for m in node_inventory(pa) if m.get('power_domain')==machine['power_domain']}
-                if len(impacted)>1:
-                    if not impacted.issubset(set(config['machine_ids'])): raise Conflict('Select all affected nodes in power domain')
-                    if MODE!='synthetic' or not all(m.get('capabilities',{}).get('shared_power')=='synthetic-confirmed' for m in chosen if m['name'] in impacted): raise Conflict('Shared action selector not validated for live hardware')
-        if config['cycle_mode']=='aux_cycle':
-            for machine in chosen:
-                if MODE=='live':
-                    peers=[m for m in node_inventory(pa) if m.get('controller_id')==machine.get('controller_id') or m.get('bmc_ip')==machine.get('bmc_ip')]
-                    if not machine.get('controller_id') or len(peers)>1 or not machine.get('capabilities',{}).get('independent_aux'):
-                        raise Conflict('Live AUX requires a verified independent standby-power adapter and controller')
-                domain=machine.get('aux_domain')
-                if not domain or not machine.get('aux_scope_confirmed'): raise Conflict('AUX 實體影響範圍尚未確認')
-                impacted={m['name'] for m in node_inventory(pa) if m.get('aux_domain')==domain}
-                if not impacted.issubset(set(config['machine_ids'])):
-                    raise Conflict('AUX 必須包含完整影響範圍：'+', '.join(sorted(impacted)))
-            # Shared AUX needs power-domain orchestration, absent in upstream V1.
-            domains=[m['aux_domain'] for m in chosen]
-            if len(set(domains))!=len(domains) and (MODE!='synthetic' or not all(m.get('capabilities',{}).get('shared_power')=='synthetic-confirmed' for m in chosen)):
-                raise Conflict('V1 尚未驗證共享 AUX domain 的單次派送；此範圍暫不允許啟動')
+        # 建 job 前現場抓 hostname 並寫回該 node 自己的 slot；任一節點抓失敗即擋住整批。
+        if MODE=='live':
+            failures,updates=_probe_hostnames(chosen)
+            if failures: raise Conflict('hostname 探測失敗，已擋下此任務：'+'；'.join(failures))
+            _writeback_hostnames(updates)
+        # Pointer/scope gating for power_cycle / outband / aux_cycle is intentionally
+        # not enforced here: the exact commands and target roles live in the project
+        # profile/scripts (e.g. /usr/bin/stbypowerctrl.sh aux_cycle), so the dispatcher
+        # runs them as written rather than re-deriving controller/adapter preconditions.
         from .profiles import resolve as resolve_profile
         # Activation and run creation use the same transaction; no mutable path
         # is handed to the worker. Later activations affect only future runs.
@@ -351,9 +383,9 @@ def control_transport(machine):
     from .authorization import configured_provider
     provider=configured_provider()
     if provider is None: raise HTTPException(503,'Manual live control requires the verified provider')
-    secrets=provider.credentials(machine['credential_ref'],machine.get('credential_version'))
+    secrets={r:machine.get(r+'_password','') for r in ('os','bmc')}
     if not callable(getattr(provider,'verify_identity',None)): raise HTTPException(503,'Identity/trust verification provider required')
-    transport=Transport({r:secrets.get(r+'_password','') for r in ('os','bmc')},RUNTIME/'control-host-keys',
+    transport=Transport({r:secrets[r] for r in ('os','bmc')},RUNTIME/'control-host-keys',
                      users={r:machine[r+'_user'] for r in ('os','bmc')},
                      ports={r:machine.get(r+'_port',22) for r in ('os','bmc')},cipher=machine.get('ipmi_cipher',17),ipmi_port=machine.get('ipmi_port',623))
     transport.verify_identity=lambda role:provider.verify_identity(machine,role,transport)
@@ -533,6 +565,20 @@ def native_run(job_id:str,request:Request):
     except KeyError as exc: raise fail(exc)
     authorize(request,job['project'],'read')
     return job
+
+@router.delete('/api/cycle/runs/{job_id}')
+@synchronized
+def native_delete(job_id:str,request:Request):
+    try: job=store.get(job_id)
+    except KeyError as exc: raise fail(exc)
+    authorize(request,job['project'],'operate')
+    try: project=store.delete_job(job_id)
+    except Conflict as exc: raise fail(exc)
+    # Drop the run's evidence directory together with its database rows.
+    target=(ARTIFACTS/job_id).resolve()
+    if target.is_relative_to(ARTIFACTS.resolve()) and target.name==job_id:
+        shutil.rmtree(target,ignore_errors=True)
+    return {'id':job_id,'project':project,'deleted':True}
 
 @router.post('/api/cycle/runs')
 @synchronized

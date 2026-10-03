@@ -72,13 +72,13 @@
     const overview=root.querySelector('.dash-mid');
     if(overview)overview.innerHTML=`<section class="eng-health"><header><h3>\u9023\u7dda\u72c0\u614b</h3><span>\u5206\u958b\u8a08\u7b97\u5404\u7ba1\u7406\u4ecb\u9762\uff1b\u88ab\u52d5\u5143\u4ef6\u4e0d\u7d0d\u5165</span></header>${[['OS',os],['BMC',bmc]].map(([label,v])=>`<div class="eng-health-row"><b>${label}</b><strong>${v.rate==null?'\u2014':v.rate+'%'}</strong><span>${v.online} / ${v.total} \u5df2\u9023\u7dda</span><span>${v.offline} \u96e2\u7dda</span><span>${v.unknown} \u672a\u77e5</span></div>`).join('')}<p>\u9023\u7dda\u4e0d\u7b49\u65bc\u786c\u9ad4\u5065\u5eb7\uff1b\u8acb\u642d\u914d\u611f\u6e2c\u5668\u8207\u8a3a\u65b7\u5224\u8b80\u3002</p></section>`;
     const note=overview?.querySelector('.eng-health header span');if(note)note.textContent='\u5404\u4ecb\u9762\u5206\u958b\u8a08\u7b97\uff1b\u6392\u9664\u672a\u8a2d\u5b9a\u8a72 IP \u7684\u5143\u4ef6\u8207\u64cb\u677f';
-    const intro=root.querySelector('#cop-box .cop-bubble');if(intro&&intro.textContent.includes('\u76ee\u524d\u5df2\u76e3\u63a7'))intro.textContent=`\u5de5\u7a0b\u52a9\u7406\uff1a${machines.length} \u500b\u8a2d\u5099\uff0f\u5143\u4ef6\u7d00\u9304\u3002OS ${os.online}/${os.total} \u5df2\u9023\u7dda\uff0cBMC ${bmc.online}/${bmc.total} \u5df2\u9023\u7dda\u3002\u53ef\u67e5\u8a62\u5c08\u6848\u8207\u8a2d\u5099\u72c0\u614b\u3002`;
+    const intro=root.querySelector('#cop-box .cop-bubble');if(intro&&intro.textContent.includes('\u76ee\u524d\u5df2\u76e3\u63a7'))intro.textContent=`AI 助理\uff1a${machines.length} \u500b\u8a2d\u5099\uff0f\u5143\u4ef6\u7d00\u9304\u3002OS ${os.online}/${os.total} \u5df2\u9023\u7dda\uff0cBMC ${bmc.online}/${bmc.total} \u5df2\u9023\u7dda\u3002\u53ef\u67e5\u8a62\u5c08\u6848\u8207\u8a2d\u5099\u72c0\u614b\u3002`;
     const health=root.querySelector('.cine-fleet-health');if(health)health.innerHTML=`<span class="cine-kicker">OS \u9023\u7dda</span><div class="cine-connectivity">${machines.filter(m=>m.mgx_type!=='blanking'&&m.os_ip).map(m=>`<i class="${m.os_alive===true?'on':m.os_alive===false?'off':'unknown'}" title="${esc(m.name)}"></i>`).join('')}</div><p><b>${os.online}</b> \u5df2\u9023\u7dda / ${os.total} \u5df2\u8a2d\u5b9a OS \u4ecb\u9762</p>`;
     const attention=root.querySelector('.cine-attention strong');if(attention)attention.innerHTML=`${os.offline}<small>OS \u96e2\u7dda</small>`;
     const preview=!!window.PA_PREVIEW;
-    const flag=root.querySelector('.cine-fleet-total small');if(flag)flag.textContent=preview?'Fixture / \u6a21\u64ec\u8cc7\u6599':'API / \u8a2d\u5099\u72c0\u614b\u5feb\u7167';
-    const footer=root.querySelector('.cine-footer span:nth-child(2)');if(footer)footer.textContent=preview?'\u7368\u7acb UI \u9810\u89bd \u00b7 \u672a\u9023\u63a5\u6b63\u5f0f FastAPI':'\u8cc7\u6599\u4f86\u6e90\uff1a\u76ee\u524d FastAPI \u670d\u52d9';
-    const snapshot=root.querySelector('.cine-insights-title>span');if(snapshot)snapshot.textContent=preview?'Fixture \u72c0\u614b\u5feb\u7167':'API \u72c0\u614b\u5feb\u7167';
+    const flag=root.querySelector('.cine-fleet-total small');if(flag)flag.textContent=preview?'測試資料 · 不代表實體設備狀態':'設備狀態';
+    const footer=root.querySelector('.cine-footer span:nth-child(2)');if(footer)footer.textContent=preview?'測試資料 · 不代表實體設備狀態':'資料來源：系統回報';
+    const snapshot=root.querySelector('.cine-insights-title>span');if(snapshot)snapshot.textContent=preview?'測試資料摘要':'狀態摘要';
     return root.innerHTML;
   };
 
@@ -123,7 +123,7 @@
   document.addEventListener('DOMContentLoaded',()=>{
     if(window.PA_PREVIEW)return;
     const side=document.querySelector('.p-side-preview');
-    if(side){const mode=document.getElementById('mode-label');side.innerHTML='<i class="p-live-dot"></i> API WORKSPACE<small>\u9023\u63a5\u76ee\u524d FastAPI \u670d\u52d9</small>';if(mode)side.append(mode);}
-    const flag=document.querySelector('.p-preview-label');if(flag)flag.textContent='API \u00b7 \u8a2d\u5099\u8cc7\u6599';
+    if(side){const mode=document.getElementById('mode-label');side.innerHTML='<i class="p-live-dot"></i> 系統管理平台<small>設備與驗證作業</small>';if(mode)side.append(mode);}
+    const flag=document.querySelector('.p-preview-label');if(flag)flag.textContent='設備資料';
   });
 })();

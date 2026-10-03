@@ -1,5 +1,30 @@
 # PROJECT_STATUS — PA Cycle Lab native Next integration
 
+## 2026-10-03 Production UI copy review
+
+Baseline `4e21a03b2f9895b6b8cdfcd3fb64bde4f20841aa`, existing branch `cycle/live-neutrino-redfish-hostname`. First-pass report was written before UI edits; second-pass review includes decoded string matches and actual production render owners.
+
+- Standardized operator-facing copy across the shell, Dashboard/Projects, equipment views, nodes, AI, Cycle and Guide. Removed fabricated user identity, design-preview badges, appearance-reference captions and marketing slogans. Kept actual inventory/model data and truthful test-mode labels.
+- Preserved Cycle layout, Summary/Full, controls, request payloads, raw evidence, routing and execution logic. No CSS, API, backend, inventory, permission, profile, engine or hardware-control changes.
+- Hidden only confirmed unfinished entries: Rack batch Reboot/AUX placeholders, legacy topology placeholder, and CDU's placeholder Telemetry tab. Real topology and supported management controls remain.
+- Browser acceptance: 58 page/theme cases PASS; Cycle request compatibility suite PASS; 14 JS syntax checks PASS. Both desktop themes reviewed, with screenshots. These are isolated fixture/intercepted UI checks, not live hardware acceptance.
+- Extra unchanged Console/KVM backend tests: **6 PASS / 15 FAIL / 0 SKIP**. Fifteen Console cases stop at missing `neutrino_demo_config.sh` during synthetic job creation. Kept the failures and did not modify checker/profile behavior to make them pass.
+- [Review and delivery scope](docs/PRODUCTION_UI_COPY_REVIEW.md), [123-line second-pass disposition](docs/PRODUCTION_UI_COPY_SECOND_PASS.md), [screenshots/results](docs/screenshots/production-copy/).
+- No deployment, service restart, production data change or hardware operation. Commit/push remain on the existing branch; the delivery message records the verified commit.
+
+## 2026-10-03 UI adaptation on the correct live branch
+
+Base: `1a51f2a4e4b00bc68890e3e6343abae69609100a`, branch `cycle/live-neutrino-redfish-hostname`. User authorized scoped UI adaptation and push. The earlier UI commits on `codex/next-rack-cycle` are **not merged** into this branch.
+
+- Adapted Cycle creation layout to this branch's five existing controls. Preserved hidden Profile, empty initial limits, loop/hour exclusive selection, backend-default parallelism, hostname labels/probe notice, project-name route fallback and insecure-context idempotency-key fallback.
+- Kept history deletion/confirmation, readable run IDs, PRE finding cards/confirmation, all action request payloads and Console Summary/Full. `cycle-console.js`, `integration/`, `engine/` and `app/main.py` remain byte-identical to the base.
+- Progress keeps current loop/valid/health prominent; attempts, POST, boot, first/unique issues and coverage remain in keyed node disclosures with existing verdict colours. Evidence groups/filters retain every original secured link.
+- Wistron blue/green desktop layout, explicit selection summary, no sticky submit overlay; scoped reduced-motion applies to pseudo-elements too. Only Cycle assets and their two cache versions change at runtime.
+- Acceptance: `tests/cycle-ui-compat-browser.cjs` compares baseline/current UI requests for loop/hour create, confirm, stop and confirmed/cancelled deletion. It also checks input rejection, selection persistence, unchanged Console code and Summary/Full controls, keyed focus/counters, artifact link count/filter, 1366/1920 light/dark and reduced motion. All mutating requests are intercepted; **no hardware or worker dispatch**.
+- Screenshots: `docs/screenshots/live-branch-ui/`. Detailed limitations and command: `docs/ACCEPTANCE.md`.
+
+Local: UI adaptation; committed/pushed: see final commit and remote verification. Deployed: no. No production service restart or inventory changes; Windows isolated browser preview only. N2/N3 GPIO remains a hardware issue, with evidence unchanged.
+
 更新：2026-10-01。正式修改目的地是 **wistroneq3300/pa-cycle-lab**。
 來源 Next 與 Vera repo 唯讀；本次沒有 production inventory/telemetry 修改、現場電源操作或部署。
 

@@ -1,0 +1,299 @@
+{
+  "baseline": "4e21a03",
+  "results": [
+    {
+      "page": "dashboard",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "ai-assistant",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "projects-l10",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "projects-l11",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "system-detail",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "system-hardware",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "system-osslots",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "system-sensors",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "system-telemetry",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "system-tasks",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "test-assignment",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "terminal-dialog",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "broadcast-selection",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "rack-3d",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "rack-list",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "rack-telemetry",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "rack-topology",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "kvm-broadcast",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "cdu-detail",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "user-guide",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "cycle-history",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "cycle-create",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "cycle-pre",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "cycle-progress",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "cycle-console",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "cycle-evidence",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "cycle-empty",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "cycle-error",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "kvm-solo-unconfigured",
+      "theme": "light",
+      "passed": true
+    },
+    {
+      "page": "dashboard",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "ai-assistant",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "projects-l10",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "projects-l11",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "system-detail",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "system-hardware",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "system-osslots",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "system-sensors",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "system-telemetry",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "system-tasks",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "test-assignment",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "terminal-dialog",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "broadcast-selection",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "rack-3d",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "rack-list",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "rack-telemetry",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "rack-topology",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "kvm-broadcast",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "cdu-detail",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "user-guide",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "cycle-history",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "cycle-create",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "cycle-pre",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "cycle-progress",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "cycle-console",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "cycle-evidence",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "cycle-empty",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "cycle-error",
+      "theme": "dark",
+      "passed": true
+    },
+    {
+      "page": "kvm-solo-unconfigured",
+      "theme": "dark",
+      "passed": true
+    }
+  ],
+  "page_errors": [],
+  "network_requests": 22,
+  "hardware_dispatches": 0,
+  "notes": "Browser-only fixture/intercepted snapshots. No hardware acceptance."
+}

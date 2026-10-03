@@ -21,7 +21,20 @@ def expand(name, parent):
     if entries == []:
         return  # Canonical empty chassis is not an implicit primary node.
     if entries is None:
-        yield {k: copy.deepcopy(parent[k]) for k in SAFE_FIELDS if k in parent}
+        target = {k: copy.deepcopy(parent[k]) for k in SAFE_FIELDS if k in parent}
+        # Only fill node when inventory already has a usable value; otherwise leave it
+        # absent (an unset node is a legitimate blocker) rather than adopting a machine
+        # name that may contain spaces/invalid chars.
+        node = target.get('node') or target.get('os_hostname')
+        if node: target['node'] = node
+        target['tray'] = target.get('tray') or target.get('project') or name
+        target['power_domain'] = target.get('power_domain') or (str(target.get('project') or name) + '-' + str(node or name))
+        # Single-OS machines keep credentials at the machine level (legacy names).
+        if parent.get('os_pass') and not target.get('os_password'):
+            target['os_password'] = parent['os_pass']
+        if parent.get('bmc_pass') and not target.get('bmc_password'):
+            target['bmc_password'] = parent['bmc_pass']
+        yield target
         return
     seen = set()
     for entry in entries:
@@ -43,13 +56,23 @@ def expand(name, parent):
         # 實體 slot 以 'pass' 存 OS 密碼（legacy 欄位名），映射到統一安全欄位 os_password。
         if entry.get('pass') and not target.get('os_password'):
             target['os_password'] = entry['pass']
+        if entry.get('bmc_pass') and not target.get('bmc_password'):
+            target['bmc_password'] = entry['bmc_pass']
+        # tray/node are derived, never stored: tray = owning project, node = OS hostname
+        # (falling back to the slot's node, then the synthetic 'n<slot>'). Never use the
+        # label: it is a display string that may contain spaces/invalid node characters.
+        node = entry.get('os_hostname') or entry.get('node') or 'n' + str(slot)
         target.update(name=node_id, node_id=node_id, parent_name=name,
                       chassis_id=parent.get('chassis_id') or identity(parent),
-                      slot_id=entry['slot_id'], slot_key='N' + str(slot), node=entry.get('node') or 'n' + str(slot),
+                      slot_id=entry['slot_id'], slot_key='N' + str(slot), node=node,
+                      tray=parent.get('tray') or parent.get('project') or name,
                       display_name=name + ' / ' + entry.get('label', 'N' + str(slot)),
                       os_ip=entry.get('ip', ''), os_user=entry.get('user', ''),
                       os_port=entry.get('port', 22), bmc_ip=entry.get('bmc_ip', ''),
                       bmc_user=entry.get('bmc_user', ''), bmc_port=entry.get('bmc_ssh_port', 22))
+        # Every node is its own power domain by default; a real shared domain can be
+        # supplied explicitly in inventory when one busbar powers several nodes.
+        target['power_domain'] = target.get('power_domain') or parent.get('power_domain') or (str(target.get('project') or name) + '-' + str(node))
         target['revision'] = node_identity.binding(entry)
         yield target
 
