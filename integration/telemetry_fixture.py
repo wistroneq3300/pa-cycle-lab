@@ -56,8 +56,17 @@ class FixtureProvisionTransport(FixtureTransport):
             count=self.monitor.gpus.get(self.binding['node_id'],0)
             return Command(0,''.join(f'{i}, GPU-fixture-{i}, NVIDIA Test GPU, 580.0\n' for i in range(count))+'SMI_RC=0\nPCI_BEGIN\nPCI_RC=0\n')
         if command.startswith('# PA_DCGM_DETECT'):
-            mode=self.monitor.gpu_scenarios.get(self.binding['node_id'],'missing')
-            return Command(0,'VERSION=fixture-dcgm\nRUNTIMES={"nvidia":{}}\nLISTENER='+('other-process' if mode=='occupied' else '')+'\n'+('UNIT=dcgm-exporter.service\nACTIVE=inactive\n' if mode=='stopped' else ''))
+            mode=self.monitor.gpu_scenarios.get(self.binding['node_id'])
+            base='VERSION=fixture-dcgm\nDOCKER_BIN=/usr/bin/docker\nNVIDIA_CTK=/usr/bin/nvidia-ctk\nTOOLKIT_PKG=nvidia-container-toolkit 1.20.1-1\nLISTENER='+('other-process' if mode=='occupied' else '')+'\n'
+            if mode in (None,'healthy'):
+                base+= 'RUNTIMES={"nvidia":{}}'
+            elif mode=='missing':
+                base+= 'RUNTIMES={"io.containerd.runc.v2":{}}'
+            elif mode=='runtime-configured-not-loaded':
+                base+= 'DAEMON_JSON={"runtimes":{"nvidia":{"path":"nvidia-container-runtime"}}}\nRUNTIMES={"io.containerd.runc.v2":{}}'
+            else:
+                base+= 'RUNTIMES={"nvidia":{}}'
+            return Command(0,base+('\nUNIT=dcgm-exporter.service\nACTIVE=inactive\n' if mode=='stopped' else ''))
         if command.startswith('docker run ') or command=='docker start pa-dcgm-exporter' or command in ('systemctl start dcgm-exporter.service','systemctl start nvidia-dcgm-exporter.service'):
             self.monitor.gpu_installed.add(self.binding['node_id']);return Command(0,'fixture DCGM ready')
         if command==detection_command(self.monitor.config.exporter_port):

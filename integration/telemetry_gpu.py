@@ -42,14 +42,60 @@ def detect_command(port):
     return '''# PA_DCGM_DETECT
 for u in nvidia-dcgm-exporter.service dcgm-exporter.service; do
  if test "$(systemctl show "$u" --property=LoadState --value 2>/dev/null)" = loaded; then
-  printf 'UNIT=%s\\n' "$u";printf 'ACTIVE=';systemctl is-active "$u" || true;break
+  printf 'UNIT=%s\\n' "$u";printf 'ACTIVE=';systemctl is-active "$u" || true;printf '\\n';break
  fi
 done
-printf 'VERSION='; dcgm-exporter --version 2>/dev/null || true
-printf 'LISTENER='; ss -H -ltnp 'sport = :PORT'
-printf 'RUNTIMES='; docker info --format '{{json .Runtimes}}' 2>/dev/null || true
-printf 'CONTAINER='; docker inspect --format '{{.State.Status}}|{{.Config.Image}}' pa-dcgm-exporter 2>/dev/null || true
+printf 'VERSION='; dcgm-exporter --version 2>/dev/null || true; printf '\\n'
+printf 'LISTENER='; ss -H -ltnp 'sport = :PORT' 2>/dev/null || true; printf '\\n'
+printf 'DOCKER_BIN='; command -v docker 2>/dev/null || true; printf '\\n'
+printf 'NVIDIA_CTK='; command -v nvidia-ctk 2>/dev/null || true; printf '\\n'
+printf 'NVIDIA_RUNTIME='; command -v nvidia-container-runtime 2>/dev/null || true; printf '\\n'
+printf 'TOOLKIT_PKG='; dpkg-query -W nvidia-container-toolkit 2>/dev/null || true; printf '\\n'
+printf 'DAEMON_JSON='; tr -d '\\n' < /etc/docker/daemon.json 2>/dev/null || true; printf '\\n'
+printf 'RUNTIMES='; docker info --format '{{json .Runtimes}}' 2>/dev/null || true; printf '\\n'
+printf 'CONTAINER='; docker inspect --format '{{.State.Status}}|{{.Config.Image}}' pa-dcgm-exporter 2>/dev/null || true; printf '\\n'
 '''.replace(':PORT',':'+str(int(port)))
+
+
+def _runtime_diagnosis(facts):
+    """Translate raw detect facts into an ordered list of (level, message) lines.
+    Used to explain exactly where automatic DCGM setup is blocked, without
+    dispatching any mutating command."""
+    lines=[]
+    docker_bin=facts.get('DOCKER_BIN','')
+    toolkit=facts.get('TOOLKIT_PKG','')
+    ctk=facts.get('NVIDIA_CTK','')
+    runtime_bin=facts.get('NVIDIA_RUNTIME','')
+    daemon=facts.get('DAEMON_JSON','')
+    try:
+        loaded=json.loads(facts.get('RUNTIMES','{}') or '{}')
+    except ValueError:
+        loaded={}
+    lines.append(('PASS' if docker_bin else 'FAIL','Docker executable: '+ (docker_bin or 'not found')))
+    if not docker_bin:
+        lines.append(('FAIL','Docker is not installed, so no container runtime is available.'))
+        lines.append(('INFO','Next: install Docker, then re-run DCGM setup from the Telemetry page.'))
+        return lines
+    lines.append(('PASS' if ctk else 'WARN','nvidia-ctk: '+ (ctk or 'not found')))
+    lines.append(('PASS' if toolkit else 'WARN','nvidia-container-toolkit package: '+ (toolkit or 'not installed')))
+    configured='nvidia' in (daemon or '')
+    lines.append(('PASS' if configured else 'WARN','Docker daemon.json declares the "nvidia" runtime: '+ ('yes' if configured else 'no')))
+    loaded_has='nvidia' in loaded
+    lines.append(('PASS' if loaded_has else 'FAIL','Docker daemon currently exposes the "nvidia" runtime: '+ ('yes' if loaded_has else 'no')))
+    if loaded_has:
+        return lines
+    if configured and toolkit:
+        # Config and package exist but the daemon has not picked them up.
+        lines.append(('FAIL','The nvidia runtime is configured on disk but the running Docker daemon has not loaded it.'))
+        lines.append(('INFO','Next: on the node run "nvidia-ctk runtime configure --runtime=docker && systemctl restart docker", then verify "docker info" lists the nvidia runtime.'))
+        lines.append(('INFO','Automatic setup will not restart your Docker daemon on its own; re-run this install after the daemon loads the runtime.'))
+    elif not toolkit:
+        lines.append(('FAIL','The NVIDIA Container Toolkit package is not present, so the nvidia runtime cannot be configured.'))
+        lines.append(('INFO','Next: install nvidia-container-toolkit, then "nvidia-ctk runtime configure --runtime=docker" and restart Docker, then re-run this install.'))
+    else:
+        lines.append(('FAIL','The nvidia runtime is not configured in the Docker daemon configuration.'))
+        lines.append(('INFO','Next: run "nvidia-ctk runtime configure --runtime=docker" and restart Docker, then re-run this install.'))
+    return lines
 
 
 def provision(service,target,job_id,command):
@@ -85,7 +131,11 @@ def provision(service,target,job_id,command):
         if not image: return dict(result,detail='DCGM installation image is not configured. Set a supported pinned PA_DCGM_EXPORTER_IMAGE.')
         try: runtimes=json.loads(facts.get('RUNTIMES','{}'))
         except ValueError: runtimes={}
-        if 'nvidia' not in runtimes: return dict(result,detail='Automatic DCGM setup requires an existing Docker NVIDIA runtime. No runtime or driver was installed.')
+        if 'nvidia' not in runtimes:
+            event('GPU_DIAGNOSE','DCGM is not running and the nvidia runtime is unavailable. Checking prerequisites...')
+            for level,message in _runtime_diagnosis(facts): event('GPU_DIAGNOSE',message,level)
+            summary='Automatic DCGM setup is blocked: the Docker nvidia runtime is not exposed by the daemon. See the diagnostic steps above for the exact cause and the next command to run.'
+            return dict(result,detail=summary)
         cmd=shlex.join(['docker','run','-d','--name','pa-dcgm-exporter','--restart','unless-stopped','--gpus','all','--cap-add','SYS_ADMIN',
                        '-p',str(service.config.dcgm_port)+':9400',image,'--no-hostname'])
         command('GPU_INSTALL','Starting the configured DCGM Exporter image.',cmd,300)

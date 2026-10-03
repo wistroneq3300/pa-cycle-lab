@@ -168,7 +168,9 @@
       const describe=(state,detail,fallback)=>(state?((labels[state]||state)+(detail?' · '+detail:'')):fallback);
       const host=this.$('[data-comp="host"]');
       const hostState=components.host;
-      host.querySelector('[data-comp-detail]').textContent=describe(hostState,hostState==='READY'?'Node Exporter 已註冊並可由中央 Prometheus 讀取。':'',node.configured?'採集 CPU、記憶體、磁碟與網路使用率。':'中央監控連線尚未設定。');
+      const ver=components.node_exporter_version;
+      const hostReadyText='Node Exporter '+(ver?('v'+ver+'，'):'')+'已註冊至中央 Prometheus，CPU／記憶體／磁碟／網路指標正常擷取。';
+      host.querySelector('[data-comp-detail]').textContent=describe(hostState,hostState==='READY'?hostReadyText:'',node.configured?'採集 CPU、記憶體、磁碟與網路使用率。':'中央監控連線尚未設定。');
       this.stateChip(host.querySelector('[data-comp-state]'),hostState);
       const hostBtn=host.querySelector('[data-install="host"]');
       hostBtn.disabled=busyHost||!node.configured;
