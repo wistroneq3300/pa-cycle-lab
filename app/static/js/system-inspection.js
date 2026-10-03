@@ -137,7 +137,7 @@
     if(result){const sections=document.createElement('div');sections.className='pd-ai-sections';
       for(const [label,values] of [['可能原因',result.possible_causes],['建議檢查',result.recommended_checks]]){const section=document.createElement('section'),h=document.createElement('h5'),list=document.createElement('ol');h.textContent=label;for(const value of values||[]){const li=document.createElement('li');li.textContent=value;list.append(li);}section.append(h,list);sections.append(section);}
       for(const [label,text,cls] of [['判讀',result.conclusion,'pd-ai-conclusion'],['確認程度',result.confidence_note,'pd-ai-basis'],['分析依據',(result.based_on||[]).join(' · '),'pd-ai-basis']]){const p=document.createElement('p');p.className=cls;p.textContent=label+'：'+text;sections.append(p);}root.append(sections);
-    }else if(analysis?.text){const p=document.createElement('p');p.textContent=analysis.text;root.append(p);}
+    }else if(analysis?.text){const pre=document.createElement('pre');pre.className='pd-ai-legacy';pre.textContent=analysis.text;root.append(pre);}
     if(analysis?.error){const p=document.createElement('p');p.textContent=analysis.error+' · '+analysis.error_category;root.append(p);}
     if(analysis?.based_on){const p=document.createElement('p');p.className='pd-ai-basis';p.textContent='依據觀測：'+stamp(analysis.based_on.last_seen_at)+' · '+(analysis.based_on.source||'已保存證據')+'。AI 建議不改變規則判定。';root.append(p);}
   }

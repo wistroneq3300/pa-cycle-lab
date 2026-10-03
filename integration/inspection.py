@@ -167,7 +167,13 @@ class InspectionStore:
                 self.change(db,item,'ARCHIVED',now,{'resolved_at':item['resolved_at']})
 
     def backfill_advice(self,db,system_id):
-        rows=db.execute("SELECT data FROM inspection_items WHERE system_id=? AND json_extract(data,'$.status')='ACTIVE' AND (json_extract(data,'$.analysis.state') IS NULL OR json_extract(data,'$.analysis.state')='NOT_REQUESTED') LIMIT 100",(system_id,)).fetchall()
+        # Re-queue active issues with no structured result: never analysed, or
+        # analysed by an older revision that only stored free text (COMPLETE with
+        # no result). Failed analyses are left alone so they are not retried in a loop.
+        rows=db.execute("SELECT data FROM inspection_items WHERE system_id=? AND json_extract(data,'$.status')='ACTIVE' "
+                        "AND (json_extract(data,'$.analysis.state') IS NULL "
+                        "OR json_extract(data,'$.analysis.state')='NOT_REQUESTED' "
+                        "OR (json_extract(data,'$.analysis.state')='COMPLETE' AND json_extract(data,'$.analysis.result') IS NULL)) LIMIT 100",(system_id,)).fetchall()
         for row in rows: self.queue_advice(db,json.loads(row[0]))
 
     def issues(self,system_id,limit=100,offset=0,status='all',node_id='',search=''):
