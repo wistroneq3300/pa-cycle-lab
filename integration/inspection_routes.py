@@ -15,8 +15,15 @@ def install(app,pa,store_getter):
             for name,machine in pa.machines.items():
                 if machine.get('mgx_type','server')!='server' or machine.get('passive'): continue
                 canonical=pa.node_identity.canonical(dict(machine,name=name))
-                result.append(dict(id=canonical['chassis_id'],name=name,project=machine.get('project'),identity_history=canonical.get('identity_history',[])[-100:],nodes=[
-                    dict(node_id=e['node_id'],slot=e['slot'],label=e.get('label') or 'N'+str(e['slot']),os_hostname=e.get('os_hostname'),bmc_hostname=e.get('bmc_hostname')) for e in canonical['os'] if not e.get('empty')]))
+                active_os=machine.get('active_os')
+                nodes=[dict(node_id=e['node_id'],slot=e['slot'],label=e.get('label') or 'N'+str(e['slot']),os_hostname=e.get('os_hostname'),bmc_hostname=e.get('bmc_hostname')) for e in canonical['os'] if not e.get('empty')]
+                # Scope the system to the currently selected node so plan, summary,
+                # issue filters and coverage all describe the same single node the
+                # operator is standing on. Unset active_os keeps the full node list.
+                if active_os is not None:
+                    scoped=[n for n in nodes if n['slot']==active_os]
+                    if scoped: nodes=scoped
+                result.append(dict(id=canonical['chassis_id'],name=name,project=machine.get('project'),active_os=active_os,identity_history=canonical.get('identity_history',[])[-100:],nodes=nodes))
             return result
     def secrets():
         values=[]
@@ -47,6 +54,14 @@ def install(app,pa,store_getter):
                         canonical=pa.node_identity.canonical(dict(parent,name=system['name']))
                         canonical['project_id']=pa.projects.get(system['project'],{}).get('project_id')
                         result=list(expand(system['name'],canonical))
+                        # Scope inspection to the machine's currently selected node
+                        # (active_os). A rack entry owns several OS slots but the
+                        # operator inspects one node at a time; without this every
+                        # slot — including powered-off peers — is collected together.
+                        active=parent.get('active_os')
+                        if active is not None:
+                            scoped=[t for t in result if t.get('slot_key')=='N'+str(active)]
+                            if scoped: result=scoped
                         for t in result:
                             entry=next((e for e in canonical['os'] if e['node_id']==t.get('node_id')), {})
                             t['binding_revision']=entry.get('binding_revision',1)

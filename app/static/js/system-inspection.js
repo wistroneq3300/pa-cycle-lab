@@ -7,7 +7,8 @@
   const labels={EXPECTED_OFFLINE:'Cycle 預期恢復中',FRESH:'資料有效',MISSING:'尚無節點資料',STALE:'資料過舊',UNAVAILABLE:'來源無法使用',NOT_COVERED:'尚未涵蓋',BACKLOG:'事件補讀中',TIMED_OUT:'採集逾時',INVALID:'觀測欄位不完整',FAILED:'採集失敗',PARTIAL:'部分資料／觀測缺口',NOT_READY:'尚未就緒',NOT_CONFIGURED:'尚未設定',NOT_SUPPORTED:'來源不支援',WAITING_READY:'開機恢復中 · 等待檢查',INTERRUPTED:'開機世代改變 · 本批不完整',SHARED:'共用控制器資料',IDENTITY_MISMATCH:'節點身分與設定不符',TRUNCATED:'資料超過採集上限'};
   Object.assign(labels,identityLabels);
   const card=()=>`<section class="pd-inspection p-surface" id="pd-inspection" aria-label="系統巡檢">
-    <div class="pd-section-heading"><h2>系統巡檢</h2><span data-status role="status">讀取中…</span></div>
+    <div class="pd-section-heading"><h2><button type="button" class="pd-inspection-collapse" data-collapse aria-expanded="true" aria-controls="pd-inspection-body" title="收闔系統巡檢"><span class="pd-inspection-caret" aria-hidden="true">▾</span>系統巡檢</button></h2><span data-status role="status">讀取中…</span></div>
+    <div class="pd-inspection-body" id="pd-inspection-body">
     <p class="pd-inspection-copy">依專案規格採集各節點的硬體與事件資料，不執行電源操作。立即巡檢會安排新的完整觀測；原手動系統診斷仍可獨立使用。</p>
     <div class="pd-inspection-counts"><span>FAIL <strong data-fail>—</strong> 項</span><span>警告 <strong data-warning>—</strong> 項</span></div>
     <p class="pd-inspection-meta" data-time>最近完成：尚未取得 · 台灣時間 UTC+8</p>
@@ -30,12 +31,20 @@
       <label>恢復遲滯（百分點）<input type="number" name="hysteresis" min="1" max="30" required></label>
       ${['cpu','memory','gpu','vram'].map((key,i)=>`<label>${['CPU','記憶體','GPU','VRAM'][i]} 警告門檻（%）<input type="number" name="${key}" min="1" max="100" required></label>`).join('')}
     </div><p>高使用率僅列警告；請依專案負載設定。AI 內容為可能原因，不改變規則判定。第一版不推送外部通知。</p><button type="submit" class="btn primary">儲存巡檢設定</button></form>
+    </div>
   </section>`;
   function dispose(){if(!mounted)return;clearTimeout(mounted.timer);mounted.abort.abort();mounted=null;}
   function mount(name){
     dispose();const root=document.getElementById('pd-inspection');if(!root)return;
     const ctx={root,name,base:'/api/machine/'+encodeURIComponent(name)+'/inspection',abort:new AbortController(),offset:0,rows:[],snapshot:null,timer:null};mounted=ctx;
     const find=s=>root.querySelector(s);
+    find('[data-collapse]').onclick=()=>{
+      const body=find('[data-inspection-body]')||document.getElementById('pd-inspection-body');
+      const button=find('[data-collapse]');const open=button.getAttribute('aria-expanded')!=='false';
+      button.setAttribute('aria-expanded',open?'false':'true');
+      if(body)body.hidden=open;
+      root.classList.toggle('pd-inspection-collapsed',open);
+    };
     find('[data-view]').onclick=async()=>{find('[data-issues]').hidden=!find('[data-issues]').hidden;if(!find('[data-issues]').hidden)await loadIssues(ctx);};
     find('[data-settings]').onclick=()=>{const form=find('[data-config]');form.hidden=!form.hidden;};
     find('[data-run]').onclick=async()=>{try{await request(ctx,'/run',{method:'POST'});find('[data-status]').textContent='巡檢中…';await refresh(ctx);}catch(e){error(ctx,e);}};
