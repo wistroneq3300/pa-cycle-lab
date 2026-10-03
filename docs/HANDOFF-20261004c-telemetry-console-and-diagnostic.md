@@ -181,32 +181,32 @@ if entry['age_seconds'] > entry.get('freshness_seconds', config['stale_seconds']
 - 邏輯：`integration/profiles.py:88` `checker_script_path()`，**無 fallback**（`CheckerMissing`）；腳本需含 `profile parameter contract` marker（`resolve()` 檢查 `count(marker)==1`）
 - **若要做**：從 `neutrino_config.sh` 複製成 `l11_test_config.sh`，改成 L11 的硬體期望值。屬專案層級工程，需先跟用戶討論 L11 要查什麼。
 
-### Q2 — BMC Hostname 改走 SSH（✅ 已完成，採方案 A：全系統預設）
-- **最終設計（方案 A）**：`engine/vera_cycle/validation_identity.py` 的 `collect_identity` 預設改為 **auto**：
-  1. **先試 BMC SSH `hostname`**（全系統預設）
-  2. SSH 連不上 / 沒這指令 → **自動退回 Redfish**（不會比改動前差）
-  3. 單一節點可用 capability **pin** 傳輸方式：`auto`（預設）/ `ssh_hostname`（只用 SSH）/ `redfish`（跳過 SSH）
-- 拆出 `_bmc_via_ssh()` / `_bmc_via_redfish()` 兩個 helper。
+### Q2 — BMC Hostname 改走 SSH（✅ 已完成：全系統預設，純 SSH）
+- **最終設計（用戶定案）**：BMC hostname **只走 SSH**，抓不到就留空（可能未上電/無 SSH），**沒有 Redfish 自動 fallback**。
+  - 預設（未設 capability）= 走 BMC SSH `hostname`
+  - `capabilities.bmc_hostname_query = 'redfish'` 例外：少數只能 Redfish 的 BMC 可單台指定
+  - `'ssh_hostname'` 舊值仍沿用（＝SSH）
+- `_bmc_via_ssh()` / `_bmc_via_redfish()` 兩個 helper；`_bmc_via_redfish` 只在明確 `redfish` 時呼叫。
 - **後端** `app/main.py`：`UpdateOs.capabilities`（None=不更動、{} = 清空、有值 = 合併）；
   `_ALLOWED_CAPABILITIES = {"bmc_hostname_query": {"auto","ssh_hostname","redfish"}}`；
   `capabilities` 在 `node_identity.binding()` hash 內 → 自動 bump `binding_revision`。
-- **前端** `product-detail.js` 節點編輯器「BMC Hostname 查詢」下拉：`自動（先試 SSH，失敗退回 Redfish）` / `只用 SSH` / `只用 Redfish`（tag → `product-detail.js?v=20261004-bmcauto1`）。
+- **前端** `product-detail.js` 節點編輯器「BMC Hostname 查詢」下拉：`SSH（BMC 執行 hostname）`（預設）/ `Redfish（僅少數 BMC 需要）`（tag → `product-detail.js?v=20261004-bmcsshonly`）。
 - **全系統探測結果**（read-only，12 個 BMC endpoint）：
 
-  | 機台 | BMC IP | SSH:22 | 自動模式結果 |
+  | 機台 | BMC IP | SSH:22 | 結果 |
   |---|---|---|---|
   | EQ3300 s1 | 10.35.228.145 | ✅ | SSH `flyboy-dcscm-...` |
-  | EQ3300 s2 | 10.35.229.130 | ❌ | 退回 Redfish |
+  | EQ3300 s2 | 10.35.229.130 | ❌ | 無（未上電/無 SSH）|
   | neutrino-n1 s1/s2/s3 | .149/.151/.155 | ✅ | SSH `vc-256-bmc-n1/n3/n3` |
   | Wickie-B300-SUT2 | 10.35.229.234 | ✅ | SSH `SPR5CFF35E8F419` |
-  | Sheng-Cisco | 10.35.229.220 | ❌ | 退回 Redfish（BMC 全不可達 → 無值）|
-  | boba-ami | 10.35.229.61 | ❌ | 退回 Redfish |
-  | naboo-01 s1–s4 | 10.10.x | ❌ | 退回 Redfish |
+  | Sheng-Cisco | 10.35.229.220 | ❌ | 無 |
+  | boba-ami | 10.35.229.61 | ❌ | 無 |
+  | naboo-01 s1–s4 | 10.10.x | ❌ | 無 |
 
-- **實機驗證**：EQ3300 s1 與 neutrino-n1 **在無任何 per-node capability 下**（皆為預設 auto）分別取得 `flyboy-dcscm-ot-de9a3f851b9e` / `vc-256-bmc-n1`。EQ3300 s1 先前手動寫入的 capability 已清除，回到純預設。
-- 測試：`tests/test_os_capabilities.py`（設定/bump、合併、清空、非法 key/value 422、stale 409、未帶欄位不動、**預設 SSH、auto 退回 Redfish、強制 redfish 跳過 SSH、pin ssh 不退回**）＋ `test_identity_sync.py` Redfish 專項改為 pin `redfish`。
+- **實機驗證**：EQ3300 s1 / neutrino-n1 取得 hostname；boba-ami（SSH 不可達）`bmc=None`（**確認無 Redfish fallback**）。
+- 測試：`tests/test_os_capabilities.py`（設定/bump、合併、清空、非法 key/value 422、stale 409、未帶欄位不動、**預設只走 SSH**、**auto 不退回 Redfish**、明確 redfish 跳過 SSH、舊 `ssh_hostname` 值仍走 SSH）＋ `test_identity_sync.py` Redfish 專項 pin `redfish`。
 
-> 歷史：`62a1ff8` 先加 capability 寫入路徑（選項式）；`b2d0430` 再依方案 A 把預設翻轉為 SSH-first + fallback。
+> 歷史：`62a1ff8` 加 capability 寫入路徑 → `b2d0430` 翻轉為 SSH-first + Redfish fallback → `80303cc` doc。**最終（本次）：移除 Redfish 自動 fallback，改為純 SSH（redfish 僅能手動指定）。**
 
 ---
 

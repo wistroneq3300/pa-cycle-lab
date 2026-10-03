@@ -396,10 +396,9 @@
       if (input.type === 'number') {input.min = '1';input.max = '65535';}
       label.append(input);form.append(label);
     }
-    // BMC hostname 查詢方式：預設 auto（先試 SSH，失敗退回 Redfish）。
-    const queryModes = [['','自動（先試 SSH，失敗退回 Redfish）'],
-                        ['ssh_hostname','只用 SSH（BMC 執行 hostname）'],
-                        ['redfish','只用 Redfish']];
+    // BMC hostname 查詢方式：預設走 SSH（抓不到就留空）；少數只能 Redfish 的 BMC 可另選。
+    const queryModes = [['','SSH（BMC 執行 hostname）'],
+                        ['redfish','Redfish（僅少數 BMC 需要）']];
     {
       const label = document.createElement('label');label.textContent = 'BMC Hostname 查詢';
       const select = document.createElement('select');select.name = 'bmc_hostname_query';select.className = 'pd-os-input';

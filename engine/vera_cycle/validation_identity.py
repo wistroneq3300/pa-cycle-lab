@@ -47,17 +47,19 @@ def collect_identity(collector, binding, include_bmc=True):
     if not include_bmc or not binding.get('bmc_ip'): return result
     transport=collector.transport; target=collector.target
     mode=(binding.get('capabilities') or {}).get('bmc_hostname_query') or 'auto'
-    # Auto is the system default: BMC hostname is read over SSH, and a BMC that
-    # cannot answer `hostname` over SSH falls back to Redfish. A per-node
-    # capability can pin the transport (ssh_hostname / redfish) when needed.
-    if mode in ('auto','ssh_hostname'):
-        if _bmc_via_ssh(transport,target,result) or mode=='ssh_hostname': return result
-    _bmc_via_redfish(transport,target,binding,result)
+    # BMC hostname is read over SSH only. A BMC that is unreachable or powered
+    # off simply yields no hostname; there is no Redfish fallback by default.
+    # A per-node capability can still pin Redfish ('redfish') for the rare BMC
+    # that only exposes HostName over Redfish.
+    if mode=='redfish':
+        _bmc_via_redfish(transport,target,binding,result)
+        return result
+    _bmc_via_ssh(transport,target,result)
     return result
 
 
 def _bmc_via_ssh(transport,target,result):
-    """Try `hostname` over BMC SSH. Returns True when it yielded a usable answer."""
+    """Read `hostname` over BMC SSH. Returns True when it yielded a usable answer."""
     try:
         response=transport.ssh(target,'bmc','hostname',20,False)
         raw=response.output; name=normalize_hostname(raw)

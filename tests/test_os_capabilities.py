@@ -142,29 +142,27 @@ class SshHostnameObservation(unittest.TestCase):
             binding["capabilities"] = {"bmc_hostname_query": capability}
         return collect_identity(Collector(), binding), calls
 
-    def test_default_auto_prefers_ssh(self):
+    def test_default_auto_uses_ssh_only(self):
         result, calls = self._collect()
         self.assertEqual(result["bmc_hostname"], "bmc.example")
         self.assertEqual(result["bmc_status"], "SUCCESS")
         self.assertEqual(result["bmc_source"], "bmc_ssh_hostname")
         self.assertEqual(calls, [("ssh", "bmc", "hostname")])
 
-    def test_auto_falls_back_to_redfish_when_ssh_fails(self):
+    def test_auto_does_not_fall_back_to_redfish(self):
         result, calls = self._collect(ssh_ok=False)
-        self.assertEqual(result["bmc_hostname"], "rf.example")
-        self.assertEqual(result["bmc_status"], "SUCCESS")
-        self.assertEqual(result["bmc_source"], "/redfish/v1/Managers/bmc/HostName")
-        self.assertEqual(calls[0], ("ssh", "bmc", "hostname"))
-        self.assertIn(("redfish",), calls)
+        self.assertIsNone(result["bmc_hostname"])
+        self.assertEqual(result["bmc_source"], "bmc_ssh_hostname")
+        self.assertFalse(any(c[0] == "redfish" for c in calls))
 
     def test_explicit_redfish_skips_ssh(self):
         result, calls = self._collect(capability="redfish")
         self.assertEqual(result["bmc_source"], "/redfish/v1/Managers/bmc/HostName")
         self.assertFalse(any(c[0] == "ssh" for c in calls))
 
-    def test_pinned_ssh_does_not_fall_back(self):
-        result, calls = self._collect(capability="ssh_hostname", ssh_ok=False)
-        self.assertIsNone(result["bmc_hostname"])
+    def test_legacy_ssh_hostname_value_still_uses_ssh(self):
+        result, calls = self._collect(capability="ssh_hostname")
+        self.assertEqual(result["bmc_source"], "bmc_ssh_hostname")
         self.assertFalse(any(c[0] == "redfish" for c in calls))
 
 
