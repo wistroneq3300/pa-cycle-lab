@@ -37,6 +37,7 @@ class FakeTransport:
         self.boots = {}
         self.calls = []
         self.uploaded = {}
+        self.uploaded_observations = {}
         self.mismatch = False
         self.empty_baseline = False
         self.hardware_failure = True
@@ -54,7 +55,8 @@ class FakeTransport:
         return Command(0, 'available')
 
     def upload(self, target, data, remote):
-        self.uploaded[target.key] = data
+        if remote.endswith('.sh'): self.uploaded[target.key] = data
+        else: self.uploaded_observations[remote]=data
 
     # --- Redfish fake -----------------------------------------------------
     # A merged-style BMC: EventLog exists, no separate SEL service.
@@ -105,7 +107,9 @@ class FakeTransport:
         if cmd.startswith('ipmitool sel '):
             return self.oob(t, cmd.removeprefix('ipmitool '), timeout)
         if cmd.startswith('sha256sum '):
-            return Command(0, digest(self.uploaded[t.key]) + ' file')
+            import shlex
+            path=shlex.split(cmd)[1]
+            return Command(0, digest(self.uploaded_observations[path] if path in self.uploaded_observations else self.uploaded[t.key]) + ' file')
         if cmd == 'id -u':
             return Command(0, '0')
         if 'apt-get install' in cmd:
@@ -119,6 +123,8 @@ class FakeTransport:
             return Command(0, '' if self.empty_baseline else PCI.splitlines()[0] if self.pci_drift and self.boots.get(t.key) == 1 else PCI)
         if cmd == 'lspci -Dvvv':
             return Command(0, PCI_VERBOSE)
+        if cmd == 'lspci -Dvv -nn':
+            return Command(0, '' if self.empty_baseline else PCI+PCI_VERBOSE)
         if (cmd.startswith('bash ') or cmd.startswith('MEMORY_MIN_RATIO=')):
             return Command(1, 'ISSUE|BF4_MISSING|BF4|Expected at least 1; detected 0\nRESULT|FAIL\n') if self.hardware_failure else Command(0, 'RESULT|PASS\n')
         if cmd == '/usr/bin/powerctrl.sh power_status':

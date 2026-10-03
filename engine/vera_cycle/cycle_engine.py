@@ -30,10 +30,12 @@ from cycle_core import (
     redfish_entries,
     redfish_verdict,
     sel_delta,
+    sel_records,
     sensor_issues,
     write_json,
 )
 from cycle_transport import Command, IdentityUnsafe
+from validation_collectors import Operation, execute_operation, OPERATIONS, core_version
 
 PACKAGES = {"lspci": "pciutils", "dmidecode": "dmidecode", "nvme": "nvme-cli",
             "ipmitool": "ipmitool", "lsusb": "usbutils", "ip": "iproute2"}
@@ -183,13 +185,12 @@ class NodeSession:
         record["issues"].append(issue(code, component, detail, severity, evidence))
 
     def command(self, record, stem, role, cmd, sudo=False, timeout=90, check=True,
-                save_evidence=True, record_command=True, include_output=True, filter_output=None):
+                save_evidence=True, record_command=True, include_output=True, filter_output=None, acquired=None):
         collection=stem in CAPTURES or stem in {'sensor','sensor_retry','sensor_confirm','sel','hardware','bmc_firmware','power','host_power'}
         phase='POST' if record.get('post_started') else 'PRE' if record['phase']=='PRE' else 'CYCLE'
         if collection: self.event(record,'POST' if phase=='POST' else 'PRE' if phase=='PRE' else 'INFO','COLLECTION_STARTED','Collecting '+stem,phase=phase)
         try:
-            result = (self.transport.oob(self.target, cmd, timeout) if role == "oob" else
-                      self.transport.ssh(self.target, role, cmd, timeout, sudo))
+            result = acquired if acquired is not None else execute_operation(self.transport,self.target,Operation(role,cmd,sudo,timeout))
         except IdentityUnsafe:
             raise
         except (ConnectionError, TimeoutError, OSError) as exc:
@@ -315,17 +316,24 @@ class NodeSession:
             self.dmesg_seen = counts
 
     def capture(self, record, post=False):
+        record['shared_core_version']=core_version()
         self.event(record,'POST' if post else 'PRE','BASELINE_COLLECTION' if not post else 'POST_STARTED',
                    'Collecting PRE baseline' if not post else 'POST started',phase='POST' if post else 'PRE')
         self.collect_dmesg(record, 'dmesg', evidence_stem='dmesg_clear')
+        shared_pci=b'VALIDATION_PCI_INPUT' in self.script
+        pci_acquisition=None
         for stem, (cmd, sudo) in CAPTURES.items():
             if stem == 'dmesg':
                 continue
             # ``pci_verbose`` is parsed in full from the in-memory output; only
             # the on-disk evidence is narrowed to link-bearing end devices so
             # the artefact stays reviewable without duplicating hardware.txt.
+            if shared_pci and stem in {'pci','pci_verbose'}:
+                cmd,sudo=OPERATIONS['pci'].command,True
             result = self.command(record, stem, "os", cmd, sudo=sudo,
-                                  filter_output=filter_pci_verbose if stem == 'pci_verbose' else None)
+                                  filter_output=filter_pci_verbose if stem == 'pci_verbose' else None,
+                                  acquired=pci_acquisition if shared_pci and stem=='pci_verbose' else None)
+            if stem=='pci': pci_acquisition=result
             if stem == "pci":
                 record["pci"] = parse_pci(result.output) if result.code == 0 else {}
                 record["pci_devices"] = merge_pci_devices(record["pci"], record.get("pci_verbose", {}))
@@ -353,7 +361,25 @@ class NodeSession:
                 self.node['blocked'].append('Cannot run the verified hardware script')
         if self.script_verified:
             ratio = getattr(self.options, 'memory_min_ratio', 0.9)
-            config = self.command(record, "hardware", "os", f"MEMORY_MIN_RATIO={ratio} bash " + shlex.quote(self.remote), sudo=True, timeout=180, check=False)
+            prefix=f"MEMORY_MIN_RATIO={ratio} "
+            if shared_pci:
+                from cycle_core import digest
+                raw=(pci_acquisition.output if pci_acquisition.code==0 else '').encode()
+                remote_pci=self.remote+'.'+record['phase'].lower()+'.'+digest(raw)[:16]+'.pci'
+                # Shared bytes are data, not a second checker upload. Failed PCI
+                # collection is never replaced with a hidden second lspci call.
+                if pci_acquisition.code==0:
+                    self.transport.upload(self.target,raw,remote_pci)
+                    verified=self.command(record,'pci_snapshot_verify','os','sha256sum '+shlex.quote(remote_pci),check=False)
+                    if verified.code or verified.output.split()[:1]!=[digest(raw)]:
+                        raise EvidencePersistenceError('Shared PCI snapshot integrity verification failed')
+                prefix+='VALIDATION_PCI_INPUT='+shlex.quote(remote_pci)+' '
+            try:
+                config = self.command(record, "hardware", "os", prefix+"bash " + shlex.quote(self.remote), sudo=True, timeout=180, check=False)
+            finally:
+                if shared_pci and pci_acquisition.code==0:
+                    try: self.transport.ssh(self.target,'os','rm -f '+shlex.quote(remote_pci),30,True)
+                    except Exception: pass  # owned temporary data only; never retry an action
             findings = config_issues(config.output, config.code)
             record["issues"] += findings
             record['hardware_checks'], record['hardware_check_details'] = parse_hardware_checks(config.output, findings)
@@ -390,6 +416,7 @@ class NodeSession:
         if post:
             valid = record['commands']['sel']['valid'] and record.get('sel_before_valid', False)
             record['sel_status'] = 'REVIEW REQUIRED' if valid else 'COLLECTION FAILED'
+            record['sel_structured'] = sel_records(sel.output) if valid else None
             record['sel_events'] = sel_delta(record.get('sel_before', ''), sel.output).splitlines() if valid else None
             if valid:
                 path = self.folder(record) / "sel_delta.txt"

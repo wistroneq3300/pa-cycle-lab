@@ -27,6 +27,28 @@ class EvidenceSource:
     def __init__(self,telemetry_path,cycle_path,artifacts,mode="synthetic"):
         self.mode=mode; self.telemetry_path=Path(telemetry_path); self.cycle_path=Path(cycle_path); self.artifacts=Path(artifacts)
 
+    def context(self,system,now):
+        """Read only the existing recovery journal; never alter reservations."""
+        wanted={n['node_id'] for n in system['nodes']}; result=[]
+        try:
+            with readonly(self.cycle_path) as db:
+                jobs=db.execute("SELECT id,data FROM jobs WHERE project=? AND json_extract(data,'$.state') IN ('RUNNING','STOP_REQUESTED')",(system['project'],)).fetchall()
+                for row in jobs:
+                    job=json.loads(row['data']); seen=set()
+                    events=db.execute("SELECT at,data FROM events WHERE job_id=? AND json_extract(data,'$.event_type') IN ('WAIT_OFFLINE','WAIT_RECOVERY','RECOVERY_DETECTED','POST_STARTED','BOOT_TIMEOUT') ORDER BY seq DESC LIMIT 512",(row['id'],)).fetchall()
+                    for event in events:
+                        data=json.loads(event['data']); nid=data.get('machine_id')
+                        if nid not in wanted or nid in seen: continue
+                        seen.add(nid)
+                        if data['event_type'] not in {'WAIT_OFFLINE','WAIT_RECOVERY'}: continue
+                        # Timeout is measured from the first wait of this loop,
+                        # not extended by every observed offline message.
+                        began=db.execute("SELECT min(at) FROM events WHERE job_id=? AND json_extract(data,'$.machine_id')=? AND json_extract(data,'$.loop')=? AND json_extract(data,'$.event_type')='WAIT_OFFLINE'",(row['id'],nid,data.get('loop',0))).fetchone()[0] or event['at']
+                        deadline=began+job['config'].get('boot_timeout',900)
+                        if began<=now<=deadline: result.append(dict(node_id=nid,phase='WAITING_RECOVERY',started_at=began,deadline=deadline,run_id=row['id']))
+        except (sqlite3.Error,OSError,KeyError): pass
+        return result
+
     def __call__(self,system,config,now):
         observations=[]; coverage=[]; config['_deadline']=time.monotonic()+10
         # Never call machine_telemetry/os_series_any: their legacy name merging cannot
@@ -56,6 +78,7 @@ class EvidenceSource:
                     detail='僅採用 canonical Node ID 歷史；機台名稱下的資料無法可靠歸屬節點。' if not seen else '已涵蓋使用率：'+', '.join(sorted(metrics))+'；溫度與功耗故障未涵蓋。'))
             except (sqlite3.Error,OSError):
                 coverage.append(dict(node_id=nid,label=node['label'],source='Telemetry',state='UNAVAILABLE',collected_at=None,detail='尚未取得可安全讀取的節點歷史。'))
+        if config.get('_skip_reports'): return observations,coverage,[]
         facts,report_coverage=self.reports(system,config,now)
         observations.extend(facts); coverage.extend(report_coverage)
         coverage.append(dict(source='Sensor／SEL／kernel log',state='NOT_COVERED',detail='即時快取缺少可靠節點身分／採集世代；不啟動額外掃描。不沿用 GPU 告警通知。'))
@@ -135,14 +158,16 @@ class InspectionService:
     def snapshot(self,name):
         system=self.resolve(name); result=self.store.summary(system['id'])
         result.update(name=name,project=system['project'],nodes=system['nodes'])
+        result['identity_history']=system.get('identity_history',[])
+        result['identity']={nid:state['identity'] for nid,state in self.store.node_state(system['id']).items() if 'identity' in state}
         for entry in result.get('coverage',[]):
             if entry.get('collected_at') is not None:
                 entry['age_seconds']=max(0,self.clock()-entry['collected_at'])
-                if entry.get('state')=='FRESH' and entry['age_seconds']>result['config']['stale_seconds']: entry['state']='STALE'
+                if entry.get('state')=='FRESH' and entry['age_seconds']>entry.get('freshness_seconds',result['config']['stale_seconds']): entry['state']='STALE'
         with self._guard:
             active=self._active.get(system['id'])
             result['running']=bool(active and not active[0].done())
-            result['delayed']=bool(result['running'] and self.clock()-active[1]>10)
+            result['delayed']=bool(result['running'] and self.clock()-active[1]>300)
         return result
 
     def submit(self,name,scheduled=False):
@@ -157,25 +182,34 @@ class InspectionService:
     def run(self,system,scheduled=False):
         from .runner import process_lock
         sid=system['id']; lock=self.store.path.parent/'inspection-locks'/key(sid)
+        entered=False
         try:
             with process_lock(lock):
+                entered=True
                 saved=self.store.system(sid); config=saved['config']
                 if scheduled and (not config['enabled'] or saved['next_due']>self.clock()): return None
                 config['_report_cursors']=copy.deepcopy(saved.get('source_cursors',{}))
+                config['_full']=not scheduled
                 observations,coverage,context=self.source(system,config,self.clock())
-                return InspectionEvaluator(self.store,self.clock).evaluate(sid,observations,coverage,context,self.secrets(),source_cursors=config['_report_cursors'])
-        except (OSError,sqlite3.Error):
-            return None  # another process is still evaluating or persistence unavailable
+                result=InspectionEvaluator(self.store,self.clock).evaluate(sid,observations,coverage,context,self.secrets(),source_cursors=config['_report_cursors'],batch=config.get('_batch'))
+                if hasattr(self.source,'evidence'): self.store.prune(sid,self.source.evidence,self.clock())
+                return result
         except Exception as exc:
-            with self.store.tx() as db:
-                item=self.store.system(sid,db)
-                item.update(error='巡檢來源無法完成：'+type(exc).__name__,next_due=self.clock()+item['config']['interval_seconds'])
-                self.store.save_system(db,item)
+            if not entered and isinstance(exc,OSError): return None  # OS lock is held elsewhere
+            try:
+                with self.store.tx() as db:
+                    item=self.store.system(sid,db)
+                    item.update(error='巡檢來源／證據保存未完成：'+type(exc).__name__,next_due=self.clock()+item['config']['interval_seconds'])
+                    self.store.save_system(db,item)
+                    db.execute('DELETE FROM inspection_progress WHERE system_id=?',(sid,))
+            except (OSError,sqlite3.Error):
+                import logging
+                logging.getLogger(__name__).exception('Inspection persistence failure; cursors were not committed')
             return None
 
     def tick(self):
         enabled={s['id']:s for s in self.store.enabled()}
-        for system in self.systems():
+        for system in sorted(self.systems(),key=lambda s:enabled.get(s['id'],{}).get('next_due',float('inf'))):
             saved=enabled.get(system['id'])
             if saved and saved['next_due']<=self.clock(): self.submit(system['name'],scheduled=True)
 

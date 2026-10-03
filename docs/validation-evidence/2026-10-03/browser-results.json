@@ -1,0 +1,33 @@
+{
+  "results": [
+    {
+      "case": "A",
+      "passed": true,
+      "independent": true,
+      "no_cycle_runs": true
+    },
+    {
+      "case": "B",
+      "passed": true,
+      "time_acceleration_seconds": 4000
+    },
+    {
+      "case": "C",
+      "passed": true,
+      "old_run_id": "neutrino_reboot_inband_20261003_175110_e1f75e",
+      "old_checker_preserved": true,
+      "run_id": "neutrino_reboot_inband_20261003_175138_6d4cd8",
+      "checker_hash": "663dedb3afa59d1afd522204d85e220917ac8684829d4e57d6f62e267c160e4e"
+    },
+    {
+      "case": "D",
+      "passed": true,
+      "stable_node_identity": true,
+      "history_deduplicated": true,
+      "old_cycle_unchanged": true
+    }
+  ],
+  "errors": [],
+  "offline": true,
+  "backend": "http://127.0.0.1:52984"
+}

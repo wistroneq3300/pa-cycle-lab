@@ -1,5 +1,21 @@
 # PROJECT_STATUS — PA Cycle Lab native Next integration
 
+## 2026-10-03 Shared Validation Core + independent observations + Identity Auto Sync
+
+Base `d6fa3afcd35477c3a55ec7de8851d72b0097c520`, existing isolated `codex/system-inspection-ux` worktree. This extends the prior inspection and detail-control work; live/main and upstream repositories are untouched.
+
+- Shared `validation_rules`/collectors/event envelopes; `cycle_core` compatibility exports. Neutrino and Naboo keep their own single checker/specification, now accepting collected snapshot input. Inspection runs the reviewed checker locally against new OS/BMC observations, without creating a Cycle or requiring an earlier Cycle report.
+- Independent identity/boot, PCIe, kernel journal/ring, Sensor, SEL, discovered Redfish LogServices, firmware/system, power status and configured NVIDIA read-only telemetry. Same-batch PCIe shared by inventory/link/checker; Cycle tree/config evidence retained. No power/log clear/package installation in Inspection.
+- Fast/Deep/Sensor/Firmware cadence, boot readiness, per-node state, durable snapshots, incremental events, occurrence/recovery, source freshness, bounded output/queues and retained evidence. Existing issue/history/handling data remain. UI extends the existing inspection card and source/evidence views; no Cycle workspace/Console redesign.
+- Current baseline intentionally disables Store reservation enforcement. This work does **not** re-enable it. Inspection's own process lock only prevents duplicate inspection work; it does not block Terminal/KVM/Cycle/manual controls. Earlier retained-lock claims below are historical, not current behavior.
+- Shared Identity Collector and canonical metadata sync: normal OS/BMC rename is INFO, stable node/chassis IDs and old reports preserved. Failed/unsupported sources never clear names; concurrent binding edits and independently observed asset mismatch require confirmation for Deep only. Existing Lab noninteractive SSH behavior is opt-in for observation transport, without changing Cycle's default.
+- Paired full integration: baseline 72 PASS/124 FAIL vs current 132 PASS/124 FAIL in pytest's raw subtest accounting. Unique IDs: 69/89 → 129/89, **0 new failure IDs**, **60 new PASS IDs**, including 24 Identity cases. Vera final full rerun 113 PASS/16 SKIP; one prior concurrent-run stop-test failure retained in artifacts, no assertion changes. PA mocks53 PASS; Next QA108 PASS/1 inherited fixture error; four JS scripts PASS.
+- Real isolated Web/Runner restart workflow PASS; four real worker crash checkpoints no replay. Four production-frontend videos and desktop/theme screenshots produced; no real DUT or LLM. Windows/MSYS evidence is not Linux/systemd acceptance.
+
+Maintenance/ownership: [SHARED_VALIDATION.md](docs/SHARED_VALIDATION.md), [IDENTITY_AUTO_SYNC.md](docs/IDENTITY_AUTO_SYNC.md). Requirement map, exact tests, artifacts and limits: [SHARED_VALIDATION_ACCEPTANCE.md](docs/SHARED_VALIDATION_ACCEPTANCE.md).
+
+Local implementation and isolated verification complete; commit/push tracked in this delivery's final SHA. **Not deployed; no production services restarted; no real hardware operated.** Cross-chassis shared-controller coordination, real platform readiness/SEL behavior and Linux/service acceptance remain explicit live gates.
+
 ## 2026-10-03 System inspection + detail controls (isolated branch)
 
 Base `6eba3a2a706203df6484ff1dcacdc3ea95774799`, branch `codex/system-inspection-ux`; independent worktree. Live branch remains unchanged.

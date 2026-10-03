@@ -1,5 +1,9 @@
 # Native Next × Vera acceptance — 2026-10-01
 
+## 2026-10-03 Shared Validation / independent inspection / Identity Auto Sync
+
+Current round is documented separately in [SHARED_VALIDATION_ACCEPTANCE.md](SHARED_VALIDATION_ACCEPTANCE.md), based on `d6fa3af`. It includes paired baseline/current test IDs, actual process fault tests, production UI connected to isolated service/fake transport, A/B/C/D videos and 1366/1920 light/dark captures. See [SHARED_VALIDATION.md](SHARED_VALIDATION.md) and [IDENTITY_AUTO_SYNC.md](IDENTITY_AUTO_SYNC.md) for maintenance and source ownership. The older totals and retained-lock descriptions below are historical; this branch's pre-existing disabled reservation behavior was preserved. No deployment or real hardware acceptance is claimed.
+
 ## 2026-10-03 UI compatibility on `cycle/live-neutrino-redfish-hostname`
 
 Baseline `1a51f2a`; earlier UI branch was not merged. Runtime diff limited to `app/static/js/cycle-workspace.js`, `app/static/css/cycle-workspace.css` and two cache-busters in `app/static/index.html`.

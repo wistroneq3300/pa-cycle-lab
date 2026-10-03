@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "instance": "data/shared-validation-process-59092cf91ba04dbd9364d80f67cffc3b",
+  "job_id": "neutrino_reboot_inband_20261003_174910_fce9cd",
+  "web_pid_changed": true,
+  "worker_pid_unchanged": true,
+  "console_history_survived_web_restart": true,
+  "incremental_events_verified": true,
+  "scheduler_pid_changed": true,
+  "worker_survived_scheduler_restart": true,
+  "state": "INCOMPLETE",
+  "completed_rounds": 2
+}

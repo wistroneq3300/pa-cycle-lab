@@ -13,6 +13,7 @@ class SyntheticTransport:
         self.boots = {}
         self.calls = []
         self.uploaded = {}
+        self.uploaded_paths = {}
         self.mismatch = False
         self.empty_baseline = False
         self.hardware_failure = False
@@ -30,7 +31,8 @@ class SyntheticTransport:
         return Command(0, 'available')
 
     def upload(self, target, data, remote):
-        self.uploaded[target.key] = data
+        self.uploaded_paths[remote]=data
+        if remote.endswith('.sh'): self.uploaded[target.key] = data
 
     def action(self, t):
         time.sleep(0.35)
@@ -50,7 +52,9 @@ class SyntheticTransport:
         if cmd.startswith('ipmitool sel '):
             return self.oob(t, cmd.removeprefix('ipmitool '), timeout)
         if cmd.startswith('sha256sum '):
-            return Command(0, digest(self.uploaded[t.key]) + ' file')
+            import shlex
+            path=shlex.split(cmd)[1]
+            return Command(0, digest(self.uploaded_paths.get(path,self.uploaded.get(t.key,b''))) + ' file')
         if cmd == 'id -u':
             return Command(0, '0')
         if 'apt-get install' in cmd:
@@ -60,7 +64,7 @@ class SyntheticTransport:
             return Command(0, 'MISSING=lspci\n' if self.package_missing else '')
         if cmd in {'reboot', 'ipmitool power cycle', '/usr/bin/stbypowerctrl.sh aux_cycle'}:
             return self.action(t)
-        if cmd == 'lspci -Dnn':
+        if cmd in {'lspci -Dnn','lspci -Dvv -nn'}:
             return Command(0, '' if self.empty_baseline else PCI.splitlines()[0] if self.pci_drift and self.boots.get(t.key) == 1 else PCI)
         if (cmd.startswith('bash ') or cmd.startswith('MEMORY_MIN_RATIO=')):
             return Command(1, 'ISSUE|BF4_MISSING|BF4|Expected at least 1; detected 0\nRESULT|FAIL\n') if self.hardware_failure else Command(0, 'RESULT|PASS\n')

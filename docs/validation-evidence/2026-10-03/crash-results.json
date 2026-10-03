@@ -1,0 +1,26 @@
+[
+  {
+    "phase": "before-intent",
+    "dispatches": 0,
+    "state": "RECONCILIATION_REQUIRED",
+    "baseline_reservations_disabled": true
+  },
+  {
+    "phase": "during-command",
+    "dispatches": 1,
+    "state": "RECONCILIATION_REQUIRED",
+    "baseline_reservations_disabled": true
+  },
+  {
+    "phase": "after-response",
+    "dispatches": 1,
+    "state": "RECONCILIATION_REQUIRED",
+    "baseline_reservations_disabled": true
+  },
+  {
+    "phase": "during-post",
+    "dispatches": 1,
+    "state": "RECONCILIATION_REQUIRED",
+    "baseline_reservations_disabled": true
+  }
+]

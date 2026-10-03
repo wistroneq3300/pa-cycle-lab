@@ -41,7 +41,19 @@ collect() {
     local variable="$1" component="$2"
     shift 2
     local value rc
-    value=$("$@" 2>&1); rc=$?
+    local source="$component"
+    case "$component" in PCI-inventory|BF4-identity|PCIe-links) source=pci ;; esac
+    if [[ -n "${VALIDATION_SNAPSHOT_DIR:-}" ]]; then
+        value=$(cat -- "$VALIDATION_SNAPSHOT_DIR/$source.txt" 2>&1); rc=$?
+        if [[ -r "$VALIDATION_SNAPSHOT_DIR/$source.rc" ]]; then read -r rc < "$VALIDATION_SNAPSHOT_DIR/$source.rc"; else rc=125; fi
+    elif [[ "$source" == pci && -n "${VALIDATION_PCI_INPUT:-}" ]]; then
+        value=$(cat -- "$VALIDATION_PCI_INPUT" 2>&1); rc=$?
+    else
+        value=$("$@" 2>&1); rc=$?
+    fi
+    if [[ "$component" == PCI-inventory && ( -n "${VALIDATION_SNAPSHOT_DIR:-}" || -n "${VALIDATION_PCI_INPUT:-}" ) ]]; then
+        value=$(printf '%s\n' "$value" | grep -E '^[[:xdigit:]]{4}:[[:xdigit:]]{2}:[[:xdigit:]]{2}\.[0-7] ')
+    fi
     printf -v "$variable" '%s' "$value"
     printf '\n[Evidence] %s\n%s\n' "$component" "$value"
     if ((rc != 0)); then fail COLLECTION_FAILED "$component" "Command exited $rc"; fi

@@ -33,7 +33,7 @@ def environment_secrets():
     return values
 
 
-def redact(text, secrets=(), limit=2000):
+def redact(text, secrets=(), limit=2000, preserve_lines=False):
     text=str(text)
     # Redact before clipping/flattening, so a boundary cannot expose a partial secret.
     for value in sorted({s for s in secrets if isinstance(s,str) and s},key=len,reverse=True):
@@ -41,7 +41,8 @@ def redact(text, secrets=(), limit=2000):
     text=re.sub(r'(?im)(authorization\s*[:=]\s*)[^\r\n]+',r'\1[REDACTED]',text)
     text=re.sub(r'(?i)((?:password|passwd|token|secret|credential_ref|api_key)\s*[=:]\s*)[^\s,;]+',r'\1[REDACTED]',text)
     text=re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]','',text)
-    text=re.sub(r'[\x00-\x1f\x7f-\x9f\u202a-\u202e\u2066-\u2069]',' ',text)
+    controls=r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f\u202a-\u202e\u2066-\u2069]' if preserve_lines else r'[\x00-\x1f\x7f-\x9f\u202a-\u202e\u2066-\u2069]'
+    text=re.sub(controls,' ',text)
     return text[:limit]
 
 

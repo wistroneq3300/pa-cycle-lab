@@ -2,7 +2,7 @@
 from pathlib import Path
 import json
 ROOT=Path(__file__).resolve().parents[1]
-files=['run.py']
+files=['run.py','engine/vera_cycle/validation_checkers.json']
 for folder in ('integration','engine/vera_cycle','app'):
     excluded={'dev','docs','data','tests','qa','node_modules','__pycache__','test-results'}
     if folder=='app': excluded|={'scripts','deploy'}

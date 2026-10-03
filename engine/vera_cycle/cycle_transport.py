@@ -40,6 +40,7 @@ class Transport:
         self.credentials = {role: "" if password is None else password
                             for role, password in credentials.items()}
         self.known_hosts = Path(known_hosts)
+        self._redfish_sessions = {}
 
     def redact(self, text):
         for secret in self.credentials.values():
@@ -60,9 +61,10 @@ class Transport:
         # Campaign-isolated TOFU; later key changes fail. Hostname is separately
         # checked against operator-supplied inventory before any remote mutation.
         hostfile = self.known_hosts / (target.key + "_" + role)
-        hostfile.parent.mkdir(parents=True, exist_ok=True)
-        hostfile.touch(exist_ok=True)
-        client.load_host_keys(str(hostfile))
+        if not getattr(self,'lab_noninteractive',False):
+            hostfile.parent.mkdir(parents=True, exist_ok=True)
+            hostfile.touch(exist_ok=True)
+            client.load_host_keys(str(hostfile))
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         watchdog = threading.Timer(timeout, client.close)
         watchdog.daemon = True
@@ -94,6 +96,15 @@ class Transport:
         watchdog = None
         sent = False
         chunks = []
+        output_size = 0
+        def append(data):
+            nonlocal output_size
+            output_size += len(data)
+            chunks.append(data)
+            # Only independent observations opt into a byte ceiling. Cycle's
+            # established output/evidence contract is unchanged by default.
+            if getattr(self,'output_limit',None) and output_size>self.output_limit:
+                raise BufferError('Observation output limit exceeded')
         try:
             client = self._connect(target, role, min(10, timeout / 4))
             # Paramiko's exec/subsystem acknowledgement wait has no timeout of
@@ -116,7 +127,7 @@ class Transport:
             channel.shutdown_write()
             while True:
                 while channel.recv_ready():
-                    chunks.append(channel.recv(65536))
+                    append(channel.recv(65536))
                     if time.monotonic() - start >= timeout:
                         raise TimeoutError("Command deadline exceeded")
                 if channel.exit_status_ready() and not channel.recv_ready():
@@ -129,7 +140,7 @@ class Transport:
                     idle = time.monotonic() + 1.0
                     while time.monotonic() < idle and time.monotonic() - start < timeout:
                         if channel.recv_ready():
-                            chunks.append(channel.recv(65536))
+                            append(channel.recv(65536))
                             idle = time.monotonic() + 1.0
                         else:
                             time.sleep(0.02)
@@ -227,10 +238,19 @@ class Transport:
         except (OSError, subprocess.TimeoutExpired) as exc:
             raise RuntimeError(f"redfish login failed: {exc}") from exc
         headers = result.stdout + result.stderr
+        if getattr(self,'lab_noninteractive',False) and re.search(r'^HTTP/\S+\s+40[13]\b',headers,re.M):
+            raise PermissionError('Redfish authentication failed')
         match = re.search(r'^x-auth-token:\s*(\S+)', headers, re.I | re.M)
         if not match:
             raise RuntimeError("redfish login returned no X-Auth-Token")
+        location=re.search(r'^location:\s*(/redfish/v1/SessionService/Sessions/[^\s]+)',headers,re.I|re.M)
+        if location: self._redfish_sessions[match.group(1)]=location.group(1)
         return match.group(1)
+
+    def redfish_logout(self,target,token,timeout=10):
+        path=self._redfish_sessions.pop(token,None)
+        if path:
+            return self._redfish(['-X','DELETE','-H',f'X-Auth-Token: {token}',f'https://{target.bmc_ip}{path}'],timeout)
 
     def redfish_get(self, target, path, token, timeout=30):
         url = f"https://{target.bmc_ip}{path}"
