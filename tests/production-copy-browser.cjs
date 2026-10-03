@@ -83,6 +83,10 @@ const forbidden=/Sheng Wu|Wistron team|Local environment|FastAPI|DESIGN PREVIEW|
    current.state='AWAITING_CONFIRMATION';await page.goto(base+'/#/cycle/runs/'+job.id);await page.locator('#cw-confirm').waitFor();await capture('cycle-pre');
    current.state='RUNNING';await page.reload();await page.locator('#cw-progress details').first().waitFor();await page.locator('#cw-progress details summary').first().click();await capture('cycle-progress',{wide:true});
    await page.locator('#cw-console-toggle').click();await page.locator('.cycle-console-row').first().waitFor();await capture('cycle-console');
+   const firstEvent=events.events[0];
+   const expectedTaipei=await page.evaluate(ts=>new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Taipei',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(new Date(ts)),firstEvent.timestamp);
+   assert.equal(await page.locator('.cycle-console-time').first().innerText(),expectedTaipei);
+   assert.match(await page.locator('.live-console-note').innerText(),/台灣時間（UTC\+8）/);
    await page.locator('[data-part=density]').click();assert.equal(await page.locator('[data-part=density]').innerText(),'Full');
    await page.locator('[data-part=pause]').click();assert.equal(await page.locator('[data-part=pause]').innerText(),'繼續檢視');await page.locator('[data-part=pause]').click();
    await page.locator('.cw-artifacts>summary').click();await page.locator('#cw-evidence').click();await page.locator('#cw-files a').first().waitFor();await capture('cycle-evidence');

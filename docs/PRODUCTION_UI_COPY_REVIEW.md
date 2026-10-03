@@ -74,6 +74,7 @@ All C/H/M findings above were addressed in display copy or explicitly scoped vis
 - `Worker / heartbeat / Lifecycle` → execution service / update information / execution status in Chinese display copy.
 - `COMPLETE 不等於 PASS` → `執行狀態與硬體驗證結果分開判定`.
 - `SYNTHETIC` display badge → `測試模式 · 不操作實體設備`; the synthetic value and execution mode do not change.
+- Console event times now render as `HH:mm:ss` in Taiwan time (`UTC+8`). Persisted event timestamps, ordering, cursor values and downloaded raw logs remain UTC/source values.
 - `Pause / Auto-scroll / View Evidence` → Chinese display labels; Summary/Full, event contents, filters, cursor and download remain unchanged.
 - `OS null` → `OS 尚未選取` in the display-only target description and batch row.
 - Global Naboo/switch/port plan → generic project configuration workflow. Historical material is archived in `docs/project-reference/naboo-configuration.md` with an explicit unverified-planning label.

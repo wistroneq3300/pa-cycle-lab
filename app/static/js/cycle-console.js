@@ -8,6 +8,11 @@
       BOOT_ID_CHANGED:'OS up, system check running', RECOVERY_DETECTED:'OS up, system check running',
       POST_STARTED:'system check running', POST_COMPLETED:'system check done'
     };
+    // Event timestamps are stored as UTC ISO values. The Console is an
+    // operator-facing view, so render them in the PA team's Taiwan timezone
+    // without changing the persisted event, cursor ordering, or downloads.
+    const taipeiTime=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Taipei',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});
+    const displayTime=value=>{const date=new Date(value);return Number.isNaN(date.getTime())?String(value||'—').slice(11,19):taipeiTime.format(date);};
     // Short label for the active cycle mode, used for the "<label> sent" stage
     // line. Unknown -> neutral "cycle", never AUX. Taken from the job's
     // structured config, never guessed from the run id or log text.
@@ -42,7 +47,7 @@
         <p hidden data-part="error" role="alert"></p>
         <div class="live-console-view" data-part="log" role="log" aria-live="off" tabindex="0" aria-label="Cycle 執行紀錄"></div>
         <div class="live-console-foot"><span class="lc-mode" data-part="status" role="status"></span><span class="lc-count" data-part="count"></span></div>
-        <p class="live-console-note">時間以 UTC 顯示。畫面最多顯示 2,000 行。Summary 顯示重點摘要；Full 顯示原始事件。暫停檢視或關閉 Console 不會停止任務。完整紀錄可下載，原始證據保存在「證據與報告」。</p>`;
+        <p class="live-console-note">時間以台灣時間（UTC+8）顯示。畫面最多顯示 2,000 行。Summary 顯示重點摘要；Full 顯示原始事件。暫停檢視或關閉 Console 不會停止任務。完整紀錄可下載，原始證據保存在「證據與報告」。</p>`;
       this.part=name=>root.querySelector(`[data-part="${name}"]`);
       this.part('log').addEventListener('scroll',()=>{const log=this.part('log');if(log.scrollHeight-log.scrollTop-log.clientHeight>30){this.auto=false;this.part('auto').classList.remove('on');this.part('auto').textContent='自動跟隨：關';this.part('auto').setAttribute('aria-pressed','false');}});
       button.onclick=()=>this.toggle();
@@ -152,7 +157,7 @@
       let newest=null;
       for(const e of events){if(existing.has(String(e.sequence)))continue;
         const row=document.createElement('div');row.className='cycle-console-row';row.dataset.sequence=e.sequence;row.dataset.machine=e.machine_id || '';row.dataset.level=LEVELS.has(e.level)?e.level:'INFO';
-        for(const [cls,value] of [['time',e.timestamp?.slice(11,19) || '—'],['node',e.machine_id?(e.node || e.machine_id):'JOB'],['level',row.dataset.level]]){const cell=document.createElement('span');cell.className=`cycle-console-${cls}`;cell.textContent=value;cell.title=cls==='node'?`${e.machine_id || 'Job'} · ${e.tray || ''}/${e.node || ''}`:e.timestamp || '';row.append(cell);}
+        for(const [cls,value] of [['time',displayTime(e.timestamp)],['node',e.machine_id?(e.node || e.machine_id):'JOB'],['level',row.dataset.level]]){const cell=document.createElement('span');cell.className=`cycle-console-${cls}`;cell.textContent=value;cell.title=cls==='time'?`${e.timestamp || '—'} · 台灣時間 UTC+8`:cls==='node'?`${e.machine_id || 'Job'} · ${e.tray || ''}/${e.node || ''}`:e.timestamp || '';row.append(cell);}
         const content=document.createElement('span');content.className='cycle-console-message';content.textContent=e.message;
         const context=document.createElement('small');context.textContent=[e.phase,e.loop!=null?`輪次 ${e.loop}`:null,e.detail].filter(Boolean).join(' · ');if(!context.textContent)context.hidden=true;content.append(context);
         if(e.evidence&&!/[:\\%?#]/.test(e.evidence)&&!e.evidence.split('/').some(p=>!p||p.startsWith('.'))){const link=document.createElement('a');link.textContent='查看證據';link.href=`${this.url}/files/${e.evidence.split('/').map(encodeURIComponent).join('/')}`;link.target='_blank';link.rel='noopener';content.append(link);}
