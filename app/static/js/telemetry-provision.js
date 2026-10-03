@@ -16,7 +16,7 @@
         <div class="tp-context"><span data-target></span><span data-time></span></div>
         <div class="tp-actions"><button class="btn primary" data-enable disabled>啟用 Telemetry</button><button class="btn" data-console hidden>查看啟用紀錄</button><a class="btn" data-grafana hidden target="_blank" rel="noopener" title="開啟此節點的 Grafana 監控圖表，不執行安裝">開啟監控圖表 ↗</a></div>
         <p class="tp-note" data-notice>啟用只針對所選節點。原有效能資料與管理功能可繼續使用。</p>
-        <section class="tp-console" hidden aria-label="Telemetry 啟用紀錄"><header><div class="tp-console-title"><h4>Telemetry Console</h4><p data-console-target>Read-only execution log</p></div><span class="tp-session" data-session>IDLE</span><span data-job></span><button class="btn" data-close>關閉紀錄</button></header>
+        <section class="tp-console" hidden aria-label="Telemetry 啟用程序"><header><div class="tp-console-title"><h4>Telemetry 啟用程序</h4><p data-console-target>Read-only execution log</p></div><span class="tp-session" data-session>IDLE</span><span data-job></span><button class="btn" data-close>關閉紀錄</button></header>
           <div class="tp-runline"><span>Current stage <strong data-stage>Queue</strong></span><span data-log-date></span><span>TAIPEI / UTC+8</span></div>
           <div class="tp-tools"><button class="btn" data-follow aria-pressed="true">自動跟隨：開</button><button class="btn" data-pause aria-pressed="false">暫停顯示</button><label>搜尋已載入紀錄<input type="search" data-search placeholder="輸入關鍵字"></label><button class="btn" data-copy>複製可見紀錄</button><a class="btn" data-download>下載完整紀錄</a></div>
           <div class="tp-log-columns" aria-hidden="true"><span>SEQ</span><span>TIME</span><span>STATUS</span><span>STAGE</span><span>EVENT</span></div>
