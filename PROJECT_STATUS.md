@@ -1,5 +1,34 @@
 # PROJECT_STATUS — PA Cycle Lab native Next integration
 
+## 2026-10-03 Optional per-node Telemetry provisioning
+
+Base `f361560a73128e0ad5075e0835e4773ff12db0e7`; same isolated
+`codex/system-inspection-ux` branch. Shared Validation, Inspection, Identity Auto
+Sync and Cycle remain on this branch. No new feature branch or live merge.
+
+- Added explicit **啟用 Telemetry** in the existing Telemetry tab, canonical-node
+  selection, durable independent provision jobs/events and a read-only Console.
+  Console output is English; display/download timestamps are UTC+8. Existing
+  charts, six tabs, Terminal/KVM/test assignment remain.
+- Reuses Shared Identity Collector/Auto Sync before provisioning; existing
+  healthy exporter is retained, stopped service started, conflicting process
+  preserved. Automatic package installation supports Ubuntu/Debian systemd;
+  all executed installations in this task were fake transport calls.
+- Configurable central URLs and atomic file_sd registration; READY requires
+  exporter, matching Prometheus UP target and fresh required metrics. Added an
+  importable Grafana dashboard; no installed central service was changed.
+- Browser-independent worker pool runs inside the existing single Web process.
+  Web death becomes INTERRUPTED without install replay; saved events remain.
+- Actual tests: new suite **30 PASS**, existing targeted Inspection/core/identity
+  **77 PASS**, Vera **113 PASS / 16 SKIP**, PA/broker **53 PASS**. Actual browser,
+  console isolation and process interruption checks PASS. Counts exclude reruns.
+  This is not an all-repository suite result or live hardware acceptance.
+- [Maintenance/configuration/rollback](docs/TELEMETRY_PROVISION.md),
+  [acceptance and screenshots](docs/TELEMETRY_ACCEPTANCE.md). Video/trace remain
+  exportable local artifacts, outside Git. Actual Grafana login/embedding and
+  Linux apt/systemd installation still require authorized environment validation.
+- **Not deployed; no production restart, DUT operation or port 3000 change.**
+
 ## 2026-10-03 Shared Validation Core + independent observations + Identity Auto Sync
 
 Base `d6fa3afcd35477c3a55ec7de8851d72b0097c520`, existing isolated `codex/system-inspection-ux` worktree. This extends the prior inspection and detail-control work; live/main and upstream repositories are untouched.

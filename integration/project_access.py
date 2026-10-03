@@ -17,6 +17,10 @@ def install(pa, app):
 
 def check(request, pa, body):
     path=request.url.path
+    if path.startswith('/api/telemetry/'):
+        # New typed routes authorize canonical node / saved job project themselves.
+        # Do not also require unrelated global permissions from project operators.
+        return
     action='read' if request.method in {'GET','HEAD'} else 'operate'
     scoped=False
     def project(value):

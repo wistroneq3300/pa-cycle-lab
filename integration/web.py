@@ -88,9 +88,17 @@ async def web_lifespan(app):
             inspection.start()
         except Exception as exc:
             print('巡檢服務未啟動：', type(exc).__name__)
+        telemetry = None
+        try:
+            telemetry = telemetry_provision_service()
+            telemetry.start()
+        except Exception as exc:
+            print('Telemetry 啟用服務未啟動：', type(exc).__name__)
         try:
             yield
         finally:
+            if telemetry is not None:
+                telemetry.close()
             if inspection is not None:
                 inspection.close()
 
@@ -660,3 +668,5 @@ app.include_router(router)
 # Local evidence-only service; existing collectors and Cycle workers are unchanged.
 from .inspection_routes import install as install_inspection
 inspection_service = install_inspection(app, pa, lambda: store)
+from .telemetry_routes import install as install_telemetry_provision
+telemetry_provision_service = install_telemetry_provision(app, pa)
