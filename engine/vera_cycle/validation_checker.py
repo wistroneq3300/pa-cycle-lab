@@ -20,7 +20,7 @@ def logic_hash(script):
     text=script.replace('\r\n','\n')
     # Only whole numeric assignments and the existing profile parameter contract
     # are omitted; no arbitrary shell expansion is accepted as a quantity edit.
-    text=re.sub(r'^(?:CPU_MIN|DIMM_EXPECTED|NVMe_MIN|NIC_MIN|BF4_EXPECTED|PCIEFAB_MIN|USB_MIN|BMC_MIN)=\d+$','',text,flags=re.M)
+    text=re.sub(r'^(?:CPU_MIN|DIMM_EXPECTED|NVMe_MIN|NIC_MIN|BF4_EXPECTED|GPU_MIN|PCIEFAB_MIN|USB_MIN|BMC_MIN)=\d+$','',text,flags=re.M)
     text=re.sub(r'^PROFILE_[A-Za-z0-9_]+_(?:ENABLED|MODE)=(?:0|1|exact|minimum)\n','',text,flags=re.M)
     text=re.sub(r'^MEMORY_MIN_RATIO=(?:0(?:\.\d+)?|1(?:\.0+)?)\n','',text,flags=re.M)
     return hashlib.sha256(text.encode()).hexdigest()

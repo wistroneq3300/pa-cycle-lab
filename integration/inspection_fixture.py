@@ -15,8 +15,9 @@ def outputs():
             'BIOS-firmware':'BIOS Information\nVersion: fixture-1\n','firmware':'BIOS Version: fixture-1\n',
             'system':'Linux fixture 6.8\n','drivers':'mlx5_core 1 0\n','sensor':'CPU Temp | 35 | degrees C | ok | na\n',
             'sel':'','sel_info':'Entries: 0\nLast Del Time: Not Available\n','power':'Chassis Power is on\n',
-            'host_power':'Host: Running\nChassis Power: On\n','bmc_identity':'fixture-controller',
-            'bmc_firmware':'Firmware Revision: fixture-1\n','kernel_snapshot':'','tools':'lspci version 3.9\ndmidecode 3.5\nnvme version 2.6\nipmitool version 1.8.19\n6.8-fixture\n'}
+            'host_power':'Host: Running\nChassis Power: On\n',            'bmc_identity':'fixture-controller',
+            'bmc_firmware':'Firmware Revision: fixture-1\n','kernel_snapshot':'','tools':'lspci version 3.9\ndmidecode 3.5\nnvme version 2.6\nipmitool version 1.8.19\n6.8-fixture\n',
+            'GPU':'\n'.join(f'GPU {i}: NVIDIA GB200 (UUID: GPU-fixture-{i})' for i in range(8))+'\n'}
 
 
 class FixtureTransport:

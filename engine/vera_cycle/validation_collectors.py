@@ -45,9 +45,10 @@ OPERATIONS = {
     'NVMe': Operation('os', 'nvme list', True),
     'MST': Operation('os', 'mst status -v', True),
     'BIOS-firmware': Operation('os', 'dmidecode -t bios', True),
+    'GPU': Operation('os', 'nvidia-smi -L'),
     'gpu': Operation('os', 'nvidia-smi --query-gpu=uuid,name,driver_version,utilization.gpu,memory.used,memory.total --format=csv,noheader,nounits'),
 }
-HARDWARE_INPUTS = ('CPU','CPU-online','DIMM','OS-memory','NVMe','MST','BIOS-firmware')
+HARDWARE_INPUTS = ('CPU','CPU-online','DIMM','OS-memory','NVMe','MST','BIOS-firmware','GPU')
 
 
 def core_version():
