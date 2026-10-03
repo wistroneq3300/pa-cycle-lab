@@ -16,7 +16,8 @@ def test_gpu_provision_and_native_charts_real_route(rig,count):
     assert len(rows)==2 and {x['labels']['instance'] for x in rows}=={nid}
     assert any(x['targets']==['192.0.2.1:9400'] for x in rows)
     payload=r.client.get('/api/telemetry/nodes/'+nid+'/charts?period=7d').json()
-    assert len(payload['panels'])==8
+    assert len(payload['panels'])==11
+    assert {'cpu','memory','gpu','hbm','temperature','cputemp','power','nvlink','ecc','network','disk'}=={p['id'] for p in payload['panels']}
     assert len(next(p for p in payload['panels'] if p['id']=='gpu')['series'])==count
     assert all(len(s['points'])<=602 for p in payload['panels'] for s in p['series'])
     execute(r,enqueue(r,key='retry-after-ready'))

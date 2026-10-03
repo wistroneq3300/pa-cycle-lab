@@ -5,7 +5,7 @@ import math
 import threading
 import time
 
-RANGES={'1h':3600,'6h':21600,'24h':86400,'7d':604800}
+RANGES={'10m':600,'30m':1800,'1h':3600,'6h':21600,'12h':43200,'24h':86400,'2d':172800,'7d':604800,'30d':2592000}
 _pool=ThreadPoolExecutor(max_workers=4,thread_name_prefix='pa-prom-query')
 _admission=threading.BoundedSemaphore(4)
 
@@ -20,7 +20,10 @@ def queries(node_id):
       ('gpu','GPU Utilization','%',True,[('',gpu('DCGM_FI_DEV_GPU_UTIL'))]),
       ('hbm','GPU HBM / VRAM','%',True,[('',f'100 * {gpu("DCGM_FI_DEV_FB_USED")} / ({gpu("DCGM_FI_DEV_FB_USED")} + {gpu("DCGM_FI_DEV_FB_FREE")})')]),
       ('temperature','GPU Temperature','°C',True,[('',gpu('DCGM_FI_DEV_GPU_TEMP'))]),
+      ('cputemp','CPU Temperature','°C',False,[('',f'max(node_hwmon_temp_celsius{s},chip!~"nvme.*"}})')]),
       ('power','GPU Power','W',True,[('',gpu('DCGM_FI_DEV_POWER_USAGE'))]),
+      ('nvlink','GPU NVLink Bandwidth','MB/s',True,[('',gpu('DCGM_FI_DEV_NVLINK_BANDWIDTH_TOTAL'))]),
+      ('ecc','Memory ECC Errors','errors',False,[('Correctable',f'sum by (controller) (node_edac_correctable_errors_total{s}}})'),('Uncorrectable',f'sum by (controller) (node_edac_uncorrectable_errors_total{s}}})')]),
       ('network','Network RX / TX','B/s',False,[(d,f'sum by(device)(rate(node_network_{metric}_bytes_total{s},device!="lo"}}[5m]))') for d,metric in [('RX','receive'),('TX','transmit')]]),
       ('disk','Disk Read / Write','B/s',False,[(d,f'sum by(device)(rate(node_disk_{metric}_bytes_total{s},device!~"loop.*|ram.*"}}[5m]))') for d,metric in [('Read','read'),('Write','written')]])]
 
@@ -83,7 +86,7 @@ class ChartService:
                             v=finite(value)
                             if start<=float(stamp)<=now: values.append([float(stamp)*1000,v])
                         if not any(v is not None for _,v in values): continue
-                        label=('GPU '+str(labels.get('gpu','?'))+(' / MIG '+str(labels['GPU_I_ID']) if 'GPU_I_ID' in labels else '')) if gpu else ' '.join(filter(None,[labels.get('device'),direction]))
+                        label=('GPU '+str(labels.get('gpu','?'))+(' / MIG '+str(labels['GPU_I_ID']) if 'GPU_I_ID' in labels else '')) if gpu else ' '.join(filter(None,[labels.get('device') or labels.get('chip') or labels.get('controller'),direction]))
                         panel['series'].append(dict(id=json.dumps([labels.get('UUID'),labels.get('gpu'),labels.get('GPU_I_ID'),labels.get('device'),direction]),label=label,points=values,latest=next((v for _,v in reversed(values) if v is not None),None)))
                 if panel['series'] and panel['state']!='QUERY_ERROR':
                     stamp=panel['sample_at'];panel['state']='READY' if stamp is not None and 0<=now-stamp<=self.monitor.config.freshness_seconds else 'STALE'
