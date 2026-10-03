@@ -7,13 +7,28 @@
   const stamp=v=>v?new Date(v*1000).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false}):'尚未取得';
   const number=(v,u)=>v==null?'—':u==='B/s'?v>=1e9?(v/1e9).toFixed(1)+' GB/s':v>=1e6?(v/1e6).toFixed(1)+' MB/s':v>=1e3?(v/1e3).toFixed(1)+' KB/s':v.toFixed(1)+' B/s':v.toFixed(1)+' '+u;
   class Dashboard {
-    constructor(root,node){
-      this.root=root;this.node=node;this.charts=new Map();this.period=periods.get(node.node_id)||'1h';this.abort=new AbortController();this.closed=false;
-      root.innerHTML='<div class="tn-toolbar"><div><h3>效能趨勢</h3><p data-sample>正在取得中央監控資料…</p></div><label>時間範圍 <select aria-label="Telemetry 時間範圍"><option>1h</option><option>6h</option><option>24h</option><option>7d</option></select></label></div><div class="tn-stats" aria-label="節點資訊"></div><p data-chart-error role="status"></p><div class="tn-grid"></div>';
+    constructor(root,node,name){
+      this.root=root;this.node=node;this.name=name||'';this.charts=new Map();this.period=periods.get(node.node_id)||'1h';this.abort=new AbortController();this.closed=false;
+      const ranges=[['10m','10 分鐘'],['30m','30 分鐘'],['1h','1 小時'],['6h','6 小時'],['12h','12 小時'],['24h','24 小時'],['2d','2 天'],['7d','7 天'],['30d','30 天']];
+      root.innerHTML='<div class="tn-toolbar"><div><h3>效能趨勢</h3><p data-sample>正在取得中央監控資料…</p></div><label>時間範圍 <select aria-label="Telemetry 時間範圍">'+ranges.map(([v,t])=>'<option value="'+v+'">'+t+'</option>').join('')+'</select></label></div>'
+        +'<section class="tn-ai" aria-label="遙測 AI 分析"><div class="tn-ai-head"><h4>遙測 AI 分析</h4><span data-ai-state>等待分析</span></div><div class="tn-ai-body" data-ai>正在分析此範圍的監控趨勢…</div></section>'
+        +'<div class="tn-stats" aria-label="節點資訊"></div><p data-chart-error role="status"></p><div class="tn-grid"></div>';
       root.querySelector('select').value=this.period;root.querySelector('select').onchange=e=>{this.period=e.target.value;periods.set(this.node.node_id,this.period);this.load();};
       const help=document.createElement('details');help.className='tn-gpu-help';help.hidden=true;help.innerHTML='<summary>GPU 監控未就緒 · 查看手動安裝與連接說明</summary><div data-gpu-help></div>';root.querySelector('.tn-grid').before(help);this.manualHelp();
       this.theme=new MutationObserver(()=>this.repaint());this.theme.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
       this.load();
+    }
+    analyze(){
+      const box=this.root.querySelector('[data-ai]'),state=this.root.querySelector('[data-ai-state]');if(!box)return;
+      const nodeId=this.node.node_id,key=nodeId+':'+this.period;
+      if(this.analysisKey===key)return;         // already requested for this node+range
+      if(this.analysisDone===key)return;        // completed; keep the rendered text
+      this.analysisKey=key;this.analysisDone=null;
+      state.textContent='分析中…';box.textContent='正在分析此範圍的監控趨勢…';
+      fetch('/api/machine/'+encodeURIComponent(this.name||'')+'/telemetry/analyze?minutes='+this.periodMinutes()+(nodeId?'&node_id='+encodeURIComponent(nodeId):''))
+        .then(r=>r.ok?r.json():Promise.reject(new Error('無法完成趨勢分析，請稍後重試')))
+        .then(data=>{if(this.closed||this.analysisKey!==key)return;this.analysisDone=key;state.textContent='分析完成';box.textContent=data.ok===false?(data.error||'AI 分析暫不可用'):(data.analysis||data.summary||'此範圍暫無明顯異常。');})
+        .catch(error=>{if(this.closed||this.analysisKey!==key||error.name==='AbortError')return;this.analysisDone=key;state.textContent='分析未完成';box.textContent=error.message||'AI 分析暫不可用，請稍後重試。';});
     }
     update(node){this.node=node;this.manualHelp();}
     manualHelp(){
@@ -36,9 +51,10 @@
       paragraph('Target 設定：'+(setup.file_sd||'尚未設定')+'。由 PA 更新，維持原 node_id；不需要重裝 Grafana 或重啟 Prometheus。');
       const copy=document.createElement('button');copy.type='button';copy.className='btn small';copy.textContent='複製安裝與連接說明';copy.onclick=async()=>{try{await navigator.clipboard.writeText([...body.children].filter(e=>e!==copy).map(e=>e.textContent).join('\n\n'));copy.textContent='已複製說明';}catch{copy.textContent='請選取說明文字複製';}};body.append(copy);
     }
+    periodMinutes(){const m={'10m':10,'30m':30,'1h':60,'6h':360,'12h':720,'24h':1440,'2d':2880,'7d':10080,'30d':43200};return m[this.period]||60;}
     async load(){
       clearTimeout(this.timer);this.request?.abort();this.request=new AbortController();const period=this.period;
-      this.root.setAttribute('aria-busy','true');
+      this.root.setAttribute('aria-busy','true');this.analyze();
       try{
         const response=await fetch('/api/telemetry/nodes/'+encodeURIComponent(this.node.node_id)+'/charts?period='+period,{signal:this.request.signal});
         if(!response.ok)throw new Error('無法取得中央監控資料，請稍後重試。');

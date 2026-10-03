@@ -85,11 +85,6 @@
       this.$('[data-outcome-title]').textContent=job?.state==='READY'?'Telemetry READY':'啟用未完成 · '+(current||'Connection');
       this.$('[data-outcome-detail]').textContent=job?.state==='READY'?'資料採集已就緒。可關閉此視窗查看目前節點的效能圖表。':job?.error||'';
     }
-    legacy(ready){
-      const body=document.querySelector('#pd-panel-telemetry .pd-telemetry-body');if(!body)return;
-      let details=body.closest('.tp-legacy');if(!details){details=document.createElement('details');details.className='tp-legacy';const summary=document.createElement('summary');summary.textContent='進階資料 · Legacy Telemetry';body.before(details);details.append(summary,body);}
-      if(this.lastReady!==ready){details.open=!ready;this.lastReady=ready;}
-    }
     async request(path,options={}) {
       const response=await fetch('/api/telemetry'+path,{...options,signal:this.abort.signal});
       const body=await response.json();if(!response.ok)throw new Error(typeof body.detail==='string'?body.detail:'無法取得 Telemetry 資料');return body;
@@ -152,14 +147,14 @@
         this.$('[data-session]').dataset.state=this.job.state;
         this.$('[data-stage]').textContent=stage(this.job.state==='READY'?'READY':this.job.current_step);
         this.$('[data-log-date]').textContent=time(this.job.created_at).split(' ')[0];}
-      this.renderPipeline(this.job);this.dashboard(node);this.renderComponents(node);this.legacy(node.state==='READY'||node.components?.host==='READY');
+      this.renderPipeline(this.job);this.dashboard(node);this.renderComponents(node);
     }
     dashboard(node) {
       const container=this.$('.tp-dashboard'),link=this.$('[data-grafana]');
       link.hidden=true;
       if(node.dashboard_url){const url=new URL(node.dashboard_url,location.origin);if(['http:','https:'].includes(url.protocol)){url.searchParams.set('theme',document.documentElement.dataset.theme||'light');link.href=url.href;link.hidden=false;}}
       container.hidden=false;
-      if(!this.native&&window.PANativeTelemetry)this.native=new PANativeTelemetry.Dashboard(container,node);
+      if(!this.native&&window.PANativeTelemetry)this.native=new PANativeTelemetry.Dashboard(container,node,this.name);
       else this.native?.update(node);
     }
     renderComponents(node) {
