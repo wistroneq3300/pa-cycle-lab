@@ -58,3 +58,19 @@
 @keyframes tp-running{0%,100%{opacity:1}50%{opacity:.35}}
 @media(prefers-reduced-motion:reduce){.tp-session[data-state="PROVISIONING"]::before{animation:none}}
 @media(max-width:1450px){.tp-workspace{padding:20px}.tp-log-row,.tp-log-columns{grid-template-columns:28px 66px 48px 68px minmax(0,1fr);gap:8px}.tp-tools label{flex-basis:100%;order:5}}
+.tp-components{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin:20px 0 0}
+.tp-comp{border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--card,var(--bg));display:flex;flex-direction:column;gap:12px}
+.tp-comp>header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.tp-comp h4{margin:0 0 4px;font-size:15px;font-weight:650}
+.tp-comp header p{margin:0;font-size:12px;color:var(--muted)}
+.tp-comp-state{flex:none;font-size:11px;font-weight:700;letter-spacing:.04em;padding:3px 10px;border-radius:999px;border:1px solid var(--border);color:var(--tp-info)}
+.tp-comp-state[data-state="READY"]{color:var(--tp-good);border-color:color-mix(in srgb,var(--tp-good) 40%,transparent)}
+.tp-comp-state[data-state="DEGRADED"],.tp-comp-state[data-state="VERIFYING"],.tp-comp-state[data-state="PROVISIONING"]{color:var(--tp-warn);border-color:color-mix(in srgb,var(--tp-warn) 40%,transparent)}
+.tp-comp-state[data-state="ERROR"],.tp-comp-state[data-state="UNREACHABLE"],.tp-comp-state[data-state="INTERRUPTED"]{color:var(--tp-fail);border-color:color-mix(in srgb,var(--tp-fail) 40%,transparent)}
+.tp-comp-actions{display:flex;gap:8px;flex-wrap:wrap}
+.tp-comp-hint{font-size:12px;color:var(--muted);margin:0}
+.tp-comp-manual{border-top:1px solid var(--border);padding-top:10px;font-size:12.5px}
+.tp-comp-manual summary{cursor:pointer;font-weight:600;color:var(--tp-info)}
+.tp-comp-manual p{margin:10px 0 4px}
+.tp-comp-manual pre{white-space:pre-wrap;overflow-wrap:anywhere;background:color-mix(in srgb,var(--border) 22%,transparent);padding:10px 12px;border-radius:6px;font:12px/1.7 ui-monospace,Consolas,monospace;margin:0}
+.tp-comp-manual a{color:var(--tp-info)}

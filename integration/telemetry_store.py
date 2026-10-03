@@ -37,6 +37,10 @@ class ProvisionStore:
               CREATE TABLE IF NOT EXISTS telemetry_components(
                 node_id TEXT PRIMARY KEY,data TEXT NOT NULL);
             ''')
+            columns={r[1] for r in db.execute('PRAGMA table_info(telemetry_jobs)')}
+            if 'scope' not in columns:
+                # Jobs created before the component split targeted the whole stack.
+                db.execute("ALTER TABLE telemetry_jobs ADD COLUMN scope TEXT NOT NULL DEFAULT 'all'")
 
     @contextmanager
     def tx(self, write=True):
@@ -59,7 +63,8 @@ class ProvisionStore:
         seq = db.execute('SELECT COALESCE(MAX(sequence),0)+1 FROM telemetry_events WHERE job_id=?', (job_id,)).fetchone()[0]
         db.execute('INSERT INTO telemetry_events VALUES(?,?,?,?,?,?)', (job_id, seq, time.time(), level, step, self.clean(message)))
 
-    def create(self, target, key):
+    def create(self, target, key, scope='all'):
+        if scope not in ('all','host','gpu'): raise ValueError('Invalid provision scope')
         with self.tx() as db:
             row=db.execute('SELECT j.* FROM telemetry_requests r JOIN telemetry_jobs j ON j.job_id=r.job_id WHERE r.node_id=? AND r.request_key=?',
                            (target['node_id'],key)).fetchone()
@@ -70,8 +75,8 @@ class ProvisionStore:
                 db.execute('INSERT INTO telemetry_requests VALUES(?,?,?)',(target['node_id'],key,row['job_id']))
                 return dict(row), False
             job_id = uuid.uuid4().hex
-            db.execute('INSERT INTO telemetry_jobs(job_id,node_id,chassis_id,project,binding,idempotency_key,state,created_at) VALUES(?,?,?,?,?,?,?,?)',
-                       (job_id,target['node_id'],target['chassis_id'],target['project'],target['revision'],key,'QUEUED',time.time()))
+            db.execute('INSERT INTO telemetry_jobs(job_id,node_id,chassis_id,project,binding,idempotency_key,state,created_at,scope) VALUES(?,?,?,?,?,?,?,?,?)',
+                       (job_id,target['node_id'],target['chassis_id'],target['project'],target['revision'],key,'QUEUED',time.time(),scope))
             self._event(db,job_id,'INFO','QUEUED','Telemetry provision job created; waiting to start.')
             db.execute('INSERT INTO telemetry_requests VALUES(?,?,?)',(target['node_id'],key,job_id))
             return dict(db.execute('SELECT * FROM telemetry_jobs WHERE job_id=?',(job_id,)).fetchone()), True

@@ -85,8 +85,10 @@ def install(app,pa):
     @router.post('/nodes/{node_id}/enable',status_code=202)
     def enable(node_id:str,body:dict,request:Request):
         access(node_id,request,'operate')
-        if set(body)!={'idempotency_key','expected_binding_revision'}: raise HTTPException(422,'請提供目前節點版本與請求識別碼')
-        try: return service().enable(node_id,body['idempotency_key'],body['expected_binding_revision'])
+        if set(body)-{'scope'} != {'idempotency_key','expected_binding_revision'}: raise HTTPException(422,'請提供目前節點版本與請求識別碼')
+        scope=body.get('scope','all')
+        if scope not in ('all','host','gpu'): raise HTTPException(422,'不支援的安裝範圍')
+        try: return service().enable(node_id,body['idempotency_key'],body['expected_binding_revision'],scope)
         except (ValueError,KeyError) as exc: raise HTTPException(409,str(exc))
 
     @router.get('/nodes/{node_id}/charts')

@@ -16,6 +16,19 @@
         <div class="tp-context"><span data-target></span><span data-time></span></div>
         <div class="tp-actions"><button class="btn primary" data-enable disabled>啟用 Telemetry</button><button class="btn" data-console hidden>查看啟用紀錄</button><a class="btn" data-grafana hidden target="_blank" rel="noopener" title="開啟此節點的 Grafana 進階分析，不執行安裝">Grafana 進階分析 ↗</a></div>
         <p class="tp-note" data-notice>啟用只針對所選節點。原有效能資料與管理功能可繼續使用。</p>
+        <div class="tp-components" data-components hidden>
+          <section class="tp-comp" data-comp="host" aria-label="主機監控 Node Exporter">
+            <header><div><h4>主機監控 · Node Exporter</h4><p data-comp-detail>採集 CPU、記憶體、磁碟與網路使用率。</p></div><span class="tp-comp-state" data-comp-state>—</span></header>
+            <div class="tp-comp-actions"><button class="btn primary" data-install="host" disabled>安裝 / 啟用 Node Exporter</button></div>
+            <details class="tp-comp-manual"><summary>手動安裝與連線說明</summary><div data-manual="host"></div></details>
+          </section>
+          <section class="tp-comp" data-comp="gpu" aria-label="GPU 監控 DCGM Exporter">
+            <header><div><h4>GPU 監控 · DCGM Exporter</h4><p data-comp-detail>採集 GPU 使用率、記憶體、溫度與功耗。</p></div><span class="tp-comp-state" data-comp-state>—</span></header>
+            <p class="tp-comp-hint" data-comp-hint>僅含 NVIDIA GPU 的伺服器需要安裝。若節點未配置 GPU，本項為不適用。</p>
+            <div class="tp-comp-actions"><button class="btn primary" data-install="gpu" disabled>安裝 / 啟用 DCGM Exporter</button></div>
+            <details class="tp-comp-manual"><summary>手動安裝與連線說明</summary><div data-manual="gpu"></div></details>
+          </section>
+        </div>
         <dialog class="tp-console pa-validation-console" aria-label="Telemetry 啟用程序" aria-modal="true"><header><div class="tp-console-title"><h4>Telemetry 啟用程序</h4><p data-console-target>Read-only execution log</p></div><span class="tp-session" data-session>IDLE</span><span data-job></span><button class="btn" data-close>關閉紀錄</button></header>
           <div class="tp-pipeline" aria-label="啟用階段"></div><div class="tp-runline"><span>Current stage <strong data-stage>Queue</strong></span><span data-log-date></span><span>TAIPEI / UTC+8</span></div>
           <div class="tp-tools"><button class="btn" data-follow aria-pressed="true">自動跟隨：開</button><button class="btn" data-pause aria-pressed="false">暫停顯示</button><label>搜尋已載入紀錄<input type="search" data-search placeholder="輸入關鍵字"></label><button class="btn" data-copy>複製可見紀錄</button><a class="btn" data-download>下載完整紀錄</a></div>
@@ -26,6 +39,7 @@
       this.$('[data-node]').onchange=()=>this.select(this.$('[data-node]').value);
       this.$('[data-enable]').onclick=()=>this.enable();
       this.$('[data-console]').onclick=()=>this.openConsole();
+      for(const btn of root.querySelectorAll('[data-install]')) btn.onclick=()=>this.enableScope(btn.dataset.install);
       this.$('[data-close]').onclick=()=>this.closeConsole();
       this.$('[data-dismiss]').onclick=()=>this.closeConsole();
       this.$('[data-view]').onclick=()=>{this.closeConsole();this.$('.tp-dashboard').scrollIntoView({block:'start',behavior:'smooth'});};
@@ -132,7 +146,7 @@
         this.$('[data-session]').dataset.state=this.job.state;
         this.$('[data-stage]').textContent=stage(this.job.state==='READY'?'READY':this.job.current_step);
         this.$('[data-log-date]').textContent=time(this.job.created_at).split(' ')[0];}
-      this.renderPipeline(this.job);this.dashboard(node);this.legacy(node.state==='READY'||node.components?.host==='READY');
+      this.renderPipeline(this.job);this.dashboard(node);this.renderComponents(node);this.legacy(node.state==='READY'||node.components?.host==='READY');
     }
     dashboard(node) {
       const container=this.$('.tp-dashboard'),link=this.$('[data-grafana]');
@@ -142,17 +156,73 @@
       if(!this.native&&window.PANativeTelemetry)this.native=new PANativeTelemetry.Dashboard(container,node);
       else this.native?.update(node);
     }
-    async enable() {
+    renderComponents(node) {
+      const wrap=this.$('[data-components]');
+      if(!node){wrap.hidden=true;return;}
+      wrap.hidden=false;
+      const components=node.components||{},job=this.job,running=active(job);
+      const scopeOf=job?.scope||'all';
+      const busyHost=running&&(scopeOf==='all'||scopeOf==='host');
+      const busyGpu=running&&(scopeOf==='all'||scopeOf==='gpu');
+      const labels={READY:'就緒',PROVISIONING:'安裝中',VERIFYING:'驗證中',DEGRADED:'需注意',ERROR:'失敗',NOT_APPLICABLE:'不適用',UNREACHABLE:'無法連線',INTERRUPTED:'中斷'};
+      const describe=(state,detail,fallback)=>(state?((labels[state]||state)+(detail?' · '+detail:'')):fallback);
+      const host=this.$('[data-comp="host"]');
+      const hostState=components.host;
+      host.querySelector('[data-comp-detail]').textContent=describe(hostState,hostState==='READY'?'Node Exporter 已註冊並可由中央 Prometheus 讀取。':'',node.configured?'採集 CPU、記憶體、磁碟與網路使用率。':'中央監控連線尚未設定。');
+      this.stateChip(host.querySelector('[data-comp-state]'),hostState);
+      const hostBtn=host.querySelector('[data-install="host"]');
+      hostBtn.disabled=busyHost||!node.configured;
+      hostBtn.textContent=busyHost?'安裝處理中…':hostState==='READY'?'重新檢查 Node Exporter':'安裝 / 啟用 Node Exporter';
+      host.querySelector('[data-manual="host"]').replaceChildren(...this.manualNodes(node.host_setup,'host'));
+      const gpu=this.$('[data-comp="gpu"]');
+      const gpuState=components.gpu?.state;
+      gpu.querySelector('[data-comp-detail]').textContent=describe(gpuState,gpuState&&gpuState!=='NOT_APPLICABLE'?components.gpu?.detail:'','採集 GPU 使用率、記憶體、溫度與功耗。');
+      this.stateChip(gpu.querySelector('[data-comp-state]'),gpuState);
+      const gpuBtn=gpu.querySelector('[data-install="gpu"]');
+      const hostReady=hostState==='READY'||components.host==='READY';
+      gpuBtn.disabled=busyGpu||!node.configured;
+      gpuBtn.textContent=busyGpu?'安裝處理中…':gpuState==='READY'?'重新檢查 DCGM Exporter':gpuState==='NOT_APPLICABLE'?'重新偵測 GPU':'安裝 / 啟用 DCGM Exporter';
+      const hint=gpu.querySelector('[data-comp-hint]');
+      hint.textContent=gpuState==='NOT_APPLICABLE'?'此節點未偵測到 NVIDIA GPU，無須安裝 DCGM Exporter。':!hostReady?'主機監控（Node Exporter）尚未就緒。仍可安裝 GPU 監控，但建議先完成主機監控。安裝前請確認已具備 NVIDIA 驅動與 Docker NVIDIA runtime。':'僅含 NVIDIA GPU 的伺服器需要安裝；安裝前請確認已具備 NVIDIA 驅動與 Docker NVIDIA runtime。';
+      gpu.querySelector('[data-manual="gpu"]').replaceChildren(...this.manualNodes(node.gpu_setup,'gpu'));
+      for(const el of wrap.querySelectorAll('[data-console-scope]')) el.hidden=!job;
+    }
+    stateChip(el,state){el.textContent=state?({READY:'就緒',PROVISIONING:'安裝中',VERIFYING:'驗證中',DEGRADED:'需注意',ERROR:'失敗',NOT_APPLICABLE:'不適用',UNREACHABLE:'無法連線',INTERRUPTED:'中斷'}[state]||state):'未安裝';el.dataset.state=state||'PENDING';}
+    manualNodes(setup,role){
+      const nodes=[];
+      const p=t=>{const el=document.createElement('p');el.textContent=t;return el;};
+      const pre=t=>{const el=document.createElement('pre');el.textContent=t;return el;};
+      const link=(t,h)=>{const a=document.createElement('a');a.href=h;a.target='_blank';a.rel='noopener';a.textContent=t;return a;};
+      if(!setup){nodes.push(p('尚未取得此節點的安裝資訊。'));return nodes;}
+      if(role==='host'){
+        nodes.push(p('1. 於節點確認作業系統與 systemd 版本：'),pre(setup.detection));
+        nodes.push(p('2. 若尚未安裝，使用系統套件安裝並啟用 Node Exporter。既有安裝請沿用，不需重複建立：'),pre(setup.installation));
+        nodes.push(p('3. 於節點本機確認 /metrics 可讀取：'),pre(setup.check_on_node));
+      }else{
+        nodes.push(p('1. 於 GPU 節點確認 NVIDIA 驅動與 Docker NVIDIA runtime。CPU-only 節點無須安裝：'),pre(setup.detection));
+        nodes.push(p('2. 若尚未安裝 DCGM Exporter，以下容器方式需已設定 NVIDIA Container Toolkit；不會替換驅動，亦不會停止占用連接埠的其他服務。'));
+        if(!setup.image)nodes.push(p('尚未指定固定版本映像，請先選擇與 GPU／驅動相容的版本並替換版本欄位。'));
+        nodes.push(pre(setup.installation));
+        nodes.push(link('NVIDIA DCGM Exporter 安裝說明 ↗',setup.documentation));
+      }
+      nodes.push(p((role==='host'?'4. ':'3. ')+'於 PA Manager（中央 Prometheus 主機：'+(setup.prometheus_url||'尚未設定')+'）確認可讀取採集端點 '+(setup.exporter_url||'')+'：'),pre(setup.check_on_manager));
+      nodes.push(p((role==='host'?'5. ':'4. ')+'回到本頁按上方對應的「安裝 / 啟用」按鈕。PA 會沿用健康的 Exporter，將此節點登記至中央 Prometheus，再確認指標。'));
+      return nodes;
+    }
+    async enable(scope='all') {
       if(!this.node||active(this.job))return;
       this.openConsole();this.$('[data-session]').textContent='CONNECTING';
-      const node=this.node,generation=++this.generation;clearTimeout(this.timer);this.$('[data-enable]').disabled=true;this.requestKey ||= key();
+      const node=this.node,generation=++this.generation;clearTimeout(this.timer);
+      for(const b of this.root.querySelectorAll('[data-install],[data-enable]')) b.disabled=true;
+      this.requestKey ||= key();
       try {
-        const job=await this.request('/nodes/'+encodeURIComponent(node.node_id)+'/enable',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idempotency_key:this.requestKey,expected_binding_revision:node.binding_revision})});
+        const job=await this.request('/nodes/'+encodeURIComponent(node.node_id)+'/enable',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idempotency_key:this.requestKey,expected_binding_revision:node.binding_revision,scope})});
         if(this.closed||generation!==this.generation)return;
-        this.update({...node,state:'PROVISIONING',detail:'啟用作業已排入背景執行。',job});
+        this.update({...node,state:'PROVISIONING',detail:'安裝作業已排入背景執行。',job});
         clearTimeout(this.timer);this.poll(generation);
-      }catch(error){if(generation===this.generation){this.error(error);this.$('[data-enable]').disabled=false;}}
+      }catch(error){if(generation===this.generation){this.error(error);this.requestKey=null;this.renderComponents(node);}}
     }
+    enableScope(scope){this.requestKey=null;this.enable(scope);}
     async pollEvents() {
       if(!this.consoleOpen||!this.job||this.eventsBusy||this.closed)return;
       const id=this.job.job_id,generation=this.generation;this.eventsBusy=true;

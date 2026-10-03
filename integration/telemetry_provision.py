@@ -103,12 +103,12 @@ class ProvisionService:
             for job in jobs:
                 if self.store.claim(job['job_id']): self.pending[job['job_id']]=self.pool.submit(self.execute,job['job_id'])
 
-    def enable(self,node_id,key,revision):
+    def enable(self,node_id,key,revision,scope='all'):
         if not isinstance(key,str) or not re.fullmatch(r'[A-Za-z0-9_.:-]{8,128}',key): raise ValueError('需要有效的 idempotency_key')
         target=self.resolve(node_id)
         if revision!=target['revision']: raise ValueError('節點連線設定已變更，請重新載入。')
         if not self.config.ready(): raise ValueError('請先設定 PA_PROMETHEUS_URL 與 PA_PROMETHEUS_FILE_SD。')
-        return self.store.create(target,key)[0]
+        return self.store.create(target,key,scope)[0]
 
     def binding(self,target):
         current=self.resolve(target['node_id'])
@@ -145,52 +145,34 @@ class ProvisionService:
                     detail=wire.redact(result.output) if hasattr(wire,'redact') else result.output
                     raise ProvisionFailure(f'{text} failed (exit {result.code}): {detail}',state)
                 return result.output
-            facts=parse_detection(command('DETECT','Inspecting Node Exporter, service, and listener.',detection_command(self.config.exporter_port)))
-            exporter,detail=self.monitor.exporter(target)
-            self.store.step(job_id,'DETECT','Version: '+facts.get('VERSION','not available'),'INFO')
-            if self.config.preferred_exporter_version:
-                self.store.step(job_id,'DETECT','Preferred / validated version: '+self.config.preferred_exporter_version+'. Healthy existing exporters are never automatically upgraded.','INFO')
-            if exporter=='OTHER' or (exporter!='READY' and facts.get('LISTENER')):
-                raise ProvisionFailure('Port is in use and cannot be verified as a healthy Node Exporter. No process was stopped. '+facts.get('LISTENER',detail))
-            if exporter=='READY':
-                self.store.step(job_id,'DETECT','Node Exporter verified. Existing installation retained.','PASS')
-                self.store.step(job_id,'START','No service change required; existing exporter endpoint is healthy.','PASS')
+            scope=job.get('scope') or 'all'
+            components=self.store.components(target['node_id'])
+            exporter_version=components.get('node_exporter_version','')
+            # ---- Host (Node Exporter) phase: run for scope all/host ----
+            if scope in ('all','host'):
+                state,detail,facts=self.execute_host(job_id,target,command)
+                host_state=state;exporter_version=facts.get('VERSION','')
+                merged=dict(self.store.components(target['node_id']))
+                merged.update(host=host_state,prometheus=host_state,node_exporter_version=exporter_version)
+                self.store.components(target['node_id'],merged)
+                if scope=='host':
+                    self.store.health(target,host_state,detail,job_id);self.store.finish(job_id,host_state,detail);return
             else:
-                unit=facts.get('UNIT')
-                if unit:
-                    if unit not in UNITS: raise ProvisionFailure('The existing exporter service could not be identified.')
-                    if facts.get('ACTIVE')=='active': raise ProvisionFailure('Exporter service is active, but metrics are unreachable. Check its listen address and firewall.','DEGRADED')
-                    command('START','Starting the existing Node Exporter service.','systemctl start '+unit)
-                else:
-                    if facts.get('BINARY'): raise ProvisionFailure('Exporter binary exists without a recognized service. Files are preserved; check the service configuration.')
-                    if facts.get('PLATFORM') not in ('ubuntu','debian') or facts.get('SYSTEMD')!='yes':
-                        raise ProvisionFailure('Automatic installation supports Ubuntu/Debian with systemd. On other platforms, prepare Node Exporter before enabling Telemetry.')
-                    if self.config.exporter_port!=9100: raise ProvisionFailure('New installations use port 9100. Prepare the exporter service first when using a custom port.')
-                    command('INSTALL','Installing Node Exporter from the system package repository.',
-                            'env DEBIAN_FRONTEND=noninteractive apt-get update && env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends prometheus-node-exporter',300)
-                    unit='prometheus-node-exporter.service'
-                    command('START','Enabling and starting the Node Exporter service.','systemctl enable --now '+unit,60)
-                self.store.step(job_id,'START','Service start completed. Verifying the metrics endpoint.','PASS')
-                self.store.step(job_id,'EXPORTER','Waiting for Node Exporter metrics.')
-                for _ in range(10):
-                    self.binding(target);exporter,_=self.monitor.exporter(target)
-                    if exporter=='READY': break
-                    if self.stop_event.wait(1): raise ProvisionFailure('Worker stopping. Recheck the exporter status before continuing.','INTERRUPTED')
-                if exporter!='READY': raise ProvisionFailure('Node Exporter metrics remain unavailable after the service start.','DEGRADED')
-            self.store.step(job_id,'EXPORTER','Node Exporter /metrics endpoint verified.','PASS')
-            self.binding(target)
-            self.store.step(job_id,'REGISTER','Publishing the node target to Prometheus.')
-            register_target(self.config,target)
-            self.store.step(job_id,'REGISTER','Target configuration published. Waiting for a scrape.','PASS')
-            self.store.step(job_id,'VERIFY','Awaiting target UP and fresh required metrics.')
-            deadline=time.monotonic()+self.config.verify_seconds
-            while True:
-                self.binding(target);state,detail=self.monitor.health(target)
-                if state=='READY' or time.monotonic()>=deadline: break
-                if self.stop_event.wait(self.config.poll_seconds): raise ProvisionFailure('Verification interrupted. Enable Telemetry again to check the current state.','INTERRUPTED')
-            host_state=state
-            # Publish host readiness before the optional GPU work begins.
-            self.store.components(target['node_id'],dict(host=host_state,gpu={'state':'PROVISIONING','detail':'Checking GPU telemetry','gpus':[]},prometheus=host_state,node_exporter_version=facts.get('VERSION','')))
+                # GPU-only job: confirm host readiness live so an existing but
+                # previously-recorded host is still accepted. Never installs host.
+                live_state,live_detail=self.monitor.health(target)
+                host_state=live_state
+                if not components:
+                    merged=dict(host=live_state,prometheus=live_state)
+                    self.store.components(target['node_id'],merged)
+            # ---- GPU (DCGM) phase: run for scope all/gpu ----
+            current_components=self.store.components(target['node_id'])
+            if host_state!='READY':
+                # Host monitoring is a soft precondition, not a blocker: the user
+                # may install GPU telemetry on its own even when host is unfinished.
+                self.store.step(job_id,'GPU_VERIFY','Host telemetry is not READY; continuing with GPU telemetry as requested.','INFO')
+            pending=dict(self.store.components(target['node_id']));pending['gpu']={'state':'PROVISIONING','detail':'Checking GPU telemetry','gpus':[]}
+            self.store.components(target['node_id'],pending)
             from .telemetry_gpu import provision
             try:
                 gpu=provision(self,target,job_id,command)
@@ -204,11 +186,14 @@ class ProvisionService:
                 if 'IDENTITY_REQUIRES_CONFIRMATION' in str(exc) or exc.state=='INTERRUPTED': raise
                 gpu=dict(state='DEGRADED',detail=self.store.clean(str(exc)),gpus=[])
             except Exception as exc:
-                gpu=dict(state='DEGRADED',detail='GPU setup incomplete: '+type(exc).__name__,gpus=[])
+                gpu=dict(state='DEGRADED',detail='GPU setup incomplete: '+type(exc).__name__+'. Review the manual installation guidance.',gpus=[])
             self.store.step(job_id,'GPU_VERIFY',gpu['detail'],'PASS' if gpu['state']=='READY' else 'INFO' if gpu['state']=='NOT_APPLICABLE' else 'WARN')
-            self.store.components(target['node_id'],dict(host=host_state,gpu=gpu,prometheus=host_state,node_exporter_version=facts.get('VERSION','')))
-            if state=='READY' and gpu['state'] not in ('READY','NOT_APPLICABLE'):
+            merged=dict(self.store.components(target['node_id']));merged['gpu']=gpu
+            self.store.components(target['node_id'],merged)
+            if host_state=='READY' and gpu['state'] not in ('READY','NOT_APPLICABLE'):
                 state='DEGRADED';detail='Host telemetry READY. GPU telemetry requires attention: '+gpu['detail']
+            else:
+                state=host_state;detail='Telemetry READY: host' + (' and GPU' if gpu['state']=='READY' else '') + ' monitoring verified.'
             self.store.health(target,state,detail,job_id);self.store.finish(job_id,state,detail)
         except ProvisionFailure as exc:
             if target: self.store.health(target,exc.state,str(exc),job_id)
@@ -218,6 +203,53 @@ class ProvisionService:
             detail='Provisioning did not complete: '+type(exc).__name__+'. Check the service logs and monitoring configuration.'
             if target: self.store.health(target,'ERROR',detail,job_id)
             self.store.finish(job_id,'ERROR',detail)
+
+    def execute_host(self,job_id,target,command):
+        """Node Exporter phase: detect, reuse or install, register, verify. Returns (state, detail, facts)."""
+        facts=parse_detection(command('DETECT','Inspecting Node Exporter, service, and listener.',detection_command(self.config.exporter_port)))
+        exporter,detail=self.monitor.exporter(target)
+        self.store.step(job_id,'DETECT','Version: '+facts.get('VERSION','not available'),'INFO')
+        if self.config.preferred_exporter_version:
+            self.store.step(job_id,'DETECT','Preferred / validated version: '+self.config.preferred_exporter_version+'. Healthy existing exporters are never automatically upgraded.','INFO')
+        if exporter=='OTHER' or (exporter!='READY' and facts.get('LISTENER')):
+            raise ProvisionFailure('Port is in use and cannot be verified as a healthy Node Exporter. No process was stopped. '+facts.get('LISTENER',detail))
+        if exporter=='READY':
+            self.store.step(job_id,'DETECT','Node Exporter verified. Existing installation retained.','PASS')
+            self.store.step(job_id,'START','No service change required; existing exporter endpoint is healthy.','PASS')
+        else:
+            unit=facts.get('UNIT')
+            if unit:
+                if unit not in UNITS: raise ProvisionFailure('The existing exporter service could not be identified.')
+                if facts.get('ACTIVE')=='active': raise ProvisionFailure('Exporter service is active, but metrics are unreachable. Check its listen address and firewall.','DEGRADED')
+                command('START','Starting the existing Node Exporter service.','systemctl start '+unit)
+            else:
+                if facts.get('BINARY'): raise ProvisionFailure('Exporter binary exists without a recognized service. Files are preserved; check the service configuration.')
+                if facts.get('PLATFORM') not in ('ubuntu','debian') or facts.get('SYSTEMD')!='yes':
+                    raise ProvisionFailure('Automatic installation supports Ubuntu/Debian with systemd. On other platforms, prepare Node Exporter before enabling Telemetry.')
+                if self.config.exporter_port!=9100: raise ProvisionFailure('New installations use port 9100. Prepare the exporter service first when using a custom port.')
+                command('INSTALL','Installing Node Exporter from the system package repository.',
+                        'env DEBIAN_FRONTEND=noninteractive apt-get update && env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends prometheus-node-exporter',300)
+                unit='prometheus-node-exporter.service'
+                command('START','Enabling and starting the Node Exporter service.','systemctl enable --now '+unit,60)
+            self.store.step(job_id,'START','Service start completed. Verifying the metrics endpoint.','PASS')
+            self.store.step(job_id,'EXPORTER','Waiting for Node Exporter metrics.')
+            for _ in range(10):
+                self.binding(target);exporter,_=self.monitor.exporter(target)
+                if exporter=='READY': break
+                if self.stop_event.wait(1): raise ProvisionFailure('Worker stopping. Recheck the exporter status before continuing.','INTERRUPTED')
+            if exporter!='READY': raise ProvisionFailure('Node Exporter metrics remain unavailable after the service start.','DEGRADED')
+        self.store.step(job_id,'EXPORTER','Node Exporter /metrics endpoint verified.','PASS')
+        self.binding(target)
+        self.store.step(job_id,'REGISTER','Publishing the node target to Prometheus.')
+        register_target(self.config,target)
+        self.store.step(job_id,'REGISTER','Target configuration published. Waiting for a scrape.','PASS')
+        self.store.step(job_id,'VERIFY','Awaiting target UP and fresh required metrics.')
+        deadline=time.monotonic()+self.config.verify_seconds
+        while True:
+            self.binding(target);state,detail=self.monitor.health(target)
+            if state=='READY' or time.monotonic()>=deadline: break
+            if self.stop_event.wait(self.config.poll_seconds): raise ProvisionFailure('Verification interrupted. Enable Telemetry again to check the current state.','INTERRUPTED')
+        return state,detail,facts
 
     def snapshot(self,node_id):
         target=self.resolve(node_id);job=self.store.latest(node_id);row=self.store.node(node_id)
@@ -229,9 +261,29 @@ class ProvisionService:
                 state='DEGRADED';detail='上次確認資料已過期，正在重新確認中央監控狀態。'
         if job and job['state'] in ('QUEUED','PROVISIONING'): state='PROVISIONING';detail='啟用作業進行中，關閉頁面不會停止。'
         elif job and job['state']=='INTERRUPTED': state='ERROR';detail=job['error']
+        components=self.store.components(node_id)
+        if not components and row:
+            # Jobs recorded before the component split have no per-component state.
+            # Fall back to the node-level result so existing hosts stay READY.
+            if state in ('READY','DEGRADED'):
+                components=dict(host=state,prometheus=state)
+            elif state in ('ERROR','UNREACHABLE','INTERRUPTED'):
+                components=dict(host=state)
         return dict(node_id=node_id,chassis_id=target['chassis_id'],label=target.get('display_name'),hostname=target.get('os_hostname'),
                     slot=target['slot_key'],os_ip=target['os_ip'],binding_revision=target['revision'],state=state,detail=detail,
-                    checked_at=checked,job=job,components=self.store.components(node_id),configured=self.config.ready(),dashboard_url=self.config.dashboard(node_id),gpu_setup=self.gpu_setup(target))
+                    checked_at=checked,job=job,components=components,configured=self.config.ready(),dashboard_url=self.config.dashboard(node_id),
+                    host_setup=self.host_setup(target),gpu_setup=self.gpu_setup(target))
+
+    def host_setup(self,target):
+        from .telemetry_monitoring import address
+        port=self.config.exporter_port
+        return dict(prometheus_url=self.config.prometheus_url,file_sd=self.config.file_sd,
+                    exporter_url='http://'+address(target['os_ip'],port)+'/metrics',port=port,
+                    detection='. /etc/os-release; echo "$PRETTY_NAME"; systemctl --version | head -n1',
+                    installation='sudo apt-get update && sudo apt-get install -y --no-install-recommends prometheus-node-exporter && sudo systemctl enable --now prometheus-node-exporter',
+                    check_on_node='curl -sf http://127.0.0.1:'+str(port)+'/metrics | head -n1',
+                    check_on_manager='curl --fail --max-time 10 '+shlex.quote('http://'+address(target['os_ip'],port)+'/metrics'),
+                    documentation='https://github.com/prometheus/node_exporter#installation-and-usage')
 
     def gpu_setup(self,target):
         from .telemetry_gpu import setup_instructions
