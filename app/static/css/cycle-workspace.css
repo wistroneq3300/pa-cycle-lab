@@ -186,6 +186,18 @@
 [data-theme=dark] #cycle-workspace .cw-cell.cw-warn{color:#f0c072}
 [data-theme=dark] #cycle-workspace .cw-cell.cw-fail{color:#ff8a84}
 [data-theme=dark] #cycle-workspace .cw-cell.cw-done{color:#7fb6ea}
+/* Verdict colouring inside the expanded node detail (<dd>). Colour only: the
+   table's left accent bar and padding would look wrong in the detail grid. */
+#cycle-workspace .cw-detail-cell{font-weight:600}
+#cycle-workspace .cw-detail-cell.cw-ok{color:#2f9e57}
+#cycle-workspace .cw-detail-cell.cw-warn{color:#b8860b}
+#cycle-workspace .cw-detail-cell.cw-fail{color:#cf3f39}
+#cycle-workspace .cw-detail-cell.cw-done{color:#3d7fbf}
+#cycle-workspace .cw-detail-cell.cw-idle{color:var(--text-2,var(--cw-muted));font-weight:500}
+[data-theme=dark] #cycle-workspace .cw-detail-cell.cw-ok{color:#6adf9b}
+[data-theme=dark] #cycle-workspace .cw-detail-cell.cw-warn{color:#f0c072}
+[data-theme=dark] #cycle-workspace .cw-detail-cell.cw-fail{color:#ff8a84}
+[data-theme=dark] #cycle-workspace .cw-detail-cell.cw-done{color:#7fb6ea}
 
 /* UI adaptation on the live branch: no Console selectors or behavior replaced. */
 #cycle-workspace{--cw-green:#356519;--cw-tint:#e6eef0}

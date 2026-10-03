@@ -228,7 +228,10 @@
     }
     const nodes=new Map(j.nodes.map(n=>[n.machine_id,n]));
     const text=(element,value)=>{value=String(value);if(element.textContent!==value)element.textContent=value;};
-    const badge=(element,value,cls)=>{value=String(value);if(element.textContent!==value)element.textContent=value;const c='cw-cell '+cls;if(element.className!==c)element.className=c;};
+    const badge=(element,value,cls)=>{value=String(value);if(element.textContent!==value)element.textContent=value;
+      // Table verdict cells vs. the expanded <dd> detail cells need different
+      // styling hooks; the javascript logic is otherwise the same.
+      const base=element.tagName==='DD'?'cw-detail-cell':'cw-cell';const c=base+' '+cls;if(element.className!==c)element.className=c;};
     for(const t of j.targets){
       const n=nodes.get(t.name)||{},row=progressRows.get(t.name);
       row.label.textContent=(t.node||t.slot_key)+' · '+stateLabel(n.stage||j.state);
