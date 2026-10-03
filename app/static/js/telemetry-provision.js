@@ -62,7 +62,9 @@
     }
     openConsole(){
       if(!this.$('.tp-console').open){this.restoreFocus=document.activeElement;this.$('.tp-console').showModal();this.$('[data-close]').focus();}
-      this.consoleOpen=true;this.renderPipeline(this.job);this.pollEvents();
+      this.consoleOpen=true;this.eventsBusy=false;this.renderPipeline(this.job);
+      if(this.rows.length)this.renderLog();
+      this.pollEvents();
     }
     closeConsole(){this.consoleOpen=false;this.$('.tp-console').close();if(this.restoreFocus?.isConnected&&!this.restoreFocus.disabled&&!this.restoreFocus.hidden)this.restoreFocus.focus();else this.$('[data-node]').focus();}
     observeStage(row){
@@ -105,6 +107,7 @@
     }
     select(nodeId) {
       clearTimeout(this.timer);this.generation=(this.generation||0)+1;this.node=this.nodes.find(n=>n.node_id===nodeId);
+      const wasOpen=this.consoleOpen;
       choices.set(this.name,{nodeId,activeSlot:this.root.dataset.slot});
       this.job=null;this.resetLog();this.requestKey=null;this.eventsBusy=false;this.closeConsole();
       this.$('.tp-dashboard').replaceChildren();this.$('.tp-dashboard').hidden=true;
@@ -121,6 +124,9 @@
           // Restore the viewer for this node, but never reuse another job's cursor.
           if(lastView.open)this.openConsole();
         }
+        // Reopen the console the user was already watching so the incoming job's
+        // events keep streaming instead of leaving an empty, closed log behind.
+        if(wasOpen&&!this.consoleOpen)this.openConsole();
         this.poll(this.generation);
       }else this.$('[data-enable]').disabled=true;
     }
@@ -128,7 +134,7 @@
       if(this.closed||generation!==this.generation)return;
       try{const node=await this.request('/nodes/'+encodeURIComponent(this.node.node_id));if(generation!==this.generation||this.closed)return;this.update(node);await this.pollEvents();}
       catch(error){this.error(error);}
-      if(!this.closed&&generation===this.generation)this.timer=setTimeout(()=>this.poll(generation),active(this.job)?1500:15000);
+      if(!this.closed&&generation===this.generation)this.timer=setTimeout(()=>this.poll(generation),(active(this.job)||this.consoleOpen)?1500:15000);
     }
     update(node) {
       this.node=node;this.$('[data-state]').textContent=node.state;this.$('[data-state]').dataset.state=node.state;
@@ -230,16 +236,28 @@
     async pollEvents() {
       if(!this.consoleOpen||!this.job||this.eventsBusy||this.closed)return;
       const id=this.job.job_id,generation=this.generation;this.eventsBusy=true;
+      // Self-heal: a cursor with no rendered rows (after switching nodes, a
+      // re-render, or an interrupted read) would fetch "no new events" forever
+      // and leave the log blank. Re-read from the start in that case.
+      if(!this.rows.length)this.cursor=0;
       try {
         // A bounded batch per tick; continued backlog reads do not redownload history.
         const data=await this.request('/jobs/'+encodeURIComponent(id)+'/events?after_seq='+this.cursor+'&limit=500');
         if(this.closed||generation!==this.generation||this.job?.job_id!==id)return;
-        for(const row of data.events){if(row.sequence<=this.cursor)continue;if(row.sequence!==this.cursor+1){this.cursor=0;this.rows=[];this.$('[data-connection]').textContent='紀錄序號中斷，正在重新取得。';return;}this.rows.push(row);this.cursor=row.sequence;if(!this.follow||this.paused)this.unread++;this.observeStage(row);}
-        this.rows=this.rows.slice(-2000);this.$('[data-connection]').textContent=data.has_more?'正在補讀較早紀錄…':active(data.job)?'已連線 · 唯讀':'紀錄已更新 · '+data.job.state;
+        const known=new Set(this.rows.map(row=>row.sequence));const added=[];
+        for(const row of data.events){
+          if(known.has(row.sequence))continue;
+          if(row.sequence!==this.cursor+1){this.rows=[];this.cursor=0;this.eventsBusy=false;setTimeout(()=>this.pollEvents(),0);return;}
+          known.add(row.sequence);added.push(row);this.cursor=row.sequence;if(!this.follow||this.paused)this.unread++;this.observeStage(row);
+        }
+        this.rows=this.rows.concat(added).sort((a,b)=>a.sequence-b.sequence).slice(-2000);
+        this.$('[data-connection]').textContent=data.has_more?'正在補讀較早紀錄…':active(data.job)?'已連線 · 唯讀':'紀錄已更新 · '+data.job.state;
         this.renderPipeline(data.job);if(!this.paused)this.renderLog();else{this.$('[data-latest]').hidden=!this.unread;this.$('[data-latest]').textContent=this.unread+' new events · 跳至最新';}
         if(data.has_more)setTimeout(()=>this.pollEvents(),50);
-      }catch(error){if(!this.closed)this.$('[data-connection]').textContent='連線中斷，將從最後序號重新連線。';}
-      finally{if(generation===this.generation)this.eventsBusy=false;}
+      }catch(error){if(!this.closed&&generation===this.generation)this.$('[data-connection]').textContent='連線中斷，將從最後序號重新連線。';}
+      // Clear the in-flight guard even when the view was replaced, otherwise a
+      // superseded generation would leave eventsBusy true and block every later poll.
+      finally{this.eventsBusy=false;}
     }
     resetLog(){
       this.pipeline={};this.unread=0;this.cursor=0;this.rows=[];this.viewLines=[];this.pauseRows=[];this.paused=false;this.follow=true;
