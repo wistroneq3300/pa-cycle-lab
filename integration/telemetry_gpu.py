@@ -12,10 +12,25 @@ def setup_instructions(config,target):
     image=config.dcgm_image or '<選擇與目前 GPU／Driver 相容的固定版本映像>'
     return dict(exporter_url='http://'+address(target['os_ip'],config.dcgm_port)+'/metrics',
                 prometheus_url=config.prometheus_url,file_sd=config.file_sd,image=config.dcgm_image,
-                detection='nvidia-smi\ndocker info --format '+shlex.quote('{{json .Runtimes}}'),
+                detection='nvidia-smi\ndocker --version\ndocker info --format '+shlex.quote('{{json .Runtimes}}'),
+                runtime_check='nvidia-ctk --version\ndpkg-query -W nvidia-container-toolkit\ncommand -v nvidia-container-runtime',
+                runtime_prepare=('\n'.join([
+                    '# 1) 安裝 NVIDIA Container Toolkit（若尚未安裝）',
+                    'curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg',
+                    'curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list',
+                    'sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit',
+                    '',
+                    '# 2) 讓 Docker 使用 nvidia runtime，並重新載入 daemon',
+                    'sudo nvidia-ctk runtime configure --runtime=docker',
+                    'sudo systemctl restart docker',
+                    '',
+                    '# 3) 確認 docker info 已列出 nvidia runtime（需看到 "nvidia"）',
+                    'docker info --format \'{{json .Runtimes}}\'',
+                ])),
                 installation=shlex.join(['sudo','docker','run','-d','--name','pa-dcgm-exporter','--restart','unless-stopped','--gpus','all','--cap-add','SYS_ADMIN','-p',str(config.dcgm_port)+':9400',image,'--no-hostname']),
                 check_on_manager='curl --fail --max-time 10 '+shlex.quote('http://'+address(target['os_ip'],config.dcgm_port)+'/metrics'),
-                documentation='https://docs.nvidia.com/datacenter/dcgm/latest/installation/install-dcgm-exporter.html')
+                documentation='https://docs.nvidia.com/datacenter/dcgm/latest/installation/install-dcgm-exporter.html',
+                toolkit_documentation='https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html')
 
 GPU_DETECT = '''# PA_GPU_CAPABILITY
 if command -v nvidia-smi >/dev/null 2>&1; then

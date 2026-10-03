@@ -201,14 +201,16 @@
         nodes.push(p('2. 若尚未安裝，使用系統套件安裝並啟用 Node Exporter。既有安裝請沿用，不需重複建立：'),pre(setup.installation));
         nodes.push(p('3. 於節點本機確認 /metrics 可讀取：'),pre(setup.check_on_node));
       }else{
-        nodes.push(p('1. 於 GPU 節點確認 NVIDIA 驅動與 Docker NVIDIA runtime。CPU-only 節點無須安裝：'),pre(setup.detection));
-        nodes.push(p('2. 若尚未安裝 DCGM Exporter，以下容器方式需已設定 NVIDIA Container Toolkit；不會替換驅動，亦不會停止占用連接埠的其他服務。'));
+        nodes.push(p('1. 於 GPU 節點確認 NVIDIA 驅動與 Docker 是否就緒（CPU-only 節點無須安裝）：'),pre(setup.detection));
+        nodes.push(p('2. 確認 NVIDIA Container Toolkit 是否已安裝，並檢查 Docker 是否已載入 nvidia runtime。第 1 步的 docker info 輸出若未列出 "nvidia"，表示尚未載入：'),pre(setup.runtime_check||'nvidia-ctk --version'));
         if(!setup.image)nodes.push(p('尚未指定固定版本映像，請先選擇與 GPU／驅動相容的版本並替換版本欄位。'));
-        nodes.push(pre(setup.installation));
+        nodes.push(p('3. 若 Docker 尚未載入 nvidia runtime，先安裝 Toolkit 並重新載入 Docker daemon。注意：重新啟動 Docker 會暫時中斷所有執行中的容器，請於維護時段執行：'),pre(setup.runtime_prepare||''));
+        nodes.push(p('4. 確認 docker info 已列出 nvidia runtime 後，以容器方式啟動 DCGM Exporter。此步驟不會替換驅動，亦不會停止占用連接埠的其他服務：'),pre(setup.installation));
+        if(setup.toolkit_documentation)nodes.push(link('NVIDIA Container Toolkit 安裝說明 ↗',setup.toolkit_documentation));
         nodes.push(link('NVIDIA DCGM Exporter 安裝說明 ↗',setup.documentation));
       }
-      nodes.push(p((role==='host'?'4. ':'3. ')+'於 PA Manager（中央 Prometheus 主機：'+(setup.prometheus_url||'尚未設定')+'）確認可讀取採集端點 '+(setup.exporter_url||'')+'：'),pre(setup.check_on_manager));
-      nodes.push(p((role==='host'?'5. ':'4. ')+'回到本頁按上方對應的「安裝 / 啟用」按鈕。PA 會沿用健康的 Exporter，將此節點登記至中央 Prometheus，再確認指標。'));
+      nodes.push(p((role==='host'?'4. ':'5. ')+'於 PA Manager（中央 Prometheus 主機：'+(setup.prometheus_url||'尚未設定')+'）確認可讀取採集端點 '+(setup.exporter_url||'')+'：'),pre(setup.check_on_manager));
+      nodes.push(p((role==='host'?'5. ':'6. ')+'回到本頁按上方對應的「安裝 / 啟用」按鈕。PA 會沿用健康的 Exporter，將此節點登記至中央 Prometheus，再確認指標。'));
       return nodes;
     }
     async enable(scope='all') {
