@@ -1,0 +1,27 @@
+{
+  "result": "PASS",
+  "results": [
+    "Telemetry modal focus/ESC/viewer close/reopen continuity, six-stage READY, legacy disclosure, iframe separate from data READY",
+    "Existing exporter no install; Prometheus failure pipeline; retry no reinstall",
+    "Canonical binding changed during identity read: stopped before installation",
+    "Cycle 1/4/32/128 canonical fleet, typed summary, attention filters, lazy matrix, 2000 rows, pause/resume/follow/history/download",
+    "128 all-healthy nodes: completion/health distinct from active recovery, no attention findings"
+  ],
+  "performance": [
+    {
+      "nodes": 32,
+      "filter_ms": 198
+    },
+    {
+      "nodes": 128,
+      "filter_ms": 276
+    }
+  ],
+  "campaigns": [
+    "neutrino_demo_power_cycle_outband_20261003_205936_07f83f",
+    "neutrino_demo_power_cycle_outband_20261003_205939_6bc084",
+    "neutrino_demo_power_cycle_outband_20261003_205940_34c8df",
+    "neutrino_demo_power_cycle_outband_20261003_205944_351312"
+  ],
+  "errors": []
+}

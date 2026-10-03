@@ -26,6 +26,7 @@ class MonitoringConfig:
     verify_seconds: float = 90
     poll_seconds: float = 5
     freshness_seconds: float = 120
+    preferred_exporter_version: str = ''
 
     @classmethod
     def environment(cls):
@@ -34,7 +35,8 @@ class MonitoringConfig:
                   grafana_url=os.getenv('PA_GRAFANA_URL','').rstrip('/'),
                   dashboard_uid=os.getenv('PA_GRAFANA_DASHBOARD_UID','pa-node-telemetry'),
                   exporter_port=int(os.getenv('PA_NODE_EXPORTER_PORT','9100')),
-                  verify_seconds=float(os.getenv('PA_TELEMETRY_VERIFY_SECONDS','90')))
+                  verify_seconds=float(os.getenv('PA_TELEMETRY_VERIFY_SECONDS','90')),
+                  preferred_exporter_version=os.getenv('PA_NODE_EXPORTER_PREFERRED_VERSION',''))
         for url in (cfg.prometheus_url,cfg.grafana_url):
             if url:
                 p=urlsplit(url)
@@ -87,10 +89,13 @@ def register_target(config, target):
                 raise ValueError('Node already has a different unmanaged endpoint')
             else: kept.append(row)
         rows=kept
+        # Mutable metadata must not create a new metric series. Revision stays
+        # in the PA DB; scrape URL validates the current endpoint independently.
+        for key in ('pa_binding','hostname','ip','os_ip','instance'):
+            inherited.pop(key,None)
         rows.append({'targets':[endpoint],'labels':{**inherited,'pa_managed':'true','node_id':target['node_id'],
-                     'chassis_id':target['chassis_id'],'project_id':str(target.get('project_id') or target['project']),
-                     'hostname':str(target.get('os_hostname') or target.get('node') or ''),
-                     'pa_binding':target['revision']}})
+                     'instance':target['node_id'],'chassis_id':target['chassis_id'],
+                     'project_id':str(target.get('project_id') or ''),'slot':str(target['slot_key'])}})
         path.parent.mkdir(parents=True,exist_ok=True)
         fd, name=tempfile.mkstemp(prefix='.pa-targets-',suffix='.json',dir=path.parent)
         try:
@@ -138,13 +143,15 @@ class MonitoringClient:
             endpoint=address(target['os_ip'],self.config.exporter_port)
             rows=self.api('targets',{'state':'active'}).get('activeTargets',[])
             matches=[r for r in rows if r.get('labels',{}).get('node_id')==target['node_id'] and
-                     r.get('labels',{}).get('pa_binding')==target['revision'] and
+                     r.get('labels',{}).get('instance')==target['node_id'] and
+                     'pa_binding' not in r.get('labels',{}) and
+                     'hostname' not in r.get('labels',{}) and
                      urlsplit(r.get('scrapeUrl','')).netloc==endpoint]
             if len(matches)!=1 or matches[0].get('health')!='up':
                 return 'DEGRADED','Prometheus has not confirmed an UP target for the current node binding.'
             exporter,_=self.exporter(target)
             if exporter!='READY': return 'DEGRADED','Node Exporter metrics could not be verified.'
-            selector='{node_id='+json.dumps(target['node_id'])+',pa_binding='+json.dumps(target['revision'])+'}'
+            selector='{node_id='+json.dumps(target['node_id'])+',instance='+json.dumps(target['node_id'])+'}'
             missing=[]
             for metric in REQUIRED:
                 result=self.api('query',{'query':'timestamp('+metric+selector+')'}).get('result',[])

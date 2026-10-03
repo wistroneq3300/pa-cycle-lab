@@ -1,0 +1,14 @@
+{
+  "result": "PASS",
+  "checks": [
+    "Summary keeps severity/ambiguity and leaves original events immutable",
+    "Boot ID alone does not complete recovery",
+    "Fleet search focus survives polling",
+    "Evidence path downloads",
+    "Event connection loss reconnects automatically",
+    "Paused viewer close/reopen continues fetching without unfreezing rows",
+    "Lazy matrix expanded capture",
+    "Telemetry filtered copy and pause",
+    "Reduced motion modal"
+  ]
+}

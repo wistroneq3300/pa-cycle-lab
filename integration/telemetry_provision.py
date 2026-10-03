@@ -146,10 +146,13 @@ class ProvisionService:
             facts=parse_detection(command('DETECT','Inspecting Node Exporter, service, and listener.',detection_command(self.config.exporter_port)))
             exporter,detail=self.monitor.exporter(target)
             self.store.step(job_id,'DETECT','Version: '+facts.get('VERSION','not available'),'INFO')
+            if self.config.preferred_exporter_version:
+                self.store.step(job_id,'DETECT','Preferred / validated version: '+self.config.preferred_exporter_version+'. Healthy existing exporters are never automatically upgraded.','INFO')
             if exporter=='OTHER' or (exporter!='READY' and facts.get('LISTENER')):
                 raise ProvisionFailure('Port is in use and cannot be verified as a healthy Node Exporter. No process was stopped. '+facts.get('LISTENER',detail))
             if exporter=='READY':
                 self.store.step(job_id,'DETECT','Node Exporter verified. Existing installation retained.','PASS')
+                self.store.step(job_id,'START','No service change required; existing exporter endpoint is healthy.','PASS')
             else:
                 unit=facts.get('UNIT')
                 if unit:
@@ -165,15 +168,18 @@ class ProvisionService:
                             'env DEBIAN_FRONTEND=noninteractive apt-get update && env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends prometheus-node-exporter',300)
                     unit='prometheus-node-exporter.service'
                     command('START','Enabling and starting the Node Exporter service.','systemctl enable --now '+unit,60)
+                self.store.step(job_id,'START','Service start completed. Verifying the metrics endpoint.','PASS')
                 self.store.step(job_id,'EXPORTER','Waiting for Node Exporter metrics.')
                 for _ in range(10):
                     self.binding(target);exporter,_=self.monitor.exporter(target)
                     if exporter=='READY': break
                     if self.stop_event.wait(1): raise ProvisionFailure('Worker stopping. Recheck the exporter status before continuing.','INTERRUPTED')
                 if exporter!='READY': raise ProvisionFailure('Node Exporter metrics remain unavailable after the service start.','DEGRADED')
+            self.store.step(job_id,'EXPORTER','Node Exporter /metrics endpoint verified.','PASS')
             self.binding(target)
             self.store.step(job_id,'REGISTER','Publishing the node target to Prometheus.')
             register_target(self.config,target)
+            self.store.step(job_id,'REGISTER','Target configuration published. Waiting for a scrape.','PASS')
             self.store.step(job_id,'VERIFY','Awaiting target UP and fresh required metrics.')
             deadline=time.monotonic()+self.config.verify_seconds
             while True:

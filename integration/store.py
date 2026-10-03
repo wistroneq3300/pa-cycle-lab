@@ -201,6 +201,38 @@ class Store:
         with self.tx(write=False) as db:
             return self._get(db,job_id)
 
+    def console_summary(self, job_id):
+        """Read-only latest-loop markers; no action or state-machine updates.
+
+        Loaded when a Console opens, so its bounded event tail need not retain
+        every earlier completion marker. Historical health remains in job.nodes.
+        """
+        with self.tx(write=False) as db:
+            rows=db.execute('''WITH e AS (
+              SELECT seq,data,json_extract(data,'$.machine_id') AS node,
+                COALESCE(json_extract(data,'$.loop'),0) AS loop,
+                json_extract(data,'$.event_type') AS kind
+              FROM events WHERE job_id=? AND json_extract(data,'$.machine_id') IS NOT NULL
+            ), latest AS (SELECT node,MAX(loop) AS loop FROM e GROUP BY node)
+            SELECT e.node,e.loop,
+              MAX(CASE WHEN kind='COMMAND_DISPATCHED' THEN 1 ELSE 0 END) AS action,
+              MAX(CASE WHEN kind='RECOVERY_DETECTED' THEN 1 ELSE 0 END) AS recovery,
+              MAX(CASE WHEN kind='POST_COMPLETED' THEN 1 ELSE 0 END) AS post,
+              MAX(CASE WHEN kind IN ('PRE_STARTED','PRE_COMPLETED','ACTION_PREPARING','COMMAND_DISPATCHING',
+                'COMMAND_DISPATCHED','RESPONSE_RETURNED','RESPONSE_LOST','WAIT_OFFLINE','WAIT_RECOVERY',
+                'OS_UNREACHABLE','BOOT_ID_CHANGED','RECOVERY_DETECTED','POST_STARTED','POST_COMPLETED') THEN seq END) AS stage_seq,
+              MAX(CASE WHEN kind LIKE 'ISSUE_%' AND json_extract(data,'$.level') IN ('WARN','FAIL','ERROR') THEN seq END) AS issue_seq
+            FROM e JOIN latest l ON e.node=l.node AND e.loop=l.loop GROUP BY e.node,e.loop''',(job_id,)).fetchall()
+            result=[]
+            for row in rows:
+                markers=[]
+                for seq in (row['stage_seq'],row['issue_seq']):
+                    if seq:
+                        event=db.execute('SELECT data FROM events WHERE seq=? AND job_id=?',(seq,job_id)).fetchone()
+                        if event: markers.append(dict(json.loads(event[0]),sequence=seq))
+                result.append(dict(machine_id=row['node'],loop=row['loop'],completed=[phase for phase,key in [('ACTION','action'),('RECOVERY','recovery'),('POST','post')] if row[key]],markers=markers))
+            return {'nodes':result,'basis':'typed events, latest loop per node'}
+
     def jobs(self, project=None):
         with self.tx(write=False) as db:
             query = 'SELECT data FROM jobs' + (' WHERE project=?' if project is not None else '') + ' ORDER BY updated DESC'

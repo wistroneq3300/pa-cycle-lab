@@ -315,6 +315,15 @@ def events(project:str,job_id:str,after:int=Query(0,ge=0,le=9223372036854775807)
     return JSONResponse(page,headers={'Cache-Control':'no-store'})
 
 
+@router.get('/api/projects/{project}/cycle/jobs/{job_id}/console-summary')
+def console_summary(project:str,job_id:str):
+    scoped(project,job_id)
+    summary=store.console_summary(job_id)
+    for node in summary['nodes']:
+        node['markers']=[secure_event_evidence(job_id,event) for event in node['markers']]
+    return JSONResponse(summary,headers={'Cache-Control':'no-store'})
+
+
 def secure_event_evidence(job_id,event):
     if event.get('evidence'):
         try: artifact_path(job_id,event['evidence'])

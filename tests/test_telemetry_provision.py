@@ -119,7 +119,8 @@ def test_identity_shared_rename_and_active_os_do_not_redirect(rig):
     assert r.pa.machines['box']['os'][2]['os_hostname']=='new-n3'
     assert r.pa.machines['box']['os'][2]['node_id']==old
     assert all(c[1]==old for c in r.monitor.calls)
-    labels=json.loads(Path(r.config.file_sd).read_text())[0]['labels'];assert labels['node_id']==old and labels['hostname']=='new-n3'
+    labels=json.loads(Path(r.config.file_sd).read_text())[0]['labels'];assert labels['node_id']==old and labels['instance']==old and 'hostname' not in labels
+    assert r.svc.snapshot(old)['hostname']=='new-n3'
 
 
 def test_edit_during_shared_identity_read_stops(rig):
@@ -195,13 +196,13 @@ def test_authorization_existing_provider(rig):
     assert r.client.get('/api/telemetry/systems/box/nodes').status_code==403
 
 
-@pytest.mark.parametrize('mode,expected',[('ok','READY'),('down','DEGRADED'),('missing','DEGRADED'),('stale','DEGRADED'),('future','DEGRADED'),('wrong_binding','DEGRADED'),('non_exporter','DEGRADED')])
+@pytest.mark.parametrize('mode,expected',[('ok','READY'),('down','DEGRADED'),('missing','DEGRADED'),('stale','DEGRADED'),('future','DEGRADED'),('wrong_instance','DEGRADED'),('non_exporter','DEGRADED')])
 def test_real_prometheus_http_contract(rig,mode,expected):
     r=rig;target=r.svc.resolve(r.nodes[0]['node_id']);queries=[]
     def handler(request):
         if request.url.path=='/metrics':return httpx.Response(200,text='not exporter' if mode=='non_exporter' else 'node_exporter_build_info{version="1.8.2"} 1\n')
         if request.url.path.endswith('/targets'):
-            data={'activeTargets':[{'labels':{'node_id':target['node_id'],'pa_binding':'wrong' if mode=='wrong_binding' else target['revision']},'scrapeUrl':'http://192.0.2.1:9100/metrics','health':'down' if mode=='down' else 'up'}]}
+            data={'activeTargets':[{'labels':{'node_id':target['node_id'],'instance':'wrong' if mode=='wrong_instance' else target['node_id']},'scrapeUrl':'http://192.0.2.1:9100/metrics','health':'down' if mode=='down' else 'up'}]}
         else:
             queries.append(request.url.params['query']);stamp=100 if mode=='stale' else 2001 if mode=='future' else 1999
             data={'result':[] if mode=='missing' else [{'value':[2000,str(stamp)]}]}
@@ -224,6 +225,67 @@ def test_old_ready_not_presented_as_current_ready(rig):
     with r.store.tx() as db: db.execute('UPDATE telemetry_nodes SET checked_at=0')
     assert r.svc.snapshot(r.nodes[0]['node_id'])['state']=='DEGRADED'
     assert r.store.get(job['job_id'])['state']=='READY'
+
+
+def test_metric_identity_survives_binding_hostname_and_ip_change(rig):
+    r=rig;target=r.svc.resolve(r.nodes[0]['node_id'])
+    register_target(r.config,target)
+    original=json.loads(Path(r.config.file_sd).read_text())[0]
+    changed=dict(target,revision='new-binding',os_hostname='renamed.example',os_ip='192.0.2.150')
+    register_target(r.config,changed)
+    current=json.loads(Path(r.config.file_sd).read_text())[0]
+    assert current['labels']==original['labels']
+    assert current['labels']['instance']==target['node_id']
+    assert current['labels']['slot']==target['slot_key']
+    assert not {'pa_binding','hostname','ip'} & current['labels'].keys()
+    assert current['targets']==['192.0.2.150:9100']
+    assert r.config.dashboard(target['node_id'])==r.config.dashboard(changed['node_id'])
+
+
+def test_preferred_exporter_never_upgrades_healthy(rig):
+    from dataclasses import replace
+    r=rig;r.svc.config=replace(r.config,preferred_exporter_version='9.9.9')
+    r.monitor.scenarios[r.nodes[0]['node_id']]='healthy'
+    job=execute(r,enqueue(r))
+    assert job['state']=='READY'
+    assert not any('apt-get' in c[-1] for c in r.monitor.calls if c[0]=='ssh')
+    assert any('9.9.9' in e['message'] for e in r.store.events(job['job_id']))
+
+
+def test_cycle_console_summary_is_read_only_and_does_not_infer_dispatch(rig,monkeypatch):
+    from integration import web
+    from integration.store import Store
+    r=rig;store=Store(r.tmp/'cycle.sqlite3')
+    monkeypatch.setattr(web,'store',store)
+    monkeypatch.setattr(web.app.state,'cycle_provider',SimpleNamespace(authenticate=lambda req:'reader',authorize=lambda actor,project,action:project=='P' and action=='read'),raising=False)
+    target=r.svc.resolve(r.nodes[0]['node_id'])
+    job=store.create('P',{'idempotency_key':'summary-test','cycle_mode':'reboot'},[target],'fixture',mode='synthetic')
+    for loop,kind in [(1,'COMMAND_DISPATCHED'),(1,'POST_COMPLETED'),(2,'COMMAND_DISPATCHING'),(2,'RESPONSE_LOST')]:
+        store.append_event(job['id'],dict(machine_id=target['name'],loop=loop,event_type=kind,phase='CYCLE'))
+    before=store.get(job['id'])
+    client=TestClient(web.app);url=f"/api/projects/P/cycle/jobs/{job['id']}/console-summary"
+    response=client.get(url);assert response.status_code==200,response.text
+    row=response.json()['nodes'][0]
+    assert row['loop']==2 and row['completed']==[]
+    assert store.get(job['id'])==before
+    assert client.get(url.replace('/projects/P/','/projects/other/')).status_code==403
+    store.append_event(job['id'],dict(machine_id=target['name'],loop=2,event_type='BOOT_ID_CHANGED',phase='RECOVERY'))
+    assert client.get(url).json()['nodes'][0]['completed']==[]
+    store.append_event(job['id'],dict(machine_id=target['name'],loop=2,event_type='RECOVERY_DETECTED',phase='CYCLE'))
+    assert client.get(url).json()['nodes'][0]['completed']==['RECOVERY']
+    store.append_event(job['id'],dict(machine_id=target['name'],loop=2,event_type='ISSUE_NEW',phase='POST',level='FAIL',message='Evidence boundary',evidence='../private/credentials.json'))
+    assert all('evidence' not in e for e in client.get(url).json()['nodes'][0]['markers'])
+
+
+def test_grafana_dashboard_uses_nine_real_metric_legends():
+    dashboard=json.loads((Path(__file__).resolve().parents[1]/'deploy/telemetry/pa-node-telemetry.json').read_text())
+    assert len(dashboard['panels'])==9
+    for panel in dashboard['panels']:
+        query=panel['targets'][0]
+        assert 'node_id="$node_id"' in query['expr'] and 'pa_binding' not in query['expr']
+        if panel['title'] in ('CPU Utilization','Memory Utilization','System Load','Uptime'): assert query['legendFormat']=='{{node_id}}'
+        elif panel['title']=='Filesystem Used': assert query['legendFormat']=='{{mountpoint}}'
+        else: assert query['legendFormat']=='{{device}}'
 
 
 def test_full_production_middleware_project_only_caller(rig,monkeypatch):

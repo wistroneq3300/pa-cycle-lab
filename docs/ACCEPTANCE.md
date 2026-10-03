@@ -257,3 +257,8 @@ KillMode=process, cross-UID/service-account and credential/artifact permissions,
 real disk-full/read-only behavior, and user-designated Neutrino target identity,
 physical power/AUX scope, reboot recovery and hardware evidence. Offline fault
 injection and synthetic success do not substitute for these checks.
+
+
+## 2026-10-03 Validation Console refinement
+
+See [the scoped acceptance report](VALIDATION_CONSOLE_REFINEMENT.md) for current commands, paired baseline failures, browser scenarios, screenshots, video/trace and live gates. Historical PASS counts above are not reused as this delivery's result.

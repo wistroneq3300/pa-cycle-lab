@@ -1,5 +1,34 @@
 # PROJECT_STATUS — PA Cycle Lab native Next integration
 
+## 2026-10-03 PA Validation Console / Grafana refinement
+
+Base `3f109f594b5e2202200b0a8cfb77577490d450a8`, same
+`codex/system-inspection-ux` branch and worktree.
+
+- Telemetry native modal, real six-stage pipeline, viewer-only close/reconnect,
+  retry and completion actions, separate visualization/data states. READY folds
+  existing legacy charts rather than removing them. English event text, UTC+8.
+- Stable Prometheus node/instance labels; mutable binding/hostname removed from
+  metric identity. Nine-panel Grafana JSON, configurable preferred exporter
+  version, no automatic upgrade of healthy installations.
+- Cycle remains inline: 1-node compact context, 2–8 node chips, 32/128-node
+  fleet/status/search/lazy chassis matrix and structured attention. Shared muted
+  console palette, no scan lines/glowing caret. Existing event/history/evidence
+  controls preserved. Summary retains collection WARN/FAIL and distinguishes
+  dispatch intent from a command actually submitted.
+- Cycle backend changes are limited to a read-only console-summary endpoint
+  and the missing Telemetry/runtime asset manifest entries. Engine, runner,
+  actions, PRE/POST/recovery/stop and event schema are unchanged.
+- Tests: Telemetry/shared/identity **62 PASS**; Vera **113 PASS / 16 SKIP**.
+  Five-suite baseline comparison **65 PASS / 35 FAIL → 69 PASS / 35 FAIL**;
+  the same **30 unique failing IDs**, **zero new failures**, four new tests.
+  Reruns/subtests are not added together. Existing fixture/reservation failures
+  are retained, not hidden. Isolated provision process crash: **zero replay**.
+- Actual browser scenarios, captures and scope/limits are recorded in
+  [VALIDATION_CONSOLE_REFINEMENT.md](docs/VALIDATION_CONSOLE_REFINEMENT.md).
+  No claim that a fixture Grafana iframe proves installed Grafana acceptance.
+- **Not deployed; no production service restart, real DUT operation or port 3000 change.**
+
 ## 2026-10-03 Telemetry Console presentation refinement
 
 - Clarified Grafana navigation as **開啟監控圖表**; installation remains
