@@ -468,10 +468,10 @@ async function openKvmBroadcast(project) {
   K.fullscreen = false;
   K.enlarged = false;
   const gridEl = $("kvm-grid");
-  if (!gridEl) { setBanner("KVM 廣播 overlay 元件未建立", "err"); return; }
+  if (!gridEl) { setBanner("無法開啟 KVM 廣播視窗，請重新開啟", "err"); return; }
   gridEl.innerHTML = "";
   $("kvm-master").innerHTML = "";
-  setBanner(`⏳ 正在自動偵測 ${cands.length} 台 BMC 的 basecode / KVM 協議…`, "ok");
+  setBanner(`⏳ 正在自動偵測 ${cands.length} 台 BMC 的 KVM 連線協定…`, "ok");
 
   // 1) 偵測
   const det = await detectProjectBasecodes(project);

@@ -32,7 +32,7 @@
     const light = theme === 'light', button = document.getElementById('theme-toggle');
     if (button) {
       button.innerHTML = `<span aria-hidden="true">${light ? '☀' : '◐'}</span><span>${light ? 'Light' : 'Dark'}</span>`;
-      button.title = light ? '目前為 Pearl Light，切換至 Graphite Dark' : '目前為 Graphite Dark，切換至 Pearl Light';
+      button.title = light ? '目前為淺色模式，切換至深色模式' : '目前為深色模式，切換至淺色模式';
       button.setAttribute('aria-label', button.title);
       button.setAttribute('aria-pressed', String(light));
     }
@@ -61,41 +61,41 @@
     const l10 = projects.filter(p => system.some(m => m.project === p.name));
     const l11 = projects.filter(p => rack.some(m => m.project === p.name));
     const online = connected.filter(m => m.os_alive === true).length;
-    return `<header class="cine-page-intro"><div><span class="cine-kicker">PA SERVER MANAGER</span><h1>工程總覽</h1></div><div class="cine-intro-actions"><button class="cine-link" onclick="cineProjects()">跳到專案 <span>↓</span></button><button class="btn" onclick="openProjectModal()">＋ 專案管理</button></div></header>
+    return `<header class="cine-page-intro"><div><span class="cine-kicker">PA SERVER MANAGER</span><h1>系統架構總覽</h1></div><div class="cine-intro-actions"><button class="cine-link" onclick="cineProjects()">跳到專案 <span>↓</span></button><button class="btn" onclick="openProjectModal()">＋ 專案管理</button></div></header>
       <section class="cine-story" id="core-story" aria-label="L10 System 到 L11 Rack 工程層級介紹">
         <div class="cine-stage" id="core-stage" data-phase="system">
           <div class="cine-stage-top"><span><i class="p-live-dot"></i> WISTRON <b>/</b> DATACENTER ENGINEERING</span><span class="cine-edition">SYSTEM CORE <b>01—02</b></span></div>
           <div class="cine-floor" aria-hidden="true"></div>
-          <div class="cine-core" id="core-visual"><img class="cine-fallback" src="/static/img/server-hero.png" alt="靜態概念伺服器示意"><canvas id="system-core" tabindex="0" role="img" aria-label="Compute Tray 與 Rack 互動 3D 模型" aria-describedby="core-interaction-help"></canvas></div>
+          <div class="cine-core" id="core-visual"><img class="cine-fallback" src="/static/img/server-hero.png" alt="伺服器設備視圖"><canvas id="system-core" tabindex="0" role="img" aria-label="Compute Tray 與 Rack 互動 3D 模型" aria-describedby="core-interaction-help"></canvas></div>
           <div class="cine-copy cine-copy-system" id="core-system-copy">
             <div class="cine-chapter"><span>01</span><b>L10 / SYSTEM LEVEL</b></div>
-            <h2>System.<br><span>To rack.</span></h2>
-            <p class="cine-lead">單機驗證，整櫃整合。</p><p class="cine-description">專案、硬體與操作，在同一個工作空間。<br>從系統狀態，直接進入工程現場。</p>
+            <h2>L10<br><span>系統管理</span></h2>
+            <p class="cine-lead">設備狀態與驗證作業。</p><p class="cine-description">依專案查看系統、硬體與連線狀態。<br>選擇設備後進入管理與驗證作業。</p>
             <div class="cine-hero-actions"><button class="btn primary" onclick="productLevel('system')">進入 System 工作區 <span>↗</span></button><button class="cine-link" onclick="productLevel('rack')">L11 Rack <span>→</span></button></div>
             <div class="cine-live-summary"><span><b>${two(l10.length)}</b> L10 專案</span><i></i><span><b>${two(system.length)}</b> 系統</span></div>
           </div>
           <div class="cine-copy cine-copy-rack" id="core-rack-copy" inert aria-hidden="true">
-            <div class="cine-chapter"><span>02</span><b>L11 / RACK LEVEL</b></div><h2>One rack.<br><span>Every layer.</span></h2>
+            <div class="cine-chapter"><span>02</span><b>L11 / RACK LEVEL</b></div><h2>L11<br><span>整櫃管理</span></h2>
             <p class="cine-lead">從元件位置，到整櫃操作。</p><p class="cine-description">48U 實體配置、Topology 與 Telemetry。<br>運算、網路、電力與冷卻，清楚分層。</p>
             <div class="cine-hero-actions"><button class="btn primary" onclick="${l11[0] ? `productRack(${esc(JSON.stringify(l11[0].name))})` : `productLevel('rack')`}">進入 Rack 工作區 <span>↗</span></button></div>
             <div class="cine-live-summary"><span><b>${two(l11.length)}</b> L11 專案</span><i></i><span><b>${two(rack.length)}</b> 元件</span></div>
           </div>
-          <div class="cine-object-label"><span class="cine-label-system">L10 / \u904b\u7b97\u7bc0\u9ede</span><span class="cine-label-rack">L11 / GB300 \u6a5f\u6ac3\u793a\u610f</span><small>GB300 \u5916\u89c0\u53c3\u8003 \u00b7 \u975e\u5b98\u65b9 3D \u793a\u610f</small></div>
+          <div class="cine-object-label"><span class="cine-label-system">L10 / \u904b\u7b97\u7bc0\u9ede</span><span class="cine-label-rack">L11 / 機櫃</span><small>設備視圖</small></div>
           <div class="cine-core-tools" id="core-tools"><span id="core-interaction-help">按住拖曳旋轉 · 方向鍵查看 · Home 重設</span><div><button type="button" data-core-view="rear" aria-label="3D 模型背面視角">背面</button><button type="button" data-core-view="reset" aria-label="重設 3D 模型視角">↺ 重設視角</button></div></div>
-          <div class="cine-stage-bottom"><div class="cine-scroll-cue"><span>↓</span> 捲動查看 System → Rack <div class="cine-progress"><i></i></div></div><span>結構示意 · 非官方 CAD／即時設備</span><button class="cine-link" onclick="cineProjects()">專案一覽 ↘</button></div>
+          <div class="cine-stage-bottom"><div class="cine-scroll-cue"><span>↓</span> 捲動查看 System → Rack <div class="cine-progress"><i></i></div></div><span>設備視圖用於位置與類型辨識；實際配置與狀態以系統回報資料為準。</span><button class="cine-link" onclick="cineProjects()">專案一覽 ↘</button></div>
         </div>
       </section>
-      <section class="cine-fleet" aria-label="工程狀態摘要"><div class="cine-fleet-total"><span class="cine-kicker">WORKSPACE SNAPSHOT</span><div><strong>${two(machines.length)}</strong><span>受管設備<small>Fixture / 模擬資料</small></span></div></div><div class="cine-fleet-levels"><button onclick="productLevel('system')"><span>L10 <small>System</small></span><b>${two(system.length)}</b></button><button onclick="productLevel('rack')"><span>L11 <small>Rack components</small></span><b>${two(rack.length)}</b></button></div><div class="cine-fleet-health"><span class="cine-kicker">OS CONNECTIVITY</span><div class="cine-connectivity">${connected.map(m=>`<i class="${m.os_alive===true?'on':m.os_alive===false?'off':'unknown'}" title="${esc(m.name)} · ${m.os_alive===true?'OS 在線':m.os_alive===false?'OS 離線':'未知'}"></i>`).join('')||'<span>尚無管理介面</span>'}</div><p><b>${online}</b> 在線 <span>／ ${connected.length} 有管理介面</span></p></div><div class="cine-attention"><span class="cine-kicker">ATTENTION</span><strong>${two(offline.length)}<small>OS 離線</small></strong><span>確認連線與電源狀態</span></div></section>
-      <section class="cine-portfolio" id="project-portfolio"><header class="cine-section-head"><div><span class="cine-kicker">02 / PROJECT PORTFOLIO</span><h2>兩個層級。獨立管理。</h2></div><span>${two(projects.length)} 專案 <b>·</b> L10 System / L11 Rack</span></header>${prior.querySelector('.p-portfolios')?.outerHTML||''}</section>
-      <header class="cine-section-head cine-insights-title"><div><span class="cine-kicker">03 / OPERATIONS SIGNAL</span><h2>系統健康與工程助理</h2></div><span>Fixture 狀態快照</span></header>${prior.querySelector('.p-insights')?.outerHTML||''}
-      <footer class="cine-footer"><span>WISTRON <b>/</b> PA SERVER MANAGER</span><span>獨立 UI 預覽 · 未連接正式 FastAPI</span><span>L10 SYSTEM <b>—</b> L11 RACK</span></footer>`;
+      <section class="cine-fleet" aria-label="工程狀態摘要"><div class="cine-fleet-total"><span class="cine-kicker">設備狀態摘要</span><div><strong>${two(machines.length)}</strong><span>受管設備<small>設備狀態</small></span></div></div><div class="cine-fleet-levels"><button onclick="productLevel('system')"><span>L10 <small>System</small></span><b>${two(system.length)}</b></button><button onclick="productLevel('rack')"><span>L11 <small>Rack components</small></span><b>${two(rack.length)}</b></button></div><div class="cine-fleet-health"><span class="cine-kicker">OS 連線</span><div class="cine-connectivity">${connected.map(m=>`<i class="${m.os_alive===true?'on':m.os_alive===false?'off':'unknown'}" title="${esc(m.name)} · ${m.os_alive===true?'OS 在線':m.os_alive===false?'OS 離線':'未知'}"></i>`).join('')||'<span>尚無管理介面</span>'}</div><p><b>${online}</b> 在線 <span>／ ${connected.length} 有管理介面</span></p></div><div class="cine-attention"><span class="cine-kicker">ATTENTION</span><strong>${two(offline.length)}<small>OS 離線</small></strong><span>確認連線與電源狀態</span></div></section>
+      <section class="cine-portfolio" id="project-portfolio"><header class="cine-section-head"><div><span class="cine-kicker">02 / 專案清單</span><h2>專案分類</h2></div><span>${two(projects.length)} 專案 <b>·</b> L10 System / L11 Rack</span></header>${prior.querySelector('.p-portfolios')?.outerHTML||''}</section>
+      <header class="cine-section-head cine-insights-title"><div><span class="cine-kicker">03 / 作業狀態</span><h2>系統狀態與 AI 助理</h2></div><span>狀態摘要</span></header>${prior.querySelector('.p-insights')?.outerHTML||''}
+      <footer class="cine-footer"><span>WISTRON <b>/</b> PA SERVER MANAGER</span><span>資料來源：系統回報</span><span>L10 SYSTEM <b>—</b> L11 RACK</span></footer>`;
   };
 
   RENDERERS.projects = () => {
     const fragment = document.createElement('div');
     fragment.innerHTML = previous.projects();
-    fragment.querySelector('.p-heading h1').textContent = projectLevelFilter.val === 'system' ? 'System workspace' : 'Rack project workspace';
-    fragment.querySelector('.p-heading p').textContent = projectLevelFilter.val === 'system' ? '以專案管理單機系統，快速檢查連線、硬體與電源。' : '以整櫃專案管理元件；實體配置與拓樸請進入 Rack workspace。';
+    fragment.querySelector('.p-heading h1').textContent = projectLevelFilter.val === 'system' ? 'L10 系統與專案' : 'L11 整櫃專案';
+    fragment.querySelector('.p-heading p').textContent = projectLevelFilter.val === 'system' ? '以專案管理單機系統，快速檢查連線、硬體與電源。' : '以整櫃專案管理元件；實體配置與拓樸請進入整櫃管理。';
     const input = fragment.querySelector('.p-search input');
     input.value = search;
     input.setAttribute('value', search);
@@ -162,7 +162,7 @@
     const onFallback = () => {
       visual.classList.remove('is-rendered'); stage.dataset.scene = 'fallback'; canvas.tabIndex = -1;
       toolButtons.forEach(button => button.disabled = true);
-      help.textContent = '靜態預覽 · 3D 暫不可用，管理功能不受影響';
+      help.textContent = '3D 暫時無法顯示，管理功能不受影響';
     };
     canvas.addEventListener('pa-core-ready', onReady);
     canvas.addEventListener('pa-core-fallback', onFallback);

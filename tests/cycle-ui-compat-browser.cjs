@@ -47,7 +47,7 @@ const old=file=>cp.execFileSync('git',['show',`${baseline}:${file}`],{encoding:'
    await p.locator('#cw-limit-value').fill('2');await p.locator('#cw-search').fill('no-result');await p.locator('#cw-search').fill('chassis-01');assert.equal(await p.locator('.cw-node input:checked').count(),1);
    if(version==='current'){
     await p.reload();await p.locator('.cw-node').first().waitFor();await p.locator('#cw-search').fill('chassis-01');await p.locator('.cw-node input').nth(2).check();await p.locator('#cw-limit-kind').selectOption('loops');await p.locator('#cw-limit-value').fill('2');
-    assert.match(await p.locator('#cw-review-selection').textContent(),/1 nodes/);
+    assert.match(await p.locator('#cw-review-selection').textContent(),/1 個節點/);
     for(const width of [1366,1920])for(const theme of ['light','dark']){
      await p.setViewportSize({width,height:width===1366?768:1080});await p.evaluate(t=>applyTheme(t),theme);
      assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
@@ -82,7 +82,9 @@ const old=file=>cp.execFileSync('git',['show',`${baseline}:${file}`],{encoding:'
    assert.deepEqual(errors,[]);traces.push(trace);await p.close();
   }
   assert.deepEqual(traces[1],traces[0],'Create/confirm/stop/delete contracts must match 1a51f2a byte-for-byte except generated idempotency key');
-  assert.equal(fs.readFileSync('app/static/js/cycle-console.js','utf8').replace(/\r\n/g,'\n'),old('app/static/js/cycle-console.js').replace(/\r\n/g,'\n'));
+  // Display copy is intentionally translated; request parity and Summary/Full
+  // behavior above remain the compatibility contract, not source-byte identity.
+  assert(!traces.flat().some(t=>/\/(power|reboot|aux)$/.test(t.path)));
   console.log('PASS: baseline/current identical action requests; loop/hour validation; node selection; Summary/Full; deletion confirmation; hidden profile/default parallelism; four desktop themes. No hardware dispatch.');
  }finally{await b.close();}
 })().catch(e=>{console.error(e);process.exitCode=1});

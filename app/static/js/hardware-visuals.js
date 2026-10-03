@@ -10,15 +10,15 @@
   'use strict';
   const UNIT_HEIGHT = 41;
   const TYPES = {
-    server: {label:'\u4f3a\u670d\u5668',en:'COMPUTE SYSTEM',units:1,depth:176,reference:'GB300 \u5916\u89c0\u8a9e\u5f59\u53c3\u8003\uff0c\u975e\u6a5f\u578b\u8fa8\u8b58'},
-    switch: {label:'\u7db2\u8def\u4ea4\u63db\u5668',en:'NETWORK SWITCH',units:1,depth:132,reference:'SN2000 \u7cfb\u5217\u5916\u89c0\u53c3\u8003\uff0c\u975e\u6a5f\u578b\u8fa8\u8b58'},
-    nvlink: {label:'NVLink Switch Tray',en:'NVLINK SWITCH TRAY',units:1,depth:169,reference:'NVLink Switch Tray \u5916\u89c0\u793a\u610f\uff0c\u975e\u6a5f\u578b\u8fa8\u8b58'},
-    cdu: {label:'\u51b7\u537b\u5206\u914d\u55ae\u5143',en:'COOLANT DISTRIBUTION',units:4,depth:138,reference:'\u901a\u7528\u6a5f\u67b6\u5f0f CDU \u793a\u610f\uff0c\u975e\u7279\u5b9a\u6a5f\u578b'},
-    pdu: {label:'\u96fb\u6e90\u5206\u914d\u5668',en:'POWER DISTRIBUTION',units:1,depth:64,reference:'\u901a\u7528\u6c34\u5e73\u5f0f PDU \u793a\u610f\uff0c\u975e\u7279\u5b9a\u6a5f\u578b'},
-    powershelf: {label:'\u96fb\u6e90\u6a21\u7d44\u5c64',en:'POWER SHELF',units:1,depth:145,reference:'\u516d\u6a21\u7d44 Power Shelf \u5916\u89c0\u793a\u610f\uff0c\u975e\u6a5f\u578b\u8fa8\u8b58'},
-    storage: {label:'\u5132\u5b58\u8a2d\u5099',en:'STORAGE ARRAY',units:2,depth:175,reference:'\u901a\u7528\u78c1\u789f\u9663\u5217\u793a\u610f\uff0c\u975e\u7279\u5b9a\u6a5f\u578b'},
-    network: {label:'\u7db2\u8def\u8a2d\u5099',en:'NETWORK APPLIANCE',units:1,depth:108,reference:'\u901a\u7528\u7db2\u8def\u8a2d\u5099\u793a\u610f\uff0c\u975e\u7279\u5b9a\u6a5f\u578b'},
-    blanking: {label:'\u64cb\u677f',en:'BLANKING PANEL',units:1,depth:10,reference:'\u6a5f\u6ac3\u64cb\u677f\u793a\u610f\uff0c\u4e0d\u4ee3\u8868\u8a2d\u5099'}
+    server: {label:'\u4f3a\u670d\u5668',en:'COMPUTE SYSTEM',units:1,depth:176,reference:'伺服器設備視圖'},
+    switch: {label:'\u7db2\u8def\u4ea4\u63db\u5668',en:'NETWORK SWITCH',units:1,depth:132,reference:'交換器設備視圖'},
+    nvlink: {label:'NVLink Switch Tray',en:'NVLINK SWITCH TRAY',units:1,depth:169,reference:'NVLink 設備視圖'},
+    cdu: {label:'\u51b7\u537b\u5206\u914d\u55ae\u5143',en:'COOLANT DISTRIBUTION',units:4,depth:138,reference:'機架式 CDU 設備視圖'},
+    pdu: {label:'\u96fb\u6e90\u5206\u914d\u5668',en:'POWER DISTRIBUTION',units:1,depth:64,reference:'PDU 設備視圖'},
+    powershelf: {label:'\u96fb\u6e90\u6a21\u7d44\u5c64',en:'POWER SHELF',units:1,depth:145,reference:'Power Shelf 設備視圖'},
+    storage: {label:'\u5132\u5b58\u8a2d\u5099',en:'STORAGE ARRAY',units:2,depth:175,reference:'儲存設備視圖'},
+    network: {label:'\u7db2\u8def\u8a2d\u5099',en:'NETWORK APPLIANCE',units:1,depth:108,reference:'網路設備視圖'},
+    blanking: {label:'\u64cb\u677f',en:'BLANKING PANEL',units:1,depth:10,reference:'機櫃擋板'}
   };
   let sequence = 0;
   const safe = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -32,7 +32,7 @@
     return 'server';
   }
   const label = type => TYPES[typeOf(type)].label;
-  const caption = type => TYPES[typeOf(type)].reference + ' \u00b7 \u975e\u672c\u6a5f\u5be6\u969b\u5916\u89c0';
+  const caption = type => TYPES[typeOf(type)].reference + '';
   function sizeOf(machine, spec) {
     const value = machine && typeof machine === 'object' ? Number(machine.rack_size) : NaN;
     return Number.isInteger(value) && value >= 1 && value <= 48 ? value : spec.units;
@@ -266,7 +266,7 @@
         }
       }
     }
-    const description=caption(type)+'\u3002\u9762\u677f\u914d\u7f6e\u70ba\u5916\u89c0\u793a\u610f\uff0c\u4e0d\u4ee3\u8868\u5373\u6642\u72c0\u614b\u3001\u9023\u63a5\u57e0\u6578\u91cf\u6216\u786c\u9ad4\u898f\u683c\u3002';
+    const description=caption(type)+'。';
     return `<svg class="pa-hardware-visual ${safe(options.className || '')}" data-hardware-type="${type}" data-hardware-view="${view}" data-hardware-units="${units}" data-hardware-material="${['server','nvlink'].includes(type)?'champagne':'neutral'}" viewBox="${view==='front'?`0 0 468 ${h+16}`:`0 0 630 ${viewHeight}`}" role="img" aria-label="${safe(label(type)+'\uff1a'+caption(type))}" xmlns="http://www.w3.org/2000/svg"><title>${safe(label(type))}</title><desc>${safe(description)}</desc>${definitions(id)}${drawing}</svg>`;
   }
   window.PAHardwareVisuals=Object.freeze({typeOf,label,caption,render,types:Object.freeze(Object.keys(TYPES))});

@@ -19,12 +19,12 @@ async function confirmUser(message) {
 "use strict";
 /* Wistron PA Server Manager - frontend */
 const NAV_ITEMS = [
-  { id: "dashboard", icon: "🏠", label: "首頁 / Dashboard", group: "總覽" },
+  { id: "dashboard", icon: "🏠", label: "系統架構總覽", group: "總覽" },
   { id: "projects",  icon: "🖘", label: "System Manager", group: "管理" },
   { id: "rack",      icon: "🗄", label: "Rack Manager", group: "管理" },
   {id:"cycle",icon:"↻",label:"Cycle 執行紀錄",group:"驗證"},
 ];
-const TITLES = { cycle:"Cycle 驗證", dashboard: "首頁 / Dashboard", projects: "System Manager", rack: "Rack Manager", machine: "單機詳情" };
+const TITLES = { cycle:"Cycle 驗證", dashboard: "系統架構總覽", projects: "System Manager", rack: "Rack Manager", machine: "單機詳情" };
 const RENDERERS = { cycle:()=>window.CycleWorkspace.shell(), dashboard: pageDashboard, projects: pageProjects, rack: pageRack, machine: pageMachine };
 const state = { view: "dashboard" };
 let _activeProject = "";       // #/projects/{name}：目前定位的專案（deep-link + 高亮）
@@ -68,7 +68,7 @@ async function api(path, options) {
     const body = options.body ? JSON.parse(options.body) : {};
     if (!body.expected_target) body.expected_target = operationTarget(decodeURIComponent(operation[1]));
     const target = body.expected_target;
-    if (!target.node_id || !target.expected_binding_revision) throw new Error("Select a configured node and refresh its binding before control");
+    if (!target.node_id || !target.expected_binding_revision) throw new Error("請選擇已設定的節點並重新載入連線資訊，再執行控制操作");
     body.node_id = body.node_id || target.node_id;
     body.expected_binding_revision = body.expected_binding_revision || target.expected_binding_revision;
     body.idempotency_key = body.idempotency_key || uuidv4();
@@ -323,14 +323,14 @@ function pageDashboard() {
       </div>
       <div class="rack-cop-panel">
         <div class="rack-cop-head">
-          <span class="cop-avatar ai">🤖</span>
-          <div class="cop-title">AI Copilot</div>
+          <span class="cop-avatar ai">AI</span>
+          <div class="cop-title">AI 助理</div>
           <button class="btn small rack-cop-clear" id="cop-clear" title="清除對話紀錄">🗑</button>
         </div>
         <div class="rack-cop-body" id="cop-box">
           <div class="cop-msg ai">
-            <span class="cop-avatar ai">🤖</span>
-            <div class="cop-bubble ai">👋 我是 AI Copilot。目前已監控 <b>${total}</b> 台系統、<b>${online}</b> 線上、<b>${offline}</b> 離線。問我任何問題～（例如「哪台有問題？」「proj_k 專案狀態？」）</div>
+            <span class="cop-avatar ai">AI</span>
+            <div class="cop-bubble ai">可查詢目前專案、設備連線狀態與系統摘要。</div>
           </div>
         </div>
         <div class="rack-cop-input">
@@ -346,7 +346,7 @@ let _copBusy = false;
 function copAppend(role, html, raw) {
   const box = document.getElementById("cop-box");
   if (!box) return;
-  const av = role === "user" ? "🧑" : "🤖";
+  const av = role === "user" ? "您" : "AI";
   box.insertAdjacentHTML("beforeend", `<div class="cop-msg ${role}">
     <span class="cop-avatar ${role}">${av}</span>
     <div class="cop-bubble ${role}">${raw ? html : esc(html)}</div>
@@ -360,7 +360,7 @@ function copTyping(on) {
   if (on) {
     if (t) return;
     box.insertAdjacentHTML("beforeend", `<div class="cop-msg ai" id="cop-typing">
-      <span class="cop-avatar ai">🤖</span><div class="cop-bubble ai typing">正在思考…</div></div>`);
+      <span class="cop-avatar ai">AI</span><div class="cop-bubble ai typing">正在分析…</div></div>`);
   } else if (t) { t.remove(); }
   box.scrollTop = box.scrollHeight;
 }
@@ -404,7 +404,7 @@ function bindCopilot() {
   if (clr) clr.addEventListener("click", () => {
     const box = document.getElementById("cop-box");
     if (box) box.innerHTML = "";
-    copAppend("ai", "👋 對話已清除。問我任何問題～（例如「哪台有問題？」）");
+    copAppend("ai", "對話已清除。可繼續查詢專案與設備狀態。");
   });
 }
 
@@ -413,14 +413,14 @@ function rackCopilotHtml() {
   return `
     <div class="rack-cop-panel">
       <div class="rack-cop-head">
-        <span class="cop-avatar ai">🤖</span>
-        <div class="cop-title">AI Copilot <span class="hint">${esc(proj) || "未選專案"}</span></div>
+        <span class="cop-avatar ai">AI</span>
+        <div class="cop-title">AI 助理 <span class="hint">${esc(proj) || "未選專案"}</span></div>
         <button class="btn small rack-cop-clear" id="rackcop-clear" title="清除對話紀錄">🗑</button>
       </div>
       <div class="rack-cop-body" id="rackcop-box">
         <div class="cop-msg ai">
-          <span class="cop-avatar ai">🤖</span>
-          <div class="cop-bubble ai">🖧 這裡的 Copilot 只會回答目前選中的機櫃專案：<b>${esc(proj) || "（尚未選擇）"}</b>。<br>可問「這櫃有幾台？哪些離線？溫度異常？」等。</div>
+          <span class="cop-avatar ai">AI</span>
+          <div class="cop-bubble ai">目前查詢範圍：<b>${esc(proj) || "尚未選擇專案"}</b>。<br>可查詢設備狀態、連線與遙測資訊。</div>
         </div>
       </div>
       <div class="rack-cop-input">
@@ -437,7 +437,7 @@ function rackCopAppend(role, text) {
   row.className = `cop-msg ${kind}`;
   const avatar = document.createElement("span");
   avatar.className = `cop-avatar ${kind}`;
-  avatar.textContent = kind === "user" ? "🧑" : "🤖";
+  avatar.textContent = kind === "user" ? "您" : "AI";
   const bubble = document.createElement("div");
   bubble.className = `cop-bubble ${kind}`;
   bubble.style.whiteSpace = "pre-wrap";
@@ -454,7 +454,7 @@ function rackCopTyping(on) {
   if (on) {
     if (t) return;
     box.insertAdjacentHTML("beforeend", `<div class="cop-msg ai" id="rackcop-typing">
-      <span class="cop-avatar ai">🤖</span><div class="cop-bubble ai typing">正在思考…</div></div>`);
+      <span class="cop-avatar ai">AI</span><div class="cop-bubble ai typing">正在分析…</div></div>`);
   } else if (t) {
     t.remove();
   }
@@ -815,7 +815,7 @@ function rackCduRefresh() {
   const external = $("cdu-mount").value === 'external';
   const size = rackCduState.size;
   $("cdu-placement").innerHTML = external
-    ? '<p class="cdu-location-note">\u653e\u5728\u6a5f\u6ac3\u6b63\u9762\u53f3\u5074\uff0c\u4e0d\u5360 U \u4f4d\u3002\u5916\u89c0\u70ba\u793a\u610f\uff0c\u4e0d\u9650\u5b9a\u8a2d\u5099\u578b\u865f\u3002</p>'
+    ? '<p class="cdu-location-note">放在機櫃正面右側，不占 U 位。</p>'
     : `<label for="cdu-size">\u5360\u7528\u9ad8\u5ea6</label><select class="input" id="cdu-size" ${rackCduState.name&&rackCduState.originalMount!=='external'?'disabled':''} onchange="rackCduRefresh()">${RACK_SIZES.map(u=>`<option value="${u}" ${u===size?'selected':''}>${u}U</option>`).join('')}</select><p class="cdu-location-note">\u56fa\u5b9a\u5728\u6a5f\u6ac3\u6700\u5e95\u90e8 U1${size>1?`\u2013U${size}`:''}\uff0c\u4e0d\u53d7\u9ede\u9078\u7684\u7a7a\u69fd\u4f4d\u7f6e\u5f71\u97ff\u3002</p>`;
   const conflicts = external ? [] : rackCduConflicts(size);
   const message = $("cdu-message");
@@ -1144,8 +1144,6 @@ function pageRack() {
       <button class="btn" onclick="rackNetworkingTopology()">🗺 網路拓樸</button>
       <button class="btn" onclick="rackPowerAllDialog()">⏻ 開機整櫃</button>
       <button class="btn btn-danger" onclick="rackPowerAllDialog(false)">⏻ 關機整櫃</button>
-      <button class="btn btn-warn" onclick="rackBulkReboot()">⟳ Reboot 整櫃</button>
-      <button class="btn" onclick="rackBulkAux()">⚡ AUX 整櫃</button>
       <button class="btn primary" onclick="rackBroadcastDialog('${esc(rackView.project)}')">📡 廣播終端</button>` : ""}
     </div>
     ${proj && (pendingByProj[proj]||[]).length && !members.length ? `
@@ -1407,7 +1405,7 @@ function rackTelemetryHtml() {
       </div>
       <div class="racktel-status" id="racktel-status"></div>
       <div id="racktel-ai-wrap" style="display:none">
-        <div class="racktel-ai-head">🤖 整櫃 AI 分析</div>
+        <div class="racktel-ai-head">整櫃 AI 分析</div>
         <div class="tel-ai" id="racktel-ai"></div>
       </div>
       <div class="tel-grid" id="racktel-grid"><!-- 依類型動態填入 --></div>
@@ -1592,7 +1590,7 @@ async function rackTelAnalyze(proj, minutes) {
     box.innerHTML = rackAiTelCache[key]; wrap.style.display = ""; return;
   }
   wrap.style.display = "";
-  box.innerHTML = "✨ 正在彙總整櫃監控摘要並分析中…";
+  box.innerHTML = "正在彙總整櫃監控摘要並分析中…";
   box.dataset.k = key;
   let d;
   try {
@@ -2457,16 +2455,16 @@ async function telAnalyze(name, minutes) {
   if (aiTelCache[key] && box.dataset.k === key) {
     box.innerHTML = aiTelCache[key]; return;
   }
-  box.innerHTML = "✨ 正在分析此範圍的監控趨勢…";
+  box.innerHTML = "正在分析此範圍的監控趨勢…";
   box.dataset.k = key;
   let d;
   try {
     d = await apiWithTimeout(`/api/machine/${encodeURIComponent(name)}/telemetry/analyze?minutes=${minutes}${node?`&node_id=${encodeURIComponent(node)}`:""}`, 12000);
   } catch (e) {
-    if(current()) box.innerHTML = `<span class="hint">🤖 趨勢分析稍後再試（AI 忙碌）</span>`; return;
+    if(current()) box.innerHTML = `<span class="hint">暫時無法完成趨勢分析，請稍後重試</span>`; return;
   }
   if (!current()) return;
-  if (d.error) { box.innerHTML = `<span class="hint">🤖 ${esc(d.error)}</span>`; return; }
+  if (d.error) { box.innerHTML = `<span class="hint">${esc(d.error)}</span>`; return; }
   const html = `${esc(d.analysis || d.summary || "")}`;
   aiTelCache[key] = html;
   if (box) box.innerHTML = html;
@@ -2699,7 +2697,7 @@ function machineSensorsHtml(d, base, name) {
     <ul class="alerts" style="margin-top:10px">
       ${(critRow + warnRow + nsRow) || `<li class="no-alert">✔ 無異常感測器（無 Critical / Warning / No Reading）</li>`}
     </ul>
-    <div class="tel-ai sensor-ai" id="sensor-ai">${sensorAiResult[name] ?? (sensorAiDone.has(name) ? "🤖 Sensor AI 已就緒（暫無分析）" : "🤖 正在分析感測器狀況…")}</div>
+    <div class="tel-ai sensor-ai" id="sensor-ai">${sensorAiResult[name] ?? (sensorAiDone.has(name) ? "感測器分析尚無結果" : "正在分析感測器資料…")}</div>
     ${d.refreshing ? `<span class="hint">（快取已過期，背景重新抓取中…）</span>` : ""}
     ${sdrBox}`;
 }
@@ -2709,7 +2707,7 @@ const sensorAiDone = new Set();
 const sensorAiResult = {};
 const sensorAiBusy = new Set();
 function sensorAiHtml(text, counts) {
-  let html = `🤖 ${esc(text || "")}`;
+  let html = `${esc(text || "")}`;
   if (counts) {
     let c = `<span class="hint">共 ${counts.total} 筆感測器 · OK ${counts.ok} · No Reading ${counts.ns}`;
     if (counts.critical) c += ` · 🔴 Crit ${counts.critical}`;
@@ -2724,11 +2722,11 @@ async function sensorAnalyze(name) {
   const show = (html) => { const el = $("sensor-ai"); if (el && _activeMachine === name && state.view === "machine") el.innerHTML = html; };
   if (sensorAiDone.has(name) && sensorAiResult[name] != null) { show(sensorAiResult[name]); return; }
   sensorAiBusy.add(name);
-  show("🤖 正在分析感測器狀況…");
+  show("正在分析感測器資料…");
   try {
     for (let attempt = 0; attempt < 30; attempt++) {
       if (_activeMachine !== name || state.view !== "machine") {
-        if (sensorAiResult[name] == null) sensorAiResult[name] = "🤖 Sensor AI 已就緒";
+        if (sensorAiResult[name] == null) sensorAiResult[name] = "感測器分析已就緒";
         return;
       }
       let d;
@@ -2738,7 +2736,7 @@ async function sensorAnalyze(name) {
         d = { error: e.name === "AbortError" ? "逾時" : "連線失敗" };
       }
       if (!d || d.error) {
-        show(`🤖 感測器資料抓取中，AI 待命…（已等待 ${attempt + 1} 輪）`);
+        show(`正在讀取感測器資料，分析將於資料就緒後開始…（已等待 ${attempt + 1} 輪）`);
         await new Promise(r => setTimeout(r, 3000));
         continue;
       }
@@ -3075,9 +3073,9 @@ function pageMachine() {
             <option value="43200">30 天</option>
           </select>
         </label>
-        <span class="tel-ai-hint">🤖 Telemetry AI</span>
+        <span class="tel-ai-hint">遙測 AI 分析</span>
       </div>
-      <div class="tel-ai" id="tel-ai">✨ 正在分析此範圍的監控趨勢…</div>
+      <div class="tel-ai" id="tel-ai">正在分析此範圍的監控趨勢…</div>
       <div class="tel-status" id="tel-status" role="status" aria-live="polite"></div>
       <div class="tel-grid" id="tel-grid">
         <div class="tel-block" data-open="1">
@@ -3267,7 +3265,7 @@ function assignTaskMetaHtml() {
       <span class="mono">${esc(ip)}</span> &nbsp;·&nbsp; <b>\u5e33\u865f\uff1a</b><span class="mono">${esc(user)}</span>
     </div>`;
   if (!_assignTask.meta.length) {
-    return head + `<div class="empty">\u6e2c\u8a66\u5eab\u5c1a\u672a\u8f09\u5165\uff08\u6c92\u6709 tests.json \u6216\u5f8c\u7aef\u932f\u8aa4\uff09</div>`;
+    return head + `<div class="empty">無法載入測試案例，請重試或聯絡管理者。</div>`;
   }
   const cards = _assignTask.meta.map(s => `
     <div class="assign-sheet-card" onclick="assignTaskOpenSheet('${s.sheet}')">
@@ -3682,7 +3680,7 @@ const AssignResultWin = (() => {
     if (!win) build();
     win._text = text;
     win.querySelector("#ar-title").textContent = title;
-    win.querySelector("#ar-hint").textContent = "\u5df2\u8907\u88fd\u5230\u526a\u8cbc\u7c3f\u3002\u53ef\u5728\u4e0b\u65b9\u6efe\u52d5\u67e5\u770b\u5b8c\u6574 TEST CASE\uff0c\u518d\u8cbc\u56de OpenHands \u804a\u5929\u3002";
+    win.querySelector("#ar-hint").textContent = "已複製到剪貼簿。請確認完整測試案例、風險與目標後，再貼至執行工具。本頁尚未執行測試。";
     win.querySelector("#ar-pre").innerHTML = arHlAssignText(text);
     win.style.display = "flex";
     win.style.width = "720px"; win.style.height = "72vh";
@@ -3714,7 +3712,7 @@ const AssignResultWin = (() => {
 // [AI AGENT 已停用]     <div class="agent-modal-body">
 // [AI AGENT 已停用]       <div class="agent-box" id="agent-box">
 // [AI AGENT 已停用]         <div class="cop-msg ai">
-// [AI AGENT 已停用]           <span class="cop-avatar ai">🤖</span>
+// [AI AGENT 已停用]           <span class="cop-avatar ai">AI</span>
 // [AI AGENT 已停用]           <div class="cop-bubble ai">👋 我是這台機器的 AI Agent。你可以問我〈狀態 / 診斷〉，或請我〈重開機 / 開關機 / AUX cycle〉。任何會改變狀態的操作，我會先提出提案，由你確認後才真的執行。</div>
 // [AI AGENT 已停用]         </div>
 // [AI AGENT 已停用]       </div>
@@ -3775,7 +3773,7 @@ const AssignResultWin = (() => {
 // [AI AGENT 已停用]   const box = $("agent-box");
 // [AI AGENT 已停用]   if (!box) return;
 // [AI AGENT 已停用]   box.insertAdjacentHTML("beforeend", `<div class="cop-msg ${role}">
-// [AI AGENT 已停用]     <span class="cop-avatar ${role}">${role === "user" ? "🧑" : "🤖"}</span>
+// [AI AGENT 已停用]     <span class="cop-avatar ${role}">${role === "user" ? "您" : "AI"}</span>
 // [AI AGENT 已停用]     <div class="cop-bubble ${role}">${html}</div>
 // [AI AGENT 已停用]   </div>`);
 // [AI AGENT 已停用]   box.scrollTop = box.scrollHeight;
@@ -3787,7 +3785,7 @@ const AssignResultWin = (() => {
 // [AI AGENT 已停用]   if (on) {
 // [AI AGENT 已停用]     if (t) return;
 // [AI AGENT 已停用]     box.insertAdjacentHTML("beforeend", `<div class="cop-msg ai" id="agent-typing">
-// [AI AGENT 已停用]       <span class="cop-avatar ai">🤖</span><div class="cop-bubble ai typing">正在思考…</div></div>`);
+// [AI AGENT 已停用]       <span class="cop-avatar ai">AI</span><div class="cop-bubble ai typing">正在分析…</div></div>`);
 // [AI AGENT 已停用]   } else if (t) { t.remove(); }
 // [AI AGENT 已停用]   box.scrollTop = box.scrollHeight;
 // [AI AGENT 已停用] }
@@ -3804,7 +3802,7 @@ const AssignResultWin = (() => {
 // [AI AGENT 已停用]   if (!box) return;
 // [AI AGENT 已停用]   box.insertAdjacentHTML("beforeend", `
 // [AI AGENT 已停用]     <div class="cop-msg ai">
-// [AI AGENT 已停用]       <span class="cop-avatar ai">🤖</span>
+// [AI AGENT 已停用]       <span class="cop-avatar ai">AI</span>
 // [AI AGENT 已停用]       <div class="cop-bubble ai" style="border:1px solid var(--amber);background:color-mix(in srgb,var(--amber) 10%, transparent)">
 // [AI AGENT 已停用]         <div style="font-weight:600;color:var(--amber);margin-bottom:6px">⚠️ 提案確認</div>
 // [AI AGENT 已停用]         <div>動作：<b>${esc(label)}</b></div>
@@ -4119,7 +4117,7 @@ function openTermDialog(name) {
     ? `<span class="hint">將直接使用元件已存的 OS 帳密連線</span>`
     : `
       <label style="display:block;font-size:12px;color:var(--text-faint);margin:8px 0 4px">OS Host</label>
-      <input class="input" id="td-os-host" style="width:100%;padding:8px" value="${esc(osPrefillHost)}" placeholder="ssh host / ip">
+      <input class="input" id="td-os-host" style="width:100%;padding:8px" value="${esc(osPrefillHost)}" placeholder="OS 主機名稱或 IP">
       <label style="display:block;font-size:12px;color:var(--text-faint);margin:8px 0 4px">OS 帳號</label>
       <input class="input" id="td-os-user" style="width:100%;padding:8px" placeholder="root">
       <label style="display:block;font-size:12px;color:var(--text-faint);margin:8px 0 4px">OS 密碼</label>
@@ -4128,7 +4126,7 @@ function openTermDialog(name) {
     ? `<span class="hint">將直接使用元件已存的 BMC 帳密連線</span>`
     : `
       <label style="display:block;font-size:12px;color:var(--text-faint);margin:8px 0 4px">BMC/IPMI Host</label>
-      <input class="input" id="td-bmc-host" style="width:100%;padding:8px" value="${esc(bmcPrefillHost)}" placeholder="bmc host / ip">
+      <input class="input" id="td-bmc-host" style="width:100%;padding:8px" value="${esc(bmcPrefillHost)}" placeholder="BMC 主機名稱或 IP">
       <label style="display:block;font-size:12px;color:var(--text-faint);margin:8px 0 4px">BMC 帳號</label>
       <input class="input" id="td-bmc-user" style="width:100%;padding:8px" placeholder="admin">
       <label style="display:block;font-size:12px;color:var(--text-faint);margin:8px 0 4px">BMC 密碼</label>
@@ -4137,7 +4135,7 @@ function openTermDialog(name) {
   showDialog(`◈ 終端機 — ${esc(name)}`, `
     <div class="rm-modal-body">
       <p style="font-size:12px;color:var(--text-faint);margin-bottom:8px">
-        此元件 ${hasCreds ? "已存有連線資訊（直接使用）" : "沒有已存的連線帳密，請填一下要連到哪台（OS 與 BMC 擇一即可）"}。
+        此元件 ${hasCreds ? "已存有連線資訊（直接使用）" : "尚未設定連線資訊，請填寫 OS 或 BMC 的目標位址與認證資料"}。
       </p>
       <div style="margin-bottom:10px">
         <div style="font-size:13px;font-weight:700;margin:10px 0 2px">🖥 OS <span class="hint">（作業系統 / shell）</span></div>
@@ -4254,7 +4252,7 @@ function changeOsIp(name) {
       <button class="btn small" id="osip-probe-btn" style="margin-top:8px" onclick="probeChangeOsBmc('${esc(name)}')">🔍 依新 OS 抓取 BMC IP</button>
       <label style="display:block;font-size:12px;color:var(--text-faint);margin:8px 0 4px">BMC IP</label>
       <input class="input" id="new-bmc-ip-input" style="width:100%;padding:8px;font-family:monospace" value="${esc(curBmc)}" placeholder="例如 INTERNAL_IP_11">
-      <label for="new-bmc-user-input">BMC SSH 帳號（新 endpoint）</label><input class="input" id="new-bmc-user-input" autocomplete="off">
+      <label for="new-bmc-user-input">BMC SSH 帳號（新連線位址）</label><input class="input" id="new-bmc-user-input" autocomplete="off">
       <label for="new-bmc-pass-input">BMC SSH 密碼</label><input class="input" id="new-bmc-pass-input" type="password" autocomplete="new-password">
       <div id="osip-msg" style="margin-top:10px;font-size:12px;white-space:pre-line"></div>
     </div>`,
