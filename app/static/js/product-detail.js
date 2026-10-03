@@ -396,6 +396,17 @@
       if (input.type === 'number') {input.min = '1';input.max = '65535';}
       label.append(input);form.append(label);
     }
+    // BMC hostname 查詢方式：部分 BMC 不支援 Redfish HostName，需改走 BMC SSH。
+    const queryModes = [['','自動（Redfish）'],['ssh_hostname','SSH（BMC 執行 hostname）']];
+    {
+      const label = document.createElement('label');label.textContent = 'BMC Hostname 查詢';
+      const select = document.createElement('select');select.name = 'bmc_hostname_query';select.className = 'pd-os-input';
+      for (const [value,text] of queryModes) {
+        const option = document.createElement('option');option.value = value;option.textContent = text;select.append(option);
+      }
+      select.value = String(node.capabilities?.bmc_hostname_query || '');
+      label.append(select);form.append(label);
+    }
     const status = document.createElement('p');status.setAttribute('role','status');
     const save = document.createElement('button');save.type='submit';save.className='btn';save.textContent='儲存連線';
     const cancel = document.createElement('button');cancel.type='button';cancel.className='btn';cancel.textContent='取消';
@@ -410,6 +421,10 @@
         if (key.includes('pass')) {if(value) body[key]=value;}
         else if (String(value)!==String(node[key]??'')) body[key]=value;
       }
+      const querySelect = form.elements.namedItem('bmc_hostname_query');
+      const nextQuery = querySelect.value;
+      const prevQuery = String(node.capabilities?.bmc_hostname_query || '');
+      if (nextQuery !== prevQuery) body.capabilities = {bmc_hostname_query: nextQuery};
       try {
         const response=await fetch(`/api/machines/${encodeURIComponent(name)}/os/${slot}`,{
           method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});

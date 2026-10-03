@@ -1126,6 +1126,8 @@ class UpdateOs(BaseModel):
     bmc_pass: str = ""
     bmc_ssh_port: int | None = Field(None, strict=True, ge=1, le=65535)
     ipmi_port: int | None = Field(None, strict=True, ge=1, le=65535)
+    # None = 不更動；{} = 清空；提供內容則與現有 capabilities 合併
+    capabilities: dict | None = None
     model_config = {"populate_by_name": True}
 
 
@@ -1257,6 +1259,22 @@ def machine_update_os(name: str, slot: int, body: UpdateOs):
         cur["credential_version"] = __import__("uuid").uuid4().hex
     if slot == m.get("active_os"):
         _sync_active_os(m)
+    if body.capabilities is not None:
+        previous_capabilities = cur.get("capabilities")
+        # 合併既有 capability，保留其他平台旗標（空白值代表移除該項）
+        merged = dict(cur.get("capabilities") or {})
+        for key, value in body.capabilities.items():
+            if key not in _ALLOWED_CAPABILITIES:
+                raise HTTPException(422, f"Unsupported capability: {key}")
+            if value in (None, ""):
+                merged.pop(key, None)
+            elif value in _ALLOWED_CAPABILITIES[key]:
+                merged[key] = value
+            else:
+                raise HTTPException(422, f"Invalid value for capability: {key}")
+        cur["capabilities"] = merged
+        if not merged and merged == (previous_capabilities or {}):
+            cur.pop("capabilities", None)
     if node_identity.binding(cur) != previous_binding:
         cur["binding_revision"] = int(cur.get("binding_revision",1)) + 1
     _save_data()
@@ -1818,6 +1836,13 @@ def _commit_connection(name, snapshot, updates, node_id=None, revision=None):
             raise
         _invalidate_machine_cache(name)
         return _bmc_safe(m)
+
+_ALLOWED_CAPABILITIES = {
+    # BMC hostname 查詢方式：ssh_hostname = 走 BMC SSH 執行 hostname，
+    # 其他/未設定 = 走 Redfish /Managers/<x>/HostName。
+    "bmc_hostname_query": {"ssh_hostname"},
+}
+
 
 def _is_masked(v):
     """前端回傳的密碼若含遮罩符號（**）就視為「未提供」，不得寫回成為真實密碼。
