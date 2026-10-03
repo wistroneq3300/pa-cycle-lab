@@ -16,14 +16,14 @@ def queries(node_id):
     gpu=lambda metric:f'max by (UUID,gpu,GPU_I_ID) ({metric}{end})'
     return [
       ('cpu','CPU Utilization','%',False,[('CPU',f'100 * (1 - avg by (node_id) (rate(node_cpu_seconds_total{s},mode="idle"}}[5m])))')]),
-      ('memory','Memory Utilization','%',False,[('Memory',f'100 * (1 - max by(node_id)(node_memory_MemAvailable_bytes{end}) / max by(node_id)(node_memory_MemTotal_bytes{end}))')]),
-      ('gpu','GPU Utilization','%',True,[('',gpu('DCGM_FI_DEV_GPU_UTIL'))]),
-      ('hbm','GPU HBM / VRAM','%',True,[('',f'100 * {gpu("DCGM_FI_DEV_FB_USED")} / ({gpu("DCGM_FI_DEV_FB_USED")} + {gpu("DCGM_FI_DEV_FB_FREE")})')]),
-      ('temperature','GPU Temperature','°C',True,[('',gpu('DCGM_FI_DEV_GPU_TEMP'))]),
       ('cputemp','CPU Temperature','°C',False,[('',f'max(node_hwmon_temp_celsius{s},chip!~"nvme.*"}})')]),
+      ('memory','Memory Utilization','%',False,[('Memory',f'100 * (1 - max by(node_id)(node_memory_MemAvailable_bytes{end}) / max by(node_id)(node_memory_MemTotal_bytes{end}))')]),
+      ('ecc','Host Memory (DIMM) ECC Errors','errors',False,[('Correctable',f'sum by (controller) (node_edac_correctable_errors_total{s}}})'),('Uncorrectable',f'sum by (controller) (node_edac_uncorrectable_errors_total{s}}})')]),
+      ('gpu','GPU Utilization','%',True,[('',gpu('DCGM_FI_DEV_GPU_UTIL'))]),
+      ('temperature','GPU Temperature','°C',True,[('',gpu('DCGM_FI_DEV_GPU_TEMP'))]),
       ('power','GPU Power','W',True,[('',gpu('DCGM_FI_DEV_POWER_USAGE'))]),
       ('nvlink','GPU NVLink Bandwidth','MB/s',True,[('',gpu('DCGM_FI_DEV_NVLINK_BANDWIDTH_TOTAL'))]),
-      ('ecc','Memory ECC Errors','errors',False,[('Correctable',f'sum by (controller) (node_edac_correctable_errors_total{s}}})'),('Uncorrectable',f'sum by (controller) (node_edac_uncorrectable_errors_total{s}}})')]),
+      ('hbm','GPU HBM / VRAM','%',True,[('',f'100 * {gpu("DCGM_FI_DEV_FB_USED")} / ({gpu("DCGM_FI_DEV_FB_USED")} + {gpu("DCGM_FI_DEV_FB_FREE")})')]),
       ('network','Network RX / TX','B/s',False,[(d,f'sum by(device)(rate(node_network_{metric}_bytes_total{s},device!="lo"}}[5m]))') for d,metric in [('RX','receive'),('TX','transmit')]]),
       ('disk','Disk Read / Write','B/s',False,[(d,f'sum by(device)(rate(node_disk_{metric}_bytes_total{s},device!~"loop.*|ram.*"}}[5m]))') for d,metric in [('Read','read'),('Write','written')]])]
 
