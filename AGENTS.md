@@ -262,3 +262,54 @@ create — do not create a job just to "test" while the user is not ready.
 
 NOT COMMITTED yet (this round): targets.py, store.py, runner.py, web.py,
 observation_service.py, profiles.py, app/static/js/cycle-workspace.js.
+
+## Telemetry reorg + diagnostic collapse (2026-10-04) — READ when touching Telemetry/inspection UI
+
+Branch `astra-console-import`, ALL PUSHED to `origin/astra-console-import` (HEAD `10fed65`).
+Full context: `docs/HANDOFF-20261004c-telemetry-console-and-diagnostic.md`.
+
+What landed (9 items, all verified on real EQ3300):
+1. **Node Exporter / DCGM split into 2 independent, retryable cards** — each has its own
+   auto-install button + manual steps; a host (Node Exporter) failure does NOT block gpu (DCGM).
+   `integration/telemetry_gpu.py` `install_job(scope)` where scope in {host,gpu,all}.
+2. **detect_command `\n` bug fixed** — each `printf` was missing `\n`, so
+   `VERSION=LISTENER=DOCKER_BIN=...` collapsed onto one line → parsed as empty → misreported
+   "nvidia runtime missing". Added `\n` + fields DOCKER_BIN/NVIDIA_CTK/TOOLKIT_PKG/DAEMON_JSON.
+3. **`_runtime_diagnosis()`** → multi-line `GPU_DIAGNOSE` console step (EQ3300 root cause was
+   daemon.json configured nvidia runtime but daemon not reloaded).
+4. **DCGM manual steps 3→6** (added NVIDIA Container Toolkit install + `nvidia-ctk runtime
+   configure` + restart-docker warning).
+5. **Frontend console blank bug fixed** (`telemetry-provision.js`): node switch called
+   `closeConsole()` and never reopened; `eventsBusy` stayed true after a superseded generation;
+   READY jobs polled 15s. Now: reopen on switch, clear `eventsBusy` unconditionally, self-heal
+   cursor when rows empty, dedup by sequence, 1.5s fast-poll while console open.
+6. **AI analysis moved into the native Grafana dashboard; Legacy Telemetry block removed.**
+   The old `進階資料 · Legacy Telemetry` (which held the 遙測 AI analysis `#tel-ai`) is gone.
+   AI analysis now renders in `telemetry-native.js` next to the charts, wired to the same
+   `/api/machine/{name}/telemetry/analyze`; time-range selector restored to the legacy 9 options
+   (10m..30d). Charts RANGES expanded accordingly (`integration/telemetry_charts.py`).
+7. **3 new chart panels**: CPU Temperature (`cputemp`, max of non-NVMe `node_hwmon_temp_celsius`),
+   GPU NVLink Bandwidth (`nvlink`, `DCGM_FI_DEV_NVLINK_BANDWIDTH_TOTAL`), Host Memory (DIMM) ECC
+   (`ecc`, `node_edac_correctable/uncorrectable_errors_total` by controller). Panels grouped by
+   subsystem. Native test panel count 8→11.
+8. **System diagnostic section now collapsible** (`product-detail.js`): `pd-diagnostic-collapse`
+   caret, per-machine `diagnosticCollapsed` Map so it survives re-render, body hides when collapsed.
+9. **Inspection coverage explained** (analysis only, no code): see handoff §7.
+
+STALE rule: `integration/inspection_service.py:166` — a source is STALE when
+`age_seconds > freshness_seconds` (per-source: 300s most, 660s sensor, 1260s tools/pcie,
+3660s firmware; global default `stale_seconds`=300). EQ3300 shows all STALE because its
+inspection schedule is `enabled:false`.
+
+STILL PENDING (user asked, NOT implemented):
+- Q1: Hardware checker = `engine/vera_cycle/<project_slug>_config.sh`. `L11 Test` needs
+  `l11_test_config.sh` (ABSENT → Hardware NOT_READY). Templates: `neutrino_config.sh`,
+  `naboo_config.sh`. No fallback (`CheckerMissing`); script needs the profile contract marker.
+- Q2: BMC Hostname can go over SSH — `engine/vera_cycle/validation_identity.py:49` already
+  supports it via `binding.capabilities.bmc_hostname_query=='ssh_hostname'`, but NOTHING writes
+  that capability yet. EQ3300 takes the Redfish path, whose BMC lacks `HostName` → NOT_SUPPORTED.
+  To fix: set `capabilities={"bmc_hostname_query":"ssh_hostname"}` on the OS-1 node binding
+  (`NODE_BINDING` writable dict; `integration/inventory.py validate_binding`). No UI entry yet.
+
+Repo note: `pa-cycle-lab` has NO `main` branch (default is `codex/neutrino-v1`); all work went to
+`astra-console-import`. `vera-cpu-rack-cycle` is a SEPARATE repo (has main) with unrelated history.
