@@ -16,7 +16,7 @@ const out=path.resolve('artifacts/telemetry-provision');fs.mkdirSync(out,{recurs
  async function shot(name){await panel.scrollIntoViewIfNeeded();await page.screenshot({path:path.join(out,name+'.png'),fullPage:false});}
  async function fixture(index,mode){const r=await page.request.post(base+'/__telemetry/fixture',{data:{index,mode}});assert(r.ok(),await r.text());return (await r.json()).node_id;}
  try{
-  await open();await waitState('NOT_CONFIGURED');await shot('before-enable-1920-light');
+  await open();await waitState('NOT_CONFIGURED');assert.equal(await panel.locator('[data-enable]').innerText(),'啟用 Telemetry');await shot('before-enable-1920-light');
   const n1=await panel.locator('[data-node]').inputValue();await panel.locator('[data-enable]').click();
   await panel.locator('.tp-console:not([hidden])').waitFor();await page.waitForTimeout(600);await shot('provisioning-1920-light');
   // Leaving UI cannot cancel install. Reopen via production route and recover history.
@@ -29,6 +29,11 @@ const out=path.resolve('artifacts/telemetry-provision');fs.mkdirSync(out,{recurs
   await panel.locator('[data-copy]').click();assert((await page.evaluate(()=>navigator.clipboard.readText())).includes('identity'));
   await panel.locator('[data-search]').fill('');await panel.locator('[data-follow]').click();await panel.locator('[data-pause]').click();assert.equal(await panel.locator('[data-pause]').getAttribute('aria-pressed'),'true');await panel.locator('[data-pause]').click();
   assert((await panel.locator('iframe').getAttribute('src')).includes('var-node_id='+n1));
+  assert((await panel.locator('[data-grafana]').innerText()).includes('開啟監控圖表'));
+  const [chart]=await Promise.all([page.waitForEvent('popup'),panel.locator('[data-grafana]').click()]);await chart.waitForLoadState();await chart.close();assert.equal(requests.length,1,'Opening Grafana must not provision');
+  assert.equal(await panel.locator('[data-session]').innerText(),'READY');
+  assert(await panel.locator('.tp-phase').getByText('Identity',{exact:true}).count()>0);
+  assert.equal(await panel.locator('.tp-log-row time').first().innerText().then(t=>/^\d{2}:\d{2}:\d{2}$/.test(t)),true);
   results.push('enable / browser navigation / resume / Taiwan time / copy / pause / scoped iframe');
   for(const width of [1920,1366])for(const theme of ['light','dark']){
    await page.setViewportSize({width,height:width===1920?1080:768});await page.evaluate(t=>applyTheme(t),theme);await page.waitForTimeout(200);

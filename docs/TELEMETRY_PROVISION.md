@@ -119,6 +119,10 @@ Network IO runs outside SQLite write transactions. Step intent is committed
 before each mutation. Evidence failure prevents that step from being dispatched.
 
 Console events are English, rendered as text, and masked before persistence.
+The Console separates sequence, Taipei time, status, stage and event text.
+Its running indicator animates only while provisioning and respects reduced
+motion. **啟用 Telemetry** initiates provisioning; **開啟監控圖表** opens the
+selected Node's Grafana dashboard and never initiates installation.
 Raw remote failure evidence retains its original content/language after masking.
 Time is stored as epoch seconds and displayed/downloaded in UTC+8. Event reads
 use `after_seq`, at most 500 per response. Browser rendering is capped at 2,000

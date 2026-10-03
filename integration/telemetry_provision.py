@@ -120,7 +120,7 @@ class ProvisionService:
             if target['revision']!=job['binding'] or target['project']!=job['project']: raise ProvisionFailure('IDENTITY_REQUIRES_CONFIRMATION: Node binding changed while queued.')
             wire=self.transport(target)
             node=Target(tray=target.get('tray',''),node=target.get('node',target['node_id']),os_ip=target['os_ip'],bmc_ip=target.get('bmc_ip',''))
-            self.store.step(job_id,'IDENTITY','Checking SSH connectivity and canonical node identity.')
+            self.store.step(job_id,'IDENTITY','Verifying SSH access and node identity.')
             observation=collect_identity(Collector(wire,node),target,include_bmc=False)
             if observation['os_status']!='SUCCESS':
                 raise ProvisionFailure('OS identity could not be verified over SSH. Stored identity and other functions are unchanged.','UNREACHABLE')
@@ -131,7 +131,7 @@ class ProvisionService:
             allowed=outcome.get('binding_revision',target['revision'])
             if current['revision']!=allowed: raise ProvisionFailure('IDENTITY_REQUIRES_CONFIRMATION: Node binding changed after identity synchronization.')
             target=current
-            self.store.step(job_id,'IDENTITY','SSH authentication succeeded; canonical node identity verified.','PASS')
+            self.store.step(job_id,'IDENTITY','Node identity verified. SSH access confirmed.','PASS')
             if outcome['status']=='AUTO_SYNC': self.store.step(job_id,'IDENTITY','Hostname updated through Shared Identity Auto Sync.','INFO')
             def command(step,text,cmd,timeout=30):
                 self.binding(target)
@@ -143,13 +143,13 @@ class ProvisionService:
                     detail=wire.redact(result.output) if hasattr(wire,'redact') else result.output
                     raise ProvisionFailure(f'{text} failed (exit {result.code}): {detail}',state)
                 return result.output
-            facts=parse_detection(command('DETECT','Checking Node Exporter, service status, and listening port.',detection_command(self.config.exporter_port)))
+            facts=parse_detection(command('DETECT','Inspecting Node Exporter, service, and listener.',detection_command(self.config.exporter_port)))
             exporter,detail=self.monitor.exporter(target)
             self.store.step(job_id,'DETECT','Version: '+facts.get('VERSION','not available'),'INFO')
             if exporter=='OTHER' or (exporter!='READY' and facts.get('LISTENER')):
                 raise ProvisionFailure('Port is in use and cannot be verified as a healthy Node Exporter. No process was stopped. '+facts.get('LISTENER',detail))
             if exporter=='READY':
-                self.store.step(job_id,'DETECT','Existing Node Exporter is healthy. Keeping the current installation.','PASS')
+                self.store.step(job_id,'DETECT','Node Exporter verified. Existing installation retained.','PASS')
             else:
                 unit=facts.get('UNIT')
                 if unit:
@@ -161,7 +161,7 @@ class ProvisionService:
                     if facts.get('PLATFORM') not in ('ubuntu','debian') or facts.get('SYSTEMD')!='yes':
                         raise ProvisionFailure('Automatic installation supports Ubuntu/Debian with systemd. On other platforms, prepare Node Exporter before enabling Telemetry.')
                     if self.config.exporter_port!=9100: raise ProvisionFailure('New installations use port 9100. Prepare the exporter service first when using a custom port.')
-                    command('INSTALL','Installing the distribution-provided Node Exporter package.',
+                    command('INSTALL','Installing Node Exporter from the system package repository.',
                             'env DEBIAN_FRONTEND=noninteractive apt-get update && env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends prometheus-node-exporter',300)
                     unit='prometheus-node-exporter.service'
                     command('START','Enabling and starting the Node Exporter service.','systemctl enable --now '+unit,60)
@@ -172,9 +172,9 @@ class ProvisionService:
                     if self.stop_event.wait(1): raise ProvisionFailure('Worker stopping. Recheck the exporter status before continuing.','INTERRUPTED')
                 if exporter!='READY': raise ProvisionFailure('Node Exporter metrics remain unavailable after the service start.','DEGRADED')
             self.binding(target)
-            self.store.step(job_id,'REGISTER','Registering the canonical node as a Prometheus target.')
+            self.store.step(job_id,'REGISTER','Publishing the node target to Prometheus.')
             register_target(self.config,target)
-            self.store.step(job_id,'VERIFY','Waiting for Prometheus target UP and required metrics.')
+            self.store.step(job_id,'VERIFY','Awaiting target UP and fresh required metrics.')
             deadline=time.monotonic()+self.config.verify_seconds
             while True:
                 self.binding(target);state,detail=self.monitor.health(target)

@@ -1,5 +1,16 @@
 # PROJECT_STATUS — PA Cycle Lab native Next integration
 
+## 2026-10-03 Telemetry Console presentation refinement
+
+- Clarified Grafana navigation as **開啟監控圖表**; installation remains
+  **啟用 Telemetry**. Verified opening the chart sends no provision request.
+- Refined the scoped Wistron Console: English messages, aligned sequence/time/
+  status/stage/event columns, target context and restrained running indicator.
+  UTC+8, read-only behavior, pause/copy, reconnect and bounded history remain.
+- This follow-up: 30 provision tests PASS, desktop browser flow and console
+  isolation PASS. Updated light/dark screenshots and local video/trace.
+  No install commands, API contracts, Cycle behavior or production services changed.
+
 ## 2026-10-03 Optional per-node Telemetry provisioning
 
 Base `f361560a73128e0ad5075e0835e4773ff12db0e7`; same isolated

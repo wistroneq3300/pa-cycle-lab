@@ -1,5 +1,23 @@
 # Telemetry provision acceptance — 2026-10-03
 
+## Console refinement follow-up
+
+After `b17a1c1`, refined the scoped Wistron Console presentation and English
+messages. Added sequence/time/status/stage columns, target context and a
+reduced-motion-aware running indicator. Grafana link is now **開啟監控圖表**;
+**啟用 Telemetry** remains the only installation entry. No command, API payload,
+job state transition or Cycle behavior changed.
+
+This follow-up reran the 30 provision tests (30 PASS), the production browser
+flow at both desktop sizes/themes (PASS), and paused copy/remount/node isolation
+(PASS). The browser now actually opens the Grafana link and verifies no extra
+provision POST occurs. Screenshots and the local video/trace were refreshed.
+The first pause test attempt exposed a test timing race: its reference copy was
+taken before Pause while backlog was still arriving. The reference is now taken
+after Pause; new arrivals and parent-remount equality assertions remain intact.
+The broader suite counts below belong to the original integration verification,
+not a newly repeated full suite for this presentation-only follow-up.
+
 Base: `f361560a73128e0ad5075e0835e4773ff12db0e7`.
 Branch: `codex/system-inspection-ux`. The delivery commit contains this report;
 use `git log -1` for its SHA. All verification below used isolated Windows

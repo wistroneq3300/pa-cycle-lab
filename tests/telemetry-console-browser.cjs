@@ -9,8 +9,9 @@ const base=process.env.PA_CYCLE_BASE_URL||'http://127.0.0.1:19486';
   await page.goto(base);await page.waitForFunction(()=>typeof openMachine==='function');await page.evaluate(()=>openMachine('chassis-01'));await page.locator('#pd-tab-telemetry').click();
   const panel=page.locator('.tp-workspace');await panel.locator('[data-console]').click();
   await page.waitForFunction(()=>document.querySelectorAll('.tp-log-row').length===2000);
-  await panel.locator('[data-copy]').click();const before=await page.evaluate(()=>navigator.clipboard.readText());
   await panel.locator('[data-pause]').click();
+  // Freeze first: backlog may still arrive between a pre-pause copy and clicking pause.
+  await panel.locator('[data-copy]').click();const before=await page.evaluate(()=>navigator.clipboard.readText());
   const result=await(await page.request.get(base+'/__telemetry/results')).json();const job=result.nodes[0].job;
   await page.request.post(base+'/__telemetry/log-batch',{data:{job_id:job.job_id,count:3}});
   await page.waitForTimeout(16500);await panel.locator('[data-copy]').click();assert.equal(await page.evaluate(()=>navigator.clipboard.readText()),before);
