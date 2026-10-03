@@ -127,7 +127,11 @@ class Identity(unittest.TestCase):
                 for future,_ in list(svc._active.values()):future.result(15)
                 payload=client.get(base).json()
                 self.assertIsNone(payload.get('error'),payload)
-                self.assertEqual(len(payload['identity_history']),8)
+                # Inspection is scoped to the machine's selected node (active_os),
+                # so only the active slot is collected and reports identity changes.
+                self.assertEqual(len(payload['nodes']),1)
+                self.assertEqual(payload['nodes'][0]['slot'],1)
+                self.assertEqual(len(payload['identity_history']),2)
                 self.assertTrue(all(n['os_hostname']=='renamed.example' for n in payload['nodes']))
                 self.assertEqual(payload['summary'],{'fail':0,'warning':0})
                 self.assertEqual(jobs.jobs('P'),[])
@@ -157,6 +161,23 @@ class Identity(unittest.TestCase):
         self.assertEqual(collect_identity(collector,t)['bmc_status'],'NOT_SUPPORTED')
         transport.redfish_get=lambda *a,**k:Command(22,'HTTP 401 Unauthorized')
         self.assertEqual(collect_identity(collector,t)['bmc_status'],'AUTH_FAILED')
+
+    def test_inspection_scopes_to_active_os(self):
+        from fastapi import FastAPI
+        from integration.inspection_routes import install
+        from integration.store import Store
+        root=Path(self.tmp.name);jobs=Store(root/'jobs.sqlite3')
+        self.pa.telemetry_core=SimpleNamespace(DB_FILE=root/'telemetry.sqlite3')
+        app=FastAPI();get_service=install(app,self.pa,lambda:jobs);svc=get_service()
+        base='/api/machine/box/inspection'
+        # The box owns 4 OS slots; the selected node decides the inspection scope.
+        for slot in (1,2,3,4):
+            self.pa.machines['box']['active_os']=slot
+            nodes=svc.resolve('box')['nodes']
+            self.assertEqual([n['slot'] for n in nodes],[slot])
+        # Without a selected node the full slot list is retained.
+        self.pa.machines['box']['active_os']=None
+        self.assertEqual(len(svc.resolve('box')['nodes']),4)
 
 
 if __name__=='__main__': unittest.main()
