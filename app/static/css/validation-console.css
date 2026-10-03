@@ -61,6 +61,7 @@
 .lc-fleet .btn{font-size:12px;padding:5px 9px;min-height:32px}
 .lc-flow{margin:14px 0 6px}.lc-flow>span{font:12px var(--pav-mono);margin-right:auto}
 .lc-fleet-note{display:block;font-size:11px;color:var(--pav-muted)}
+.lc-single-target{font:13px var(--pav-mono);color:var(--pav-muted);margin:0 0 8px}
 .lc-attention,.lc-matrix{margin-top:14px;border-top:1px solid var(--pav-line)}
 .lc-attention>summary,.lc-matrix summary{padding:10px 0;cursor:pointer;font-size:13px}
 .lc-attention>div{display:flex;gap:8px;flex-wrap:wrap;max-height:160px;overflow:auto}
