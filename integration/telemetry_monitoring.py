@@ -27,6 +27,8 @@ class MonitoringConfig:
     poll_seconds: float = 5
     freshness_seconds: float = 120
     preferred_exporter_version: str = ''
+    dcgm_port: int = 9400
+    dcgm_image: str = ''
 
     @classmethod
     def environment(cls):
@@ -36,7 +38,9 @@ class MonitoringConfig:
                   dashboard_uid=os.getenv('PA_GRAFANA_DASHBOARD_UID','pa-node-telemetry'),
                   exporter_port=int(os.getenv('PA_NODE_EXPORTER_PORT','9100')),
                   verify_seconds=float(os.getenv('PA_TELEMETRY_VERIFY_SECONDS','90')),
-                  preferred_exporter_version=os.getenv('PA_NODE_EXPORTER_PREFERRED_VERSION',''))
+                  preferred_exporter_version=os.getenv('PA_NODE_EXPORTER_PREFERRED_VERSION',''),
+                  dcgm_port=int(os.getenv('PA_DCGM_EXPORTER_PORT','9400')),
+                  dcgm_image=os.getenv('PA_DCGM_EXPORTER_IMAGE',''))
         for url in (cfg.prometheus_url,cfg.grafana_url):
             if url:
                 p=urlsplit(url)
@@ -44,6 +48,9 @@ class MonitoringConfig:
                     raise ValueError('Monitoring URL must be an HTTP(S) base URL without credentials/query')
         if not re.fullmatch(r'[A-Za-z0-9_-]{1,64}',cfg.dashboard_uid): raise ValueError('Invalid dashboard UID')
         if not 1<=cfg.exporter_port<=65535 or not 1<=cfg.verify_seconds<=600: raise ValueError('Invalid monitoring limits')
+        if not 1<=cfg.dcgm_port<=65535 or cfg.dcgm_port==cfg.exporter_port: raise ValueError('Invalid GPU exporter port')
+        if cfg.dcgm_image and (not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._/:@-]{1,250}',cfg.dcgm_image) or ':' not in cfg.dcgm_image.rsplit('/',1)[-1] or cfg.dcgm_image.endswith(':latest')):
+            raise ValueError('DCGM image requires a pinned tag or digest')
         return cfg
 
     def ready(self):
@@ -64,21 +71,24 @@ def address(host, port):
         return f'{host}:{port}'
 
 
-def register_target(config, target):
+def register_target(config, target, role='host'):
     """One exclusive PA service writer; preserve every non-PA file_sd group."""
     path=Path(config.file_sd)
     with _file_lock:
         rows=json.loads(path.read_text(encoding='utf-8')) if path.exists() else []
         if not isinstance(rows,list) or any(not isinstance(r,dict) or not isinstance(r.get('targets'),list) for r in rows):
             raise ValueError('Existing file_sd is invalid; file unchanged')
-        endpoint=address(target['os_ip'],config.exporter_port)
+        if role not in ('host','gpu'): raise ValueError('Invalid exporter role')
+        endpoint=address(target['os_ip'],config.exporter_port if role=='host' else config.dcgm_port)
         # Adopt an existing POC endpoint in the dedicated PA file without a
         # duplicate scrape. Preserve its labels and other members of its group.
         inherited={};kept=[];adopted=0
         for row in rows:
             labels=row.get('labels',{})
-            ours=labels.get('pa_managed')=='true' and labels.get('node_id')==target['node_id']
+            ours=labels.get('pa_managed')=='true' and labels.get('node_id')==target['node_id'] and labels.get('pa_exporter','host')==role
             if ours: inherited.update(labels);continue
+            if labels.get('pa_managed')=='true' and labels.get('node_id')==target['node_id'] and labels.get('pa_exporter','host')!=role:
+                kept.append(row);continue
             if endpoint in row['targets']:
                 if labels.get('node_id') not in (None,target['node_id']) or adopted:
                     raise ValueError('Endpoint belongs to another node or duplicate target groups')
@@ -93,6 +103,7 @@ def register_target(config, target):
         # in the PA DB; scrape URL validates the current endpoint independently.
         for key in ('pa_binding','hostname','ip','os_ip','instance'):
             inherited.pop(key,None)
+        if role=='gpu': inherited['pa_exporter']='gpu'
         rows.append({'targets':[endpoint],'labels':{**inherited,'pa_managed':'true','node_id':target['node_id'],
                      'instance':target['node_id'],'chassis_id':target['chassis_id'],
                      'project_id':str(target.get('project_id') or ''),'slot':str(target['slot_key'])}})
@@ -103,6 +114,22 @@ def register_target(config, target):
                 json.dump(rows,out,ensure_ascii=False,indent=2);out.write('\n');out.flush();os.fsync(out.fileno())
             os.chmod(name,0o644)
             os.replace(name,path)
+        finally:
+            if os.path.exists(name): os.unlink(name)
+
+
+def unregister_target(config,node_id,role):
+    if role not in ('host','gpu'): raise ValueError('Invalid exporter role')
+    path=Path(config.file_sd)
+    with _file_lock:
+        if not path.exists(): return
+        rows=json.loads(path.read_text(encoding='utf-8'))
+        kept=[r for r in rows if not (r.get('labels',{}).get('pa_managed')=='true' and r['labels'].get('node_id')==node_id and r['labels'].get('pa_exporter','host')==role)]
+        fd,name=tempfile.mkstemp(prefix='.pa-targets-',suffix='.json',dir=path.parent)
+        try:
+            with os.fdopen(fd,'w',encoding='utf-8') as out:
+                json.dump(kept,out,ensure_ascii=False,indent=2);out.flush();os.fsync(out.fileno())
+            os.chmod(name,0o644);os.replace(name,path)
         finally:
             if os.path.exists(name): os.unlink(name)
 
@@ -136,6 +163,26 @@ class MonitoringClient:
         body=json.loads(self.get(self.config.prometheus_url+'/api/v1/'+path,params))
         if body.get('status')!='success': raise ValueError('Prometheus query failed')
         return body['data']
+
+    def gpu_exporter(self,target):
+        try:
+            text=self.get('http://'+address(target['os_ip'],self.config.dcgm_port)+'/metrics')
+            if re.search(r'^DCGM_FI_DEV_(?:GPU_UTIL|GPU_TEMP|FB_USED)\{',text,re.M): return 'READY','DCGM metrics responding'
+            return 'OTHER','Port responds without DCGM metrics'
+        except Exception as exc: return 'UNAVAILABLE','GPU metrics unavailable: '+type(exc).__name__
+
+    def gpu_health(self,target):
+        try:
+            endpoint=address(target['os_ip'],self.config.dcgm_port)
+            rows=self.api('targets',{'state':'active'}).get('activeTargets',[])
+            matches=[r for r in rows if r.get('labels',{}).get('node_id')==target['node_id'] and r.get('labels',{}).get('instance')==target['node_id'] and urlsplit(r.get('scrapeUrl','')).netloc==endpoint]
+            if len(matches)!=1 or matches[0].get('health')!='up': return 'DEGRADED','GPU target is not UP'
+            selector='{node_id='+json.dumps(target['node_id'])+',instance='+json.dumps(target['node_id'])+'}'
+            for metric in ('DCGM_FI_DEV_GPU_UTIL','DCGM_FI_DEV_FB_USED','DCGM_FI_DEV_FB_FREE','DCGM_FI_DEV_GPU_TEMP','DCGM_FI_DEV_POWER_USAGE'):
+                rows=self.api('query',{'query':'timestamp('+metric+selector+')'}).get('result',[])
+                if not rows or any(not 0<=self.clock()-float(r['value'][1])<=self.config.freshness_seconds for r in rows): return 'DEGRADED','GPU metrics are missing or stale: '+metric
+            return 'READY','GPU target UP and required metrics available'
+        except Exception as exc: return 'DEGRADED','GPU verification unavailable: '+type(exc).__name__
 
     def health(self, target):
         if not self.config.ready(): return 'NOT_CONFIGURED','Central monitoring endpoint and target file are not configured.'

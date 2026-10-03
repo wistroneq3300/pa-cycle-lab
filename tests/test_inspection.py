@@ -86,20 +86,22 @@ class Rules(unittest.TestCase):
         with self.store.tx(False) as db:
             text=' '.join(r[0] for table in ('inspection_items','inspection_changes','inspection_advice') for r in db.execute('SELECT data FROM '+table))
         self.assertNotIn('sentinel-password',text); self.assertNotIn('token=abc',text)
-    def test_ai_failure_does_not_change_issue_and_warning_not_auto_queued(self):
+    def test_ai_failure_does_not_change_issue_and_warning_is_auto_queued(self):
         self.store.configure('s',{'ai_enabled':True},'test'); self.evaluate(self.obs())
-        with self.store.tx(False) as db: self.assertEqual(db.execute('SELECT count(*) FROM inspection_advice').fetchone()[0],0)
+        with self.store.tx(False) as db: self.assertEqual(db.execute("SELECT count(*) FROM inspection_advice WHERE state='QUEUED'").fetchone()[0],1)
         self.now+=1; self.evaluate(self.obs(kind='explicit_failure',verified_rule=True,event_id='e'))
         def unavailable(data): raise TimeoutError()
         svc=InspectionService(self.path,lambda:[],lambda *a:([],[],[]),ai=unavailable)
         try: svc.ai_once()
         finally: svc.close()
-        issue=self.store.issues('s')[0]; self.assertEqual(issue['severity'],'FAIL'); self.assertEqual(issue['analysis']['state'],'UNAVAILABLE')
+        issue=self.store.issues('s')[0]; self.assertEqual(issue['severity'],'FAIL'); self.assertEqual(issue['analysis']['state'],'ERROR'); self.assertEqual(issue['analysis']['error_category'],'TIMEOUT')
     def test_slow_ai_does_not_hold_writer_and_new_evidence_is_coalesced(self):
         self.store.configure('s',{'ai_enabled':True},'test')
         self.evaluate(self.obs(kind='explicit_failure',verified_rule=True,event_id='first',fingerprint='A',evidence='first'))
         entered=threading.Event();release=threading.Event()
-        def slow(data): entered.set();release.wait(3);return 'Possible cause only'
+        def slow(data):
+            entered.set();release.wait(3)
+            return json.dumps(dict(possible_causes=['Possible cause only'],recommended_checks=['Review evidence'],conclusion='Unconfirmed',confidence_note='Advisory',based_on=['first']))
         svc=InspectionService(self.path,lambda:[],lambda *a:([],[],[]),ai=slow)
         worker=threading.Thread(target=svc.ai_once);worker.start()
         try:
@@ -109,8 +111,10 @@ class Rules(unittest.TestCase):
                 self.now+=1
                 self.evaluate(self.obs(kind='explicit_failure',verified_rule=True,event_id=str(i),fingerprint=str(i),evidence='new-'+str(i)))
             with self.store.tx(False) as db:
-                self.assertEqual(db.execute("SELECT count(*) FROM inspection_advice WHERE state='QUEUED'").fetchone()[0],1)
-                self.assertIn('new-9',db.execute("SELECT data FROM inspection_advice WHERE state='QUEUED'").fetchone()[0])
+                self.assertEqual(db.execute("SELECT count(*) FROM inspection_advice WHERE state IN ('QUEUED','RUNNING')").fetchone()[0],1)
+                pending=json.loads(db.execute("SELECT data FROM inspection_advice WHERE state='RUNNING'").fetchone()[0])
+                self.assertEqual(pending['next_input']['evidence'],'new-9')
+                self.assertEqual(pending['input']['evidence'],'first')
         finally: release.set();worker.join(3);svc.close()
         self.assertEqual(self.store.issues('s')[0]['analysis']['based_on']['evidence'],'first')
 

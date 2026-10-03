@@ -1,5 +1,30 @@
 # PROJECT_STATUS — PA Cycle Lab native Next integration
 
+## 2026-10-04 Native Telemetry / GPU / Inspection refinement
+
+Continues the user's photo branch `astra-console-import`, base
+`2d8d6739d1c4b4640d0ab7d1048fe6e423aa9ad4`; no live merge or deployment.
+
+- Native eight-panel PA Telemetry, per-GPU series, bounded canonical-node
+  Prometheus API, 1h/6h/24h/7d. Grafana remains advanced analysis; Legacy retained.
+- Optional DCGM detection/reuse/configured container installation. Host charts
+  remain available for CPU-only and GPU failures. Manual GPU instructions show
+  this PA/Prometheus and the canonical scrape endpoint; instructions execute nothing.
+- Durable two-slot priority AI queue for enabled active Warning/FAIL, structured
+  advisory, masked bounded evidence excerpts, explicit failure categories.
+  Reanalysis now refreshes the mounted issue without F5; parent refresh preserves
+  card state and evidence focus. Recovered issues archive after seven days, not delete.
+- Raw evidence text modal with source/time, search, copy and full download.
+- User's active-node inspection scope and collapse retained. Cycle core/action,
+  PRE/POST/recovery, Shared Validation and identity rules not modified.
+- Current targeted tests: 105 passed; independent/edge: 32 passed; Vera: 113
+  passed / 16 skipped; App: 53 passed. Broad exact-base comparison: both 71
+  passed / 37 failed outcomes, same failing IDs. These suites overlap; do not sum.
+  Real production UI with isolated fake transport: five scenario groups passed,
+  zero page errors. Fixture process restart: INTERRUPTED, zero command replay.
+- No real DUT, LLM, Linux service installation or central monitoring operation.
+  See [implementation, acceptance and rollback](docs/NATIVE_TELEMETRY_INSPECTION_REFINEMENT.md).
+
 ## 2026-10-03 PA Validation Console / Grafana refinement
 
 Base `3f109f594b5e2202200b0a8cfb77577490d450a8`, same

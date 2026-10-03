@@ -1,0 +1,222 @@
+{
+  "base": "2d8d6739d1c4b4640d0ab7d1048fe6e423aa9ad4",
+  "branch": "astra-console-import",
+  "hardware": "NOT_RUN",
+  "deployed": false,
+  "baseline_unique_failing_ids": [
+    [
+      "tests.test_console.ConsoleTests",
+      "test_artifact_references_reuse_path_boundary"
+    ],
+    [
+      "tests.test_console.ConsoleTests",
+      "test_concurrent_ordering_and_terminal_is_last"
+    ],
+    [
+      "tests.test_console.ConsoleTests",
+      "test_console_reads_and_download_never_change_job_or_locks"
+    ],
+    [
+      "tests.test_console.ConsoleTests",
+      "test_event_failure_after_dispatch_never_retries"
+    ],
+    [
+      "tests.test_console.ConsoleTests",
+      "test_incremental_pages_tail_and_older_have_no_duplicates"
+    ],
+    [
+      "tests.test_console.ConsoleTests",
+      "test_invalid_query_bounds"
+    ],
+    [
+      "tests.test_console.ConsoleTests",
+      "test_large_journal_indexed_pages_and_bounded_export"
+    ],
+    [
+      "tests.test_console.ConsoleTests",
+      "test_legacy_rows_remain_readable"
+    ],
+    [
+      "tests.test_console.ConsoleTests",
+      "test_multi_node_error_only_and_search"
+    ],
+    [
+      "tests.test_console.ConsoleTests",
+      "test_observer_redacts_backend_credential_values_in_findings"
+    ],
+    [
+      "tests.test_console.ConsoleTests",
+      "test_redaction_before_sqlite_api_and_download"
+    ],
+    [
+      "tests.test_console.ConsoleTests",
+      "test_response_lost_operational_sequence_no_false_pass"
+    ],
+    [
+      "tests.test_console.ConsoleTests",
+      "test_stop_round_event_and_complete_post"
+    ],
+    [
+      "tests.test_console.ConsoleTests",
+      "test_structured_persistence_reopen_and_refresh"
+    ],
+    [
+      "tests.test_console.ConsoleTests",
+      "test_worker_lost_event_and_no_replay"
+    ],
+    [
+      "tests.test_integration.IntegrationTests",
+      "test_all_modes_and_channels_use_real_node_session"
+    ],
+    [
+      "tests.test_integration.IntegrationTests",
+      "test_all_pre_blocked_keeps_evidence"
+    ],
+    [
+      "tests.test_integration.IntegrationTests",
+      "test_artifact_traversal_and_ssh_keys_hidden"
+    ],
+    [
+      "tests.test_integration.IntegrationTests",
+      "test_cancel_preserves_pre_and_releases_locks"
+    ],
+    [
+      "tests.test_integration.IntegrationTests",
+      "test_collection_failure_never_becomes_pass"
+    ],
+    [
+      "tests.test_integration.IntegrationTests",
+      "test_complete_actual_engine_reports_events_and_no_passwords"
+    ],
+    [
+      "tests.test_integration.IntegrationTests",
+      "test_concurrent_reservations_and_direct_control_conflict"
+    ],
+    [
+      "tests.test_integration.IntegrationTests",
+      "test_graceful_stop_finishes_entire_round"
+    ],
+    [
+      "tests.test_integration.IntegrationTests",
+      "test_idempotency_and_conflicting_reuse"
+    ],
+    [
+      "tests.test_integration.IntegrationTests",
+      "test_input_and_project_isolation"
+    ],
+    [
+      "tests.test_integration.IntegrationTests",
+      "test_local_transport_boundaries_and_csrf"
+    ],
+    [
+      "tests.test_integration.IntegrationTests",
+      "test_new_web_client_reconnects_to_same_running_worker"
+    ],
+    [
+      "tests.test_integration.IntegrationTests",
+      "test_process_death_recovery_no_replay"
+    ],
+    [
+      "tests.test_integration.IntegrationTests",
+      "test_shared_aux_scope_rejected_before_any_job"
+    ],
+    [
+      "tests.test_integration.IntegrationTests",
+      "test_stale_pre_confirmation_and_fixed_target_snapshot"
+    ],
+    [
+      "tests.test_platform_telemetry.PlatformTelemetry",
+      "test_cpu_samples_without_cycle_are_node_bound_and_reservations_defer"
+    ],
+    [
+      "tests.test_platform_telemetry.PlatformTelemetry",
+      "test_observation_restart_requires_os_ownership_and_keeps_control_locks"
+    ]
+  ],
+  "new_failing_ids": [],
+  "resolved_ids": [],
+  "suites": {
+    "refinement-targeted.xml": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "105",
+        "time": "21.446",
+        "timestamp": "2026-10-04T00:11:14.419029+08:00",
+        "hostname": "ShengWu"
+      }
+    ],
+    "refinement-baseline-broad.xml": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "37",
+        "skipped": "0",
+        "tests": "108",
+        "time": "27.324",
+        "timestamp": "2026-10-03T23:38:35.200929+08:00",
+        "hostname": "ShengWu"
+      }
+    ],
+    "refinement-current-broad.xml": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "37",
+        "skipped": "0",
+        "tests": "108",
+        "time": "26.393",
+        "timestamp": "2026-10-03T23:45:05.670521+08:00",
+        "hostname": "ShengWu"
+      }
+    ],
+    "refinement-bash.xml": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "32",
+        "time": "160.083",
+        "timestamp": "2026-10-03T23:38:58.103998+08:00",
+        "hostname": "ShengWu"
+      }
+    ],
+    "refinement-vera.xml": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "16",
+        "tests": "164",
+        "time": "13.045",
+        "timestamp": "2026-10-03T23:45:41.127389+08:00",
+        "hostname": "ShengWu"
+      }
+    ],
+    "refinement-app.xml": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "53",
+        "time": "3.449",
+        "timestamp": "2026-10-03T23:53:38.820518+08:00",
+        "hostname": "ShengWu"
+      }
+    ]
+  },
+  "browser": {
+    "results": [
+      "Native 8-panel dashboard, eight distinct GPU series, 7d query, legend control, no Grafana iframe, host/GPU provision continuity",
+      "Existing selected-node/collapse/Terminal/KVM/Test entries preserved; transport-driven findings, raw evidence modal focus/search/copy; AI timeout and retry auto-refresh without F5",
+      "DCGM conflict preserves Host charts; manual setup identifies current PA, Prometheus and canonical GPU endpoint",
+      "CPU-only Host charts READY, GPU NOT_APPLICABLE, no DCGM requirement",
+      "Cycle inline console and four-node controls retained"
+    ],
+    "errors": []
+  }
+}

@@ -72,6 +72,8 @@ class ProvisionService:
         self.monitor=monitor;self.config=config;self.sleep=sleep;self.workers=workers
         self.stop_event=threading.Event();self.pool=None;self.thread=None;self.pending={};self.mutex=threading.RLock()
         self.last_health={}
+        from .telemetry_charts import ChartService
+        self.charts=ChartService(monitor)
 
     def start(self):
         with self.mutex:
@@ -186,6 +188,27 @@ class ProvisionService:
                 self.binding(target);state,detail=self.monitor.health(target)
                 if state=='READY' or time.monotonic()>=deadline: break
                 if self.stop_event.wait(self.config.poll_seconds): raise ProvisionFailure('Verification interrupted. Enable Telemetry again to check the current state.','INTERRUPTED')
+            host_state=state
+            # Publish host readiness before the optional GPU work begins.
+            self.store.components(target['node_id'],dict(host=host_state,gpu={'state':'PROVISIONING','detail':'Checking GPU telemetry','gpus':[]},prometheus=host_state,node_exporter_version=facts.get('VERSION','')))
+            from .telemetry_gpu import provision
+            try:
+                gpu=provision(self,target,job_id,command)
+                if gpu['state']=='VERIFYING':
+                    deadline=time.monotonic()+self.config.verify_seconds
+                    while True:
+                        self.binding(target);gpu['state'],gpu['detail']=self.monitor.gpu_health(target)
+                        if gpu['state']=='READY' or time.monotonic()>=deadline: break
+                        if self.stop_event.wait(self.config.poll_seconds): break
+            except ProvisionFailure as exc:
+                if 'IDENTITY_REQUIRES_CONFIRMATION' in str(exc) or exc.state=='INTERRUPTED': raise
+                gpu=dict(state='DEGRADED',detail=self.store.clean(str(exc)),gpus=[])
+            except Exception as exc:
+                gpu=dict(state='DEGRADED',detail='GPU setup incomplete: '+type(exc).__name__,gpus=[])
+            self.store.step(job_id,'GPU_VERIFY',gpu['detail'],'PASS' if gpu['state']=='READY' else 'INFO' if gpu['state']=='NOT_APPLICABLE' else 'WARN')
+            self.store.components(target['node_id'],dict(host=host_state,gpu=gpu,prometheus=host_state,node_exporter_version=facts.get('VERSION','')))
+            if state=='READY' and gpu['state'] not in ('READY','NOT_APPLICABLE'):
+                state='DEGRADED';detail='Host telemetry READY. GPU telemetry requires attention: '+gpu['detail']
             self.store.health(target,state,detail,job_id);self.store.finish(job_id,state,detail)
         except ProvisionFailure as exc:
             if target: self.store.health(target,exc.state,str(exc),job_id)
@@ -208,7 +231,11 @@ class ProvisionService:
         elif job and job['state']=='INTERRUPTED': state='ERROR';detail=job['error']
         return dict(node_id=node_id,chassis_id=target['chassis_id'],label=target.get('display_name'),hostname=target.get('os_hostname'),
                     slot=target['slot_key'],os_ip=target['os_ip'],binding_revision=target['revision'],state=state,detail=detail,
-                    checked_at=checked,job=job,configured=self.config.ready(),dashboard_url=self.config.dashboard(node_id))
+                    checked_at=checked,job=job,components=self.store.components(node_id),configured=self.config.ready(),dashboard_url=self.config.dashboard(node_id),gpu_setup=self.gpu_setup(target))
+
+    def gpu_setup(self,target):
+        from .telemetry_gpu import setup_instructions
+        return setup_instructions(self.config,target)
 
     def refresh(self,node_id):
         # Read-only monitoring checks are coalesced and run off-request, never SSH/install.
@@ -220,5 +247,14 @@ class ProvisionService:
                 target=self.resolve(node_id);old=self.store.node(node_id)
                 if not old or old['state'] not in ('READY','DEGRADED'): return
                 state,detail=self.monitor.health(target)
+                components=self.store.components(node_id)
+                if components:
+                    components.update(host=state,prometheus=state)
+                    gpu=components.get('gpu',{})
+                    if gpu.get('state') in ('READY','DEGRADED','VERIFYING') and gpu.get('gpus'):
+                        gpu['state'],gpu['detail']=self.monitor.gpu_health(target)
+                    self.store.components(node_id,components)
+                    if state=='READY' and gpu.get('state') not in ('READY','NOT_APPLICABLE'):
+                        state='DEGRADED';detail='Host telemetry READY. GPU telemetry requires attention.'
                 self.binding(target);self.store.health(target,state,detail,old.get('job_id'))
             self.pending['health:'+node_id]=self.pool.submit(check)

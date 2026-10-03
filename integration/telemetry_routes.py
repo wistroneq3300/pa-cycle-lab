@@ -89,6 +89,12 @@ def install(app,pa):
         try: return service().enable(node_id,body['idempotency_key'],body['expected_binding_revision'])
         except (ValueError,KeyError) as exc: raise HTTPException(409,str(exc))
 
+    @router.get('/nodes/{node_id}/charts')
+    def charts(node_id:str,request:Request,period:str=Query('1h',pattern='^(1h|6h|24h|7d)$')):
+        target=access(node_id,request);svc=service()
+        gpu=svc.store.components(node_id).get('gpu',{}).get('state')
+        return svc.charts.read(target,period,gpu)
+
     def job_access(job_id,request):
         try: job=service().store.get(job_id)
         except KeyError: raise HTTPException(404,'找不到 Telemetry 任務')

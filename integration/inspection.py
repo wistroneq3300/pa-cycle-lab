@@ -49,6 +49,7 @@ class InspectionStore:
     def __init__(self,path):
         self.path=Path(path); self.path.parent.mkdir(parents=True,exist_ok=True)
         with self.tx() as db:
+            previous_version=db.execute('PRAGMA user_version').fetchone()[0]
             db.executescript('''
                 CREATE TABLE IF NOT EXISTS inspection_systems(id TEXT PRIMARY KEY, data TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS inspection_items(id TEXT PRIMARY KEY, system_id TEXT NOT NULL, data TEXT NOT NULL);
@@ -64,8 +65,24 @@ class InspectionStore:
                 CREATE INDEX IF NOT EXISTS inspection_snapshots_system ON inspection_snapshots(system_id,collected_at);
                 CREATE TABLE IF NOT EXISTS inspection_nodes(id TEXT PRIMARY KEY,system_id TEXT NOT NULL,data TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS inspection_progress(system_id TEXT NOT NULL,node_id TEXT NOT NULL,data TEXT NOT NULL,PRIMARY KEY(system_id,node_id));
-                PRAGMA user_version=2;
             ''')
+            columns={r[1] for r in db.execute('PRAGMA table_info(inspection_advice)')}
+            for name,spec in [('priority','INTEGER NOT NULL DEFAULT 1'),('created_at','REAL NOT NULL DEFAULT 0'),('worker_slot','INTEGER')]:
+                if name not in columns: db.execute(f'ALTER TABLE inspection_advice ADD COLUMN {name} {spec}')
+            # Older single-worker jobs had no slot. They are advisory and can be
+            # retried after migration; device operations are never involved.
+            db.execute("UPDATE inspection_advice SET state='QUEUED' WHERE state='RUNNING' AND worker_slot IS NULL")
+            if previous_version<3:
+                # Keep legacy records, but only the newest pending analysis per
+                # issue is eligible. This migration never removes issue history.
+                pending=db.execute("SELECT id,issue_id FROM inspection_advice WHERE state='QUEUED' ORDER BY rowid DESC").fetchall()
+                seen=set()
+                for row in pending:
+                    if row['issue_id'] in seen: db.execute("UPDATE inspection_advice SET state='SUPERSEDED' WHERE id=?",(row['id'],))
+                    seen.add(row['issue_id'])
+                db.execute("UPDATE inspection_advice SET priority=0 WHERE issue_id IN (SELECT id FROM inspection_items WHERE json_extract(data,'$.severity')='FAIL')")
+            db.execute('CREATE INDEX IF NOT EXISTS inspection_advice_pending ON inspection_advice(state,priority,created_at)')
+            db.execute('PRAGMA user_version=3')
 
     @contextmanager
     def tx(self,write=True):
@@ -109,6 +126,11 @@ class InspectionStore:
                 ORDER BY collected_at LIMIT 200''',(system_id,cutoff,system_id,system_id)).fetchall()
             pinned={v.get('evidence_ref',{}).get('snapshot_id') for r in db.execute('SELECT data FROM inspection_nodes WHERE system_id=?',(system_id,))
                     for v in json.loads(r[0]).get('sources',{}).values()}
+            # Analysis keeps the exact evidence it used, including older versions.
+            for row in db.execute('SELECT data FROM inspection_advice WHERE system_id=?',(system_id,)):
+                advice=json.loads(row[0])
+                for basis in (advice.get('input',{}),advice.get('next_input',{}),advice.get('outcome',{}).get('based_on',{})):
+                    pinned.add((basis.get('evidence_ref') or {}).get('snapshot_id'))
             for row in rows:
                 if row['id'] in pinned: continue
                 removed.append(json.loads(row['data'])['raw_evidence'])
@@ -129,15 +151,35 @@ class InspectionStore:
             item=self.system(system_id,db); item['config']=validate_config(item['config'],changes)
             item.update(configured_by=str(actor),configured_at=at,next_due=at+int(key(system_id)[:4],16)%15)
             self.save_system(db,item)
+            if item['config']['ai_enabled']: self.backfill_advice(db,system_id)
         return item
 
     def enabled(self):
         with self.tx(False) as db:
             return [json.loads(r[0]) for r in db.execute("SELECT data FROM inspection_systems WHERE json_extract(data,'$.config.enabled')=1")]
 
-    def issues(self,system_id,limit=100,offset=0):
+    def archive_recovered(self,now):
+        with self.tx() as db:
+            rows=db.execute("SELECT data FROM inspection_items WHERE json_extract(data,'$.status')='RECOVERED' AND json_extract(data,'$.resolved_at')<? LIMIT 500",(now-7*86400,)).fetchall()
+            for row in rows:
+                item=json.loads(row[0]); item.update(status='ARCHIVED',archived_at=now)
+                db.execute('UPDATE inspection_items SET data=? WHERE id=?',(encode(item),item['id']))
+                self.change(db,item,'ARCHIVED',now,{'resolved_at':item['resolved_at']})
+
+    def backfill_advice(self,db,system_id):
+        rows=db.execute("SELECT data FROM inspection_items WHERE system_id=? AND json_extract(data,'$.status')='ACTIVE' AND (json_extract(data,'$.analysis.state') IS NULL OR json_extract(data,'$.analysis.state')='NOT_REQUESTED') LIMIT 100",(system_id,)).fetchall()
+        for row in rows: self.queue_advice(db,json.loads(row[0]))
+
+    def issues(self,system_id,limit=100,offset=0,status='all',node_id='',search=''):
+        where='system_id=?'; args=[system_id]
+        if status=='current': where+=" AND json_extract(data,'$.status') IN ('ACTIVE','RECOVERED')"
+        elif status in ('ACTIVE','RECOVERED','ARCHIVED'): where+=" AND json_extract(data,'$.status')=?";args.append(status)
+        if node_id:
+            where+=" AND (json_extract(data,'$.node_id')=? OR EXISTS(SELECT 1 FROM json_each(json_extract(data,'$.affected_nodes')) WHERE value=?))";args.extend([node_id,node_id])
+        if search:
+            where+=" AND (json_extract(data,'$.facts') LIKE ? OR json_extract(data,'$.component') LIKE ? OR json_extract(data,'$.rule') LIKE ?)";args.extend(['%'+search[:200]+'%']*3)
         with self.tx(False) as db:
-            rows=db.execute("SELECT data FROM inspection_items WHERE system_id=? ORDER BY json_extract(data,'$.status') ASC,json_extract(data,'$.last_seen_at') DESC LIMIT ? OFFSET ?",(system_id,limit,offset)).fetchall()
+            rows=db.execute("SELECT data FROM inspection_items WHERE "+where+" ORDER BY json_extract(data,'$.status') ASC,json_extract(data,'$.last_seen_at') DESC LIMIT ? OFFSET ?",(*args,limit,offset)).fetchall()
         return [json.loads(r[0]) for r in rows]
 
     def summary(self,system_id):
@@ -146,6 +188,9 @@ class InspectionStore:
             counts=db.execute("SELECT json_extract(data,'$.severity') severity,count(*) n FROM inspection_items WHERE system_id=? AND json_extract(data,'$.status')='ACTIVE' GROUP BY severity",(system_id,)).fetchall()
             item['summary']={'fail':0,'warning':0}
             for row in counts: item['summary']['fail' if row['severity']=='FAIL' else 'warning']=row['n']
+            item['lifecycle_counts']={}
+            for state in ('RECOVERED','ARCHIVED'):
+                item['lifecycle_counts'][state.lower()]=db.execute("SELECT count(*) FROM inspection_items WHERE system_id=? AND json_extract(data,'$.status')=?",(system_id,state)).fetchone()[0]
             item['progress']=[dict(node_id=r['node_id'],**json.loads(r['data'])) for r in db.execute('SELECT node_id,data FROM inspection_progress WHERE system_id=?',(system_id,))]
         return item
 
@@ -177,16 +222,8 @@ class InspectionStore:
             item=json.loads(row[0]); return self.queue_advice(db,item,manual)
 
     def queue_advice(self,db,item,manual=False):
-        if db.execute("SELECT count(*) FROM inspection_advice WHERE state IN ('QUEUED','RUNNING')").fetchone()[0]>=16: return 'BUSY'
-        evidence={k:item.get(k) for k in ('node_id','component','rule','severity','facts','evidence','fingerprint','recurrences')}
-        pending=db.execute("SELECT id FROM inspection_advice WHERE issue_id=? AND state='QUEUED'",(item['id'],)).fetchone()
-        if pending:
-            # Coalesce to the newest evidence, without an unbounded per-issue backlog.
-            db.execute('UPDATE inspection_advice SET data=? WHERE id=?',(encode(evidence),pending['id']))
-            return 'PENDING'
-        aid=key(item['id'],evidence,time.time() if manual else None)
-        db.execute("INSERT OR IGNORE INTO inspection_advice VALUES(?,?,?,'QUEUED',?)",(aid,item['system_id'],item['id'],encode(evidence)))
-        return 'QUEUED'
+        from .inspection_advice import queue
+        return queue(self,db,item,manual)
 
 
 class InspectionEvaluator:
@@ -250,12 +287,12 @@ class InspectionEvaluator:
                     if not item:
                         item=dict(id=iid,system_id=system_id,node_id=obs['node_id'],component=obs['component'],rule=obs['rule'],first_seen_at=ts,observations=0,recurrences=0,acknowledged=False,known_issue=False,mute_until=0)
                         transition='OPENED'
-                    elif item['status']=='RECOVERED':
+                    elif item['status'] in ('RECOVERED','ARCHIVED'):
                         transition='REOPENED'; item['recurrences']+=1
                     elif item['severity']=='WARNING' and severity=='FAIL': transition='ESCALATED'
                     elif item['severity']=='FAIL': severity='FAIL'
                     item.update(status='ACTIVE',severity=severity,last_seen_at=max(ts,item.get('last_seen_at',ts)),resolved_at=None,
-                                facts=redact(facts,secrets,1000),source=obs.get('source'),
+                                facts=redact(facts,secrets,1000),source=obs.get('source'),observation_kind=kind,
                                 evidence=redact(obs.get('evidence',''),secrets,1000),
                                 evidence_ref=obs.get('evidence_ref'),fingerprint=obs.get('fingerprint'),observations=item['observations']+1)
                     item.update(occurrences=item.get('occurrences',0)+(1 if event and obs.get('countable',True) else 0),source_time=obs.get('source_time'),
@@ -269,7 +306,7 @@ class InspectionEvaluator:
                             evidence=item.get('evidence'),evidence_ref=item.get('evidence_ref'),facts=item.get('facts')))
                     elif severity=='FAIL' and previous_evidence!=(item['facts'],item['fingerprint']):
                         self.store.change(db,item,'EVIDENCE_UPDATED',ts,{k:item.get(k) for k in ('facts','evidence','evidence_ref','fingerprint')})
-                    if config['ai_enabled'] and severity=='FAIL' and (transition or previous_evidence!=(item['facts'],item['fingerprint'])):
+                    if config['ai_enabled'] and (transition or previous_evidence!=(item['facts'],item['fingerprint']) or not item.get('analysis')):
                         self.store.queue_advice(db,item)
                 elif item and item['status']=='ACTIVE' and healthy and state['healthy_count']>=config['recovery_samples']:
                     item.update(status='RECOVERED',resolved_at=ts)

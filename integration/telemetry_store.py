@@ -34,6 +34,8 @@ class ProvisionStore:
               CREATE TABLE IF NOT EXISTS telemetry_requests(
                 node_id TEXT NOT NULL,request_key TEXT NOT NULL,job_id TEXT NOT NULL,
                 PRIMARY KEY(node_id,request_key));
+              CREATE TABLE IF NOT EXISTS telemetry_components(
+                node_id TEXT PRIMARY KEY,data TEXT NOT NULL);
             ''')
 
     @contextmanager
@@ -112,6 +114,14 @@ class ProvisionStore:
         with self.tx(False) as db:
             row = db.execute('SELECT * FROM telemetry_nodes WHERE node_id=?',(node_id,)).fetchone()
             return dict(row) if row else None
+
+    def components(self,node_id,value=None):
+        with self.tx(value is not None) as db:
+            if value is not None:
+                db.execute('INSERT OR REPLACE INTO telemetry_components VALUES(?,?)',(node_id,json.dumps(value,ensure_ascii=False)))
+                return value
+            row=db.execute('SELECT data FROM telemetry_components WHERE node_id=?',(node_id,)).fetchone()
+            return json.loads(row[0]) if row else {}
 
     def recover(self):
         # Called once by the exclusive service owner, never by a GET/reconnect.

@@ -208,34 +208,18 @@ class InspectionService:
             return None
 
     def tick(self):
+        self.store.archive_recovered(self.clock())
         enabled={s['id']:s for s in self.store.enabled()}
+        with self.store.tx() as db:
+            for row in db.execute('SELECT id,data FROM inspection_systems').fetchall():
+                if json.loads(row['data'])['config'].get('ai_enabled'): self.store.backfill_advice(db,row['id'])
         for system in sorted(self.systems(),key=lambda s:enabled.get(s['id'],{}).get('next_due',float('inf'))):
             saved=enabled.get(system['id'])
             if saved and saved['next_due']<=self.clock(): self.submit(system['name'],scheduled=True)
 
-    def ai_once(self):
-        if self.ai is None: return
-        from .runner import process_lock
-        try:
-            with process_lock(self.store.path.parent/'inspection-ai.lock'):
-                with self.store.tx() as db:
-                    # A dead AI process may leave RUNNING; analysis has no device side effects.
-                    db.execute("UPDATE inspection_advice SET state='UNAVAILABLE' WHERE state='RUNNING'")
-                    row=db.execute("SELECT * FROM inspection_advice WHERE state='QUEUED' ORDER BY rowid LIMIT 1").fetchone()
-                    if not row: return
-                    db.execute("UPDATE inspection_advice SET state='RUNNING' WHERE id=?",(row['id'],))
-                try:
-                    answer=redact(self.ai(row['data']),(*environment_secrets(),*self.secrets()),4000)
-                    state='COMPLETE'
-                except Exception: answer='AI 暫時無法使用；規則判定與證據仍保留。'; state='UNAVAILABLE'
-                with self.store.tx() as db:
-                    db.execute('UPDATE inspection_advice SET state=?,data=? WHERE id=?',(state,encode({'text':answer,'label':'可能原因／待確認'}),row['id']))
-                    itemrow=db.execute('SELECT data FROM inspection_items WHERE id=?',(row['issue_id'],)).fetchone()
-                    if itemrow:
-                        item=json.loads(itemrow[0]); item['analysis']={'state':state,'text':answer,'label':'可能原因／待確認',
-                            'based_on':json.loads(row['data']),'completed_at':self.clock()}
-                        db.execute('UPDATE inspection_items SET data=? WHERE id=?',(encode(item),row['issue_id']))
-        except OSError: return
+    def ai_once(self,slot=0):
+        from .inspection_advice import run_one
+        return run_one(self,slot)
 
     def start(self):
         if self._threads: return
@@ -243,7 +227,7 @@ class InspectionService:
             while not self._stop.wait(1):
                 try: callback()
                 except Exception: pass
-        self._threads=[threading.Thread(target=loop,args=(f,),daemon=True) for f in (self.tick,self.ai_once)]
+        self._threads=[threading.Thread(target=loop,args=(f,),daemon=True) for f in (self.tick,lambda:self.ai_once(0),lambda:self.ai_once(1))]
         for thread in self._threads: thread.start()
 
     def close(self):

@@ -14,7 +14,7 @@
       this.pipeline={};this.unread=0;this.closed=false; this.consoleOpen=false; this.name=root.dataset.system; this.node=null; this.job=null;
       root.innerHTML=`<header class="tp-heading"><div><h3>Node Telemetry <span data-state class="tp-state">載入中</span></h3><p data-detail aria-live="polite">正在取得節點設定…</p></div><label class="tp-node">監控節點<select aria-label="Telemetry 節點" data-node><option value="">選擇節點</option></select></label></header>
         <div class="tp-context"><span data-target></span><span data-time></span></div>
-        <div class="tp-actions"><button class="btn primary" data-enable disabled>啟用 Telemetry</button><button class="btn" data-console hidden>查看啟用紀錄</button><a class="btn" data-grafana hidden target="_blank" rel="noopener" title="開啟此節點的 Grafana 監控圖表，不執行安裝">開啟監控圖表 ↗</a></div>
+        <div class="tp-actions"><button class="btn primary" data-enable disabled>啟用 Telemetry</button><button class="btn" data-console hidden>查看啟用紀錄</button><a class="btn" data-grafana hidden target="_blank" rel="noopener" title="開啟此節點的 Grafana 進階分析，不執行安裝">Grafana 進階分析 ↗</a></div>
         <p class="tp-note" data-notice>啟用只針對所選節點。原有效能資料與管理功能可繼續使用。</p>
         <dialog class="tp-console pa-validation-console" aria-label="Telemetry 啟用程序" aria-modal="true"><header><div class="tp-console-title"><h4>Telemetry 啟用程序</h4><p data-console-target>Read-only execution log</p></div><span class="tp-session" data-session>IDLE</span><span data-job></span><button class="btn" data-close>關閉紀錄</button></header>
           <div class="tp-pipeline" aria-label="啟用階段"></div><div class="tp-runline"><span>Current stage <strong data-stage>Queue</strong></span><span data-log-date></span><span>TAIPEI / UTC+8</span></div>
@@ -52,17 +52,18 @@
     }
     closeConsole(){this.consoleOpen=false;this.$('.tp-console').close();if(this.restoreFocus?.isConnected&&!this.restoreFocus.disabled&&!this.restoreFocus.hidden)this.restoreFocus.focus();else this.$('[data-node]').focus();}
     observeStage(row){
-      const phase={IDENTITY:'Identity',DETECT:'Exporter',INSTALL:'Service',START:'Service',EXPORTER:'Metrics',REGISTER:'Prometheus',VERIFY:'Prometheus',READY:'Ready'}[row.step];
+      const phase=row.step.startsWith('GPU_')?'GPU':{IDENTITY:'Identity',DETECT:'Exporter',INSTALL:'Service',START:'Service',EXPORTER:'Metrics',REGISTER:'Prometheus',VERIFY:'Prometheus',READY:'Ready'}[row.step];
       if(!phase)return;
       if(phase==='Service')this.pipeline.Exporter='PASS';
       this.pipeline[phase]=row.level==='PASS'&&row.step!=='REGISTER'?'PASS':['FAIL','ERROR'].includes(row.level)?'FAIL':row.level==='WARN'?'WARN':this.pipeline[phase]==='PASS'?'PASS':'ACTIVE';
     }
     renderPipeline(job){
-      const phases=['Identity','Exporter','Service','Metrics','Prometheus','Ready'];
+      const phases=['Identity','Exporter','Service','Metrics','Prometheus',...(this.pipeline.GPU?['GPU']:[]),'Ready'];
       const failed=job&&!active(job)&&job.state!=='READY';
-      const current={IDENTITY:'Identity',DETECT:'Exporter',INSTALL:'Service',START:'Service',EXPORTER:'Metrics',REGISTER:'Prometheus',VERIFY:'Prometheus'}[job?.current_step];
+      let current=job?.current_step?.startsWith('GPU_')?'GPU':{IDENTITY:'Identity',DETECT:'Exporter',INSTALL:'Service',START:'Service',EXPORTER:'Metrics',REGISTER:'Prometheus',VERIFY:'Prometheus'}[job?.current_step];
+      if(failed&&this.node?.components?.host&&this.node.components.host!=='READY')current='Prometheus';
       const fragment=document.createDocumentFragment();
-      for(const phase of phases){const el=document.createElement('span');const state=job?.state==='READY'?'PASS':failed&&phase===current?'FAIL':this.pipeline[phase]||'PENDING';el.dataset.state=state;el.textContent=phase;el.title=state;el.setAttribute('aria-label',phase+': '+state);fragment.append(el);}
+      for(const phase of phases){const el=document.createElement('span');const state=phase==='GPU'&&this.node?.components?.gpu?.state==='NOT_APPLICABLE'?'NOT_APPLICABLE':job?.state==='READY'?'PASS':failed&&phase===current?'FAIL':this.pipeline[phase]||'PENDING';el.dataset.state=state;el.textContent=phase+(state==='NOT_APPLICABLE'?' · N/A':'');el.title=state;el.setAttribute('aria-label',phase+': '+state);fragment.append(el);}
       this.$('.tp-pipeline').replaceChildren(fragment);
       this.$('.tp-outcome').hidden=!job||active(job);this.$('[data-view]').hidden=job?.state!=='READY';this.$('[data-retry]').hidden=!failed;
       this.$('[data-outcome-title]').textContent=job?.state==='READY'?'Telemetry READY':'啟用未完成 · '+(current||'Connection');
@@ -93,6 +94,7 @@
       choices.set(this.name,{nodeId,activeSlot:this.root.dataset.slot});
       this.job=null;this.resetLog();this.requestKey=null;this.eventsBusy=false;this.closeConsole();
       this.$('.tp-dashboard').replaceChildren();this.$('.tp-dashboard').hidden=true;
+      this.native?.dispose();this.native=null;
       if(this.node){
         this.update(this.node);
         if(lastView?.name===this.name&&lastView.nodeId===nodeId){
@@ -130,18 +132,15 @@
         this.$('[data-session]').dataset.state=this.job.state;
         this.$('[data-stage]').textContent=stage(this.job.state==='READY'?'READY':this.job.current_step);
         this.$('[data-log-date]').textContent=time(this.job.created_at).split(' ')[0];}
-      this.renderPipeline(this.job);this.dashboard(node);this.legacy(node.state==='READY');
+      this.renderPipeline(this.job);this.dashboard(node);this.legacy(node.state==='READY'||node.components?.host==='READY');
     }
     dashboard(node) {
       const container=this.$('.tp-dashboard'),link=this.$('[data-grafana]');
-      if(node.state!=='READY'){container.hidden=true;link.hidden=true;return;}
-      if(!node.dashboard_url){container.hidden=false;link.hidden=true;container.textContent='Data Pipeline READY · Grafana SETUP REQUIRED — 中央採集正常，請設定 Grafana 網址。';return;}
-      const url=new URL(node.dashboard_url,location.origin);if(!['http:','https:'].includes(url.protocol))return;
-      const theme=document.documentElement.dataset.theme||'light';url.searchParams.set('theme',theme);
-      link.href=url.href;link.hidden=false;container.hidden=false;
-      let frame=container.querySelector('iframe');
-      if(!frame){const hint=document.createElement('p');hint.textContent='Data Pipeline READY · Visualization 待確認。圖表若受登入或嵌入設定限制，請開啟 Grafana；不需重新啟用 Telemetry。';frame=document.createElement('iframe');frame.title='所選節點的 Grafana Telemetry';frame.loading='lazy';frame.onerror=()=>{hint.textContent='Grafana visualization unavailable. Prometheus telemetry is healthy.';};container.replaceChildren(hint,frame);}
-      if(frame.src!==url.href)frame.src=url.href;
+      link.hidden=true;
+      if(node.dashboard_url){const url=new URL(node.dashboard_url,location.origin);if(['http:','https:'].includes(url.protocol)){url.searchParams.set('theme',document.documentElement.dataset.theme||'light');link.href=url.href;link.hidden=false;}}
+      container.hidden=false;
+      if(!this.native&&window.PANativeTelemetry)this.native=new PANativeTelemetry.Dashboard(container,node);
+      else this.native?.update(node);
     }
     async enable() {
       if(!this.node||active(this.job))return;
@@ -190,7 +189,7 @@
     error(error){if(error.name==='AbortError'||this.closed)return;this.$('[data-detail]').textContent=error.message;this.$('[data-state]').textContent='連線未完成';}
     dispose(){
       if(this.node)lastView={name:this.name,nodeId:this.node.node_id,jobId:this.job?.job_id,pipeline:this.pipeline,rows:this.rows,cursor:this.cursor,open:this.consoleOpen,follow:this.follow,paused:this.paused,pauseRows:this.pauseRows,search:this.$('[data-search]').value,top:this.$('.tp-log').scrollTop};
-      this.$('.tp-console').close();this.closed=true;clearTimeout(this.timer);clearTimeout(this.frameTimer);this.abort.abort();
+      this.$('.tp-console').close();this.closed=true;clearTimeout(this.timer);clearTimeout(this.frameTimer);this.abort.abort();this.native?.dispose();
     }
   }
   window.TelemetryProvision={
