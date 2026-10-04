@@ -105,15 +105,21 @@ class InspectionStore:
         with self.tx(False) as db:
             return {r['id']:json.loads(r['data']) for r in db.execute('SELECT id,data FROM inspection_nodes WHERE system_id=?',(system_id,))}
 
-    def successful_nodes(self,system_id):
+    def successful_nodes(self,system_id,bindings=None):
         """Canonical nodes with at least one durable successful collection.
 
         ``inspection_nodes`` is the existing per-node aggregate written by the
         independent collector.  Unlike the chassis summary, it remains bound to
-        the original node_id when the operator changes ``active_os``.
+        the original node_id when the operator changes ``active_os``.  When the
+        current bindings are supplied, evidence from an older endpoint revision
+        is deliberately excluded rather than carried onto a replaced node.
         """
         result={}
         for node_id,state in self.node_state(system_id).items():
+            if bindings is not None:
+                version=state.get('version')
+                if node_id not in bindings or not isinstance(version,(list,tuple)) or len(version)<4 or version[3]!=bindings[node_id]:
+                    continue
             successes=[source.get('last_success') for source in state.get('sources',{}).values()
                        if type(source.get('last_success')) in {int,float} and math.isfinite(source['last_success']) and source['last_success']>0]
             completed=state.get('last_completed')
@@ -121,6 +127,22 @@ class InspectionStore:
                 completed=max(successes,default=None)  # compatibility with older durable node aggregates
             if successes and completed is not None: result[node_id]=completed
         return result
+
+    def active_issue_state(self,system_id,limit=50):
+        """Unbounded active aggregates plus a bounded, priority-sorted display list."""
+        active="system_id=? AND json_extract(data,'$.status')='ACTIVE'"
+        with self.tx(False) as db:
+            count_rows=db.execute("SELECT json_extract(data,'$.severity') severity,count(*) n FROM inspection_items WHERE "+active+" GROUP BY severity",(system_id,)).fetchall()
+            node_rows=db.execute("""SELECT DISTINCT node_id FROM (
+                SELECT json_extract(data,'$.node_id') node_id FROM inspection_items WHERE system_id=? AND json_extract(data,'$.status')='ACTIVE'
+                UNION ALL
+                SELECT affected.value node_id FROM inspection_items,json_each(COALESCE(json_extract(data,'$.affected_nodes'),'[]')) affected
+                WHERE system_id=? AND json_extract(data,'$.status')='ACTIVE'
+            ) WHERE node_id IS NOT NULL AND node_id!=''""",(system_id,system_id)).fetchall()
+            rows=db.execute("SELECT data FROM inspection_items WHERE "+active+" ORDER BY CASE json_extract(data,'$.severity') WHEN 'FAIL' THEN 0 ELSE 1 END,json_extract(data,'$.last_seen_at') DESC LIMIT ?",(system_id,max(0,int(limit)))).fetchall()
+        counts={'fail':0,'warning':0}
+        for row in count_rows: counts['fail' if row['severity']=='FAIL' else 'warning']+=row['n']
+        return {'counts':counts,'node_ids':{row['node_id'] for row in node_rows},'issues':[json.loads(row[0]) for row in rows]}
 
     def progress(self,system_id,node_id,data):
         with self.tx() as db:

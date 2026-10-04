@@ -698,6 +698,7 @@ def validation_overview(request:Request):
                         monitoring={'reporting':0,'total':0},last_validation=None) for name in allowed}
     targets=[target for target in node_inventory(pa) if target.get('project') in projects]
     targets_by_node={target['node_id']:target for target in targets}
+    bindings_by_node={target['node_id']:target.get('revision') for target in targets}
     for name,item in projects.items():
         members=[machine for machine in machine_rows.values() if machine.get('project')==name and machine.get('mgx_type','server')=='server' and not machine.get('passive')]
         item['systems']=len(members)
@@ -709,17 +710,17 @@ def validation_overview(request:Request):
     for system in inspection.systems():
         project=projects.get(system.get('project'))
         if not project: continue
-        active=inspection.store.issues(system['id'],100,0,'ACTIVE')
+        active=inspection.store.active_issue_state(system['id'])
         canonical_ids={target['node_id'] for target in targets if target.get('chassis_id')==system['id'] and target.get('project')==system.get('project')}
-        successful=inspection.store.successful_nodes(system['id'])
+        successful=inspection.store.successful_nodes(system['id'],bindings_by_node)
         checked_ids=canonical_ids.intersection(successful)
-        issue_nodes=set()
-        for issue in active:
+        issue_nodes=active['node_ids']
+        project['issues']['fail']+=active['counts']['fail']
+        project['issues']['warning']+=active['counts']['warning']
+        for issue in active['issues']:
             severity='FAIL' if issue.get('severity')=='FAIL' else 'WARNING'
-            project['issues']['fail' if severity=='FAIL' else 'warning']+=1
             affected=set(issue.get('affected_nodes') or [])
             if issue.get('node_id'): affected.add(issue['node_id'])
-            issue_nodes.update(affected)
             node=next((targets_by_node[node_id] for node_id in affected if node_id in targets_by_node),None)
             issue_rows.append(dict(id=issue['id'],project=system['project'],system=system['name'],node_id=issue.get('node_id'),
                                    node=(node.get('slot_key') or node.get('display_name')) if node else issue.get('node_id'),severity=severity,

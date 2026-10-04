@@ -76,7 +76,7 @@ class ValidationOverviewAggregation(unittest.TestCase):
             self.inspection_store.save_system(db,system)
             for index in indexes:
                 node_id=self.targets[index]['node_id']
-                state={'last_completed':completed+index,
+                state={'last_completed':completed+index,'version':['core','checker','policy',self.targets[index]['revision']],
                        'sources':{'Identity':{'state':'FRESH','last_success':completed+index,'collected_at':completed+index}}}
                 db.execute('INSERT OR REPLACE INTO inspection_nodes VALUES(?,?,?)',
                            (node_id,self.chassis_id,inspection_encode(state)))
@@ -112,6 +112,14 @@ class ValidationOverviewAggregation(unittest.TestCase):
         self.assertEqual(second['totals']['validation'],{'checked':1,'pass':1,'total':5})
         self.assertEqual(self.inspection_store.successful_nodes(self.chassis_id),{self.targets[0]['node_id']:1000})
 
+    def test_inspection_coverage_requires_the_current_node_binding(self):
+        self.seed_inspected(0)
+        self.assertEqual(self.overview()['totals']['validation'],{'checked':1,'pass':1,'total':5})
+
+        self.web.pa.machines['chassis-01']['os'][0]['ip']='192.0.2.250'
+        data=self.overview()
+        self.assertEqual(data['totals']['validation'],{'checked':0,'pass':0,'total':5})
+
     def test_mixed_per_node_inspection_and_active_issues_aggregate_correctly(self):
         self.seed_inspected(0,1,2)
         self.seed_failed_inspection(3)
@@ -124,6 +132,27 @@ class ValidationOverviewAggregation(unittest.TestCase):
         self.assertEqual(project['issues'],{'fail':1,'warning':1})
         self.assertEqual(data['totals']['validation'],{'checked':3,'pass':1,'total':5})
         self.assertEqual({issue['node'] for issue in data['issues']},{'N2','N3'})
+
+    def test_more_than_100_active_issues_are_fully_aggregated(self):
+        self.seed_inspected(0,1)
+        with self.inspection_store.tx() as db:
+            for number in range(120):
+                item=dict(id='warning-'+str(number),system_id=self.chassis_id,node_id=self.targets[1]['node_id'],
+                          status='ACTIVE',severity='WARNING',component='telemetry',rule='fixture.warning.'+str(number),
+                          facts='fixture warning',affected_nodes=[],first_seen_at=1000,last_seen_at=2000+number,
+                          observations=1,recurrences=0)
+                db.execute('INSERT INTO inspection_items VALUES(?,?,?)',(item['id'],self.chassis_id,inspection_encode(item)))
+            fail=dict(id='old-fail',system_id=self.chassis_id,node_id=self.targets[0]['node_id'],status='ACTIVE',severity='FAIL',
+                      component='gpu',rule='fixture.old-fail',facts='old but still active',affected_nodes=[],first_seen_at=1,
+                      last_seen_at=1,observations=1,recurrences=0)
+            db.execute('INSERT INTO inspection_items VALUES(?,?,?)',(fail['id'],self.chassis_id,inspection_encode(fail)))
+
+        data=self.overview();project=data['projects'][0]
+        self.assertEqual(project['issues'],{'fail':1,'warning':120})
+        self.assertEqual(project['validation'],{'checked':2,'pass':0,'total':5})
+        self.assertEqual(data['totals']['issues'],{'fail':1,'warning':120})
+        self.assertEqual(len(data['issues']),50)
+        self.assertEqual(data['issues'][0]['severity'],'FAIL')
 
     def test_host_reporting_requires_fresh_canonical_health_row(self):
         now=time.time();freshness=self.telemetry.config.freshness_seconds

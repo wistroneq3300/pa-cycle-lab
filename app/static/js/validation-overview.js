@@ -3,6 +3,7 @@
   'use strict';
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const replayKey='pa_dashboard_cinematic_played';
+  const REFRESH_MS=30000;
   let overview=null,selectedProject='',loading=null,teardown=()=>{};
   const quote=value=>esc(JSON.stringify(String(value)));
   const readRecent=()=>{try{return JSON.parse(sessionStorage.getItem('pa_recent_devices')||'[]');}catch{return [];}};
@@ -39,8 +40,11 @@
   function renderData(){
     const root=document.querySelector('.vo-overview');if(!root||!overview)return;
     if(selectedProject&&!projectByName(selectedProject))selectedProject='';
-    const select=root.querySelector('[data-vo-select]');select.replaceChildren(new Option('所有專案',''));
-    for(const project of overview.projects){select.add(new Option(project.name,project.name));}select.value=selectedProject;
+    const select=root.querySelector('[data-vo-select]'),names=overview.projects.map(project=>project.name),existing=[...select.options].slice(1).map(option=>option.value);
+    if(names.length!==existing.length||names.some((name,index)=>name!==existing[index])){
+      select.replaceChildren(new Option('所有專案',''));for(const name of names)select.add(new Option(name,name));
+    }
+    select.value=selectedProject;
     const item=selectedSummary(),isProject=!!selectedProject;
     root.querySelector('[data-vo-level]').textContent=isProject?(item.level==='L11'?'L11 Validation':'L10 Validation'):'全域驗證狀態';
     root.querySelector('[data-vo-title]').textContent=isProject?item.name:'所有專案';
@@ -65,9 +69,10 @@
     root.querySelector('[data-vo-recent]').innerHTML=`<div><h3>最近使用</h3>${recentDevices.length?recentDevices.map(name=>`<button type="button" onclick="openMachine(${quote(name)})"><b>${esc(name)}</b><span>開啟 →</span></button>`).join(''):'<p>尚無最近使用的系統。</p>'}</div><div><h3>最近 Cycle</h3>${runs.length?runs.map(run=>`<a href="#/cycle/runs/${encodeURIComponent(run.id)}"><b>${esc(run.project)}</b><span>${esc(run.state)} · ${fmt(run.updated_at||run.created_at)}</span></a>`).join(''):'<p>尚無 Cycle 執行紀錄。</p>'}</div>`;
   }
 
-  async function loadOverview(){
-    if(overview){renderData();return;}if(loading)return loading;
+  async function loadOverview(force=false,silent=false){
+    if(overview&&!force){renderData();return;}if(loading)return loading;
     loading=fetch('/api/validation/overview',{cache:'no-store'}).then(async response=>{if(!response.ok)throw new Error('驗證總覽暫時無法取得');overview=await response.json();renderData();}).catch(error=>{
+      if(silent&&overview)return;
       const root=document.querySelector('.vo-overview');if(root)root.querySelectorAll('.vo-loading').forEach(node=>node.textContent=error.message+'，請稍後重新整理。');
     }).finally(()=>{loading=null;});return loading;
   }
@@ -92,8 +97,8 @@
   function mountOverview(){
     teardown();teardown=()=>{};const root=document.querySelector('.vo-overview'),story=document.getElementById('core-story'),canvas=document.getElementById('system-core');if(!root||!story||!canvas)return;
     const select=root.querySelector('[data-vo-select]');select.onchange=()=>{selectedProject=select.value;renderData();};root.querySelector('[data-vo-enter]').onclick=()=>window.cineEnterSelected();root.querySelector('[data-vo-replay]').onclick=()=>play(true);
-    void loadOverview();
-    let frame=0,timer=0,cancelled=false,start=0;
+    const refreshExisting=!!overview;void loadOverview(refreshExisting,refreshExisting);
+    let frame=0,timer=0,refreshTimer=0,cancelled=false,start=0;
     const cancel=()=>{cancelled=true;clearTimeout(timer);cancelAnimationFrame(frame);};
     const manualScroll=()=>{cancel();const top=story.getBoundingClientRect().top,progress=Math.max(0,Math.min(1,(80-top)/Math.max(420,story.offsetHeight*.75)));applyProgress(progress);};
     const input=()=>cancel();
@@ -101,8 +106,9 @@
     function play(force=false){cancel();cancelled=false;start=0;applyProgress(0);try{sessionStorage.setItem(replayKey,'1');}catch{}timer=setTimeout(()=>{if(!cancelled)frame=requestAnimationFrame(tick);},force?80:800);}
     let played=false;try{played=sessionStorage.getItem(replayKey)==='1';}catch{}
     if(reduced.matches||played)applyProgress(1);else play();
+    refreshTimer=setInterval(()=>{if(!document.hidden&&root.isConnected)void loadOverview(true,true);},REFRESH_MS);
     window.addEventListener('scroll',manualScroll,{passive:true});canvas.addEventListener('pointerdown',input,{passive:true});canvas.addEventListener('touchstart',input,{passive:true});canvas.addEventListener('keydown',input);story.addEventListener('wheel',input,{passive:true});
-    teardown=()=>{cancel();window.removeEventListener('scroll',manualScroll);canvas.removeEventListener('pointerdown',input);canvas.removeEventListener('touchstart',input);canvas.removeEventListener('keydown',input);story.removeEventListener('wheel',input);};
+    teardown=()=>{cancel();clearInterval(refreshTimer);window.removeEventListener('scroll',manualScroll);canvas.removeEventListener('pointerdown',input);canvas.removeEventListener('touchstart',input);canvas.removeEventListener('keydown',input);story.removeEventListener('wheel',input);};
   }
   window.cineOpenProject=name=>{const project=projectByName(name);productProject(name,project?.level==='L11'?'rack':'system');};
   window.cineEnterSelected=()=>selectedProject?window.cineOpenProject(selectedProject):productLevel('system');
