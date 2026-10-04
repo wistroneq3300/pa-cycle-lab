@@ -1,0 +1,18 @@
+name: Runtime manifest
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  consistency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check runtime manifest without modifying it
+        run: python3 scripts/check_runtime_manifest.py
+      - name: Verify runtime hash is fail-closed
+        run: python3 -c 'from integration.store import engine_hash; print("engine_hash:", engine_hash())'

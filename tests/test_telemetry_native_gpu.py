@@ -25,6 +25,22 @@ def test_gpu_provision_and_native_charts_real_route(rig,count):
     assert len(json.loads(r.tmp.joinpath('targets.json').read_text()))==2
 
 
+def test_host_and_gpu_scopes_do_not_dispatch_the_other_component(rig):
+    nid=rig.nodes[0]['node_id'];rig.monitor.gpus[nid]=1
+    rig.svc.config=rig.monitor.config=replace(rig.config,dcgm_image='registry.example/dcgm:validated-v1')
+    host=execute(rig,enqueue(rig,key='host-scope-001',scope='host'))
+    assert host['state']=='READY' and host['scope']=='host'
+    host_commands=[call[2] for call in rig.monitor.calls if call[0]=='ssh']
+    assert not any('# PA_GPU_CAPABILITY' in command for command in host_commands)
+
+    rig.monitor.calls.clear()
+    gpu=execute(rig,enqueue(rig,key='gpu-scope-001',scope='gpu'))
+    assert gpu['state']=='READY' and gpu['scope']=='gpu'
+    gpu_commands=[call[2] for call in rig.monitor.calls if call[0]=='ssh']
+    assert any('# PA_GPU_CAPABILITY' in command for command in gpu_commands)
+    assert not any("sport = :9100" in command for command in gpu_commands)
+
+
 @pytest.mark.parametrize('mode,expected,install',[('healthy','READY',0),('occupied','DEGRADED',0),('stopped','READY',0),('down','DEGRADED',1)])
 def test_gpu_partial_does_not_break_host(rig,mode,expected,install):
     r=rig;nid=r.nodes[0]['node_id'];r.monitor.gpus[nid]=1;r.monitor.gpu_scenarios[nid]=mode
@@ -56,6 +72,13 @@ def test_unknown_gpu_is_not_cpu_only():
 
 def test_invalid_range_rejected_without_prometheus(rig):
     assert rig.client.get('/api/telemetry/nodes/'+rig.nodes[0]['node_id']+'/charts?period=unlimited').status_code==422
+
+
+@pytest.mark.parametrize('period',['10m','30m','1h','6h','12h','24h','2d','7d','30d'])
+def test_all_supported_ranges_share_the_route_and_chart_contract(rig,period):
+    response=rig.client.get('/api/telemetry/nodes/'+rig.nodes[0]['node_id']+f'/charts?period={period}')
+    assert response.status_code==200
+    assert response.json()['range']==period
 
 
 @pytest.mark.parametrize('mode,expected',[('empty','NO_DATA'),('stale','STALE'),('error','QUERY_ERROR')])

@@ -11,6 +11,7 @@ from .identity_sync import IdentitySync
 from .telemetry_store import ProvisionStore
 from .telemetry_monitoring import MonitoringConfig, MonitoringClient
 from .telemetry_provision import ProvisionService
+from .telemetry_charts import RANGE_PATTERN
 
 
 def install(app,pa):
@@ -92,7 +93,7 @@ def install(app,pa):
         except (ValueError,KeyError) as exc: raise HTTPException(409,str(exc))
 
     @router.get('/nodes/{node_id}/charts')
-    def charts(node_id:str,request:Request,period:str=Query('1h',pattern='^(1h|6h|24h|7d)$')):
+    def charts(node_id:str,request:Request,period:str=Query('1h',pattern=RANGE_PATTERN)):
         target=access(node_id,request);svc=service()
         gpu=svc.store.components(node_id).get('gpu',{}).get('state')
         return svc.charts.read(target,period,gpu)

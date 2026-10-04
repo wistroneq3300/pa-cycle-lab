@@ -1,13 +1,33 @@
-"""Maintainer tool: explicitly update the reviewed runtime file manifest."""
+"""Maintainer tool: deterministically update the reviewed runtime manifest."""
 from pathlib import Path
 import json
-ROOT=Path(__file__).resolve().parents[1]
-files=['run.py','engine/vera_cycle/validation_checkers.json']
-for folder in ('integration','engine/vera_cycle','app'):
-    excluded={'dev','docs','data','tests','qa','node_modules','__pycache__','test-results'}
-    if folder=='app': excluded|={'scripts','deploy'}
-    for p in (ROOT/folder).rglob('*'):
-        rel=p.relative_to(ROOT)
-        if any(part.startswith('.') or part in excluded for part in rel.parts): continue
-        if p.is_file() and (p.suffix in {'.py','.sh','.js','.css','.html'}|({'.md'} if folder!='app' else set()) or p.name=='VERSION'): files.append(rel.as_posix())
-(ROOT/'RUNTIME_ENGINE_FILES.json').write_text(json.dumps({'RUNTIME_ENGINE_FILES':sorted(files)},indent=2)+'\n',encoding='utf-8')
+
+ROOT = Path(__file__).resolve().parents[1]
+MANIFEST = ROOT / 'RUNTIME_ENGINE_FILES.json'
+
+
+def discover_runtime_files(root=ROOT):
+    files = {'run.py', 'engine/vera_cycle/validation_checkers.json'}
+    for folder in ('integration', 'engine/vera_cycle', 'app'):
+        excluded = {'dev', 'docs', 'data', 'tests', 'qa', 'node_modules', '__pycache__', 'test-results'}
+        if folder == 'app':
+            excluded |= {'scripts', 'deploy'}
+        for path in (root / folder).rglob('*'):
+            relative = path.relative_to(root)
+            if any(part.startswith('.') or part in excluded for part in relative.parts):
+                continue
+            suffixes = {'.py', '.sh', '.js', '.css', '.html'} | ({'.md'} if folder != 'app' else set())
+            if path.is_file() and (path.suffix in suffixes or path.name == 'VERSION'):
+                files.add(relative.as_posix())
+    return sorted(files)
+
+
+def generate_manifest(root=ROOT):
+    manifest = root / MANIFEST.name
+    payload = {'RUNTIME_ENGINE_FILES': discover_runtime_files(root)}
+    manifest.write_text(json.dumps(payload, indent=2) + '\n', encoding='utf-8')
+    return manifest
+
+
+if __name__ == '__main__':
+    generate_manifest()

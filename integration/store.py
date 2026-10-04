@@ -56,7 +56,7 @@ def runtime_hash(ui=False):
     manifest=ROOT/'RUNTIME_ENGINE_FILES.json'
     files=json.loads(manifest.read_text(encoding='utf-8'))['RUNTIME_ENGINE_FILES']
     # New nested runtime files cannot silently evade PRE's version guarantee.
-    discovered={'run.py'}
+    discovered={'run.py','engine/vera_cycle/validation_checkers.json'}
     for folder in ('integration','engine/vera_cycle','app'):
         excluded={'dev','docs','data','tests','node_modules','__pycache__','qa','test-results'}
         if folder=='app': excluded|={'scripts','deploy'}
@@ -66,7 +66,10 @@ def runtime_hash(ui=False):
             suffixes={'.py','.sh','.js','.css','.html'} | ({'.md'} if folder!='app' else set())
             if p.is_file() and (p.suffix in suffixes or p.name=='VERSION'):
                 discovered.add(relative.as_posix())
-    if discovered-set(files): raise Conflict('Runtime manifest is missing: '+', '.join(sorted(discovered-set(files))))
+    missing=discovered-set(files)
+    extra=set(files)-discovered
+    if missing: raise Conflict('Runtime manifest is missing: '+', '.join(sorted(missing)))
+    if extra: raise Conflict('Runtime manifest has extra entries: '+', '.join(sorted(extra)))
     if len(files)!=len(set(files)): raise Conflict('Duplicate runtime manifest entries')
     hashes={}
     for name in files:

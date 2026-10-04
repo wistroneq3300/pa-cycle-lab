@@ -44,9 +44,11 @@ def rig(tmp_path):
     if svc.thread: svc.close()
 
 
-def enqueue(r,index=0,key='request-001'):
+def enqueue(r,index=0,key='request-001',scope=None):
     node=r.client.get('/api/telemetry/systems/box/nodes').json()['nodes'][index]
-    response=r.client.post('/api/telemetry/nodes/'+node['node_id']+'/enable',json={'idempotency_key':key,'expected_binding_revision':node['binding_revision']})
+    body={'idempotency_key':key,'expected_binding_revision':node['binding_revision']}
+    if scope is not None: body['scope']=scope
+    response=r.client.post('/api/telemetry/nodes/'+node['node_id']+'/enable',json=body)
     assert response.status_code==202,response.text
     return response.json()
 

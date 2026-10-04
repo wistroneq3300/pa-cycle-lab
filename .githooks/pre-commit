@@ -1,0 +1,7 @@
+#!/bin/sh
+set -eu
+
+python3 scripts/runtime_manifest.py
+git add RUNTIME_ENGINE_FILES.json
+python3 scripts/check_runtime_manifest.py
+python3 -c 'from integration.store import engine_hash; print("engine_hash:", engine_hash())'

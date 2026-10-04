@@ -6,6 +6,7 @@ import threading
 import time
 
 RANGES={'10m':600,'30m':1800,'1h':3600,'6h':21600,'12h':43200,'24h':86400,'2d':172800,'7d':604800,'30d':2592000}
+RANGE_PATTERN='^('+'|'.join(RANGES)+')$'
 _pool=ThreadPoolExecutor(max_workers=4,thread_name_prefix='pa-prom-query')
 _admission=threading.BoundedSemaphore(4)
 

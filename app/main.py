@@ -1,4 +1,4 @@
-"""Wistron PA Server Manager — 後端 (FastAPI)
+"""Wistron PA Validation Platform — 後端 (FastAPI)
 
 提供：
 - 專案分類（projects）：新增/列出/刪除，機台可掛到某個專案。
@@ -65,7 +65,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from pydantic import BaseModel, Field
 
-app = FastAPI(title="Wistron PA Server Manager API")
+app = FastAPI(title="Wistron PA Validation Platform API")
 
 # 開發用：允許本機檔案直接開
 # Integration owns authentication, same-origin policy and route classification.
@@ -4050,6 +4050,25 @@ def _tel_latest(r):
     return f"{last:.1f}" if isinstance(last,(int,float)) else str(last)
 
 
+def _telemetry_trend_desc(vals):
+    """Describe a real series without inventing a trend from insufficient data."""
+    if not vals:
+        return "沒有趨勢資料"
+    if len(vals) == 1:
+        return "資料不足"
+    half = len(vals) // 2
+    first = vals[:half]
+    second = vals[half:]
+    a = sum(first) / len(first)
+    b = sum(second) / len(second)
+    d = b - a
+    if d > max(5, abs(a) * 0.3):
+        return "上升"
+    if d < -max(5, abs(a) * 0.3):
+        return "下降"
+    return "持平"
+
+
 @app.get("/api/machine/{name}/telemetry/analyze")
 def machine_telemetry_analyze(name: str, minutes: int = 60, node_id: str = ""):
     """針對單機 Telemetry 數據，叫本機 AI 做『簡短』分析（幾句話說明是否正常）。
@@ -4070,20 +4089,6 @@ def machine_telemetry_analyze(name: str, minutes: int = 60, node_id: str = ""):
     def trend_key(k):
         vals = [r[k] for r in os_arr if r.get(k) is not None]
         return _tel_latest(vals)
-    def trend_desc(vals):
-        """把時間序列壓成趨勢描述：第一半平均 vs 後半平均 → 上升/持平/下降。"""
-        if not vals:
-            return ""
-        half = max(1, len(vals) // 2)
-        a = sum(vals[:half]) / half
-        b = sum(vals[half:]) / (len(vals) - half)
-        d = b - a
-        if d > max(5, abs(a) * 0.3):
-            return "上升"
-        if d < -max(5, abs(a) * 0.3):
-            return "下降"
-        return "持平"
-
     cpu_vals = [r.get("cpu_used") for r in os_arr if r.get("cpu_used") is not None]
     load1_vals = [r.get("load1") for r in os_arr if r.get("load1") is not None]
     memp_vals = [r.get("mem_used_pct") for r in os_arr if r.get("mem_used_pct") is not None]
@@ -4092,11 +4097,11 @@ def machine_telemetry_analyze(name: str, minutes: int = 60, node_id: str = ""):
     memp = last_key("mem_used_pct"); memu = last_key("mem_used_gb"); memt = last_key("mem_total_gb")
 
     trend_parts = [
-        f"CPU使用率{trend_desc(cpu_vals)}",
-        f"Load{trend_desc(load1_vals)}",
+        f"CPU使用率{_telemetry_trend_desc(cpu_vals)}",
+        f"Load{_telemetry_trend_desc(load1_vals)}",
     ]
     if memp_vals:
-        trend_parts.append(f"記憶體{trend_desc(memp_vals)}")
+        trend_parts.append(f"記憶體{_telemetry_trend_desc(memp_vals)}")
 
     disk = ""
     disks = osd.get("disk") or []
@@ -4129,7 +4134,7 @@ def machine_telemetry_analyze(name: str, minutes: int = 60, node_id: str = ""):
             u = [x for x in s.get("util", []) if x is not None]
             if len(u) >= 4:
                 tot += 1
-                if trend_desc(u) == "上升":
+                if _telemetry_trend_desc(u) == "上升":
                     up += 1
         if tot and up / tot >= 0.6:
             gpu_trend_note = "，GPU 多數正在上升"
