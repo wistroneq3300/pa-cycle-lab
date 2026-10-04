@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wistron PA Server Manager</title>
+<title>Wistron PA Validation Platform</title>
 <link rel="icon" type="image/svg+xml" href="/static/img/wistron-official.svg">
 <link rel="stylesheet" href="/static/css/style.css?v=20261001-tel-status1">
 <link rel="stylesheet" href="/static/css/wistron-boot.css?v=20261001-boot1">
 <link rel="stylesheet" href="/static/vendor/xterm/xterm.css">
 <link rel="stylesheet" href="/static/css/product.css?v=20260924-promote-visible">
-<link rel="stylesheet" href="/static/css/product-detail.css?v=20261004-diagcollapse">
+<link rel="stylesheet" href="/static/css/product-detail.css?v=20261004-platform1">
 <link rel="stylesheet" href="/static/css/cinematic.css?v=20260924gb300-insertion2">
 <link rel="stylesheet" href="/static/css/workspace-cinematic.css?v=20261001-sensor-fix">
 <link rel="stylesheet" href="/static/css/wistron-light.css">
@@ -20,10 +20,11 @@
 <link rel="stylesheet" href="/static/css/workspace-ux.css?v=20261001-teltime1">
 <link rel="stylesheet" href="/static/css/topology.css?v=20260924-network-led2">
 <link rel="stylesheet" href="/static/css/cycle.css?v=20261003-lc3"><link rel="stylesheet" href="/static/css/cycle-workspace.css?v=20261003-vc1">
-<link rel="stylesheet" href="/static/css/telemetry-provision.css?v=20261004-diag">
-<link rel="stylesheet" href="/static/css/telemetry-native.css?v=20261004-ai">
-<link rel="stylesheet" href="/static/css/inspection-refinement.css?v=20261004-legacy">
+<link rel="stylesheet" href="/static/css/telemetry-provision.css?v=20261004-platform1">
+<link rel="stylesheet" href="/static/css/telemetry-native.css?v=20261004">
+<link rel="stylesheet" href="/static/css/inspection-refinement.css?v=20261004">
 <link rel="stylesheet" href="/static/css/validation-console.css?v=20261003-vc1">
+<link rel="stylesheet" href="/static/css/validation-overview.css?v=20261004-platform1">
 </head>
 <body>
 
@@ -38,14 +39,14 @@
           <div class="l1">Wistron PA</div>
         </div>
       </div>
-      <div class="manager-label">SERVER MANAGER</div>
-      <div class="sub">L10 系統 · L11 機櫃 統一管理平台</div>
+      <div class="manager-label">VALIDATION PLATFORM</div>
+      <div class="sub">Product Assurance · Server &amp; Rack Validation</div>
     </div>
 
     <nav class="nav" id="nav"></nav>
 
     <div class="sidebar-foot">
-      <span>Wistron PA Server Manager</span><br>
+      <span>Wistron / Product Assurance</span><br>
       <span id="mode-label">Mode: Light</span>
     </div>
   </aside>
@@ -70,10 +71,6 @@
 </svg>
       </button>
 
-            <a class="icon-btn gh-link" id="gh-link" href="https://github.com/wistroneq3300/pa-server-manager-next" target="_blank" rel="noopener noreferrer" title="專案原始碼：GitHub">
-        <svg viewBox="0 0 16 16" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.86 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
-      </a>
-
       <button class="icon-btn" id="theme-toggle" title="切換深淺色">🌓</button>
 
       <div class="user"></div>
@@ -92,7 +89,7 @@
           '<img class="wistron-boot__logo" src="/static/img/wistronlogo.png" alt="Wistron">' +
         '</div>' +
         '<div class="wistron-boot__wordmark">Wistron</div>' +
-        '<div class="wistron-boot__msg">PA Server Manager 載入中…</div>';
+        '<div class="wistron-boot__msg">PA Validation Platform 載入中…</div>';
       document.body.appendChild(boot);
       // 安全網：若 JS 崩潰導致 boot 永不淡出，8 秒後強制移除，避免永久白屏。
       window.__wistronBootGuard = setTimeout(function () {
@@ -274,7 +271,7 @@
 <div class="modal-backdrop" id="bc-modal" style="display:none">
   <div class="modal bc-modal bc-drag" id="bc-modal-box">
     <div class="term-drag-handle bc-head" id="bc-head">
-      <div class="modal-title" id="bc-title"><span class="grip">▦</span> 📡 廣播終端 <span class="hint" id="bc-title-hint"></span></div>
+      <div class="modal-title" id="bc-title"><span class="grip">▦</span> 廣播終端 <span class="hint" id="bc-title-hint"></span></div>
       <span class="spacer"></span>
       <button class="icon-btn bc-max" id="bc-max-btn" onclick="toggleBcMaximize()" title="放大 / 還原">⛶</button>
       <button class="icon-btn" onclick="closeBroadcast()" title="關閉">✕</button>
@@ -283,7 +280,7 @@
       <div class="bc-tabs" id="bc-tabs"></div>
       <div class="bc-ctrl">
         <button class="btn small" id="bc-grid-btn" onclick="bcSetGrid(!bcState.grid)" title="同時顯示全部主機（方形網格，幾台就排幾格）"><span class="bc-chk-box"></span>全部顯示</button>
-        <button class="btn small active" id="bc-bcast-on" onclick="bcSetBroadcast(true)" title="廣播模式">📡 廣播全部</button>
+        <button class="btn small active" id="bc-bcast-on" onclick="bcSetBroadcast(true)" title="廣播模式">廣播全部</button>
         <button class="btn small" id="bc-bcast-off" onclick="bcSetBroadcast(false)" title="只操作目前選取主機">◈ 目前主機</button>
       </div>
     </div>
@@ -293,7 +290,7 @@
     </div>
     <div class="bc-statusbar" id="bc-status">
       <div class="bc-bcastbar">
-        <span class="bc-bc-label">📡 指令列</span>
+        <span class="bc-bc-label">指令列</span>
         <input id="bc-input" type="text" placeholder="輸入指令，Enter 送出（自動加到目前主機或全部主機）" autocomplete="off" spellcheck="false">
       </div>
       <span class="hint" id="bc-status-txt" style="white-space:nowrap"></span>
@@ -306,7 +303,7 @@
 <script src="/static/vendor/chartjs/chart.umd.min.js"></script>
 <script src="/static/js/equipment-rules.js?v=20260924-r4"></script>
 <script src="/static/js/equipment-connections.js?v=20260924-r4"></script>
-<script src="/static/js/app.js?v=20261003-telemetry1"></script>
+<script src="/static/js/app.js?v=20261004-platform1"></script>
 <script src="/static/js/topology.js?v=20260924-network-led2"></script>
 <script src="/static/js/userguide.js?v=20260924-guide1"></script>
 <script>
@@ -318,28 +315,29 @@ window.SPX_KVM_LAUNCH_API =
   (location.hostname === "127.0.0.1" && "https://portal.lab.example.internal/api/kvm/launch") ||
   (location.origin + "/api/kvm/launch");
 </script>
-<script src="/static/js/product.js?v=20261001-sysworkspace1"></script>
+<script src="/static/js/product.js?v=20261004-platform1"></script>
 <script src="/static/js/inspection-evidence.js?v=20261004"></script>
-<script src="/static/js/system-inspection.js?v=20261004-legacy"></script>
-<script src="/static/js/telemetry-native.js?v=20261004-ai2"></script>
-<script src="/static/js/telemetry-provision.js?v=20261004-reopen"></script>
-<script src="/static/js/product-detail.js?v=20261004-bmcsshonly"></script>
+<script src="/static/js/system-inspection.js?v=20261004-platform1"></script>
+<script src="/static/js/telemetry-native.js?v=20261004-platform1"></script>
+<script src="/static/js/telemetry-provision.js?v=20261004-platform1"></script>
+<script src="/static/js/product-detail.js?v=20261004-platform1"></script>
 <script src="/static/js/core-scene.js?v=20260924-cooling1"></script>
-<script src="/static/js/cinematic.js?v=20260924gb300-insertion2"></script>
+<script src="/static/js/cinematic.js?v=20261004-platform1"></script>
 <script src="/static/js/workspace-cinematic.js?v=20260924-ux2"></script>
 <script src="/static/js/hardware-visuals.js?v=20260924-power-fans"></script>
 <script src="/static/js/workspace-reliability.js?v=20260924-cooling1"></script>
 <script src="/static/js/rack-equipment-scene.js?v=20260924-network-led2"></script>
-<script src="/static/js/equipment-workspace.js?v=20261001-sysworkspace1"></script>
+<script src="/static/js/equipment-workspace.js?v=20261004-platform1"></script>
 <script src="/static/js/engineering-ux.js?v=20261001-noreadout1"></script>
 <script src="/static/js/operations-ux.js?v=20260924-ux2"></script>
-<script src="/static/js/workspace-ux.js?v=20261001-sysworkspace1"></script>
+<script src="/static/js/workspace-ux.js?v=20261004-platform1"></script>
+<script src="/static/js/validation-overview.js?v=20261004-platform1"></script>
 <script type="module" src="/static/js/kvm_broadcast.js?v=20260924-review1"></script>
 <div id="guide-root"></div>
 
 
 <script src="/static/js/cycle-fleet.js?v=20261003-vc1"></script>
-<script src="/static/js/cycle-console.js?v=20261003-vc1"></script>
+<script src="/static/js/cycle-console.js?v=20261004-platform1"></script>
 <script src="/static/js/cycle-workspace.js?v=20261003-ui-adapt2"></script>
 
 </body>

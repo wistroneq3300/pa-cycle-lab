@@ -17,14 +17,14 @@ async function confirmUser(message) {
   return typeof window.uxConfirm === "function" ? window.uxConfirm(message) : window.confirm(message);
 }
 "use strict";
-/* Wistron PA Server Manager - frontend */
+/* Wistron PA Validation Platform - frontend */
 const NAV_ITEMS = [
-  { id: "dashboard", icon: "🏠", label: "系統架構總覽", group: "總覽" },
-  { id: "projects",  icon: "🖘", label: "System Manager", group: "管理" },
-  { id: "rack",      icon: "🗄", label: "Rack Manager", group: "管理" },
-  {id:"cycle",icon:"↻",label:"Cycle 執行紀錄",group:"驗證"},
+  { id: "dashboard", icon: "", label: "總覽", group: "總覽" },
+  { id: "projects",  icon: "", label: "系統與專案", group: "管理" },
+  { id: "rack",      icon: "", label: "機櫃管理", group: "管理" },
+  { id: "cycle",     icon: "", label: "Cycle 驗證", group: "驗證" },
 ];
-const TITLES = { cycle:"Cycle 驗證", dashboard: "系統架構總覽", projects: "System Manager", rack: "Rack Manager", machine: "單機詳情" };
+const TITLES = { cycle:"Cycle 驗證", dashboard: "總覽", projects: "系統與專案", rack: "機櫃管理", machine: "系統詳情" };
 const RENDERERS = { cycle:()=>window.CycleWorkspace.shell(), dashboard: pageDashboard, projects: pageProjects, rack: pageRack, machine: pageMachine };
 const state = { view: "dashboard" };
 let _activeProject = "";       // #/projects/{name}：目前定位的專案（deep-link + 高亮）
@@ -572,7 +572,7 @@ async function rackPing(project) {
     rackView.pingCheckedAt = "";
     notifyUser("Ping 失敗：" + e.message);
   }
-  if (btn) { btn.textContent = "📡 Ping Rack"; btn.disabled = false; }
+  if (btn) { btn.textContent = "整櫃連線檢查"; btn.disabled = false; }
   if (state.view === "rack") setView("rack");
 }
 // 整櫃開/關機：彈出「廣播式多選」讓使用者勾選要同時控制哪些機台
@@ -983,8 +983,8 @@ function rackAddDialog(presetU) {
   if (!candidates.length) {
     const otherProjects = machines.filter(x => x.level === "rack" && x.project !== proj);
     notifyUser(otherProjects.length
-      ? `這個機櫃專案「${proj}」沒有其他可加入的 L11 機台。\n其他專案的 L11 不能跨專案加進來（${esc([...new Set(otherProjects.map(m=>m.project))].join("、"))}）。請在 System Manager 把該系統設為本專案的 L11。`
-      : "此機櫃目前沒有其他可加入的 L11 機台（所有同專案 L11 都已在此機櫃；L10 請先在 System Manager 升為本專案的 L11）。");
+      ? `這個機櫃專案「${proj}」沒有其他可加入的 L11 機台。\n其他專案的 L11 不能跨專案加入（${esc([...new Set(otherProjects.map(m=>m.project))].join("、"))}）。請先到「系統與專案」把該系統設為本專案的 L11。`
+      : "此機櫃目前沒有其他可加入的 L11 機台（所有同專案 L11 都已在此機櫃；L10 請先到「系統與專案」升為本專案的 L11）。");
     return;
   }
   const selOpts = candidates.map(m => `<option value="${esc(m.name)}">${esc(m.name)} (${esc(m.os_ip||"—")})</option>`).join("");
@@ -1134,21 +1134,21 @@ function pageRack() {
   return `
     <div class="rack-hero">
       <div class="rack-hero-left">
-        <div class="rack-hero-title">🗄 Rack Manager</div>
+        <div class="rack-hero-title">機櫃管理</div>
         <div class="rack-hero-sub">${esc(proj || "（未選專案）")} 專案 · ${members.length} 台</div>
         ${racksProjectDesc ? `<div class="rack-hero-desc">${esc(racksProjectDesc)}</div>` : ""}
       </div>
       ${toolbar}
       ${anyRack ? `
-      <button class="btn primary" id="rack-ping-btn" onclick="rackPing('${esc(rackView.project)}')">📡 Ping Rack</button>
-      <button class="btn" onclick="rackNetworkingTopology()">🗺 網路拓樸</button>
+      <button class="btn primary" id="rack-ping-btn" onclick="rackPing('${esc(rackView.project)}')" title="ICMP Ping">整櫃連線檢查</button>
+      <button class="btn" onclick="rackNetworkingTopology()">網路拓樸</button>
       <button class="btn" onclick="rackPowerAllDialog()">⏻ 開機整櫃</button>
       <button class="btn btn-danger" onclick="rackPowerAllDialog(false)">⏻ 關機整櫃</button>
-      <button class="btn primary" onclick="rackBroadcastDialog('${esc(rackView.project)}')">📡 廣播終端</button>` : ""}
+      <button class="btn primary" onclick="rackBroadcastDialog('${esc(rackView.project)}')">廣播終端</button>` : ""}
     </div>
     ${proj && (pendingByProj[proj]||[]).length && !members.length ? `
     <div class="rack-pending-hint">
-      ⏳ <b>${esc(proj)}</b> 有 <b>${(pendingByProj[proj]||[]).length}</b>台 L11 系統還沒上櫃。到 System Manager 的 L11 分頁按「＋ 新增至機櫃」挑一台、選 U 數，就會出現在這裡。
+      <b>${esc(proj)}</b> 有 <b>${(pendingByProj[proj]||[]).length}</b> 台 L11 系統尚未上櫃。到「系統與專案」的 L11 分頁選擇「新增至機櫃」，再指定 U 數。
     </div>` : ""}
     <div class="rack-status-legend">
       ${Object.values(MGX_TYPES).filter((v, i, a) => a.findIndex(x => x.cls === v.cls) === i).map(v => `<span class="mgx-legend"><span class="mgx-dot ${v.cls}"></span>${esc(v.label)}</span>`).join("")}
@@ -1354,7 +1354,7 @@ function devicesHtml(members, pinged) {
           ${!equipmentIsServer(m) ? equipmentActionsHtml(m) : ""}
           ${equipmentIsServer(m) && equipmentCanConnect(m) ? `<button class="btn small" onclick="openTerm('${esc(m.name)}')">▶ Terminal</button>` : ""}
           ${equipmentCanPower(m) ? `<button class="btn small" onclick="machControlDialog('${esc(m.name)}')" title="開關機 / Reboot / AUX cycle">⏻ 開關機</button>` : ""}
-          ${rackIsExternal(m) ? "" : `<button class="btn small" title="從機櫃拿掉（System Manager 的 L11 不受影響）" onclick="rackUnmount('${esc(m.name)}')">刪除</button>`}
+          ${rackIsExternal(m) ? "" : `<button class="btn small" title="從機櫃移出（「系統與專案」的 L11 資料不受影響）" onclick="rackUnmount('${esc(m.name)}')">刪除</button>`}
         </td>
       </tr>`;
     }).join("") + `</tbody></table></div></div>`;
@@ -1980,7 +1980,7 @@ function pageProjects() {
   const nRack = machines.filter(m => isRackItem(m)).length;
   return `
     <div class="section-h flex-wrap">
-      <span class="t" style="font-size:18px">System Manager</span>
+      <span class="t" style="font-size:18px">系統與專案</span>
       <span class="hint">專案分組 · 拖曳卡片調整順序</span>
       <div class="lvl-tabs">
         <button class="btn small lvl-tab ${projectLevelFilter.val==="system"?"active":""}" data-lvl="system" onclick="setProjectLevelFilter('system')">🖘 L10 系統 ${nSys}</button>
@@ -2223,7 +2223,7 @@ async function rackPromote(name, project) {
 // 把 L11 降回 L10（單機）：清除機櫃位置欄位
 async function rackDemote(name) {
   if (!equipmentIsServer(machines.find(m=>m.name===name))) return notifyUser("Only servers can be converted to L10");
-  if (!await confirmUser("確定要把「" + name + "」降回 L10（退出 Rack Manager）嗎？")) return;
+  if (!await confirmUser("確定要把「" + name + "」降回 L10（退出機櫃管理）嗎？")) return;
   try {
     await api("/api/machines/" + encodeURIComponent(name), { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ level: "system", rack_u: 0 }) });
     await Promise.all([loadMachines(), loadProjects()]);
@@ -2490,7 +2490,7 @@ async function loadTelemetry() {
     return;
   }
   if (_activeMachine!==name || target!==JSON.stringify(observationViewTarget(name))) return;
-  if(win) win.textContent=telWindowLabel(telMinutes)+(d.history_source==="legacy-machine-unattributed"?" · 舊 machine 歷史／未確認 node 歸屬":" · Node "+(operationTarget(name).active_os??"—"))+" · 採集 "+(d.observation?.state||"UNKNOWN");
+  if(win) win.textContent=telWindowLabel(telMinutes)+(d.history_source==="legacy-machine-unattributed"?" · 未確認節點歸屬的歷史紀錄":" · Node "+(operationTarget(name).active_os??"—"))+" · 採集 "+(d.observation?.state||"UNKNOWN");
   const os = d.os || {}, gpu = d.gpu || {};
   const oarr = os.os || [];
   const oLabels = oarr.map(r => telT(r.ts));
@@ -3989,7 +3989,7 @@ async function deleteMachine(name) {
 async function rackUnmount(name) {
   const item=machines.find(m=>m.name===name);
   if (item && rackIsExternal(item)) return rackCduDialog(item.project,item.name);
-  if (!await confirmUser("「" + name + "」要從機櫃拿掉嗎？\n（System Manager 的系統不會被刪除，只是取消機櫃 U 位置、仍維持 L11）")) return;
+  if (!await confirmUser("「" + name + "」要從機櫃拿掉嗎？\n（「系統與專案」中的系統不會被刪除，只會取消機櫃 U 位置並維持 L11。）")) return;
   try {
     await rackPlace(name, 0, item?.project);
     setView("rack");
@@ -4032,7 +4032,7 @@ function renderProjectList() {
     const systems = machines.filter(m => m.project === p.name && !isRackItem(m)).length;
     return `<tr><td><b>${esc(p.name)}</b></td><td>${esc(p.desc || "")}</td><td>${p.machine_count}（R${racks}/S${systems}）</td>
       <td style="white-space:nowrap">
-        <button class="btn small" data-cycle-project="${encodeURIComponent(p.name)}">Cycle Test</button>
+        <button class="btn small" data-cycle-project="${encodeURIComponent(p.name)}">Cycle 驗證</button>
         <button class="btn small" onclick="editProjectStart('${esc(p.name)}')">編輯</button>
         <button class="btn small${canDelete ? "" : " disabled"}" title="${canDelete ? "刪除" : "此專案還有機台，無法刪除"}" ${canDelete ? `onclick="deleteProject('${esc(p.name)}')"` : "disabled"}>刪除</button>
       </td></tr>`;
@@ -4440,7 +4440,7 @@ function rackBroadcastDialog(project) {
       : '';
     return `<div style="margin-bottom:8px">${header}${list}</div>`;
   }).join("");
-  showDialog("📡 廣播終端 — 選擇要同時控制的主機 / 節點", `
+  showDialog("廣播終端 — 選擇要同時控制的主機 / 節點", `
     <label style="display:block;font-size:12px;color:var(--text-faint);margin-bottom:10px">
       勾選要同步下指令的「節點」（多 OS 機框每顆 OS 各自一節點；同一次指令同時送到所有勾選節點的 OS shell）。
     </label>

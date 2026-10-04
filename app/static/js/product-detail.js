@@ -62,7 +62,7 @@
   }
   function kv(label, value, cls = '') { return `<div class="pd-key-value ${cls}"><span>${label}</span><strong>${esc(value || '—')}</strong></div>`; }
   function stateDot(online, label) { return `<span class="pd-state ${online === true ? 'pd-state-online' : online === false ? 'pd-state-offline' : ''}"><i></i>${online===true?'Ping \u53ef\u9054':online===false?'Ping \u672a\u56de\u61c9':'\u5c1a\u672a\u89c0\u6e2c'}</span>`; }
-  let tabs = [['overview','Overview','系統概覽'],['hardware','Hardware','硬體配置'],['osslots','OS Slots','獨立 OS'],['sensors','Sensors & firmware','感測與韌體'],['telemetry','Telemetry','效能遙測'],['tasks','Test tasks','測試任務']];
+  let tabs = [['overview','Overview','概覽'],['hardware','Inventory','硬體'],['osslots','Nodes','節點'],['sensors','Health','健康狀態'],['telemetry','Telemetry','遙測'],['tasks','Validation','驗證']];
   // Keep the asynchronously produced report attached to its new workspace panel.
   sensorAnalyze = async function(name) {
     await originalSensorAnalyze(name);
@@ -156,15 +156,16 @@
       </select>
     </div>` : '';
     const connection = `<div class="pd-connectivity"><div class="pd-connection"><div class="pd-connection-icon">OS</div><div><span>作業系統${multiOs ? ` <small class="pd-os-slot-tag">${esc(dispLabel(osList.find(e=>e.slot===activeOs)))}</small>` : ''}</span><strong>${esc(b.os_ip || '未設定 OS IP')}</strong><small class="pd-mac">MAC: ${esc((d.network_identity?.os?.ip === b.os_ip && d.network_identity?.os?.mac) || "\u672a\u53d6\u5f97")}</small><small>${esc(b.os_user || '—')}</small></div>${stateDot(b.os_alive, b.os_alive ? 'Online' : 'Offline')}</div><div class="pd-connection"><div class="pd-connection-icon">BMC</div><div><span>管理控制器</span><strong>${esc(b.bmc_ip || '未設定 BMC IP')}</strong><small class="pd-mac">MAC: ${esc((d.network_identity?.bmc?.ip === b.bmc_ip && d.network_identity?.bmc?.mac) || "\u672a\u53d6\u5f97")}</small><small>${esc(b.bmc_user || '—')} · IPMI</small></div>${stateDot(b.bmc_alive, !b.bmc_ip ? 'Not set' : b.bmc_alive ? 'Online' : 'Offline')}</div></div>`;
-    const overview = `<div class="pd-overview-top"><section class="pd-showcase p-surface"><div class="pd-showcase-copy"><span class="pd-eyebrow">${level} / ${rack ? 'RACK COMPONENT' : 'SYSTEM LEVEL'}</span><h2 class="pd-identity-heading" title="${esc(identity.label || '系統配置')}">${esc(identity.model || '系統配置')}</h2><p>${esc(identity.label || hw.cpu?.model || os.distro || '硬體、連線與測試作業')}</p><button class="pd-text-action" onclick="productDetailTab('hardware')">檢視硬體配置 ${glyph('arrow-up-right','↗')}</button></div>${chassis()}<div class="pd-showcase-foot"><span>${esc(b.project || '未分類專案')}</span><span>${esc(rack && b.rack_u ? `U${b.rack_u} · ${b.rack_size || 1}U` : os.distro || '系統配置')}</span></div></section><section class="pd-connect-panel p-surface">${title('管理介面','連線狀態',stateDot(b.os_alive && (!b.bmc_ip || b.bmc_alive), b.os_alive && (!b.bmc_ip || b.bmc_alive) ? 'Connected' : 'Attention'))}${connection}<div class="pd-connection-foot"><span>Chassis power</span>${b.bmc_alive ? powerBadge(d.power) : '<span class="pd-dim">Unavailable</span>'}</div></section></div><div class="pd-inventory-summary pd-inventory-reported">${hardwareSummary.map(([label,value,caption],i) => `<button class="pd-summary-tile p-surface p-tilt" data-inventory="${label.toLowerCase()}" onclick="productDetailTab('hardware')"><span class="pd-eyebrow">${label}</span><strong>${esc(value)}</strong><small title="${esc(caption)}">${esc(caption)}</small><span class="pd-tile-index">0${i+1} ↗</span></button>`).join('')}</div><p class="pd-inventory-note">${d.os_info?.fetched_at ? `資料時間：${esc(d.os_info.fetched_at)} · ` : ''}依目前回報資料顯示；未回報不代表未安裝。</p>${diagnostic ? `<section class="pd-diagnostic p-surface${diagnosticCollapsed.get(name)?' pd-diagnostic-collapsed':''}"><div class="pd-section-heading"><h2><button type="button" class="pd-diagnostic-collapse" data-diag-collapse aria-expanded="${diagnosticCollapsed.get(name)?'false':'true'}" title="收闔系統診斷"><span class="pd-diagnostic-caret" aria-hidden="true">▾</span>系統診斷</button></h2><span class="pd-diagnostic-heading-actions"><span class="pd-eyebrow">診斷資訊</span><button class="pd-text-action" onclick="runDiagnose(${quote(name)})">執行系統診斷 ${glyph('arrow-up-right','↗')}</button></span></div><div class="pd-diagnostic-body" data-diag-body${diagnosticCollapsed.get(name)?' hidden':''}>${cleanSection(diagnostic,'Diagnostic report','pd-diagnostic-content')}</div></section>` : ''}${equipmentIsServer(m) && !m.passive ? (window.SystemInspection?.card(name) || '') : ""}`;
-    const firmwareSummary = `<section class="pd-firmware-summary"><span class="pd-eyebrow">FIRMWARE</span><h3>平台韌體</h3><p>BIOS · ${esc(hw.firmware?.bios?.vendor || '—')} ${esc(hw.firmware?.bios?.version || '')}</p><p>BMC · ${esc((d.fw || []).find(item => item.key === 'Firmware Revision')?.value || '—')}</p><button class="pd-text-action" onclick="productDetailTab('sensors',true)">開啟 韌體清單 ↗</button></section>`;
+    const healthSummary = equipmentIsServer(m) && !m.passive ? `<section class="pd-health-summary p-surface"><div><span class="pd-eyebrow">HEALTH</span><h3>健康狀態</h3><strong data-health-summary>正在取得巡檢狀態…</strong></div><button class="pd-text-action" onclick="productDetailTab('sensors',true)">查看健康狀態 ${glyph('arrow-up-right','↗')}</button></section>` : '';
+    const overview = `<div class="pd-overview-top"><section class="pd-showcase p-surface"><div class="pd-showcase-copy"><span class="pd-eyebrow">${level} / ${rack ? 'RACK COMPONENT' : 'SYSTEM LEVEL'}</span><h2 class="pd-identity-heading" title="${esc(identity.label || '系統配置')}">${esc(identity.model || '系統配置')}</h2><p>${esc(identity.label || hw.cpu?.model || os.distro || '硬體、連線與測試作業')}</p><button class="pd-text-action" onclick="productDetailTab('hardware')">檢視硬體配置 ${glyph('arrow-up-right','↗')}</button></div>${chassis()}<div class="pd-showcase-foot"><span>${esc(b.project || '未分類專案')}</span><span>${esc(rack && b.rack_u ? `U${b.rack_u} · ${b.rack_size || 1}U` : os.distro || '系統配置')}</span></div></section><section class="pd-connect-panel p-surface">${title('管理介面','連線狀態',stateDot(b.os_alive && (!b.bmc_ip || b.bmc_alive), b.os_alive && (!b.bmc_ip || b.bmc_alive) ? 'Connected' : 'Attention'))}${connection}<div class="pd-connection-foot"><span>Chassis power</span>${b.bmc_alive ? powerBadge(d.power) : '<span class="pd-dim">Unavailable</span>'}</div></section></div><div class="pd-inventory-summary pd-inventory-reported">${hardwareSummary.map(([label,value,caption],i) => `<button class="pd-summary-tile p-surface p-tilt" data-inventory="${label.toLowerCase()}" onclick="productDetailTab('hardware')"><span class="pd-eyebrow">${label}</span><strong>${esc(value)}</strong><small title="${esc(caption)}">${esc(caption)}</small><span class="pd-tile-index">0${i+1} ↗</span></button>`).join('')}</div><p class="pd-inventory-note">${d.os_info?.fetched_at ? `資料時間：${esc(d.os_info.fetched_at)} · ` : ''}依目前回報資料顯示；未回報不代表未安裝。</p>${healthSummary}`;
+    const firmwareSummary = `<section class="pd-firmware-summary"><span class="pd-eyebrow">FIRMWARE</span><h3>平台韌體</h3><p>BIOS · ${esc(hw.firmware?.bios?.vendor || '—')} ${esc(hw.firmware?.bios?.version || '')}</p><p>BMC · ${esc((d.fw || []).find(item => item.key === 'Firmware Revision')?.value || '—')}</p><button class="pd-text-action" onclick="productDetailTab('sensors',true)">開啟韌體清單 ↗</button></section>`;
     const hardwarePanel = `${title('COMPONENT INVENTORY','硬體配置',`<span class="pd-section-note">${esc(d.os_info?.fetched_at || '最近一次設備資料')}</span>`)}<div class="pd-hardware-layout"><div class="pd-hardware-body p-surface">${cleanSection(hardware,'硬體配置')}</div><div class="pd-identity-card p-surface">${cleanSection(basic,'系統識別資訊')}${firmwareSummary}</div></div>`;
-    const sensorsPanel = `${title('PLATFORM HEALTH','感測與韌體',`<span class="pd-section-note">BMC / BIOS / DEVICE FIRMWARE</span>`)}${b.bmc_alive ? `<div class="pd-sensors-layout"><div class="p-surface pd-sensor-card" id="pd-sensor-live">${cleanSection(sensors,'感測器讀值')}</div><div class="p-surface pd-firmware-card">${cleanSection(firmware,'韌體清單')}</div></div>` : `<div class="pd-unavailable p-surface"><h3>${!b.bmc_ip ? 'BMC 尚未設定' : b.bmc_alive===false ? 'BMC 目前無法連線' : 'BMC 狀態掃描中…'}</h3><p>${esc(b.bmc_ip || '未設定 BMC IP')} · ${!b.bmc_ip ? '請先於機台設定填入 BMC IP／帳密。' : b.bmc_alive===false ? 'BMC 無回應，請檢查網路或電源。' : '背景正在採集感測器與韌體資訊，請稍候或按「重新整理」。'}</p><button class="btn" onclick="machineRefresh()">重新整理</button></div>`}`;
+    const sensorsPanel = `${title('PLATFORM HEALTH','健康狀態',`<span class="pd-section-note">巡檢 / 診斷 / 感測器 / 韌體</span>`)}${equipmentIsServer(m) && !m.passive ? (window.SystemInspection?.card(name) || '') : ''}${diagnostic ? `<section class="pd-diagnostic p-surface${diagnosticCollapsed.get(name)?' pd-diagnostic-collapsed':''}"><div class="pd-section-heading"><h2><button type="button" class="pd-diagnostic-collapse" data-diag-collapse aria-expanded="${diagnosticCollapsed.get(name)?'false':'true'}" title="收合快速診斷"><span class="pd-diagnostic-caret" aria-hidden="true">▾</span>快速診斷</button></h2><button class="pd-text-action" onclick="runDiagnose(${quote(name)})">執行快速診斷 ${glyph('arrow-up-right','↗')}</button></div><div class="pd-diagnostic-body" data-diag-body${diagnosticCollapsed.get(name)?' hidden':''}>${cleanSection(diagnostic,'診斷結果','pd-diagnostic-content')}</div></section>` : ''}${b.bmc_alive ? `<div class="pd-sensors-layout"><div class="p-surface pd-sensor-card" id="pd-sensor-live">${cleanSection(sensors,'感測器讀值')}</div><div class="p-surface pd-firmware-card">${cleanSection(firmware,'韌體清單')}</div></div>` : `<div class="pd-unavailable p-surface"><h3>${!b.bmc_ip ? 'BMC 尚未設定' : b.bmc_alive===false ? 'BMC 目前無法連線' : 'BMC 狀態掃描中…'}</h3><p>${esc(b.bmc_ip || '未設定 BMC IP')} · ${!b.bmc_ip ? '請先於機台設定填入 BMC IP／帳密。' : b.bmc_alive===false ? 'BMC 無回應，請檢查網路或電源。' : '背景正在採集感測器與韌體資訊，請稍候或按「重新整理」。'}</p><button class="btn" onclick="machineRefresh()">重新整理</button></div>`}`;
     const cycleTaskCard = `<section class="pd-task-intro p-surface"><div><h3>Cycle 驗證</h3><p>進入後勾選單一、多個或全部節點，再執行 PRE 與確認。</p><button class="btn" onclick="openChassisCycle(${quote(b.project||'')},${quote(name)})">Cycle 驗證</button><a class="btn" href="#/cycle">近期 Cycle 任務</a></div></section>`;
-    const tasksPanel = `${title('VALIDATION WORKFLOW','測試任務',`<span class="pd-section-note">選擇測項 → 確認目標 → 產生指令</span>`)}<div class="pd-task-intro p-surface"><span class="pd-task-number">01 — 03</span><div><span class="pd-eyebrow">TARGET / ${esc(name)}</span><h3>選擇案例，產生測試指令。</h3><p>為 ${esc(name)} 挑選測試項目，產生可複製至執行工具的指令。</p><button class="pd-primary-btn" onclick="openAssignTask(${quote(name)})">選擇測試與指派 ${glyph('arrow-up-right','↗')}</button></div><div class="pd-task-process"><span><b>01</b>選擇測試類別</span><span><b>02</b>挑選案例與範圍</span><span><b>03</b>產生執行指令</span></div></div>${cycleTaskCard}<div class="pd-library-heading"><h3>測試案例庫 <span>可用測項</span></h3><span id="pd-library-total" class="pd-section-note" aria-live="polite">載入中</span></div><div id="pd-library" class="pd-library-grid"><div class="pd-library-loading" role="status">正在取得案例庫…</div></div>`;
+    const tasksPanel = `${title('VALIDATION WORKFLOW','驗證',`<span class="pd-section-note">Cycle Validation / Test Library / Recent Runs</span>`)}${cycleTaskCard}<div class="pd-task-intro p-surface"><span class="pd-task-number">TEST LIBRARY</span><div><span class="pd-eyebrow">TARGET / ${esc(name)}</span><h3>從測試案例庫指派驗證項目</h3><p>為 ${esc(name)} 選擇測項與執行範圍，再產生執行指令。</p><button class="pd-primary-btn" onclick="openAssignTask(${quote(name)})">開啟 Test Library ${glyph('arrow-up-right','↗')}</button></div><div class="pd-task-process"><span><b>01</b>選擇測試類別</span><span><b>02</b>確認案例與範圍</span><span><b>03</b>產生執行指令</span></div></div><div class="pd-library-heading"><h3>Test Library <span>可用測項</span></h3><span id="pd-library-total" class="pd-section-note" aria-live="polite">載入中</span></div><div id="pd-library" class="pd-library-grid"><div class="pd-library-loading" role="status">正在取得案例庫…</div></div>`;
     const physicalRows=[...osList,...(b.physical_slots||[]).filter(s=>!osList.some(n=>n.slot===s.slot)).map(s=>({...s,empty:true}))].sort((a,b)=>a.slot-b.slot);
     const osRows = physicalRows.map(e => {
-      if(e.empty)return `<tr><td><span class="pd-os-slot-num">${e.slot}</span></td><td colspan="9" class="pd-dim">空槽 · 無 已安裝節點。新增實體節點 會建立新身分；既有退役歷史保留。</td></tr>`;
+      if(e.empty)return `<tr><td><span class="pd-os-slot-num">${e.slot}</span></td><td colspan="9" class="pd-dim">空槽 · 尚未安裝節點。新增實體節點會建立新的資產身分；既有退役歷史保留。</td></tr>`;
       const alive = (b.os_alive_map && b.os_alive_map.hasOwnProperty(e.slot)) ? b.os_alive_map[e.slot] : (osList.length === 1 && activeOs === e.slot ? b.os_alive : null);
       const isActive = e.slot === activeOs;
       // 主 OS（slot 1）若標籤是通用「OS 1」或空，則以機台名稱（即 hostname）顯示
@@ -185,14 +186,14 @@
         </td>
       </tr>`;
     }).join('');
-    const osSlotsPanel = `${title('MULTI-OS CHASSIS','獨立 OS 管理',`<span class="pd-section-note">1 機框 = ${osList.length} 個 已安裝節點 · 控制器依硬體對應設定</span>`)}
+    const osSlotsPanel = `${title('MULTI-NODE CHASSIS','節點管理',`<span class="pd-section-note">1 機框 = ${osList.length} 個已安裝節點 · 控制器依硬體拓樸綁定</span>`)}
       <div class="pd-os-manage p-surface">
-        <div class="pd-os-intro"><p>每個 實體槽位 保留獨立 節點身分。目前 OS 只表示目前選取，不會改變已建立 Cycle 任務 的目標。</p><p class="pd-dim">控制器、KVM 與電源影響範圍依實際硬體對應設定，不假設每個節點有獨立 BMC。退役保留歷史與物理槽位，更換實體節點 需新建資產身分。</p></div>
+        <div class="pd-os-intro"><p>每個實體槽位維持獨立節點身分。切換目前節點只會改變操作目標，不會修改既有 Cycle 任務。</p><p class="pd-dim">BMC、KVM 與電源控制依實際硬體拓樸綁定。節點退役後保留歷史紀錄；更換實體節點時會建立新的資產身分。</p></div>
         <div class="pd-os-table-wrap">
-        <table class="pd-os-table"><colgroup><col style="width:60px"><col style="width:198px"><col style="width:160px"><col style="width:90px"><col style="width:124px"><col style="width:160px"><col style="width:90px"><col style="width:120px"><col style="width:74px"><col style="width:128px"></colgroup><thead><tr><th>槽位</th><th>標籤</th><th>OS IP</th><th>OS 帳號</th><th>OS 憑證</th><th>BMC IP</th><th>BMC 帳號</th><th>BMC 憑證</th><th>OS 狀態</th><th>操作</th></tr></thead><tbody>${osRows || '<tr><td colspan="10" class="pd-dim">沒有 已安裝節點；可新增計畫節點</td></tr>'}</tbody></table>
+        <table class="pd-os-table"><colgroup><col style="width:60px"><col style="width:198px"><col style="width:160px"><col style="width:90px"><col style="width:124px"><col style="width:160px"><col style="width:90px"><col style="width:120px"><col style="width:74px"><col style="width:128px"></colgroup><thead><tr><th>槽位</th><th>標籤</th><th>OS IP</th><th>OS 帳號</th><th>OS 憑證</th><th>BMC IP</th><th>BMC 帳號</th><th>BMC 憑證</th><th>OS 狀態</th><th>操作</th></tr></thead><tbody>${osRows || '<tr><td colspan="10" class="pd-dim">尚未安裝節點；可新增節點。</td></tr>'}</tbody></table>
         </div>
         <div class="pd-os-add">
-          <span class="pd-eyebrow">新增節點資產（使用最低空槽；不沿用退役節點 ID）</span><p class="pd-dim">先建檔不連設備。可另選授權連線探測；硬體對應尚未確認時，Cycle 無法執行。</p>
+          <span class="pd-eyebrow">新增節點</span><p class="pd-dim">系統會使用最低可用槽位並建立新的節點身分。可先建立資料，或完成連線確認後再新增。</p>
           <div class="pd-os-add-row">
             <input class="pd-os-input" id="pd-os-new-label" placeholder="顯示標籤">
             <input class="pd-os-input" id="pd-os-new-ip" placeholder="OS IP">
@@ -201,14 +202,13 @@
             <input class="pd-os-input" id="pd-os-new-bmc-ip" placeholder="BMC IP（可稍後設定）">
             <input class="pd-os-input" id="pd-os-new-bmc-user" placeholder="BMC 帳號">
             <input class="pd-os-input" id="pd-os-new-bmc-pass" type="password" placeholder="BMC 密碼">
-            <button class="btn primary" onclick="pdOsPlan(${quote(name)})">＋ 建立計畫節點</button>
-            <button class="btn" onclick="pdOsAddAndProbe(${quote(name)})">授權探測後建立</button>
+            <button class="btn primary" onclick="pdOsPlan(${quote(name)})">新增節點（不連線）</button>
+            <button class="btn" onclick="pdOsAddAndProbe(${quote(name)})">連線確認後新增</button>
           </div>
         </div>
       </div>`;
-    const cycleNodeLinks=`<button class="btn" onclick="openChassisCycle(${quote(b.project||'')},${quote(name)})">Cycle 驗證</button><span>進入後選擇要驗證的節點</span>`;
-    const panels = {overview,hardware:hardwarePanel,osslots:osSlotsPanel+`<div class="cw-actions">${cycleNodeLinks}</div>`,sensors:sensorsPanel,telemetry:`${title('系統效能','效能遙測','<span class="pd-section-note">CPU / DIMM / SSD / NIC / GPU</span>')}${equipmentIsServer(m) && !m.passive ? (window.TelemetryProvision?.card(name,activeOs) || '') : ''}`,tasks:tasksPanel};
-    return `<div class="pd-workspace" data-system="${esc(name)}"><div class="pd-breadcrumb"><button onclick="machineBack()">系統與專案</button><span>/</span><button onclick="machineBack()">${esc(b.project || '未分類')}</button><span>/</span><strong>${esc(name)}</strong></div><header class="pd-system-header"><div class="pd-system-title"><span class="pd-eyebrow">${level} ${rack ? 'RACK LEVEL' : 'SYSTEM LEVEL'} / 系統工作區</span><h1>${esc(name)}<span class="pd-level-pill">${level}</span></h1><p>${esc(identity.label || os.distro || '系統平台')} <span>·</span> ${esc(hw.cpu?.model || b.mgx_type || '受管系統')}</p></div>${osDropdown}<div class="pd-header-status">${stateDot(b.os_alive,b.os_alive ? 'System online' : 'System offline')}<div><span>專案</span><b>${esc(b.project || '未分類')}</b></div></div></header><div class="pd-workspace-grid"><div class="pd-main"><nav class="pd-tabs" role="tablist" aria-label="系統工作區">${viewTabs.map(([key,label,zh]) => `<button id="pd-tab-${key}" role="tab" aria-selected="${selected===key}" aria-controls="pd-panel-${key}" tabindex="${selected===key?'0':'-1'}" class="${selected===key?'is-active':''}" data-pd-tab="${key}" onclick="productDetailTab('${key}')"><span>${label}</span><small>${zh}</small></button>`).join('')}</nav>${viewTabs.map(([key]) => `<section id="pd-panel-${key}" role="tabpanel" aria-labelledby="pd-tab-${key}" class="pd-tab-panel${selected===key?' is-active':''}"${selected!==key?' hidden':''}>${panels[key]}</section>`).join('')}</div><aside class="pd-operations p-surface"><div class="pd-ops-heading"><span class="pd-eyebrow">設備管理</span><h2>系統操作</h2><span class="pd-command-line"></span></div><div class="pd-operation-group">${operationButton(findAction('openTermDialog'),'開啟 Terminal','terminal',true)}${b.bmc_ip ? `<button class="pd-operation" onclick="window.openKvmSolo && window.openKvmSolo(${quote(name)})">${glyph('monitor','▣')}<span>KVM</span><b>↗</b></button>`:''}${operationButton(findAction('openAssignTask'),'指派測試任務','clipboard')}</div>${rackSpecificationAction ? `<details class="pd-ops-disclosure pd-settings"><summary><span>設備設定</span><b aria-hidden="true">⌄</b></summary><div>${rackSpecificationAction}</div></details>` : ''}${powerActions ? `<details class="pd-ops-disclosure pd-power-group"><summary><span>電源操作</span><b aria-hidden="true">⌄</b></summary><div class="pd-power-content">${powerActions.outerHTML}</div></details>`:''}<div class="pd-ops-context">${kv('專案層級',rack?'L11 / Rack Level':'L10 / System Level')}${kv('設備類型',b.mgx_type || 'server')}${rack && b.rack_u ? kv('機櫃位置',`U${b.rack_u} · ${b.rack_size || 1}U`) : kv('運作時間',os.uptime)}</div><div class="pd-refresh-action">${operationButton(findAction('machineRefresh'),'重新整理資料','refresh')}</div><div class="pd-ops-foot"><i></i>系統驗證平台</div></aside></div></div>`;
+    const panels = {overview,hardware:hardwarePanel,osslots:osSlotsPanel,sensors:sensorsPanel,telemetry:`${title('系統效能','遙測','<span class="pd-section-note">CPU / DIMM / SSD / NIC / GPU</span>')}${equipmentIsServer(m) && !m.passive ? (window.TelemetryProvision?.card(name,activeOs) || '') : ''}<div class="pd-telemetry-body p-surface">${cleanSection(telemetry,'遙測')}</div>`,tasks:tasksPanel};
+    return `<div class="pd-workspace" data-system="${esc(name)}"><div class="pd-breadcrumb"><button onclick="machineBack()">系統與專案</button><span>/</span><button onclick="machineBack()">${esc(b.project || '未分類')}</button><span>/</span><strong>${esc(name)}</strong></div><header class="pd-system-header"><div class="pd-system-title"><span class="pd-eyebrow">${level} ${rack ? 'RACK LEVEL' : 'SYSTEM LEVEL'} / 系統工作區</span><h1>${esc(name)}<span class="pd-level-pill">${level}</span></h1><p>${esc(identity.label || os.distro || '系統平台')} <span>·</span> ${esc(hw.cpu?.model || b.mgx_type || '受管系統')}</p></div>${osDropdown}<div class="pd-header-status">${stateDot(b.os_alive,b.os_alive ? 'System online' : 'System offline')}<div><span>專案</span><b>${esc(b.project || '未分類')}</b></div></div></header><div class="pd-workspace-grid"><div class="pd-main"><nav class="pd-tabs" role="tablist" aria-label="系統工作區">${viewTabs.map(([key,label,zh]) => `<button id="pd-tab-${key}" role="tab" aria-selected="${selected===key}" aria-controls="pd-panel-${key}" tabindex="${selected===key?'0':'-1'}" class="${selected===key?'is-active':''}" data-pd-tab="${key}" onclick="productDetailTab('${key}')"><span>${label}</span><small>${zh}</small></button>`).join('')}</nav>${viewTabs.map(([key]) => `<section id="pd-panel-${key}" role="tabpanel" aria-labelledby="pd-tab-${key}" class="pd-tab-panel${selected===key?' is-active':''}"${selected!==key?' hidden':''}>${panels[key]}</section>`).join('')}</div><aside class="pd-operations p-surface"><div class="pd-ops-heading"><span class="pd-eyebrow">操作</span><h2>系統操作</h2><span class="pd-command-line"></span></div><div class="pd-operation-group">${operationButton(findAction('openTermDialog'),'Terminal','terminal',true)}${b.bmc_ip ? `<button class="pd-operation" onclick="window.openKvmSolo && window.openKvmSolo(${quote(name)})">${glyph('monitor','▣')}<span>KVM</span><b>↗</b></button>`:''}</div>${rackSpecificationAction ? `<details class="pd-ops-disclosure pd-settings"><summary><span>設備設定</span><b aria-hidden="true">⌄</b></summary><div>${rackSpecificationAction}</div></details>` : ''}${powerActions ? `<details class="pd-ops-disclosure pd-power-group"><summary><span>電源控制</span><b aria-hidden="true">⌄</b></summary><div class="pd-power-content">${powerActions.outerHTML}</div></details>`:''}<div class="pd-ops-context">${kv('專案層級',rack?'L11 / Rack Level':'L10 / System Level')}${kv('設備類型',b.mgx_type || 'server')}${rack && b.rack_u ? kv('機櫃位置',`U${b.rack_u} · ${b.rack_size || 1}U`) : kv('運作時間',os.uptime)}</div><div class="pd-refresh-action">${operationButton(findAction('machineRefresh'),'重新整理','refresh')}</div></aside></div></div>`;
   };
   window.productDetailTab = function(key, focusTab = false) {
     if (!tabs.some(t => t[0] === key)) return;
@@ -396,18 +396,6 @@
       if (input.type === 'number') {input.min = '1';input.max = '65535';}
       label.append(input);form.append(label);
     }
-    // BMC hostname 查詢方式：預設走 SSH（抓不到就留空）；少數只能 Redfish 的 BMC 可另選。
-    const queryModes = [['','SSH（BMC 執行 hostname）'],
-                        ['redfish','Redfish（僅少數 BMC 需要）']];
-    {
-      const label = document.createElement('label');label.textContent = 'BMC Hostname 查詢';
-      const select = document.createElement('select');select.name = 'bmc_hostname_query';select.className = 'pd-os-input';
-      for (const [value,text] of queryModes) {
-        const option = document.createElement('option');option.value = value;option.textContent = text;select.append(option);
-      }
-      select.value = String(node.capabilities?.bmc_hostname_query || '');
-      label.append(select);form.append(label);
-    }
     const status = document.createElement('p');status.setAttribute('role','status');
     const save = document.createElement('button');save.type='submit';save.className='btn';save.textContent='儲存連線';
     const cancel = document.createElement('button');cancel.type='button';cancel.className='btn';cancel.textContent='取消';
@@ -422,10 +410,6 @@
         if (key.includes('pass')) {if(value) body[key]=value;}
         else if (String(value)!==String(node[key]??'')) body[key]=value;
       }
-      const querySelect = form.elements.namedItem('bmc_hostname_query');
-      const nextQuery = querySelect.value;
-      const prevQuery = String(node.capabilities?.bmc_hostname_query || '');
-      if (nextQuery !== prevQuery) body.capabilities = {bmc_hostname_query: nextQuery};
       try {
         const response=await fetch(`/api/machines/${encodeURIComponent(name)}/os/${slot}`,{
           method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
@@ -617,6 +601,14 @@
     workspace.querySelectorAll('.pd-ops-disclosure').forEach(menu => menu.addEventListener('keydown', event => {
       if (event.key === 'Escape' && menu.open) { menu.open = false; menu.querySelector('summary').focus(); event.preventDefault(); }
     }));
+    workspace.querySelector('[data-diag-collapse]')?.addEventListener('click', event => {
+      const button=event.currentTarget,body=workspace.querySelector('[data-diag-body]');
+      const collapsed=button.getAttribute('aria-expanded')==='true';
+      diagnosticCollapsed.set(workspace.dataset.system,collapsed);
+      button.setAttribute('aria-expanded',String(!collapsed));
+      workspace.querySelector('.pd-diagnostic')?.classList.toggle('pd-diagnostic-collapsed',collapsed);
+      if(body)body.hidden=collapsed;
+    });
     workspace.querySelector('.pd-tabs')?.addEventListener('keydown', event => {
       if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
       const visibleTabs=[...workspace.querySelectorAll('.pd-tabs [data-pd-tab]')].filter(t=>!t.hidden);
@@ -632,18 +624,5 @@
     const content = document.getElementById('content');
     if (content) new MutationObserver(() => window.productDetailAfterRender()).observe(content,{childList:true});
     window.productDetailAfterRender();
-  });
-  // Collapse/expand the system diagnostic section (delegated: the section is re-rendered on refresh).
-  document.addEventListener('click', (event) => {
-    const button = event.target.closest('.pd-diagnostic-collapse');
-    if (!button) return;
-    const section = button.closest('.pd-diagnostic');
-    const body = section?.querySelector('[data-diag-body]');
-    const open = button.getAttribute('aria-expanded') !== 'false';
-    button.setAttribute('aria-expanded', open ? 'false' : 'true');
-    if (body) body.hidden = open;
-    section?.classList.toggle('pd-diagnostic-collapsed', open);
-    const name = section?.closest('.pd-workspace')?.dataset.system;
-    if (name) diagnosticCollapsed.set(name, open);
   });
 })();

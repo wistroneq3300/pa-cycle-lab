@@ -39,7 +39,7 @@ if MODE=='synthetic':
     pass
 
 app=pa.app
-app.title='PA Server Manager Next - Cycle Integration'
+app.title='PA Validation Platform - Cycle Integration'
 store=Store()
 # One ordering for inventory mutation and snapshot/reservation acquisition.
 from . import inventory as inventory_module
@@ -679,3 +679,70 @@ from .inspection_routes import install as install_inspection
 inspection_service = install_inspection(app, pa, lambda: store)
 from .telemetry_routes import install as install_telemetry_provision
 telemetry_provision_service = install_telemetry_provision(app, pa)
+
+
+@app.get('/api/validation/overview')
+def validation_overview(request:Request):
+    """Read-only Product Assurance overview from durable inspection/Cycle/Telemetry state."""
+    allowed=[]
+    with pa._DATA_LOCK:
+        project_rows=copy.deepcopy(pa.projects)
+        machine_rows=copy.deepcopy(pa.machines)
+    for name in project_rows:
+        try: authorize(request,name,'read')
+        except HTTPException: continue
+        allowed.append(name)
+    projects={name:dict(name=name,systems=0,nodes=0,level='L10',issues={'fail':0,'warning':0},
+                        validation={'checked':0,'pass':0,'total':0},cycle={'running':0,'completed':0},
+                        monitoring={'reporting':0,'total':0},last_validation=None) for name in allowed}
+    targets=[target for target in node_inventory(pa) if target.get('project') in projects]
+    for name,item in projects.items():
+        members=[machine for machine in machine_rows.values() if machine.get('project')==name and machine.get('mgx_type','server')=='server' and not machine.get('passive')]
+        item['systems']=len(members)
+        item['level']='L11' if any(machine.get('level')=='rack' for machine in members) else 'L10'
+        nodes=[target for target in targets if target.get('project')==name]
+        item['nodes']=item['validation']['total']=item['monitoring']['total']=len(nodes)
+    inspection=inspection_service()
+    issue_rows=[]
+    for system in inspection.systems():
+        project=projects.get(system.get('project'))
+        if not project: continue
+        snapshot=inspection.store.summary(system['id'])
+        active=inspection.store.issues(system['id'],100,0,'ACTIVE')
+        checked_ids={node['node_id'] for node in system.get('nodes',[])} if snapshot.get('last_completed_at') else set()
+        issue_nodes=set()
+        for issue in active:
+            severity='FAIL' if issue.get('severity')=='FAIL' else 'WARNING'
+            project['issues']['fail' if severity=='FAIL' else 'warning']+=1
+            affected=set(issue.get('affected_nodes') or [])
+            if issue.get('node_id'): affected.add(issue['node_id'])
+            issue_nodes.update(affected)
+            node=next((node for node in system.get('nodes',[]) if node['node_id'] in affected),None)
+            issue_rows.append(dict(id=issue['id'],project=system['project'],system=system['name'],node_id=issue.get('node_id'),
+                                   node=node.get('label') if node else issue.get('node_id'),severity=severity,
+                                   component=issue.get('component'),rule=issue.get('rule'),facts=issue.get('facts'),
+                                   last_seen_at=issue.get('last_seen_at')))
+        project['validation']['checked']+=len(checked_ids)
+        project['validation']['pass']+=len(checked_ids-issue_nodes)
+        completed=snapshot.get('last_completed_at')
+        if completed and (project['last_validation'] is None or completed>project['last_validation']): project['last_validation']=completed
+    telemetry=telemetry_provision_service()
+    for target in targets:
+        project=projects[target['project']]
+        if telemetry.store.components(target['node_id']).get('host')=='READY': project['monitoring']['reporting']+=1
+    recent=[]
+    for job in store.jobs():
+        project=projects.get(job.get('project'))
+        if not project: continue
+        if job.get('state') in {'CREATED','PREPARING','AWAITING_CONFIRMATION','RUNNING','STOP_REQUESTED'}: project['cycle']['running']+=1
+        elif job.get('state')=='COMPLETE': project['cycle']['completed']+=1
+        recent.append({key:job.get(key) for key in ('id','project','state','health','created_at','updated_at')})
+    rows=list(projects.values())
+    totals=dict(projects=len(rows),systems=sum(row['systems'] for row in rows),nodes=sum(row['nodes'] for row in rows),
+                issues={'fail':sum(row['issues']['fail'] for row in rows),'warning':sum(row['issues']['warning'] for row in rows)},
+                validation={'checked':sum(row['validation']['checked'] for row in rows),'pass':sum(row['validation']['pass'] for row in rows),'total':sum(row['validation']['total'] for row in rows)},
+                cycle={'running':sum(row['cycle']['running'] for row in rows),'completed':sum(row['cycle']['completed'] for row in rows)},
+                monitoring={'reporting':sum(row['monitoring']['reporting'] for row in rows),'total':sum(row['monitoring']['total'] for row in rows)})
+    issue_rows.sort(key=lambda issue:(0 if issue['severity']=='FAIL' else 1,-(issue.get('last_seen_at') or 0)))
+    recent.sort(key=lambda job:job.get('updated_at') or job.get('created_at') or 0,reverse=True)
+    return {'generated_at':time.time(),'totals':totals,'projects':rows,'issues':issue_rows[:50],'recent_runs':recent[:10]}

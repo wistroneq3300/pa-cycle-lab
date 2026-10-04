@@ -230,7 +230,7 @@ class Routes(unittest.TestCase):
         from integration.settings import DATA
         from fastapi.testclient import TestClient
         previous_store=web.store; previous_machines=web.pa.machines; previous_projects=web.pa.projects
-        web.store=Store(DATA/'inspection-route'/ 'jobs.sqlite3')
+        web.store=Store(DATA/('inspection-route-'+uuid.uuid4().hex)/'jobs.sqlite3')
         web.pa.projects={'A':{},'B':{}}
         web.pa.machines={name:dict(id=name,name=name,project=project,mgx_type='server',os=[dict(slot=i,node_id=name+'-n'+str(i),ip='192.0.2.'+str(i),user='fixture',port=2200+i) for i in range(1,5)]) for name,project in [('box','A'),('other','B')]}
         class Provider:
@@ -252,6 +252,10 @@ class Routes(unittest.TestCase):
                 for future,_ in list(service._active.values()): future.result(5)
                 self.assertIsNotNone(client.get(base).json()['last_completed_at'])
                 self.assertEqual(client.get(base+'/issues').json()['issues'],[])
+                overview=client.get('/api/validation/overview')
+                self.assertEqual(overview.status_code,200,overview.text)
+                self.assertEqual([row['name'] for row in overview.json()['projects']],['A'])
+                self.assertEqual(overview.json()['totals']['projects'],1)
                 client.close()
         finally:
             web.inspection_service().close(); web.app.state.cycle_provider=None

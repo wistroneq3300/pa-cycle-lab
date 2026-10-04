@@ -9,7 +9,7 @@
   const card=()=>`<section class="pd-inspection p-surface" id="pd-inspection" aria-label="系統巡檢">
     <div class="pd-section-heading"><h2><button type="button" class="pd-inspection-collapse" data-collapse aria-expanded="true" aria-controls="pd-inspection-body" title="收闔系統巡檢"><span class="pd-inspection-caret" aria-hidden="true">▾</span>系統巡檢</button></h2><span data-status role="status">讀取中…</span></div>
     <div class="pd-inspection-body" id="pd-inspection-body">
-    <p class="pd-inspection-copy">依專案規格採集各節點的硬體與事件資料，不執行電源操作。立即巡檢會安排新的完整觀測；原手動系統診斷仍可獨立使用。</p>
+    <p class="pd-inspection-copy">依專案規格檢查節點硬體、事件與遙測資料，持續追蹤異常與恢復狀態。巡檢僅執行唯讀觀測，不會變更設備電源狀態。</p>
     <div class="pd-inspection-counts"><span>FAIL <strong data-fail>—</strong> 項</span><span>警告 <strong data-warning>—</strong> 項</span></div>
     <p class="pd-inspection-meta" data-time>最近完成：尚未取得 · 台灣時間 UTC+8</p>
     <p class="pd-inspection-meta" data-version></p><p class="pd-inspection-meta" data-completeness></p>
@@ -21,16 +21,16 @@
     <section data-issues hidden aria-label="巡檢問題與恢復歷史"><div class="pd-inspection-filters"><label>節點 <select data-node><option value="">全部節點</option></select></label><label>狀態 <select data-filter><option value="current">目前問題與最近恢復</option><option value="ACTIVE">目前問題</option><option value="RECOVERED">最近恢復</option><option value="ARCHIVED">歷史問題</option><option value="all">全部紀錄</option></select></label><label>搜尋全部符合範圍 <input data-issue-search type="search" placeholder="規則、元件或問題摘要"></label></div><button type="button" class="btn small" data-reload>更新問題</button><span data-history-count></span><div data-list></div><div class="pd-inspection-paging"><button class="btn small" data-prev>上一頁</button><span data-page></span><button class="btn small" data-next>下一頁</button></div></section>
     <form data-config hidden><h3>此系統巡檢設定</h3><p>設定只影響巡檢規則，不會變更 Telemetry 收集頻率。</p><div class="pd-inspection-fields">
       <label><input type="checkbox" name="enabled"> 啟用排程</label><label><input type="checkbox" name="ai_enabled"> 活躍警告與 FAIL 使用 AI 分析</label>
-      <label>Fast 事件巡檢（秒）<input type="number" name="interval_seconds" min="30" max="3600" required></label>
-      <label>Deep 硬體巡檢（秒）<input type="number" name="deep_seconds" min="60" max="86400" required></label>
+      <label>事件巡檢間隔（秒）<input type="number" name="interval_seconds" min="30" max="3600" required></label>
+      <label>完整硬體巡檢間隔（秒）<input type="number" name="deep_seconds" min="60" max="86400" required></label>
       <label>Sensor 採集（秒）<input type="number" name="sensor_seconds" min="30" max="86400" required></label>
       <label>韌體資訊採集（秒）<input type="number" name="firmware_seconds" min="60" max="604800" required></label>
       <label>高使用率持續（秒）<input type="number" name="duration_seconds" min="0" max="3600" required></label>
       <label>恢復所需新樣本<input type="number" name="recovery_samples" min="1" max="20" required></label>
-      <label>Telemetry 有效期限（秒）<input type="number" name="stale_seconds" min="30" max="3600" required></label>
+      <label>遙測資料有效期限（秒）<input type="number" name="stale_seconds" min="30" max="3600" required></label>
       <label>恢復遲滯（百分點）<input type="number" name="hysteresis" min="1" max="30" required></label>
       ${['cpu','memory','gpu','vram'].map((key,i)=>`<label>${['CPU','記憶體','GPU','VRAM'][i]} 警告門檻（%）<input type="number" name="${key}" min="1" max="100" required></label>`).join('')}
-    </div><p>高使用率僅列警告；請依專案負載設定。AI 內容為可能原因，不改變規則判定。第一版不推送外部通知。</p><button type="submit" class="btn primary">儲存巡檢設定</button></form>
+    </div><p>高使用率僅列警告；請依專案負載設定。AI 內容為輔助判讀，不改變規則判定。</p><button type="submit" class="btn primary">儲存巡檢設定</button></form>
     </div>
   </section>`;
   function dispose(){if(!mounted)return;const ctx=mounted,r=ctx.root;
@@ -101,6 +101,8 @@
       r.querySelector('[data-status]').textContent=data.delayed?'採集時間較長 · 仍在處理':data.running?'採集中…':data.config.enabled?`已啟用 · Fast ${data.config.interval_seconds}s / Deep ${data.config.deep_seconds||600}s`:'排程未啟用';
       r.querySelector('[data-run]').disabled=!!data.running;
       r.querySelector('[data-fail]').textContent=data.summary.fail;r.querySelector('[data-warning]').textContent=data.summary.warning;
+      const summary=r.closest('.pd-workspace')?.querySelector('[data-health-summary]');
+      if(summary)summary.textContent=`${data.summary.fail} FAIL · ${data.summary.warning} Warning`;
       r.querySelector('[data-history-count]').textContent=`最近恢復 ${data.lifecycle_counts?.recovered||0} · 歷史問題 ${data.lifecycle_counts?.archived||0}`;
       r.querySelector('[data-time]').textContent='最近 Fast：'+stamp(data.last_fast_at||data.last_completed_at)+' · Deep：'+stamp(data.last_deep_at)+' · UTC+8';
       r.querySelector('[data-version]').textContent='Project Checker：'+(data.checker_hash?data.checker_hash.slice(0,12):'未設定')+' · 共用核心：'+(data.shared_core_version?data.shared_core_version.slice(0,12):'尚未採集');
@@ -131,13 +133,13 @@
   }
   function renderAI(root,analysis){
     const signature=JSON.stringify(analysis||{});if(root.dataset.signature===signature)return;root.dataset.signature=signature;root.replaceChildren();
-    const state=analysis?.state||'NOT_REQUESTED',header=document.createElement('header'),title=document.createElement('h4'),status=document.createElement('span');title.textContent='AI ANALYSIS';status.dataset.aiState='';status.dataset.state=state;
+    const state=analysis?.state||'NOT_REQUESTED',header=document.createElement('header'),title=document.createElement('h4'),status=document.createElement('span');title.textContent='AI 輔助判讀';status.dataset.aiState='';status.dataset.state=state;
     status.textContent={NOT_REQUESTED:'尚未分析',QUEUED:'等待分析',RUNNING:'分析中…',COMPLETE:'完成 '+stamp(analysis?.completed_at),UNAVAILABLE:'服務暫時無法使用',ERROR:'分析失敗'}[state]||state;header.append(title,status);root.append(header);
     const result=analysis?.result;
     if(result){const sections=document.createElement('div');sections.className='pd-ai-sections';
       for(const [label,values] of [['可能原因',result.possible_causes],['建議檢查',result.recommended_checks]]){const section=document.createElement('section'),h=document.createElement('h5'),list=document.createElement('ol');h.textContent=label;for(const value of values||[]){const li=document.createElement('li');li.textContent=value;list.append(li);}section.append(h,list);sections.append(section);}
-      for(const [label,text,cls] of [['判讀',result.conclusion,'pd-ai-conclusion'],['確認程度',result.confidence_note,'pd-ai-basis'],['分析依據',(result.based_on||[]).join(' · '),'pd-ai-basis']]){const p=document.createElement('p');p.className=cls;p.textContent=label+'：'+text;sections.append(p);}root.append(sections);
-    }else if(analysis?.text){const pre=document.createElement('pre');pre.className='pd-ai-legacy';pre.textContent=analysis.text;root.append(pre);}
+      for(const [label,text,cls] of [['判讀',result.conclusion,'pd-ai-conclusion'],['判讀限制 / 確認程度',result.confidence_note,'pd-ai-basis'],['分析依據',(result.based_on||[]).join(' · '),'pd-ai-basis']]){const p=document.createElement('p');p.className=cls;p.textContent=label+'：'+text;sections.append(p);}root.append(sections);
+    }else if(analysis?.text){const p=document.createElement('p');p.textContent=analysis.text;root.append(p);}
     if(analysis?.error){const p=document.createElement('p');p.textContent=analysis.error+' · '+analysis.error_category;root.append(p);}
     if(analysis?.based_on){const p=document.createElement('p');p.className='pd-ai-basis';p.textContent='依據觀測：'+stamp(analysis.based_on.last_seen_at)+' · '+(analysis.based_on.source||'已保存證據')+'。AI 建議不改變規則判定。';root.append(p);}
   }

@@ -181,3 +181,4 @@ html[data-theme=light] .pd-power-group .btn{background:var(--p-panel)!important;
 .pd-inspection-issue[data-severity=FAIL]>summary{color:var(--red,#cc5555)}
 .pd-inspection-issue[data-severity=WARNING]>summary{color:#d9aa55}
 html[data-theme=light] .pd-inspection-issue[data-severity=WARNING]>summary{color:#805509}
+.pd-health-summary{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px;margin-top:18px}.pd-health-summary h3{margin:4px 0}.pd-health-summary strong{color:var(--text);font-size:14px}

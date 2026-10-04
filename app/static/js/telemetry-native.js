@@ -14,7 +14,7 @@
         +'<section class="tn-ai" aria-label="遙測 AI 分析"><div class="tn-ai-head"><h4>遙測 AI 分析</h4><span data-ai-state>等待分析</span></div><div class="tn-ai-body" data-ai>正在分析此範圍的監控趨勢…</div></section>'
         +'<div class="tn-stats" aria-label="節點資訊"></div><p data-chart-error role="status"></p><div class="tn-grid"></div>';
       root.querySelector('select').value=this.period;root.querySelector('select').onchange=e=>{this.period=e.target.value;periods.set(this.node.node_id,this.period);this.load();};
-      const help=document.createElement('details');help.className='tn-gpu-help';help.hidden=true;help.innerHTML='<summary>GPU 監控未就緒 · 查看手動安裝與連接說明</summary><div data-gpu-help></div>';root.querySelector('.tn-grid').before(help);this.manualHelp();
+      const help=document.createElement('section');help.className='tn-gpu-help';help.hidden=true;help.innerHTML='<strong>GPU 監控尚未就緒</strong><p data-gpu-detail></p><button type="button" class="btn" data-gpu-settings>前往 GPU 監控設定</button>';help.querySelector('[data-gpu-settings]').onclick=()=>document.querySelector('.tp-component[data-component="gpu"]')?.scrollIntoView({behavior:'smooth',block:'center'});root.querySelector('.tn-grid').before(help);this.manualHelp();
       this.theme=new MutationObserver(()=>this.repaint());this.theme.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
       this.load();
     }
@@ -32,24 +32,9 @@
     }
     update(node){this.node=node;this.manualHelp();}
     manualHelp(){
-      const section=this.root.querySelector('.tn-gpu-help'),gpu=this.node.components?.gpu,setup=this.node.gpu_setup;
-      section.hidden=!gpu||['READY','NOT_APPLICABLE','VERIFYING','PROVISIONING'].includes(gpu.state)||!setup;
-      if(section.hidden)return;const signature=JSON.stringify([gpu,setup]);if(section.dataset.signature===signature)return;section.dataset.signature=signature;
-      const body=section.querySelector('[data-gpu-help]');body.replaceChildren();
-      const paragraph=text=>{const p=document.createElement('p');p.textContent=text;body.append(p);};
-      const command=text=>{const pre=document.createElement('pre');pre.textContent=text;body.append(pre);};
-      paragraph('CPU、Memory、Disk 與 Network 監控可繼續使用。GPU 尚未就緒：'+gpu.detail);
-      paragraph('連接目的地：目前 PA Manager '+location.origin+'。由中央 Prometheus 主動讀取此節點的 /metrics；DCGM 不需要設定推送到 PA 的網址。');
-      paragraph('中央 Prometheus（PA 後端設定）：'+(setup.prometheus_url||'尚未設定')+'。採集端點：'+setup.exporter_url);
-      paragraph('1. 在這台 GPU Server 確認 NVIDIA Driver 與既有 Docker NVIDIA runtime。CPU-only Server 不需要安裝 DCGM。');command(setup.detection);
-      paragraph('2. 若尚未安裝 DCGM Exporter，依此平台相容版本手動安裝。下列容器方式需要已設定好的 NVIDIA Container Toolkit；不會替換 Driver。已有服務請沿用，不要重複建立或停止占用連接埠的其他程式。');
-      if(!setup.image)paragraph('尚未指定映像版本：請先從 NVIDIA 官方安裝說明選擇符合 GPU／Driver 的固定版本，替換下面的版本欄位。');
-      command(setup.installation);
-      const link=document.createElement('a');link.href=setup.documentation;link.target='_blank';link.rel='noopener';link.textContent='NVIDIA DCGM Exporter 安裝說明 ↗';body.append(link);
-      paragraph('3. 在 PA Manager／中央監控主機確認可讀取下列端點。若兩者分開部署，請在 Prometheus 所在主機檢查；節點需允許該主機連入採集連接埠。');command(setup.check_on_manager);
-      paragraph('4. 回本頁按「啟用 Telemetry」。PA 會沿用健康的 Exporter，將此 Node 登記至目前中央 Prometheus，再確認 GPU metrics。Host 圖表不需要等待此步完成。');
-      paragraph('Target 設定：'+(setup.file_sd||'尚未設定')+'。由 PA 更新，維持原 node_id；不需要重裝 Grafana 或重啟 Prometheus。');
-      const copy=document.createElement('button');copy.type='button';copy.className='btn small';copy.textContent='複製安裝與連接說明';copy.onclick=async()=>{try{await navigator.clipboard.writeText([...body.children].filter(e=>e!==copy).map(e=>e.textContent).join('\n\n'));copy.textContent='已複製說明';}catch{copy.textContent='請選取說明文字複製';}};body.append(copy);
+      const section=this.root.querySelector('.tn-gpu-help'),gpu=this.node.components?.gpu;
+      section.hidden=!gpu||['READY','NOT_APPLICABLE','VERIFYING','PROVISIONING'].includes(gpu.state);
+      if(!section.hidden)section.querySelector('[data-gpu-detail]').textContent=gpu.detail||'請在上方 GPU 監控卡片完成設定或重新檢查。';
     }
     periodMinutes(){const m={'10m':10,'30m':30,'1h':60,'6h':360,'12h':720,'24h':1440,'2d':2880,'7d':10080,'30d':43200};return m[this.period]||60;}
     async load(){

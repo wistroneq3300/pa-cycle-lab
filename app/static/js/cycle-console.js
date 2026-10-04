@@ -33,8 +33,6 @@
       root.classList.add('live-console','pa-validation-console');
       root.innerHTML=`<div class="live-console-head"><span class="lc-dot" aria-hidden="true"></span><h3>CYCLE EXECUTION</h3><span class="lc-job" data-part="job"></span></div>
         <div data-part="fleet" class="lc-fleet"></div><div class="live-console-bar">
-
-          <button class="btn" data-part="auto" aria-pressed="true" title="自動捲到最新">自動跟隨</button>
           <span class="lc-seg" role="group" aria-label="View"><button class="btn" data-part="density" aria-pressed="true">Summary</button><button class="btn" data-part="full" aria-pressed="false">Full</button></span>
           <button class="btn" data-part="pause" title="暫停檢視（不影響任務）">暫停檢視</button>
           <input class="lc-search" type="search" data-part="search" placeholder="搜尋日誌…" maxlength="200" aria-label="搜尋目前視窗">
@@ -45,15 +43,14 @@
           <a class="lc-icon" data-part="download" title="下載完整日誌" aria-label="下載完整日誌">Download</a>
         </div>
         <div class="lc-columns" aria-hidden="true"><span>SEQ</span><span>TIME</span><span>NODE</span><span>STATE</span><span>STAGE</span><span>EVENT</span></div><p hidden data-part="error" role="alert"></p>
-        <div class="live-console-view" data-part="log" role="log" aria-live="off" tabindex="0" aria-label="Cycle 執行紀錄"></div>
+        <div class="live-console-view" data-part="log" role="log" aria-live="off" tabindex="0" aria-label="Cycle 驗證紀錄"></div>
         <div class="live-console-foot"><span class="lc-mode" data-part="status" role="status"></span><button class="btn" data-part="latest" hidden>跳至最新</button><span class="lc-count" data-part="count"></span></div>
         <p class="live-console-note">時間以台灣時間（UTC+8）顯示。畫面最多顯示 2,000 行。Summary 顯示重點摘要；Full 顯示原始事件。暫停檢視或關閉 Console 不會停止任務。完整紀錄可下載，原始證據保存在「證據與報告」。</p>`;
       this.part=name=>root.querySelector(`[data-part="${name}"]`);
       this.fleet=new CycleFleet(this.part('fleet'),()=>{this.node=this.fleet.node;this.render(true);});
-      this.part('latest').onclick=()=>{this.auto=true;this.paused=false;this.part('auto').textContent='自動跟隨';this.part('auto').setAttribute('aria-pressed','true');this.part('pause').setAttribute('aria-pressed','false');this.part('pause').textContent='暫停檢視';this.render(true);this.bottom();this.status();};
-      this.part('log').addEventListener('scroll',()=>{const log=this.part('log');if(log.scrollHeight-log.scrollTop-log.clientHeight>30){this.auto=false;this.part('auto').classList.remove('on');this.part('auto').textContent='自動跟隨：關';this.part('auto').setAttribute('aria-pressed','false');}});
+      this.part('latest').onclick=()=>{this.auto=true;this.paused=false;this.part('pause').setAttribute('aria-pressed','false');this.part('pause').textContent='暫停檢視';this.render(true);this.bottom();this.status();};
+      this.part('log').addEventListener('scroll',()=>{const log=this.part('log'),atBottom=log.scrollHeight-log.scrollTop-log.clientHeight<=30;this.auto=atBottom;if(atBottom){this.unread=0;this.part('latest').hidden=true;this.status();}});
       button.onclick=()=>this.toggle();
-      this.part('auto').onclick=()=>{this.auto=!this.auto;this.part('auto').textContent=this.auto?'自動跟隨':'自動跟隨：關';this.part('auto').classList.toggle('on',this.auto);this.part('auto').setAttribute('aria-pressed',this.auto);if(this.auto)this.bottom();};
       this.part('pause').onclick=()=>{this.paused=!this.paused;if(this.paused)this.pausedRows=this.buffer.slice();this.part('pause').textContent=this.paused?'繼續檢視':'暫停檢視';this.part('pause').setAttribute('aria-pressed',this.paused);if(!this.paused)this.render();this.status();};
       const density=value=>{this.summary=value;this.part('density').setAttribute('aria-pressed',value);this.part('full').setAttribute('aria-pressed',!value);this.render(true);};
       this.part('density').onclick=()=>density(true);this.part('full').onclick=()=>density(false);
@@ -61,14 +58,14 @@
       this.part('search').oninput=()=>{clearTimeout(this.searchTimer);this.searchTimer=setTimeout(()=>this.render(true),150);};
       this.part('history').onclick=()=>this.loadHistory();
       this.part('older').onclick=()=>this.loadHistory(this.visible()[0]?.sequence || (this.history || this.buffer)[0]?.sequence);
-      this.part('live').onclick=()=>{this.cancel();this.history=null;this.part('live').hidden=true;this.part('older').hidden=true;this.render(true);this.poll();};
+      this.part('live').onclick=()=>{this.cancel();this.history=null;this.auto=true;this.part('live').hidden=true;this.part('older').hidden=true;this.render(true);this.bottom();this.poll();};
     }
     cancel(){this.revision++;clearTimeout(this.timer);this.controller?.abort();this.controller=null;}
     close(){this.cancel();clearTimeout(this.searchTimer);this.root.hidden=true;this.button.setAttribute('aria-expanded','false');}
     reset(){this.close();this.job=null;this.buffer=[];this.history=null;this.cursor=0;this.part('log').replaceChildren();}
     setJob(job,url){
       if(this.job?.id!==job.id){
-        this.cancel();this.buffer=[];this.history=null;this.cursor=0;this.node='';this.paused=false;this.loaded=false;this.url=url;
+        this.cancel();this.buffer=[];this.history=null;this.cursor=0;this.node='';this.paused=false;this.auto=true;this.unread=0;this.loaded=false;this.url=url;
         this.part('pause').textContent='暫停檢視';this.part('pause').classList.remove('on');this.part('pause').setAttribute('aria-pressed','false');
         this.summary=true;this.part('density').textContent='Summary';this.part('density').setAttribute('aria-pressed','true');this.part('density').classList.remove('on');this.part('full').setAttribute('aria-pressed','false');
         this.part('live').hidden=true;this.part('older').hidden=true;this.part('search').value='';
@@ -144,7 +141,7 @@
       return out;
     }
     visible(){const query=this.part('search').value.toLowerCase(),source=this.history||(this.paused?this.pausedRows:this.buffer),base=this.summary?this.fold(source):source;return base.filter(e=>this.fleet.accepts(e.machine_id)&&(!this.errorsOnly()||['FAIL','ERROR'].includes(e.level))&&(!query||`${e.message} ${e.detail || ''}`.toLowerCase().includes(query))).slice(-RENDER);}
-    status(){const mode=this.history?'歷史視窗':this.paused?'已暫停檢視 · 不影響任務':'LIVE · 每 1.5 秒更新';this.part('status').textContent=`${mode}${this.unread?' · '+this.unread+' 筆新輸出，按 自動跟隨 跳到最新':''}${this.history?' · 每頁最多 500 筆':''}${this.trimmed?' · 閱讀位置已移出視窗，請用 History 查看':''}`;this.part('latest').hidden=!this.unread;this.part('latest').textContent=this.unread+' new events · 跳至最新';this.part('count').textContent=`顯示 ${this.visible().length} / ${(this.history || this.buffer).length} 筆`;}
+    status(){const mode=this.history?'歷史視窗':this.paused?'已暫停檢視 · 不影響任務':'LIVE · 每 1.5 秒更新';this.part('status').textContent=`${mode}${this.unread?' · '+this.unread+' 筆新輸出':''}${this.history?' · 每頁最多 500 筆':''}${this.trimmed?' · 閱讀位置已移出視窗，請用 History 查看':''}`;this.part('latest').hidden=!this.unread;this.part('latest').textContent=this.unread+' 筆新輸出 · 跳至最新';this.part('count').textContent=`顯示 ${this.visible().length} / ${(this.history || this.buffer).length} 筆`;}
     bottom(){this.unread=0;const log=this.part('log');log.scrollTop=log.scrollHeight;}
     render(force=false){
       const log=this.part('log'),events=this.visible();

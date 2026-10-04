@@ -17,7 +17,7 @@ const out=path.resolve('docs/screenshots/system-inspection');fs.mkdirSync(out,{r
 const m=window.__INSPECTION_FIXTURE.machines.find(m=>m.name==='host_a');m.id='chassis-a';m.os=[1,2,3,4].map(i=>({slot:i,node_id:'n'+i,label:'N'+i,ip:'192.0.2.'+(20+i),user:'fixture'+i,port:2200+i,bmc_ip:'198.51.100.'+(20+i),bmc_user:'fixture',bmc_port:22,binding_revision:1}));m.active_os=1;`});
    const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
    let before=true,state='disabled',writes=[],malicious=false;
-   const now=1791000000,config={enabled:false,ai_enabled:false,interval_seconds:120,duration_seconds:120,recovery_samples:2,stale_seconds:300,hysteresis:5,thresholds:{cpu:90,memory:95,gpu:95,vram:95}};
+   const now=1791000000,config={enabled:false,ai_enabled:false,interval_seconds:120,deep_seconds:600,sensor_seconds:120,firmware_seconds:3600,duration_seconds:120,recovery_samples:2,stale_seconds:300,hysteresis:5,thresholds:{cpu:90,memory:95,gpu:95,vram:95}};
    const nodes=[1,2,3,4].map(i=>({node_id:'n'+i,slot:i,label:'N'+i}));
    await page.route('**/*',async route=>{
     const u=new URL(route.request().url());if(u.origin!==base)return route.abort();
@@ -39,14 +39,15 @@ const m=window.__INSPECTION_FIXTURE.machines.find(m=>m.name==='host_a');m.id='ch
     }
     return route.fulfill({status:404,json:{detail:'No isolated fixture'}});
    });
-   async function open(){await page.goto(base+'/#/dashboard');await page.locator('.cine-story').waitFor();await page.evaluate(()=>openMachine('host_a'));await page.locator('.pd-system-header').waitFor();}
+   async function open(){await page.goto(base+'/#/dashboard');await page.locator('.cine-story,.vo-overview').first().waitFor();await page.evaluate(()=>openMachine('host_a'));await page.locator('.pd-system-header').waitFor();}
    await open();await page.screenshot({path:path.join(out,`before-${width}-${theme}.png`)});
    const oldPower=await page.locator('.mach-power-actions [onclick]').evaluateAll(es=>es.map(e=>e.getAttribute('onclick')));
-   before=false;await page.goto(base+"/?inspection=after#/dashboard");await open();await page.locator('#pd-inspection [data-status]').filter({hasText:'未啟用'}).waitFor();
+   before=false;await page.goto(base+"/?inspection=after#/dashboard");await open();await page.locator('#pd-tab-sensors').click();await page.locator('#pd-inspection [data-status]').filter({hasText:'未啟用'}).waitFor();
    assert.equal(await page.locator('[onclick*="runDiagnose("]').count(),1);
    assert(await page.locator('.pd-operations [onclick*="openTermDialog"]').isVisible());
    assert(await page.locator('.pd-operations [onclick*="openKvmSolo"]').isVisible());
-   assert(await page.locator('.pd-operations [onclick*="openAssignTask"]').isVisible());
+   assert.equal(await page.locator('.pd-operations [onclick*="openAssignTask"]').count(),0);
+   assert.equal(await page.locator('#pd-panel-tasks [onclick*="openAssignTask"]').count(),1);
    assert.deepEqual(await page.locator('.mach-power-actions [onclick]').evaluateAll(es=>es.map(e=>e.getAttribute('onclick'))),oldPower);
    await page.locator('.pd-power-group summary').focus();await page.keyboard.press('Enter');
    assert.equal(await page.locator('.pd-power-group').getAttribute('open'),'');assert.equal(writes.length,0);
@@ -56,7 +57,7 @@ const m=window.__INSPECTION_FIXTURE.machines.find(m=>m.name==='host_a');m.id='ch
     config.enabled=state!=='disabled';await page.evaluate(()=>{document.querySelector('#pd-inspection [data-issues]').hidden=true;SystemInspection.mount('host_a');});
     await page.waitForTimeout(150);await page.locator('#pd-inspection').scrollIntoViewIfNeeded();
     if(state!=='disabled'){await page.locator('#pd-inspection [data-view]').click();await page.locator('.pd-inspection-issue').first().waitFor();await page.locator('.pd-inspection-issue summary').click();}
-    if(state==='stale')await page.locator('.pd-inspection-coverage summary').click();
+    if(state==='stale')await page.locator('.pd-inspection-coverage summary').first().click();
     assert.equal(await page.evaluate(()=>!!window.unsafe),false);
     await page.screenshot({path:path.join(out,`${state}-${width}-${theme}.png`)});
     results.push({theme,width,state,passed:true});

@@ -7,11 +7,6 @@
       "passed": true
     },
     {
-      "page": "ai-assistant",
-      "theme": "light",
-      "passed": true
-    },
-    {
       "page": "projects-l10",
       "theme": "light",
       "passed": true
@@ -152,11 +147,6 @@
       "passed": true
     },
     {
-      "page": "ai-assistant",
-      "theme": "dark",
-      "passed": true
-    },
-    {
       "page": "projects-l10",
       "theme": "dark",
       "passed": true
@@ -293,7 +283,7 @@
     }
   ],
   "page_errors": [],
-  "network_requests": 22,
+  "network_requests": 20,
   "hardware_dispatches": 0,
   "notes": "Browser-only fixture/intercepted snapshots. No hardware acceptance."
 }

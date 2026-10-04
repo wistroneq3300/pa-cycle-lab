@@ -57,7 +57,7 @@ const old=file=>cp.execFileSync('git',['show',`${baseline}:${file}`],{encoding:'
    }
    await p.locator('#cw-create').click();await p.locator('#cw-confirm').waitFor({state:'visible'});
    await p.locator('#cw-confirm').click();await p.locator('#cw-console-toggle').click();await p.locator('[data-part=density]').waitFor();
-   assert.equal(await p.locator('[data-part=density]').innerText(),'Summary');await p.locator('[data-part=density]').click();assert.equal(await p.locator('[data-part=density]').innerText(),'Full');
+    assert.equal(await p.locator('[data-part=density]').innerText(),'Summary');await p.locator('[data-part=full]').click();assert.equal(await p.locator('[data-part=full]').getAttribute('aria-pressed'),'true');assert.equal(await p.locator('[data-part=density]').getAttribute('aria-pressed'),'false');
    if(version==='current'){
     const details=p.locator('#cw-progress details').first();await details.locator('summary').click();await details.locator('summary').focus();
     const identity=await details.getAttribute('data-node');await p.waitForTimeout(1800);

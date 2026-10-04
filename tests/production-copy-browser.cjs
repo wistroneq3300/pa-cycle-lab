@@ -42,6 +42,7 @@ const forbidden=/Sheng Wu|Wistron team|Local environment|FastAPI|DESIGN PREVIEW|
     network.push({method,path:u.pathname});
     if(method!=='GET')return r.fulfill({status:403,json:{detail:'Read-only browser acceptance'}});
     if(u.pathname==='/api/cycle/capabilities')return r.fulfill(unavailable?{status:503,json:{detail:'服務暫時無法使用'}}:{json:cap});
+    if(u.pathname==='/api/validation/overview')return r.fulfill({json:{generated_at:1791096000,totals:{projects:2,systems:3,nodes:6,issues:{fail:0,warning:0},validation:{checked:0,pass:0,total:6},cycle:{running:0,completed:1},monitoring:{reporting:0,total:6}},projects:[{name:'proj_k',level:'L11',systems:2,nodes:5,issues:{fail:0,warning:0},validation:{checked:0,pass:0,total:5},cycle:{running:0,completed:1},monitoring:{reporting:0,total:5},last_validation:null},{name:'proj_l10',level:'L10',systems:1,nodes:1,issues:{fail:0,warning:0},validation:{checked:0,pass:0,total:1},cycle:{running:0,completed:0},monitoring:{reporting:0,total:1},last_validation:null}],issues:[],recent_runs:[]}});
     if(u.pathname==='/api/cycle/inventory')return r.fulfill(unavailable?{status:503,json:{detail:'服務暫時無法使用'}}:{json:empty?{...inventory,projects:inventory.projects.map(p=>({...p,targets:[]}))}:inventory});
     if(u.pathname==='/api/cycle/runs')return r.fulfill({json:{runs:[job],has_more:false}});
     if(u.pathname.endsWith('/events'))return r.fulfill({json:events});
@@ -59,9 +60,8 @@ const forbidden=/Sheng Wu|Wistron team|Local environment|FastAPI|DESIGN PREVIEW|
     if(wide){await page.setViewportSize({width:1920,height:1080});await page.screenshot({path:path.join(output,`${name}-1920-${theme}.png`),animations:'disabled'});await page.setViewportSize({width:1366,height:768});}
     results.push({page:name,theme,passed:true});
    }
-   await page.goto(base+'/#/dashboard');await page.locator('.cine-story').waitFor();await capture('dashboard',{wide:true});
+   await page.goto(base+'/#/dashboard');await page.locator('.vo-overview').waitFor();await capture('dashboard',{wide:true});
    assert.equal(await page.locator('.user').innerText(),'');
-   await page.locator('#cop-input').fill('查詢目前設備狀態');await page.evaluate(()=>copSend());await page.waitForTimeout(250);await capture('ai-assistant');
    await page.evaluate(()=>productLevel('system'));await capture('projects-l10');
    await page.evaluate(()=>productLevel('rack'));await capture('projects-l11');
    await page.evaluate(()=>openMachine('host_a'));await page.locator('.pd-system-header').waitFor();await capture('system-detail',{wide:true});
@@ -87,7 +87,7 @@ const forbidden=/Sheng Wu|Wistron team|Local environment|FastAPI|DESIGN PREVIEW|
    const expectedTaipei=await page.evaluate(ts=>new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Taipei',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(new Date(ts)),firstEvent.timestamp);
    assert.equal(await page.locator('.cycle-console-time').first().innerText(),expectedTaipei);
    assert.match(await page.locator('.live-console-note').innerText(),/台灣時間（UTC\+8）/);
-   await page.locator('[data-part=density]').click();assert.equal(await page.locator('[data-part=density]').innerText(),'Full');
+   await page.locator('[data-part=full]').click();assert.equal(await page.locator('[data-part=full]').getAttribute('aria-pressed'),'true');
    await page.locator('[data-part=pause]').click();assert.equal(await page.locator('[data-part=pause]').innerText(),'繼續檢視');await page.locator('[data-part=pause]').click();
    await page.locator('.cw-artifacts>summary').click();await page.locator('#cw-evidence').click();await page.locator('#cw-files a').first().waitFor();await capture('cycle-evidence');
    empty=true;await page.goto(base+'/#/cycle/new');await page.locator('#cw-matrix').waitFor();assert.equal(await page.locator('.cw-node').count(),0);await page.locator('#cw-matrix').scrollIntoViewIfNeeded();await capture('cycle-empty');

@@ -61,7 +61,7 @@
     const l10 = projects.filter(p => system.some(m => m.project === p.name));
     const l11 = projects.filter(p => rack.some(m => m.project === p.name));
     const online = connected.filter(m => m.os_alive === true).length;
-    return `<header class="cine-page-intro"><div><span class="cine-kicker">PA SERVER MANAGER</span><h1>系統架構總覽</h1></div><div class="cine-intro-actions"><button class="cine-link" onclick="cineProjects()">跳到專案 <span>↓</span></button><button class="btn" onclick="openProjectModal()">＋ 專案管理</button></div></header>
+    return `<header class="cine-page-intro"><div><span class="cine-kicker">PA VALIDATION PLATFORM</span><h1>總覽</h1></div><div class="cine-intro-actions"><button class="cine-link" onclick="cineProjects()">跳到專案 <span>↓</span></button><button class="btn" onclick="openProjectModal()">＋ 專案管理</button></div></header>
       <section class="cine-story" id="core-story" aria-label="L10 System 到 L11 Rack 工程層級介紹">
         <div class="cine-stage" id="core-stage" data-phase="system">
           <div class="cine-stage-top"><span><i class="p-live-dot"></i> WISTRON <b>/</b> DATACENTER ENGINEERING</span><span class="cine-edition">SYSTEM CORE <b>01—02</b></span></div>
@@ -88,7 +88,7 @@
       <section class="cine-fleet" aria-label="工程狀態摘要"><div class="cine-fleet-total"><span class="cine-kicker">設備狀態摘要</span><div><strong>${two(machines.length)}</strong><span>受管設備<small>設備狀態</small></span></div></div><div class="cine-fleet-levels"><button onclick="productLevel('system')"><span>L10 <small>System</small></span><b>${two(system.length)}</b></button><button onclick="productLevel('rack')"><span>L11 <small>Rack components</small></span><b>${two(rack.length)}</b></button></div><div class="cine-fleet-health"><span class="cine-kicker">OS 連線</span><div class="cine-connectivity">${connected.map(m=>`<i class="${m.os_alive===true?'on':m.os_alive===false?'off':'unknown'}" title="${esc(m.name)} · ${m.os_alive===true?'OS 在線':m.os_alive===false?'OS 離線':'未知'}"></i>`).join('')||'<span>尚無管理介面</span>'}</div><p><b>${online}</b> 在線 <span>／ ${connected.length} 有管理介面</span></p></div><div class="cine-attention"><span class="cine-kicker">ATTENTION</span><strong>${two(offline.length)}<small>OS 離線</small></strong><span>確認連線與電源狀態</span></div></section>
       <section class="cine-portfolio" id="project-portfolio"><header class="cine-section-head"><div><span class="cine-kicker">02 / 專案清單</span><h2>專案分類</h2></div><span>${two(projects.length)} 專案 <b>·</b> L10 System / L11 Rack</span></header>${prior.querySelector('.p-portfolios')?.outerHTML||''}</section>
       <header class="cine-section-head cine-insights-title"><div><span class="cine-kicker">03 / 作業狀態</span><h2>系統狀態與 AI 助理</h2></div><span>狀態摘要</span></header>${prior.querySelector('.p-insights')?.outerHTML||''}
-      <footer class="cine-footer"><span>WISTRON <b>/</b> PA SERVER MANAGER</span><span>資料來源：系統回報</span><span>L10 SYSTEM <b>—</b> L11 RACK</span></footer>`;
+      <footer class="cine-footer"><span>WISTRON <b>/</b> PRODUCT ASSURANCE</span><span>資料來源：系統回報</span><span>L10 SYSTEM <b>—</b> L11 RACK</span></footer>`;
   };
 
   RENDERERS.projects = () => {
@@ -181,6 +181,11 @@
     function update() {
       raf = 0;
       const bounds = story.getBoundingClientRect();
+      const compact = stage.classList.contains('vo-scene');
+      // The compact validation overview owns its one-shot playback and manual
+      // takeover. This legacy scroll-story updater only mounts and themes its
+      // scene; writing progress here would reset a completed rack on resize.
+      if (compact) return;
       const progress = reduced.matches ? 0 : Math.max(0, Math.min(1, (76 - bounds.top) / Math.max(1, story.offsetHeight - stage.offsetHeight)));
       const crossed = progress > .53;
       const out = Math.max(0, Math.min(1, 1 - progress * 2.5));
@@ -251,9 +256,8 @@
   };
   document.addEventListener('DOMContentLoaded', () => {
     applyTheme(savedTheme === 'light' ? 'light' : 'dark');
-    document.querySelector('.p-brand-product').innerHTML = 'PA Server<span>Manager<span class="cine-version"> / NEXT</span></span>';
-    document.querySelector('.p-brand-caption').textContent = 'DATACENTER ENGINEERING';
-    document.querySelector('.p-top-label').innerHTML = 'ENGINEERING <i>/</i>';
+    const brand=document.querySelector('.p-brand-product');if(brand)brand.innerHTML='PA Validation<span>Platform</span>';
+    const caption=document.querySelector('.p-brand-caption');if(caption)caption.textContent='PRODUCT ASSURANCE · SERVER & RACK VALIDATION';
     afterRender();
   });
 })();

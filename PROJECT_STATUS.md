@@ -1,5 +1,61 @@
 # PROJECT_STATUS — PA Cycle Lab native Next integration
 
+## 2026-10-04 PA Validation Platform consolidation
+
+Branch `astra-console-import`; integrated on top of remote commit `5ec9249`.
+No deployment, production service restart, real DUT command, power action or
+live Telemetry installation was performed.
+
+- Runtime closure is fail-closed and deterministic. The manifest includes
+  `engine/vera_cycle/eq3300_config.sh`; generation, missing/extra validation,
+  pre-commit staging and CI read-only validation are present. Production never
+  repairs an unknown runtime tree.
+- Telemetry charts use one nine-range contract (`10m`, `30m`, `1h`, `6h`,
+  `12h`, `24h`, `2d`, `7d`, `30d`). Trend analysis reports no data for zero
+  samples and insufficient data for one sample; the API route is bound to the
+  actual analysis handler and no longer returns the accidental validator 422.
+- Product-facing branding is **Wistron PA Validation Platform**. Navigation is
+  Overview, Systems & Projects, Rack and Cycle Validation. Ping copy says OS
+  reachable, never hardware healthy. The guide follows the same terminology.
+- System Detail is now Overview / Inventory / Nodes / Health / Telemetry /
+  Validation. Inspection, diagnosis, sensors and firmware share the Health
+  information architecture without merging their backends. Nodes owns node
+  identity; Validation owns Cycle and Test Library. Duplicate Cycle and test
+  assignment actions were removed from the competing contexts.
+- Telemetry provisioning has independent Host / GPU component controls and a
+  scoped durable job. The console is reduced to stage/status/log/outcome,
+  natural follow, one download, contextual retry and close. Node selection,
+  Grafana, independent retry and manual installation guidance remain.
+- Cycle Console retains Summary, Full, Pause, Search, Errors, History,
+  Older/Live, download, Fleet/node filters and evidence. Only the independent
+  Auto Follow control was removed; natural follow and unread jump remain.
+- Dashboard has one renderer and five sections: cinematic project hero, Key
+  Status, Attention Required, Projects and Recent Activity. Its read-only
+  overview endpoint aggregates inspection issue lifecycle, validation, Cycle
+  and monitoring coverage. The existing Server → U40 → Rack scene plays once,
+  yields immediately to scroll/pointer/touch/keyboard, stops at Full Rack and
+  stays there on resize/theme changes; replay is secondary.
+- Browser acceptance: Telemetry provisioning and 2,000-line console PASS;
+  Dashboard cinematic plus 1366/1920 Light/Dark PASS; Inspection 16 state /
+  viewport / theme cases PASS; native Cycle 128-node selection, PRE, Confirm,
+  eight valid cycles and full Console controls PASS; Cycle compatibility PASS;
+  production-copy 56 page/theme cases PASS. All hardware writes were synthetic
+  or intercepted. JavaScript syntax passed for 19 changed files.
+- After merging the remote EQ3300 / Telemetry work, the complete requested
+  Runtime / Telemetry / Inspection selection was **129 passed, 5 failed**.
+  `test_telemetry_scope.py`, `test_telemetry_gpu_diag.py` and
+  `test_os_capabilities.py` are now present and pass. Two retained
+  `test_platform_telemetry.py` failures and one inspection process-death test
+  reflect Windows process-lock behavior; two independent-inspection failures
+  reflect the Linux shell fixture exiting 127 on Windows. These limits are
+  reported, not relabeled as PASS. Post-merge Telemetry provisioning, console,
+  validation overview and 16-state inspection browser regressions pass.
+- One broad Impeccable detector pass was run. Its large result is dominated by
+  existing inactive `atelier.css`, standalone KVM/demo pages, vendor xterm and
+  historical DESIGN.md token drift; active Dashboard and Telemetry decisions
+  were verified by browser interaction and screenshots instead of changing
+  unrelated legacy surfaces.
+
 ## 2026-10-04 Native Telemetry / GPU / Inspection refinement
 
 Continues the user's photo branch `astra-console-import`, base

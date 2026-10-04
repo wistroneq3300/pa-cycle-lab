@@ -10,38 +10,39 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
  try {
   await page.goto(base+'/#/cycle/new');await page.locator('.cw-node').first().waitFor();
   assert.equal(await page.locator('.cw-node').count(),128);
-  await page.locator('#cw-all').click();assert.match(await page.locator('#cw-count').innerText(),/32 chassis \/ 128 nodes/);
+  await page.locator('#cw-visible').click();assert.match(await page.locator('#cw-count').innerText(),/32 個機框 \/ 128 個節點/);
   await page.locator('#cw-search').fill('chassis-01');assert.equal(await page.locator('.cw-node').count(),4);
-  assert.match(await page.locator('#cw-count').innerText(),/128 nodes/);
+  assert.match(await page.locator('#cw-count').innerText(),/128 個節點/);
   await page.locator('#cw-none').click();await page.locator('#cw-visible').click();
-  assert.match(await page.locator('#cw-count').innerText(),/1 chassis \/ 4 nodes/);
+  assert.match(await page.locator('#cw-count').innerText(),/1 個機框 \/ 4 個節點/);
   for(const width of [1366,1920])for(const theme of ['light','dark']){
    await page.setViewportSize({width,height:width===1366?768:1080});
    await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);
    await page.screenshot({path:path.join(output,`wizard-${width}-${theme}.png`),fullPage:true});
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   }
+  await page.locator('#cw-limit-kind').selectOption('loops');await page.locator('#cw-limit-value').fill('2');
   await page.locator('#cw-create').click();await page.locator('#cw-confirm').waitFor({timeout:60000});
   const id=await page.locator('#cw-run-id').innerText();
-  assert.match(id,/^[a-f0-9]{32}$/);await page.locator('#cw-confirm').click();
-  await page.waitForFunction(()=>document.querySelector('#cw-run-title')?.textContent.includes('COMPLETE'),{},{timeout:60000});
-  const url=base+'/api/projects/Neutrino%20Demo/cycle/jobs/'+id;
-  const job=await(await page.request.get(url)).json();assert.equal(job.state,'COMPLETE');
+  assert.match(id,/^[a-z0-9_]+$/);await page.locator('#cw-confirm').click();
+  await page.waitForFunction(()=>document.querySelector('#cw-run-title')?.textContent.toUpperCase().includes('COMPLETE'),{},{timeout:60000});
+  const job=await(await page.request.get(base+'/api/cycle/runs/'+id)).json();assert.equal(job.state,'COMPLETE');
+  const url=base+'/api/projects/'+encodeURIComponent(job.project)+'/cycle/jobs/'+id;
   assert.equal(new Set(job.targets.map(t=>t.chassis_id)).size,1);assert.equal(job.targets.length,4);
   assert.equal(job.nodes.reduce((a,n)=>a+n.valid_cycles,0),8);
   await page.locator('#cw-console-toggle').click();await page.locator('.cycle-console-row').first().waitFor();
   const firstNode=job.targets[0].name;
   await page.locator(`[data-machine="${firstNode}"][aria-pressed]`).click();
   assert.equal(await page.locator(`.cycle-console-row:not([data-machine="${firstNode}"])`).count(),0);
-  await page.locator('[data-machine=""][aria-pressed]').click();
-  await page.locator('[data-part=errors]').check();
+  await page.locator('[data-fleet-focus="ALL"][aria-pressed]').click();
+  await page.locator('[data-part=errors]').click();
   assert.equal(await page.locator('.cycle-console-row:not([data-level=ERROR]):not([data-level=FAIL])').count(),0);
-  await page.locator('[data-part=errors]').uncheck();
+  await page.locator('[data-part=errors]').click();
   await page.locator('[data-part=search]').fill('command');await page.waitForTimeout(200);
   const all=await page.locator('.cycle-console-row').allTextContents();assert(all.every(t=>t.toLowerCase().includes('command')));
   await page.locator('[data-part=search]').fill('');await page.waitForTimeout(200);
-  await page.locator('[data-part=pause]').click();const before=requests.length;await page.waitForTimeout(1700);
-  assert(!requests.slice(before).some(u=>u.includes('/events?')));
+  await page.locator('[data-part=pause]').click();const pausedRows=await page.locator('.cycle-console-row').allTextContents();await page.waitForTimeout(1700);
+  assert.deepEqual(await page.locator('.cycle-console-row').allTextContents(),pausedRows);assert.match(await page.locator('[data-part=pause]').innerText(),/繼續檢視/);
   await page.locator('[data-part=pause]').click();
   for(const width of [1366,1920])for(const theme of ['light','dark']){
    await page.setViewportSize({width,height:width===1366?768:1080});await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);

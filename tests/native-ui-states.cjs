@@ -24,10 +24,10 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
    await route.fulfill({json:data});
   });
   await page.goto(base+'/#/cycle/new');await page.locator('.cw-node').first().waitFor();
-  await page.locator('#cw-all').click();assert.match(await page.locator('#cw-count').innerText(),/128 個目標有缺失/);
+  await page.locator('#cw-visible').click();assert.match(await page.locator('#cw-count').innerText(),/128 個目標有缺失/);
   await page.screenshot({path:path.join(out,'blocked-long-names.png'),fullPage:true,animations:'disabled'});
   await page.locator('#cw-search').fill('no-matching-target');assert.equal(await page.locator('.cw-node').count(),0);
-  assert.match(await page.locator('#cw-count').innerText(),/128 nodes/);
+  assert.match(await page.locator('#cw-count').innerText(),/128 個節點/);
   await page.screenshot({path:path.join(out,'empty-filter.png'),fullPage:true,animations:'disabled'});
   await page.unroute('**/api/cycle/inventory');
   await page.route('**/api/cycle/runs?*',route=>route.fulfill({status:503,json:{detail:'SYNTHETIC error-state fixture: service unavailable'}}));

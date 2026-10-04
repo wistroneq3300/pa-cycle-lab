@@ -43,7 +43,7 @@
     const body='<p><strong>'+esc(name)+'</strong> \u00b7 '+(promotion?'L10 \u2192 L11':'\u4fee\u6b63\u6a5f\u6ac3\u5360\u7528\u9ad8\u5ea6')+'</p>'+
       '<label class="ux-field">\u76ee\u6a19\u5c08\u6848<select id="ux-spec-project" '+(promotion?'':'disabled')+'>'+ (promotion?candidates.map(p=>'<option value="'+esc(p.name)+'">'+esc(p.name)+'</option>').join(''):'<option value="'+esc(target)+'">'+esc(target||'\u672a\u6307\u6d3e')+'</option>')+'</select></label>'+
       '<label class="ux-field">\u5be6\u969b\u8a2d\u5099\u9ad8\u5ea6<select id="ux-spec-size">'+heightOptions(size)+'</select></label>'+
-      '<p>'+(promotion?'\u8f49\u63db\u5f8c\u5148\u4fdd\u6301\u672a\u4e0a\u6ac3\uff0c\u518d\u81f3 Rack Manager \u9078\u64c7\u4f4d\u7f6e\u3002':'\u4fdd\u7559\u76ee\u524d\u4e0a\u7de3 U \u4f4d\uff1bCDU \u56fa\u5b9a\u5f9e U1 \u5411\u4e0a\u3002\u5982\u6709\u91cd\u758a\uff0c\u8acb\u5148\u79fb\u4f4d\u6216\u79fb\u51fa\u6a5f\u6ac3\u3002')+'</p><div id="ux-spec-preview"></div>';
+      '<p>'+(promotion?'\u8f49\u63db\u5f8c\u5148\u4fdd\u6301\u672a\u4e0a\u6ac3\uff0c\u518d\u81f3\u300c\u6a5f\u6ac3\u7ba1\u7406\u300d\u9078\u64c7\u4f4d\u7f6e\u3002':'\u4fdd\u7559\u76ee\u524d\u4e0a\u7de3 U \u4f4d\uff1bCDU \u56fa\u5b9a\u5f9e U1 \u5411\u4e0a\u3002\u5982\u6709\u91cd\u758a\uff0c\u8acb\u5148\u79fb\u4f4d\u6216\u79fb\u51fa\u6a5f\u6ac3\u3002')+'</p><div id="ux-spec-preview"></div>';
     showDialog(promotion?'\u5347\u70ba L11':'\u4fee\u6b63\u8a2d\u5099\u9ad8\u5ea6',body,[
       {txt:'\u53d6\u6d88',fn:closeDialog},
       {txt:'\u5132\u5b58\u898f\u683c',cls:'primary',fn:async()=>{
@@ -68,30 +68,7 @@
     const b=document.createElement('button');b.className='btn';b.textContent='\u4fee\u6b63\u9ad8\u5ea6';b.onclick=()=>uxRackSpecification(name);document.getElementById('rm-dialog-foot')?.prepend(b);
   }return result;};
 
-  // Keep the existing renderers and scene lifecycles; change the shared layout once.
-  const dashboard=RENDERERS.dashboard;
-  RENDERERS.dashboard=function(){
-    const root=document.createElement('div');root.innerHTML=dashboard();
-    const os=PAEngineering.connectivity(machines,'os'),bmc=PAEngineering.connectivity(machines,'bmc');
-    const attention=machines.filter(m=>(m.os_ip&&m.os_alive===false)||(m.bmc_ip&&m.bmc_alive===false));
-    const unknown=machines.filter(m=>m.mgx_type!=='blanking'&&((m.os_ip&&m.os_alive==null)||(m.bmc_ip&&m.bmc_alive==null)));
-    const recent=read('pa_recent_devices',[]).filter(name=>machines.some(m=>m.name===name)).slice(0,4);
-    const metrics=[['\u5c08\u6848',projects.length],['\u8a2d\u5099\uff0f\u5143\u4ef6',machines.length],['Ping \u672a\u56de\u61c9',attention.length],['\u5f85\u89c0\u6e2c',unknown.length]];
-    const summary='<section class="ux-overview" aria-label="設備狀態摘要"><header><div><h1>系統架構總覽</h1><p>查看設備狀態、最近使用設備與專案。</p></div><button class="btn primary" onclick="productLevel(\'system\')">\u7ba1\u7406\u8a2d\u5099</button></header>'+
-      '<div class="ux-metrics">'+metrics.map(([label,value])=>'<div><span>'+label+'</span><strong>'+value+'</strong></div>').join('')+'</div>'+
-      '<div class="ux-overview-columns"><section><h2>\u512a\u5148\u78ba\u8a8d</h2>'+(attention.length?attention.slice(0,4).map(m=>'<button class="ux-device-link" onclick="openMachine('+q(m.name)+')"><b>'+esc(m.name)+'</b><span>'+(m.os_alive===false&&m.os_ip?'OS ':'')+(m.bmc_alive===false&&m.bmc_ip?'BMC ':'')+'Ping \u672a\u56de\u61c9 \u2192</span></button>').join(''):'<p>\u76ee\u524d\u6c92\u6709 Ping \u672a\u56de\u61c9\u7684\u8a2d\u5099\u3002</p>')+'<small>OS '+os.online+'/'+os.total+' \u53ef\u9054 \u00b7 BMC '+bmc.online+'/'+bmc.total+' \u53ef\u9054\uff1b\u4e0d\u4ee3\u8868\u786c\u9ad4\u5065\u5eb7\u6216\u8a8d\u8b49\u6210\u529f\u3002</small></section>'+
-      '<section><h2>\u6700\u8fd1\u6aa2\u8996</h2>'+(recent.length?recent.map(name=>'<button class="ux-device-link" onclick="openMachine('+q(name)+')">'+esc(name)+'<span>\u958b\u555f \u2192</span></button>').join(''):'<p>\u958b\u555f\u8a2d\u5099\u5f8c\uff0c\u53ef\u5728\u6b64\u5feb\u901f\u8fd4\u56de\u3002</p>')+'<p class="ux-task-note">'+(typeof powerBatch!=='undefined'&&powerBatch?.running?'\u96fb\u6e90\u6279\u6b21\u8655\u7406\u4e2d':'\u672c\u9801\u7121\u57f7\u884c\u4e2d\u7684\u96fb\u6e90\u6279\u6b21')+'</p></section></div></section>';
-    root.querySelector('.cine-page-intro')?.remove();
-    root.insertAdjacentHTML('afterbegin',summary);
-    const story=root.querySelector('#core-story');
-    if(story){
-      const toggle=document.createElement('button');toggle.className='btn ux-story-toggle';toggle.setAttribute('onclick','uxToggleStory(this)');toggle.setAttribute('aria-controls','core-story');
-      const hidden=read('pa_story_collapsed',false);toggle.setAttribute('aria-expanded',String(!hidden));toggle.textContent=hidden?'\u5c55\u958b 3D \u8a2d\u5099\u5c55\u793a':'\u6536\u5408 3D \u8a2d\u5099\u5c55\u793a';
-      story.before(toggle);story.hidden=hidden;
-    }
-    return root.innerHTML;
-  };
-  window.uxToggleStory=button=>{const story=document.getElementById('core-story');story.hidden=!story.hidden;save('pa_story_collapsed',story.hidden);button.setAttribute('aria-expanded',String(!story.hidden));button.textContent=story.hidden?'\u5c55\u958b 3D \u8a2d\u5099\u5c55\u793a':'\u6536\u5408 3D \u8a2d\u5099\u5c55\u793a';window.dispatchEvent(new Event('resize'));};
+  // Dashboard information architecture is owned by validation-overview.js.
 
   const rack=RENDERERS.rack;
   RENDERERS.rack=function(){
@@ -107,7 +84,7 @@
       if(/topoTodo|rackBulkReboot|rackBulkAux/.test(action)){b.remove();return;}
       containers[key].append(b);
     });
-    const title=hero.querySelector('.rack-hero-title');if(title)title.textContent='Rack Manager';
+    const title=hero.querySelector('.rack-hero-title');if(title)title.textContent='機櫃管理';
     hero.append(toolbar);return root.innerHTML;
   };
 

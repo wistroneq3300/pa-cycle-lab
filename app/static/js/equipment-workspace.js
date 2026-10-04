@@ -138,7 +138,7 @@
     topologyGeneration++;topologyAbort?.abort();
     rackPingRequest++;rackView.pinged=null;rackView.pingProject='';rackView.pingCheckedAt='';
     const pingButton=document.getElementById('rack-ping-btn');
-    if(pingButton){pingButton.disabled=false;pingButton.textContent='\ud83d\udce1 Ping Rack';}
+    if(pingButton){pingButton.disabled=false;pingButton.textContent='整櫃連線檢查';}
     const summary=document.getElementById('rack-ping-summary');
     if(summary)summary.innerHTML=rackStatusCounts(rackMembers(),[]);
     const failures=document.getElementById('rack-ping-failures');
