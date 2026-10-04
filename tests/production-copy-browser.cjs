@@ -22,7 +22,7 @@ const forbidden=/Sheng Wu|Wistron team|Local environment|FastAPI|DESIGN PREVIEW|
   const events=await(await client.request.get(source+url+'/events?tail=true&limit=500')).json();
   const artifacts=await(await client.request.get(source+url+'/artifacts')).json();
   let fixture=fs.readFileSync('app/static/js/preview-fixtures.js','utf8')
-   .replace("if(!path.startsWith('/api/'))","if(!path.startsWith('/api/')||path.includes('/cycle'))")
+   .replace("if(!path.startsWith('/api/'))","if(!path.startsWith('/api/')||path.includes('/cycle')||path==='/api/validation/overview')")
    .replace('window.PA_PREVIEW=','window.__COPY_FIXTURE=')
    .replaceAll('Design preview','2026-10-03 10:00:00').replaceAll(' · sample inventory','').replaceAll(' (sample)','');
   // Fixture values stay test data; all production modules and DOM owners are real.
@@ -60,7 +60,8 @@ const forbidden=/Sheng Wu|Wistron team|Local environment|FastAPI|DESIGN PREVIEW|
     if(wide){await page.setViewportSize({width:1920,height:1080});await page.screenshot({path:path.join(output,`${name}-1920-${theme}.png`),animations:'disabled'});await page.setViewportSize({width:1366,height:768});}
     results.push({page:name,theme,passed:true});
    }
-   await page.goto(base+'/#/dashboard');await page.locator('.vo-overview').waitFor();await capture('dashboard',{wide:true});
+   await page.goto(base+'/#/dashboard');await page.locator('.vo-overview').waitFor();await page.locator('[data-vo-status]').getByText('Telemetry',{exact:true}).waitFor();await capture('dashboard',{wide:true});
+   assert.equal(await page.locator('[data-vo-status]').getByText('Telemetry',{exact:true}).count(),1);assert.equal(await page.getByText('Monitoring',{exact:true}).count(),0);
    assert.equal(await page.locator('.user').innerText(),'');
    await page.evaluate(()=>productLevel('system'));await capture('projects-l10');
    await page.evaluate(()=>productLevel('rack'));await capture('projects-l11');

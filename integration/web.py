@@ -21,7 +21,7 @@ from .inventory import synchronized, mutate, local_write, validate_machine
 from .boundary import category
 from . import control as manual
 from .credentials import load_credentials
-from .store import Store, Conflict, SAFE_FIELDS, TERMINAL, scopes, target_reason, validate_request, fingerprint
+from .store import Store, Conflict, SAFE_FIELDS, TERMINAL, IN_PROGRESS, scopes, target_reason, validate_request, fingerprint
 from cycle_core import EvidencePersistenceError
 from .events import log_line
 from .targets import inventory as node_inventory, resolve_target, resolve_control_target, public
@@ -684,6 +684,7 @@ telemetry_provision_service = install_telemetry_provision(app, pa)
 @app.get('/api/validation/overview')
 def validation_overview(request:Request):
     """Read-only Product Assurance overview from durable inspection/Cycle/Telemetry state."""
+    overview_at=time.time()
     allowed=[]
     with pa._DATA_LOCK:
         project_rows=copy.deepcopy(pa.projects)
@@ -696,6 +697,7 @@ def validation_overview(request:Request):
                         validation={'checked':0,'pass':0,'total':0},cycle={'running':0,'completed':0},
                         monitoring={'reporting':0,'total':0},last_validation=None) for name in allowed}
     targets=[target for target in node_inventory(pa) if target.get('project') in projects]
+    targets_by_node={target['node_id']:target for target in targets}
     for name,item in projects.items():
         members=[machine for machine in machine_rows.values() if machine.get('project')==name and machine.get('mgx_type','server')=='server' and not machine.get('passive')]
         item['systems']=len(members)
@@ -707,9 +709,10 @@ def validation_overview(request:Request):
     for system in inspection.systems():
         project=projects.get(system.get('project'))
         if not project: continue
-        snapshot=inspection.store.summary(system['id'])
         active=inspection.store.issues(system['id'],100,0,'ACTIVE')
-        checked_ids={node['node_id'] for node in system.get('nodes',[])} if snapshot.get('last_completed_at') else set()
+        canonical_ids={target['node_id'] for target in targets if target.get('chassis_id')==system['id'] and target.get('project')==system.get('project')}
+        successful=inspection.store.successful_nodes(system['id'])
+        checked_ids=canonical_ids.intersection(successful)
         issue_nodes=set()
         for issue in active:
             severity='FAIL' if issue.get('severity')=='FAIL' else 'WARNING'
@@ -717,24 +720,29 @@ def validation_overview(request:Request):
             affected=set(issue.get('affected_nodes') or [])
             if issue.get('node_id'): affected.add(issue['node_id'])
             issue_nodes.update(affected)
-            node=next((node for node in system.get('nodes',[]) if node['node_id'] in affected),None)
+            node=next((targets_by_node[node_id] for node_id in affected if node_id in targets_by_node),None)
             issue_rows.append(dict(id=issue['id'],project=system['project'],system=system['name'],node_id=issue.get('node_id'),
-                                   node=node.get('label') if node else issue.get('node_id'),severity=severity,
+                                   node=(node.get('slot_key') or node.get('display_name')) if node else issue.get('node_id'),severity=severity,
                                    component=issue.get('component'),rule=issue.get('rule'),facts=issue.get('facts'),
                                    last_seen_at=issue.get('last_seen_at')))
         project['validation']['checked']+=len(checked_ids)
         project['validation']['pass']+=len(checked_ids-issue_nodes)
-        completed=snapshot.get('last_completed_at')
+        completed=max((successful[node_id] for node_id in checked_ids),default=None)
         if completed and (project['last_validation'] is None or completed>project['last_validation']): project['last_validation']=completed
     telemetry=telemetry_provision_service()
     for target in targets:
         project=projects[target['project']]
-        if telemetry.store.components(target['node_id']).get('host')=='READY': project['monitoring']['reporting']+=1
+        durable=telemetry.store.node(target['node_id'])
+        components=telemetry.store.components(target['node_id'])
+        checked_at=durable.get('checked_at') if durable else None
+        fresh=type(checked_at) in {int,float} and 0<=overview_at-checked_at<=telemetry.config.freshness_seconds
+        if components.get('host')=='READY' and durable and durable.get('binding')==target.get('revision') and fresh:
+            project['monitoring']['reporting']+=1
     recent=[]
     for job in store.jobs():
         project=projects.get(job.get('project'))
         if not project: continue
-        if job.get('state') in {'CREATED','PREPARING','AWAITING_CONFIRMATION','RUNNING','STOP_REQUESTED'}: project['cycle']['running']+=1
+        if job.get('state') in IN_PROGRESS: project['cycle']['running']+=1
         elif job.get('state')=='COMPLETE': project['cycle']['completed']+=1
         recent.append({key:job.get(key) for key in ('id','project','state','health','created_at','updated_at')})
     rows=list(projects.values())
@@ -745,4 +753,4 @@ def validation_overview(request:Request):
                 monitoring={'reporting':sum(row['monitoring']['reporting'] for row in rows),'total':sum(row['monitoring']['total'] for row in rows)})
     issue_rows.sort(key=lambda issue:(0 if issue['severity']=='FAIL' else 1,-(issue.get('last_seen_at') or 0)))
     recent.sort(key=lambda job:job.get('updated_at') or job.get('created_at') or 0,reverse=True)
-    return {'generated_at':time.time(),'totals':totals,'projects':rows,'issues':issue_rows[:50],'recent_runs':recent[:10]}
+    return {'generated_at':overview_at,'totals':totals,'projects':rows,'issues':issue_rows[:50],'recent_runs':recent[:10]}

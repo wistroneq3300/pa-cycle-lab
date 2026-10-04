@@ -18,6 +18,9 @@ from .profiles import checker_script_path, checker_missing_message
 from cycle_core import LOG_TIMEZONE
 
 TERMINAL = {'COMPLETE', 'INCOMPLETE', 'CANCELLED', 'BLOCKED', 'ERROR', 'RECONCILIATION_REQUIRED'}
+# Store/domain lifecycle states that still represent an in-progress Cycle.  The
+# older PREPARING spelling is accepted for imported history only.
+IN_PROGRESS = {'CREATED', 'PRE_RUNNING', 'AWAITING_CONFIRMATION', 'RUNNING', 'STOP_REQUESTED', 'PREPARING'}
 SAFE_FIELDS = ('name','project','tray','node','os_ip','bmc_ip','os_hostname','bmc_hostname',
                'os_user','bmc_user','os_port','bmc_port','ipmi_cipher','power_domain','aux_domain',
                'aux_scope_confirmed','credential_ref','synthetic','mgx_type','cycle_profile',

@@ -46,13 +46,13 @@
     root.querySelector('[data-vo-title]').textContent=isProject?item.name:'所有專案';
     root.querySelector('[data-vo-systems]').textContent=item.systems;root.querySelector('[data-vo-nodes]').textContent=item.nodes;
     root.querySelector('[data-vo-fail]').textContent=`${item.issues.fail} FAIL`;root.querySelector('[data-vo-warn]').textContent=`${item.issues.warning} WARN`;
-    root.querySelector('[data-vo-summary]').textContent=`Cycle ${item.cycle.running} Running · Monitoring ${item.monitoring.reporting} / ${item.monitoring.total}`;
+    root.querySelector('[data-vo-summary]').textContent=`Cycle ${item.cycle.running} Running · Telemetry ${item.monitoring.reporting} / ${item.monitoring.total}`;
     root.querySelector('[data-vo-enter]').textContent=isProject?'進入專案':'進入系統與專案';
     const cards=[
       ['Active Issues',`${item.issues.fail} FAIL · ${item.issues.warning} WARN`,'需要檢視的巡檢問題',item.issues.fail?'fail':item.issues.warning?'warn':'ok'],
       ['Validation',`${item.validation.checked} / ${item.validation.total}`,'Nodes checked',item.validation.checked<item.validation.total?'warn':'ok'],
       ['Cycle',`${item.cycle.running} Running · ${item.cycle.completed} Completed`,'Cycle validation runs',item.cycle.running?'active':'ok'],
-      ['Monitoring',`${item.monitoring.reporting} / ${item.monitoring.total}`,'Nodes reporting',item.monitoring.reporting<item.monitoring.total?'warn':'ok']
+      ['Telemetry',`${item.monitoring.reporting} / ${item.monitoring.total}`,'Nodes reporting',item.monitoring.reporting<item.monitoring.total?'warn':'ok']
     ];
     root.querySelector('[data-vo-status]').innerHTML=cards.map(([label,value,detail,state])=>`<article data-state="${state}"><span>${label}</span><strong>${value}</strong><small>${detail}</small></article>`).join('');
     const issues=overview.issues.filter(issue=>!selectedProject||issue.project===selectedProject).slice(0,6);

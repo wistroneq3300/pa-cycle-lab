@@ -105,6 +105,23 @@ class InspectionStore:
         with self.tx(False) as db:
             return {r['id']:json.loads(r['data']) for r in db.execute('SELECT id,data FROM inspection_nodes WHERE system_id=?',(system_id,))}
 
+    def successful_nodes(self,system_id):
+        """Canonical nodes with at least one durable successful collection.
+
+        ``inspection_nodes`` is the existing per-node aggregate written by the
+        independent collector.  Unlike the chassis summary, it remains bound to
+        the original node_id when the operator changes ``active_os``.
+        """
+        result={}
+        for node_id,state in self.node_state(system_id).items():
+            successes=[source.get('last_success') for source in state.get('sources',{}).values()
+                       if type(source.get('last_success')) in {int,float} and math.isfinite(source['last_success']) and source['last_success']>0]
+            completed=state.get('last_completed')
+            if type(completed) not in {int,float} or not math.isfinite(completed) or completed<=0:
+                completed=max(successes,default=None)  # compatibility with older durable node aggregates
+            if successes and completed is not None: result[node_id]=completed
+        return result
+
     def progress(self,system_id,node_id,data):
         with self.tx() as db:
             db.execute('INSERT OR REPLACE INTO inspection_progress VALUES(?,?,?)',(system_id,node_id,encode(data)))
