@@ -680,6 +680,10 @@ inspection_service = install_inspection(app, pa, lambda: store)
 from .telemetry_routes import install as install_telemetry_provision
 telemetry_provision_service = install_telemetry_provision(app, pa)
 
+# PA Agent runs (P3-b): create/read formal AgentRun records. No OpenHands here.
+from .agent_routes import install as install_agent_runs
+agent_run_store = install_agent_runs(app, pa)
+
 
 @app.get('/api/validation/overview')
 def validation_overview(request:Request):
