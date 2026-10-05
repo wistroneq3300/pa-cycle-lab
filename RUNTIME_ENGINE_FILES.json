@@ -66,6 +66,7 @@
     "app/static/js/kvm-solo.js",
     "app/static/js/kvm_broadcast.js",
     "app/static/js/operations-ux.js",
+    "app/static/js/pa-agent.js",
     "app/static/js/premium.js",
     "app/static/js/preview-fixtures.js",
     "app/static/js/product-detail.js",
