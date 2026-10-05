@@ -309,17 +309,12 @@ async function waitForServer() {
       msgsBefore: (document.querySelector("#pa-drawer-body") || { querySelectorAll: () => [] }).querySelectorAll(".pa-msg").length,
     };
   });
-  // 使用者在輸入框打字後按 Enter → 應等同按「送出」→ 觸發 /start 並帶上該訊息。
+  // 確認閘門：在輸入框打字後按 Enter「不得」啟動執行（必須明確按鈕）。
   const ENTER_NOTE = "E2E-ENTER-NOTE: 請優先檢查 PCIe link";
   await page.fill("#pa-msg-input", ENTER_NOTE);
   await page.focus("#pa-msg-input");
   await page.keyboard.press("Enter");
-  // Enter 送出是非同步：等送出鈕隱藏（= start 已發出）再讀狀態。
-  await page.waitForFunction(
-    () => { const b = document.getElementById("pa-drawer-start"); return b && b.hidden; },
-    null, { timeout: 5000 },
-  ).catch(() => {});
-  // Enter 應已送出：run 啟動 → 送出鈕隱藏，且訊息以「你」卡片顯示。
+  await page.waitForTimeout(800);
   const enterResult = await page.evaluate((note) => {
     const btn = document.getElementById("pa-drawer-start");
     const body = document.getElementById("pa-drawer-body");
@@ -327,11 +322,26 @@ async function waitForServer() {
       ? Array.from(body.querySelectorAll(".pa-msg-role")).filter((n) => n.textContent === "你").length
       : 0;
     return {
-      startHidden: !!btn && btn.hidden,
+      // Enter 後 run 仍未啟動：按鈕仍可見、尚未輪詢到訊息。
+      startStillVisible: !!(btn && !btn.hidden),
+      noMsgsYet: (body ? body.querySelectorAll(".pa-msg").length : 0) === 0,
       noteShown: (body ? body.textContent : "").includes(note),
       userMsgs,
     };
   }, ENTER_NOTE);
+  // 使用者明確按下「確認並開始執行」→ 才觸發 /start。
+  await page.evaluate(() => {
+    const btn = document.getElementById("pa-drawer-start");
+    if (btn && !btn.hidden) btn.click();
+  });
+  await page.waitForFunction(
+    () => { const b = document.getElementById("pa-drawer-start"); return b && b.hidden; },
+    null, { timeout: 5000 },
+  ).catch(() => {});
+  const confirmResult = await page.evaluate(() => {
+    const btn = document.getElementById("pa-drawer-start");
+    return { startHidden: !!btn && btn.hidden };
+  });
   await page.waitForFunction(
     () => {
       const b = document.querySelector("#pa-drawer-body");
@@ -387,11 +397,11 @@ async function waitForServer() {
     ["left pane shows testcase content", leftPane.length > 0],
     ["run created (status shown)", statusText.length > 0],
     // 審閱優先：未自動執行 —— 開始執行按鈕已顯示 + 待審閱橫幅 + 尚未輪詢訊息。
-    ["review-first: 開始執行 button shown", reviewState.startVisible],
+    ["review-first: 確認並開始執行 button shown", reviewState.startVisible],
     ["review-first: review banner present", reviewState.reviewBanner],
     ["review-first: not auto-started (0 msgs before click)", reviewState.msgsBefore === 0],
-    ["Enter-to-send: typing + Enter started the run (送出 hidden)", enterResult.startHidden],
-    ["Enter-to-send: typed note shown as user card", enterResult.noteShown],
+    ["confirm-gate: Enter does NOT start the run", enterResult.startStillVisible && enterResult.noMsgsYet],
+    ["confirm-gate: explicit button click starts the run", confirmResult.startHidden],
     ["messages polled + rendered", msgInfo.count >= 2],
     ["user+assistant roles present", msgInfo.roles.includes("你") && msgInfo.roles.includes("PA Agent")],
     // Centered two-column modal + scrim.

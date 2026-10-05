@@ -170,38 +170,77 @@ class AgentGateway:
         review = context.get("ai_review") or {}
         target = context.get("target") or {}
         lines = [
-            f"You are the PA Agent running test case {tc.get('code')} "
-            f"(variant {context.get('case_variant_id')}).",
+            "你是 PA Agent，正在執行測試案例 "
+            f"{tc.get('code')}（variant {context.get('case_variant_id')}）。",
             "",
-            f"Sub-function: {tc.get('sub_function') or '-'}",
-            f"Test set: {tc.get('test_set') or '-'}",
-            f"Items: {tc.get('items') or '-'}",
+            "【輸出語言】全程使用繁體中文回覆（指令、程式碼、原始 log 可保留原文）。",
             "",
-            "Procedure:",
+            f"子功能：{tc.get('sub_function') or '-'}",
+            f"測試集：{tc.get('test_set') or '-'}",
+            f"測項：{tc.get('items') or '-'}",
+            "",
+            "執行程序：",
             (tc.get("procedure") or "-"),
             "",
-            "Acceptance criteria:",
+            "驗收標準：",
             (tc.get("criteria") or "-"),
         ]
+
+        # 人工（MANUAL ONLY）測項：本質是人工目視／物理檢查，沒有可執行的指令。
+        # 若不特別說明，agent 會自行 SSH 猛跑指令，把 context 撐爆而報錯。
+        if self._is_manual_only(tc):
+            lines += [
+                "",
+                "【重要：本測項為「人工檢查」(MANUAL ONLY)】",
+                "此測項由工程師以目視／物理方式檢查，沒有可由指令自動驗證的項目。",
+                "請勿 SSH 到 DUT 執行任何指令，也不要嘗試模擬或聲稱已完成物理檢查。",
+                "你只需要：",
+                "  1) 列出此測項需要工程師提供的證據（照片、檢查清單、blackbox 狀態等）；",
+                "  2) 說明判定所需的資訊；",
+                "  3) 等待工程師提供證據後，再依其內容整理紀錄。",
+                "PASS／FAIL／BLOCKED 一律由工程師裁定。",
+            ]
 
         # Execution target. Without this the agent has no DUT to run against and
         # will fabricate results; it MUST SSH into the given host to run commands.
         dut = self._dut_block(target)
-        if dut:
+        if dut and not self._is_manual_only(tc):
             lines += ["", dut]
         instruction = (review.get("openhands_instruction")
                        or tc.get("ai_agent_instruction"))
         if instruction:
-            lines += ["", "Agent instruction:", instruction]
+            lines += ["", "Agent 指示：", instruction]
         if tc.get("ai_precheck"):
-            lines += ["", "Pre-check:", tc["ai_precheck"]]
+            lines += ["", "執行前檢查：", tc["ai_precheck"]]
         if tc.get("ai_commands"):
-            lines += ["", "Commands:", tc["ai_commands"]]
+            lines += ["", "指令：", tc["ai_commands"]]
         if tc.get("ai_postcheck"):
-            lines += ["", "Post-check:", tc["ai_postcheck"]]
+            lines += ["", "執行後檢查：", tc["ai_postcheck"]]
+
+        lines += [
+            "",
+            "【執行原則】",
+            "- 動手前先確認測試步驟；有疑慮時先停下詢問，不要自行假設。",
+            "- 指令輸出只需摘要重點，勿將整包原始輸出貼回；避免累積過長內容。",
+            "- 不得捏造指令輸出；SSH 失敗就據實回報。",
+        ]
         if (user_note or "").strip():
-            lines += ["", "Engineer note (follow this):", user_note.strip()]
+            lines += ["", "【工程師備註（請遵循）】", user_note.strip()]
         return "\n".join(lines)
+
+    @staticmethod
+    def _is_manual_only(tc):
+        """True when the case is a manual/physical check (no runnable commands).
+
+        Library rows carry this as ``category`` == "MANUAL ONLY" (also seen as
+        ``manual_only`` boolean or ``mode``); check all shapes.
+        """
+        cat = str(tc.get("category") or "").upper()
+        if "MANUAL" in cat:
+            return True
+        if tc.get("manual_only") is True:
+            return True
+        return str(tc.get("mode") or "").upper() in {"MANUAL", "MANUAL_ONLY"}
 
     @staticmethod
     def _dut_block(target):
