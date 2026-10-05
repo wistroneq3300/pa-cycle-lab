@@ -1,13 +1,13 @@
-# HANDOFF — PA Cycle Lab / Test Library integration (P1/P2/P3 done; **26 commits UNPUSHED — no GitHub credential in env**)
+# HANDOFF — PA Cycle Lab / Test Library integration (P1/P2/P3 done; **all 27 commits PUSHED to origin — in sync as of 2026-10-01**)
 
 > Copy this whole file into the next conversation window as the first message.
 
 ## 0. TL;DR for the next agent
 
-- Repo: `wistroneq3300/pa-cycle-lab`, branch **`astra-console-import`**, HEAD **`f913f27`** (26 commits ahead of origin).
+- Repo: `wistroneq3300/pa-cycle-lab`, branch **`astra-console-import`**, HEAD **`1679d67`** (== origin, in sync).
 - **P1 is DONE (committed).** Merged 3,112-case library is live; assignment flow untouched in behaviour.
-- **PUSH BLOCKER (2026-10-01):** `origin/astra-console-import` is at `4a707db`; local `HEAD` is at `f913f27` — **26 commits ahead, all unpushed.** No `GITHUB_TOKEN`/`GH_TOKEN` in env, `~/.git-credentials` is empty, and the `id_rsa` SSH key is not registered with GitHub (ssh auth = "Permission denied"). A valid GitHub credential (token or registered SSH key) is needed before `git push origin astra-console-import` will succeed.
-- **P2 is DONE (commit `48d0430`, local; not pushed).** Test Case detail panel renders `ai_review`
+- **PUSH RESOLVED (2026-10-01):** `origin/astra-console-import` is at **`1679d67`** == local `HEAD` — **fully in sync, 0 commits ahead.** Earlier "26 commits unpushed" blocker was cleared by pushing all commits with a provided GitHub token. (Verified via GitHub API: remote branch tip `1679d67`.)
+- **P2 is DONE (commit `48d0430`, pushed).** Test Case detail panel renders `ai_review`
   as sectioned blocks with five-way classification badges. Frontend-only
   (`app/static/js/engineering-ux.js`, `app/static/css/engineering-ux.css`, `app/static/index.html`).
 - **P3 is DONE (committed, `f913f27`).** AgentRun + live OpenHands gateway + event ingest + message persistence; e2e-verified against the live 27B agent-server. Spec: `docs/P3-PA-AGENT-DESIGN.md`. Open sub-items: P3-d (policy engine), P3-e (chat drawer), P3-f/g/h (attachments, validation write-back, scheduling).
