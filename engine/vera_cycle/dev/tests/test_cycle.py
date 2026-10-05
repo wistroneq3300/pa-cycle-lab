@@ -340,6 +340,38 @@ class PureTests(unittest.TestCase):
         self.assertEqual(health(items), 'FAIL')
         self.assertIn('PCIE_DOWNGRADE', [item['code'] for item in items])
 
+    def test_structured_pcie_signal_suppresses_fallback_guess(self):
+        # When structured PCIe evidence exists, the raw dump must not be guessed at:
+        # a stray LnkSta line must never be attributed to the last-seen device.
+        text = (
+            '0000:f2:00.1 SATA controller [0106]: AMD FCH SATA Controller\n'
+            '\tCapabilities: [64] Express (v2) Endpoint\n'
+            '\tLnkSta: Speed 32GT/s, Width x16\n'
+            'ISSUE|PCIE_DOWNGRADE|0000:03:00.0|NVIDIA: LnkSta: Speed 32GT/s, Width x8 (downgraded)\n'
+            'CHECK|PCIE_LINK|bdf=0000:03:00.0|state=evaluated|lnksta=LnkSta: Speed 32GT/s, Width x8 (downgraded)\n'
+            'CHECK|PCIE_LINK|bdf=0000:f2:00.1|state=evaluated|lnksta=LnkSta: Speed 32GT/s, Width x16\n'
+            'RESULT|FAIL\n'
+        )
+        items = config_issues(text, 0)
+        pcie = [i for i in items if i['code'] == 'PCIE_DOWNGRADE']
+        self.assertEqual([i['component'] for i in pcie], ['0000:03:00.0'])
+
+    def test_real_evidence_pcie_downgrade_is_gpu_not_sata(self):
+        # Regression from a live EQ3300 snapshot: the SATA controller (f2:00.1) was
+        # wrongly reported as a downgraded endpoint. Only the GPU belongs here.
+        import os
+        root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+        path = os.path.join(root, 'data', 'pa6969', 'inspection-evidence', '6d',
+                            '6d6d5113b35c4ad7bccb53179c31b854.txt')
+        if not os.path.exists(path):
+            self.skipTest('live inspection evidence not present')
+        with open(path, encoding='utf-8', errors='replace') as fh:
+            text = fh.read()
+        pcie = [i for i in config_issues(text, 0) if i['code'] == 'PCIE_DOWNGRADE']
+        components = sorted(i['component'] for i in pcie)
+        self.assertEqual(components, ['0000:03:00.0'])
+        self.assertNotIn('0000:f2:00.1', components)
+
     def test_empty_config_is_not_pass(self):
         self.assertEqual(health(config_issues('', 0)), 'FAIL')
         self.assertEqual(health(config_issues('RESULT|FAIL', 0)), 'FAIL')

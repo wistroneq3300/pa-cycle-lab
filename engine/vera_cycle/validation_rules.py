@@ -397,19 +397,32 @@ def config_issues(text, code):
         items.append(issue("CONFIG_FAILED", "hardware", "Hardware script returned RESULT|FAIL"))
     if "RESULT|" not in text:
         items.append(issue("CONFIG_INCOMPLETE", "hardware", "Hardware script did not return a final structured result"))
-    # Legacy scripts may omit structured issues. Restrict the fallback to an
-    # explicitly identified endpoint's LnkSta, never bridges or general prose.
-    bdf, endpoint = "", False
-    for line in text.splitlines():
-        header = re.match(r"^([0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\.[0-7])\s", line, re.I)
-        if header:
-            bdf, endpoint = header[1], False
-        elif re.search(r"Express.*(?:Legacy\s+)?Endpoint", line):
-            endpoint = True
-        elif endpoint and "LnkSta:" in line:
-            link_code = "PCIE_DOWNGRADE" if re.search(r"down[\s-]*grad|degrad", line, re.I) else "PCIE_LINK_UNAVAILABLE" if re.search(r"Speed\s+unknown|Width\s+x0\b", line, re.I) else None
-            if link_code and not any(i['code'] == link_code and i['component'] == bdf for i in items):
-                items.append(issue(link_code, bdf, line.strip(), snippet=line.strip()))
+    # Legacy scripts may omit structured issues. Only fall back to prose when no
+    # structured PCIe signal exists (an ISSUE|PCIE_* finding or a CHECK|PCIE_LINK
+    # line), otherwise the structured data is authoritative and guessing from the
+    # raw lspci dump would duplicate findings under the wrong BDF.
+    structured_pcie = any(
+        str(i.get('code', '')).startswith('PCIE_') for i in items
+    ) or 'CHECK|PCIE_LINK' in text
+    if not structured_pcie:
+        # Walk the verbose dump one device block at a time: only an explicitly
+        # identified Express Endpoint contributes, and its LnkSta must belong to
+        # that same block. A BDF embedded in the line (bdf=...) always wins.
+        bdf, endpoint = "", False
+        for line in text.splitlines():
+            header = re.match(r"^([0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\.[0-7])\s", line, re.I)
+            if header:
+                bdf, endpoint = header[1], False
+                continue
+            inline = re.search(r"\bbdf=([0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\.[0-7])\b", line, re.I)
+            if re.search(r"Express.*(?:Legacy\s+)?Endpoint", line):
+                endpoint = True
+                continue
+            if endpoint and "LnkSta:" in line:
+                link_code = "PCIE_DOWNGRADE" if re.search(r"down[\s-]*grad|degrad", line, re.I) else "PCIE_LINK_UNAVAILABLE" if re.search(r"Speed\s+unknown|Width\s+x0\b", line, re.I) else None
+                component = inline[1] if inline else bdf
+                if link_code and not any(i['code'] == link_code and i['component'] == component for i in items):
+                    items.append(issue(link_code, component, line.strip(), snippet=_check_snippet(line) or line.strip()))
     return items
 
 def parse_hardware_checks(text, findings):
