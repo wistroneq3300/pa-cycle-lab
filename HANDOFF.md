@@ -415,6 +415,32 @@ Test case `Wistron-Storage-00009-V003` — "FIO Mix read/write bandwidth/IOPS (7
   (`cancelPolling()` on TERMINAL; `open()` resets `renderedSeq`/body so a rerun starts clean).
 - `tests/pa-agent-drawer-e2e.cjs` → **PASS (11/11)**; `tests/_p3e_e2e.cjs` → **PASS**;
   `node --check` OK on `app.js`, `pa-agent.js`, both E2E files.
+
+### FIXED (2026-10-01): agent had no tools — "啟動失敗 422" then "no terminal tool"
+Two independent bugs stopped a run from doing anything; both fixed and pushed (`c446231`, `e95cd7a`):
+1. **HTTP 422 on create-conversation**: gateway sent `include_default_tools: true`, but
+   agent-server 1.49.6 wants a `list[str]`. Field removed (`c446231`). The running web service
+   had NOT been restarted, so the old code was still live and kept 422-ing — **always restart
+   `pa-manager-6969-web.service` after editing the gateway.**
+2. **Agent created with no environment tools**: with no `tools` list, agent-server gives only
+   `FinishTool`/`ThinkTool` (`openhands.sdk.tool.builtins.BUILT_IN_TOOLS`) — the agent could
+   think but ran nothing. Root causes: (a) `/srv/pa-agent/start-pa-agent-server.sh` never
+   installed `openhands-tools`, so `terminal`/`file_editor` weren't registered at all; (b) the
+   registered tool names are the **short forms** (`terminal`, `file_editor`, `task_tracker`),
+   NOT the class names (`TerminalTool` → `KeyError: not registered`).
+   Fixes: start script now uses `--with openhands-sdk/tools/workspace` (backup
+   `start-pa-agent-server.sh.bak-20261005-202520`); gateway sends
+   `tools:[{name:"terminal"},{name:"file_editor"},{name:"task_tracker"}]` (`e95cd7a`).
+   **Verified live**: a `Check PCIe` run SSHes to the DUT (10.35.228.144), runs `nvidia-smi`,
+   `lspci -vvv`, `dmesg` — real execution, no more fabricated report.
+
+### Dialog UX issues reported (NOT fixed yet)
+- 「送出」button only does a **local echo** (`addUserMessage`) — it does NOT POST to the backend,
+  and there is no backend endpoint to send a message into a run. Only 「開始執行」 actually starts
+  the agent. Either wire a real message endpoint or disable/label the button.
+- Chat pane too small: `@media(max-width:820px)` caps `.pa-drawer-left/.pa-drawer-right` at
+  `max-height:38%`.
+- Dark element top-right: to be confirmed (close button vs. scrim area).
 - **P3-c + P3-e are the current work front.** P3-d (policy engine), P3-f/g/h (attachments, evidence
   write-back, scheduling) still open (progress table in §6).
 - **Git:** branch `astra-console-import`. **Uncommitted** = the P3-e frontend: `style.css`,
