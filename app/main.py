@@ -1616,7 +1616,13 @@ def api_testlibrary_meta():
             cnt[k if k in cnt else "UNRESOLVED"] += 1
         out.append({"label": label, "sheet": s.get("name"), "count": s.get("count"),
                     "auto": cnt["YES"], "partial": cnt["PARTIAL"], "no": cnt["NO"], "unresolved": cnt["UNRESOLVED"]})
-    return {"total": data.get("total", 0), "sheets": out, "version": data.get("version"), "schema_version": data.get("schema_version")}
+    meta = data.get("merge_metadata") or {}
+    return {"total": data.get("total", 0), "sheets": out, "version": data.get("version"),
+            "schema_version": data.get("schema_version"),
+            "library_version": data.get("schema_version"),
+            "source_tests_json_sha256": meta.get("tests_json_sha256"),
+            "active_ai_review": data.get("active_ai_review"),
+            "generated_at": data.get("generated_at")}
 
 
 @app.get("/api/testlibrary/export")

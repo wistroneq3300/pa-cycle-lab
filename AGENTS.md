@@ -313,3 +313,21 @@ STILL PENDING (user asked, NOT implemented):
 
 Repo note: `pa-cycle-lab` has NO `main` branch (default is `codex/neutrino-v1`); all work went to
 `astra-console-import`. `vera-cpu-rack-cycle` is a SEPARATE repo (has main) with unrelated history.
+
+## Node identity MAC guard + connection hostnames (2026-10-05, commit 349d4ba)
+
+- `validation_overview` (/api/validation/overview) crashed with KeyError on targets lacking
+  `node_id` (non-node machines: blanking panels, switches). Middleware maps KeyError to a
+  generic 404, so the dashboard showed empty. Fixed by filtering targets with `node_id`.
+- Identity hostname changes are now guarded by MAC: `collect_identity` records `os_mac`/`bmc_mac`
+  (matched to the REGISTERED os_ip/bmc_ip via `ip a` / `ipmitool lan print`). `identity_sync`
+  accepts a hostname change only while the same MAC is present; a MAC mismatch (or an unreadable
+  MAC after a baseline exists) blocks with IDENTITY_REQUIRES_CONFIRMATION. First observation
+  records the MAC baseline in data.json (one durable write). Raw, case-preserving hostnames are
+  stored as `os_hostname_raw`/`bmc_hostname_raw` (note: `normalize_hostname` lowercases).
+- 連線狀態 panel now shows a small Hostname tag for OS/BMC (raw case), with a warning variant
+  when it differs from the system name.
+- Telemetry manual install instructions restored (host+gpu) from `host_setup`/`gpu_setup`.
+- Removed the legacy "既有效能圖表" collapsible (`tp-legacy`) from the Telemetry panel.
+- Pre-existing test failures (~87) in this checkout are fixture/env gaps (missing checker scripts,
+  run2 engine variant) — NOT caused by this work; keep the diff of `pytest tests/ -q` before/after.

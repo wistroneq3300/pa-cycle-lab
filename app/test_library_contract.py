@@ -1,9 +1,79 @@
-"""Variant identity and artifact version for reviewed test-library rows."""
+"""Variant identity, provenance and a UI-facing view for reviewed test-library rows.
+
+The library may be delivered in either of two schemas:
+
+* legacy flat rows (``ai_can_execute`` / ``ai_commands`` / ``ai_packages_needed``
+  / ``ai_logs_output`` / ``risk``), or
+* the merged GPT second-review schema (``schema_version`` =
+  ``tests-gpt-merged-v1``) where the same information lives under a nested
+  ``ai_review`` object plus review provenance in ``merge_metadata``.
+
+``prepare_library`` normalises both into a stable, UI-friendly view *without
+touching the source fields*, so ``ai_review`` survives intact for downstream
+consumers (PA Agent) while the existing library UI keeps working unchanged.
+"""
 import hashlib
 import json
 
+MERGED_SCHEMA = 'tests-gpt-merged-v1'
+
+# automation_classification -> the legacy tri-state badge the library UI shows.
+_CLASS_TO_LEGACY = {
+    'FULLY AUTOMATABLE': 'YES',
+    'REQUIRES PACKAGE / USER CONFIRMATION': 'PARTIAL',
+    'MANUAL ONLY': 'PARTIAL',
+    'BLOCKED': 'NO',
+}
+
+
+def _as_lines(value):
+    """Render a list of steps (or a plain string) as newline-joined text."""
+    if value is None:
+        return ''
+    if isinstance(value, str):
+        return value.strip()
+    if isinstance(value, (list, tuple)):
+        return '\n'.join(str(v).strip() for v in value if str(v).strip())
+    return str(value).strip()
+
+
+def normalize_item(item):
+    """Fill the legacy flat fields from a merged ``ai_review`` when present.
+
+    Never overwrites a value that is already set, so legacy rows and previously
+    normalised rows are left untouched (keeps ``prepare_library`` idempotent).
+    """
+    review = item.get('ai_review')
+    if not isinstance(review, dict):
+        return item
+    classification = review.get('automation_classification')
+    if not item.get('ai_can_execute') and classification:
+        item['ai_can_execute'] = _CLASS_TO_LEGACY.get(classification, 'UNRESOLVED')
+    if not item.get('ai_packages_needed'):
+        item['ai_packages_needed'] = _as_lines(review.get('required_packages'))
+    if not item.get('ai_logs_output'):
+        item['ai_logs_output'] = _as_lines(review.get('logs_to_collect'))
+    if not item.get('ai_commands'):
+        # The UI shows ai_commands as the executable instruction; prefer the
+        # concrete command, then the agent instruction, then pre-check steps.
+        command = _as_lines(review.get('test_command'))
+        if not command:
+            command = _as_lines(review.get('openhands_instruction'))
+        if not command:
+            command = _as_lines(review.get('pre_check_commands'))
+        item['ai_commands'] = command
+    if not item.get('risk'):
+        item['risk'] = review.get('risk_level') or ''
+    return item
+
 
 def prepare_library(library):
+    merged = False
+    for label, sheet in library.get('sheets', {}).items():
+        for item in sheet.get('items', []):
+            if isinstance(item.get('ai_review'), dict):
+                merged = True
+                normalize_item(item)
     seen = set()
     for label, sheet in library.get('sheets', {}).items():
         for item in sheet.get('items', []):
@@ -18,7 +88,7 @@ def prepare_library(library):
             seen.add(identity)
     raw = json.dumps(library.get('sheets', {}), sort_keys=True, ensure_ascii=False, separators=(',', ':'))
     library['version'] = hashlib.sha256(raw.encode()).hexdigest()
-    library['schema_version'] = 2
+    library['schema_version'] = library.get('schema_version') or (MERGED_SCHEMA if merged else 2)
     return library
 
 

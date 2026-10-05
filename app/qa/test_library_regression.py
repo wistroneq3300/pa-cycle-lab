@@ -57,4 +57,55 @@ class LibraryContract(unittest.TestCase):
         self.assertEqual((meta['sheets'][0]['no'],meta['sheets'][0]['unresolved']),(1,1))
 
 
+class MergedLibraryContract(unittest.TestCase):
+    """Merged GPT second-review schema: ai_review -> UI view, provenance preserved."""
+
+    def merged_item(self):
+        return {'code':'Wistron-HW-00001-V006','sub_function':'HW','test_set':'PCIe','items':'Check PCIe',
+                'ai_review':{'automation_classification':'FULLY AUTOMATABLE',
+                             'test_command':'lspci -nn',
+                             'required_packages':['pciutils'],
+                             'logs_to_collect':['lspci -vvv','AER'],
+                             'risk_level':'LOW','end_user_decides':['PASS','FAIL','BLOCKED'],
+                             'openhands_instruction':'Use read-only pciutils.'},
+                'previous_ai_review':None}
+
+    def test_merged_item_normalised_and_ai_review_preserved(self):
+        lib={'sheets':{'F':{'name':'Functionality','items':[self.merged_item()]}}}
+        prepare_library(lib)
+        it=lib['sheets']['F']['items'][0]
+        self.assertEqual(it['ai_can_execute'],'YES')
+        self.assertEqual(it['ai_commands'],'lspci -nn')
+        self.assertEqual(it['ai_packages_needed'],'pciutils')
+        self.assertEqual(it['ai_logs_output'],'lspci -vvv\nAER')
+        self.assertEqual(it['risk'],'LOW')
+        # source review is never discarded
+        self.assertEqual(it['ai_review']['automation_classification'],'FULLY AUTOMATABLE')
+        self.assertEqual(lib['schema_version'],'tests-gpt-merged-v1')
+
+    def test_classification_mapping(self):
+        cases={'FULLY AUTOMATABLE':'YES','REQUIRES PACKAGE / USER CONFIRMATION':'PARTIAL',
+               'MANUAL ONLY':'PARTIAL','BLOCKED':'NO','SOMETHING ELSE':'UNRESOLVED'}
+        for cls,expect in cases.items():
+            lib={'sheets':{'F':{'name':'F','items':[{'code':'C','ai_review':{'automation_classification':cls}}]}}}
+            prepare_library(lib)
+            self.assertEqual(lib['sheets']['F']['items'][0]['ai_can_execute'],expect,cls)
+
+    def test_normalization_idempotent_and_variant_stable(self):
+        lib={'sheets':{'F':{'name':'F','items':[self.merged_item(),self.merged_item()]}}}
+        prepare_library(lib)
+        first=lib['version']; ids=[i['case_variant_id'] for i in lib['sheets']['F']['items']]
+        prepare_library(lib)
+        self.assertEqual(lib['version'],first)
+        self.assertEqual([i['case_variant_id'] for i in lib['sheets']['F']['items']],ids)
+
+    def test_legacy_rows_untouched(self):
+        lib={'sheets':{'F':{'name':'F','items':[{'code':'X','ai_can_execute':'NO','ai_commands':'foo'}]}}}
+        prepare_library(lib)
+        it=lib['sheets']['F']['items'][0]
+        self.assertEqual(it['ai_can_execute'],'NO')
+        self.assertEqual(it['ai_commands'],'foo')
+        self.assertEqual(lib['schema_version'],2)
+
+
 if __name__=='__main__':unittest.main()
