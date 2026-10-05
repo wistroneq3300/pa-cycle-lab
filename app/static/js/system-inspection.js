@@ -10,7 +10,7 @@
     <div class="pd-section-heading"><h2><button type="button" class="pd-inspection-collapse" data-collapse aria-expanded="true" aria-controls="pd-inspection-body" title="收闔系統巡檢"><span class="pd-inspection-caret" aria-hidden="true">▾</span>系統巡檢</button></h2><span data-status role="status">讀取中…</span></div>
     <div class="pd-inspection-body" id="pd-inspection-body">
     <p class="pd-inspection-copy">依專案規格檢查節點硬體、事件與遙測資料，持續追蹤異常與恢復狀態。巡檢僅執行唯讀觀測，不會變更設備電源狀態。</p>
-    <div class="pd-inspection-counts"><span>FAIL <strong data-fail>—</strong> 項</span><span>警告 <strong data-warning>—</strong> 項</span></div>
+    <div class="pd-inspection-counts"><span data-severity="FAIL">FAIL <strong data-fail>—</strong> 項</span><span data-severity="WARN">WARN <strong data-warning>—</strong> 項</span></div>
     <p class="pd-inspection-meta" data-time>最近完成：尚未取得 · 台灣時間 UTC+8</p>
     <p class="pd-inspection-meta" data-version></p><p class="pd-inspection-meta" data-completeness></p>
     <p class="pd-inspection-meta" data-progress aria-live="polite"></p>
@@ -152,7 +152,7 @@
       const label=ctx.snapshot.nodes.find(n=>n.node_id===issue.node_id)?.label||((issue.affected_nodes||[]).length?'共用控制器 · '+issue.affected_nodes.map(id=>ctx.snapshot.nodes.find(n=>n.node_id===id)?.label||id).join('、'):issue.node_id);
       detail.dataset.severity=issue.status!=='ACTIVE'?issue.status:issue.severity;
       const ruleLabel={'cpu.utilization.high':'CPU 持續高使用率','memory.utilization.high':'記憶體持續高使用率','gpu.utilization.high':'GPU 持續高使用率','vram.utilization.high':'VRAM 持續高使用率'}[issue.rule]||(issue.rule.startsWith('DMESG_')?'核心日誌硬體錯誤':issue.rule);
-      summary.textContent=`${issue.status==='ARCHIVED'?'已封存':issue.status==='RECOVERED'?'已恢復':issue.severity==='FAIL'?'FAIL':'警告'} · ${label} · ${issue.component} · ${ruleLabel}`;detail.append(summary);
+      summary.textContent=`${issue.status==='ARCHIVED'?'已封存':issue.status==='RECOVERED'?'已恢復':issue.severity==='FAIL'?'FAIL':'WARN'} · ${label} · ${issue.component} · ${ruleLabel}`;detail.append(summary);
       const facts=document.createElement('p');facts.textContent=issue.facts;detail.append(facts);
       const timing=document.createElement('p');timing.textContent=`首次 ${stamp(issue.first_seen_at)} · 最後觀測 ${stamp(issue.last_seen_at)} · 恢復 ${issue.resolved_at?stamp(issue.resolved_at):'尚未恢復'} · 發生 ${issue.occurrences||0} 次 · 觀測 ${issue.observations||0} 次 · 復發 ${issue.recurrences} 次${issue.occurrence_precision==='uncertain'?' · 來源切換，事件次數未能精確確認':issue.occurrence_precision==='lower_bound'?' · ring buffer 次數為可確認下限':''}`;detail.append(timing);
       const evidence=document.createElement('pre');evidence.textContent='證據來源：'+(issue.evidence||'未提供');detail.append(evidence);

@@ -186,3 +186,9 @@ html[data-theme=light] .pd-inspection-issue[data-severity=WARNING]>summary{color
 .pd-connection .pd-hostname.is-warn{background:rgba(216,170,85,.18);color:#d9aa55}
 html[data-theme=light] .pd-connection .pd-hostname{background:rgba(70,110,140,.1);color:#4b6b80}
 html[data-theme=light] .pd-connection .pd-hostname.is-warn{background:rgba(180,130,20,.16);color:#805509}
+.pd-inspection-counts span[data-severity=FAIL] strong{color:var(--red,#cc5555)}
+.pd-inspection-counts span[data-severity=FAIL]{color:var(--red,#cc5555)}
+.pd-inspection-counts span[data-severity=WARN] strong{color:#d9aa55}
+.pd-inspection-counts span[data-severity=WARN]{color:#d9aa55}
+html[data-theme=light] .pd-inspection-counts span[data-severity=FAIL],html[data-theme=light] .pd-inspection-counts span[data-severity=FAIL] strong{color:#c0392b}
+html[data-theme=light] .pd-inspection-counts span[data-severity=WARN],html[data-theme=light] .pd-inspection-counts span[data-severity=WARN] strong{color:#8a6100}
