@@ -108,11 +108,124 @@
   // Read-only library detail panel. Original selection/copy semantics are preserved.
   let inspectedCase=null;
   const verdict = r => String(r.ai_can_execute||'UNRESOLVED').toUpperCase();
-  function caseDetails(r){
-    if(!r)return '<p class="eng-empty">\u9ede\u9078\u6e2c\u9805\u67e5\u770b\u5b8c\u6574\u5167\u5bb9\u3002</p>';
-    return `<header><span>${esc(r.code)}</span><h3>${esc(r.items)}</h3><b>${esc(verdict(r))}</b><p>\u6b64\u8655\u50c5\u7522\u751f\u6d3e\u5de5\u6307\u4ee4\uff0c\u4e0d\u6703\u57f7\u884c\u6e2c\u8a66\u3002</p></header>${[['\u98a8\u96aa\u8207\u6ce8\u610f\u4e8b\u9805',r.risk],['\u5957\u4ef6\u8207\u524d\u7f6e',r.ai_packages_needed],['\u6307\u4ee4\uff0f\u57f7\u884c\u8aaa\u660e',r.ai_commands],['\u8b49\u64da\u8207\u8f38\u51fa',r.ai_logs_output],['\u5224\u5b9a\u6a19\u6e96',r.criteria],['\u539f\u59cb\u624b\u4f5c\u696d\u55ae\uff08\u53c3\u8003\uff09',r.procedure]].map(([label,value])=>`<section><h4>${label}</h4><pre>${esc(value||'\u672a\u63d0\u4f9b')}</pre></section>`).join('')}`;
+
+  // The five-way automation classification. Each maps to a distinct badge colour.
+  const CLASS_BADGE = {
+    'FULLY AUTOMATABLE':['green','\u5168\u81ea\u52d5'],
+    'REQUIRES PACKAGE / USER CONFIRMATION':['amber','\u9700\u5957\u4ef6\uff0f\u4eba\u5de5\u78ba\u8a8d'],
+    'MANUAL ONLY':['blue','\u50c5\u4eba\u5de5'],
+    'BLOCKED':['red','\u5df2\u963b\u64cb'],
+  };
+  const classBadge = cls => {
+    const [tone,label] = CLASS_BADGE[cls] || ['muted', cls || '\u672a\u5206\u985e'];
+    return `<span class="eng-badge eng-tone-${tone}">${esc(label)}</span>`;
+  };
+  const riskBadge = lvl => {
+    const l = String(lvl||'').toUpperCase();
+    const tone = l==='CRITICAL'?'red':l==='HIGH'?'amber':l==='MEDIUM'?'blue':l==='LOW'?'green':'muted';
+    return l ? `<span class="eng-badge eng-tone-${tone}">\u98a8\u96aa ${esc(l)}</span>` : '';
+  };
+  const boolBadge = (v,text) => v ? `<span class="eng-badge eng-tone-amber">${esc(text)}</span>` : '';
+
+  // A section that renders a value as a bullet list, prose block, or config rows.
+  const asArr = v => Array.isArray(v) ? v.filter(x=>x!=null&&String(x).trim()!=='') : (v==null||String(v).trim()===''?[]:[String(v)]);
+  const bulletSection = (label, value, note) => {
+    const arr = asArr(value);
+    if(!arr.length) return '';
+    return `<section class="eng-case-sec"><h4>${esc(label)}${note?` <em>${esc(note)}</em>`:''}</h4><ul>${arr.map(t=>`<li>${esc(t)}</li>`).join('')}</ul></section>`;
+  };
+  const proseSection = (label, value) => {
+    const t = value==null?'':String(value).trim();
+    if(!t) return '';
+    return `<section class="eng-case-sec"><h4>${esc(label)}</h4><p class="eng-case-prose">${esc(t)}</p></section>`;
+  };
+  // The pipeline: pre-check -> test -> post-check, shown as ordered stage boxes.
+  const stageSection = (label, value) => {
+    const arr = asArr(value);
+    if(!arr.length) return '';
+    return `<section class="eng-case-sec eng-case-stage"><h4>${esc(label)}</h4><ol>${arr.map(t=>`<li>${esc(t)}</li>`).join('')}</ol></section>`;
+  };
+
+  function caseReview(r){
+    const rev = r.ai_review;
+    if(!rev) return '';
+    const out = [];
+    if(rev.purpose) out.push(proseSection('\u76ee\u7684', rev.purpose));
+    if(rev.test_name) out.push(proseSection('\u6e2c\u8a66\u540d\u7a31', rev.test_name));
+
+    // Preconditions / safety / risk
+    out.push(bulletSection('\u524d\u7f6e\u689d\u4ef6', rev.preconditions));
+    out.push(bulletSection('\u5b89\u5168\u6aa2\u67e5', rev.safety_checks));
+    out.push(bulletSection('\u98a8\u96aa\u8aaa\u660e', rev.risk_notes));
+    out.push(proseSection('\u5f71\u97ff\u7bc4\u570d', rev.blast_radius));
+
+    // Packages + the three execution stages
+    out.push(bulletSection('\u6240\u9700\u5957\u4ef6', rev.required_packages));
+    out.push(stageSection('\u2460 \u524d\u7f6e\u6aa2\u67e5 (pre-check)', rev.pre_check_commands));
+    out.push(proseSection('\u2461 \u6e2c\u8a66\u6307\u4ee4 (test command)', rev.test_command));
+    out.push(stageSection('\u2462 \u5f8c\u7f6e\u78ba\u8a8d (post-check)', rev.post_check_commands));
+
+    // Evidence & outputs
+    out.push(bulletSection('\u9810\u671f\u8b49\u64da', rev.expected_evidence));
+    out.push(bulletSection('\u8981\u6536\u96c6\u7684\u65e5\u8a8c', rev.logs_to_collect));
+
+    // Human-facing instructions
+    out.push(bulletSection('\u624b\u52d5\u6b65\u9a5f', rev.manual_steps));
+    out.push(proseSection('\u6062\u5fa9\u7a0b\u5e8f', rev.recovery_procedure));
+
+    // Gating / policy — only when meaningful
+    out.push(bulletSection('\u963b\u64cb\u689d\u4ef6', rev.blocked_conditions));
+    return out.filter(Boolean).join('');
   }
-  assignTaskRow=function(r,dup){const index=_assignTask.items.indexOf(r);return `<div class="assign-row eng-case-row"><label><input type="checkbox" data-variant="${esc(assignTaskKey(r))}" aria-label="${esc(r.code)}" ${_assignTask.sel.has(assignTaskKey(r))?'checked':''} onchange="assignTaskToggle(${q(assignTaskKey(r))},this.checked)"></label><button type="button" class="eng-case-open" onclick="engInspectCase(${index})"><span><b>${esc(verdict(r))}</b> <code>${esc(r.code)}</code></span><strong>${esc(r.items)}</strong><small>${esc(r.test_set||'')}${dup?.has(r.code)?' \u00b7 \u540c\u78bc\u591a\u7b46':''}</small></button></div>`;};
+
+  function caseDetails(r){
+    if(!r){
+      return '<p class="eng-empty">\u9ede\u9078\u6e2c\u9805\u67e5\u770b\u5b8c\u6574\u5167\u5bb9\u3002</p>';
+    }
+    const rev = r.ai_review;
+    const flags = [];
+    if(rev){
+      flags.push(classBadge(rev.automation_classification));
+      flags.push(riskBadge(rev.risk_level||r.risk));
+      if(rev.destructive_actions) flags.push(boolBadge(true,'\u5177\u7834\u58de\u6027'));
+      if(rev.requires_human_approval) flags.push(boolBadge(true,'\u9700\u4eba\u5de5\u6838\u51c6'));
+      if(rev.user_confirmation_required) flags.push(boolBadge(true,'\u9700\u4f7f\u7528\u8005\u78ba\u8a8d'));
+      const decides = asArr(rev.end_user_decides);
+      if(decides.length) flags.push(`<span class="eng-badge eng-tone-muted">\u5de5\u7a0b\u5e2b\u88c1\u5b9a\uff1a${esc(decides.join(' / '))}</span>`);
+    } else {
+      flags.push(`<span class="eng-badge eng-tone-muted">${esc(verdict(r))}</span>`);
+      if(r.risk) flags.push(riskBadge(r.risk));
+    }
+    const head = `<header class="eng-case-head">
+      <div class="eng-case-id"><code>${esc(r.code)}</code>${r.case_variant_id?`<small class="mono">${esc(String(r.case_variant_id).slice(0,20))}</small>`:''}</div>
+      <h3>${esc(r.items||r.test_set||'')}</h3>
+      <div class="eng-case-flags">${flags.join('')}</div>
+      <p>\u6b64\u8655\u50c5\u7522\u751f\u6d3e\u5de5\u6307\u4ee4\uff0c\u4e0d\u6703\u57f7\u884c\u6e2c\u8a66\u3002</p>
+    </header>`;
+    const body = rev ? caseReview(r) : '';
+    // Legacy flat fields still matter (criteria / procedure live only here).
+    const legacy = [
+      ['\u5224\u5b9a\u6a19\u6e96', r.criteria],
+      ['\u539f\u59cb\u624b\u4f5c\u696d\u55ae\uff08\u53c3\u8003\uff09', r.procedure],
+    ].map(([label,value])=>{
+      const t = value==null?'':String(value).trim();
+      return t ? `<details class="eng-case-fold"><summary>${esc(label)}</summary><pre>${esc(t)}</pre></details>` : '';
+    }).join('');
+    return head + body + legacy;
+  }
+  // Row label resolves to the five-way classification when the merged review is present,
+  // falling back to the legacy YES/PARTIAL/NO tri-state for older rows.
+  const rowLabel = r => {
+    const rev = r.ai_review;
+    if(rev && CLASS_BADGE[rev.automation_classification]) {
+      const [tone,label] = CLASS_BADGE[rev.automation_classification];
+      return `<span class="eng-badge eng-tone-${tone}">${esc(label)}</span>`;
+    }
+    const v = verdict(r);
+    const tone = v==='YES'?'green':v==='NO'?'red':'amber';
+    return `<span class="eng-badge eng-tone-${tone}">${esc(v)}</span>`;
+  };
+  assignTaskRow=function(r,dup){const index=_assignTask.items.indexOf(r);return `<div class="assign-row eng-case-row"><label><input type="checkbox" data-variant="${esc(assignTaskKey(r))}" aria-label="${esc(r.code)}" ${_assignTask.sel.has(assignTaskKey(r))?'checked':''} onchange="assignTaskToggle(${q(assignTaskKey(r))},this.checked)"></label><button type="button" class="eng-case-open" onclick="engInspectCase(${index})"><span>${rowLabel(r)} <code>${esc(r.code)}</code></span><strong>${esc(r.items)}</strong><small>${esc(r.test_set||'')}${dup?.has(r.code)?' \u00b7 \u540c\u78bc\u591a\u7b46':''}</small></button></div>`;};
   const baseTaskList=assignTaskListHtml;
   assignTaskListHtml=function(){const root=document.createElement('div');root.innerHTML=baseTaskList();const rows=root.querySelector('.assign-rows');if(!rows)return root.innerHTML;const layout=document.createElement('div');layout.className='eng-case-layout';rows.before(layout);layout.append(rows);const row=(_assignTask.items||[]).find(r=>r===inspectedCase);layout.insertAdjacentHTML('beforeend',`<aside class="eng-case-detail" id="eng-case-detail" aria-label="\u6e2c\u9805\u5167\u5bb9">${caseDetails(row)}</aside>`);root.querySelector('#assign-q')?.setAttribute('aria-label','\u641c\u5c0b\u6e2c\u8a66\u6848\u4f8b');return root.innerHTML;};
   window.engInspectCase=index=>{inspectedCase=_assignTask.items[index];const panel=document.getElementById('eng-case-detail');if(panel){panel.innerHTML=caseDetails(inspectedCase);panel.scrollTop=0;}document.querySelectorAll('.eng-case-open').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`engInspectCase(${index})`));};
