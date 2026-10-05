@@ -3641,22 +3641,28 @@ function assignResultRichHtml(chosen, mm, sname, ip, user, dupSet) {
   const E = (s) => esc(String(s == null ? "" : s));
   const arr = (v) => Array.isArray(v) ? v.filter(x => x != null && String(x).trim() !== "") : (v == null || String(v).trim() === "" ? [] : [String(v)]);
   const CLASS_BADGE = {
-    "FULLY AUTOMATABLE": ["green", "FULLY AUTOMATABLE"],
-    "REQUIRES PACKAGE / USER CONFIRMATION": ["amber", "REQUIRES PACKAGE / USER CONFIRMATION"],
-    "MANUAL ONLY": ["blue", "MANUAL ONLY"],
-    "BLOCKED": ["red", "BLOCKED"],
+    "FULLY AUTOMATABLE": ["green", "全自動"],
+    "REQUIRES PACKAGE / USER CONFIRMATION": ["amber", "需套件／人工確認"],
+    "MANUAL ONLY": ["blue", "僅人工"],
+    "BLOCKED": ["red", "已阻擋"],
   };
   const legacyClass = (can) => can === "YES" ? "FULLY AUTOMATABLE" : can === "PARTIAL" ? "REQUIRES PACKAGE / USER CONFIRMATION" : "MANUAL ONLY";
-  const badge = (cls) => { const [tone, label] = CLASS_BADGE[cls] || ["muted", cls || "UNCLASSIFIED"]; return `<span class="eng-badge eng-tone-${tone}">${E(label)}</span>`; };
-  const riskBadge = (lvl) => { const l = String(lvl || "").toUpperCase(); if (!l) return ""; const tone = l === "CRITICAL" ? "red" : l === "HIGH" ? "amber" : l === "MEDIUM" ? "blue" : l === "LOW" ? "green" : "muted"; return `<span class="eng-badge eng-tone-${tone}">RISK ${E(l)}</span>`; };
+  const badge = (cls) => { const [tone, label] = CLASS_BADGE[cls] || ["muted", cls || "未分類"]; return `<span class="eng-badge eng-tone-${tone}">${E(label)}</span>`; };
+  const riskBadge = (lvl) => { const l = String(lvl || "").toUpperCase(); if (!l) return ""; const tone = l === "CRITICAL" ? "red" : l === "HIGH" ? "amber" : l === "MEDIUM" ? "blue" : l === "LOW" ? "green" : "muted"; return `<span class="eng-badge eng-tone-${tone}">風險 ${E(l)}</span>`; };
   const flag = (v, text) => v ? `<span class="eng-badge eng-tone-amber">${E(text)}</span>` : "";
   const sec = (label, body) => body ? `<section class="eng-case-sec"><h4>${E(label)}</h4>${body}</section>` : "";
   const ul = (label, value) => { const a = arr(value); return a.length ? sec(label, `<ul>${a.map(t => `<li>${E(t)}</li>`).join("")}</ul>`) : ""; };
   const ol = (label, value) => { const a = arr(value); return a.length ? sec(label, `<ol>${a.map(t => `<li>${E(t)}</li>`).join("")}</ol>`) : ""; };
   const prose = (label, value) => { const t = value == null ? "" : String(value).trim(); return t ? sec(label, `<p class="eng-case-prose">${E(t)}</p>`) : ""; };
   const code = (label, value) => { const t = value == null ? "" : String(value).trim(); return t ? sec(label, `<pre class="eng-case-pre">${E(t)}</pre>`) : ""; };
-  // Key-value summary row (monospace, one line per field).
-  const kv = (pairs) => `<pre class="eng-case-pre">${pairs.filter(p => p && p[1] != null && String(p[1]).trim() !== "").map(([k, v]) => E(String(k).padEnd(14)) + ": " + E(v)).join("\n")}</pre>`;
+  // Key-value summary row (monospace, one line per field). Keys may be CJK, whose
+  // display width is ~2 columns, so pad by display width rather than char count.
+  const dispLen = (s) => Array.from(String(s)).reduce((n, c) => n + (/[\u1100-\u115F\u2E80-\uA4CF\uAC00-\uD7A3\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFF60\uFFE0-\uFFE6]/.test(c) ? 2 : 1), 0);
+  const kv = (pairs) => {
+    const rows = pairs.filter(p => p && p[1] != null && String(p[1]).trim() !== "");
+    const w = rows.reduce((m, [k]) => Math.max(m, dispLen(k)), 0);
+    return `<pre class="eng-case-pre">` + rows.map(([k, v]) => E(k) + " ".repeat(Math.max(0, w - dispLen(k))) + " : " + E(v)).join("\n") + `</pre>`;
+  };
 
   const cards = chosen.map((r) => {
     const rev = r.ai_review || {};
@@ -3669,66 +3675,66 @@ function assignResultRichHtml(chosen, mm, sname, ip, user, dupSet) {
     const headline = [
       badge(cls),
       riskBadge(rev.risk_level),
-      flag(rev.destructive_actions, "DESTRUCTIVE"),
-      flag(rev.requires_human_approval, "HUMAN APPROVAL REQUIRED"),
-      flag(rev.user_confirmation_required, "USER CONFIRMATION REQUIRED"),
-      (Array.isArray(rev.end_user_decides) && rev.end_user_decides.length) ? `<span class="eng-badge eng-tone-blue">ENGINEER DECIDES: ${E(rev.end_user_decides.join(" / "))}</span>` : "",
+      flag(rev.destructive_actions, "具破壞性"),
+      flag(rev.requires_human_approval, "需人工核准"),
+      flag(rev.user_confirmation_required, "需使用者確認"),
+      (Array.isArray(rev.end_user_decides) && rev.end_user_decides.length) ? `<span class="eng-badge eng-tone-blue">工程師裁定：${E(rev.end_user_decides.join(" / "))}</span>` : "",
     ].filter(Boolean).join("");
 
-    const note = can === "YES" ? "Fully automatable."
-      : can === "PARTIAL" ? "Partially automatable — confirm hardware environment / designate the test target before running."
-      : "Not automatable (manual or unsafe operation) — reference only.";
+    const note = can === "YES" ? "可自動執行。"
+      : can === "PARTIAL" ? "部分可自動，需先確認硬體環境／指定測試目標再執行。"
+      : "無法自動執行（需人工操作或危險操作），僅供參考。";
 
     // Approval checklist is DERIVED from existing ai_review flags/packages only.
     const approvals = [];
     arr(rev.required_packages).forEach(p => {
       // Only short single-name entries are treated as installable packages; long
       // prose prerequisites stay in the REQUIRED PACKAGES section instead.
-      if (String(p).trim().length <= 40 && !/[;。.、]/.test(p)) approvals.push(`[ ] Install package: ${p}`);
-      else approvals.push(`[ ] Provide: ${p}`);
+      if (String(p).trim().length <= 40 && !/[;。.、]/.test(p)) approvals.push(`[ ] 安裝套件：${p}`);
+      else approvals.push(`[ ] 提供：${p}`);
     });
-    if (rev.destructive_actions) approvals.push("[ ] Data-loss approval: YES (this case overwrites/destroys data)");
-    if (rev.requires_human_approval) approvals.push("[ ] Human approval required before execution");
-    if (rev.user_confirmation_required) approvals.push("[ ] User confirmation of target environment");
-    const approvalSec = approvals.length ? code("APPROVAL REQUIRED (obtain each before running)", approvals.join("\n")) : "";
+    if (rev.destructive_actions) approvals.push("[ ] 資料遺失批准：是（此案例會覆寫／銷毀資料）");
+    if (rev.requires_human_approval) approvals.push("[ ] 執行前需人工核准");
+    if (rev.user_confirmation_required) approvals.push("[ ] 需使用者確認目標環境");
+    const approvalSec = approvals.length ? code("需要批准（執行前逐項取得）", approvals.join("\n")) : "";
 
     // SOURCE WORK ORDER — reference only, never run as-is.
     const procRaw = String(r.procedure || "").trim();
     const multiStep = /(\r?\n)/.test(procRaw);
     const sourceWarn = (can !== "YES" || rev.destructive_actions)
-      ? `<p class="eng-case-prose">The source work order below is the ORIGINAL human procedure. It may contradict the title (e.g. wrong profile), lack a designated target, or destroy data. Do NOT execute it as written — run only the corrected, approved profile.</p>`
+      ? `<p class="eng-case-prose">以下為原始人工作業單，可能與標題不符（例如 profile 錯誤）、未指定目標，或會銷毀資料。請勿直接執行——只執行修正後、經批准的 profile。</p>`
       : "";
     const sourceBody = multiStep ? `<pre class="eng-case-pre">${E(procRaw)}</pre>` : `<p class="eng-case-prose">${E(procRaw)}</p>`;
-    const sourceSec = procRaw ? sec("SOURCE WORK ORDER  ⚠ DO NOT RUN AS-IS (reference only)", sourceWarn + sourceBody) : "";
+    const sourceSec = procRaw ? sec("原始手作業單 ⚠ 請勿直接執行（僅供參照）", sourceWarn + sourceBody) : "";
 
     const body = [
-      code("TARGET", [mm && mm.label, sname, ip, user].filter(Boolean).join(" · ")),
+      code("目標機台", [mm && mm.label, sname, ip, user].filter(Boolean).join(" · ")),
       kv([
-        ["CASE VARIANT", variant],
-        ["TEST CODE", (r.code || "") + (r.test_set ? ` (${r.test_set})` : "")],
-        ["CLASSIFICATION", cls],
-        ["RISK", rev.risk_level || ""],
-        ["DESTRUCTIVE", rev.destructive_actions ? "true" : ""],
+        ["測試案例變體", variant],
+        ["測試代碼", (r.code || "") + (r.test_set ? ` (${r.test_set})` : "")],
+        ["分類", cls],
+        ["風險", rev.risk_level || ""],
+        ["破壞性", rev.destructive_actions ? "true" : ""],
       ]),
-      prose("PURPOSE", rev.purpose),
-      prose("TEST NAME", rev.test_name || tname),
-      ul("PRECONDITIONS", rev.preconditions),
-      ul("SAFETY CHECKS", rev.safety_checks),
-      ul("RISK NOTES", rev.risk_notes),
-      prose("BLAST RADIUS", rev.blast_radius),
-      ul("REQUIRED PACKAGES", rev.required_packages),
+      prose("目的", rev.purpose),
+      prose("測試名稱", rev.test_name || tname),
+      ul("前置條件", rev.preconditions),
+      ul("安全檢查", rev.safety_checks),
+      ul("風險說明", rev.risk_notes),
+      prose("影響範圍", rev.blast_radius),
+      ul("所需套件", rev.required_packages),
       approvalSec,
-      code("① PRE-CHECK", [].concat(arr(rev.pre_check_commands), arr(r.ai_precheck)).filter((v, i, a) => a.indexOf(v) === i).join("\n")),
-      code("② TEST COMMAND", rev.test_command || r.ai_commands),
-      code("③ POST-CHECK", [].concat(arr(rev.post_check_commands), arr(r.ai_postcheck)).filter((v, i, a) => a.indexOf(v) === i).join("\n")),
-      ul("EXPECTED EVIDENCE", rev.expected_evidence),
-      ul("LOGS TO COLLECT", rev.logs_to_collect),
-      ul("MANUAL STEPS", rev.manual_steps),
-      prose("RECOVERY PROCEDURE", rev.recovery_procedure),
-      ul("BLOCKED CONDITIONS", rev.blocked_conditions),
+      code("① 前置檢查（pre-check）", [].concat(arr(rev.pre_check_commands), arr(r.ai_precheck)).filter((v, i, a) => a.indexOf(v) === i).join("\n")),
+      code("② 測試指令（test command）", rev.test_command || r.ai_commands),
+      code("③ 後置確認（post-check）", [].concat(arr(rev.post_check_commands), arr(r.ai_postcheck)).filter((v, i, a) => a.indexOf(v) === i).join("\n")),
+      ul("預期證據", rev.expected_evidence),
+      ul("要收集的日誌", rev.logs_to_collect),
+      ul("手動步驟", rev.manual_steps),
+      prose("恢復程序", rev.recovery_procedure),
+      ul("阻擋條件", rev.blocked_conditions),
       sourceSec,
-      prose(r.ai_agent_instruction ? "🤖 PA AGENT INSTRUCTION" : "", r.ai_agent_instruction),
-      prose(r.criteria ? "✅ VERDICT CRITERIA" : "", r.criteria),
+      prose(r.ai_agent_instruction ? "🤖 PA Agent 指示" : "", r.ai_agent_instruction),
+      prose(r.criteria ? "✅ 判定標準" : "", r.criteria),
     ].join("");
 
     return `<article class="eng-case-detail" style="max-height:none;margin-bottom:18px">
@@ -3743,9 +3749,9 @@ function assignResultRichHtml(chosen, mm, sname, ip, user, dupSet) {
   }).join("");
 
   return `<div class="eng-case-detail-wrap">
-    <div class="eng-case-sec"><h4>PA AGENT RUN — ASSIGNMENT</h4>
-    <p class="eng-case-prose">Target: ${E([mm.label, sname, ip, user].filter(Boolean).join(" · "))}</p>
-    <p class="eng-case-prose">Execute the following on ${E(ip)} (${E(user)}). Copy this into the OpenHands chat so the agent can SSH in to install / run / collect evidence. PASS/FAIL is judged by you.</p></div>
+    <div class="eng-case-sec"><h4>PA AGENT 指派任務</h4>
+    <p class="eng-case-prose">目標機台：${E([mm.label, sname, ip, user].filter(Boolean).join(" · "))}</p>
+    <p class="eng-case-prose">請在 ${E(ip)}（${E(user)}）上執行以下測項。將本內容複製到 OpenHands 聊天，讓 Agent 透過 SSH 安裝／執行／收集證據；得失判定由您。</p></div>
     ${cards}
   </div>`;
 }
