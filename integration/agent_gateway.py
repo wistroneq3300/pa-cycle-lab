@@ -167,6 +167,7 @@ class AgentGateway:
         """
         tc = context.get("testcase") or {}
         review = context.get("ai_review") or {}
+        target = context.get("target") or {}
         lines = [
             f"You are the PA Agent running test case {tc.get('code')} "
             f"(variant {context.get('case_variant_id')}).",
@@ -181,6 +182,12 @@ class AgentGateway:
             "Acceptance criteria:",
             (tc.get("criteria") or "-"),
         ]
+
+        # Execution target. Without this the agent has no DUT to run against and
+        # will fabricate results; it MUST SSH into the given host to run commands.
+        dut = self._dut_block(target)
+        if dut:
+            lines += ["", dut]
         instruction = (review.get("openhands_instruction")
                        or tc.get("ai_agent_instruction"))
         if instruction:
@@ -191,6 +198,34 @@ class AgentGateway:
             lines += ["", "Commands:", tc["ai_commands"]]
         if tc.get("ai_postcheck"):
             lines += ["", "Post-check:", tc["ai_postcheck"]]
+        return "\n".join(lines)
+
+    @staticmethod
+    def _dut_block(target):
+        """Render the DUT connection block, or "" if no target was resolved.
+
+        Plaintext credentials (per product decision): the engineer reads the log
+        and the conversation is internal, so we accept the credential appearing in
+        the transcript rather than gating the agent behind a secret broker.
+        """
+        ip = (target or {}).get("os_ip")
+        if not ip:
+            return ""
+        user = target.get("os_user") or "root"
+        port = target.get("os_port") or 22
+        pwd = target.get("os_password") or ""
+        auth = f"password: {pwd}" if pwd else "key-based auth (no password)"
+        lines = [
+            "Execution target (DUT):",
+            f"  SSH host: {user}@{ip}  (port {port}, {auth})",
+            f"  Project: {target.get('project') or '-'}   Node: {target.get('node_id') or '-'}",
+            "",
+            "You MUST run every test command on this DUT over SSH — none of the "
+            "commands run locally. Example:",
+            f"  sshpass -p '<password>' ssh -o StrictHostKeyChecking=no "
+            f"-p {port} {user}@{ip} 'lspci -nn'",
+            "If SSH fails, report the failure as the log; never invent command output.",
+        ]
         return "\n".join(lines)
 
     def start_run(self, run_id, *, workspace_dir=None, auto_run=True):
@@ -206,7 +241,17 @@ class AgentGateway:
                 "kind": "LocalWorkspace",
                 "working_dir": workspace_dir or f"/srv/pa-agent/workspace/{run_id}",
             },
-            "agent": {"kind": "Agent", "llm": self._llm_config()},
+            "agent": {
+                "kind": "Agent",
+                "llm": self._llm_config(),
+                # Do NOT send `include_default_tools`: openhands-agent-server
+                # 1.49.6 expects a list[str] of built-in tool classes (not the
+                # boolean True the old code sent -> HTTP 422), and it already
+                # registers the full default toolset (terminal, file editor, ...)
+                # at startup. Omitting the field therefore gives the agent every
+                # default tool it needs to actually run the test commands instead
+                # of fabricating a report.
+            },
             "initial_message": {
                 "role": "user",
                 "content": [{"type": "text", "text": self.build_instruction(run["context"])}],

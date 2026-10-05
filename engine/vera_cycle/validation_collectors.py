@@ -12,6 +12,15 @@ import time
 from pathlib import Path
 from cycle_transport import Command
 
+# Per-LogService entry cap. Some BMCs (e.g. Manager Journal) return a single
+# 1000-entry page; keep the newest 500 so one noisy service cannot crowd the
+# report. Reaching it is recorded as a coverage limit (not completeness).
+REDFISH_ENTRIES_PER_SERVICE = 500
+
+# LogService display priority (most actionable first); anything unlisted sorts
+# after these, alphabetically. Used only for the coverage label ordering.
+REDFISH_SERVICE_PRIORITY = ("EventLog", "SEL", "Journal", "HostLogger")
+
 
 @dataclass(frozen=True)
 class Operation:
@@ -156,7 +165,7 @@ class Collector:
             if result.code: raise OSError('Redfish resource unavailable')
             if len(result.output.encode('utf-8'))>2097152: raise OSError('Redfish page output limit exceeded')
             return json.loads(result.output[result.output.find('{'):])
-        services=[]; unavailable=[]; entries=[]; next_pages={}; complete=True
+        services=[]; unavailable=[]; entries=[]; next_pages={}; complete=True; truncated=[]
         def members(path):
             result=[]; seen=set()
             while path:
@@ -180,15 +189,41 @@ class Collector:
                     path=service.get('@odata.id','').rstrip('/')
                     if path: services.append(path)
         for service in sorted(set(services)):
-            path=(resume or {}).get(service) or service+'/Entries'; seen=set(); pages=0
+            path=(resume or {}).get(service) or service+'/Entries'; seen=set(); pages=0; rows=[]
             while path and pages<max_pages:
                 if path in seen: complete=False; unavailable.append('repeated page '+path); next_pages[service]=path; break
                 seen.add(path); pages+=1
                 try: payload=get(path)
                 except (ValueError,OSError): complete=False; next_pages[service]=path; break
-                for row in payload.get('Members',[]): entries.append(dict(row,_service=service))
+                rows.extend(r for r in payload.get('Members',[]) if isinstance(r,dict))
                 path=payload.get('Members@odata.nextLink') or payload.get('@odata.nextLink')
             if path: next_pages[service]=path; complete=False
+            # Some BMCs (e.g. Manager Journal) return thousands of entries
+            # oldest-first. Keep the newest REDFISH_ENTRIES_PER_SERVICE (ISO-8601
+            # Created sorts lexicographically); entries without a timestamp keep
+            # their original order at the tail. Overflow is a coverage limit.
+            if len(rows)>REDFISH_ENTRIES_PER_SERVICE:
+                indexed=list(enumerate(rows))
+                indexed.sort(key=lambda i:(i[1].get('Created') or '', i[0]), reverse=True)
+                rows=[r for _,r in indexed[:REDFISH_ENTRIES_PER_SERVICE]]
+                complete=False
+                truncated.append(service)
+                # Never resume a capped service: a later page holds older
+                # entries, so resuming would skip the newest ones. Re-read from
+                # page 1 next run and trim to the newest cap again.
+                next_pages.pop(service, None)
+            entries.extend(dict(row,_service=service) for row in rows)
+        reason='; '.join(unavailable)
+        if truncated:
+            reason=(reason+'; ' if reason else '')+f'kept newest {REDFISH_ENTRIES_PER_SERVICE} entries per service: '+', '.join(sorted(truncated))
+        # Short names of the LogServices actually read, ordered by importance
+        # (EventLog/SEL/Journal first, then the rest alphabetically) so the
+        # coverage line and its "top 3" collapse lead with the useful logs.
+        service_names=sorted(
+            {p.rstrip('/').rsplit('/',1)[-1] for p in services},
+            key=lambda n:(REDFISH_SERVICE_PRIORITY.index(n) if n in REDFISH_SERVICE_PRIORITY else len(REDFISH_SERVICE_PRIORITY),n),
+        )
         return dict(entries=entries,raw=json.dumps(raw,ensure_ascii=False),services=services,next_pages=next_pages,
+                    truncated=sorted(truncated),service_names=service_names,
                     collection_status='PARTIAL' if not complete or unavailable and services else 'SUCCESS' if services else 'FAILED' if unavailable else 'NOT_SUPPORTED',
-                    reason='; '.join(unavailable),complete=complete,backlog=bool(next_pages))
+                    reason=reason,complete=complete,backlog=bool(next_pages))

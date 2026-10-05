@@ -6,6 +6,24 @@
   const stamp=v=>v?new Date(v*1000).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false}):'尚未取得';
   const labels={EXPECTED_OFFLINE:'Cycle 預期恢復中',FRESH:'資料有效',MISSING:'尚無節點資料',STALE:'資料過舊',UNAVAILABLE:'來源無法使用',NOT_COVERED:'尚未涵蓋',BACKLOG:'事件補讀中',TIMED_OUT:'採集逾時',INVALID:'觀測欄位不完整',FAILED:'採集失敗',PARTIAL:'部分資料／觀測缺口',NOT_READY:'尚未就緒',NOT_CONFIGURED:'尚未設定',NOT_SUPPORTED:'來源不支援',WAITING_READY:'開機恢復中 · 等待檢查',INTERRUPTED:'開機世代改變 · 本批不完整',SHARED:'共用控制器資料',IDENTITY_MISMATCH:'節點身分與設定不符',TRUNCATED:'資料超過採集上限'};
   Object.assign(labels,identityLabels);
+  // A capped Redfish LogService is PARTIAL for a specific, actionable reason:
+  // the source is healthy but only the newest N entries were kept. Call that out
+  // instead of the generic "部分資料／觀測缺口" so operators know nothing is wrong.
+  const redfishCap=/kept newest (\d+) entries per service/;
+  const coverageLabel=entry=>{
+    const detail=String(entry.detail||'');
+    const cap=entry.source==='Redfish'&&entry.state==='PARTIAL'&&redfishCap.exec(detail);
+    return cap?`已達 ${cap[1]} 筆上限（保留最新）`:labels[entry.state]||entry.state;
+  };
+  // Render the source more specifically: Redfish covers several LogServices
+  // (EventLog/SEL/Journal). Show the ones actually read, collapsing to the
+  // first three with a total when there are more than three.
+  const sourceLabel=entry=>{
+    const services=entry.services||[];
+    if(!services.length)return entry.source;
+    const shown=services.length>3?`${services.slice(0,3).join('／')}… (共${services.length})`:services.join('／');
+    return `${entry.source}（${shown}）`;
+  };
   const card=()=>`<section class="pd-inspection p-surface" id="pd-inspection" aria-label="系統巡檢">
     <div class="pd-section-heading"><h2><button type="button" class="pd-inspection-collapse" data-collapse aria-expanded="true" aria-controls="pd-inspection-body" title="收闔系統巡檢"><span class="pd-inspection-caret" aria-hidden="true">▾</span>系統巡檢</button></h2><span data-status role="status">讀取中…</span></div>
     <div class="pd-inspection-body" id="pd-inspection-body">
@@ -120,7 +138,7 @@
       const coverage=r.querySelector('[data-coverage]');
       const signature=JSON.stringify(data.coverage||[]);
       if(ctx.coverageSignature!==signature){ctx.coverageSignature=signature;coverage.replaceChildren();
-      for(const entry of required){const line=document.createElement('p');const node=data.nodes.find(n=>n.node_id===entry.node_id);line.textContent=[node?.label,entry.source,labels[entry.state]||entry.state,entry.collected_at?'採集 '+stamp(entry.collected_at):'',entry.duration!=null?entry.duration.toFixed(1)+' 秒':'',entry.detail].filter(Boolean).join(' · ');if(entry.evidence_ref?.snapshot_id){const link=document.createElement('button');link.type='button';link.className='pd-text-action';link.textContent=' 原始證據';link.onclick=()=>window.InspectionEvidence.open(ctx.base,entry.evidence_ref.snapshot_id,node?.label||entry.source);line.append(link);}coverage.append(line);}}
+      for(const entry of required){const line=document.createElement('p');const node=data.nodes.find(n=>n.node_id===entry.node_id);line.textContent=[node?.label,sourceLabel(entry),coverageLabel(entry),entry.collected_at?'採集 '+stamp(entry.collected_at):'',entry.duration!=null?entry.duration.toFixed(1)+' 秒':'',entry.detail].filter(Boolean).join(' · ');if(entry.evidence_ref?.snapshot_id){const link=document.createElement('button');link.type='button';link.className='pd-text-action';link.textContent=' 原始證據';link.onclick=()=>window.InspectionEvidence.open(ctx.base,entry.evidence_ref.snapshot_id,node?.label||entry.source);line.append(link);}coverage.append(line);}}
       if(!coverage.childNodes.length)coverage.textContent='尚未巡檢。零項異常不代表所有節點均已完成檢查。';
       const select=r.querySelector('[data-node]');if(select.options.length===1)for(const node of data.nodes){const option=document.createElement('option');option.value=node.node_id;option.textContent=node.label;select.append(option);}
       const form=r.querySelector('[data-config]');if(form.hidden){for(const [name,value] of Object.entries(data.config)){if(name==='thresholds'){for(const [metric,threshold] of Object.entries(value))form.elements[metric].value=threshold;}else if(form.elements[name]){if(typeof value==='boolean')form.elements[name].checked=value;else form.elements[name].value=value;}}}

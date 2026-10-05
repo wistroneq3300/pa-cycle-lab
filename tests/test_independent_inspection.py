@@ -201,4 +201,27 @@ class Events(unittest.TestCase):
         self.assertEqual(events[0]['severity'],'WARN')
         self.assertEqual(sel_records('1 | 01/01/2026 | 00:00:00 | OEM | vendor 42')[0]['severity'],'UNKNOWN')
 
+    def test_redfish_per_service_entry_cap_keeps_newest(self):
+        from validation_collectors import REDFISH_ENTRIES_PER_SERVICE
+        entries=[dict(Id=str(i),Created=f'2026-10-01T{i//60:02d}:{i%60:02d}:00Z',Message=f'e{i}') for i in range(REDFISH_ENTRIES_PER_SERVICE+5)]
+        class _FakeTransport:
+            def redfish_login(self,target): return 'tok'
+            def redfish_get(self,target,path,token,timeout=30):
+                from cycle_transport import Command
+                if path=='/redfish/v1/Systems': payload={'Members':[{'@odata.id':'/redfish/v1/Systems/node'}]}
+                elif path=='/redfish/v1/Managers': payload={'Members':[]}
+                elif path.endswith('/LogServices'): payload={'Members':[{'@odata.id':path+'/SEL'}]}
+                elif path.endswith('/Entries'): payload={'Members':entries}
+                else: payload={}
+                return Command(0,json.dumps(payload))
+        result=Collector(_FakeTransport(),{'node_id':'n'},clock=lambda:self.now).redfish()
+        kept=result['entries']
+        self.assertEqual(len(kept),REDFISH_ENTRIES_PER_SERVICE)
+        ids=[e['Id'] for e in kept]
+        self.assertEqual(ids,sorted(ids,key=lambda i:int(i),reverse=True))  # newest first
+        self.assertTrue(result['truncated'])
+        self.assertFalse(result['complete'])
+        self.assertNotIn(result['services'][0],result['next_pages'])  # capped service is never resumed
+        self.assertIn(f'kept newest {REDFISH_ENTRIES_PER_SERVICE} entries per service',result['reason'])
+
 if __name__=='__main__': unittest.main()

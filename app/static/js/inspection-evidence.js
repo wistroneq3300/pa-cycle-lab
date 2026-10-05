@@ -2,6 +2,28 @@
 (() => {
   let current;
   function close(){if(!current)return;const {dialog,abort,restore,issueId}=current;current=null;abort.abort();dialog.close();dialog.remove();if(restore?.isConnected)restore.focus();else if(issueId){const card=document.querySelector('[data-issue-id="'+CSS.escape(issueId)+'"]');card?.querySelector('[data-evidence-open]')?.focus();}}
+function formatEvidence(text){
+    // Raw evidence can be one giant single-line JSON blob (e.g. the Redfish
+    // transcript: [{path,code,body},...]). Pretty-print valid JSON so it is
+    // readable and vertically scrollable instead of one endless horizontal
+    // line. Non-JSON (or JSON truncated mid-record) is returned unchanged; CSS
+    // handles wrapping so nothing ever runs off horizontally.
+    const trimmed=String(text||'').trim();
+    if(!trimmed||(trimmed[0]!=='['&&trimmed[0]!=='{'))return text;
+    try{return JSON.stringify(JSON.parse(trimmed),null,2);}catch{/* fall through */}
+    if(trimmed[0]==='['){
+      // Tolerate a 256 KB cut inside the array: pretty-print each complete
+      // top-level object and drop the trailing partial one.
+      const parts=trimmed.slice(1).split(/\},\s*\{/);
+      const pretty=[];
+      for(const part of parts){
+        const chunk=part.replace(/^\{?/,'{').replace(/\}?$/,'}');
+        try{pretty.push(JSON.stringify(JSON.parse(chunk),null,2));}catch{break;}
+      }
+      if(pretty.length)return pretty.join(',\n');
+    }
+    return text;
+  }
   async function open(base,id,label=''){
     close();const dialog=document.createElement('dialog');dialog.className='pa-evidence-modal';dialog.setAttribute('aria-label','原始證據');dialog.setAttribute('aria-modal','true');
     dialog.innerHTML='<header><div><h2>原始證據</h2><p data-context></p></div><button class="btn" data-close>關閉</button></header><div class="pe-tools"><label>搜尋本次載入內容 <input type="search" placeholder="輸入關鍵字"></label><button class="btn" data-next>下一筆</button><span data-match role="status"></span></div><p data-status role="status">載入中…</p><pre tabindex="0" aria-label="唯讀原始證據"></pre><footer><span data-source></span><button class="btn" data-copy>複製</button><a class="btn" data-download>下載完整證據</a></footer>';
@@ -13,7 +35,7 @@
     dialog.querySelector('[data-copy]').onclick=async()=>{try{await navigator.clipboard.writeText(ctx.text);dialog.querySelector('[data-status]').textContent='已複製載入內容。';}catch{dialog.querySelector('[data-status]').textContent='剪貼簿無法使用，請選取文字或下載。';}};
     const search=()=>{const query=dialog.querySelector('input').value.toLocaleLowerCase(),pre=dialog.querySelector('pre');if(!query)return;let index=ctx.text.toLocaleLowerCase().indexOf(query,ctx.position+1);if(index<0)index=ctx.text.toLocaleLowerCase().indexOf(query);ctx.position=index;dialog.querySelector('[data-match]').textContent=index<0?'找不到符合內容':'已定位符合內容';if(index>=0&&pre.firstChild){const range=document.createRange();range.setStart(pre.firstChild,index);range.setEnd(pre.firstChild,index+query.length);const selection=getSelection();selection.removeAllRanges();selection.addRange(range);const rect=range.getBoundingClientRect();pre.scrollTop+=rect.top-pre.getBoundingClientRect().top-pre.clientHeight/3;}};
     dialog.querySelector('input').oninput=()=>{ctx.position=-1;search();};dialog.querySelector('[data-next]').onclick=search;
-    try{const response=await fetch(base+'/evidence/'+encodeURIComponent(id)+'/view',{signal:ctx.abort.signal});if(!response.ok)throw new Error('證據暫時無法取得。');const data=await response.json();if(current!==ctx)return;ctx.text=data.text;dialog.querySelector('pre').textContent=data.text;dialog.querySelector('[data-status]').textContent=data.truncated?'目前顯示前 256 KB；完整內容可下載。':'完整證據 · 唯讀';dialog.querySelector('[data-source]').textContent=[data.source,data.collected_at?new Date(data.collected_at*1000).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false})+' UTC+8':''].filter(Boolean).join(' · ');}catch(e){if(e.name!=='AbortError'&&current===ctx)dialog.querySelector('[data-status]').textContent=e.message;}
+    try{const response=await fetch(base+'/evidence/'+encodeURIComponent(id)+'/view',{signal:ctx.abort.signal});if(!response.ok)throw new Error('證據暫時無法取得。');const data=await response.json();if(current!==ctx)return;ctx.text=formatEvidence(data.text);dialog.querySelector('pre').textContent=ctx.text;dialog.querySelector('[data-status]').textContent=data.truncated?'目前顯示前 256 KB；完整內容可下載。':'完整證據 · 唯讀';dialog.querySelector('[data-source]').textContent=[data.source,data.collected_at?new Date(data.collected_at*1000).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false})+' UTC+8':''].filter(Boolean).join(' · ');}catch(e){if(e.name!=='AbortError'&&current===ctx)dialog.querySelector('[data-status]').textContent=e.message;}
   }
   window.InspectionEvidence={open,close};
 })();

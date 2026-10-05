@@ -92,6 +92,16 @@ def _target_snapshot(pa, node_id, expected_revision):
         "os_slot": target.get("slot"),
         "binding_revision": target.get("revision"),
         "chassis_id": target.get("chassis_id"),
+        # Connection details the agent needs to reach the DUT. Pulled from the
+        # machines DATA JSON via targets.inventory(); without these the agent has
+        # no target to SSH to and will fabricate results.
+        "os_ip": target.get("os_ip") or "",
+        "os_user": target.get("os_user") or "",
+        "os_port": target.get("os_port") or 22,
+        "os_password": target.get("os_password") or "",
+        "bmc_ip": target.get("bmc_ip") or "",
+        "bmc_user": target.get("bmc_user") or "",
+        "bmc_password": target.get("bmc_password") or "",
     }
 
 

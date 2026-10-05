@@ -3450,27 +3450,10 @@ async function assignTaskCopy() {
   const chosen = items.filter(r => sel.has(assignTaskKey(r)));
   if (!chosen.length) { notifyUser("\u6e2c\u9805\u6e05\u55ae\u5df2\u5207\u63db\uff0c\u8acb\u91cd\u65b0\u52fe\u9078"); return; }
 
-  // P3-e：選取「單一」測項時，交接給 PA Agent 對話側欄（P3-c 後端）而非靜態指令視窗。
-  if (chosen.length === 1) {
-    const row = chosen[0];
-    const variant = row.case_variant_id || "";
-    if (variant && window.PA_Agent && typeof window.PA_Agent.open === "function") {
-      const t = operationTarget(_assignTask.name) || {};
-      const title = (row.items ? String(row.items) : row.code) || variant;
-      closeDialog();
-      window.PA_Agent.open({
-        case_variant_id: variant,
-        node_id: t.node_id || "",
-        expected_binding_revision: t.expected_binding_revision || "",
-        branch: sname || mm.sheet || "",
-        title,
-        task: "PA Agent 依此測項與目標節點執行並回報結果。",
-      });
-      return;
-    }
-  }
-
   // \u6e05\u7406\u539f\u59cb\u8cc4\u6599\u91cc\u591a\u990a\u7684\u7a7a\u884c\uff082 \u500b\u4ee5\u4e0a\u9023\u7e8c blank line \u5168\u7e2e\u6210 1 \u500b\uff09\uff0c\u7559\u4e0b\u6b63\u5e38\u6bb5\u843d\u9593\u8ddd
+  // P3-e：抽出共用指令產生器，讓「單一測項」與「多測項」兩條路徑都產生
+  //   同構的 plain text（複製用）＋ rich HTML（結果窗/對話左欄用）。
+  const buildAssignment = () => {
   const collapseBlank = (s) => String(s || "").replace(/\n{3,}/g, "\n\n");
   // Hard-wrap long English lines at word boundaries so dense command/note text
   // stays readable instead of forming one unbroken block. Existing line breaks
@@ -3586,14 +3569,40 @@ async function assignTaskCopy() {
   // Rich HTML view of the same content, styled like the Test Case detail panel.
   // The plain-text `text` above is still what gets copied to the clipboard.
   const rich = assignResultRichHtml(chosen, mm, sname, ip, user, dupSet);
+  return { text, summary, rich };
+  };
+
+  // P3-e：選取「單一」測項時，交接給 PA Agent 對話視窗（P3-c 後端）。
+  // 左欄沿用與多測項同構的指令區塊（完整原始命令 + rich HTML），而非簡短提示。
+  if (chosen.length === 1) {
+    const row = chosen[0];
+    const variant = row.case_variant_id || "";
+    if (variant && window.PA_Agent && typeof window.PA_Agent.open === "function") {
+      const t = operationTarget(_assignTask.name) || {};
+      const title = (row.items ? String(row.items) : row.code) || variant;
+      const built1 = buildAssignment();
+      closeDialog();
+      window.PA_Agent.open({
+        case_variant_id: variant,
+        node_id: t.node_id || "",
+        expected_binding_revision: t.expected_binding_revision || "",
+        branch: sname || mm.sheet || "",
+        title,
+        task: built1.text,
+        rich: built1.rich,
+      });
+      return;
+    }
+  }
 
   // 複製到剪貼簿（成功與否都開浮動視窗；失敗時視窗內仍可「複製全部」手動重試）
-  const copied = await assignTaskClip(text);
+  const built = buildAssignment();
+  const copied = await assignTaskClip(built.text);
   closeDialog();
   window.uxNotify?.(copied ? "\u6307\u4ee4\u5df2\u7522\u751f\u4e26\u8907\u88fd\uff1b\u5c1a\u672a\u57f7\u884c\u6e2c\u8a66" : "\u6307\u4ee4\u5df2\u7522\u751f\uff1b\u526a\u8cbc\u7c3f\u7121\u6cd5\u5beb\u5165\uff0c\u8acb\u5728\u7d50\u679c\u8996\u7a97\u624b\u52d5\u8907\u88fd", !copied);
 
   // 開仿 User Guide 的浮動小視窗，讓使用者在下方滾動看完整 TEST CASE
-  AssignResultWin.render("\u2705 \u6307\u6d3e\u53ef\u57f7\u884c\u6307\u4ee4 \u00b7 " + summary, text, rich, chosen);
+  AssignResultWin.render("\u2705 \u6307\u6d3e\u53ef\u57f7\u884c\u6307\u4ee4 \u00b7 " + built.summary, built.text, built.rich, chosen);
 }
 
 async function assignTaskClip(text) {
@@ -3839,11 +3848,17 @@ const AssignResultWin = (() => {
       const first = (win._cases || [])[0] || {};
       const variant = first.case_variant_id || "";
       if (!variant) { window.uxNotify?.("此指派沒有可用的 case_variant_id，無法交給 PA Agent", true); return; }
+      // 開啟左右兩欄的 PA Agent 視窗：左＝測項內容，右＝對話。
+      // 指派結果視窗本身即可收起，避免兩個視窗疊在一起。
+      const rich = win._rich || "";
+      const text = win._text || "";
+      AssignResultWin.close();
       window.PA_Agent.open({
         case_variant_id: variant,
         node_id: t.node_id || "",
         expected_binding_revision: t.expected_binding_revision || "",
-        task: win._text || "",
+        task: text,
+        rich,
         title: "PA Agent 分析指派結果 · " + (mach?.name || title || ""),
         branch: mach?.name || undefined,
       });
@@ -3898,6 +3913,7 @@ const AssignResultWin = (() => {
   function render(title, text, rich, cases) {
     if (!win) build();
     win._text = text;
+    win._rich = rich || "";
     win._cases = Array.isArray(cases) ? cases : [];
     win.querySelector("#ar-title").textContent = title;
     win.querySelector("#ar-hint").textContent = "已複製到剪貼簿。請確認完整測試案例、風險與目標後，再貼至執行工具。本頁尚未執行測試。";

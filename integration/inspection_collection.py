@@ -137,6 +137,10 @@ class IndependentSource:
                        collected_at=snap['collected_at'],duration=snap['duration'],freshness_seconds=cadence*2+60,
                        last_attempt=at,last_success=at if snap['collection_status']=='SUCCESS' else state.get('sources',{}).get(name,{}).get('last_success'),
                        detail=snap['reason'],evidence_ref={'snapshot_id':sid},checker_hash=checker_hash,scope=snap['scope'])
+            # Expose which Redfish LogServices were read so the UI can show e.g.
+            # "Redfish EventLog/SEL" instead of an over-broad "Redfish".
+            services=item.get('service_names') if name=='Redfish' else None
+            if services: entry['services']=list(services)
             state.setdefault('sources',{})[name]=entry; coverage.append(entry)
             return snap
 
