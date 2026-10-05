@@ -45,6 +45,11 @@ _STATE_DONE = {
 _ACTION = {"id": "a1", "kind": "ActionEvent", "tool_name": "terminal",
            "thought": [{"type": "text", "text": "checking fio"}],
            "timestamp": "2026-10-05T00:00:00Z"}
+_FINISH = {"id": "a2", "kind": "ActionEvent", "tool_name": "finish",
+           "thought": [{"type": "text", "text": "done"}],
+           "action": {"kind": "FinishAction",
+                      "message": "lspci shows 2 GPUs; LnkSta x16"},
+           "timestamp": "2026-10-05T00:00:02Z"}
 _OBS = {"id": "o1", "kind": "ObservationEvent", "tool_name": "terminal",
         "content": "fio not installed", "timestamp": "2026-10-05T00:00:01Z"}
 
@@ -107,9 +112,23 @@ class GatewayIngestTests(unittest.TestCase):
         self.assertEqual(len(run["commands"]), 1)
         self.assertEqual(len(run["evidence"]), 1)
         self.assertEqual(summary["messages"], 2)
-        self.assertEqual(summary["status"], "PASS")  # finished -> PASS
-        self.assertEqual(run["status"], "PASS")
+        # finished means the agent stopped — status is DONE, never a verdict.
+        self.assertEqual(summary["status"], "DONE")
+        self.assertEqual(run["status"], "DONE")
         self.assertIsNotNone(run["ended_at"])
+
+    def test_finish_action_becomes_final_result_and_agent_message(self):
+        summary = self.gateway.ingest("run-1", events=[_FINISH, _STATE_DONE])
+        run = self.store.get_run("run-1")
+        # the closing statement is the deliverable the engineer reads
+        self.assertEqual(run["final_result"], "lspci shows 2 GPUs; LnkSta x16")
+        self.assertEqual(run["status"], "DONE")
+        # and it is mirrored into chat as an agent message (it is a FinishAction,
+        # not a MessageEvent, so it would otherwise never reach the drawer body)
+        finished = [m for m in run["messages"] if m["kind"] == "finish"]
+        self.assertEqual(len(finished), 1)
+        self.assertEqual(finished[0]["role"], "agent")
+        self.assertEqual(finished[0]["text"], "lspci shows 2 GPUs; LnkSta x16")
 
     def test_status_maps_to_waiting_and_records_approval(self):
         summary = self.gateway.ingest("run-1", events=[_STATE_WAIT])

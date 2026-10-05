@@ -421,3 +421,37 @@ Test case `Wistron-Storage-00009-V003` — "FIO Mix read/write bandwidth/IOPS (7
   `index.html`, `app.js` (modified) + `pa-agent.js` (new) + `tests/pa-agent-drawer-e2e.cjs` and
   `tests/_p3e_e2e.cjs` (new). `app/data/tests.json.bak-20261005-112357-pre-merged` stays untracked.
 - 27B vLLM service param change is live (§2a).
+
+## 11. P3-e revision (2026-10-01): log-only agent + verdict retired
+
+Product decision (engineer owns the verdict; the system never declares PASS/FAIL):
+
+- **The agent produces a log only.** PASS/FAIL/BLOCKED are the engineer's call, made *outside*
+  this system by reading the log. The drawer shows the log; it offers no verdict buttons.
+- **"Can't run it" → the engineer abandons the run.** No system-judged BLOCKED state.
+
+Consequences + fixes (backend `integration/agent_gateway.py`, `agent_runs.py`, `agent_routes.py`):
+
+- **False-green fixed.** OpenHands `finished` mapped to `PASS` → now maps to **`DONE`**. A run that
+  merely stopped (e.g. the agent had no shell tool and gave up — observed live) was reported as a
+  pass; it is now `DONE` (agent stopped, log ready, awaiting engineer).
+- State machine is now `PENDING / RUNNING / WAITING_FOR_USER / DONE / ERROR`. `PASS/FAIL/BLOCKED`
+  are **retired** (constants kept, no longer produced). `_TERMINAL_STATUSES` includes `DONE`.
+- **`final_result` is now actually written.** Nothing ever set it, so the drawer's result card never
+  appeared. `classify_event` now captures the agent's `FinishAction.message` and `ingest` persists it
+  as `final_result` **and** mirrors it into the chat as a `kind="finish"` agent message (it is an
+  ActionEvent, not a MessageEvent, so it previously never reached the chat body at all).
+
+Frontend (`app/static/js/pa-agent.js`, `app/static/css/style.css`):
+
+- `STATUS_LABEL` drops PASS/FAIL/BLOCKED; `DONE` → **「完成（待工程師判定）」**. `ROLE_LABEL` gains
+  `agent` (backend emits `source="agent"`, previously rendered raw).
+- Centered two-column **modal** gains its missing **scrim** (`<div class="pa-drawer-scrim">`, the CSS
+  rule existed but the element did not) — click-to-dismiss + dimmed backdrop.
+- **RUNNING was a blank body**: agent activity is `ActionEvent`/`ObservationEvent`, which never enter
+  the chat stream. Added a live **activity strip** (`.pa-activity`) showing the latest command +
+  tool output, updated in place.
+- Tests: `tests/test_agent_gateway.py` updated (`finished→DONE`; new
+  `test_finish_action_becomes_final_result_and_agent_message`). Both E2E updated to the new contract
+  (`DONE`, log card, centered-modal + scrim checks). `tests/pa-agent-drawer-e2e.cjs` → **20/20**;
+  `tests/_p3e_e2e.cjs` → **PASS**; agent pytest → **24 passed**.

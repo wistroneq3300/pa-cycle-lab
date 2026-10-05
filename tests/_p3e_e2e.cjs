@@ -38,16 +38,20 @@ const VARIANT = "cv-e2e-0001";
     }
     if (p === "/api/agent/runs/run-e2e-1/messages") {
       pollCount++;
+      if (pollCount < 2) return j({ ok: true, messages: [] });
       return j({ ok: true, messages: [
         { seq: 1, role: "user", kind: "message", text: "請分析此指派結果", created_at: 1759200000 },
-        { seq: 2, role: "assistant", kind: "message", text: "收到，開始檢查節點 eq3300。", created_at: 1759200003 },
+        { seq: 2, role: "agent", kind: "message", text: "收到，開始檢查節點 eq3300。", created_at: 1759200003 },
         { seq: 3, role: "tool", kind: "command", text: "ipmitool mc info\nCisco CIMC 4.1", created_at: 1759200005 },
       ] });
     }
     if (p === "/api/agent/runs/run-e2e-1") {
-      // flip to terminal after a couple of polls
-      const status = pollCount >= 2 ? "PASS" : "RUNNING";
-      return j({ ok: true, run: { run_id: "run-e2e-1", status, final_result: status === "PASS" ? "節點健康，指派可執行。" : "" } });
+      // flip to DONE after a couple of polls (finished -> DONE, not PASS: the
+      // agent only logs; PASS/FAIL is the engineer's call).
+      const status = pollCount >= 3 ? "DONE" : "RUNNING";
+      return j({ ok: true, run: { run_id: "run-e2e-1", status, final_result: status === "DONE" ? "節點健康，指派可執行。" : "",
+        commands: [{ tool: "terminal", thought: "檢查 IPMI", timestamp: "t" }],
+        evidence: [{ tool: "terminal", content: "Cisco CIMC 4.1", timestamp: "t" }] } });
     }
     return j({ error: p }, 404);
   });
@@ -78,7 +82,8 @@ const VARIANT = "cv-e2e-0001";
         ctx: !!document.querySelector(".pa-ctx"),
         msgCount: bodyEl ? bodyEl.querySelectorAll(".pa-msg").length : 0,
         roles: bodyEl ? Array.from(bodyEl.querySelectorAll(".pa-msg-role")).map((n) => n.textContent) : [],
-        hasFinal: bodyEl ? /最終結果/.test(bodyEl.textContent) : false,
+        hasLog: bodyEl ? /節點健康，指派可執行。/.test(bodyEl.textContent) : false,
+        hasActivity: !!document.querySelector("#pa-drawer-body .pa-activity"),
       };
     });
     console.log(tag, JSON.stringify(d));
@@ -87,10 +92,13 @@ const VARIANT = "cv-e2e-0001";
 
   await page.waitForTimeout(400);
   const a = await snap("after-open ");
+  // Review-first: the run is only created (PENDING) until the user starts it.
+  await page.evaluate(() => { const b = document.getElementById("pa-drawer-start"); if (b && !b.hidden) b.click(); });
   await page.waitForTimeout(4500); // let polling tick a few times
   const b = await snap("after-poll ");
   await page.waitForTimeout(2500);
   const c = await snap("after-final");
+  await page.screenshot({ path: ".agent_tmp/p3e-drawer.png", animations: "disabled" });
 
   // close via Escape
   await page.keyboard.press("Escape");
@@ -106,9 +114,12 @@ const VARIANT = "cv-e2e-0001";
   const check = (cond, label) => { if (!cond) { ok = false; console.log("FAIL:", label); } };
   check(a.open && a.hasClose, "drawer opened with close button");
   check(a.ctx, "context banner rendered");
+  check(/待審閱|待啟動/.test(a.status), "review-first: pending review before start");
   check(b.msgCount >= 3, ">=3 messages rendered");
   check(b.roles.includes("你") && b.roles.includes("PA Agent"), "user+assistant roles present");
-  check(c.hasFinal, "final result shown on PASS");
+  check(b.hasActivity, "live activity strip shown (commands/evidence not in chat)");
+  check(/工程師判定/.test(c.status), "DONE status: 待工程師判定");
+  check(c.hasLog, "agent log card shown on DONE");
   check(closed, "drawer removed after Escape");
   console.log(ok ? "\nP3-e E2E: PASS ✅" : "\nP3-e E2E: FAIL ❌");
   process.exit(ok ? 0 : 1);

@@ -30,12 +30,17 @@ import os
 
 # OpenHands execution status -> PA run status. ``waiting_for_confirmation`` and
 # ``paused`` both mean the run is blocked on an operator, i.e. WAITING_FOR_USER.
+#
+# ``finished`` maps to DONE, never PASS/FAIL: the agent only produces a log, and
+# the PASS/FAIL/BLOCKED verdict is the engineer's call (made outside this system).
+# Mapping ``finished`` to PASS was a false-green — a run that merely stopped
+# (e.g. the agent had no shell tool and gave up) was reported as a pass.
 _STATUS_MAP = {
     "idle": "PENDING",
     "running": "RUNNING",
     "paused": "WAITING_FOR_USER",
     "waiting_for_confirmation": "WAITING_FOR_USER",
-    "finished": "PASS",
+    "finished": "DONE",
     "error": "ERROR",
     "stuck": "ERROR",
     "deleting": "ERROR",
@@ -69,12 +74,20 @@ def classify_event(event):
             return "ignore", None
         return "message", {"role": role, "text": text, "event_id": event.get("id")}
     if kind == "ActionEvent":
-        return "command", {
+        action = event.get("action") or {}
+        tool = event.get("tool_name") or action.get("kind")
+        payload = {
             "event_id": event.get("id"),
-            "tool": event.get("tool_name") or (event.get("action") or {}).get("kind"),
+            "tool": tool,
             "thought": _text_of({"content": event.get("thought") or []}),
             "timestamp": event.get("timestamp"),
         }
+        # The agent's closing statement carries the log the engineer reads. It
+        # arrives as a FinishAction (channel "command"), not a MessageEvent, so
+        # surface it here or it never reaches final_result / the chat body.
+        if tool == "finish" or action.get("kind") == "FinishAction":
+            payload["finish_message"] = action.get("message") or ""
+        return "command", payload
     if kind == "ObservationEvent":
         return "evidence", {
             "event_id": event.get("id"),
@@ -238,6 +251,7 @@ class AgentGateway:
         summary = {"messages": 0, "commands": 0, "evidence": 0, "status": None,
                    "approval_requested": False}
         pending_commands, pending_evidence = [], []
+        finish_log = ""
         for event in events:
             channel, payload = classify_event(event)
             if channel == "message":
@@ -249,6 +263,8 @@ class AgentGateway:
                     summary["messages"] += 1
             elif channel == "command":
                 pending_commands.append(payload)
+                if payload.get("finish_message"):
+                    finish_log = payload["finish_message"]
             elif channel == "evidence":
                 pending_evidence.append(payload)
             elif channel == "status":
@@ -265,8 +281,19 @@ class AgentGateway:
 
         if summary["status"]:
             updates = {"status": summary["status"]}
-            if summary["status"] in {"PASS", "FAIL", "BLOCKED", "ERROR"}:
+            if summary["status"] in {"PASS", "FAIL", "BLOCKED", "DONE", "ERROR"}:
                 updates["ended_at"] = _now()
+            # The engineer reads the agent's log to reach a verdict, so persist
+            # the closing statement as final_result and mirror it into the chat
+            # as an agent message (it is a FinishAction, not a MessageEvent, and
+            # would otherwise never reach the drawer body).
+            if finish_log:
+                updates["final_result"] = finish_log
+                seq = self.store.add_message(
+                    run_id, role="agent", text=finish_log, kind="finish",
+                )
+                if seq is not None:
+                    summary["messages"] += 1
             self.store.update_state(run_id, **updates)
             if summary["status"] == "WAITING_FOR_USER":
                 self.store.record_approval(run_id, {

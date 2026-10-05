@@ -14,12 +14,49 @@ Design rules (from docs/P3-PA-AGENT-DESIGN.md):
 """
 from __future__ import annotations
 
+import os
+import threading
+import time
+
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from . import targets as targets_module
 from .agent_gateway import AgentGateway
-from .agent_runs import AgentRunStore
+from .agent_runs import (
+    AgentRunStore, STATUS_DONE, STATUS_PASS, STATUS_FAIL, STATUS_BLOCKED,
+    STATUS_ERROR,
+)
+
+# Terminal run statuses: once a run is in one of these, its OpenHands conversation
+# has finished producing new events and the background sync can stop. PASS/FAIL/
+# BLOCKED are retired but kept here so any pre-existing run still settles.
+_TERMINAL_STATUSES = {
+    STATUS_DONE, STATUS_ERROR, STATUS_PASS, STATUS_FAIL, STATUS_BLOCKED,
+}
+_SYNC_INTERVAL = float(os.environ.get("PA_AGENT_SYNC_INTERVAL", "2.0"))
+_SYNC_MAX_ITERS = int(os.environ.get("PA_AGENT_SYNC_MAX_ITERS", "1500"))  # ~50 min at 2s
+
+
+def _sync_run_loop(store, gateway, run_id):
+    """Background sync: fold the run's OpenHands events into run state until terminal.
+
+    ``gateway.start_run`` only *creates* the conversation and flips the run to
+    RUNNING; nothing else ever calls :meth:`AgentGateway.ingest`, so
+    ``agent_run_messages`` would stay empty and the Chat Drawer's ``/messages``
+    poll would never render output ("執行中…" with a blank body). This loop is the
+    missing trigger: it periodically ingests (which fetches events, appends
+    messages/commands/evidence, and maps terminal status) until the run settles.
+    """
+    for _ in range(_SYNC_MAX_ITERS):
+        try:
+            gateway.ingest(run_id)
+        except Exception:  # agent-server blip — skip this tick, keep trying
+            pass
+        run = store.get_run(run_id)
+        if run is None or run.get("status") in _TERMINAL_STATUSES:
+            return
+        time.sleep(_SYNC_INTERVAL)
 
 
 class AgentRunCreateReq(BaseModel):
@@ -129,6 +166,15 @@ def install(app, pa, store_getter=None):
         except Exception as exc:  # agent-server unreachable / rejected
             store.update_state(run_id, status="ERROR", failure_reason=str(exc))
             raise HTTPException(502, f"agent gateway failed: {exc}")
+        # Kick off the background event sync so the Chat Drawer's /messages poll
+        # actually receives the run's output. Without this, agent_run_messages
+        # stays empty (only a manual POST /ingest would fill it) and the drawer
+        # shows "執行中…" with a blank body.
+        if req.auto_run:
+            threading.Thread(
+                target=_sync_run_loop, args=(store, gateway, run_id),
+                name=f"pa-agent-sync-{run_id}", daemon=True,
+            ).start()
         return {"ok": True, "run_id": run_id, "conversation_ref": conversation_id,
                 "run": store.get_run(run_id)}
 

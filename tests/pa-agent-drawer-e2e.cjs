@@ -156,12 +156,14 @@ async function serveJson(page) {
       pollCount++;
       return j({ ok: true, messages: [
         { seq: 1, role: "user", kind: "message", text: "請分析此指派結果", created_at: 1759200000 },
-        { seq: 2, role: "assistant", kind: "message", text: `PA Agent E2E transcript for ${VARIANT}.`, created_at: 1759200003 },
+        { seq: 2, role: "agent", kind: "message", text: `PA Agent E2E transcript for ${VARIANT}.`, created_at: 1759200003 },
       ] });
     }
     if (path === "/api/agent/runs/run-e2e-1") {
-      const status = pollCount >= 2 ? "PASS" : "RUNNING";
-      return j({ ok: true, run: { run_id: "run-e2e-1", status, final_result: status === "PASS" ? "指派可執行。" : "" } });
+      // finished -> DONE (never PASS/FAIL: the agent only logs; the engineer decides).
+      const status = pollCount >= 2 ? "DONE" : "RUNNING";
+      return j({ ok: true, run: { run_id: "run-e2e-1", status,
+        final_result: status === "DONE" ? "E2E agent log: lspci shows 2 GPUs; LnkSta x16." : "" } });
     }
 
     // Unmocked API routes return an empty success object rather than 404 so the
@@ -286,11 +288,32 @@ async function waitForServer() {
     return !!el && el.classList.contains("open") && el.offsetWidth > 0 && el.offsetHeight > 0;
   });
   const ctxRendered = await page.evaluate(() => !!document.querySelector("#pa-agent-drawer .pa-ctx"));
+  // 新兩欄：左欄測項內容應有內容（rich 或 text 之一）。
+  const leftPane = await page.evaluate(() => {
+    const el = document.querySelector("#pa-agent-drawer #pa-drawer-case");
+    return el ? (el.textContent || "").trim() : "";
+  });
   const statusText = await page.evaluate(() => {
     const el = document.getElementById("pa-drawer-status");
     return el ? el.textContent : "";
   });
-  // The drawer creates+starts the run and polls the mocked messages.
+  // 審閱優先：open() 只建立 PENDING run，不自動執行。先確認「開始執行」
+  // 按鈕已顯示（待審閱），訊息尚未開始輪詢。
+  await page.waitForSelector("#pa-drawer-start", { state: "visible", timeout: 10000 }).catch(() => {});
+  const reviewState = await page.evaluate(() => {
+    const btn = document.getElementById("pa-drawer-start");
+    return {
+      startVisible: !!(btn && !btn.hidden && btn.offsetWidth > 0),
+      reviewBanner: !!document.querySelector("#pa-drawer-body .pa-review"),
+      status: (document.getElementById("pa-drawer-status") || {}).textContent || "",
+      msgsBefore: (document.querySelector("#pa-drawer-body") || { querySelectorAll: () => [] }).querySelectorAll(".pa-msg").length,
+    };
+  });
+  // 使用者審閱後才點「開始執行」→ 觸發 /start 並開始輪詢 mocked 訊息。
+  await page.evaluate(() => {
+    const btn = document.getElementById("pa-drawer-start");
+    if (btn && !btn.hidden) btn.click();
+  });
   await page.waitForFunction(
     () => {
       const b = document.querySelector("#pa-drawer-body");
@@ -306,6 +329,33 @@ async function waitForServer() {
       roles: b ? Array.from(b.querySelectorAll(".pa-msg-role")).map((n) => n.textContent) : [],
     };
   });
+  // Let the poll settle the run to DONE before reading the final status.
+  await page.waitForFunction(
+    () => ((document.getElementById("pa-drawer-status") || {}).textContent || "").includes("工程師判定"),
+    null, { timeout: 10000 },
+  ).catch(() => {});
+
+  // Centered two-column modal: the panel is horizontally + vertically centered
+  // and a scrim covers the viewport (click-to-dismiss).
+  const modal = await page.evaluate(() => {
+    const panel = document.querySelector("#pa-agent-drawer .pa-drawer-panel");
+    const scrim = document.querySelector("#pa-agent-drawer .pa-drawer-scrim");
+    if (!panel) return null;
+    const r = panel.getBoundingClientRect();
+    const cs = getComputedStyle(scrim || panel);
+    return {
+      cx: Math.abs((r.left + r.right) / 2 - window.innerWidth / 2),
+      cy: Math.abs((r.top + r.bottom) / 2 - window.innerHeight / 2),
+      hasScrim: !!scrim && cs.pointerEvents === "auto" && parseFloat(cs.opacity) > 0,
+      cols: getComputedStyle(document.querySelector("#pa-agent-drawer .pa-drawer-cols")).flexDirection,
+    };
+  });
+  // Status re-read after the run settles (statusText above was taken pre-start).
+  const finalStatusText = await page.evaluate(() => {
+    const el = document.getElementById("pa-drawer-status");
+    return el ? el.textContent : "";
+  });
+  const doneStatus = finalStatusText.includes("工程師判定");
 
   const checks = [
     ["PA_Agent.open captured", !!opened],
@@ -316,9 +366,21 @@ async function waitForServer() {
     ["task carries assignment text", !!(opened && opened.task && opened.task.length > 0)],
     ["drawer element present + open", drawerVisible],
     ["context banner rendered", ctxRendered],
-    ["run started (status shown)", statusText.length > 0],
+    ["left pane shows testcase content", leftPane.length > 0],
+    ["run created (status shown)", statusText.length > 0],
+    // 審閱優先：未自動執行 —— 開始執行按鈕已顯示 + 待審閱橫幅 + 尚未輪詢訊息。
+    ["review-first: 開始執行 button shown", reviewState.startVisible],
+    ["review-first: review banner present", reviewState.reviewBanner],
+    ["review-first: not auto-started (0 msgs before click)", reviewState.msgsBefore === 0],
     ["messages polled + rendered", msgInfo.count >= 2],
     ["user+assistant roles present", msgInfo.roles.includes("你") && msgInfo.roles.includes("PA Agent")],
+    // Centered two-column modal + scrim.
+    ["centered two-column modal", !!modal && modal.cx <= 2 && modal.cy <= 2],
+    ["two columns side-by-side (row)", !!modal && modal.cols === "row"],
+    ["scrim present + interactive", !!modal && modal.hasScrim],
+    // Retired verdict: DONE card carries the agent's log, status says 待工程師判定.
+    ["DONE status: 待工程師判定", doneStatus],
+    ["agent log card rendered", msgInfo.roles.includes("PA Agent")],
   ];
 
   console.log("\n== P3-e E2E: PA Agent drawer hand-off ==");

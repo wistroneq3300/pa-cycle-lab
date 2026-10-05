@@ -30,13 +30,20 @@ CONTEXT_SCHEMA_VERSION = 1
 
 # Run lifecycle. PENDING and RUNNING are in-flight; the rest are terminal except
 # WAITING_FOR_USER, which pauses for an operator decision.
+#
+# DONE means the agent stopped and produced its log — NOT that the test passed.
+# The verdict (PASS/FAIL/BLOCKED) belongs to the engineer, who reads the log and
+# decides outside this system, so those three are retired from the state machine
+# (kept for reference, no longer produced by the gateway).
 STATUS_PENDING = "PENDING"
 STATUS_RUNNING = "RUNNING"
 STATUS_WAITING_FOR_USER = "WAITING_FOR_USER"
+STATUS_DONE = "DONE"
+STATUS_ERROR = "ERROR"
+# Retired: no longer assigned by the gateway (see AgentGateway._STATUS_MAP).
 STATUS_PASS = "PASS"
 STATUS_FAIL = "FAIL"
 STATUS_BLOCKED = "BLOCKED"
-STATUS_ERROR = "ERROR"
 
 # Slots the context snapshot packs from a reviewed row. The full ``ai_review``
 # object is kept verbatim alongside these so nothing is lost or invented.
