@@ -19,7 +19,7 @@
       root.innerHTML=`<header class="tp-heading"><div><h3>節點遙測 <span data-state class="tp-state">載入中</span></h3><p data-detail aria-live="polite">正在取得節點設定…</p></div><label class="tp-node">監控節點<select aria-label="Telemetry 節點" data-node><option value="">選擇節點</option></select></label></header>
         <div class="tp-context"><span data-target></span><span data-time></span></div>
         <div class="tp-components">
-          <section class="tp-component" data-component="host"><div><span class="tp-kicker">HOST</span><h4>主機監控 · Node Exporter</h4><p>CPU / Memory / Disk / Network</p></div><strong data-component-state>尚未檢查</strong><div class="tp-component-actions"><button class="btn primary" data-enable-scope="host" disabled>安裝 / 啟用</button><details><summary>手動安裝說明</summary><div class="tp-manual"><p>請依作業系統套件來源安裝 Node Exporter，確認服務啟動且中央 Prometheus 可讀取此節點的 <code>/metrics</code>。</p><p>平台不會停止未知服務或自動取代既有的健康安裝。</p></div></details></div></section>
+          <section class="tp-component" data-component="host"><div><span class="tp-kicker">HOST</span><h4>主機監控 · Node Exporter</h4><p>CPU / Memory / Disk / Network</p></div><strong data-component-state>尚未檢查</strong><div class="tp-component-actions"><button class="btn primary" data-enable-scope="host" disabled>安裝 / 啟用</button><details><summary>手動安裝說明</summary><div class="tp-manual" data-host-manual><p>請先選擇節點以取得此節點的安裝與連線資訊。</p></div></details></div></section>
           <section class="tp-component" data-component="gpu"><div><span class="tp-kicker">GPU</span><h4>GPU 監控 · DCGM Exporter</h4><p>GPU / HBM / Temperature / Power / NVLink</p></div><strong data-component-state>尚未檢查</strong><div class="tp-component-actions"><button class="btn primary" data-enable-scope="gpu" disabled>安裝 / 啟用</button><details><summary>手動安裝說明</summary><div class="tp-manual" data-gpu-manual><p>請先選擇節點以取得相容的 DCGM Exporter 設定。</p></div></details></div></section>
         </div>
         <div class="tp-actions"><button class="btn" data-console hidden>查看安裝紀錄</button><a class="btn" data-grafana hidden target="_blank" rel="noopener" title="開啟此節點的 Grafana 進階分析">Grafana 進階分析 ↗</a></div>
@@ -93,12 +93,6 @@
         this.$('[data-outcome-detail]').textContent=job?.error||this.node?.detail||'請查看完整紀錄後重新嘗試。';
       }
     }
-    legacy(ready){
-      const body=document.querySelector('#pd-panel-telemetry .pd-telemetry-body');if(!body)return;
-      let details=body.closest('.tp-legacy');
-      if(!details){details=document.createElement('details');details.className='tp-legacy';const summary=document.createElement('summary');summary.textContent='進階資料 · 既有效能圖表';body.before(details);details.append(summary,body);}
-      if(this.lastReady!==ready){details.open=!ready;this.lastReady=ready;}
-    }
     async request(path,options={}){
       const response=await fetch('/api/telemetry'+path,{...options,signal:this.abort.signal});
       const body=await response.json();if(!response.ok)throw new Error(typeof body.detail==='string'?body.detail:'無法取得 Telemetry 資料');return body;
@@ -142,10 +136,41 @@
       gpu.textContent=busy&&this.job?.scope==='gpu'?'啟用中…':gpuState==='READY'?'重新檢查':gpuState==='NOT_APPLICABLE'?'不適用':'安裝 / 啟用';gpu.hidden=gpuState==='NOT_APPLICABLE';
     }
     manualHelp(node){
-      const box=this.$('[data-gpu-manual]'),setup=node.gpu_setup||{};box.replaceChildren();
-      const p=document.createElement('p');p.textContent='先確認 NVIDIA Driver 與 NVIDIA Container Toolkit，再依平台相容版本啟用 DCGM Exporter。已有服務應沿用，請勿重複建立或停止占用連接埠的其他程式。';box.append(p);
-      if(setup.detection){const pre=document.createElement('pre');pre.textContent=setup.detection;box.append(pre);}
-      if(setup.documentation){const link=document.createElement('a');link.href=setup.documentation;link.target='_blank';link.rel='noopener';link.textContent='NVIDIA DCGM Exporter 安裝說明 ↗';box.append(link);}
+      const p=t=>{const el=document.createElement('p');el.textContent=t;return el;};
+      const pre=t=>{const el=document.createElement('pre');el.textContent=t;return el;};
+      const link=(t,h)=>{const a=document.createElement('a');a.href=h;a.target='_blank';a.rel='noopener';a.textContent=t;return a;};
+      const hostBox=this.$('[data-host-manual]'),gpuBox=this.$('[data-gpu-manual]');
+      const host=node?.host_setup||{},gpu=node?.gpu_setup||{};
+      if(hostBox){
+        const rows=[];
+        if(!node){rows.push(p('請先選擇節點以取得此節點的安裝與連線資訊。'));}
+        else{
+          rows.push(p('1. 於節點確認作業系統與 systemd 版本：'),pre(host.detection||''));
+          rows.push(p('2. 若尚未安裝，使用系統套件安裝並啟用 Node Exporter。既有安裝請沿用，不需重複建立：'),pre(host.installation||''));
+          rows.push(p('3. 於節點本機確認 /metrics 可讀取：'),pre(host.check_on_node||''));
+          rows.push(p('4. 於 PA Manager（中央 Prometheus 主機：'+(host.prometheus_url||'尚未設定')+'）確認可讀取採集端點 '+(host.exporter_url||'')+'：'),pre(host.check_on_manager||''));
+          rows.push(p('5. 回到本頁按上方「安裝 / 啟用」。PA 會沿用健康的 Exporter，將此節點登記至中央 Prometheus，再確認指標。'));
+          rows.push(p('注意：平台不會停止未知服務、不會自動取代既有的健康安裝，也不會更動其他監控設定。'));
+        }
+        hostBox.replaceChildren(...rows);
+      }
+      if(gpuBox){
+        const rows=[];
+        if(!node){rows.push(p('請先選擇節點以取得相容的 DCGM Exporter 設定。'));}
+        else{
+          rows.push(pre('先確認 NVIDIA Driver 與 Docker 已就緒，再依平台相容版本以容器方式啟用 DCGM Exporter。既有服務請沿用，勿重複建立或停止占用連接埠的其他程式。'));
+          rows.push(p('1. 於 GPU 節點確認 NVIDIA 驅動與 Docker 是否就緒（CPU-only 節點無須安裝）：'),pre(gpu.detection||''));
+          rows.push(p('2. 確認 NVIDIA Container Toolkit 是否已安裝，並檢查 Docker 是否已載入 nvidia runtime（第 1 步 docker info 輸出若未列出 "nvidia"，表示尚未載入）：'),pre(gpu.runtime_check||'nvidia-ctk --version'));
+          if(!gpu.image)rows.push(p('尚未指定固定版本映像，請先選擇與 GPU／驅動相容的版本並替換映像欄位。'));
+          rows.push(p('3. 若 Docker 尚未載入 nvidia runtime，先安裝 Toolkit 並重新載入 Docker daemon。注意：重新啟動 Docker 會暫時中斷所有執行中的容器，請於維護時段執行：'),pre(gpu.runtime_prepare||''));
+          rows.push(p('4. 確認 docker info 已列出 nvidia runtime 後，以容器方式啟動 DCGM Exporter。此步驟不會替換驅動，亦不會停止占用連接埠的其他服務：'),pre(gpu.installation||''));
+          if(gpu.toolkit_documentation)rows.push(link('NVIDIA Container Toolkit 安裝說明 ↗',gpu.toolkit_documentation));
+          if(gpu.documentation)rows.push(link('NVIDIA DCGM Exporter 安裝說明 ↗',gpu.documentation));
+          rows.push(p('5. 於 PA Manager（中央 Prometheus 主機：'+(gpu.prometheus_url||'尚未設定')+'）確認可讀取採集端點 '+(gpu.exporter_url||'')+'：'),pre(gpu.check_on_manager||''));
+          rows.push(p('6. 回到本頁按上方「安裝 / 啟用」。PA 會沿用健康的 Exporter，將此節點登記至中央 Prometheus，再確認指標。'));
+        }
+        gpuBox.replaceChildren(...rows);
+      }
     }
     update(node){
       this.node=node;this.$('[data-state]').textContent=stateLabel(node.state);this.$('[data-state]').dataset.state=node.state;
@@ -166,7 +191,7 @@
         this.$('[data-session]').textContent=this.job.state==='PROVISIONING'?'RUNNING':this.job.state;this.$('[data-session]').dataset.state=this.job.state;
         this.$('[data-stage]').textContent=stage(this.job.state==='READY'?'READY':this.job.current_step);this.$('[data-log-date]').textContent=time(this.job.created_at).split(' ')[0];
       }
-      this.renderPipeline(this.job);this.dashboard(node);this.legacy(host==='READY');this.setButtons();
+      this.renderPipeline(this.job);this.dashboard(node);this.setButtons();
     }
     dashboard(node){
       const container=this.$('.tp-dashboard'),link=this.$('[data-grafana]');link.hidden=true;

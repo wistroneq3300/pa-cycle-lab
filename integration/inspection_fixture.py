@@ -31,6 +31,15 @@ class FixtureTransport:
             if 'identity' in self.scenario.get('failed',[]): return Command(124,'Fixture timeout')
             boot=self.scenario.get('boot_id','00000000-0000-0000-0000-000000000001')
             return Command(0,'HOSTNAME='+self.scenario.get('hostname',self.target.get('os_hostname','fixture'))+'\nBOOT_ID='+boot+'\n')
+        if role=='os' and command=='ip a':
+            text=self.scenario.get('os_ip_a')
+            if text is None:
+                text='2: eth0: <BROADCAST,MULTICAST,UP>\n    link/ether 02:00:00:00:00:01 brd ff:ff:ff:ff:ff:ff\n    inet %s/24 scope global eth0\n' % self.target.get('os_ip','192.0.2.1')
+            return Command(0,text)
+        if role=='os' and command.startswith('for ch in 0 1 2 3'):
+            text=self.scenario.get('bmc_lan')
+            if text is None: return Command(0,'---CHANNEL 1---\nIP Address          : %s\nMAC Address         : 02:00:00:00:00:02\n' % self.target.get('bmc_ip','198.51.100.1'))
+            return Command(0,text)
         if role=='bmc' and command=='hostname':
             if 'bmc_ssh' in self.scenario.get('failed',[]): return Command(124,'Fixture BMC SSH timeout')
             return Command(0,self.scenario.get('bmc_hostname',self.target.get('bmc_hostname') or 'fixture-bmc'))

@@ -27,7 +27,8 @@ SAFE_FIELDS = ('name','project','tray','node','os_ip','bmc_ip','os_hostname','bm
                'node_id','parent_name','chassis_id','slot_key','display_name','revision',
                'controller_id','system_uri','console_id','node_serial','hardware_uuid',
                'slot_id','project_id','rack_id','mapping_status','capabilities','credential_version','ipmi_port',
-               'expected_identity','trust','os_password','bmc_password')
+               'expected_identity','trust','os_password','bmc_password',
+               'os_hostname_raw','bmc_hostname_raw','os_mac','bmc_mac')
 
 class Conflict(ValueError):
     pass

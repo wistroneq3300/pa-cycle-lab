@@ -38,6 +38,9 @@ class Identity(unittest.TestCase):
         t=t or self.target();transport=FixtureTransport(t,self.scenario,self.calls)
         return collect_identity(Collector(transport,Target('t','n',t['os_ip'],t['bmc_ip']),clock=lambda:1000),t)
     def test_unchanged_zero_inventory_write(self):
+        # First observation records the MAC baseline (one durable write); an identical
+        # second observation must then be a true no-op with no further writes.
+        self.sync(self.target(),self.observe());self.pa._save_data.reset_mock()
         self.assertEqual(self.sync(self.target(),self.observe())['status'],'UNCHANGED');self.pa._save_data.assert_not_called()
     def test_os_rename_stable_identity_and_history(self):
         t=self.target();self.scenario['hostname']='new.example.'
@@ -101,6 +104,8 @@ class Identity(unittest.TestCase):
         self.scenario['hostname']='new';self.sync(self.target(),self.observe())
         self.assertEqual(old.read_bytes(),before);self.assertEqual(self.observe()['os_hostname'],'new')
     def test_normalization_not_rename_loop(self):
+        self.sync(self.target(),self.observe())   # MAC baseline write
+        self.pa._save_data.reset_mock()
         self.scenario['hostname']='  N1.\n';self.sync(self.target(),self.observe());self.pa._save_data.assert_not_called()
         self.assertEqual(normalize_hostname('Host.Example.'),'host.example');self.assertIsNone(normalize_hostname('bad name'))
     def test_known_bmc_ssh_capability(self):
@@ -187,6 +192,39 @@ class Identity(unittest.TestCase):
         # Without a selected node the full slot list is retained.
         self.pa.machines['box']['active_os']=None
         self.assertEqual(len(svc.resolve('box')['nodes']),4)
+
+    def test_collect_identity_records_mac(self):
+        obs=self.observe();self.assertEqual(obs['os_mac'],'02:00:00:00:00:01');self.assertEqual(obs['bmc_mac'],'02:00:00:00:00:02')
+
+    def test_rename_same_mac_updates_and_stores_mac(self):
+        t=self.target();self.sync(t,self.observe(t))          # baseline: MAC stored, no rename
+        self.assertEqual(self.pa.machines['box']['os'][0]['os_mac'],'02:00:00:00:00:01')
+        self.scenario['hostname']='renamed.example'
+        result=self.sync(self.target(),self.observe())
+        self.assertEqual(result['status'],'AUTO_SYNC')
+        self.assertEqual(self.target()['os_hostname'],'renamed.example')
+        self.assertEqual(self.pa.machines['box']['os'][0]['os_mac'],'02:00:00:00:00:01')
+
+    def test_rename_different_mac_is_blocked(self):
+        t=self.target();self.sync(t,self.observe(t))          # baseline MAC recorded
+        self.pa._save_data.reset_mock()
+        self.scenario['hostname']='renamed.example'
+        self.scenario['os_ip_a']='2: eth9: <UP>\n    link/ether aa:bb:cc:dd:ee:ff\n    inet %s/24 scope global eth9\n' % t['os_ip']
+        result=self.sync(self.target(),self.observe())
+        self.assertEqual(result['status'],'IDENTITY_REQUIRES_CONFIRMATION')
+        self.assertIn('MAC',result['reason']);self.pa._save_data.assert_not_called()
+
+    def test_rename_without_mac_after_baseline_is_blocked(self):
+        t=self.target();self.sync(t,self.observe(t))          # baseline MAC recorded
+        self.scenario['hostname']='renamed.example';self.scenario['os_ip_a']=''  # MAC unreadable now
+        result=self.sync(self.target(),self.observe())
+        self.assertEqual(result['status'],'IDENTITY_REQUIRES_CONFIRMATION')
+
+    def test_mac_change_without_rename_is_blocked(self):
+        t=self.target();self.sync(t,self.observe(t))          # baseline MAC recorded
+        self.scenario['os_ip_a']='2: eth9: <UP>\n    link/ether aa:bb:cc:dd:ee:ff\n    inet %s/24 scope global eth9\n' % t['os_ip']
+        result=self.sync(self.target(),self.observe())
+        self.assertEqual(result['status'],'IDENTITY_REQUIRES_CONFIRMATION')
 
 
 if __name__=='__main__': unittest.main()

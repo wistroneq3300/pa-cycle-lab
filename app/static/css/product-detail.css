@@ -182,3 +182,7 @@ html[data-theme=light] .pd-power-group .btn{background:var(--p-panel)!important;
 .pd-inspection-issue[data-severity=WARNING]>summary{color:#d9aa55}
 html[data-theme=light] .pd-inspection-issue[data-severity=WARNING]>summary{color:#805509}
 .pd-health-summary{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px;margin-top:18px}.pd-health-summary h3{margin:4px 0}.pd-health-summary strong{color:var(--text);font-size:14px}
+.pd-connection .pd-hostname{display:inline-block;margin-top:2px;font-size:8px;padding:1px 6px;border-radius:4px;background:rgba(141,181,207,.12);color:#9fb6c4;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pd-connection .pd-hostname.is-warn{background:rgba(216,170,85,.18);color:#d9aa55}
+html[data-theme=light] .pd-connection .pd-hostname{background:rgba(70,110,140,.1);color:#4b6b80}
+html[data-theme=light] .pd-connection .pd-hostname.is-warn{background:rgba(180,130,20,.16);color:#805509}

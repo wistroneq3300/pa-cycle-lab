@@ -696,7 +696,7 @@ def validation_overview(request:Request):
     projects={name:dict(name=name,systems=0,nodes=0,level='L10',issues={'fail':0,'warning':0},
                         validation={'checked':0,'pass':0,'total':0},cycle={'running':0,'completed':0},
                         monitoring={'reporting':0,'total':0},last_validation=None) for name in allowed}
-    targets=[target for target in node_inventory(pa) if target.get('project') in projects]
+    targets=[target for target in node_inventory(pa) if target.get('project') in projects and target.get('node_id')]
     targets_by_node={target['node_id']:target for target in targets}
     bindings_by_node={target['node_id']:target.get('revision') for target in targets}
     for name,item in projects.items():

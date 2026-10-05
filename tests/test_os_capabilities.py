@@ -147,7 +147,10 @@ class SshHostnameObservation(unittest.TestCase):
         self.assertEqual(result["bmc_hostname"], "bmc.example")
         self.assertEqual(result["bmc_status"], "SUCCESS")
         self.assertEqual(result["bmc_source"], "bmc_ssh_hostname")
-        self.assertEqual(calls, [("ssh", "bmc", "hostname")])
+        # BMC hostname is read over BMC SSH; the only other SSH calls are the OS-side
+        # MAC evidence reads, which never touch Redfish.
+        name_calls = [c for c in calls if "hostname" in c[2]]
+        self.assertEqual(name_calls, [("ssh", "bmc", "hostname")])
 
     def test_auto_does_not_fall_back_to_redfish(self):
         result, calls = self._collect(ssh_ok=False)
@@ -158,7 +161,9 @@ class SshHostnameObservation(unittest.TestCase):
     def test_explicit_redfish_skips_ssh(self):
         result, calls = self._collect(capability="redfish")
         self.assertEqual(result["bmc_source"], "/redfish/v1/Managers/bmc/HostName")
-        self.assertFalse(any(c[0] == "ssh" for c in calls))
+        # Explicit Redfish never opens a BMC SSH session for the hostname; the OS-side
+        # MAC evidence reads are a separate, unrelated part of identity collection.
+        self.assertFalse(any(len(c) > 1 and c[0] == "ssh" and c[1] == "bmc" for c in calls))
 
     def test_legacy_ssh_hostname_value_still_uses_ssh(self):
         result, calls = self._collect(capability="ssh_hostname")

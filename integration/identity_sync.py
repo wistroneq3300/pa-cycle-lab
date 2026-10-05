@@ -42,13 +42,27 @@ class IdentitySync:
                 if want and actual and str(want).casefold()!=str(actual).casefold(): return reject('實體資產識別不一致：'+field)
             if observation.get('identity_mismatch'): return reject('來源回報資產識別不一致')
             changes=[]
+            mutated=False
             for role in ('os','bmc'):
                 value=observation.get(role+'_hostname')
                 if observation.get(role+'_status')!='SUCCESS' or not normalize_hostname(value): continue
                 key=role+'_hostname'
+                observed_mac=observation.get(role+'_mac')
+                stored_mac=entry.get(role+'_mac')
+                # MAC (keyed to the registered IP) is the asset evidence for a name change.
+                # A name change is only accepted while the same interface is still present;
+                # if the stored MAC no longer matches, the target may be a different machine.
+                if stored_mac and observed_mac and stored_mac!=observed_mac:
+                    return reject(role.upper()+' 網卡 MAC 與前次不一致（可能已換到其他實體節點），請重新確認目標')
+                if observed_mac and entry.get(role+'_mac')!=observed_mac:
+                    entry[role+'_mac']=observed_mac;mutated=True
                 if normalize_hostname(entry.get(key))!=normalize_hostname(value):
+                    if stored_mac and not observed_mac:
+                        return reject('無法取得 '+role.upper()+' 網卡 MAC 以確認 hostname 變更，請重新確認目標')
                     changes.append((role.upper()+'_HOSTNAME_CHANGED',entry.get(key,''),value))
-                    entry[key]=value
+                    entry[key]=value;mutated=True
+                    if observation.get(role+'_hostname_raw') and entry.get(key+'_raw')!=observation[role+'_hostname_raw']:
+                        entry[key+'_raw']=observation[role+'_hostname_raw'];mutated=True
                 result[key]=entry.get(key)
             boot=observation.get('os_boot_id')
             if observation.get('os_status')=='SUCCESS' and previous_boot and boot and previous_boot!=boot:
@@ -63,14 +77,14 @@ class IdentitySync:
                 event=dict(id=eid,node_id=entry['node_id'],chassis_id=canonical['chassis_id'],kind=kind,
                            previous=before,current=after,observed_at=observation['collected_at'],source='inspection_identity',severity='INFO')
                 history.append(event);events.append(event)
-            if not events: return result
+            if not events and not mutated: return result
             backup=copy.deepcopy(parent)
             try:
                 if any(e['kind'].endswith('HOSTNAME_CHANGED') for e in events):
                     entry['binding_revision']=int(entry.get('binding_revision',1))+1
                 # Only the selected node's display metadata is reflected at top level.
                 if canonical.get('active_os')==entry.get('slot'):
-                    for field in ('os_hostname','bmc_hostname'):
+                    for field in ('os_hostname','bmc_hostname','os_hostname_raw','bmc_hostname_raw','os_mac','bmc_mac'):
                         if field in entry: canonical[field]=entry[field]
                 parent.clear();parent.update(canonical)
                 pa._save_data()

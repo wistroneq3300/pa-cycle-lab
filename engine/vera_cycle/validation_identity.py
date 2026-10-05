@@ -1,7 +1,45 @@
 """Shared identity observations. No inventory writes, issues, or actions."""
+import ipaddress
 import json
 import re
 import uuid
+
+
+def _mac(value):
+    value=(value or '').lower().strip()
+    if not re.fullmatch(r'(?:[0-9a-f]{2}:){5}[0-9a-f]{2}',value): return None
+    if value in ('00:00:00:00:00:00','ff:ff:ff:ff:ff:ff'): return None
+    return value
+
+
+def _ip(value):
+    try: return ipaddress.ip_address(str(value).split('%')[0])
+    except (ValueError,AttributeError): return None
+
+
+def os_mac_from_ip(text,expected_ip):
+    """link/ether of the interface carrying the registered OS IP (never guessed)."""
+    target=_ip(expected_ip)
+    if target is None: return None
+    for block in re.split(r'(?=^\d+: )',text or '',flags=re.M):
+        mac=re.search(r'\blink/ether\s+(\S+)',block)
+        addrs=re.findall(r'\binet6?\s+([^/\s]+)',block)
+        if mac and _mac(mac[1]) and target in [_ip(a) for a in addrs]: return _mac(mac[1])
+    return None
+
+
+def bmc_mac_from_ip(text,expected_ip):
+    """MAC of the ipmitool lan channel whose IP Address matches the registered BMC IP."""
+    target=_ip(expected_ip)
+    if target is None: return None
+    for block in re.split(r'(?=^---CHANNEL \d+---$)',text or '',flags=re.M):
+        address=re.search(r'^\s*IP Address\s*:\s*(\S+)\s*$',block,re.M)
+        mac=re.search(r'^\s*MAC Address\s*:\s*(\S+)\s*$',block,re.M)
+        if address and mac and _ip(address[1])==target and _mac(mac[1]): return _mac(mac[1])
+    return None
+
+
+LAN_CHANNELS='for ch in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do printf "%s\\n" "---CHANNEL $ch---"; timeout 2 ipmitool lan print "$ch" 2>/dev/null; done'
 
 
 def normalize_hostname(value):
@@ -35,6 +73,7 @@ def collect_identity(collector, binding, include_bmc=True):
                 binding_revision=binding.get('revision'),os_ip=binding.get('os_ip'),bmc_ip=binding.get('bmc_ip'),
                 os_hostname=hostname,os_hostname_raw=raw,os_boot_id=boot,os_status=status,
                 bmc_hostname=None,bmc_hostname_raw=None,bmc_status='NOT_SUPPORTED',
+                os_mac=None,bmc_mac=None,
                 collected_at=item['collected_at'],source='inspection_identity',os_evidence=item)
     expected=binding.get('expected_identity') or {}
     if any(expected.get(k) or binding.get(k) for k in ('hardware_uuid','node_serial')):
@@ -44,8 +83,18 @@ def collect_identity(collector, binding, include_bmc=True):
             value=values.get(field.upper(),'').strip()
             if asset['collection_status']=='SUCCESS' and value: result[field]=value
         result['asset_status']=asset['collection_status']
-    if not include_bmc or not binding.get('bmc_ip'): return result
     transport=collector.transport; target=collector.target
+    try:
+        text=transport.ssh(target,'os','ip a',20,False).output
+        result['os_mac']=os_mac_from_ip(text,binding.get('os_ip'))
+    except Exception:
+        result['os_mac']=None
+    if not include_bmc or not binding.get('bmc_ip'): return result
+    try:
+        lan=transport.ssh(target,'os',LAN_CHANNELS,45,False).output
+        result['bmc_mac']=bmc_mac_from_ip(lan,binding.get('bmc_ip'))
+    except Exception:
+        result['bmc_mac']=None
     mode=(binding.get('capabilities') or {}).get('bmc_hostname_query') or 'auto'
     # BMC hostname is read over SSH only. A BMC that is unreachable or powered
     # off simply yields no hostname; there is no Redfish fallback by default.
