@@ -258,6 +258,21 @@ Implemented in `app/static/js/engineering-ux.js`; see §2b. Requirements were:
   Evidence → Result.
 - Result codes: PASS / FAIL / BLOCKED / RUNNING / WAITING_FOR_USER / ERROR.
 
+### P3 implementation progress (updated 2026-10-05)
+
+| Phase | Status | Notes |
+|---|---|---|
+| P3-a | **DONE** | Isolated PA Agent agent-server on **18010** (`/srv/pa-agent`, own HOME/tmux/conversations), qwen3.8-27b. systemd `pa-agent-server.service` (enabled, Restart=always). Verified: 27B answered `PA-AGENT-27B-OK`; main 18000 untouched (40 conversations). |
+| P3-b | **DONE** (commit `fb41c27`) | `integration/agent_runs.py` (immutable AgentRunContext + mutable run state, SQLite `agent_runs.sqlite3`) and `integration/agent_routes.py` — `POST/GET /api/agent/runs`, `GET /api/agent/runs/{id}`, `GET /api/agent/runs/{id}/context`. Registered 2 files in `RUNTIME_ENGINE_FILES.json`. Tests: 12 new, all pass; full suite baseline 87 == 87 (0 new). |
+| P3-a-6 | open | Front door 4443 not built. Not required: PA backend calls `http://127.0.0.1:18010` directly. Add only if a browser-reachable OpenHands UI is wanted for debugging. |
+| P3-c | open | Gateway: OpenHands conversation bridge + event coalescing (depends on P3-b). |
+| P3-d | open | Policy engine (classification/approvals/end_user_decides, backend-enforced). |
+| P3-e | open | PA Agent Chat Drawer (frontend). |
+| P3-f/g/h | open | Attachments/project docs; evidence + Validation Overview write-back; scheduling dedupe/retention. |
+
+P3-a operational notes live in `/srv/pa-agent/README.md` (start/stop, isolation map,
+secrets, never-touch rules). Never restart `agent-canvas.service` / kill pid 2921102.
+
 ### Constraints the user repeated (do not violate)
 - Do NOT redesign the Test Case library UI or break the current 指派任務 flow.
 - Do NOT iframe OpenHands. Do NOT let the frontend control OpenHands directly.
