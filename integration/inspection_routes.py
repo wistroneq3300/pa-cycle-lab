@@ -16,7 +16,7 @@ def install(app,pa,store_getter):
                 if machine.get('mgx_type','server')!='server' or machine.get('passive'): continue
                 canonical=pa.node_identity.canonical(dict(machine,name=name))
                 active_os=machine.get('active_os')
-                nodes=[dict(node_id=e['node_id'],slot=e['slot'],label=e.get('label') or 'N'+str(e['slot']),os_hostname=e.get('os_hostname'),bmc_hostname=e.get('bmc_hostname')) for e in canonical['os'] if not e.get('empty')]
+                nodes=[dict(node_id=e['node_id'],slot=e['slot'],label=e.get('label') or 'N'+str(e['slot']),os_hostname=e.get('os_hostname'),bmc_hostname=e.get('bmc_hostname'),os_hostname_raw=e.get('os_hostname_raw'),bmc_hostname_raw=e.get('bmc_hostname_raw')) for e in canonical['os'] if not e.get('empty')]
                 # Scope the system to the currently selected node so plan, summary,
                 # issue filters and coverage all describe the same single node the
                 # operator is standing on. Unset active_os keeps the full node list.

@@ -85,15 +85,22 @@
       const data=await request(ctx,'');if(mounted!==ctx)return;const changed=ctx.snapshot&&ctx.snapshot.last_completed_at!==data.last_completed_at;ctx.snapshot=data;const r=ctx.root;
       const identitySignature=JSON.stringify([data.nodes,data.identity,data.identity_history]);
       if(ctx.identitySignature!==identitySignature){ctx.identitySignature=identitySignature;
+        const hn=(node,role)=>node[role+'_hostname_raw']||node[role+'_hostname']||'';
         const box=r.querySelector('[data-identity]');box.replaceChildren();
         for(const node of data.nodes){const observed=data.identity?.[node.node_id];const p=document.createElement('p');
-          p.textContent=`${node.label} · OS ${node.os_hostname||'尚未取得'} · BMC ${node.bmc_hostname||'尚未取得'}`;
-          if(observed?.sync?.status==='IDENTITY_REQUIRES_CONFIRMATION')p.textContent+=` · Identity 需確認 · ${observed.os_ip||''} / ${observed.bmc_ip||''} · 觀測 OS ${observed.os_hostname||'無資料'} / BMC ${observed.bmc_hostname||'無資料'} · ${observed.sync.reason} · ${stamp(observed.collected_at)}`;
+          p.textContent=`${node.label} · OS ${hn(node,'os')||'尚未取得'} · BMC ${hn(node,'bmc')||'尚未取得'}`;
+          if(observed?.sync?.status==='IDENTITY_REQUIRES_CONFIRMATION')p.textContent+=` · Identity 需確認 · ${observed.os_ip||''} / ${observed.bmc_ip||''} · 觀測 OS ${observed.os_hostname_raw||observed.os_hostname||'無資料'} / BMC ${observed.bmc_hostname_raw||observed.bmc_hostname||'無資料'} · ${observed.sync.reason} · ${stamp(observed.collected_at)}`;
           else if(observed)p.textContent+=` · OS ${identityLabels[observed.os_status]||labels[observed.os_status]||observed.os_status} · BMC ${identityLabels[observed.bmc_status]||labels[observed.bmc_status]||observed.bmc_status} · ${stamp(observed.collected_at)}`;
           box.append(p);}
         const history=r.querySelector('[data-identity-history]');history.replaceChildren();
         for(const event of [...(data.identity_history||[])].reverse()){const p=document.createElement('p');const node=data.nodes.find(n=>n.node_id===event.node_id);
-          p.textContent=`${stamp(event.observed_at)} · ${node?.label||event.node_id} · ${{OS_HOSTNAME_CHANGED:'OS Hostname 已變更',BMC_HOSTNAME_CHANGED:'BMC Hostname 已變更',BOOT_GENERATION_CHANGED:'開機世代已變更'}[event.kind]||event.kind} · ${event.previous||'未設定'} → ${event.current}`;history.append(p);}
+          // Older events only stored the normalised value; current rows use the raw case.
+          const current=event.current||'';
+          const prev=event.previous||'';
+          const kindLabel={OS_HOSTNAME_CHANGED:'OS Hostname',BMC_HOSTNAME_CHANGED:'BMC Hostname',BOOT_GENERATION_CHANGED:'開機世代'}[event.kind]||event.kind;
+          if(!prev)p.textContent=`${stamp(event.observed_at)} · ${node?.label||event.node_id} · ${kindLabel} 初次讀取 · ${current}`;
+          else p.textContent=`${stamp(event.observed_at)} · ${node?.label||event.node_id} · ${kindLabel} 已變更 · ${prev} → ${current}`;
+          history.append(p);}
         if(!history.childNodes.length)history.textContent='尚無名稱或開機世代變更紀錄。';
       }
       if(changed&&!r.querySelector('[data-issues]').hidden)r.querySelector('[data-reload]').textContent='有新結果 · 更新問題';

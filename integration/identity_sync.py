@@ -56,13 +56,15 @@ class IdentitySync:
                     return reject(role.upper()+' 網卡 MAC 與前次不一致（可能已換到其他實體節點），請重新確認目標')
                 if observed_mac and entry.get(role+'_mac')!=observed_mac:
                     entry[role+'_mac']=observed_mac;mutated=True
+                raw=observation.get(role+'_hostname_raw')
+                raw=raw.strip() if isinstance(raw,str) else raw
+                if raw and entry.get(key+'_raw')!=raw:
+                    entry[key+'_raw']=raw;mutated=True
                 if normalize_hostname(entry.get(key))!=normalize_hostname(value):
                     if stored_mac and not observed_mac:
                         return reject('無法取得 '+role.upper()+' 網卡 MAC 以確認 hostname 變更，請重新確認目標')
                     changes.append((role.upper()+'_HOSTNAME_CHANGED',entry.get(key,''),value))
                     entry[key]=value;mutated=True
-                    if observation.get(role+'_hostname_raw') and entry.get(key+'_raw')!=observation[role+'_hostname_raw']:
-                        entry[key+'_raw']=observation[role+'_hostname_raw'];mutated=True
                 result[key]=entry.get(key)
             boot=observation.get('os_boot_id')
             if observation.get('os_status')=='SUCCESS' and previous_boot and boot and previous_boot!=boot:

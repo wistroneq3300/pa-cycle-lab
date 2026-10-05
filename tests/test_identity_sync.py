@@ -104,9 +104,12 @@ class Identity(unittest.TestCase):
         self.scenario['hostname']='new';self.sync(self.target(),self.observe())
         self.assertEqual(old.read_bytes(),before);self.assertEqual(self.observe()['os_hostname'],'new')
     def test_normalization_not_rename_loop(self):
-        self.sync(self.target(),self.observe())   # MAC baseline write
+        self.sync(self.target(),self.observe())   # baseline (MAC + raw)
         self.pa._save_data.reset_mock()
-        self.scenario['hostname']='  N1.\n';self.sync(self.target(),self.observe());self.pa._save_data.assert_not_called()
+        # A case/whitespace-only difference must NOT create a HOSTNAME_CHANGED event.
+        self.scenario['hostname']='  N1.\n';self.sync(self.target(),self.observe())
+        self.assertFalse(any(e['kind']=='OS_HOSTNAME_CHANGED' for e in self.pa.machines['box']['identity_history']))
+        self.assertEqual(self.pa.machines['box']['os'][0]['os_hostname'],'n1')
         self.assertEqual(normalize_hostname('Host.Example.'),'host.example');self.assertIsNone(normalize_hostname('bad name'))
     def test_known_bmc_ssh_capability(self):
         self.pa.machines['box']['os'][0]['capabilities']={'bmc_hostname_query':'ssh_hostname'}
