@@ -331,3 +331,65 @@ Repo note: `pa-cycle-lab` has NO `main` branch (default is `codex/neutrino-v1`);
 - Removed the legacy "既有效能圖表" collapsible (`tp-legacy`) from the Telemetry panel.
 - Pre-existing test failures (~87) in this checkout are fixture/env gaps (missing checker scripts,
   run2 engine variant) — NOT caused by this work; keep the diff of `pytest tests/ -q` before/after.
+
+## PA Agent runtime: two servers, tool wiring, and the manifest CI (2026-10-01)
+
+READ THIS before touching the PA Agent (chat drawer / AgentRun) path.
+
+### Two OpenHands servers — do not confuse them
+- `:18000` is the MAIN OpenHands Agent Server (Agent Canvas). It has tools.
+- `:18010` is the PA Agent server, started by `/srv/pa-agent/start-pa-agent-server.sh`
+  as systemd unit `pa-agent-server.service`; api key in `/srv/pa-agent/api-key.txt`;
+  log at `/srv/pa-agent/logs/pa-agent-server.log`; LLM profiles in
+  `/srv/pa-agent/settings/profiles/` (Fernet-encrypted api_key; active model
+  `openai/qwen3.8-27b`, base_url `http://127.0.0.1:8001/v1`).
+- The web app talks to 18010 via `integration/agent_gateway.py` (do NOT edit 18000 here).
+
+### Why the agent "had no tools" (root cause, both layers must hold)
+1. **The launch script must install openhands-tools.** 18010 runs via `uvx`; if the
+   command is only `--from openhands-agent-server==1.49.6` then `openhands-tools` is
+   absent, the tool classes are never imported/registered, and `terminal`/`file_editor`
+   do not exist. Fix: launch with
+   `uvx --from openhands-agent-server==1.49.6 --with openhands-sdk==1.49.6 --with openhands-tools==1.49.6 --with openhands-workspace==1.49.6 agent-server ...`
+   (a backup `start-pa-agent-server.sh.bak-*` is kept next to it).
+2. **The conversation create payload must list the tools explicitly.** With no `tools`,
+   agent-server 1.49.6 attaches only `FinishTool`/`ThinkTool`
+   (`openhands.sdk.tool.builtins.BUILT_IN_TOOLS`) → the agent can think but runs nothing.
+   The names are the REGISTERED SHORT FORMS, not class names:
+   `{"name":"terminal"}`, `{"name":"file_editor"}`, `{"name":"task_tracker"}`
+   (`"TerminalTool"` → `KeyError: ToolDefinition 'TerminalTool' is not registered`).
+   `agent_gateway.start_run()` sends these.
+
+### Gateway gotchas
+- Do NOT send `include_default_tools` (openhands-agent-server 1.49.6 wants `list[str]`,
+  the old `true` → HTTP 422). Field removed; keep it removed.
+- After editing `integration/agent_gateway.py` or `integration/agent_routes.py`, you MUST
+  `systemctl restart pa-manager-6969-web.service` — a stale process keeps serving the old
+  code and re-422s (this bit us: the fix was live in git but not in the running server).
+- Free-text the engineer types in the drawer is sent on start as `user_note`
+  (`AgentRunStartReq.user_note`) and appended to the brief as
+  `Engineer note (follow this): ...`.
+
+### Runtime manifest CI (why "All checks have failed" appears though push succeeded)
+- `.github/workflows/runtime-manifest.yml` runs `scripts/check_runtime_manifest.py`,
+  which compares `RUNTIME_ENGINE_FILES.json` against `discover_runtime_files()`.
+- **After adding/removing/renaming ANY `.py/.js/.css/.html/.sh` (or `VERSION`) under
+  `integration/`, `engine/vera_cycle/`, or `app/` — re-run `python3 scripts/runtime_manifest.py`
+  and commit the updated `RUNTIME_ENGINE_FILES.json`.** Otherwise the check prints
+  "Missing runtime files: + <path>" and fails. The push itself still succeeds; the failure
+  is the check, not the push.
+- Excluded dirs (never listed): `dev`, `docs`, `data`, `tests`, `qa`, `node_modules`,
+  `__pycache__`, `test-results`; plus `app/scripts` and `app/deploy`.
+
+### PA Agent chat drawer (frontend)
+- `app/static/js/pa-agent.js` (IIFE, exposes `window.PA_Agent`); styles in
+  `app/static/css/style.css` (`.pa-drawer*`, `.pa-info-card`, `.pa-msg-input`).
+- One action button `#pa-drawer-start`, labelled 「送出」 (it starts the run). Typing +
+  **Enter** in `#pa-msg-input` fires the same action (Shift+Enter = newline; IME
+  composition guarded). There is NO run-message endpoint — the note rides on start only.
+- Theme: default is DARK (`<html data-theme="dark">`); light-theme overrides live under
+  `:root[data-theme="light"]`. `--card`/`--panel-bg`/`--accent` are NOT defined vars, so
+  their inline fallbacks always apply — set explicit colours, don't rely on them.
+- Bump cache busters in `app/static/index.html` (`style.css?v=...`, `pa-agent.js?v=...`)
+  whenever those two files change, or the browser serves stale assets.
+- E2E: `tests/pa-agent-drawer-e2e.cjs` (mock backend via page.route; currently 22/22).
