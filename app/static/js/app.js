@@ -3452,6 +3452,25 @@ async function assignTaskCopy() {
 
   // \u6e05\u7406\u539f\u59cb\u8cc4\u6599\u91cc\u591a\u990a\u7684\u7a7a\u884c\uff082 \u500b\u4ee5\u4e0a\u9023\u7e8c blank line \u5168\u7e2e\u6210 1 \u500b\uff09\uff0c\u7559\u4e0b\u6b63\u5e38\u6bb5\u843d\u9593\u8ddd
   const collapseBlank = (s) => String(s || "").replace(/\n{3,}/g, "\n\n");
+  // Hard-wrap long English lines at word boundaries so dense command/note text
+  // stays readable instead of forming one unbroken block. Existing line breaks
+  // and leading indentation are preserved.
+  const wrapBlock = (s, width) => String(s || "").split("\n").map(line => {
+    const lead = (line.match(/^\s*/) || [""])[0];
+    const body = line.slice(lead.length);
+    if (!body || body.length <= width) return line;
+    const parts = body.split(/(\s+)/);
+    const out = []; let cur = "";
+    const flush = () => { if (cur.trim()) out.push(lead + cur.trim()); cur = ""; };
+    for (const tok of parts) {
+      if (!tok) continue;
+      if (cur && (cur.length + tok.length) > width) flush();
+      cur += tok;
+    }
+    flush();
+    return out.join("\n");
+  }).join("\n");
+  const WIDTH = 96;
   const lines = [];
   lines.push(`\u76ee\u6a19\u6a5f\u53f0\uff1a${mm.label} \u00b7 ${sname} \u00b7 ${ip} \u00b7 ${user}`);
   lines.push(`\u8acb\u5728 ${ip} \u9019\u53f0 ${user} \u4e3b\u6a5f\u4e0a\u57f7\u884c\u4ee5\u4e0b\u6e2c\u9805\uff08\u60a8\u8907\u88fd\u5f8c\u8cbc\u4e0a\u56de\u5230 OpenHands \u804a\u5929\uff0c\u8b93\u6211 SSH \u4e0a\u53bb\u5b89\u88dd/\u57f7\u884c/\u6536\u96c6\u8b49\u64da\uff1b\u5f97\u5931\u5224\u5b9a\u7531\u60a8\uff09\uff1a`);
@@ -3462,14 +3481,14 @@ async function assignTaskCopy() {
     const pkg = r.ai_packages_needed ? `\uff08\u5305\uff1a${r.ai_packages_needed}\uff09` : "";
     const SEP = "   " + "\u2500".repeat(64);
     const box = (s) => {
-      const L = s.split('\n');
-      const w = Math.max(40, ...L.map(l => l.length)) + 1;
+      const L = wrapBlock(s, WIDTH - 5).split('\n');
+      const w = Math.min(WIDTH - 5, Math.max(40, ...L.map(l => l.length))) + 1;
       const out = ["   \u250c" + "\u2500".repeat(w)];
       L.forEach(l => out.push("   \u2502 " + l));
       out.push("   \u2514" + "\u2500".repeat(w));
       return out.join('\n');
     };
-    const indent = (s, n) => s.split('\n').map(l => " ".repeat(n) + (l || "")).join('\n');
+    const indent = (s, n) => wrapBlock(s, WIDTH - n).split('\n').map(l => " ".repeat(n) + (l || "")).join('\n');
 
     lines.push(`${i + 1}. ${can === "YES" ? "\ud83d\udfe2" : can === "PARTIAL" ? "\ud83d\udfe0" : "\u26ab"} \u6e2c\u8a66\u9805\u76ee\uff1a${tname}${dupSet.has(r.code) ? ` [${r.test_set||""}]` : ""}`);
     lines.push(`   Variant: ${r.case_variant_id || assignTaskKey(r)}`);
@@ -3481,16 +3500,34 @@ async function assignTaskCopy() {
         : "\u7121\u6cd5\u81ea\u52d5\u57f7\u884c\uff08\u9700\u4eba\u5de5\u64cd\u4f5c\u6216\u5371\u96aa\u64cd\u4f5c\uff09\uff0c\u53ea\u63d0\u4f9b\u53c3\u8003\u3002";
     lines.push(`   ${note}`);
 
+    const preRaw = collapseBlank([r.ai_precheck].filter(Boolean).join("\n")).trim();
+    if (preRaw) {
+      lines.push(SEP);
+      lines.push(`   \u2460 \u524d\u7f6e\u6aa2\u67e5\uff08pre-check\uff09\uff1a`);
+      lines.push(box(preRaw));
+    }
     const cmdValid = can !== "NO" && cmdRaw
       && !cmdRaw.startsWith("\u2014") && cmdRaw.indexOf("<CMD>") === -1 && cmdRaw.indexOf("sshpass") === -1;
     if (cmdValid) {
       lines.push(SEP);
-      lines.push(`   \u25b6 \u672c\u6b21\u8981\u8dd1\u7684\u6307\u4ee4\uff08AI \u5df2\u6574\u7406\uff0c\u53ef\u76f4\u63a5\u8cbc\u4e0a shell \u57f7\u884c\uff09\uff1a`);
+      lines.push(`   \u2461 \u672c\u6b21\u8981\u57f7\u884c\uff08test command\uff09\uff1a`);
       lines.push(box(cmdRaw));
     } else if (cmdRaw) {
       lines.push(SEP);
-      lines.push(`   \u25b6 \u53c3\u8003\u6307\u4ee4\uff08\u7121\u6cd5\u76f4\u63a5\u57f7\u884c\uff0c\u4ec5\u4f9b\u53c3\u8003\uff09\uff1a`);
+      lines.push(`   \u2461 \u672c\u6b21\u8981\u57f7\u884c\u8aaa\u660e\uff08\u7121\u6cd5\u76f4\u63a5\u57f7\u884c\uff0c\u4f9b Agent \u5224\u8b80\uff09\uff1a`);
       lines.push(box(cmdRaw));
+    }
+    const postRaw = collapseBlank([r.ai_postcheck].filter(Boolean).join("\n")).trim();
+    if (postRaw) {
+      lines.push(SEP);
+      lines.push(`   \u2462 \u5f8c\u7f6e\u78ba\u8a8d\uff08post-check\uff09\uff1a`);
+      lines.push(box(postRaw));
+    }
+    const instRaw = collapseBlank(r.ai_agent_instruction).trim();
+    if (instRaw) {
+      lines.push(SEP);
+      lines.push(`   \ud83e\udd16 PA Agent \u6307\u793a\uff08\u4f9b Agent \u9075\u5faa\uff09\uff1a`);
+      lines.push(indent(instRaw, 6));
     }
 
     const procRaw = collapseBlank(r.procedure).trim();

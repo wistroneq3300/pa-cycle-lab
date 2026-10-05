@@ -79,9 +79,26 @@ class MergedLibraryContract(unittest.TestCase):
         self.assertEqual(it['ai_packages_needed'],'pciutils')
         self.assertEqual(it['ai_logs_output'],'lspci -vvv\nAER')
         self.assertEqual(it['risk'],'LOW')
+        self.assertEqual(it['ai_precheck'],'')      # no pre_check_commands supplied
+        self.assertEqual(it['ai_postcheck'],'')
+        self.assertEqual(it['ai_agent_instruction'],'Use read-only pciutils.')
         # source review is never discarded
         self.assertEqual(it['ai_review']['automation_classification'],'FULLY AUTOMATABLE')
         self.assertEqual(lib['schema_version'],'tests-gpt-merged-v1')
+
+    def test_pre_post_stages_and_variant_stable(self):
+        item=self.merged_item()
+        item['ai_review']['pre_check_commands']=['capture baseline','confirm target']
+        item['ai_review']['post_check_commands']=['verify device present']
+        lib={'sheets':{'F':{'name':'Functionality','items':[item]}}}
+        prepare_library(lib)
+        it=lib['sheets']['F']['items'][0]
+        self.assertEqual(it['ai_precheck'],'capture baseline\nconfirm target')
+        self.assertEqual(it['ai_postcheck'],'verify device present')
+        # case_variant_id ignores injected view fields -> stable across reloads
+        before=it['case_variant_id']
+        prepare_library(lib)
+        self.assertEqual(it['case_variant_id'],before)
 
     def test_classification_mapping(self):
         cases={'FULLY AUTOMATABLE':'YES','REQUIRES PACKAGE / USER CONFIRMATION':'PARTIAL',

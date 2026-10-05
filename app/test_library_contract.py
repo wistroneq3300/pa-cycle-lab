@@ -17,6 +17,14 @@ import json
 
 MERGED_SCHEMA = 'tests-gpt-merged-v1'
 
+# Fields the contract injects *for merged rows*; excluded from the identity hash so
+# case_variant_id stays stable across contract versions. Legacy rows keep the
+# original hashing (only case_variant_id excluded) so their ids do not churn.
+_DERIVED_FIELDS = frozenset({
+    'case_variant_id', 'ai_can_execute', 'ai_commands', 'ai_packages_needed',
+    'ai_logs_output', 'ai_precheck', 'ai_postcheck', 'ai_agent_instruction', 'risk',
+})
+
 # automation_classification -> the legacy tri-state badge the library UI shows.
 _CLASS_TO_LEGACY = {
     'FULLY AUTOMATABLE': 'YES',
@@ -54,14 +62,16 @@ def normalize_item(item):
     if not item.get('ai_logs_output'):
         item['ai_logs_output'] = _as_lines(review.get('logs_to_collect'))
     if not item.get('ai_commands'):
-        # The UI shows ai_commands as the executable instruction; prefer the
-        # concrete command, then the agent instruction, then pre-check steps.
-        command = _as_lines(review.get('test_command'))
-        if not command:
-            command = _as_lines(review.get('openhands_instruction'))
-        if not command:
-            command = _as_lines(review.get('pre_check_commands'))
-        item['ai_commands'] = command
+        # The merged review keeps a natural-language test_command plus explicit
+        # pre/post step lists. Surface each stage as its own field so the
+        # assignment output can present them in order without losing any stage.
+        item['ai_commands'] = _as_lines(review.get('test_command'))
+    if not item.get('ai_precheck'):
+        item['ai_precheck'] = _as_lines(review.get('pre_check_commands'))
+    if not item.get('ai_postcheck'):
+        item['ai_postcheck'] = _as_lines(review.get('post_check_commands'))
+    if not item.get('ai_agent_instruction'):
+        item['ai_agent_instruction'] = _as_lines(review.get('openhands_instruction'))
     if not item.get('risk'):
         item['risk'] = review.get('risk_level') or ''
     return item
@@ -77,7 +87,11 @@ def prepare_library(library):
     seen = set()
     for label, sheet in library.get('sheets', {}).items():
         for item in sheet.get('items', []):
-            payload = {key: value for key, value in item.items() if key != 'case_variant_id'}
+            if isinstance(item.get('ai_review'), dict):
+                skip = _DERIVED_FIELDS
+            else:
+                skip = {'case_variant_id'}
+            payload = {key: value for key, value in item.items() if key not in skip}
             raw = json.dumps([sheet.get('name', label), payload], sort_keys=True, ensure_ascii=False, separators=(',', ':'))
             base = 'case-' + hashlib.sha256(raw.encode()).hexdigest()[:24]
             identity, index = base, 1

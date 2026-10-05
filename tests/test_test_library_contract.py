@@ -77,6 +77,26 @@ class ShippedLibrary(unittest.TestCase):
         prepare_library(again)
         self.assertEqual(again['version'], before)
 
+    def test_stage_fields_present_for_merged_rows(self):
+        reviewed = [it for it in self.items if isinstance(it.get('ai_review'), dict)]
+        if not reviewed:
+            self.skipTest('legacy dataset (no ai_review)')
+        pre = sum(1 for it in reviewed if it.get('ai_precheck'))
+        post = sum(1 for it in reviewed if it.get('ai_postcheck'))
+        self.assertGreater(pre, len(reviewed) * 0.9)
+        self.assertGreater(post, len(reviewed) * 0.9)
+        # identity excludes injected stage fields -> reload keeps same ids
+        def key(it):
+            return (it.get('code'), it.get('test_set'), it.get('items'))
+        before = {key(it): it['case_variant_id'] for it in reviewed[:500]}
+        with open(self.path, encoding='utf-8') as fh:
+            again = json.load(fh)
+        prepare_library(again)
+        rows = [it for sheet in again['sheets'].values() for it in sheet.get('items', [])]
+        after = {key(it): it['case_variant_id'] for it in rows}
+        mismatches = [k for k, v in before.items() if after.get(k) != v]
+        self.assertEqual(mismatches, [])
+
 
 if __name__ == '__main__':
     unittest.main()
