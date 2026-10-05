@@ -70,6 +70,7 @@ class AgentRunCreateReq(BaseModel):
 class AgentRunStartReq(BaseModel):
     auto_run: bool = Field(True, description="Start the agent immediately after creating the conversation")
     workspace_dir: str = Field("", description="Override the agent workspace directory (optional)")
+    user_note: str = Field("", description="Free-text instruction from the user, appended to the agent brief")
 
 
 class AgentRunIngestReq(BaseModel):
@@ -170,7 +171,8 @@ def install(app, pa, store_getter=None):
             raise HTTPException(404, "unknown run_id")
         try:
             conversation_id = gateway.start_run(
-                run_id, workspace_dir=req.workspace_dir or None, auto_run=req.auto_run)
+                run_id, workspace_dir=req.workspace_dir or None, auto_run=req.auto_run,
+                user_note=req.user_note or "")
         except KeyError:
             raise HTTPException(404, "unknown run_id")
         except Exception as exc:  # agent-server unreachable / rejected

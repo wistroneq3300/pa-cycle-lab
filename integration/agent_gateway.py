@@ -159,11 +159,12 @@ class AgentGateway:
 
     # -- conversation lifecycle ---------------------------------------------
 
-    def build_instruction(self, context):
+    def build_instruction(self, context, user_note=""):
         """Compose the opening message sent to OpenHands for a run.
 
         Only the fields the case needs are sent (design §5.3), not the whole
-        library row.
+        library row. ``user_note`` is the free-text the engineer typed in the
+        chat drawer; it is appended last so it takes precedence.
         """
         tc = context.get("testcase") or {}
         review = context.get("ai_review") or {}
@@ -198,6 +199,8 @@ class AgentGateway:
             lines += ["", "Commands:", tc["ai_commands"]]
         if tc.get("ai_postcheck"):
             lines += ["", "Post-check:", tc["ai_postcheck"]]
+        if (user_note or "").strip():
+            lines += ["", "Engineer note (follow this):", user_note.strip()]
         return "\n".join(lines)
 
     @staticmethod
@@ -228,7 +231,7 @@ class AgentGateway:
         ]
         return "\n".join(lines)
 
-    def start_run(self, run_id, *, workspace_dir=None, auto_run=True):
+    def start_run(self, run_id, *, workspace_dir=None, auto_run=True, user_note=""):
         """Create the OpenHands conversation for a run and bind it to the run."""
         run = self.store.get_run(run_id)
         if run is None:
@@ -259,7 +262,7 @@ class AgentGateway:
             },
             "initial_message": {
                 "role": "user",
-                "content": [{"type": "text", "text": self.build_instruction(run["context"])}],
+                "content": [{"type": "text", "text": self.build_instruction(run["context"], user_note)}],
                 "run": bool(auto_run),
             },
         }

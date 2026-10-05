@@ -76,14 +76,13 @@
           <section class="pa-drawer-right">
             <div id="pa-drawer-body" class="pa-drawer-body" aria-live="polite"></div>
             <footer class="pa-drawer-foot">
-              <div class="pa-input-wrap">
-                <textarea id="pa-msg-input" class="pa-msg-input" rows="1"
-                  placeholder="對 PA Agent 說點什麼…（Enter 送出，Shift+Enter 換行）"
-                  aria-label="訊息輸入"></textarea>
-                <button type="button" id="pa-msg-send" class="pa-msg-send" title="送出（Enter）">送出</button>
+              <textarea id="pa-msg-input" class="pa-msg-input" rows="1"
+                placeholder="對 PA Agent 說點什麼…（可留空；Shift+Enter 換行）"
+                aria-label="訊息輸入"></textarea>
+              <div class="pa-foot-row">
+                <span id="pa-drawer-hint" class="pa-drawer-hint">由 PA Backend AgentRun 處理；實際執行取決於 P3-d 授權策略</span>
+                <button type="button" id="pa-drawer-start" class="pa-drawer-start" hidden>送出</button>
               </div>
-              <span id="pa-drawer-hint" class="pa-drawer-hint">由 PA Backend AgentRun 處理；實際執行取決於 P3-d 授權策略</span>
-              <button type="button" id="pa-drawer-start" class="pa-drawer-start" hidden>開始執行</button>
             </footer>
           </section>
         </div>
@@ -98,29 +97,16 @@
   }
   function onKey(e) { if (e.key === "Escape") close(); }
 
-  // 右欄輸入：多行 textarea（自動增高），Enter 送出 / Shift+Enter 換行。
-  // 送出即把訊息以「你」卡片加入對話（並對後端訊息流做本地回顯）。
+  // 右欄輸入：多行 textarea（自動增高）。內容會隨「送出」一起交給 agent，
+// 不是獨立的聊天訊息（後端沒有 run-message endpoint）；留空則只執行測項本身。
   function wireInput() {
     const input = root.querySelector("#pa-msg-input");
-    const send = root.querySelector("#pa-msg-send");
-    if (!input || !send) return;
+    if (!input) return;
     const autoGrow = () => {
       input.style.height = "auto";
-      input.style.height = Math.min(input.scrollHeight, 180) + "px";
+      input.style.height = Math.min(input.scrollHeight, 240) + "px";
     };
     input.addEventListener("input", autoGrow);
-    const doSend = () => {
-      const v = (input.value || "").trim();
-      if (!v) return;
-      addUserMessage(v);
-      input.value = "";
-      autoGrow();
-      input.focus();
-    };
-    send.addEventListener("click", doSend);
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); doSend(); }
-    });
   }
   function addUserMessage(text) {
     const div = document.createElement("div");
@@ -239,16 +225,19 @@
        </div>`);
   }
 
-  // 使用者按下「開始執行」後才啟動（審閱通過）。
+  // 使用者按下「送出」後才啟動（審閱通過）。輸入框內容若有，一併帶給 agent。
   async function startRun() {
     if (!state.runId) return;
     const startBtn = root?.querySelector("#pa-drawer-start");
-    if (startBtn) { startBtn.disabled = true; startBtn.textContent = "啟動中…"; }
+    const input = root?.querySelector("#pa-msg-input");
+    const note = (input?.value || "").trim();
+    if (startBtn) { startBtn.disabled = true; startBtn.textContent = "送出中…"; }
+    if (note) { addUserMessage(note); input.value = ""; input.style.height = "auto"; }
     setStatus("啟動中…", "busy");
     try {
       const s = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/start`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ auto_run: true }),
+        body: JSON.stringify({ auto_run: true, user_note: note }),
       });
       const sd = await s.json().catch(() => ({}));
       if (!s.ok) {
@@ -257,7 +246,7 @@
         body().insertAdjacentHTML("beforeend",
           `<div class="pa-msg pa-msg-assistant"><div class="pa-msg-head"><span class="pa-msg-role">PA Agent</span></div>
              <div class="pa-msg-content pa-msg-error">啟動失敗：${esc(sd.detail || sd.error || ("HTTP " + s.status))}</div></div>`);
-        if (startBtn) { startBtn.disabled = false; startBtn.textContent = "開始執行"; }
+        if (startBtn) { startBtn.disabled = false; startBtn.textContent = "送出"; }
         scrollBottom();
         return;
       }
@@ -267,7 +256,7 @@
       beginPolling();
     } catch (e) {
       setStatus("啟動受挫", "err");
-      if (startBtn) { startBtn.disabled = false; startBtn.textContent = "開始執行"; }
+      if (startBtn) { startBtn.disabled = false; startBtn.textContent = "送出"; }
       body().insertAdjacentHTML("beforeend",
         `<div class="pa-msg pa-msg-assistant"><div class="pa-msg-head"><span class="pa-msg-role">PA Agent</span></div>
            <div class="pa-msg-content pa-msg-error">啟動失敗：${esc(e.message)}</div></div>`);
@@ -377,13 +366,13 @@
     state.run = null;
     body().innerHTML = "";
     const startBtn = root?.querySelector("#pa-drawer-start");
-    if (startBtn) { startBtn.hidden = true; startBtn.disabled = false; startBtn.textContent = "開始執行"; }
+    if (startBtn) { startBtn.hidden = true; startBtn.disabled = false; startBtn.textContent = "送出"; }
     // 先填左欄指令內容，再於其上方 prepend 資訊確認卡（若先 renderInfoCard 會被 renderLeftPanel 的 innerHTML 清掉）。
     renderLeftPanel();
     renderInfoCard();
     renderContextBanner();
     if (state.context.case_variant_id) {
-      // 審閱優先：只建立（PENDING），不自動啟動；使用者點「開始執行」才啟動。
+      // 審閱優先：只建立（PENDING），不自動啟動；使用者點「送出」才啟動。
       createRun();
     } else {
       setStatus("就緒");
