@@ -186,7 +186,7 @@ class Transport:
     def oob(self, target, command, timeout=30):
         env = os.environ.copy()
         env["IPMI_PASSWORD"] = self.credentials.get("bmc", "")
-        argv = ["ipmitool", "-I", "lanplus", "-p", str(self.ipmi_port), "-C", str(self.cipher), "-H", target.bmc_ip,
+        argv = ["ipmitool", "-I", "lanplus", "-p", str(self.ipmi_port), "-N", "30", "-R", "1", "-C", str(self.cipher), "-H", target.bmc_ip,
                 "-U", self.users.get("bmc", os.environ.get("BMC_USER", "root")), "-E", *shlex.split(command)]
         start = time.monotonic()
         try:

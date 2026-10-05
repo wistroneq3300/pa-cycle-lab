@@ -282,17 +282,25 @@ class NodeSession:
             raise RuntimeError('Remote hardware script hash verification failed; no execution')
         self.script_verified = True
 
-    def collect_dmesg(self, record, stem, clear=False, save_evidence=None, evidence_stem=None):
+    def collect_dmesg(self, record, stem, clear=False, save_evidence=None, evidence_stem=None,
+                      wipe_only=False):
         # The plain ``dmesg`` read only establishes the baseline count; its
         # buffer is re-read verbatim by ``dmesg -c`` moments later, so keeping
         # both files would double the largest evidence artefact. Only the
         # clear variant is retained on disk, and events seen by the non-clear
         # read cite that retained file instead.
+        #
+        # ``wipe_only`` uses ``dmesg -C`` to discard the buffer without reading
+        # its contents, so the pre-clear backlog never becomes a finding.
         if save_evidence is None:
-            save_evidence = clear
-        result = self.command(record, stem, 'os', 'dmesg -c' if clear else 'dmesg', sudo=True,
+            save_evidence = clear and not wipe_only
+        command = 'dmesg -C' if wipe_only else 'dmesg -c' if clear else 'dmesg'
+        result = self.command(record, stem, 'os', command, sudo=True,
                               save_evidence=save_evidence)
         if result.code:
+            return
+        if wipe_only:
+            self.dmesg_seen = {}
             return
         boot = record['identities'].get('os', {}).get('boot_id', '')
         events = dmesg_issues(result.output)
@@ -644,10 +652,11 @@ class NodeSession:
         cleared so PRE captures a clean baseline. Redfish clear happens inside
         collect_redfish(clear=True) at PRE time, driven from here.
         """
-        # dmesg: probe with a read, then clear.
+        # dmesg: probe with a read, then wipe only (`dmesg -C`); the pre-PRE
+        # backlog is discarded without being parsed, so it never becomes a finding.
         probe = self.command(record, "pre_dmesg_probe", "os", "dmesg", sudo=True, check=False)
         if probe.code == 0:
-            self.collect_dmesg(record, "pre_dmesg_clear", clear=True)
+            self.collect_dmesg(record, "pre_dmesg_clear", wipe_only=True)
         else:
             self.add(record, 'CLEAR_SKIPPED', 'dmesg', 'PRE dmesg read failed; original was not cleared', severity='WARN')
         # IPMI SEL: probe with a list, then clear.
