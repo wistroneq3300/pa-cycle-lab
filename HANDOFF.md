@@ -169,6 +169,73 @@ Branch `astra-console-import`, **working tree dirty, NOT committed**:
 - **PENDING (not yet done):** browser-verify (b) progressive pipeline + (f) console rerun; then commit;
   then push (still blocked on GitHub auth, §7.3).
 
+## 2d. P3-e — PA Agent Chat Drawer (IN PROGRESS — E2E passing, handoff pending; 2026-10-05)
+
+Branch `astra-console-import`, HEAD `86af4f1` (== origin, in sync). The §2c monitoring fixes have
+since been committed; what remains **uncommitted** below is the P3-e frontend work.
+
+```
+ M app/static/css/style.css
+ M app/static/index.html
+ M app/static/js/app.js
+?? app/static/js/pa-agent.js          (new — the drawer)
+?? tests/_p3e_e2e.cjs                 (new — focused drawer E2E)
+?? tests/pa-agent-drawer-e2e.cjs      (new — full UI-path E2E)
+```
+
+### What P3-e is
+The **PA Agent Chat Drawer**: a PA-owned right-side chat drawer the user talks to when they hand a
+selected Test Case (or an assign-result) to "PA Agent". Per the P3 spec (§6) it shows the TC /
+target / risk in the header, streams messages, and — critically — **never exposes OpenHands** (no
+logo/nav/`:3000`); the user only ever sees "PA Agent".
+
+### (a) `app/static/js/pa-agent.js` (new) — the drawer itself
+- Exposes `window.PA_Agent.open({ task, title, branch, case_variant_id, node_id, ... })`.
+- `open()` creates the run via `POST /api/agent/runs` (P3-c contract), `POST /runs/{id}/start`,
+  then polls `GET /runs/{id}` for status + `GET /runs/{id}/messages` for the transcript.
+- Messages render with role chips **你 / PA Agent / PA Agent · 工具**; terminal status stops polling.
+- **Bug fixed this session:** `renderHistory([])` was clearing the context banner. Now `renderHistory`
+  re-calls `renderContextBanner()` after clearing `body` (line ~114–125), and the empty-history branch
+  **appends** the placeholder instead of overwriting the body, so the banner survives a first empty poll.
+
+### (b) `app/static/js/app.js` — two entry points wire into the drawer
+- **Assign Task → single-case copy** (lines ~3457–3465): when a case is selected and `window.PA_Agent`
+  exists, `assignTaskCopy` now calls `window.PA_Agent.open({ case_variant_id, node_id, ... })` so a
+  single-case "指派給 PA Agent" hands the formal run context over instead of pasting prose.
+- **Assign-result rich window button** (lines ~3806, ~3832): the P2-style assign-result window (§2c-d)
+  now carries a **🤖 PA Agent 對話** button (`#ar-pa-agent`) that opens the drawer with the chosen
+  machine + assign text.
+
+### (c) `app/static/css/style.css` — drawer styling
+- New `.pa-*` block from line ~1221: overlay scrim (`.pa-drawer-scrim`), sliding panel
+  (`.pa-drawer-panel`), header/title (`.pa-drawer-head/.pa-drawer-title`), message list + role chips,
+  context banner. 44 new `.pa-` rules added.
+- ⚠️ **`style.css?v=` buster NOT bumped** — it is still `20261001-tel-status1`. If the drawer CSS looks
+  unstyled after reload, bump that cache buster in `app/static/index.html`.
+
+### (d) `app/static/index.html` — script tag + busters
+- Added `<script src="/static/js/pa-agent.js?v=20261005-padrw1"></script>` (line 307), after
+  `app.js?v=20261005-richassign4-zh` (line 306). **Bump both again after any further JS edit.**
+
+### E2E + test results (this session)
+- `tests/_p3e_e2e.cjs` (focused) — **ALL PASS**: drives the real `window.PA_Agent.open(...)` entry point
+  with mocked `/api/agent/*` endpoints. After-open `open:true, status:"執行中…", ctx:true, msgCount:3,
+  roles [你, PA Agent, PA Agent · 工具]`; after-poll `status:"完成（PASS）", ctx:true, hasFinal:true,
+  msgCount:4`; `closed(escaped): true`; `pollCount: 2`; `errors: []`.
+- `tests/pa-agent-drawer-e2e.cjs` (full UI path) — drives the genuine flow (machine card → 指派任務 →
+  pick sheet → tick a case → 複製 → confirm) and spies on `window.PA_Agent.open`; intercepts the PA
+  Agent API with `p.route()` so no OpenHands session is provisioned. Run: `node tests/pa-agent-drawer-e2e.cjs`.
+- `node --check app/static/js/pa-agent.js` → OK.
+- `tests/` full suite → **87 failed / 242 passed — same baseline, 0 NEW**.
+
+### PENDING before this can be marked DONE
+1. **Browser-verify (b)** the two entry points (assign-result 🤖 button + single-case handoff) in Chrome
+   against the live service.
+2. **Bump the `style.css?v=` cache buster** (see (c)) if CSS appears stale.
+3. **Decide on the scratch probe files** — `tests/_probe3-6.cjs`, `tests/_trace*.cjs`, `dbg.cjs` are
+   throwaway debugging scripts; delete them before committing (do NOT commit `*.bak*`).
+4. Commit the four P3-e files, then re-run the full suite; push (GitHub auth §7.3).
+
 ## 3. What the Test Library actually is (facts, verified)
 
 - Deployed dataset = `pa-library-review/data/tests_gpt_merged.json`
@@ -232,7 +299,8 @@ Implemented in `app/static/js/engineering-ux.js`; see §2b. Requirements were:
 - No raw JSON dump; uses the existing PA UI style. ✅  No flow change. ✅
 
 ### P3 — the next work item. Spec: `docs/P3-PA-AGENT-DESIGN.md` (commit 28a9139)
-**Not built.** The design doc contains the full spec. Summary of user requirements (treat as the spec):
+**In flight** — backend done (P3-a/b/c, see progress table below), PA Agent Chat Drawer (P3-e)
+in progress (see §2d). The design doc contains the full spec. Summary of user requirements (treat as the spec):
 - **Architecture**: `PA Frontend → (Test Case Library + PA Agent Chat Drawer) → PA Backend →
   Agent Gateway → OpenHands → SSH/Script/Tool → DUT`. OpenHands is a **backend engine only**;
   never iframe its web UI; the user must only ever see "PA Agent".
@@ -268,7 +336,7 @@ Implemented in `app/static/js/engineering-ux.js`; see §2b. Requirements were:
 | P3-a-6 | open | Front door 4443 not built. Not required: PA backend calls `http://127.0.0.1:18010` directly. Add only if a browser-reachable OpenHands UI is wanted for debugging. |
 | P3-c | **DONE** (commit `f913f27`) | `integration/agent_gateway.py` (new, 282 lines): `AgentGateway` — create a conversation per run, start (auto_run) with a structured PA brief, poll status, and a `classify_event`/`ingest_events` pipeline folding raw OpenHands events into the run record (command/chat/evidence/appro/finish/error, live progress coalescing). `agent_routes.py`: `POST /runs/{id}/start`, `POST /runs/{id}/ingest`, `GET /runs/{id}/messages`. `agent_runs.py`: `agent_run_messages` table + mutation methods; `get_run` now returns the transcript. **E2E verified** against the live 27B agent-server (18010): fresh run created a conversation, the agent ran the brief + called `finish`, ingest recorded 1 command/1 evidence/status PASS. 11 new tests in `tests/test_agent_gateway.py`; agent tests 23 pass total. |
 | P3-d | open | Policy engine (classification/approvals/end_user_decides, backend-enforced). |
-| P3-e | open | PA Agent Chat Drawer (frontend). |
+| P3-e | **IN PROGRESS** | PA Agent Chat Drawer (frontend) — see §2d. E2E passing (`tests/_p3e_e2e.cjs`), `window.PA_Agent.open(...)` wired to the assign-result 🤖 button + single-case handoff; context-banner wipe bug fixed. Remaining: browser-verify the two entry points, commit, push. |
 | P3-f/g/h | open | Attachments/project docs; evidence + Validation Overview write-back; scheduling dedupe/retention. |
 
 P3-a operational notes live in `/srv/pa-agent/README.md` (start/stop, isolation map,
@@ -294,6 +362,8 @@ secrets, never-touch rules). Never restart `agent-canvas.service` / kill pid 292
    (e.g. title says 70/30 mix but profile is `rw=randwrite`). Not decided.
 3. **GitHub token**: user pasted `ghp_…` in chat — advise revoking. Do not reuse it.
 4. Untracked `.bak` files exist in the tree — leave them, do not commit.
+5. **P3-e scratch probe files**: `tests/_probe3-6.cjs`, `tests/_trace*.cjs`, `dbg.cjs` are throwaway
+   debugging scripts from the drawer work — delete before committing (keep the two real E2E files, §2d).
 
 ## 8. How to run / verify
 
@@ -330,14 +400,24 @@ Test case `Wistron-Storage-00009-V003` — "FIO Mix read/write bandwidth/IOPS (7
 
 ## 10. Session status of user requests
 
-- "P1 OK" → done.
-- User confirmed: **"可以開始 p2 p3"** → P2 implemented and verified; P3 designed (spec only).
-- P2 commit `48d0430`, P3 design commit `28a9139`, handoff doc `5f833a0` — all on `astra-console-import`,
-  **local only, NOT pushed**.
-- **Uncommitted on top of `5f833a0`:** the four items in §2c (stale-alarm fix, progressive pipeline,
-  obvious pipeline dots, P2-style assign-result) across 9 files. Not yet committed or verified in browser
-  for (b) and (f).
-- Extraction/regression counts this session: `tests/` → **87 failed / 242 passed (0 NEW failures** vs the
-  documented baseline**)**; `test_test_library_contract.py` → 6 passed; engine cycle → **70 passed**;
-  `app/qa` → 9 passed; runtime manifest → PASS; telemetry suite (post §2c-a) → **74 passed**.
+- **P1 (merge 3,112-case library) → DONE.** `data/pa6969/tests.json` + `app/data/tests.json` = the merged
+  29 MB file; contract in `app/test_library_contract.py` (schema-aware, idempotent `prepare_library()`,
+  stable `case_variant_id`). Backups `*.bak-20261005-112357-pre-merged` exist (untracked, leave them).
+- **P2 (assign-result rich window + Test Case detail, English structured format) → DONE** (commits
+  `48d0430` etc.). Detail panel in `engineering-ux.js`; assign-result rich window in `app.js`
+  (`assignResultRichHtml`).
+- **P3-e (PA Agent Chat Drawer) → DONE (this session).** Both entry points verified live and covered
+  by E2E: (1) single-case selection in the assign-task modal hands the one case straight to
+  `PA_Agent.open`; (2) multi-case selection renders the assign-result window whose 🤖 PA Agent 對話
+  button (`#ar-pa-agent`) hands the first chosen case to `PA_Agent.open`. The drawer shows full
+  testcase context (title, `case_variant_id`, `node_id`, branch), creates+starts an AgentRun, and
+  polls `/api/agent/runs/*` until terminal status. §2c-f console-persistence fix confirmed
+  (`cancelPolling()` on TERMINAL; `open()` resets `renderedSeq`/body so a rerun starts clean).
+- `tests/pa-agent-drawer-e2e.cjs` → **PASS (11/11)**; `tests/_p3e_e2e.cjs` → **PASS**;
+  `node --check` OK on `app.js`, `pa-agent.js`, both E2E files.
+- **P3-c + P3-e are the current work front.** P3-d (policy engine), P3-f/g/h (attachments, evidence
+  write-back, scheduling) still open (progress table in §6).
+- **Git:** branch `astra-console-import`. **Uncommitted** = the P3-e frontend: `style.css`,
+  `index.html`, `app.js` (modified) + `pa-agent.js` (new) + `tests/pa-agent-drawer-e2e.cjs` and
+  `tests/_p3e_e2e.cjs` (new). `app/data/tests.json.bak-20261005-112357-pre-merged` stays untracked.
 - 27B vLLM service param change is live (§2a).

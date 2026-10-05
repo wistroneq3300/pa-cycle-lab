@@ -3450,6 +3450,26 @@ async function assignTaskCopy() {
   const chosen = items.filter(r => sel.has(assignTaskKey(r)));
   if (!chosen.length) { notifyUser("\u6e2c\u9805\u6e05\u55ae\u5df2\u5207\u63db\uff0c\u8acb\u91cd\u65b0\u52fe\u9078"); return; }
 
+  // P3-e：選取「單一」測項時，交接給 PA Agent 對話側欄（P3-c 後端）而非靜態指令視窗。
+  if (chosen.length === 1) {
+    const row = chosen[0];
+    const variant = row.case_variant_id || "";
+    if (variant && window.PA_Agent && typeof window.PA_Agent.open === "function") {
+      const t = operationTarget(_assignTask.name) || {};
+      const title = (row.items ? String(row.items) : row.code) || variant;
+      closeDialog();
+      window.PA_Agent.open({
+        case_variant_id: variant,
+        node_id: t.node_id || "",
+        expected_binding_revision: t.expected_binding_revision || "",
+        branch: sname || mm.sheet || "",
+        title,
+        task: "PA Agent 依此測項與目標節點執行並回報結果。",
+      });
+      return;
+    }
+  }
+
   // \u6e05\u7406\u539f\u59cb\u8cc4\u6599\u91cc\u591a\u990a\u7684\u7a7a\u884c\uff082 \u500b\u4ee5\u4e0a\u9023\u7e8c blank line \u5168\u7e2e\u6210 1 \u500b\uff09\uff0c\u7559\u4e0b\u6b63\u5e38\u6bb5\u843d\u9593\u8ddd
   const collapseBlank = (s) => String(s || "").replace(/\n{3,}/g, "\n\n");
   // Hard-wrap long English lines at word boundaries so dense command/note text
@@ -3573,7 +3593,7 @@ async function assignTaskCopy() {
   window.uxNotify?.(copied ? "\u6307\u4ee4\u5df2\u7522\u751f\u4e26\u8907\u88fd\uff1b\u5c1a\u672a\u57f7\u884c\u6e2c\u8a66" : "\u6307\u4ee4\u5df2\u7522\u751f\uff1b\u526a\u8cbc\u7c3f\u7121\u6cd5\u5beb\u5165\uff0c\u8acb\u5728\u7d50\u679c\u8996\u7a97\u624b\u52d5\u8907\u88fd", !copied);
 
   // 開仿 User Guide 的浮動小視窗，讓使用者在下方滾動看完整 TEST CASE
-  AssignResultWin.render("\u2705 \u6307\u6d3e\u53ef\u57f7\u884c\u6307\u4ee4 \u00b7 " + summary, text, rich);
+  AssignResultWin.render("\u2705 \u6307\u6d3e\u53ef\u57f7\u884c\u6307\u4ee4 \u00b7 " + summary, text, rich, chosen);
 }
 
 async function assignTaskClip(text) {
@@ -3782,7 +3802,8 @@ const AssignResultWin = (() => {
     const foot = el("div", "ar-foot");
     foot.innerHTML =
       '<span class="ar-hint" id="ar-hint"></span>' +
-      '<button class="btn small" id="ar-copy-all" title="複製全部指令文字">\ud83d\udccb 複製全部</button>';
+      '<button class="btn small" id="ar-copy-all" title="複製全部指令文字">\ud83d\udccb 複製全部</button>' +
+      '<button class="btn small btn-good" id="ar-pa-agent" title="交給 PA Agent 分析此指派">🤖 PA Agent 對話</button>';
     content.appendChild(body);
     content.appendChild(foot);
     win.appendChild(bar);
@@ -3807,6 +3828,25 @@ const AssignResultWin = (() => {
       const prev = hint.textContent;
       hint.textContent = "\u2705 \u5df2\u8907\u88fd\u5230\u526a\u8cbc\u7c3f";
       setTimeout(() => { hint.textContent = prev; }, 1600);
+    });
+    win.querySelector("#ar-pa-agent").addEventListener("click", () => {
+      if (!window.PA_Agent) return;
+      const title = win.querySelector("#ar-title")?.textContent || "";
+      const mach = (typeof assignTaskMach === "function") ? assignTaskMach() : null;
+      const t = (typeof operationTarget === "function") ? (operationTarget(mach?.name) || {}) : {};
+      // AgentRun 以單一 case_variant_id 為錨點；多測項視窗取第一筆作為 run 錨點，
+      // 其餘測項仍完整保留在 task 文字中，交由 PA Agent 依上下文處理。
+      const first = (win._cases || [])[0] || {};
+      const variant = first.case_variant_id || "";
+      if (!variant) { window.uxNotify?.("此指派沒有可用的 case_variant_id，無法交給 PA Agent", true); return; }
+      window.PA_Agent.open({
+        case_variant_id: variant,
+        node_id: t.node_id || "",
+        expected_binding_revision: t.expected_binding_revision || "",
+        task: win._text || "",
+        title: "PA Agent 分析指派結果 · " + (mach?.name || title || ""),
+        branch: mach?.name || undefined,
+      });
     });
     win.querySelector(".ar-grip").addEventListener("mousedown", (e) => {
       e.preventDefault(); e.stopPropagation();
@@ -3855,9 +3895,10 @@ const AssignResultWin = (() => {
     }
   }
 
-  function render(title, text, rich) {
+  function render(title, text, rich, cases) {
     if (!win) build();
     win._text = text;
+    win._cases = Array.isArray(cases) ? cases : [];
     win.querySelector("#ar-title").textContent = title;
     win.querySelector("#ar-hint").textContent = "已複製到剪貼簿。請確認完整測試案例、風險與目標後，再貼至執行工具。本頁尚未執行測試。";
     const pre = win.querySelector("#ar-pre");
