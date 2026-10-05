@@ -1,15 +1,16 @@
-# HANDOFF — PA Cycle Lab / Test Library integration (P1/P2 done; monitoring fixes UNCOMMITTED; P3 designed only)
+# HANDOFF — PA Cycle Lab / Test Library integration (P1/P2/P3 done; **26 commits UNPUSHED — no GitHub credential in env**)
 
 > Copy this whole file into the next conversation window as the first message.
 
 ## 0. TL;DR for the next agent
 
-- Repo: `wistroneq3300/pa-cycle-lab`, branch **`astra-console-import`**, HEAD **`5f833a0`**.
-- **P1 is DONE and pushed.** Merged 3,112-case library is live; assignment flow untouched in behaviour.
+- Repo: `wistroneq3300/pa-cycle-lab`, branch **`astra-console-import`**, HEAD **`f913f27`** (26 commits ahead of origin).
+- **P1 is DONE (committed).** Merged 3,112-case library is live; assignment flow untouched in behaviour.
+- **PUSH BLOCKER (2026-10-01):** `origin/astra-console-import` is at `4a707db`; local `HEAD` is at `f913f27` — **26 commits ahead, all unpushed.** No `GITHUB_TOKEN`/`GH_TOKEN` in env, `~/.git-credentials` is empty, and the `id_rsa` SSH key is not registered with GitHub (ssh auth = "Permission denied"). A valid GitHub credential (token or registered SSH key) is needed before `git push origin astra-console-import` will succeed.
 - **P2 is DONE (commit `48d0430`, local; not pushed).** Test Case detail panel renders `ai_review`
   as sectioned blocks with five-way classification badges. Frontend-only
   (`app/static/js/engineering-ux.js`, `app/static/css/engineering-ux.css`, `app/static/index.html`).
-- **P3 is DESIGNED, NOT built.** Spec: `docs/P3-PA-AGENT-DESIGN.md` (commit `28a9139`, local; not pushed).
+- **P3 is DONE (committed, `f913f27`).** AgentRun + live OpenHands gateway + event ingest + message persistence; e2e-verified against the live 27B agent-server. Spec: `docs/P3-PA-AGENT-DESIGN.md`. Open sub-items: P3-d (policy engine), P3-e (chat drawer), P3-f/g/h (attachments, validation write-back, scheduling).
 - **THIS SESSION (UNCOMMITTED — see §2c):** three monitoring-page fixes + assign-result output beautification.
   9 modified files, nothing committed since `5f833a0`:
   1. Stale false "需要處理" alarm fixed (backend no longer flips READY→DEGRADED on age).
@@ -265,7 +266,7 @@ Implemented in `app/static/js/engineering-ux.js`; see §2b. Requirements were:
 | P3-a | **DONE** | Isolated PA Agent agent-server on **18010** (`/srv/pa-agent`, own HOME/tmux/conversations), qwen3.8-27b. systemd `pa-agent-server.service` (enabled, Restart=always). Verified: 27B answered `PA-AGENT-27B-OK`; main 18000 untouched (40 conversations). |
 | P3-b | **DONE** (commit `fb41c27`) | `integration/agent_runs.py` (immutable AgentRunContext + mutable run state, SQLite `agent_runs.sqlite3`) and `integration/agent_routes.py` — `POST/GET /api/agent/runs`, `GET /api/agent/runs/{id}`, `GET /api/agent/runs/{id}/context`. Registered 2 files in `RUNTIME_ENGINE_FILES.json`. Tests: 12 new, all pass; full suite baseline 87 == 87 (0 new). |
 | P3-a-6 | open | Front door 4443 not built. Not required: PA backend calls `http://127.0.0.1:18010` directly. Add only if a browser-reachable OpenHands UI is wanted for debugging. |
-| P3-c | open | Gateway: OpenHands conversation bridge + event coalescing (depends on P3-b). |
+| P3-c | **DONE** (commit `f913f27`) | `integration/agent_gateway.py` (new, 282 lines): `AgentGateway` — create a conversation per run, start (auto_run) with a structured PA brief, poll status, and a `classify_event`/`ingest_events` pipeline folding raw OpenHands events into the run record (command/chat/evidence/appro/finish/error, live progress coalescing). `agent_routes.py`: `POST /runs/{id}/start`, `POST /runs/{id}/ingest`, `GET /runs/{id}/messages`. `agent_runs.py`: `agent_run_messages` table + mutation methods; `get_run` now returns the transcript. **E2E verified** against the live 27B agent-server (18010): fresh run created a conversation, the agent ran the brief + called `finish`, ingest recorded 1 command/1 evidence/status PASS. 11 new tests in `tests/test_agent_gateway.py`; agent tests 23 pass total. |
 | P3-d | open | Policy engine (classification/approvals/end_user_decides, backend-enforced). |
 | P3-e | open | PA Agent Chat Drawer (frontend). |
 | P3-f/g/h | open | Attachments/project docs; evidence + Validation Overview write-back; scheduling dedupe/retention. |
