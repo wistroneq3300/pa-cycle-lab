@@ -3471,6 +3471,19 @@ async function assignTaskCopy() {
     return out.join("\n");
   }).join("\n");
   const WIDTH = 96;
+  // Split prose into bullet lines: keep existing line breaks, then break each
+  // line into sentences (after '.', ';', '!' or '?') while protecting decimals,
+  // paths, and version-like tokens such as '70/30', './fio', 'v1.2'.
+  const sentences = (s) => String(s || "")
+    .split("\n")
+    .map(l => l.trim())
+    .filter(Boolean)
+    .flatMap(l => l.split(/;\s+(?=\S)/))
+    .flatMap(l => l.split(/(?<=[.!?])\s+(?=[A-Z0-9(\u2018\u201c'"`])/))
+    .map(x => x.trim())
+    .filter(Boolean);
+  const bullets = (s, width) => sentences(s).map(x =>
+    " \u2022 " + wrapBlock(x, width).split("\n").join("\n   ")).join("\n");
   const lines = [];
   lines.push(`\u76ee\u6a19\u6a5f\u53f0\uff1a${mm.label} \u00b7 ${sname} \u00b7 ${ip} \u00b7 ${user}`);
   lines.push(`\u8acb\u5728 ${ip} \u9019\u53f0 ${user} \u4e3b\u6a5f\u4e0a\u57f7\u884c\u4ee5\u4e0b\u6e2c\u9805\uff08\u60a8\u8907\u88fd\u5f8c\u8cbc\u4e0a\u56de\u5230 OpenHands \u804a\u5929\uff0c\u8b93\u6211 SSH \u4e0a\u53bb\u5b89\u88dd/\u57f7\u884c/\u6536\u96c6\u8b49\u64da\uff1b\u5f97\u5931\u5224\u5b9a\u7531\u60a8\uff09\uff1a`);
@@ -3504,30 +3517,30 @@ async function assignTaskCopy() {
     if (preRaw) {
       lines.push(SEP);
       lines.push(`   \u2460 \u524d\u7f6e\u6aa2\u67e5\uff08pre-check\uff09\uff1a`);
-      lines.push(box(preRaw));
+      lines.push(box(bullets(preRaw, WIDTH - 8)));
     }
     const cmdValid = can !== "NO" && cmdRaw
       && !cmdRaw.startsWith("\u2014") && cmdRaw.indexOf("<CMD>") === -1 && cmdRaw.indexOf("sshpass") === -1;
     if (cmdValid) {
       lines.push(SEP);
       lines.push(`   \u2461 \u672c\u6b21\u8981\u57f7\u884c\uff08test command\uff09\uff1a`);
-      lines.push(box(cmdRaw));
+      lines.push(box(bullets(cmdRaw, WIDTH - 8)));
     } else if (cmdRaw) {
       lines.push(SEP);
       lines.push(`   \u2461 \u672c\u6b21\u8981\u57f7\u884c\u8aaa\u660e\uff08\u7121\u6cd5\u76f4\u63a5\u57f7\u884c\uff0c\u4f9b Agent \u5224\u8b80\uff09\uff1a`);
-      lines.push(box(cmdRaw));
+      lines.push(box(bullets(cmdRaw, WIDTH - 8)));
     }
     const postRaw = collapseBlank([r.ai_postcheck].filter(Boolean).join("\n")).trim();
     if (postRaw) {
       lines.push(SEP);
       lines.push(`   \u2462 \u5f8c\u7f6e\u78ba\u8a8d\uff08post-check\uff09\uff1a`);
-      lines.push(box(postRaw));
+      lines.push(box(bullets(postRaw, WIDTH - 8)));
     }
     const instRaw = collapseBlank(r.ai_agent_instruction).trim();
     if (instRaw) {
       lines.push(SEP);
       lines.push(`   \ud83e\udd16 PA Agent \u6307\u793a\uff08\u4f9b Agent \u9075\u5faa\uff09\uff1a`);
-      lines.push(indent(instRaw, 6));
+      lines.push(indent(bullets(instRaw, WIDTH - 8), 6));
     }
 
     const procRaw = collapseBlank(r.procedure).trim();
