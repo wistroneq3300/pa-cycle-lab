@@ -18,6 +18,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from . import targets as targets_module
+from .agent_gateway import AgentGateway
 from .agent_runs import AgentRunStore
 
 
@@ -27,6 +28,15 @@ class AgentRunCreateReq(BaseModel):
     expected_binding_revision: str = Field("", description="Bind the run to this revision (optional)")
     required_documents: list = Field(default_factory=list)
     user_attachments: list = Field(default_factory=list)
+
+
+class AgentRunStartReq(BaseModel):
+    auto_run: bool = Field(True, description="Start the agent immediately after creating the conversation")
+    workspace_dir: str = Field("", description="Override the agent workspace directory (optional)")
+
+
+class AgentRunIngestReq(BaseModel):
+    events: list = Field(default_factory=list, description="Raw OpenHands events to fold in (optional live poll)")
 
 
 def _target_snapshot(pa, node_id, expected_revision):
@@ -51,6 +61,7 @@ def _target_snapshot(pa, node_id, expected_revision):
 def install(app, pa, store_getter=None):
     router = APIRouter()
     store = AgentRunStore()
+    gateway = AgentGateway(store)
 
     def _library():
         library = pa._load_testlib()
@@ -105,6 +116,39 @@ def install(app, pa, store_getter=None):
             raise HTTPException(404, "unknown run_id")
         return {"ok": True, "context": run["context"],
                 "context_verified": store.verify_context(run_id)}
+
+    @router.post("/api/agent/runs/{run_id}/start")
+    def start_run(run_id: str, req: AgentRunStartReq):
+        if store.get_run(run_id) is None:
+            raise HTTPException(404, "unknown run_id")
+        try:
+            conversation_id = gateway.start_run(
+                run_id, workspace_dir=req.workspace_dir or None, auto_run=req.auto_run)
+        except KeyError:
+            raise HTTPException(404, "unknown run_id")
+        except Exception as exc:  # agent-server unreachable / rejected
+            store.update_state(run_id, status="ERROR", failure_reason=str(exc))
+            raise HTTPException(502, f"agent gateway failed: {exc}")
+        return {"ok": True, "run_id": run_id, "conversation_ref": conversation_id,
+                "run": store.get_run(run_id)}
+
+    @router.post("/api/agent/runs/{run_id}/ingest")
+    def ingest_events(run_id: str, req: AgentRunIngestReq):
+        if store.get_run(run_id) is None:
+            raise HTTPException(404, "unknown run_id")
+        try:
+            summary = gateway.ingest(run_id, events=req.events or None)
+        except ValueError as exc:
+            raise HTTPException(409, str(exc))
+        except Exception as exc:
+            raise HTTPException(502, f"agent gateway failed: {exc}")
+        return {"ok": True, "summary": summary, "run": store.get_run(run_id)}
+
+    @router.get("/api/agent/runs/{run_id}/messages")
+    def get_messages(run_id: str, limit: int = 500):
+        if store.get_run(run_id) is None:
+            raise HTTPException(404, "unknown run_id")
+        return {"ok": True, "messages": store.list_messages(run_id, limit=limit)}
 
     app.include_router(router)
     return store

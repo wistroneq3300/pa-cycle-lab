@@ -105,6 +105,19 @@ class AgentRunStore:
                     commands_json     TEXT NOT NULL DEFAULT '[]',
                     evidence_json     TEXT NOT NULL DEFAULT '[]'
                 );
+
+                CREATE TABLE IF NOT EXISTS agent_run_messages (
+                    run_id            TEXT NOT NULL REFERENCES agent_runs(run_id) ON DELETE CASCADE,
+                    seq               INTEGER NOT NULL,
+                    role              TEXT NOT NULL,
+                    kind              TEXT NOT NULL,
+                    text              TEXT NOT NULL,
+                    source_event_id   TEXT,
+                    created_at        TEXT NOT NULL,
+                    PRIMARY KEY (run_id, seq)
+                );
+                CREATE INDEX IF NOT EXISTS idx_agent_messages_run
+                    ON agent_run_messages(run_id, seq);
                 """
             )
 
@@ -177,7 +190,7 @@ class AgentRunStore:
                 "SELECT * FROM agent_run_state WHERE run_id=?", (run_id,)
             ).fetchone()
         context = json.loads(run["context_json"])
-        return {
+        result = {
             "run_id": run["run_id"],
             "case_variant_id": run["case_variant_id"],
             "library_version": run["library_version"],
@@ -196,6 +209,110 @@ class AgentRunStore:
             "ended_at": state["ended_at"] if state else None,
             "updated_at": state["updated_at"] if state else None,
         }
+        result["messages"] = self.list_messages(run_id)
+        return result
+
+    # -- mutable state (advanced by the Gateway) -----------------------------
+
+    def _get_json_col(self, db, run_id, column):
+        row = db.execute(
+            f"SELECT {column} FROM agent_run_state WHERE run_id=?", (run_id,)
+        ).fetchone()
+        return json.loads(row[column]) if row and row[column] else []
+
+    def update_state(self, run_id, *, status=None, conversation_ref=None,
+                     final_result=None, failure_reason=None,
+                     started_at=None, ended_at=None):
+        """Patch mutable run state. Only supplied fields change."""
+        fields, params = {}, []
+        for name, value in (
+            ("status", status), ("conversation_ref", conversation_ref),
+            ("final_result", final_result), ("failure_reason", failure_reason),
+            ("started_at", started_at), ("ended_at", ended_at),
+        ):
+            if value is not None:
+                fields[name] = value
+        fields["updated_at"] = _now()
+        assignments = ", ".join(f"{k}=?" for k in fields)
+        params = list(fields.values()) + [run_id]
+        with self._lock, self._connect() as db:
+            cur = db.execute(
+                f"UPDATE agent_run_state SET {assignments} WHERE run_id=?", params
+            )
+            if cur.rowcount == 0:
+                raise KeyError("unknown run_id")
+
+    def append_commands(self, run_id, commands):
+        """Append command records (tool calls) to the run's evidence trail."""
+        if not commands:
+            return
+        with self._lock, self._connect() as db:
+            current = self._get_json_col(db, run_id, "commands_json")
+            current.extend(commands)
+            db.execute(
+                "UPDATE agent_run_state SET commands_json=?, updated_at=? WHERE run_id=?",
+                (json.dumps(current, ensure_ascii=False), _now(), run_id),
+            )
+
+    def append_evidence(self, run_id, evidence):
+        if not evidence:
+            return
+        with self._lock, self._connect() as db:
+            current = self._get_json_col(db, run_id, "evidence_json")
+            current.extend(evidence)
+            db.execute(
+                "UPDATE agent_run_state SET evidence_json=?, updated_at=? WHERE run_id=?",
+                (json.dumps(current, ensure_ascii=False), _now(), run_id),
+            )
+
+    def record_approval(self, run_id, approval):
+        """Record an approval request or decision (kind/status/...)."""
+        with self._lock, self._connect() as db:
+            current = self._get_json_col(db, run_id, "approvals_json")
+            current.append(approval)
+            db.execute(
+                "UPDATE agent_run_state SET approvals_json=?, updated_at=? WHERE run_id=?",
+                (json.dumps(current, ensure_ascii=False), _now(), run_id),
+            )
+
+    def add_message(self, run_id, *, role, text, kind="message",
+                    source_event_id=None):
+        """Append a chat message. ``source_event_id`` dedups replays/coalescing."""
+        with self._lock, self._connect() as db:
+            if source_event_id:
+                dup = db.execute(
+                    "SELECT 1 FROM agent_run_messages WHERE run_id=? AND source_event_id=?",
+                    (run_id, source_event_id),
+                ).fetchone()
+                if dup:
+                    return None
+            row = db.execute(
+                "SELECT COALESCE(MAX(seq),0)+1 AS n FROM agent_run_messages WHERE run_id=?",
+                (run_id,),
+            ).fetchone()
+            seq = row["n"]
+            db.execute(
+                "INSERT INTO agent_run_messages (run_id, seq, role, kind, text, "
+                "source_event_id, created_at) VALUES (?,?,?,?,?,?,?)",
+                (run_id, seq, role, kind, text, source_event_id, _now()),
+            )
+        return seq
+
+    def update_message_text(self, run_id, seq, text):
+        """Update an existing chat message in place (progress line coalescing)."""
+        with self._lock, self._connect() as db:
+            db.execute(
+                "UPDATE agent_run_messages SET text=? WHERE run_id=? AND seq=?",
+                (text, run_id, seq),
+            )
+
+    def list_messages(self, run_id, limit=500):
+        with self._connect() as db:
+            rows = db.execute(
+                "SELECT seq, role, kind, text, created_at FROM agent_run_messages "
+                "WHERE run_id=? ORDER BY seq LIMIT ?", (run_id, int(limit)),
+            ).fetchall()
+        return [dict(r) for r in rows]
 
     def list_runs(self, *, case_variant_id=None, status=None, limit=100):
         clauses, params = [], []

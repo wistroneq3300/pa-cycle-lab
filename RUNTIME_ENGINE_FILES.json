@@ -169,6 +169,7 @@
     "engine/vera_cycle/validation_rules.py",
     "engine/vera_cycle/validation_transport.py",
     "integration/__init__.py",
+    "integration/agent_gateway.py",
     "integration/agent_routes.py",
     "integration/agent_runs.py",
     "integration/authorization.py",
