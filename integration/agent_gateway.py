@@ -244,13 +244,18 @@ class AgentGateway:
             "agent": {
                 "kind": "Agent",
                 "llm": self._llm_config(),
-                # Do NOT send `include_default_tools`: openhands-agent-server
-                # 1.49.6 expects a list[str] of built-in tool classes (not the
-                # boolean True the old code sent -> HTTP 422), and it already
-                # registers the full default toolset (terminal, file editor, ...)
-                # at startup. Omitting the field therefore gives the agent every
-                # default tool it needs to actually run the test commands instead
-                # of fabricating a report.
+                # Environment tools must be listed explicitly: with no `tools`,
+                # agent-server 1.49.6 gives the agent only FinishTool/ThinkTool
+                # (see openhands.sdk.tool.builtins.BUILT_IN_TOOLS), so it can
+                # think but not run anything. The names are the registered
+                # short forms (``terminal``, ``file_editor``), not the class
+                # names, and they only resolve once openhands-tools is installed
+                # in the agent-server environment (see /srv/pa-agent/start-*.sh).
+                "tools": [
+                    {"name": "terminal", "params": {}},
+                    {"name": "file_editor", "params": {}},
+                    {"name": "task_tracker", "params": {}},
+                ],
             },
             "initial_message": {
                 "role": "user",
