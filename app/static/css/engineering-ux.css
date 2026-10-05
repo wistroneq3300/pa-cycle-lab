@@ -38,3 +38,11 @@
 .eng-case-fold{margin:12px 0;border:1px solid var(--ew-line);border-radius:8px;background:var(--ew-surface);overflow:hidden}
 .eng-case-fold summary{cursor:pointer;padding:10px 14px;font-size:12px;color:var(--ew-blue);background:var(--ew-raised)}
 .eng-case-fold pre{margin:0;border-radius:0}
+
+.eng-case-flags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 10px}
+.eng-case-pre{font:12px/1.8 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--ew-raised);border:1px solid var(--ew-line);padding:12px;border-radius:7px;margin:0}
+/* Assign-result window reuses the detail panel rendering as a rich view. */
+.ar-pre.ar-rich{font-family:inherit;white-space:normal;word-break:normal;background:transparent;padding:0;color:inherit}
+.ar-pre.ar-rich .eng-case-detail{max-height:none!important;background:transparent;border:0;border-radius:0;padding:0;margin:0}
+.ar-pre.ar-rich .eng-case-detail+.eng-case-detail{border-top:1px dashed var(--ew-line);padding-top:18px}
+

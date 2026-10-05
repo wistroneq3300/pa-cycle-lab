@@ -225,7 +225,12 @@ def test_dashboard_canonical_scope_and_configurable_endpoint(rig):
 def test_old_ready_not_presented_as_current_ready(rig):
     r=rig;job=execute(r,enqueue(r))
     with r.store.tx() as db: db.execute('UPDATE telemetry_nodes SET checked_at=0')
-    assert r.svc.snapshot(r.nodes[0]['node_id'])['state']=='DEGRADED'
+    snap=r.svc.snapshot(r.nodes[0]['node_id'])
+    # A stale READY must not be presented as a fresh verdict, but idling alone is
+    # not a health failure: the node stays READY and is flagged stale instead of
+    # being flipped to DEGRADED just because nobody re-checked within the window.
+    assert snap['state']=='READY'
+    assert snap['stale'] is True
     assert r.store.get(job['job_id'])['state']=='READY'
 
 

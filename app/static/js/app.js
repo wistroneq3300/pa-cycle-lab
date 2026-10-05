@@ -3563,13 +3563,17 @@ async function assignTaskCopy() {
   const text = lines.join("\n");
   const summary = chosen.length + "\u500b\u6e2c\u9805" + " \u00b7 " + (mm.label || sname);
 
+  // Rich HTML view of the same content, styled like the Test Case detail panel.
+  // The plain-text `text` above is still what gets copied to the clipboard.
+  const rich = assignResultRichHtml(chosen, mm, sname, ip, user, dupSet);
+
   // 複製到剪貼簿（成功與否都開浮動視窗；失敗時視窗內仍可「複製全部」手動重試）
   const copied = await assignTaskClip(text);
   closeDialog();
   window.uxNotify?.(copied ? "\u6307\u4ee4\u5df2\u7522\u751f\u4e26\u8907\u88fd\uff1b\u5c1a\u672a\u57f7\u884c\u6e2c\u8a66" : "\u6307\u4ee4\u5df2\u7522\u751f\uff1b\u526a\u8cbc\u7c3f\u7121\u6cd5\u5beb\u5165\uff0c\u8acb\u5728\u7d50\u679c\u8996\u7a97\u624b\u52d5\u8907\u88fd", !copied);
 
   // 開仿 User Guide 的浮動小視窗，讓使用者在下方滾動看完整 TEST CASE
-  AssignResultWin.render("\u2705 \u6307\u6d3e\u53ef\u57f7\u884c\u6307\u4ee4 \u00b7 " + summary, text);
+  AssignResultWin.render("\u2705 \u6307\u6d3e\u53ef\u57f7\u884c\u6307\u4ee4 \u00b7 " + summary, text, rich);
 }
 
 async function assignTaskClip(text) {
@@ -3630,6 +3634,123 @@ function arHlAssignText(text) {
 
 // 指派任務結果浮動視窗（複製測項改為指令） — 仿 User Guide 小視窗
 // ============================================================
+// Rich, sectioned HTML for the assign-result window. Mirrors the Test Case detail
+// panel (same eng-* classes) so the generated command reads as nicely as the
+// library detail, while the clipboard still carries the plain-text script.
+function assignResultRichHtml(chosen, mm, sname, ip, user, dupSet) {
+  const E = (s) => esc(String(s == null ? "" : s));
+  const arr = (v) => Array.isArray(v) ? v.filter(x => x != null && String(x).trim() !== "") : (v == null || String(v).trim() === "" ? [] : [String(v)]);
+  const CLASS_BADGE = {
+    "FULLY AUTOMATABLE": ["green", "FULLY AUTOMATABLE"],
+    "REQUIRES PACKAGE / USER CONFIRMATION": ["amber", "REQUIRES PACKAGE / USER CONFIRMATION"],
+    "MANUAL ONLY": ["blue", "MANUAL ONLY"],
+    "BLOCKED": ["red", "BLOCKED"],
+  };
+  const legacyClass = (can) => can === "YES" ? "FULLY AUTOMATABLE" : can === "PARTIAL" ? "REQUIRES PACKAGE / USER CONFIRMATION" : "MANUAL ONLY";
+  const badge = (cls) => { const [tone, label] = CLASS_BADGE[cls] || ["muted", cls || "UNCLASSIFIED"]; return `<span class="eng-badge eng-tone-${tone}">${E(label)}</span>`; };
+  const riskBadge = (lvl) => { const l = String(lvl || "").toUpperCase(); if (!l) return ""; const tone = l === "CRITICAL" ? "red" : l === "HIGH" ? "amber" : l === "MEDIUM" ? "blue" : l === "LOW" ? "green" : "muted"; return `<span class="eng-badge eng-tone-${tone}">RISK ${E(l)}</span>`; };
+  const flag = (v, text) => v ? `<span class="eng-badge eng-tone-amber">${E(text)}</span>` : "";
+  const sec = (label, body) => body ? `<section class="eng-case-sec"><h4>${E(label)}</h4>${body}</section>` : "";
+  const ul = (label, value) => { const a = arr(value); return a.length ? sec(label, `<ul>${a.map(t => `<li>${E(t)}</li>`).join("")}</ul>`) : ""; };
+  const ol = (label, value) => { const a = arr(value); return a.length ? sec(label, `<ol>${a.map(t => `<li>${E(t)}</li>`).join("")}</ol>`) : ""; };
+  const prose = (label, value) => { const t = value == null ? "" : String(value).trim(); return t ? sec(label, `<p class="eng-case-prose">${E(t)}</p>`) : ""; };
+  const code = (label, value) => { const t = value == null ? "" : String(value).trim(); return t ? sec(label, `<pre class="eng-case-pre">${E(t)}</pre>`) : ""; };
+  // Key-value summary row (monospace, one line per field).
+  const kv = (pairs) => `<pre class="eng-case-pre">${pairs.filter(p => p && p[1] != null && String(p[1]).trim() !== "").map(([k, v]) => E(String(k).padEnd(14)) + ": " + E(v)).join("\n")}</pre>`;
+
+  const cards = chosen.map((r) => {
+    const rev = r.ai_review || {};
+    const can = String(r.ai_can_execute || "NO").toUpperCase();
+    const cls = rev.automation_classification || legacyClass(can);
+    const tname = r.items ? String(r.items) : r.code;
+    const variant = r.case_variant_id || assignTaskKey(r);
+    const dup = dupSet && dupSet.has(r.code) ? ` <em>${E(r.test_set || "")}</em>` : "";
+
+    const headline = [
+      badge(cls),
+      riskBadge(rev.risk_level),
+      flag(rev.destructive_actions, "DESTRUCTIVE"),
+      flag(rev.requires_human_approval, "HUMAN APPROVAL REQUIRED"),
+      flag(rev.user_confirmation_required, "USER CONFIRMATION REQUIRED"),
+      (Array.isArray(rev.end_user_decides) && rev.end_user_decides.length) ? `<span class="eng-badge eng-tone-blue">ENGINEER DECIDES: ${E(rev.end_user_decides.join(" / "))}</span>` : "",
+    ].filter(Boolean).join("");
+
+    const note = can === "YES" ? "Fully automatable."
+      : can === "PARTIAL" ? "Partially automatable — confirm hardware environment / designate the test target before running."
+      : "Not automatable (manual or unsafe operation) — reference only.";
+
+    // Approval checklist is DERIVED from existing ai_review flags/packages only.
+    const approvals = [];
+    arr(rev.required_packages).forEach(p => {
+      // Only short single-name entries are treated as installable packages; long
+      // prose prerequisites stay in the REQUIRED PACKAGES section instead.
+      if (String(p).trim().length <= 40 && !/[;。.、]/.test(p)) approvals.push(`[ ] Install package: ${p}`);
+      else approvals.push(`[ ] Provide: ${p}`);
+    });
+    if (rev.destructive_actions) approvals.push("[ ] Data-loss approval: YES (this case overwrites/destroys data)");
+    if (rev.requires_human_approval) approvals.push("[ ] Human approval required before execution");
+    if (rev.user_confirmation_required) approvals.push("[ ] User confirmation of target environment");
+    const approvalSec = approvals.length ? code("APPROVAL REQUIRED (obtain each before running)", approvals.join("\n")) : "";
+
+    // SOURCE WORK ORDER — reference only, never run as-is.
+    const procRaw = String(r.procedure || "").trim();
+    const multiStep = /(\r?\n)/.test(procRaw);
+    const sourceWarn = (can !== "YES" || rev.destructive_actions)
+      ? `<p class="eng-case-prose">The source work order below is the ORIGINAL human procedure. It may contradict the title (e.g. wrong profile), lack a designated target, or destroy data. Do NOT execute it as written — run only the corrected, approved profile.</p>`
+      : "";
+    const sourceBody = multiStep ? `<pre class="eng-case-pre">${E(procRaw)}</pre>` : `<p class="eng-case-prose">${E(procRaw)}</p>`;
+    const sourceSec = procRaw ? sec("SOURCE WORK ORDER  ⚠ DO NOT RUN AS-IS (reference only)", sourceWarn + sourceBody) : "";
+
+    const body = [
+      code("TARGET", [mm && mm.label, sname, ip, user].filter(Boolean).join(" · ")),
+      kv([
+        ["CASE VARIANT", variant],
+        ["TEST CODE", (r.code || "") + (r.test_set ? ` (${r.test_set})` : "")],
+        ["CLASSIFICATION", cls],
+        ["RISK", rev.risk_level || ""],
+        ["DESTRUCTIVE", rev.destructive_actions ? "true" : ""],
+      ]),
+      prose("PURPOSE", rev.purpose),
+      prose("TEST NAME", rev.test_name || tname),
+      ul("PRECONDITIONS", rev.preconditions),
+      ul("SAFETY CHECKS", rev.safety_checks),
+      ul("RISK NOTES", rev.risk_notes),
+      prose("BLAST RADIUS", rev.blast_radius),
+      ul("REQUIRED PACKAGES", rev.required_packages),
+      approvalSec,
+      code("① PRE-CHECK", [].concat(arr(rev.pre_check_commands), arr(r.ai_precheck)).filter((v, i, a) => a.indexOf(v) === i).join("\n")),
+      code("② TEST COMMAND", rev.test_command || r.ai_commands),
+      code("③ POST-CHECK", [].concat(arr(rev.post_check_commands), arr(r.ai_postcheck)).filter((v, i, a) => a.indexOf(v) === i).join("\n")),
+      ul("EXPECTED EVIDENCE", rev.expected_evidence),
+      ul("LOGS TO COLLECT", rev.logs_to_collect),
+      ul("MANUAL STEPS", rev.manual_steps),
+      prose("RECOVERY PROCEDURE", rev.recovery_procedure),
+      ul("BLOCKED CONDITIONS", rev.blocked_conditions),
+      sourceSec,
+      prose(r.ai_agent_instruction ? "🤖 PA AGENT INSTRUCTION" : "", r.ai_agent_instruction),
+      prose(r.criteria ? "✅ VERDICT CRITERIA" : "", r.criteria),
+    ].join("");
+
+    return `<article class="eng-case-detail" style="max-height:none;margin-bottom:18px">
+      <header class="eng-case-head">
+        <p>${E(r.code || "")}${dup} · Variant: <code>${E(variant)}</code></p>
+        <h3>${E(tname)}</h3>
+        <div class="eng-case-flags">${headline}</div>
+        <p>${E(note)}</p>
+      </header>
+      ${body}
+    </article>`;
+  }).join("");
+
+  return `<div class="eng-case-detail-wrap">
+    <div class="eng-case-sec"><h4>PA AGENT RUN — ASSIGNMENT</h4>
+    <p class="eng-case-prose">Target: ${E([mm.label, sname, ip, user].filter(Boolean).join(" · "))}</p>
+    <p class="eng-case-prose">Execute the following on ${E(ip)} (${E(user)}). Copy this into the OpenHands chat so the agent can SSH in to install / run / collect evidence. PASS/FAIL is judged by you.</p></div>
+    ${cards}
+  </div>`;
+}
+
+
 const AssignResultWin = (() => {
   let win = null, dragOff = null, resize = null, lastNormal = null;
 
@@ -3728,15 +3849,17 @@ const AssignResultWin = (() => {
     }
   }
 
-  function render(title, text) {
+  function render(title, text, rich) {
     if (!win) build();
     win._text = text;
     win.querySelector("#ar-title").textContent = title;
     win.querySelector("#ar-hint").textContent = "已複製到剪貼簿。請確認完整測試案例、風險與目標後，再貼至執行工具。本頁尚未執行測試。";
-    win.querySelector("#ar-pre").innerHTML = arHlAssignText(text);
+    const pre = win.querySelector("#ar-pre");
+    if (rich) { pre.innerHTML = rich; pre.classList.add("ar-rich"); }
+    else { pre.innerHTML = arHlAssignText(text); pre.classList.remove("ar-rich"); }
     win.style.display = "flex";
-    win.style.width = "720px"; win.style.height = "72vh";
-    win.style.left = "calc(50vw - 360px)"; win.style.top = "12vh";
+    win.style.width = "860px"; win.style.height = "76vh";
+    win.style.left = "calc(50vw - 430px)"; win.style.top = "10vh";
     win.classList.remove("ar-maxed");
     win.querySelector(".ar-body").scrollTop = 0;
   }

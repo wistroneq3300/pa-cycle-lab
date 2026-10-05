@@ -14,12 +14,22 @@
 .tp-console::backdrop{background:rgba(4,15,24,.64);backdrop-filter:blur(2px)}
 .tp-console>header{order:0;flex:none;padding:16px 20px}
 .tp-pipeline{order:1;display:flex;gap:8px;padding:12px 20px;flex-wrap:wrap;border-bottom:1px solid var(--pav-line)}
-.tp-pipeline>span{flex:1;min-width:100px;font:12px/1.6 system-ui,sans-serif;display:flex;gap:8px;align-items:center;color:var(--pav-muted)}
-.tp-pipeline>span::before{content:'';display:inline-block;width:6px;height:6px;border:1px solid currentColor;border-radius:50%}
-.tp-pipeline>[data-state="PASS"]::before{background:currentColor}
-.tp-pipeline>[data-state="ACTIVE"]{font-weight:700}
-.tp-pipeline>[data-state="ACTIVE"]::before{background:currentColor;animation:pav-pulse 2s ease-in-out infinite}
-.tp-pipeline>[data-state="FAIL"]::before{border-radius:1px;background:currentColor}
+.tp-pipeline>span{flex:1;min-width:100px;font:600 12px/1.6 system-ui,sans-serif;display:flex;gap:9px;align-items:center;color:var(--pav-muted);padding:3px 0}
+.tp-pipeline>span::before{content:'';display:inline-block;flex:none;width:13px;height:13px;box-sizing:border-box;border:2px solid currentColor;border-radius:50%;background:transparent;transition:background .18s ease,border-color .18s ease,box-shadow .18s ease}
+/* Not yet reached: dashed grey marker so the "pending" stages read clearly. */
+.tp-pipeline>[data-state="PENDING"]{color:var(--pav-muted);opacity:.75}
+.tp-pipeline>[data-state="PENDING"]::before{border-style:dashed;border-width:2px}
+/* Currently running: solid amber ring + pulsing halo. */
+.tp-pipeline>[data-state="ACTIVE"]{color:var(--pav-warn);font-weight:800}
+.tp-pipeline>[data-state="ACTIVE"]::before{background:var(--pav-warn);border-color:var(--pav-warn);animation:pav-ping 1.5s ease-out infinite}
+/* Done: filled green with a check-like ring. */
+.tp-pipeline>[data-state="PASS"]{color:var(--pav-pass);font-weight:700}
+.tp-pipeline>[data-state="PASS"]::before{background:var(--pav-pass);border-color:var(--pav-pass);box-shadow:0 0 0 3px color-mix(in srgb,var(--pav-pass) 22%,transparent)}
+.tp-pipeline>[data-state="FAIL"]{color:var(--pav-fail);font-weight:800}
+.tp-pipeline>[data-state="FAIL"]::before{border-radius:3px;background:var(--pav-fail);border-color:var(--pav-fail);box-shadow:0 0 0 3px color-mix(in srgb,var(--pav-fail) 22%,transparent)}
+.tp-pipeline>[data-state="WARN"]{color:var(--pav-warn);font-weight:700}
+.tp-pipeline>[data-state="WARN"]::before{background:var(--pav-warn);border-color:var(--pav-warn)}
+.tp-pipeline>[data-state="NOT_APPLICABLE"]{opacity:.5}
 .tp-console .tp-runline{order:2;padding:8px 20px}
 .tp-console .tp-log-columns{order:3;padding-block:8px}
 .tp-console .tp-log{order:4;flex:1;min-height:100px;height:auto}
@@ -69,6 +79,7 @@
 .lc-matrix>div{max-height:260px;overflow:auto;contain:layout style}.lc-matrix>div>details{border-bottom:1px solid var(--pav-line)}
 .lc-matrix details>div{display:flex;gap:8px;flex-wrap:wrap;padding-bottom:8px}
 @keyframes pav-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes pav-ping{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--pav-warn) 75%,transparent)}70%{box-shadow:0 0 0 7px color-mix(in srgb,var(--pav-warn) 0%,transparent)}100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--pav-warn) 0%,transparent)}}
 @keyframes pav-open{from{opacity:.4;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:1450px){.tp-workspace .tp-console{width:calc(100vw - 48px);height:calc(100dvh - 48px)}.tp-console .tp-tools label{flex-basis:auto;order:0}.tp-console .tp-tools{gap:6px}.tp-console .tp-tools .btn{font-size:12px;padding:6px 8px}.tp-console .tp-outcome{padding:8px 20px}#cycle-workspace .cycle-console-row,#cycle-workspace .lc-columns{grid-template-columns:36px 66px 84px 50px 64px minmax(0,1fr);gap:8px}}
 @media(prefers-reduced-motion:reduce){.tp-console[open],.tp-pipeline>[data-state="ACTIVE"]::before,.lc-dot{animation:none}}

@@ -1,19 +1,37 @@
-# HANDOFF — PA Cycle Lab / Test Library integration (P1 & P2 done; P3 designed, not built)
+# HANDOFF — PA Cycle Lab / Test Library integration (P1/P2 done; monitoring fixes UNCOMMITTED; P3 designed only)
 
 > Copy this whole file into the next conversation window as the first message.
 
 ## 0. TL;DR for the next agent
 
-- Repo: `wistroneq3300/pa-cycle-lab`, branch **`astra-console-import`**.
+- Repo: `wistroneq3300/pa-cycle-lab`, branch **`astra-console-import`**, HEAD **`5f833a0`**.
 - **P1 is DONE and pushed.** Merged 3,112-case library is live; assignment flow untouched in behaviour.
-- **P2 is DONE (commit `48d0430`, local; not pushed).** Test Case detail panel now renders `ai_review`
-  as sectioned/collapsible blocks with five-way classification badges. Frontend-only change
+- **P2 is DONE (commit `48d0430`, local; not pushed).** Test Case detail panel renders `ai_review`
+  as sectioned blocks with five-way classification badges. Frontend-only
   (`app/static/js/engineering-ux.js`, `app/static/css/engineering-ux.css`, `app/static/index.html`).
-- **P3 is DESIGNED, NOT built.** Spec is `docs/P3-PA-AGENT-DESIGN.md` (commit `28a9139`, local; not pushed).
-- **27B vLLM service changed this session** to high-concurrency mode (64K + prefix caching) for PA Agent
-  use — see §2a.
-- One open follow-up that was never done: **re-run inspection on EQ3300** to clear a stale
-  `0000:f2:00.1 PCIE_DOWNGRADE` row in `inspection.sqlite3`. See §7.
+- **P3 is DESIGNED, NOT built.** Spec: `docs/P3-PA-AGENT-DESIGN.md` (commit `28a9139`, local; not pushed).
+- **THIS SESSION (UNCOMMITTED — see §2c):** three monitoring-page fixes + assign-result output beautification.
+  9 modified files, nothing committed since `5f833a0`:
+  1. Stale false "需要處理" alarm fixed (backend no longer flips READY→DEGRADED on age).
+  2. Pipeline lights progressively (260 ms stagger) instead of all-at-once.
+  3. Pipeline dots enlarged + strong per-state colors/glow.
+  4. "產生測試指令" result window now renders the P2-style rich sectioned panel (clipboard text unchanged).
+5. **P2 (rich assign panel) reworked to English structured layout** — `assignResultRichHtml()` in
+   `app/static/js/app.js` now renders all sections in English (`PA AGENT RUN — ASSIGNMENT`,
+   `TARGET` / `CASE VARIANT` / `CLASSIFICATION` / `RISK` / `DESTRUCTIVE` key-value header,
+   `PURPOSE`, `PRECONDITIONS`, `SAFETY CHECKS`, `RISK NOTES`, `BLAST RADIUS`, `REQUIRED PACKAGES`,
+   `APPROVAL REQUIRED` checklist, `① PRE-CHECK` / `② TEST COMMAND` / `③ POST-CHECK`,
+   `EXPECTED EVIDENCE`, `LOGS TO COLLECT`, `MANUAL STEPS`, `RECOVERY PROCEDURE`, `BLOCKED CONDITIONS`,
+   `SOURCE WORK ORDER ⚠ DO NOT RUN AS-IS`, `🤖 PA AGENT INSTRUCTION`, `✅ VERDICT CRITERIA`).
+   Badge labels also English. `APPROVAL REQUIRED` is DERIVED from existing `ai_review` flags only
+   (`required_packages`, `destructive_actions`, `requires_human_approval`, `user_confirmation_required`).
+   **Clipboard plain-text (`assignTaskCopy` lines) is UNCHANGED.** Cache buster:
+   `app.js?v=20261005-richassign3-en`.
+- **27B vLLM service** retuned earlier this session to 64K + prefix caching (port 8001, GPU 4/5) — §2a.
+- **Open follow-ups:** §7 items 1–4 (re-run inspection; source-contradiction UI undecided; revoke pasted token; leave `.bak` files).
+- **User-reported bug to confirm next:** "node exporter / dcgm 一開始有 console，關掉再執行一次 console 又沒了"
+  — a candidate fix is already in the uncommitted diff (`update()` re-fetches events on a new job when the
+  console is open; `openConsole()` guards on `rows` not `pipeline`). **Verify in-browser before trusting it.**
 - The GitHub token the user pasted in the previous chat **must be revoked** — it was exposed in chat.
 
 ## 1. Environment / where things live
@@ -75,6 +93,80 @@ a7f825f  feat(pa-testlib): ingest merged 3112-case library (schema A)
   (plus risk / destructive / approval / end-user-decides flags). Legacy rows fall back to YES/PARTIAL/NO.
 - Cache busters bumped: `engineering-ux.{js,css}?v=20261005-case-detail*` in `app/static/index.html`.
 - Verified in-browser on `Wistron-Storage-00009-V003` (FIO 70/30, CRITICAL) and a Mechanical MANUAL ONLY case.
+
+## 2c. THIS SESSION — uncommitted changes (2026-10-05, later)
+
+Branch `astra-console-import`, **working tree dirty, NOT committed**:
+
+```
+ M app/static/css/engineering-ux.css
+ M app/static/css/polish.css
+ M app/static/css/validation-console.css
+ M app/static/index.html
+ M app/static/js/app.js
+ M app/static/js/telemetry-provision.js
+ M integration/telemetry_monitoring.py
+ M integration/telemetry_provision.py
+ M tests/test_telemetry_provision.py
+```
+
+### (a) Stale "需要處理" false alarm — FIXED
+- Root cause: `integration/telemetry_provision.py` `snapshot()` flipped a node from `READY` to
+  `DEGRADED` whenever `now - checked_at > freshness_seconds` (was **120 s**), even if nothing was wrong —
+  so a healthy node showed "需要處理" within 2 minutes of idling.
+- Fix: on staleness, **keep `state='READY'`** and set a new `stale=True` flag + soft detail
+  ("已就緒；資料可能已過期，背景正在重新確認中央監控狀態。"). `stale` added to the snapshot dict.
+- `integration/telemetry_monitoring.py`: `freshness_seconds` default **120 → 900**, now overridable via
+  `PA_TELEMETRY_FRESHNESS_SECONDS` (also added `PA_TELEMETRY_VERIFY_SECONDS` passthrough).
+- `app/static/js/telemetry-provision.js` `update()`: sets `[data-state].dataset.stale='1'` when stale.
+- Verified live: `GET /api/telemetry/systems/EQ3300-AIAgent/nodes` → `state=READY, stale=False`;
+  UI header shows **已就緒** (was 需要處理).
+- **Contract test updated:** `tests/test_telemetry_provision.py::test_old_ready_not_presented_as_current_ready`
+  now asserts `state=='READY' and stale is True` (was `state=='DEGRADED'`). Intentional behaviour change.
+
+### (b) Pipeline lights progressively — CHANGED
+- `app/static/js/telemetry-provision.js`: added `this.stageQueue` / `this.stageTimer`, `pumpStage()`
+  (drains queued events at **260 ms** each → `observeStage` + `renderPipeline`).
+- `renderPipeline()`: while `stageQueue` is non-empty, does NOT snap all stages to PASS on a READY job,
+  so stages light one-by-one. `pollEvents()` pushes rows to `stageQueue` instead of calling `observeStage`.
+- `resetLog()` clears queue + timer; `dispose()` clears timer.
+
+### (c) Pipeline dots more obvious — CHANGED
+- `app/static/css/validation-console.css`: dots 6px → **13px**, `flex:none`, transitions.
+  - PENDING: dashed 2px hollow, muted, opacity .75
+  - ACTIVE: solid amber + new `@keyframes pav-ping` ring (0→7px) — pulsing halo
+  - PASS: solid green + 3px green halo;  FAIL: red, 3px radius + red halo;  WARN: solid amber;  N/A: opacity .5
+
+### (d) Assign-result window beautified (P2-style) — CHANGED
+- `app/static/js/app.js`: new `assignResultRichHtml(chosen, mm, sname, ip, user, dupSet)` renders the
+  same content as the P2 detail panel (reuses `eng-*` classes): badge row
+  (classification / risk / destructive / approval / user-confirm / engineer-decision) + purpose,
+  preconditions, safety, risk, blast radius, packages, ①pre-check ②test-cmd ③post-check, evidence,
+  logs, manual steps, recovery, blocked conditions, 🤖 PA Agent instruction.
+- `AssignResultWin.render(title, text, rich)` now takes a third `rich` arg; adds `.ar-rich` to `#ar-pre`.
+  **Clipboard text is unchanged** (still the plain-text script).
+- CSS added to `app/static/css/engineering-ux.css` (`.eng-case-flags`, `.eng-case-pre`, `.ar-pre.ar-rich …`).
+  NOTE: `polish.css` is still edited but **is NOT linked in index.html** — the rich CSS intentionally
+  lives in `engineering-ux.css` (which IS linked). Revert the polish.css edit if you don't want the noise.
+- Verified live: generated command for `Wistron-Storage-00009-V003` renders the full rich panel.
+
+### (e) Cache busters bumped in `app/static/index.html`
+`app.js?v=20261005-richassign2`, `engineering-ux.css?v=20261005-case-detail3`,
+`validation-console.css?v=20261005-pipeline1`, `telemetry-provision.js?v=20261005-consolefix1`.
+**Bump again after any further JS/CSS edit.**
+
+### (f) Console-disappears-on-rerun — candidate fix (verify in browser)
+- `openConsole()` now guards on `rows.length` instead of `pipeline` (pipeline was a stale bool).
+- `update()`: when a job is open and its `jobId` changed but the console is still visible, it re-fetches
+  events for the new job instead of dropping the console.
+- **Not yet confirmed in-browser.** This is the user's reported bug — verify before committing.
+
+### Session test results (this batch)
+- `tests/` → **87 FAILED / 242 passed** = **same count as documented baseline, 0 NEW**.
+- telemetry suite (`test_telemetry_provision|scope|trend|gpu_diag|native_gpu`) → **74 passed**.
+- `node --check` on `app.js` + `telemetry-provision.js` → OK. Service restarted, HTTP 200.
+- **PENDING (not yet done):** browser-verify (b) progressive pipeline + (f) console rerun; then commit;
+  then push (still blocked on GitHub auth, §7.3).
 
 ## 3. What the Test Library actually is (facts, verified)
 
@@ -224,8 +316,12 @@ Test case `Wistron-Storage-00009-V003` — "FIO Mix read/write bandwidth/IOPS (7
 
 - "P1 OK" → done.
 - User confirmed: **"可以開始 p2 p3"** → P2 implemented and verified; P3 designed (spec only).
-- P2 commit `48d0430`, P3 design commit `28a9139` — both on `astra-console-import`, **local only, NOT pushed**.
+- P2 commit `48d0430`, P3 design commit `28a9139`, handoff doc `5f833a0` — all on `astra-console-import`,
+  **local only, NOT pushed**.
+- **Uncommitted on top of `5f833a0`:** the four items in §2c (stale-alarm fix, progressive pipeline,
+  obvious pipeline dots, P2-style assign-result) across 9 files. Not yet committed or verified in browser
+  for (b) and (f).
 - Extraction/regression counts this session: `tests/` → **87 failed / 242 passed (0 NEW failures** vs the
   documented baseline**)**; `test_test_library_contract.py` → 6 passed; engine cycle → **70 passed**;
-  `app/qa` → 9 passed; runtime manifest → PASS.
+  `app/qa` → 9 passed; runtime manifest → PASS; telemetry suite (post §2c-a) → **74 passed**.
 - 27B vLLM service param change is live (§2a).

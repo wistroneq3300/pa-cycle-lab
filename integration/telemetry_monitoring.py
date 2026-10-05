@@ -25,7 +25,7 @@ class MonitoringConfig:
     exporter_port: int = 9100
     verify_seconds: float = 90
     poll_seconds: float = 5
-    freshness_seconds: float = 120
+    freshness_seconds: float = 900
     preferred_exporter_version: str = ''
     dcgm_port: int = 9400
     dcgm_image: str = ''
@@ -38,6 +38,7 @@ class MonitoringConfig:
                   dashboard_uid=os.getenv('PA_GRAFANA_DASHBOARD_UID','pa-node-telemetry'),
                   exporter_port=int(os.getenv('PA_NODE_EXPORTER_PORT','9100')),
                   verify_seconds=float(os.getenv('PA_TELEMETRY_VERIFY_SECONDS','90')),
+                  freshness_seconds=float(os.getenv('PA_TELEMETRY_FRESHNESS_SECONDS','900')),
                   preferred_exporter_version=os.getenv('PA_NODE_EXPORTER_PREFERRED_VERSION',''),
                   dcgm_port=int(os.getenv('PA_DCGM_EXPORTER_PORT','9400')),
                   dcgm_image=os.getenv('PA_DCGM_EXPORTER_IMAGE',''))

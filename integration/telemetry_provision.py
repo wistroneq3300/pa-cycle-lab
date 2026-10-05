@@ -253,12 +253,16 @@ class ProvisionService:
 
     def snapshot(self,node_id):
         target=self.resolve(node_id);job=self.store.latest(node_id);row=self.store.node(node_id)
-        state='NOT_CONFIGURED';detail='此節點目前尚未啟用 Telemetry。';checked=None
+        state='NOT_CONFIGURED';detail='此節點目前尚未啟用 Telemetry。';checked=None;stale=False
         if row:
             state=row['state'];detail=row['detail'];checked=row['checked_at']
             if row['binding']!=target['revision']: state='DEGRADED';detail='連線設定已變更，請重新啟用以確認目前節點。'
             elif state=='READY' and time.time()-checked>self.config.freshness_seconds:
-                state='DEGRADED';detail='上次確認資料已過期，正在重新確認中央監控狀態。'
+                # The stored verdict is still READY; only its age lapsed. Report it as a
+                # soft staleness hint instead of a health failure, so a node that is
+                # actually healthy never shows up as "needs attention" just for idling.
+                stale=True
+                detail='已就緒；資料可能已過期，背景正在重新確認中央監控狀態。'
         if job and job['state'] in ('QUEUED','PROVISIONING'): state='PROVISIONING';detail='啟用作業進行中，關閉頁面不會停止。'
         elif job and job['state']=='INTERRUPTED': state='ERROR';detail=job['error']
         components=self.store.components(node_id)
@@ -270,7 +274,7 @@ class ProvisionService:
             elif state in ('ERROR','UNREACHABLE','INTERRUPTED'):
                 components=dict(host=state)
         return dict(node_id=node_id,chassis_id=target['chassis_id'],label=target.get('display_name'),hostname=target.get('os_hostname'),
-                    slot=target['slot_key'],os_ip=target['os_ip'],binding_revision=target['revision'],state=state,detail=detail,
+                    slot=target['slot_key'],os_ip=target['os_ip'],binding_revision=target['revision'],state=state,detail=detail,stale=stale,
                     checked_at=checked,job=job,components=components,configured=self.config.ready(),dashboard_url=self.config.dashboard(node_id),
                     host_setup=self.host_setup(target),gpu_setup=self.gpu_setup(target))
 

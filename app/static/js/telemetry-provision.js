@@ -16,6 +16,7 @@
     constructor(root) {
       this.root=root;this.abort=new AbortController();this.cursor=0;this.rows=[];this.follow=true;this.pipeline={};this.unread=0;
       this.closed=false;this.consoleOpen=false;this.name=root.dataset.system;this.node=null;this.job=null;
+      this.stageQueue=[];this.stageTimer=null;
       root.innerHTML=`<header class="tp-heading"><div><h3>節點遙測 <span data-state class="tp-state">載入中</span></h3><p data-detail aria-live="polite">正在取得節點設定…</p></div><label class="tp-node">監控節點<select aria-label="Telemetry 節點" data-node><option value="">選擇節點</option></select></label></header>
         <div class="tp-context"><span data-target></span><span data-time></span></div>
         <div class="tp-components">
@@ -52,7 +53,13 @@
     }
     openConsole(){
       if(!this.$('.tp-console').open){this.restoreFocus=document.activeElement;this.$('.tp-console').showModal();this.$('[data-close]').focus();}
-      this.consoleOpen=true;this.renderPipeline(this.job);this.pollEvents();
+      this.consoleOpen=true;
+      // If this console has no rows yet for the current job, replay its existing event
+      // trace so the pipeline animates through the stages instead of appearing empty
+      // or instantly fully lit. Guard on rows (not pipeline) so a stale pipeline from a
+      // previously viewed job can't suppress the reload.
+      if(this.job&&!this.rows.length){this.cursor=0;this.stageQueue=[];this.pipeline={};}
+      this.renderPipeline(this.job);this.pumpStage();this.pollEvents();
     }
     closeConsole(){
       this.consoleOpen=false;
@@ -71,15 +78,33 @@
       if(phase==='Service')this.pipeline.Exporter='PASS';
       this.pipeline[phase]=row.level==='PASS'&&row.step!=='REGISTER'?'PASS':['FAIL','ERROR'].includes(row.level)?'FAIL':row.level==='WARN'?'WARN':this.pipeline[phase]==='PASS'?'PASS':'ACTIVE';
     }
+    // Light pipeline stages progressively instead of all-at-once when a burst of
+    // events arrives at the same instant (a fast job emits its whole trace in one poll).
+    pumpStage(){
+      if(this.stageTimer||this.closed)return;
+      const tick=()=>{
+        this.stageTimer=null;
+        if(this.closed)return;
+        const next=this.stageQueue.shift();
+        if(next===undefined)return;
+        this.observeStage(next);this.renderPipeline(this.job);
+        if(this.stageQueue.length)this.stageTimer=setTimeout(tick,260);
+      };
+      tick();
+    }
     renderPipeline(job){
       const scope=job?.scope||'all';
       const phases=scope==='gpu'?['Identity','GPU','Ready']:scope==='host'?['Identity','Exporter','Service','Metrics','Prometheus','Ready']:['Identity','Exporter','Service','Metrics','Prometheus','GPU','Ready'];
       const failed=job&&!active(job)&&job.state!=='READY';
+      // While queued stage events are still animating, let them light the pipeline one by
+      // one instead of snapping everything to the final READY verdict at once.
+      const animating=this.stageQueue.length>0;
       const current=job?.current_step?.startsWith('GPU_')?'GPU':{IDENTITY:'Identity',DETECT:'Exporter',INSTALL:'Service',START:'Service',EXPORTER:'Metrics',REGISTER:'Prometheus',VERIFY:'Prometheus'}[job?.current_step];
       const fragment=document.createDocumentFragment();
       for(const phase of phases){
         const el=document.createElement('span'),na=phase==='GPU'&&this.node?.components?.gpu?.state==='NOT_APPLICABLE';
-        const state=na?'NOT_APPLICABLE':job?.state==='READY'?'PASS':failed&&phase===current?'FAIL':this.pipeline[phase]||'PENDING';
+        const lit=this.pipeline[phase];
+        const state=na?'NOT_APPLICABLE':(!animating&&job?.state==='READY')?'PASS':failed&&phase===current?'FAIL':lit||(!animating&&phase==='Ready'&&current?'ACTIVE':'PENDING');
         el.dataset.state=state;el.textContent=phase+(na?' · N/A':'');el.title=state;el.setAttribute('aria-label',phase+': '+state);fragment.append(el);
       }
       this.$('.tp-pipeline').replaceChildren(fragment);
@@ -174,6 +199,7 @@
     }
     update(node){
       this.node=node;this.$('[data-state]').textContent=stateLabel(node.state);this.$('[data-state]').dataset.state=node.state;
+      if(node.stale){this.$('[data-state]').dataset.stale='1';}else{delete this.$('[data-state]').dataset.stale;}
       this.$('[data-detail]').textContent=node.state==='NOT_CONFIGURED'?'此節點尚未連接中央效能監控。Host 與 GPU 監控可分別啟用。':node.detail;
       this.$('[data-target]').textContent=`${node.slot} · ${node.hostname||'尚未取得 hostname'} · ${node.os_ip}`;this.$('[data-time]').textContent='最後確認 '+time(node.checked_at);
       const host=node.components?.host||'NOT_CONFIGURED',gpu=node.components?.gpu||{state:'NOT_CONFIGURED'};
@@ -182,7 +208,8 @@
       gpuCard.querySelector('[data-component-state]').textContent=stateLabel(gpu.state);gpuCard.dataset.state=gpu.state;
       this.manualHelp(node);
       this.$('[data-notice]').textContent=node.configured?'安裝與啟用只針對所選節點。關閉紀錄或離開頁面不會停止作業。':'中央監控連線尚未設定；既有效能資料仍可使用。';
-      if(node.job?.job_id!==this.job?.job_id){this.resetLog();this.requestKey=null;}
+      const newJob=node.job?.job_id!==this.job?.job_id;
+      if(newJob){this.resetLog();this.requestKey=null;}
       this.job=node.job;this.$('[data-console]').hidden=!this.job;
       if(this.job){
         this.$('[data-job]').textContent='JOB / '+this.job.job_id.slice(0,8);this.$('[data-download]').href='/api/telemetry/jobs/'+encodeURIComponent(this.job.job_id)+'/log';
@@ -192,6 +219,7 @@
         this.$('[data-stage]').textContent=stage(this.job.state==='READY'?'READY':this.job.current_step);this.$('[data-log-date]').textContent=time(this.job.created_at).split(' ')[0];
       }
       this.renderPipeline(this.job);this.dashboard(node);this.setButtons();
+      if(newJob&&this.consoleOpen)this.pollEvents();
     }
     dashboard(node){
       const container=this.$('.tp-dashboard'),link=this.$('[data-grafana]');link.hidden=true;
@@ -218,14 +246,14 @@
         for(const row of data.events){
           if(row.sequence<=this.cursor)continue;
           if(row.sequence!==this.cursor+1){this.cursor=0;this.rows=[];this.$('[data-connection]').textContent='紀錄序號中斷，正在重新取得。';return;}
-          this.rows.push(row);this.cursor=row.sequence;if(!this.follow)this.unread++;this.observeStage(row);
+          this.rows.push(row);this.cursor=row.sequence;if(!this.follow)this.unread++;this.stageQueue.push(row);
         }
         this.rows=this.rows.slice(-2000);this.$('[data-connection]').textContent=data.has_more?'正在補讀較早紀錄…':active(data.job)?'已連線 · 唯讀':'紀錄已更新 · '+data.job.state;
-        this.renderPipeline(data.job);this.renderLog();if(data.has_more)setTimeout(()=>this.pollEvents(),50);
+        this.renderPipeline(data.job);this.pumpStage();this.renderLog();if(data.has_more)setTimeout(()=>this.pollEvents(),50);
       }catch(error){if(!this.closed)this.$('[data-connection]').textContent='連線中斷，將從最後序號重新連線。';}
       finally{if(generation===this.generation)this.eventsBusy=false;}
     }
-    resetLog(){this.pipeline={};this.unread=0;this.cursor=0;this.rows=[];this.follow=true;this.$('.tp-log').replaceChildren();this.$('[data-latest]').hidden=true;}
+    resetLog(){this.pipeline={};this.unread=0;this.cursor=0;this.rows=[];this.follow=true;this.stageQueue=[];if(this.stageTimer){clearTimeout(this.stageTimer);this.stageTimer=null;}this.$('.tp-log').replaceChildren();this.$('[data-latest]').hidden=true;}
     line(row){return `${time(row.timestamp)} [${row.level}] [${stage(row.step)}] ${row.message}`;}
     renderLog(){
       const log=this.$('.tp-log'),top=log.scrollTop,fragment=document.createDocumentFragment();
@@ -242,7 +270,7 @@
     error(error){if(error.name==='AbortError'||this.closed)return;this.$('[data-detail]').textContent=error.message;this.$('[data-state]').textContent='連線未完成';}
     dispose(){
       if(this.node)lastView={name:this.name,nodeId:this.node.node_id,jobId:this.job?.job_id,pipeline:this.pipeline,rows:this.rows,cursor:this.cursor,open:this.consoleOpen,follow:this.follow,unread:this.unread,top:this.$('.tp-log').scrollTop};
-      if(this.$('.tp-console').open)this.$('.tp-console').close();this.closed=true;clearTimeout(this.timer);this.abort.abort();this.native?.dispose();
+      if(this.$('.tp-console').open)this.$('.tp-console').close();this.closed=true;clearTimeout(this.timer);if(this.stageTimer){clearTimeout(this.stageTimer);this.stageTimer=null;}this.abort.abort();this.native?.dispose();
     }
   }
   window.TelemetryProvision={
