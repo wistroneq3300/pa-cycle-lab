@@ -309,11 +309,29 @@ async function waitForServer() {
       msgsBefore: (document.querySelector("#pa-drawer-body") || { querySelectorAll: () => [] }).querySelectorAll(".pa-msg").length,
     };
   });
-  // 使用者審閱後才點「開始執行」→ 觸發 /start 並開始輪詢 mocked 訊息。
-  await page.evaluate(() => {
+  // 使用者在輸入框打字後按 Enter → 應等同按「送出」→ 觸發 /start 並帶上該訊息。
+  const ENTER_NOTE = "E2E-ENTER-NOTE: 請優先檢查 PCIe link";
+  await page.fill("#pa-msg-input", ENTER_NOTE);
+  await page.focus("#pa-msg-input");
+  await page.keyboard.press("Enter");
+  // Enter 送出是非同步：等送出鈕隱藏（= start 已發出）再讀狀態。
+  await page.waitForFunction(
+    () => { const b = document.getElementById("pa-drawer-start"); return b && b.hidden; },
+    null, { timeout: 5000 },
+  ).catch(() => {});
+  // Enter 應已送出：run 啟動 → 送出鈕隱藏，且訊息以「你」卡片顯示。
+  const enterResult = await page.evaluate((note) => {
     const btn = document.getElementById("pa-drawer-start");
-    if (btn && !btn.hidden) btn.click();
-  });
+    const body = document.getElementById("pa-drawer-body");
+    const userMsgs = body
+      ? Array.from(body.querySelectorAll(".pa-msg-role")).filter((n) => n.textContent === "你").length
+      : 0;
+    return {
+      startHidden: !!btn && btn.hidden,
+      noteShown: (body ? body.textContent : "").includes(note),
+      userMsgs,
+    };
+  }, ENTER_NOTE);
   await page.waitForFunction(
     () => {
       const b = document.querySelector("#pa-drawer-body");
@@ -372,6 +390,8 @@ async function waitForServer() {
     ["review-first: 開始執行 button shown", reviewState.startVisible],
     ["review-first: review banner present", reviewState.reviewBanner],
     ["review-first: not auto-started (0 msgs before click)", reviewState.msgsBefore === 0],
+    ["Enter-to-send: typing + Enter started the run (送出 hidden)", enterResult.startHidden],
+    ["Enter-to-send: typed note shown as user card", enterResult.noteShown],
     ["messages polled + rendered", msgInfo.count >= 2],
     ["user+assistant roles present", msgInfo.roles.includes("你") && msgInfo.roles.includes("PA Agent")],
     // Centered two-column modal + scrim.

@@ -77,7 +77,7 @@
             <div id="pa-drawer-body" class="pa-drawer-body" aria-live="polite"></div>
             <footer class="pa-drawer-foot">
               <textarea id="pa-msg-input" class="pa-msg-input" rows="1"
-                placeholder="對 PA Agent 說點什麼…（可留空；Shift+Enter 換行）"
+                placeholder="對 PA Agent 說點什麼…（Enter 送出，Shift+Enter 換行）"
                 aria-label="訊息輸入"></textarea>
               <div class="pa-foot-row">
                 <span id="pa-drawer-hint" class="pa-drawer-hint">由 PA Backend AgentRun 處理；實際執行取決於 P3-d 授權策略</span>
@@ -99,6 +99,7 @@
 
   // 右欄輸入：多行 textarea（自動增高）。內容會隨「送出」一起交給 agent，
 // 不是獨立的聊天訊息（後端沒有 run-message endpoint）；留空則只執行測項本身。
+// Enter = 送出（同按鈕）；Shift+Enter = 換行。
   function wireInput() {
     const input = root.querySelector("#pa-msg-input");
     if (!input) return;
@@ -107,6 +108,13 @@
       input.style.height = Math.min(input.scrollHeight, 240) + "px";
     };
     input.addEventListener("input", autoGrow);
+    input.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" || e.shiftKey || e.isComposing || e.keyCode === 229) return;
+      e.preventDefault();
+      const btn = root.querySelector("#pa-drawer-start");
+      // 尚未建立 run（或已啟動）時不觸發；交由按鈕狀態決定。
+      if (btn && !btn.hidden && !btn.disabled) { startRun(); }
+    });
   }
   function addUserMessage(text) {
     const div = document.createElement("div");
