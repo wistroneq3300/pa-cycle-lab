@@ -127,7 +127,7 @@ nvme_check() {
     minimum NVMe "$qty" "$NVMe_MIN"
 }
 nic_check() {
-    local data nic mst_valid=true
+    local data nic mst_valid=true last_skip_bdf=""
     collect data MST mst status -v || mst_valid=false
     # Count Mellanox NIC functions from the mst device table, keyed by DEVICE_TYPE.
     # Every ConnectX*/BlueField* row is one NIC function, regardless of model, so a
@@ -137,7 +137,49 @@ nic_check() {
     if ((nic == 0)) && printf '%s\n' "$data" | grep -q 'MST PCI module is not loaded'; then
         fail MST_MODULE MST "MST kernel module is not loaded; Mellanox NIC count is unavailable (run: mst start)"
     fi
-    if "$mst_valid"; then minimum NIC "$nic" "$NIC_MIN"; fi
+    if "$mst_valid"; then
+        minimum NIC "$nic" "$NIC_MIN"
+        # Per-slot NIC inventory on top of the count. EQ3300 has no fixed slot
+        # map, so every mst row that carries a PCI BDF is classified on its own:
+        #   PRESENT  - DEVICE_TYPE is a NIC family (ConnectX*/BlueField*)
+        #   SKIP     - GB100: a GPU (incl. its NVLink controller), not a NIC
+        #   DEGRADED - any other type (e.g. NA): a NIC position whose device did
+        #              not come up as a NIC. Reported by BDF with the raw mst row
+        #              so the report names the port instead of only "one fewer".
+        # The engine stores this in the PRE baseline, so a NIC that later
+        # disappears entirely is caught as NIC_MISSING by BDF.
+        while IFS='|' read -r kind bdf extra rest; do
+            case "$kind" in
+                PRESENT)
+                    printf 'CHECK|NIC_SLOT|slot=%s|state=PRESENT|mst_device=%s\n' "$bdf" "$extra"
+                    ;;
+                SKIP)
+                    # GB100 exposes a *_pciconf and a *_pci_cr row on the same
+                    # BDF; report the GPU once, not twice.
+                    if [[ "$bdf" != "$last_skip_bdf" ]]; then
+                        printf 'CHECK|NIC_NON_CARD|slot=%s|type=GB100\n' "$bdf"
+                        last_skip_bdf="$bdf"
+                    fi
+                    ;;
+                DEGRADED)
+                    printf 'CHECK|NIC_SLOT|slot=%s|state=DEGRADED|mst_device=%s\n' "$bdf" "$extra"
+                    printf 'CHECK|NIC_MST_ROW|slot=%s|row=%s\n' "$bdf" "$rest"
+                    fail NIC_DEGRADED NIC "slot $bdf -> Mellanox NIC (MST device ${extra##*/}) present but DEVICE_TYPE is not a NIC family (expected ConnectX*/BlueField*); card in place but not functional (degraded slot $bdf). mst status row: $rest"
+                    ;;
+            esac
+        done < <(printf '%s\n' "$data" | awk '
+            function bdfof(   i) { for (i = 1; i <= NF; i++) if ($i ~ /^[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-7]$/) return tolower($i); return "" }
+            function devof(   i) { for (i = 1; i <= NF; i++) if ($i ~ /^\/dev\/mst\//) return $i; return "" }
+            function scrub(row) { gsub(/\t/, " ", row); gsub(/  +/, " ", row); sub(/^ +/, "", row); sub(/ +$/, "", row); return row }
+            {
+                t = tolower($1)
+                b = bdfof()
+                if (t ~ /^gb100/) { print "SKIP|" b "|" scrub($0); next }
+                if (b == "") next
+                if (t ~ /^(connectx|bluefield)/) { print "PRESENT|" b "|" devof(); next }
+                print "DEGRADED|" b "|" devof() "|" scrub($0)
+            }')
+    fi
 }
 gpu_check() {
     local data qty

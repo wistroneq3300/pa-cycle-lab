@@ -18,6 +18,7 @@ from cycle_core import (
     issue,
     issue_baseline,
     missing_sensors,
+    nic_slot_issues,
     now,
     filter_pci_verbose,
     merge_pci_devices,
@@ -395,6 +396,21 @@ class NodeSession:
             findings = config_issues(config.output, config.code)
             record["issues"] += findings
             record['hardware_checks'], record['hardware_check_details'] = parse_hardware_checks(config.output, findings)
+            # Pull the per-slot NIC inventory out of the CHECK|NIC_SLOT lines so
+            # the PRE baseline can name exactly which NIC is removed or degraded
+            # after a loop, instead of only reporting a lower card count.
+            record['nic_slots'] = {}
+            for line in config.output.splitlines():
+                if not line.startswith('CHECK|NIC_SLOT|'):
+                    continue
+                values = dict(c.split('=', 1) for c in line.split('|')[2:] if '=' in c)
+                if 'slot' in values:
+                    record['nic_slots'][values['slot'].lower()] = values.get('state', 'PRESENT')
+            # Compare the NIC slot inventory against the PRE baseline so a card
+            # that is present at PRE but absent (removed) or degraded (non-Vera
+            # device type) after a loop is named by BDF, not just counted.
+            if post and self.baseline and 'nic' in self.baseline:
+                record['issues'] += nic_slot_issues(self.baseline['nic'], record.get('nic_slots', {}))
         sensor = self.command(record, "sensor", "oob", "sensor list")
         record["sensors"] = parse_sensors(sensor.output) if record['commands']['sensor']['valid'] else []
         if post:
@@ -940,7 +956,8 @@ class NodeSession:
             # only the PCI baseline is required to keep cycle comparisons safe.
             if not record["pci"]:
                 self.node["blocked"].append("PRE PCI baseline is unavailable")
-            self.baseline = dict(pci=record["pci"].copy(), sensors=[r.copy() for r in record["sensors"]])
+            self.baseline = dict(pci=record["pci"].copy(), sensors=[r.copy() for r in record["sensors"]],
+                                 nic=dict(record.get("nic_slots", {})))
             self.pre_issue_keys = issue_baseline(record["issues"])
             self.expected_boot = record['identities']['os']['boot_id']
         except Exception as exc:

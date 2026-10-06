@@ -9,9 +9,20 @@ from pathlib import Path
 BASE=Path(__file__).resolve().parents[2]
 SHELL=os.environ.get('VERA_TEST_SHELL') or shutil.which('bash')
 
+# The producer keys the NIC check on these expected slots (see NIC_SLOTS in
+# neutrino_config.sh). The MST stub must emit exactly this set, otherwise every
+# slot is reported missing. Kept at module scope so test classes that borrow
+# HardwareTests.run_fixture still resolve it.
+NIC_SLOTS = ['0001:00:00.0', '0002:00:00.0', '0002:20:00.0', '0003:00:00.0',
+             '0003:80:00.0', '0004:00:00.0', '0004:40:00.0', '0004:80:00.0',
+             '0004:c0:00.0', '0005:00:00.0', '0006:00:00.0', '0009:00:00.0',
+             '000a:00:00.0', '000a:20:00.0', '000b:00:00.0', '000b:80:00.0',
+             '000c:00:00.0', '000c:40:00.0', '000c:80:00.0', '000c:c0:00.0',
+             '000d:00:00.0', '000e:00:00.0']
+
 @unittest.skipUnless(SHELL,'Set VERA_TEST_SHELL to a Bash executable')
 class HardwareTests(unittest.TestCase):
-    def run_fixture(self, dimms=16, bf4='BlueField-4', downgrade=False, functions=2, serials=None, endpoint=True, unavailable=False, project='neutrino', overrides=None, ratio='0.90'):
+    def run_fixture(self, dimms=16, bf4='BlueField-4', downgrade=False, functions=2, serials=None, endpoint=True, unavailable=False, project='neutrino', overrides=None, ratio='0.90', missing_slot=None, degraded_slot=None):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp)
             serials = ['CARD-A'] * functions if serials is None else serials
@@ -35,8 +46,9 @@ class HardwareTests(unittest.TestCase):
               'nvme':"printf '/dev/nvme0n1 disk0\\n/dev/nvme0n2 namespace2\\n/dev/nvme1n1 disk1\\n'",
               'lscpu':"printf '# CPU,Socket,Online\\n0,0,Y\\n1,1,Y\\n'",
               'cat':"printf 'MemTotal: 2000000000 kB\\n'",
-              'mst':f'''i=1; while [ "$i" -le 22 ]; do printf 'Vera(rev:0) /dev/mst/device %04x:01:00.0\\n' "$i"; i=$((i+1)); done
-                        echo '{bf4}(rev:0) /dev/mst/dpu 0000:02:00.0' ''',
+              'mst':''.join(
+                  ('echo NA /dev/mst/mt12184_pciconf0 {0}\n' if bdf == degraded_slot else 'echo Vera\\(rev:0\\) /dev/mst/device {0}\n').format(bdf)
+                  for bdf in NIC_SLOTS if bdf != missing_slot),
               'lspci':f'''case "$1" in
                     -Dvv) printf '%s\\n' '{verbose_inventory}';;
                     -Dvvv) printf '%s\\n' '{identities}';;
@@ -65,6 +77,33 @@ class HardwareTests(unittest.TestCase):
         result=self.run_fixture(dimms=17)
         self.assertEqual(result.returncode,1,result.stdout+result.stderr)
         self.assertIn('ISSUE|DIMM_COUNT',result.stdout)
+
+    def test_nic_slot_degraded_is_not_reported_as_missing(self):
+        # Real regression: an enumerated NIC whose MST DEVICE_TYPE flipped from
+        # Vera to NA (e.g. slot 0002:00:00.0) keeps its PCI slot. It must be
+        # reported as present-but-degraded, never as a removed card, or the
+        # report tells the customer a card vanished while lspci still shows it.
+        result=self.run_fixture(degraded_slot='0002:00:00.0')
+        self.assertIn('CHECK|NIC_SLOT|slot=0002:00:00.0|state=DEGRADED|device_type=NA',result.stdout)
+        self.assertIn('ISSUE|NIC_DEGRADED|NIC',result.stdout)
+        self.assertIn('mst status row: NA /dev/mst/mt12184_pciconf0 0002:00:00.0',result.stdout)
+        self.assertNotIn('state=MISSING',result.stdout)
+        self.assertNotIn('ISSUE|DEVICE_MISSING|NIC',result.stdout)
+
+    def test_nic_slot_missing_is_a_device_removal(self):
+        # A slot whose BDF is absent from the MST inventory is a real removal and
+        # keeps the original DEVICE_MISSING contract.
+        result=self.run_fixture(missing_slot='0003:00:00.0')
+        self.assertIn('CHECK|NIC_SLOT|slot=0003:00:00.0|state=MISSING',result.stdout)
+        self.assertIn('ISSUE|DEVICE_MISSING|NIC',result.stdout)
+        self.assertIn('missing slot 0003:00:00.0',result.stdout)
+        self.assertNotIn('ISSUE|NIC_DEGRADED|NIC',result.stdout)
+
+    def test_nic_all_slots_present_passes(self):
+        result=self.run_fixture()
+        self.assertIn('CHECK|NIC_SLOT|slot=0002:00:00.0|state=PRESENT',result.stdout)
+        self.assertNotIn('state=MISSING',result.stdout)
+        self.assertNotIn('state=DEGRADED',result.stdout)
 
     def test_bf3_never_counts_as_bf4(self):
         for model in ('BlueField-3','BlueField','ConnectX-9','DPU'):
@@ -149,6 +188,81 @@ class HardwareTests(unittest.TestCase):
         for ratio, expected in [('0.5', 0), ('0.51', 1), ('nan', 1), ('0', 1)]:
             result = self.run_fixture(ratio=ratio, overrides={'cat': "printf 'MemTotal: 1073741824 kB\\n'"})
             self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+
+
+@unittest.skipUnless(SHELL,'Set VERA_TEST_SHELL to a Bash executable')
+class Eq3300HardwareTests(unittest.TestCase):
+    """EQ3300 NIC model: brand-agnostic ConnectX*/BlueField* count plus a per-slot
+    mst inventory. GB100 is a GPU (excluded), and any non-NIC device type on a NIC
+    position is reported as degraded with its raw mst row."""
+
+    # Two BlueField3 ports + two ConnectX7 ports = four NIC functions.
+    NIC_ROWS = [
+        'BlueField3(rev:1) /dev/mst/mt41692_pciconf1.1 b9:00.1 mlx5_13 net-ens212f1np1 1 /dev/fwctl/fwctl13',
+        'BlueField3(rev:1) /dev/mst/mt41692_pciconf1 b9:00.0 mlx5_12 net-ens212f0np0 1 /dev/fwctl/fwctl12',
+        'ConnectX7(rev:0) /dev/mst/mt4129_pciconf1 21:00.0 mlx5_9 net-ibs203 0 /dev/fwctl/fwctl9',
+        'ConnectX7(rev:0) /dev/mst/mt4129_pciconf0 09:00.0 mlx5_5 net-ibs204 0 /dev/fwctl/fwctl5',
+    ]
+    # Each GPU exposes a pciconf and a pci_cr row on the same BDF.
+    GPU_ROWS = [
+        'GB100(rev:0) /dev/mst/mt10497_pciconf0 03:00.0 0',
+        'GB100(rev:0) /dev/mst/mt10497_pci_cr0 03:00.0 0',
+    ]
+
+    def run_eq(self, nic_rows=None, gpu_rows=None):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            rows = (self.NIC_ROWS if nic_rows is None else nic_rows) + (self.GPU_ROWS if gpu_rows is None else gpu_rows)
+            mst = "printf '%s\\n' " + " ".join("'" + r.replace("'", "") + "'" for r in rows)
+            tools = {
+                'mst': mst,
+                'nvidia-smi': "printf 'GPU 0: NVIDIA B200\\nGPU 1: NVIDIA B200\\nGPU 2: NVIDIA B200\\nGPU 3: NVIDIA B200\\nGPU 4: NVIDIA B200\\nGPU 5: NVIDIA B200\\nGPU 6: NVIDIA B200\\nGPU 7: NVIDIA B200\\n'",
+                'dmidecode': "printf 'Status: Populated, Enabled\\nStatus: Populated, Enabled\\n'",
+                'nvme': "printf '/dev/nvme0n1 disk0\\n/dev/nvme1n1 disk1\\n'",
+                'lscpu': "printf '# CPU,Socket,Online\\n0,0,Y\\n1,1,Y\\n'",
+                'cat': "printf 'MemTotal: 2000000000 kB\\n'",
+                'lspci': "printf '0000:01:00.0 PCI bridge [0604]: NVIDIA bridge [10de:2f95]\\n'",
+                'ipmitool': "echo 'Firmware Revision: example'",
+            }
+            for name, content in tools.items():
+                f = root / name
+                f.write_text('#!/usr/bin/env sh\n' + content + '\n', encoding='utf-8', newline='\n')
+                f.chmod(0o755)
+            env = {**os.environ, 'NIC_MIN': '4',
+                   'PATH': str(root) + os.pathsep + str(Path(SHELL).parent) + os.pathsep + os.environ.get('PATH', '')}
+            return subprocess.run([SHELL, str(BASE / 'eq3300_config.sh')], env=env,
+                                  capture_output=True, text=True, encoding='utf-8', timeout=45, check=False)
+
+    def test_all_nics_present_and_gpu_excluded(self):
+        result = self.run_eq()
+        self.assertIn('CHECK|NIC_SLOT|slot=b9:00.1|state=PRESENT', result.stdout)
+        self.assertIn('CHECK|NIC_SLOT|slot=09:00.0|state=PRESENT', result.stdout)
+        # The two GPU rows collapse to one GB100 non-card line.
+        self.assertEqual(result.stdout.count('CHECK|NIC_NON_CARD|slot=03:00.0|type=GB100'), 1)
+        self.assertNotIn('ISSUE|NIC_DEGRADED|NIC', result.stdout)
+
+    def test_nic_wrong_device_type_is_degraded_with_raw_row(self):
+        # A NIC position whose DEVICE_TYPE is no longer ConnectX*/BlueField* is
+        # present-but-degraded, named by BDF, with the raw mst row as evidence.
+        rows = [r.replace('ConnectX7(rev:0) /dev/mst/mt4129_pciconf0 09:00.0 mlx5_5 net-ibs204 0 /dev/fwctl/fwctl5',
+                          'NA /dev/mst/mt4129_pciconf0 09:00.0 0') for r in self.NIC_ROWS]
+        result = self.run_eq(nic_rows=rows)
+        self.assertIn('CHECK|NIC_SLOT|slot=09:00.0|state=DEGRADED', result.stdout)
+        self.assertIn('ISSUE|NIC_DEGRADED|NIC', result.stdout)
+        self.assertIn('mst status row: NA /dev/mst/mt4129_pciconf0 09:00.0 0', result.stdout)
+        # The healthy ports are untouched.
+        self.assertIn('CHECK|NIC_SLOT|slot=b9:00.1|state=PRESENT', result.stdout)
+
+    def test_absent_nic_slot_is_not_emitted_present(self):
+        # A NIC that is gone leaves no row: its slot is simply absent, so the
+        # PRE baseline (not this script) is what reports it as NIC_MISSING.
+        rows = [r for r in self.NIC_ROWS if '09:00.0' not in r]
+        result = self.run_eq(nic_rows=rows)
+        self.assertNotIn('slot=09:00.0|state=PRESENT', result.stdout)
+        self.assertNotIn('slot=09:00.0|state=DEGRADED', result.stdout)
+
 
 if __name__=='__main__':
     unittest.main()
