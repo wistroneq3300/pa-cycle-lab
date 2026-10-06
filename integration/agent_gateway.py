@@ -47,6 +47,48 @@ _STATUS_MAP = {
 }
 
 
+# ---------------------------------------------------------------------------
+# Engineer chat-turn intent
+# ---------------------------------------------------------------------------
+# A free-text chat turn is one of three things, and they must travel different
+# paths on the agent-server:
+#
+#   "go"       approve execution (OK/GO/開始/執行/…)  -> agent-loop turn
+#   "rerun"    explicit re-run request                -> agent-loop turn
+#   "question" anything else (ask/explain/path/…)     -> ask_agent (no loop)
+#
+# The distinction is the whole point: an agent-loop turn lets the model emit a
+# FinishAction and re-paste the test record, which is exactly the "I asked a
+# question and it dumped the same report again" complaint. ``ask_agent`` is a
+# single LLM call with no tool loop, so a question can only be answered — it
+# structurally cannot re-run the test.
+_GO_KEYWORDS = ("ok", "go", "開始", "开始", "執行", "执行", "可以", "run", "確認", "确认", "同意")
+# Explicit re-run intent. Deliberately requires a rerun verb; a bare "執行"
+# stays a "go" (some engineers approve with it), which is the safer default.
+_RERUN_KEYWORDS = ("重跑", "重新", "再執行", "再执行", "再跑", "rerun", "re-run", "run again", "重新驗證", "重新验证")
+
+
+def classify_user_intent(text):
+    """Classify an engineer chat turn as ``"go"`` / ``"rerun"`` / ``"question"``.
+
+    Pure, case-insensitive, trivially unit-testable. A bare keyword (after
+    stripping surrounding punctuation/whitespace) is treated as approval;
+    a keyword buried inside a sentence is not, so "GO 之後請補充說明" stays a
+    question rather than silently triggering execution.
+    """
+    raw = (text or "").strip()
+    if not raw:
+        return "question"
+    lowered = raw.lower()
+    # Normalise a bare "OK." / "GO!" / "ok~" to its keyword form.
+    stripped = lowered.strip("。.!！~～ 、,，:：;；\t\n ")
+    if stripped in _GO_KEYWORDS:
+        return "go"
+    if any(k in lowered for k in _RERUN_KEYWORDS):
+        return "rerun"
+    return "question"
+
+
 def _text_of(llm_message):
     """Flatten an OpenHands llm_message content list into plain text."""
     if not isinstance(llm_message, dict):
@@ -179,6 +221,10 @@ class AgentGateway:
         "工程師收到後若提出問題或補充資訊，你應據此修正計畫，再等待下一次同意。",
         "當工程師回覆「OK」或「GO」表示可以執行時，直接依你剛才說明的計畫執行，",
         "不需要再次詢問；執行完畢後產出測試記錄。",
+        "計畫執行完（已產出測試記錄）之後，若工程師只是「提問」（例如問檔案路徑、",
+        "問某欄位的意義、要求補充說明），請直接針對問題作答，不要重跑測試、不要重新",
+        "執行指令、也不要重貼同一份測試記錄。只有當工程師明確要求「重跑、重新驗證、",
+        "再執行一次、補充新的檢查項目」時，才再度執行並產出新的記錄。",
         "",
     ]
 
@@ -205,7 +251,10 @@ class AgentGateway:
             f"測試集：{tc.get('test_set') or '-'}",
             f"測項：{tc.get('items') or '-'}",
             "",
-            "執行程序：",
+            "原始手作業單 ⚠ 請勿直接執行（僅供參照）：",
+            "以下為原始作業單內容，可能過時、與標題不符或含破壞性步驟。",
+            "它僅供你理解測項意圖與背景，不是要你照著直接執行的指令；",
+            "實際執行請以下方修正後的計畫與 AI 指令為準，切勿盲目照抄作業單。",
             (tc.get("procedure") or "-"),
             "",
             "驗收標準：",
@@ -249,6 +298,17 @@ class AgentGateway:
             "- 動手前先確認測試步驟；有疑慮時先停下詢問，不要自行假設。",
             "- 指令輸出只需摘要重點，勿將整包原始輸出貼回；避免累積過長內容。",
             "- 不得捏造指令輸出；SSH 失敗就據實回報。",
+            "- 工程師的後續訊息若只是提問（要求說明、問路徑、問欄位），直接回答即可，",
+            "  不要重跑指令或重貼已產出的測試記錄；僅在工程師明確要求重跑時才再執行。",
+            "- 產出檔案請「同類合併、避免碎檔」。多顆裝置（如多張 GPU）的原始證據要合併成",
+            "  單一檔案，並用醒目分隔線標出各裝置，例如：",
+            "    * 測試前 lspci -vvv：全部裝置寫入 lspci_vvv_pre.txt，各裝置前加一行",
+            "      「===== 03:00.0 (10de:2901) =====」；",
+            "    * 測試後 lspci -vvv：同樣合併為 lspci_vvv_post.txt；",
+            "    * lspci -nn：合併為 lspci_nn_pre.txt / lspci_nn_post.txt；",
+            "    * 摘要與判定：test_record.txt。",
+            "  除非工程師另有指示，成果目錄一律只保留上述同類合併的檔案（約 5 個），",
+            "  不要為每顆裝置或每個時點各開一個檔案。",
         ]
         if (user_note or "").strip():
             lines += ["", "【工程師備註（請遵循）】", user_note.strip()]
@@ -365,6 +425,12 @@ class AgentGateway:
         Returns the conversation id. Raises ValueError when the run has no
         bound conversation. Never fabricates a reply — the agent's response
         arrives through :meth:`ingest` like any other event.
+
+        The body must be the server's ``SendMessageRequest`` shape
+        (``role``/``content``/``run``). Sending a raw ``MessageEvent``
+        (``kind``/``source``/``llm_message``) is accepted with HTTP 200 but the
+        unknown ``llm_message`` field is dropped, so the agent receives an
+        EMPTY user turn and wonders why nothing was said.
         """
         run = self.store.get_run(run_id)
         if run is None:
@@ -373,17 +439,40 @@ class AgentGateway:
         if not cid:
             raise ValueError("run has no conversation; start it first")
         payload = {
-            "kind": "MessageEvent",
-            "source": "user",
-            "llm_message": {
-                "role": "user",
-                "content": [{"type": "text", "text": text}],
-            },
+            "role": "user",
+            "content": [{"type": "text", "text": text}],
             "run": True,
         }
         response = self._http().post(self._MESSAGE_ENDPOINT.format(cid=cid), json=payload)
         response.raise_for_status()
         return cid
+
+    # Endpoint for a *question* turn. ``ask_agent`` is a single LLM call against
+    # the conversation that returns the answer directly and does NOT start an
+    # agent-loop turn — no tools, so the agent cannot re-run the test or emit a
+    # FinishAction. Overridable for the same reason as _MESSAGE_ENDPOINT.
+    _ASK_ENDPOINT = os.environ.get(
+        "PA_AGENT_ASK_ENDPOINT", "/api/conversations/{cid}/ask_agent")
+
+    def ask_agent(self, run_id, question):
+        """Ask the run's conversation a question and return the agent's answer.
+
+        Unlike :meth:`send_user_message`, this neither appends a message to the
+        conversation nor triggers a run loop. The reply is a plain string; the
+        caller records it as an agent chat message. Raises ValueError when the
+        run has no bound conversation.
+        """
+        run = self.store.get_run(run_id)
+        if run is None:
+            raise KeyError("unknown run_id")
+        cid = run.get("conversation_ref")
+        if not cid:
+            raise ValueError("run has no conversation; start it first")
+        response = self._http().post(
+            self._ASK_ENDPOINT.format(cid=cid), json={"question": question})
+        response.raise_for_status()
+        data = response.json() or {}
+        return (data.get("response") or "").strip()
 
     # -- event ingestion -----------------------------------------------------
 
@@ -418,10 +507,17 @@ class AgentGateway:
         for event in events:
             channel, payload = classify_event(event)
             if channel == "message":
-                seq = self.store.add_message(
-                    run_id, role=payload["role"], text=payload["text"],
-                    source_event_id=payload.get("event_id"),
-                )
+                seq = None
+                # A user turn was echoed locally by the route on send; adopt it
+                # rather than inserting a duplicate when its event comes back.
+                if payload["role"] == "user" and payload.get("event_id"):
+                    seq = self.store.claim_pending_user_message(
+                        run_id, payload["text"], payload["event_id"])
+                if seq is None:
+                    seq = self.store.add_message(
+                        run_id, role=payload["role"], text=payload["text"],
+                        source_event_id=payload.get("event_id"),
+                    )
                 if seq is not None:
                     summary["messages"] += 1
             elif channel == "command":

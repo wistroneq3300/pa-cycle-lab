@@ -14,3 +14,7 @@ engine/vera_cycle/test-results/
 app/qa/tmp/
 app/qa/artifacts/
 app/qa/previews/
+
+# Data backups and agent-local state (not source)
+app/data/tests.json.bak-*
+.openhands/

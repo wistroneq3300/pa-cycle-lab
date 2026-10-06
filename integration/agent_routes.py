@@ -22,7 +22,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from . import targets as targets_module
-from .agent_gateway import AgentGateway
+from .agent_gateway import AgentGateway, classify_user_intent
 from .agent_runs import (
     AgentRunStore, STATUS_DONE, STATUS_PASS, STATUS_FAIL, STATUS_BLOCKED,
     STATUS_ERROR, STATUS_WAITING_FOR_USER,
@@ -240,11 +240,18 @@ def install(app, pa, store_getter=None):
 
     @router.post("/api/agent/runs/{run_id}/messages")
     def post_message(run_id: str, req: AgentRunMessageReq):
-        """Append an engineer chat turn and let the agent reply.
+        """Append an engineer chat turn and route it by intent.
 
-        The turn is recorded locally first (so it renders even before the agent
-        responds), then forwarded to the run's OpenHands conversation. A gateway
-        failure is surfaced as 502 — no fabricated reply is ever stored.
+        Three intents travel different paths (see ``classify_user_intent``):
+
+        * ``go`` / ``rerun`` — an agent-loop turn (``POST /events``): the agent
+          executes and produces the test record.
+        * ``question``       — ``ask_agent``: a single LLM call with no tool
+          loop, so the agent can only answer. This is what stops the agent from
+          re-running the test and re-pasting the record on a plain question.
+
+        The turn is always recorded locally first, so the chat renders it even
+        before any agent output. A gateway failure is surfaced as 502.
         """
         run = store.get_run(run_id)
         if run is None:
@@ -254,18 +261,33 @@ def install(app, pa, store_getter=None):
             raise HTTPException(422, "text is required")
         if not run.get("conversation_ref"):
             raise HTTPException(409, "run has no conversation; start it first")
+        intent = classify_user_intent(text)
         before = store.list_messages(run_id)
         min_seq = max([m.get("seq", 0) for m in before] or [0])
         store.add_message(run_id, role="user", text=text)
-        try:
-            gateway.send_user_message(run_id, text)
-        except Exception as exc:  # agent-server unreachable / rejected
-            raise HTTPException(502, f"agent gateway failed: {exc}")
-        threading.Thread(
-            target=_sync_messages_loop, args=(store, gateway, run_id),
-            kwargs={"min_seq": min_seq}, name=f"pa-agent-msg-{run_id}", daemon=True,
-        ).start()
-        return {"ok": True, "run_id": run_id, "messages": store.list_messages(run_id)}
+
+        if intent in ("go", "rerun"):
+            try:
+                gateway.send_user_message(run_id, text)
+            except Exception as exc:  # agent-server unreachable / rejected
+                raise HTTPException(502, f"agent gateway failed: {exc}")
+            # The agent-loop turn's output arrives asynchronously via ingest.
+            threading.Thread(
+                target=_sync_messages_loop, args=(store, gateway, run_id),
+                kwargs={"min_seq": min_seq}, name=f"pa-agent-msg-{run_id}", daemon=True,
+            ).start()
+        else:
+            # Question: single-call answer, no agent loop. Store the reply as an
+            # agent message so the drawer renders it like any other turn.
+            try:
+                answer = gateway.ask_agent(run_id, text)
+            except Exception as exc:  # agent-server unreachable / rejected
+                raise HTTPException(502, f"agent gateway failed: {exc}")
+            if answer:
+                store.add_message(run_id, role="agent", text=answer)
+
+        return {"ok": True, "run_id": run_id, "intent": intent,
+                "messages": store.list_messages(run_id)}
 
     app.include_router(router)
     return store

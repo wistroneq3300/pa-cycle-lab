@@ -313,6 +313,34 @@ class AgentRunStore:
                 (text, run_id, seq),
             )
 
+    def claim_pending_user_message(self, run_id, text, source_event_id):
+        """Adopt a locally-echoed user message when its server event arrives.
+
+        The route records the engineer's turn immediately (``source_event_id``
+        NULL) so the bubble renders before the agent replies. The same turn then
+        comes back as a user ``MessageEvent`` during ingest. Without this, that
+        event would be inserted as a SECOND copy of the same text. Matching the
+        most recent unclaimed user row by text and stamping it with the event id
+        keeps the dedupe idempotent *and* preserves the original ordering.
+
+        Returns the adopted row's seq, or None when there is nothing to adopt
+        (so the caller inserts a fresh row, e.g. turns typed outside this UI).
+        """
+        with self._lock, self._connect() as db:
+            row = db.execute(
+                "SELECT seq FROM agent_run_messages WHERE run_id=? AND role='user' "
+                "AND source_event_id IS NULL AND text=? ORDER BY seq DESC LIMIT 1",
+                (run_id, text),
+            ).fetchone()
+            if row is None:
+                return None
+            db.execute(
+                "UPDATE agent_run_messages SET source_event_id=? "
+                "WHERE run_id=? AND seq=?",
+                (source_event_id, run_id, row["seq"]),
+            )
+            return row["seq"]
+
     def list_messages(self, run_id, limit=500):
         with self._connect() as db:
             rows = db.execute(

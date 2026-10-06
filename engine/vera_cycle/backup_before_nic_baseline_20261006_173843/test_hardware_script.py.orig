@@ -1,0 +1,193 @@
+"""Run neutrino_config.sh against PATH stubs, never the host's hardware tools."""
+import os
+import shutil
+import subprocess
+import tempfile
+import unittest
+from pathlib import Path
+
+BASE=Path(__file__).resolve().parents[2]
+SHELL=os.environ.get('VERA_TEST_SHELL') or shutil.which('bash')
+
+# The producer keys the NIC check on these expected slots (see NIC_SLOTS in
+# neutrino_config.sh). The MST stub must emit exactly this set, otherwise every
+# slot is reported missing. Kept at module scope so test classes that borrow
+# HardwareTests.run_fixture still resolve it.
+NIC_SLOTS = ['0001:00:00.0', '0002:00:00.0', '0002:20:00.0', '0003:00:00.0',
+             '0003:80:00.0', '0004:00:00.0', '0004:40:00.0', '0004:80:00.0',
+             '0004:c0:00.0', '0005:00:00.0', '0006:00:00.0', '0009:00:00.0',
+             '000a:00:00.0', '000a:20:00.0', '000b:00:00.0', '000b:80:00.0',
+             '000c:00:00.0', '000c:40:00.0', '000c:80:00.0', '000c:c0:00.0',
+             '000d:00:00.0', '000e:00:00.0']
+
+@unittest.skipUnless(SHELL,'Set VERA_TEST_SHELL to a Bash executable')
+class HardwareTests(unittest.TestCase):
+    def run_fixture(self, dimms=16, bf4='BlueField-4', downgrade=False, functions=2, serials=None, endpoint=True, unavailable=False, project='neutrino', overrides=None, ratio='0.90', missing_slot=None, degraded_slot=None):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp)
+            serials = ['CARD-A'] * functions if serials is None else serials
+            identities = '\n'.join(f"0000:0{i+4}:00.0 Ethernet controller: Mellanox {bf4}\n Capabilities: [54] Vital Product Data\n [SN] Serial number: {serial}" for i, serial in enumerate(serials))
+            pci_functions = '\n'.join(f"0000:0{i+4}:00.0 Ethernet controller [0200]: Mellanox {bf4} [15b3:a2dc]" for i in range(functions))
+            pci_inventory = '\n'.join(f'0000:{i:02x}:00.0 PCI bridge [0604]: NVIDIA bridge [10de:2f95]' for i in range(16, 36)) + '\n' + pci_functions + '\n0000:02:00.0 USB controller [0c03]: controller [1234:5678]\n0000:03:00.0 PCI bridge [0604]: ASPEED AST1150 [1234:9876]\n0000:01:00.0 Ethernet controller [0200]: Mellanox ConnectX test endpoint'
+            link_inventory = pci_inventory.replace('0000:01:00.0 Ethernet controller [0200]: Mellanox ConnectX test endpoint', f"0000:01:00.0 Ethernet controller [0200]: Mellanox ConnectX test endpoint\n Capabilities: [80] Express (v2) {'Endpoint' if endpoint else 'Root Port'}\n LnkSta: Speed {'unknown, Width x0' if unavailable else '16GT/s, Width x8'} {'(downgraded)' if downgrade else ''}")
+            # ``lspci -Dvv -nn`` carries link status AND VPD serials in one dump,
+            # so the fixtures feed BF4 blocks through the same verbose output the
+            # checks now share instead of a separate ``-Dvvv`` capture.
+            verbose_inventory = link_inventory
+            for i, serial in enumerate(serials):
+                verbose_inventory = verbose_inventory.replace(
+                    f"0000:0{i+4}:00.0 Ethernet controller [0200]: Mellanox {bf4} [15b3:a2dc]",
+                    f"0000:0{i+4}:00.0 Ethernet controller [0200]: Mellanox {bf4} [15b3:a2dc]\n Capabilities: [54] Vital Product Data\n [SN] Serial number: {serial}")
+            tools={
+              'dmidecode':f'''case "$*" in
+                '-t processor') printf 'Status: Populated, Enabled\\nStatus: Populated, Enabled\\n';;
+                '-t memory') i=1; while [ "$i" -le {dimms} ]; do printf 'Memory Device\\n Size: 128 GB\\n'; i=$((i+1)); done; printf 'Memory Device\\n Size: No Module Installed\\n';;
+                *) echo 'Version: example';; esac''',
+              'nvme':"printf '/dev/nvme0n1 disk0\\n/dev/nvme0n2 namespace2\\n/dev/nvme1n1 disk1\\n'",
+              'lscpu':"printf '# CPU,Socket,Online\\n0,0,Y\\n1,1,Y\\n'",
+              'cat':"printf 'MemTotal: 2000000000 kB\\n'",
+              'mst':''.join(
+                  ('echo NA /dev/mst/mt12184_pciconf0 {0}\n' if bdf == degraded_slot else 'echo Vera\\(rev:0\\) /dev/mst/device {0}\n').format(bdf)
+                  for bdf in NIC_SLOTS if bdf != missing_slot),
+              'lspci':f'''case "$1" in
+                    -Dvv) printf '%s\\n' '{verbose_inventory}';;
+                    -Dvvv) printf '%s\\n' '{identities}';;
+                    -Dnn) printf '%s\\n' '{pci_inventory}';;
+                    *) printf '%s\\n' '{pci_inventory}';;
+                  esac''',
+              'ipmitool':"echo 'Firmware Revision: example'"}
+            for name, transform in (overrides or {}).items():
+                tools[name] = transform(tools[name]) if callable(transform) else transform
+            # POSIX sh stubs so the harness runs under both dash and Git Bash.
+            for name,content in tools.items():
+                file=root/name
+                file.write_text('#!/usr/bin/env sh\n'+content+'\n',encoding='utf-8',newline='\n')
+                file.chmod(0o755)
+            env={**os.environ,'MEMORY_MIN_RATIO':ratio,'PATH':str(root)+os.pathsep+str(Path(SHELL).parent)+os.pathsep+os.environ.get('PATH','')}
+            result=subprocess.run([SHELL,str(BASE/f'{project}_config.sh')],env=env,capture_output=True,text=True,encoding='utf-8',timeout=45,check=False)
+            return result
+
+    def test_populated_16_pass_and_namespace_dedup(self):
+        result=self.run_fixture()
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertIn('CHECK|NVMe|actual=2',result.stdout)
+        self.assertIn('RESULT|PASS',result.stdout)
+
+    def test_extra_dimm_fails(self):
+        result=self.run_fixture(dimms=17)
+        self.assertEqual(result.returncode,1,result.stdout+result.stderr)
+        self.assertIn('ISSUE|DIMM_COUNT',result.stdout)
+
+    def test_nic_slot_degraded_is_not_reported_as_missing(self):
+        # Real regression: an enumerated NIC whose MST DEVICE_TYPE flipped from
+        # Vera to NA (e.g. slot 0002:00:00.0) keeps its PCI slot. It must be
+        # reported as present-but-degraded, never as a removed card, or the
+        # report tells the customer a card vanished while lspci still shows it.
+        result=self.run_fixture(degraded_slot='0002:00:00.0')
+        self.assertIn('CHECK|NIC_SLOT|slot=0002:00:00.0|state=DEGRADED|device_type=NA',result.stdout)
+        self.assertIn('ISSUE|NIC_DEGRADED|NIC',result.stdout)
+        self.assertIn('mst status row: NA /dev/mst/mt12184_pciconf0 0002:00:00.0',result.stdout)
+        self.assertNotIn('state=MISSING',result.stdout)
+        self.assertNotIn('ISSUE|DEVICE_MISSING|NIC',result.stdout)
+
+    def test_nic_slot_missing_is_a_device_removal(self):
+        # A slot whose BDF is absent from the MST inventory is a real removal and
+        # keeps the original DEVICE_MISSING contract.
+        result=self.run_fixture(missing_slot='0003:00:00.0')
+        self.assertIn('CHECK|NIC_SLOT|slot=0003:00:00.0|state=MISSING',result.stdout)
+        self.assertIn('ISSUE|DEVICE_MISSING|NIC',result.stdout)
+        self.assertIn('missing slot 0003:00:00.0',result.stdout)
+        self.assertNotIn('ISSUE|NIC_DEGRADED|NIC',result.stdout)
+
+    def test_nic_all_slots_present_passes(self):
+        result=self.run_fixture()
+        self.assertIn('CHECK|NIC_SLOT|slot=0002:00:00.0|state=PRESENT',result.stdout)
+        self.assertNotIn('state=MISSING',result.stdout)
+        self.assertNotIn('state=DEGRADED',result.stdout)
+
+    def test_bf3_never_counts_as_bf4(self):
+        for model in ('BlueField-3','BlueField','ConnectX-9','DPU'):
+            with self.subTest(model=model):
+                result=self.run_fixture(bf4=model)
+                self.assertEqual(result.returncode,1,result.stdout+result.stderr)
+                self.assertIn('ISSUE|BF4_MISSING',result.stdout)
+
+    def test_bf4_check_reports_source_counts(self):
+        # A missing device has no offending row to quote, so the CHECK line must
+        # carry where the card was looked for and how many were found there.
+        result=self.run_fixture(bf4='BlueField-3')
+        self.assertIn('CHECK|BF4|actual=0|exact=1|pci_functions=0',result.stdout)
+
+    def test_bf4_present_passes_and_counts(self):
+        result=self.run_fixture(bf4='BlueField-4')
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertIn('CHECK|BF4|actual=1|exact=1|pci_functions=2',result.stdout)
+
+    def test_bf4_fail_names_function_count(self):
+        # Two functions with distinct VPD serials are two physical cards when one
+        # is expected; the failure must name the card count and the function count.
+        result=self.run_fixture(bf4='BlueField-4',functions=2,serials=['CARD-A','CARD-B'])
+        self.assertEqual(result.returncode,1,result.stdout+result.stderr)
+        self.assertIn('Expected exactly 1 physical card(s); detected 2 from 2 PCI functions',result.stdout)
+
+    def test_bf4_missing_names_zero_functions(self):
+        result=self.run_fixture(bf4='BlueField-4',functions=0)
+        self.assertEqual(result.returncode,1,result.stdout+result.stderr)
+        self.assertIn('Expected exactly 1 physical card(s); detected 0',result.stdout)
+
+    def test_downgrade_is_failure_with_bdf(self):
+        result=self.run_fixture(downgrade=True)
+        self.assertEqual(result.returncode,1,result.stdout+result.stderr)
+        self.assertIn('ISSUE|PCIE_DOWNGRADE|0000:01:00.0',result.stdout)
+        self.assertIn('CHECK|PCIE_DOWNGRADE|bdf=0000:01:00.0|lnksta=',result.stdout)
+
+    def test_distinct_serials_are_two_cards_and_exact_count_fails(self):
+        result = self.run_fixture(serials=['CARD-A', 'CARD-B'])
+        self.assertIn('ISSUE|BF4_COUNT|BF4', result.stdout)
+        self.assertIn('CHECK|BF4|actual=2|exact=1', result.stdout)
+
+    def test_partial_identity_never_guesses_card_count(self):
+        result = self.run_fixture(serials=['CARD-A', ''])
+        self.assertIn('ISSUE|BF4_IDENTITY_UNAVAILABLE', result.stdout)
+        self.assertEqual(result.returncode, 1)
+
+    def test_bridge_downgrade_is_not_endpoint_failure(self):
+        result = self.run_fixture(downgrade=True, endpoint=False)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_endpoint_unavailable_fails(self):
+        result = self.run_fixture(unavailable=True)
+        self.assertIn('ISSUE|PCIE_LINK_UNAVAILABLE', result.stdout)
+
+    def test_naboo_configuration(self):
+        result = self.run_fixture(project='naboo')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_review_hardware_failures_for_both_projects(self):
+        scenarios = [
+            ({'lscpu': "printf '0,0,Y\\n1,1,N\\n'"}, 'CPU_TOPOLOGY'),
+            ({'dmidecode': lambda s: s.replace('Populated, Enabled\\nStatus: Populated, Enabled', 'Populated, Enabled\\nStatus: Populated, Disabled By BIOS')}, 'CPU_DISABLED'),
+            ({'cat': "printf 'MemTotal: 1000000000 kB\\n'"}, 'MEMORY_VISIBLE'),
+            ({'mst': "i=0; while [ $i -lt 22 ]; do echo 'Vera(rev:0) /dev/mst/device 0001:01:00.0'; i=$((i+1)); done"}, 'DUPLICATE_BDF'),
+            ({'lspci': lambda s: s.replace(' LnkSta: Speed 16GT/s, Width x8 ', ' LnkCap: Speed 16GT/s, Width x8 ')}, 'PCIE_LINK_UNAVAILABLE'),
+            ({'lspci': lambda s: s.replace(' Capabilities: [80] Express (v2) Endpoint', ' Capabilities: <access denied>')}, 'PCIE_LINK_UNAVAILABLE'),
+            # A BF4 function whose VPD serial is blank cannot confirm a physical
+            # card count; the shared verbose capture carries both link and serial
+            # data, so the identity guard is exercised through that same dump.
+            ({'lspci': lambda s: s.replace(' [SN] Serial number: CARD-A', ' [SN] Serial number:')}, 'BF4_IDENTITY_UNAVAILABLE'),
+        ]
+        for project in ('neutrino', 'naboo'):
+            for overrides, code in scenarios:
+                with self.subTest(project=project, code=code):
+                    result = self.run_fixture(project=project, overrides=overrides)
+                    self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                    self.assertIn('ISSUE|' + code, result.stdout)
+
+    def test_memory_ratio_boundary_and_invalid_config(self):
+        # Sixteen 128 GiB modules = 2147483648 KiB; 50% is exact.
+        for ratio, expected in [('0.5', 0), ('0.51', 1), ('nan', 1), ('0', 1)]:
+            result = self.run_fixture(ratio=ratio, overrides={'cat': "printf 'MemTotal: 1073741824 kB\\n'"})
+            self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+
+if __name__=='__main__':
+    unittest.main()
