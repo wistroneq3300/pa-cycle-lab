@@ -1109,6 +1109,11 @@ class AddOs(BaseModel):
     bmc_pass: str = ""
     bmc_ssh_port: int = Field(22, strict=True, ge=1, le=65535)
     ipmi_port: int = Field(623, strict=True, ge=1, le=65535)
+    # 身份驗證用的主機名。可先留空（用 probe 端點自動抓取並落地），也可直接填。
+    # 帶進 _norm_os_entry 才會寫入 data.json；不填則節點會因缺少 hostname 而被
+    # Cycle 視為無效目標（fallback 成 n<slot>）。
+    os_hostname: str = ""
+    bmc_hostname: str = ""
     model_config = {"populate_by_name": True}
 
 
@@ -1128,6 +1133,9 @@ class UpdateOs(BaseModel):
     ipmi_port: int | None = Field(None, strict=True, ge=1, le=65535)
     # None = 不更動；{} = 清空；提供內容則與現有 capabilities 合併
     capabilities: dict | None = None
+    # 身份驗證主機名。None = 不更動；空字串 = 清除；非空 = 設定。
+    os_hostname: str | None = None
+    bmc_hostname: str | None = None
     model_config = {"populate_by_name": True}
 
 
@@ -1198,7 +1206,11 @@ def machine_add_os(name: str, body: AddOs):
     entry = _norm_os_entry({"ip": ip, "user": user, "pass": pw, "port": port,
                             "label": body.label or f"OS {slot}",
                             "bmc_ip": body.bmc_ip, "bmc_user": body.bmc_user,
-                            "bmc_pass": add_bmc_pass, "bmc_ssh_port": body.bmc_ssh_port, "ipmi_port": body.ipmi_port}, slot)
+                            "bmc_pass": add_bmc_pass, "bmc_ssh_port": body.bmc_ssh_port, "ipmi_port": body.ipmi_port,
+                            # 身份主機名隨新增一起落地；留空時節點會被 Cycle 視為缺少
+                            # hostname（可用 probe 端點自動抓取，或稍後 PATCH 補上）。
+                            "os_hostname": (body.os_hostname or "").strip(),
+                            "bmc_hostname": (body.bmc_hostname or "").strip()}, slot)
     if entry is None:
         # 新增的 OS 也要有 ip+user 才成立（上面已檢查 ip/user 非空，這裡只是防禦）
         raise HTTPException(400, "OS 資料無效")
@@ -1249,6 +1261,21 @@ def machine_update_os(name: str, slot: int, body: UpdateOs):
         cur["bmc_user"] = body.bmc_user.strip()
     if body.bmc_pass and not _is_masked(body.bmc_pass):
         cur["bmc_pass"] = body.bmc_pass
+    # 身份主機名：None = 不更動；空字串 = 清除；非空 = 設定。變更會反映在
+    # node_identity.binding()，因此下方 binding_revision 會自動遞增，
+    # 迫使 Cycle 重新確認目標（避免舊 binding 被沿用）。
+    if body.os_hostname is not None:
+        value = body.os_hostname.strip()
+        if value:
+            cur["os_hostname"] = value
+        else:
+            cur.pop("os_hostname", None)
+    if body.bmc_hostname is not None:
+        value = body.bmc_hostname.strip()
+        if value:
+            cur["bmc_hostname"] = value
+        else:
+            cur.pop("bmc_hostname", None)
     for field in ("bmc_ssh_port", "ipmi_port"):
         if field in body.model_fields_set:
             value = getattr(body, field)
@@ -1328,11 +1355,16 @@ class ProbeOsSlot(BaseModel):
 
 
 @app.post("/api/machines/{name}/os/{slot}/probe")
+@_data_transaction
 def machine_probe_os(name: str, slot: int, body: ProbeOsSlot = None):
-    """用「該 slot 的 OS 帳密」SSH 上去：
-    1) 抓 hostname（自動填 OS 標籤）
-    2) 在本機跑 ipmitool lan print 抓 BMC IP Address（自動填 BMC IP）
-    回 {ok, hostname, bmc_ip, ipmitool_ok, error}。BMC 帳號/密碼不抓（手動填）。"""
+    """用「該 slot 的 OS 帳密」SSH 上去，抓取身份主機名並持久化：
+    1) 抓 OS hostname → 寫入 slot 的 os_hostname（並同步 OS 標籤）
+    2) 在本機跑 ipmitool lan print 抓 BMC IP Address → 寫回 slot 的 bmc_ip（若尚未填）
+    3) 若該 slot 有 BMC 帳密，順便 SSH 進 BMC 抓 hostname → 寫入 bmc_hostname（best-effort）
+    回 {ok, hostname, bmc_ip, bmc_hostname, ipmitool_ok, error}。
+
+    抓到的 hostname 會真正落地到 data.json（過去只回傳給前端、不寫回，
+    導致新增節點永遠缺少 hostname，在 Cycle 被 fallback 成 n<slot> 而無法選取）。"""
     if name not in machines:
         raise HTTPException(404, f"機台不存在: {name}")
     m = machines[name]
@@ -1346,20 +1378,49 @@ def machine_probe_os(name: str, slot: int, body: ProbeOsSlot = None):
     os_port = int(e.get("port") or 22)
     if not os_ip or not os_user or not os_pass:
         return {"ok": False, "error": f"OS {slot} 未填齊 OS IP/帳號/密碼，無法自動抓取。請先補齊再按「抓」。"}
-    # 1) hostname
+    # 1) OS hostname
     hostname, rc, err = ssh_run(os_ip, os_user, os_pass, os_port, "hostname", timeout=12)
     if rc != 0 or not hostname:
         return {"ok": False, "error": f"SSH 連不上 OS {slot}（{os_ip}）：{err or '無法登入'}"}
     hostname = hostname.strip()
-    # 2) BMC IP（用該 OS 本機 ipmitool lan print）
+
+    # 落地：OS hostname；標籤若尚未自訂則一併帶上，讓節點/標籤一致。
+    previous_binding = node_identity.binding(e)
+    e["os_hostname"] = hostname
+    if not (e.get("label") or "").strip() or (e.get("label") or "").strip().lower() in ("", f"os {slot}".lower()):
+        e["label"] = hostname
+
+    # 2) BMC IP（用該 OS 本機 ipmitool lan print）；只在使用者尚未填 bmc_ip 時才自動填。
     bmc_ip, has_ipmi, perr = _probe_bmc_ip(os_ip, os_user, os_pass, os_port)
+    bmc_ip_filled = False
+    if bmc_ip and not (e.get("bmc_ip") or "").strip():
+        e["bmc_ip"] = bmc_ip
+        bmc_ip_filled = True
+
+    # 3) BMC hostname（best-effort；需要該 slot 的 BMC 帳密）
+    bmc_hostname = None
+    target_bmc_ip = (e.get("bmc_ip") or "").strip()
+    if target_bmc_ip and e.get("bmc_user") and e.get("bmc_pass"):
+        bmc_hn, hn_rc, _ = ssh_run(target_bmc_ip, e.get("bmc_user"), e.get("bmc_pass"),
+                                   int(e.get("bmc_ssh_port") or 22), "hostname", timeout=12)
+        if hn_rc == 0 and bmc_hn:
+            bmc_hostname = bmc_hn.strip()
+            e["bmc_hostname"] = bmc_hostname
+
+    # binding() 涵蓋 os_hostname/bmc_hostname/bmc_ip，變更即遞增 revision，
+    # 迫使既有 Cycle 目標重新確認（不沿用舊 binding）。
+    if node_identity.binding(e) != previous_binding:
+        e["binding_revision"] = int(e.get("binding_revision", 1)) + 1
+    _save_data()
+    _invalidate_machine_cache(name)
+
+    result = {"ok": True, "hostname": hostname, "bmc_ip": bmc_ip if bmc_ip_filled else (e.get("bmc_ip") or None),
+              "bmc_hostname": bmc_hostname, "ipmitool_ok": has_ipmi, "os_hostname": hostname}
     if not has_ipmi:
-        return {"ok": True, "hostname": hostname, "bmc_ip": None, "ipmitool_ok": False,
-                "error": f"hostname 已抓到（{hostname}），但 OS {slot} 內無 ipmitool，無法自動抓 BMC IP。請手動填 BMC IP。"}
-    if not bmc_ip:
-        return {"ok": True, "hostname": hostname, "bmc_ip": None, "ipmitool_ok": True,
-                "error": f"hostname 已抓到（{hostname}），但 ipmitool 取不到 BMC IP：{perr}。請手動填。"}
-    return {"ok": True, "hostname": hostname, "bmc_ip": bmc_ip, "ipmitool_ok": True}
+        result["error"] = f"hostname 已抓到並寫入（{hostname}），但 OS {slot} 內無 ipmitool，無法自動抓 BMC IP。請手動填 BMC IP。"
+    elif not bmc_ip:
+        result["error"] = f"hostname 已抓到並寫入（{hostname}），但 ipmitool 取不到 BMC IP：{perr}。請手動填。"
+    return result
 
 
 # ---- 線上狀態快取（TTL），避免大量機台時每次 API 都同步 ping 卡住 ----
