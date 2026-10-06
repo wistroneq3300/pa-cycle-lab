@@ -184,25 +184,66 @@ def records_health(records):
     return next(value for value in ('FAIL', 'WARN', 'UNKNOWN', 'PENDING', 'PASS') if value in states)
 
 
+def _redfish_delta_ids(record):
+    """Ids introduced this record's before->POST delta, or None if unavailable.
+
+    Prefers the explicit top-level marker written at capture time; falls back to
+    the per-service meta so records captured before the marker existed still
+    classify Redfish findings against their loop delta. ``None`` means no
+    comparable delta, so the caller keeps the PRE baseline.
+    """
+    marker = record.get('eventlog_delta_ids')
+    if marker is not None:
+        return {str(i) for i in marker}
+    ids = set()
+    seen_meta = False
+    for stem in ('eventlog_meta', 'redfish_sel_meta'):
+        meta = record.get(stem)
+        if not meta:
+            continue
+        seen_meta = True
+        delta = meta.get('delta') or {}
+        if delta.get('status') == 'UNAVAILABLE':
+            return None
+        for entry in delta.get('new_entries', []):
+            ids.add(str(entry.get('id', '')))
+    return ids if seen_meta else None
+
+
 def aggregate_issues(campaign):
     merged = {}
     for node in campaign["nodes"]:
         # Keep the PRE comparison separate from severity and causation.
         pre_keys = issue_baseline(node['pre']['issues'])
         for record in node_records(node):
+            delta_ids = _redfish_delta_ids(record)
             classified = classify_against_pre([i.copy() for i in record['issues']], pre_keys)
             for item in classified:
+                # Redfish findings classify against this loop's before->POST
+                # delta, not the PRE baseline, so a long-lived event is NEW only
+                # on the loop that introduced it. An UNAVAILABLE delta leaves the
+                # marker absent, so the PRE baseline still applies.
+                if delta_ids is not None and item.get('identity'):
+                    event_id = item['identity'].split('|')[1] if '|' in item['identity'] else ''
+                    item['per_loop_new'] = event_id in delta_ids
+                    item['classification'] = 'NEW' if item['per_loop_new'] else 'KNOWN'
+                    item['known_reason'] = ('' if item['per_loop_new']
+                                            else 'Introduced in an earlier loop of this campaign')
                 key = (node["key"], *issue_key(item))
                 entry = merged.setdefault(key, {**item, "node": node["key"], "occurrences": []})
                 if item["severity"] == "FAIL":
                     entry["severity"] = "FAIL"
-                if entry.get('classification') != 'WORSENED':
+                # NEW wins over KNOWN when the same finding is observed across
+                # phases, so the group surfaces where it was first introduced.
+                if entry.get('classification') != 'NEW':
                     entry['classification'] = item['classification']
                     entry['known_reason'] = item['known_reason']
-                    if item['classification'] == 'WORSENED':
-                        entry['detail'] = item['detail']
-                        entry['native_severity'] = item.get('native_severity')
+                if item.get('severity_changed'):
+                    entry['severity_changed'] = True
+                    entry['previous_severity'] = item.get('previous_severity')
+                    entry['current_severity'] = item.get('current_severity')
                 entry["occurrences"].append(dict(phase=record["phase"], detail=item["detail"],
+                                                  classification=item.get("classification", ""),
                                                   evidence=item.get("evidence", ""),
                                                   snippet=item.get("snippet", "")))
     return list(merged.values())
