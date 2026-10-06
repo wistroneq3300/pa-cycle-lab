@@ -83,6 +83,11 @@ class NodeSession:
         self.pre_issue_keys = {}
         self.upload_attempted = False
         self.script_verified = False
+        # Set true only when the hardware script is confirmed to have run to
+        # completion (transport RETURNED, a single legal RESULT, and that RESULT
+        # is the last line). A verified file+SHA is NOT execution proof, so this
+        # gates post_complete/completed/valid_cycle independently of health.
+        self.hardware_execution_complete = False
         self.dmesg_seen = {}
         self.expected_boot = None
         self.cleanup_safe = True
@@ -331,6 +336,10 @@ class NodeSession:
 
     def capture(self, record, post=False):
         record['shared_core_version']=core_version()
+        # Reset per capture: an earlier phase's complete execution must never
+        # carry over into this loop's verdict.
+        self.hardware_execution_complete = False
+        record['hardware_execution_complete'] = False
         self.event(record,'POST' if post else 'PRE','BASELINE_COLLECTION' if not post else 'POST_STARTED',
                    'Collecting PRE baseline' if not post else 'POST started',phase='POST' if post else 'PRE')
         self.collect_dmesg(record, 'dmesg', evidence_stem='dmesg_clear')
@@ -396,6 +405,27 @@ class NodeSession:
                     except Exception: pass  # owned temporary data only; never retry an action
             findings = config_issues(config.output, config.code)
             record["issues"] += findings
+            # Execution completion is a separate question from health: a script
+            # that ran fully and reported RESULT|FAIL (exit 1) IS complete, while
+            # a timeout/RESPONSE_LOST/truncated run is NOT, regardless of what
+            # findings it produced. Only a transport RETURNED with exactly one
+            # legal RESULT, matching the exit code, sitting on the last line
+            # proves the run reached its end.
+            lines = [line.strip() for line in config.output.splitlines() if line.strip()]
+            results = [line for line in lines if line.startswith('RESULT|')]
+            expected_result = {0: 'RESULT|PASS', 1: 'RESULT|FAIL'}.get(config.code)
+            self.hardware_execution_complete = bool(
+                config.state == 'RETURNED' and expected_result and results == [expected_result]
+                and lines and lines[-1] == expected_result
+                and not (config.code == 0 and findings))
+            record['hardware_execution_complete'] = self.hardware_execution_complete
+            if not self.hardware_execution_complete:
+                self.add(record, 'HARDWARE_EXECUTION_INCOMPLETE', 'hardware',
+                         f'Execution not confirmed: state={config.state}, exit={config.code}, final result={results}',
+                         evidence=record['commands']['hardware']['evidence'])
+                self.node.update(active=False, stop_reason='Hardware script execution incomplete')
+                if not post:
+                    self.node['blocked'].append('Hardware script execution incomplete')
             record['hardware_checks'], record['hardware_check_details'] = parse_hardware_checks(config.output, findings)
             # Pull the per-slot NIC inventory out of the CHECK|NIC_SLOT lines so
             # the PRE baseline can name exactly which NIC is removed or degraded
@@ -499,15 +529,18 @@ class NodeSession:
     # Bound pagination so an anomalous BMC nextLink cannot loop forever.
     REDFISH_MAX_PAGES = 20
 
-    def _redfish_discover(self):
+    def _redfish_discover(self, token):
         """Return dict(system_id, services={name: odata_id}, token, listing_valid, reason).
 
         A failed or unreadable discovery is NOT the same as an empty service
         list: ``listing_valid`` stays false and callers must not conclude that
         any particular service is absent. Only a successfully read, structurally
         valid LogServices collection lets us say a service is NOT PRESENT.
+
+        The caller owns the session: ``token`` is the already-issued X-Auth-Token
+        and is reused for every request below (never a second login), so the
+        caller can guarantee its release even if any of these steps raise.
         """
-        token = self._redfish_token()
         systems = self.transport.redfish_get(self.target, "/redfish/v1/Systems", token)
         if systems.code or not systems.output:
             raise RuntimeError("Redfish /Systems unavailable")
@@ -541,31 +574,43 @@ class NodeSession:
         never turn a valid collection into a FAIL and must never re-trigger any
         power/cycle action. The worst case is a WARN finding so an operator can
         see the leak instead of it silently exhausting the BMC session table.
+
+        A transport-level failure (HTTP 500, timeout, lost response) is returned
+        as a non-zero ``Command`` rather than raised, so the return value is
+        inspected too: any unconfirmed release is a WARN, never a silent
+        success.
         """
         if not token:
             return
         try:
-            self.transport.redfish_logout(self.target, token)
+            result = self.transport.redfish_logout(self.target, token)
+            released = result is None or not getattr(result, 'code', 1)
+            reason = None if released else f"state={getattr(result, 'state', 'UNKNOWN')}, exit={getattr(result, 'code', '?')}"
         except Exception as exc:
-            if record is not None:
-                self.add(record, 'REDFISH_LOGOUT_FAILED', 'redfish',
-                         f'Redfish session logout failed; session may remain open on the BMC: {exc}',
-                         severity='WARN')
+            released, reason = False, str(exc)
+        if released:
+            return
+        if record is not None:
+            self.add(record, 'REDFISH_LOGOUT_FAILED', 'redfish',
+                     f'Redfish session logout not confirmed; session may remain open on the BMC: {reason}',
+                     severity='WARN')
 
     @contextmanager
     def _redfish_session(self, record=None):
         """Discover a session and guarantee logout, whatever the caller does.
 
-        Yields the discovery dict (``token`` used for subsequent ``redfish_get``
-        calls). ``finally`` releases the session so repeated PRE/LOOP/POST
-        collections on a long, multi-node, multi-loop campaign cannot leak one
-        session per collection and exhaust the BMC session table.
+        The login happens *before* the ``try`` so its token can be released in
+        ``finally`` even when discovery itself raises: the previous shape logged
+        in inside ``_redfish_discover`` and only entered the ``try`` afterwards,
+        so a /Systems failure leaked one BMC session per collection. When login
+        itself fails there is no session to release and no fabricated logout.
         """
-        disc = self._redfish_discover()
+        token = self._redfish_token()
         try:
+            disc = self._redfish_discover(token)
             yield disc
         finally:
-            self._redfish_logout(disc.get('token'), record=record)
+            self._redfish_logout(token, record=record)
 
     @staticmethod
     def _redfish_json(text):
@@ -1208,10 +1253,11 @@ class NodeSession:
                         self.event(record,'WARN','COMMAND_RECONCILED','Previously ambiguous command reconciled by changed boot ID and power-on evidence',phase='POST')
             elif any(a["state"] == "RESPONSE_LOST" for a in record["action"]):
                 self.add(record, "COMMAND_UNCONFIRMED", "cycle", "Lost response could not be reconciled with boot and power evidence")
-            record["post_complete"] = True
-            self.node["completed"] += 1
+            record['independent_checks_complete'] = True
+            record["post_complete"] = self.hardware_execution_complete
+            self.node["completed"] += int(record['post_complete'])
             record['boot_confirmed'] = bool(recovered)
-            record['valid_cycle'] = bool(recovered and record.get('power_on') and self.script_verified)
+            record['valid_cycle'] = bool(recovered and record.get('power_on') and self.script_verified and self.hardware_execution_complete)
             self.node['valid_cycles'] += int(record['valid_cycle'])
         except Exception as exc:
             if isinstance(exc, EvidencePersistenceError): raise

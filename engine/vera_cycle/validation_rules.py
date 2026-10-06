@@ -497,9 +497,19 @@ def parse_hardware_checks(text, findings):
             # while the NIC finding is FAIL, because 'NIC_SLOT' never matches the
             # 'NIC' finding component. Skip it so the report has one authority.
             continue
+        # Raw per-slot evidence, not a health validation: the mst row and a
+        # non-NIC device (GPU) on a NIC position must not be badged PASS/FAIL as
+        # a hardware check. Their content stays in the hardware.txt evidence and
+        # the NIC slot inventory.
+        if name in {'NIC_MST_ROW', 'NIC_NON_CARD'}:
+            continue
         component = values.get('bdf', name)
         state = 'UNSUPPORTED' if values.get('state') == 'unsupported' else 'PASS'
-        related = {'CPU_ONLINE': 'CPU', 'MEMORY_VISIBLE': 'DIMM', 'BF4_IDENTITIES': 'BF4'}.get(name, component)
+        # NIC_DEGRADED/NIC_MISSING are validations whose finding component is
+        # 'NIC'; without this mapping they default to PASS while their own NIC
+        # finding is FAIL.
+        related = {'CPU_ONLINE': 'CPU', 'MEMORY_VISIBLE': 'DIMM', 'BF4_IDENTITIES': 'BF4',
+                   'NIC_DEGRADED': 'NIC', 'NIC_MISSING': 'NIC'}.get(name, component)
         if any(i['component'] in {component, related} for i in findings):
             state = 'FAIL'
         key = f'{name}/{component}' if 'bdf' in values else name

@@ -50,6 +50,15 @@ class FakeTransport:
         self.power_off = False
         self.on_action = None
         self.package_missing = False
+        # Redfish session lifecycle bookkeeping. ``live_sessions`` models the
+        # BMC's session table: a login adds a token, only a *confirmed* logout
+        # removes it; an unconfirmed logout leaves it behind so tests can prove
+        # the leak is visible instead of silently swallowed.
+        self.logins = 0
+        self.logout_result = None
+        self.logout_raises = None
+        self.live_sessions = set()
+        self.systems = None
 
     def local_dependencies(self):
         return Command(0, 'available')
@@ -68,13 +77,18 @@ class FakeTransport:
     def redfish_login(self, target, timeout=20):
         if self.redfish_fail:
             raise RuntimeError('redfish login failed (fake)')
-        return 'FAKETOKEN'
+        self.logins += 1
+        token = f'FAKETOKEN{self.logins}'
+        self.live_sessions.add(token)
+        return token
 
     def redfish_get(self, target, path, token, timeout=30):
         self.calls.append((target.key, 'redfish', path))
         if self.redfish_fail:
             return Command(255, 'unreachable', 'NOT_ISSUED')
         if path == '/redfish/v1/Systems':
+            if self.systems is not None:
+                return self.systems
             return Command(0, json.dumps({"Members": [{"@odata.id": "/redfish/v1/Systems/System_0"}]}))
         if path == '/redfish/v1/Systems/System_0/LogServices':
             members = [{"@odata.id": "/redfish/v1/Systems/System_0/LogServices/EventLog"}]
@@ -93,6 +107,11 @@ class FakeTransport:
 
     def redfish_logout(self, target, token, timeout=10):
         self.calls.append((target.key, 'redfish-logout', token))
+        if self.logout_raises is not None:
+            raise self.logout_raises
+        if self.logout_result is not None:
+            return self.logout_result
+        self.live_sessions.discard(token)
         return Command(0, 'OK')
 
     def action(self, t):
