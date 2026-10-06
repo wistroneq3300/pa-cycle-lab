@@ -3310,7 +3310,7 @@ async function assignTaskOpenSheet(sheetName) {
     [
       { txt: "\u25c0 \u56de\u5206\u985e", cls: "btn", fn: () => assignTaskBack() },
       { txt: "\u95dc\u9589", cls: "btn", fn: () => { if (modal) modal.style.width = ""; closeDialog(); } },
-      { txt: `\ud83d\udccb \u8907\u88fd\u6e2c\u9805\u6539\u70ba\u6307\u4ee4 (${_assignTask.sel.size})`,
+      { txt: `\u25b6 \u4e0b\u4e00\u6b65\uff1a\u9032\u5165 PA Agent (${_assignTask.sel.size})`,
         cls: "btn-primary primary", fn: () => assignTaskCopy() },
     ]);
 }
@@ -3391,7 +3391,7 @@ function assignTaskSearch() {
     [
       { txt: "\u25c0 \u56de\u5206\u985e", cls: "btn", fn: () => assignTaskBack() },
       { txt: "\u95dc\u9589", cls: "btn", fn: () => { if (modal) modal.style.width = ""; closeDialog(); } },
-      { txt: `\ud83d\udccb \u8907\u88fd\u6e2c\u9805\u6539\u70ba\u6307\u4ee4 (${_assignTask.sel.size})`,
+      { txt: `\u25b6 \u4e0b\u4e00\u6b65\uff1a\u9032\u5165 PA Agent (${_assignTask.sel.size})`,
         cls: "btn-primary primary", fn: () => assignTaskCopy() },
     ]);
 }
@@ -3403,7 +3403,7 @@ function assignTaskPage(dir) {
   showDialog(`\u2705 \u6307\u6d3e\u4efb\u52d9 \u00b7 ${esc(_assignTask.sheet ? _assignTask.sheet.label : "")}`, `<div id="assign-task-body">${assignTaskListHtml()}</div>`, [
     { txt: "\u25c0 \u56de\u5206\u985e", cls: "btn", fn: () => assignTaskBack() },
     { txt: "\u95dc\u9589", cls: "btn", fn: () => { if (modal) modal.style.width = ""; closeDialog(); } },
-    { txt: `\ud83d\udccb \u8907\u88fd\u6e2c\u9805\u6539\u70ba\u6307\u4ee4 (${_assignTask.sel.size})`, cls: "btn-primary primary", fn: () => assignTaskCopy() },
+    { txt: `\u25b6 \u4e0b\u4e00\u6b65\uff1a\u9032\u5165 PA Agent (${_assignTask.sel.size})`, cls: "btn-primary primary", fn: () => assignTaskCopy() },
   ]);
 }
 function assignTaskToggle(code, on) {
@@ -3432,7 +3432,7 @@ function assignTaskReRender() {
   showDialog(`\u2705 \u6307\u6d3e\u4efb\u52d9 \u00b7 ${esc(_assignTask.sheet ? _assignTask.sheet.label : "")}`, `<div id="assign-task-body">${assignTaskListHtml()}</div>`, [
     { txt: "\u25c0 \u56de\u5206\u985e", cls: "btn", fn: () => assignTaskBack() },
     { txt: "\u95dc\u9589", cls: "btn", fn: () => { if (modal) modal.style.width = ""; closeDialog(); } },
-    { txt: `\ud83d\udccb \u8907\u88fd\u6e2c\u9805\u6539\u70ba\u6307\u4ee4 (${_assignTask.sel.size})`, cls: "btn-primary primary", fn: () => assignTaskCopy() },
+    { txt: `\u25b6 \u4e0b\u4e00\u6b65\uff1a\u9032\u5165 PA Agent (${_assignTask.sel.size})`, cls: "btn-primary primary", fn: () => assignTaskCopy() },
   ]);
 }
 
@@ -3590,6 +3590,7 @@ async function assignTaskCopy() {
         title,
         task: built1.text,
         rich: built1.rich,
+        mode: "plan",
       });
       return;
     }
@@ -3661,7 +3662,7 @@ function arHlAssignText(text) {
 }
 // [AR-HL v1 END]
 
-// 指派任務結果浮動視窗（複製測項改為指令） — 仿 User Guide 小視窗
+// 指派任務結果浮動視窗（下一步：進入 PA Agent） — 仿 User Guide 小視窗
 // ============================================================
 // Rich, sectioned HTML for the assign-result window. Mirrors the Test Case detail
 // panel (same eng-* classes) so the generated command reads as nicely as the
@@ -3812,7 +3813,7 @@ const AssignResultWin = (() => {
     foot.innerHTML =
       '<span class="ar-hint" id="ar-hint"></span>' +
       '<button class="btn small" id="ar-copy-all" title="複製全部指令文字">\ud83d\udccb 複製全部</button>' +
-      '<button class="btn small btn-good" id="ar-pa-agent" title="交給 PA Agent 分析此指派">🤖 PA Agent 對話</button>';
+      '<button class="btn small btn-good" id="ar-pa-agent" title="進入 PA Agent（先出計畫，經你同意後才執行）">🤖 進入 PA Agent</button>';
     content.appendChild(body);
     content.appendChild(foot);
     win.appendChild(bar);
@@ -3861,6 +3862,7 @@ const AssignResultWin = (() => {
         rich,
         title: "PA Agent 分析指派結果 · " + (mach?.name || title || ""),
         branch: mach?.name || undefined,
+        mode: "plan",
       });
     });
     win.querySelector(".ar-grip").addEventListener("mousedown", (e) => {

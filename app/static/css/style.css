@@ -1236,98 +1236,154 @@ tr.has-gpu-alert td{box-shadow:inset 0 2px 0 0 #ff6a3d}
 .pa-drawer-title{display:flex;align-items:center;gap:10px;min-width:0}
 .pa-drawer-ico{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:7px;
   font-weight:700;font-size:11px;letter-spacing:.5px;color:#eef6ff;
-  background:linear-gradient(135deg,#2f8fff,#7c4dff)}
+  background:linear-gradient(135deg,#2f8fff,#5a7bd6)}
 .pa-drawer-titles{display:flex;flex-direction:column;min-width:0}
 .pa-drawer-titles strong{font-size:13px;color:var(--text,#e8eaf0)}
-.pa-drawer-status{font-size:11px;color:var(--text-dim,#9aa2b1)}
-.pa-drawer-status.busy{color:var(--accent,#4aa3ff)}
-.pa-drawer-status.err{color:var(--red,#ff5a52)}
+.pa-drawer-status{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim,#9aa2b1)}
+.pa-status-dot{width:7px;height:7px;border-radius:50%;background:var(--text-faint,#6b7180);flex:none}
+.pa-status-busy .pa-status-dot{background:var(--accent,#4aa3ff);box-shadow:0 0 0 3px rgba(74,163,255,.18);animation:pa-pulse 1.4s infinite}
+.pa-status-wait .pa-status-dot{background:var(--yellow,#f5a623)}
+.pa-status-done .pa-status-dot{background:var(--green,#3fbf7f)}
+.pa-status-err .pa-status-dot{background:var(--red,#ff5a52)}
+.pa-status-busy{color:var(--accent,#4aa3ff)}
+.pa-status-wait{color:var(--yellow,#f5a623)}
+.pa-status-done{color:var(--green,#3fbf7f)}
+.pa-status-err{color:var(--red,#ff5a52)}
+@keyframes pa-pulse{0%,100%{opacity:1}50%{opacity:.45}}
 .pa-drawer-close{flex:none;width:28px;height:28px;border-radius:6px;border:1px solid var(--border);
   background:transparent;color:var(--text-dim,#9aa2b1);font-size:18px;line-height:1;cursor:pointer}
 .pa-drawer-close:hover{color:var(--text,#e8eaf0);border-color:var(--text-dim,#9aa2b1)}
-/* 兩欄：左＝測項內容（指派給 PA Agent 的指令），右＝對話流 */
+/* 兩欄：左＝測試任務（Test Case Context 約 38%），右＝Agent 對話區（約 62%） */
 .pa-drawer-cols{flex:1;display:flex;min-height:0}
-.pa-drawer-left{flex:1 1 52%;min-width:0;display:flex;flex-direction:column;
+.pa-drawer-left{flex:0 0 38%;min-width:0;display:flex;flex-direction:column;
   border-right:1px solid var(--border);background:var(--bg,#0f1114)}
-.pa-drawer-left-head{flex:none;padding:10px 14px;border-bottom:1px solid var(--border);
-  font-size:11px;letter-spacing:.3px;color:var(--text-dim,#9aa2b1)}
+.pa-drawer-left-head{flex:none;display:flex;align-items:baseline;gap:8px;
+  padding:10px 14px;border-bottom:1px solid var(--border)}
+.pa-drawer-left-head strong{font-size:12px;letter-spacing:.4px;color:var(--text,#e8eaf0)}
+.pa-drawer-left-sub{font-size:10px;letter-spacing:.4px;color:var(--text-faint,#6b7180);text-transform:uppercase}
 .pa-drawer-case{flex:1;overflow:auto;padding:14px}
 .pa-case-text{margin:0;font-size:12px;line-height:1.6;color:var(--text,#e8eaf0);
   white-space:pre-wrap;word-break:break-word}
-.pa-drawer-right{flex:1 1 48%;min-width:0;display:flex;flex-direction:column;min-height:0}
-.pa-drawer-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;
+/* 左欄：測試任務摘要 */
+.pa-task-meta{margin:0 0 14px;padding:10px 12px;background:var(--panel-bg,#1b1e24);
+  border:1px solid var(--border,#2a2e37);border-radius:8px}
+.pa-task-grid{margin:0;display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:12px}
+.pa-task-grid dt{color:var(--text-dim,#8a909c);white-space:nowrap}
+.pa-task-grid dd{margin:0;word-break:break-word;color:var(--text,#e8eaf0)}
+.pa-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.pa-task-refs{margin:14px 0 0;border-top:1px dashed var(--border,#2a2e37);padding-top:10px}
+.pa-task-refs h4{margin:0 0 6px;font-size:12px;color:var(--text-dim,#9aa2b1);letter-spacing:.3px}
+.pa-refs-empty{font-size:11.5px;color:var(--text-faint,#6b7180)}
+.pa-drawer-right{flex:1 1 62%;min-width:0;display:flex;flex-direction:column;min-height:0}
+.pa-drawer-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;
   background:var(--bg,#0f1114)}
-.pa-ctx{flex:none;border:1px dashed var(--border);border-radius:8px;padding:10px 12px;background:var(--bg-panel)}
-.pa-ctx strong{display:block;font-size:11px;color:var(--text-dim,#9aa2b1);margin-bottom:6px;letter-spacing:.3px}
-.pa-ctx pre{margin:0;font-size:12px;line-height:1.5;color:var(--text,#e8eaf0);white-space:pre-wrap;word-break:break-word;
-  max-height:140px;overflow:auto}
-.pa-msg{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--bg-panel)}
+.pa-empty,.pa-msg-empty{color:var(--text-faint,#6b7180);font-size:12px;text-align:center;padding:24px 8px}
+/* 訊息：工程師 / PA Agent / 系統 / 工具 視覺分離 */
+.pa-msg{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--bg-panel);
+  max-width:88%}
 .pa-msg-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
 .pa-msg-role{font-size:11px;font-weight:600;letter-spacing:.3px;padding:2px 8px;border-radius:999px;
   background:rgba(255,255,255,.06);color:var(--text-dim,#9aa2b1)}
 .pa-msg-time{font-size:10px;color:var(--text-faint,#6b7180)}
-.pa-msg-user{border-color:rgba(74,163,255,.4);background:rgba(74,163,255,.08)}
-.pa-msg-user .pa-msg-role{background:rgba(74,163,255,.2);color:#bcdcff}
-.pa-msg-content{font-size:13px;line-height:1.6;color:var(--text,#e8eaf0);white-space:pre-wrap;word-break:break-word}
+.pa-msg-content{font-size:13px;line-height:1.65;color:var(--text,#e8eaf0);white-space:pre-wrap;word-break:break-word}
+/* Markdown 渲染後：改用一般換行（各區塊自帶間距），避免 pre-wrap 造成多餘空行 */
+.pa-msg-content.pa-md{white-space:normal}
+.pa-md .pa-md-p{margin:0 0 8px}
+.pa-md .pa-md-p:last-child{margin-bottom:0}
+.pa-md .pa-md-h{margin:12px 0 6px;font-size:14px;font-weight:700;color:var(--text,#e8eaf0)}
+.pa-md .pa-md-h:first-child{margin-top:0}
+.pa-md .pa-md-ul,.pa-md .pa-md-ol{margin:4px 0 8px;padding-left:20px}
+.pa-md .pa-md-ul{list-style:disc}
+.pa-md .pa-md-ol{list-style:decimal}
+.pa-md .pa-md-ul li,.pa-md .pa-md-ol li{margin:2px 0}
+.pa-md .pa-md-hr{border:0;border-top:1px solid rgba(255,255,255,.14);margin:12px 0}
+.pa-md .pa-md-quote{margin:8px 0;padding:4px 12px;border-left:3px solid rgba(74,163,255,.5);
+  background:rgba(74,163,255,.06);color:var(--text-dim,#9aa2b1);border-radius:0 4px 4px 0}
+.pa-md code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;
+  padding:1px 5px;border-radius:4px;background:rgba(255,255,255,.1);color:#ffd9a0;word-break:break-word}
+.pa-md .pa-md-pre{margin:8px 0;padding:10px 12px;border-radius:8px;overflow-x:auto;
+  background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.08)}
+.pa-md .pa-md-pre code{padding:0;background:none;color:#d6e2f0;font-size:12px;line-height:1.55;white-space:pre}
+.pa-md a{color:#7fc0ff;text-decoration:underline}
+.pa-md strong{font-weight:700;color:#fff}
+.pa-md .pa-md-table{border-collapse:collapse;width:100%;margin:8px 0;font-size:12px}
+.pa-md .pa-md-table th,.pa-md .pa-md-table td{border:1px solid rgba(255,255,255,.14);padding:6px 9px;text-align:left;vertical-align:top}
+.pa-md .pa-md-table th{background:rgba(255,255,255,.08);font-weight:600;white-space:nowrap}
+.pa-md .pa-md-table tr:nth-child(even) td{background:rgba(255,255,255,.03)}
+/* 工程師：靠右、藍框 */
+.pa-msg-eng{align-self:flex-end;border-color:rgba(74,163,255,.4);background:rgba(74,163,255,.08)}
+.pa-msg-eng .pa-msg-role{background:rgba(74,163,255,.2);color:#bcdcff}
+/* PA Agent：靠左 */
+.pa-msg-agent{align-self:flex-start;border-color:var(--border,#2a2e37);background:var(--bg-panel,#16181d)}
+.pa-msg-agent .pa-msg-role{background:rgba(124,77,255,.18);color:#cbb8ff}
+/* 工具活動 */
+.pa-msg-tool{align-self:stretch;max-width:100%;border-style:dashed;background:rgba(0,0,0,.18)}
+.pa-msg-tool .pa-msg-role{background:rgba(255,255,255,.05);color:var(--text-dim,#9aa2b1)}
 .pa-msg-error{color:var(--red,#ff5a52)}
-.pa-msg-tool{border:1px solid var(--border);border-radius:8px;background:rgba(0,0,0,.2);padding:8px 10px}
-.pa-msg-tool-name{font-size:11px;font-weight:600;color:var(--accent,#4aa3ff);margin-bottom:4px}
 .pa-msg-tool-io{margin:0;font-size:11px;line-height:1.5;color:var(--text-dim,#9aa2b1);white-space:pre-wrap;word-break:break-word;
-  max-height:220px;overflow:auto}
-.pa-msg-tool-call{font-size:12px;color:var(--text-dim,#9aa2b1);padding:2px 0}
-.pa-msg-empty{color:var(--text-faint,#6b7180);font-size:12px;text-align:center;padding:24px 8px}
-/* 執行中的活動條（最新命令 / 工具輸出；就地更新，不堆積） */
-.pa-activity{flex:none;border:1px dashed var(--border,#2a2e37);border-radius:8px;padding:8px 10px;background:rgba(0,0,0,.18)}
-.pa-activity-title{font-size:11px;color:var(--text-dim,#9aa2b1);margin-bottom:6px;letter-spacing:.3px}
-.pa-approval{flex:none;margin:0 14px;border:1px solid var(--yellow,#f5a623);background:rgba(245,166,35,.1);
+  max-height:260px;overflow:auto}
+/* 系統提示（非工程師發言） */
+.pa-sysnote,.pa-done-note{align-self:stretch;display:flex;gap:8px;align-items:flex-start;
+  font-size:11.5px;line-height:1.55;color:var(--text-dim,#9aa2b1);
+  background:rgba(255,255,255,.03);border:1px dashed var(--border,#2a2e37);border-radius:8px;padding:8px 10px}
+.pa-done-note{border-style:solid;border-color:var(--green,#3fbf7f);background:rgba(63,191,127,.08);
+  color:var(--text,#e8eaf0)}
+.pa-sysnote-tag{flex:none;font-size:10px;font-weight:600;letter-spacing:.4px;padding:1px 6px;border-radius:4px;
+  background:rgba(255,255,255,.08);color:var(--text-dim,#9aa2b1)}
+.pa-done-note .pa-sysnote-tag{background:rgba(63,191,127,.2);color:var(--green,#3fbf7f)}
+/* 執行活動（可摺疊，不淹沒對話） */
+.pa-activity{flex:none;align-self:stretch;border:1px dashed var(--border,#2a2e37);border-radius:8px;
+  padding:8px 10px;background:rgba(0,0,0,.18)}
+.pa-activity-title{cursor:pointer;font-size:11px;color:var(--text-dim,#9aa2b1);letter-spacing:.3px;list-style:none}
+.pa-activity-title::-webkit-details-marker{display:none}
+.pa-activity-title::before{content:"▶ ";font-size:9px}
+.pa-activity[open] .pa-activity-title::before{content:"▼ "}
+.pa-activity .pa-msg-tool-io{margin-top:8px}
+/* Agent 執行計畫卡（承載未來 plan 物件；未提供時不渲染假計畫） */
+.pa-plan{flex:none;align-self:stretch;border:1px solid rgba(124,77,255,.4);border-radius:10px;
+  background:rgba(124,77,255,.06);padding:10px 12px}
+.pa-plan-title{font-size:11px;font-weight:600;letter-spacing:.3px;color:#cbb8ff;margin-bottom:8px}
+.pa-plan-empty{font-size:11.5px;color:var(--text-dim,#9aa2b1)}
+/* 等待確認提示（僅在等待工程師確認時出現）——純文字，無按鈕 */
+.pa-approval-slot{flex:none;border:1px solid var(--yellow,#f5a623);background:rgba(245,166,35,.1);
   border-radius:10px;padding:10px 12px}
-.pa-approval-head{font-size:12px;font-weight:600;color:var(--yellow,#f5a623);margin-bottom:6px}
-.pa-approval-detail{margin:0 0 8px;font-size:11px;line-height:1.5;color:var(--text,#e8eaf0);white-space:pre-wrap;
-  word-break:break-word;background:rgba(0,0,0,.2);border-radius:6px;padding:6px 8px;max-height:120px;overflow:auto}
-.pa-approval-actions{display:flex;gap:8px}
+.pa-approval-hint{display:flex;flex-direction:column;gap:6px}
+.pa-approval-head{font-size:12px;font-weight:600;color:var(--yellow,#f5a623)}
+.pa-approval-note{font-size:11.5px;line-height:1.6;color:var(--text-dim,#9aa2b1)}
+.pa-approval-note kbd{font:inherit;font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;
+  border:1px solid var(--border,#2a2e37);background:var(--panel-bg,#14161a);color:var(--text,#e6e9ef)}
 .pa-drawer-foot{flex:none;display:flex;flex-direction:column;gap:8px;
   padding:10px 14px;border-top:1px solid var(--border)}
-.pa-foot-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.pa-drawer-hint{font-size:10px;color:var(--text-faint,#6b7180);line-height:1.4;flex:1;min-width:0}
-.pa-drawer-start{flex:none;font-size:12px;font-weight:600;padding:8px 16px;border-radius:8px;border:0;
-  cursor:pointer;background:var(--accent,#4aa3ff);color:#0b1220}
-.pa-drawer-start:hover:not(:disabled){filter:brightness(1.08)}
-.pa-drawer-start:disabled{opacity:.55;cursor:not-allowed}
+.pa-foot-hint{font-size:10px;color:var(--text-faint,#6b7180);line-height:1.4}
+.pa-drawer-hint{font-size:10px;color:var(--text-faint,#6b7180);line-height:1.4}
 /* 左欄 rich / 空狀態 */
 .pa-case-rich{font-size:12px;line-height:1.6;color:var(--text,#e8eaf0)}
 .pa-case-rich pre{white-space:pre-wrap;word-break:break-word}
 .pa-case-empty{font-size:12px;color:var(--text-faint,#6b7180);text-align:center;padding:24px 8px}
-/* 右欄待審閱橫幅 */
-.pa-review{flex:none;border:1px solid var(--accent,#4aa3ff);border-radius:10px;
-  background:rgba(74,163,255,.1);padding:12px 14px}
-.pa-review-title{font-size:12px;font-weight:600;color:var(--accent,#4aa3ff);margin-bottom:6px;letter-spacing:.2px}
-.pa-review-text{font-size:12px;line-height:1.6;color:var(--text,#e8eaf0);white-space:pre-wrap;word-break:break-word}
-.pa-review-meta{margin-top:8px;font-size:11px;color:var(--text-dim,#9aa2b1);line-height:1.5;
-  white-space:pre-wrap;word-break:break-word}
-.pa-review-warn{color:var(--yellow,#f5a623)}
-/* 案例資訊確認卡（左欄頂端） */
-.pa-info-card{margin:0 0 12px;padding:10px 12px;background:var(--panel-bg,#1b1e24);border:1px solid var(--border,#2a2e37);border-radius:8px}
-.pa-info-card-title{font-size:13px;font-weight:600;margin-bottom:8px}
-.pa-info-grid{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:12.5px}
-.pa-info-grid dt{color:var(--text-dim,#8a909c)}
-.pa-info-grid dd{margin:0;word-break:break-word}
-.pa-info-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-/* 右欄多行輸入（自動增高） */
-.pa-input-wrap{display:flex;gap:8px;align-items:flex-end;margin-bottom:6px}
-.pa-msg-input{width:100%;box-sizing:border-box;resize:none;min-height:72px;max-height:240px;line-height:1.5;padding:12px 14px;
+/* 對話輸入區 */
+.pa-input-wrap{display:flex;gap:8px;align-items:flex-end}
+.pa-attach{flex:none;width:38px;height:38px;border-radius:8px;border:1px solid var(--border,#2a2e37);
+  background:var(--panel-bg,#14161a);color:var(--text-dim,#9aa2b1);font-size:15px;cursor:not-allowed;opacity:.6}
+.pa-msg-input{flex:1;box-sizing:border-box;resize:none;min-height:38px;max-height:200px;line-height:1.5;padding:9px 12px;
   background:var(--panel-bg,#14161a);border:1px solid var(--border,#2a2e37);border-radius:8px;
   color:var(--text,#e6e9ef);font:inherit;font-size:13px;overflow-y:auto}
 .pa-msg-input:focus{outline:none;border-color:var(--accent,#4aa3ff)}
-.pa-msg-send{white-space:nowrap;padding:9px 14px;background:var(--accent,#4aa3ff);color:#fff;border:none;
+.pa-msg-input::placeholder{color:var(--text-faint,#6b7180)}
+.pa-msg-send{flex:none;white-space:nowrap;padding:9px 16px;background:var(--accent,#4aa3ff);color:#fff;border:none;
   border-radius:8px;cursor:pointer;font:inherit;font-size:13px;font-weight:600}
-.pa-msg-send:hover{filter:brightness(1.08)}
+.pa-msg-send:hover:not(:disabled){filter:brightness(1.08)}
+.pa-msg-send:disabled{opacity:.55;cursor:not-allowed}
 /* 浅色主題覆寫 */
 :root[data-theme="light"] .pa-drawer-panel{background:var(--bg-panel,#fff);border-color:var(--border,#d5d9e0);
   box-shadow:0 24px 70px rgba(30,40,60,.22)}
 :root[data-theme="light"] .pa-drawer-body,
 :root[data-theme="light"] .pa-drawer-left,
 :root[data-theme="light"] .pa-drawer-case{background:var(--bg,#f4f5f7)}
-:root[data-theme="light"] .pa-info-card{background:var(--card,#fff);border-color:var(--border,#d5d9e0)}
+:root[data-theme="light"] .pa-task-meta{background:var(--card,#fff);border-color:var(--border,#d5d9e0)}
+/* 窄螢幕：左欄收合較小，右欄對話優先 */
+@media (max-width:1100px){
+  .pa-drawer-left{flex-basis:34%}
+}
 :root[data-theme="light"] .pa-info-card-title{color:var(--text,#1a1d22)}
 :root[data-theme="light"] .pa-info-grid dt{color:var(--text-dim,#5b626e)}
 :root[data-theme="light"] .pa-info-grid dd{color:var(--text,#1a1d22)}

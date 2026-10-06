@@ -2,8 +2,8 @@
 /* E2E — P3-e: Assign Task -> PA Agent drawer hand-off (entry point #2).
  *
  * Drives the real production flow: open the genuine assign-task modal
- * (`openAssignTask`) -> pick sheet -> tick TWO cases -> 產生指令 (2) ->
- * 確認產生指令. The multi-case path renders the assign-result window; its
+ * (`openAssignTask`) -> pick sheet -> tick TWO cases -> 下一步：進入 PA Agent (2) ->
+ * 進入 PA Agent (confirm step). The multi-case path renders the assign-result window; its
  * 🤖 PA Agent 對話 button (`#ar-pa-agent`) must hand the first chosen case to
  * PA_Agent.open, which opens the chat drawer and starts an AgentRun.
  * (A single-case selection short-circuits straight to PA_Agent.open; the
@@ -129,6 +129,9 @@ async function serveStatic(page) {
 
 async function serveJson(page) {
   let pollCount = 0;
+  let started = false;
+  let startMode = null;
+  let approved = false;
   await page.route(/^http:\/\/127\.0\.0\.1:\d+\/api\//, async (route) => {
     const u = new URL(route.request().url());
     const key = u.pathname + u.search;
@@ -150,18 +153,35 @@ async function serveJson(page) {
       return j({ ok: true, run: { run_id: "run-e2e-1", case_variant_id: VARIANT, status: "PENDING", context: {} } });
     }
     if (path === "/api/agent/runs/run-e2e-1/start" && method === "POST") {
-      return j({ ok: true, run_id: "run-e2e-1", conversation_ref: "conv-1", run: { run_id: "run-e2e-1", status: "RUNNING" } });
+      // Plan-mode start: the conversation is created and the agent produces its
+      // plan. Nothing has executed yet — that only happens after a GO message.
+      started = true;
+      const body = (() => { try { return JSON.parse(route.request().postData() || "{}"); } catch { return {}; } })();
+      startMode = body.mode || "execute";
+      return j({ ok: true, run_id: "run-e2e-1", conversation_ref: "conv-1",
+        run: { run_id: "run-e2e-1", status: started ? "RUNNING" : "PENDING" } });
+    }
+    if (path === "/api/agent/runs/run-e2e-1/messages" && method === "POST") {
+      // Engineer turn (e.g. "GO"): acknowledge like a normal chat message.
+      const body = (() => { try { return JSON.parse(route.request().postData() || "{}"); } catch { return {}; } })();
+      if (/^\s*(ok|go|開始|执行|執行|可以|run)\s*$/i.test(String(body.text || ""))) approved = true;
+      return j({ ok: true, run_id: "run-e2e-1", messages: [] });
     }
     if (path === "/api/agent/runs/run-e2e-1/messages") {
       pollCount++;
-      return j({ ok: true, messages: [
-        { seq: 1, role: "user", kind: "message", text: "請分析此指派結果", created_at: 1759200000 },
-        { seq: 2, role: "agent", kind: "message", text: `PA Agent E2E transcript for ${VARIANT}.`, created_at: 1759200003 },
-      ] });
+      const msgs = [
+        { seq: 1, role: "agent", kind: "message",
+          text: "我將對 DUT 執行 PCIe 盤點，先做 lspci -nn，再以 BDF 查 -vvv，最後與 SPEC 比對。要開始請回覆 OK 或 GO。",
+          created_at: 1759200001 },
+      ];
+      return j({ ok: true, messages: msgs });
     }
     if (path === "/api/agent/runs/run-e2e-1") {
-      // finished -> DONE (never PASS/FAIL: the agent only logs; the engineer decides).
-      const status = pollCount >= 2 ? "DONE" : "RUNNING";
+      // Agent 出計畫後，agent-server 的 per-turn「finished」會映射成
+      // WAITING_FOR_USER（等待工程師，不是 DONE 也不是執行中）；approved 之後
+      // 才由 DONE 收尾（DONE 絕不顯示為 PASS）。
+      let status = "WAITING_FOR_USER";
+      if (approved) status = pollCount >= 2 ? "DONE" : "RUNNING";
       return j({ ok: true, run: { run_id: "run-e2e-1", status,
         final_result: status === "DONE" ? "E2E agent log: lspci shows 2 GPUs; LnkSta x16." : "" } });
     }
@@ -258,13 +278,15 @@ async function waitForServer() {
   await boxes.nth(0).check();
   await boxes.nth(1).check();
 
-  // Footer action reads 產生指令 (2) once cases are selected.
-  const genBtn = page.locator('button:has-text("產生指令")').first();
+  // Footer action reads 下一步：進入 PA Agent (2) once cases are selected.
+  const genBtn = page.locator('button:has-text("下一步：進入 PA Agent")').first();
   await genBtn.waitFor({ state: "visible", timeout: 10000 });
   await genBtn.click();
 
-  // workspace-ux wraps assignTaskCopy with a confirm step.
-  const confirmBtn = page.locator('button:has-text("確認產生指令")').first();
+  // workspace-ux wraps assignTaskCopy with a confirm step ("確認測項與目標").
+  // The primary button reads 進入 PA Agent; scope to the dialog footer so it
+  // does not collide with the footer button ("下一步：進入 PA Agent") behind it.
+  const confirmBtn = page.locator('#rm-dialog-foot .primary:has-text("進入 PA Agent")').first();
   await confirmBtn.waitFor({ state: "visible", timeout: 10000 });
   await confirmBtn.click();
 
@@ -287,7 +309,8 @@ async function waitForServer() {
     const el = document.getElementById("pa-agent-drawer");
     return !!el && el.classList.contains("open") && el.offsetWidth > 0 && el.offsetHeight > 0;
   });
-  const ctxRendered = await page.evaluate(() => !!document.querySelector("#pa-agent-drawer .pa-ctx"));
+  // 新兩欄版面：測試任務摘要改由左欄 .pa-task-meta 呈現（.pa-ctx 為舊版殘留）。
+  const ctxRendered = await page.evaluate(() => !!document.querySelector("#pa-agent-drawer .pa-drawer-left .pa-task-meta"));
   // 新兩欄：左欄測項內容應有內容（rich 或 text 之一）。
   const leftPane = await page.evaluate(() => {
     const el = document.querySelector("#pa-agent-drawer #pa-drawer-case");
@@ -297,58 +320,58 @@ async function waitForServer() {
     const el = document.getElementById("pa-drawer-status");
     return el ? el.textContent : "";
   });
-  // 審閱優先：open() 只建立 PENDING run，不自動執行。先確認「開始執行」
-  // 按鈕已顯示（待審閱），訊息尚未開始輪詢。
-  await page.waitForSelector("#pa-drawer-start", { state: "visible", timeout: 10000 }).catch(() => {});
-  const reviewState = await page.evaluate(() => {
-    const btn = document.getElementById("pa-drawer-start");
-    return {
-      startVisible: !!(btn && !btn.hidden && btn.offsetWidth > 0),
-      reviewBanner: !!document.querySelector("#pa-drawer-body .pa-review"),
-      status: (document.getElementById("pa-drawer-status") || {}).textContent || "",
-      msgsBefore: (document.querySelector("#pa-drawer-body") || { querySelectorAll: () => [] }).querySelectorAll(".pa-msg").length,
-    };
-  });
-  // 確認閘門：在輸入框打字後按 Enter「不得」啟動執行（必須明確按鈕）。
-  const ENTER_NOTE = "E2E-ENTER-NOTE: 請優先檢查 PCIe link";
-  await page.fill("#pa-msg-input", ENTER_NOTE);
-  await page.focus("#pa-msg-input");
-  await page.keyboard.press("Enter");
-  await page.waitForTimeout(800);
-  const enterResult = await page.evaluate((note) => {
-    const btn = document.getElementById("pa-drawer-start");
-    const body = document.getElementById("pa-drawer-body");
-    const userMsgs = body
-      ? Array.from(body.querySelectorAll(".pa-msg-role")).filter((n) => n.textContent === "你").length
-      : 0;
-    return {
-      // Enter 後 run 仍未啟動：按鈕仍可見、尚未輪詢到訊息。
-      startStillVisible: !!(btn && !btn.hidden),
-      noMsgsYet: (body ? body.querySelectorAll(".pa-msg").length : 0) === 0,
-      noteShown: (body ? body.textContent : "").includes(note),
-      userMsgs,
-    };
-  }, ENTER_NOTE);
-  // 使用者明確按下「確認並開始執行」→ 才觸發 /start。
-  await page.evaluate(() => {
-    const btn = document.getElementById("pa-drawer-start");
-    if (btn && !btn.hidden) btn.click();
-  });
-  await page.waitForFunction(
-    () => { const b = document.getElementById("pa-drawer-start"); return b && b.hidden; },
-    null, { timeout: 5000 },
-  ).catch(() => {});
-  const confirmResult = await page.evaluate(() => {
-    const btn = document.getElementById("pa-drawer-start");
-    return { startHidden: !!btn && btn.hidden };
-  });
+  // 對話式確認閘門（Design Y）：沒有「開始執行」按鈕，一切都在同一個輸入框。
+  // 開窗後 agent 先出計畫並等待；輸入 OK/GO 送出才會執行。
   await page.waitForFunction(
     () => {
       const b = document.querySelector("#pa-drawer-body");
-      return b && b.querySelectorAll(".pa-msg").length >= 2;
+      return b && b.querySelectorAll(".pa-msg").length >= 1;
     },
-    null,
-    { timeout: 15000 },
+    null, { timeout: 15000 },
+  ).catch(() => {});
+  const reviewState = await page.evaluate(() => {
+    const body = document.querySelector("#pa-drawer-body");
+    const planMsg = Array.from(body ? body.querySelectorAll(".pa-msg-agent .pa-msg-content") : [])
+      .map((n) => n.textContent).join("\n");
+    return {
+      startButtonExists: !!document.getElementById("pa-drawer-start"),
+      status: (document.getElementById("pa-drawer-status") || {}).textContent || "",
+      planMentionsGo: /OK|GO/.test(planMsg),          // agent 是否明示可打的關鍵字
+      msgCount: body ? body.querySelectorAll(".pa-msg").length : 0,
+      // 確認流程必須純對話：抽屜內不得出現任何核准按鈕（只靠輸入框打 OK/GO）。
+      approvalButtons: document.querySelectorAll(
+        "#pa-agent-drawer .pa-approval-actions button, #pa-agent-drawer [data-act='approve'], #pa-agent-drawer [data-act='revise']"
+      ).length,
+    };
+  });
+
+  // 非關鍵字：在輸入框打字後按 Enter，訊息應送出（像一般對話），但「不得」被
+  // 當成同意 → mock 的 approved 仍為 false，run 不會進入 DONE。
+  const NOTE = "E2E-NOTE: 請優先檢查 PCIe link";
+  await page.fill("#pa-msg-input", NOTE);
+  await page.focus("#pa-msg-input");
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(1200);
+  const noteResult = await page.evaluate((note) => {
+    const body = document.getElementById("pa-drawer-body");
+    const userBubbles = body
+      ? Array.from(body.querySelectorAll(".pa-msg-eng .pa-msg-content")).map((n) => n.textContent)
+      : [];
+    return {
+      noteSent: userBubbles.some((t) => t.includes(note)),
+      status: (document.getElementById("pa-drawer-status") || {}).textContent || "",
+    };
+  }, NOTE);
+  // 尚未同意：run 不應是 DONE（仍在等待或執行中）。
+  const notDoneYet = !noteResult.status.includes("工程師判定");
+
+  // 明確同意：輸入 GO 送出 → run 依計畫執行並收尾為 DONE。
+  await page.fill("#pa-msg-input", "GO");
+  await page.focus("#pa-msg-input");
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(
+    () => ((document.getElementById("pa-drawer-status") || {}).textContent || "").includes("工程師判定"),
+    null, { timeout: 15000 },
   ).catch(() => {});
   const msgInfo = await page.evaluate(() => {
     const b = document.querySelector("#pa-drawer-body");
@@ -393,17 +416,19 @@ async function waitForServer() {
     ["title", opened && opened.title === EXPECT_TITLE],
     ["task carries assignment text", !!(opened && opened.task && opened.task.length > 0)],
     ["drawer element present + open", drawerVisible],
-    ["context banner rendered", ctxRendered],
+    ["left pane context rendered", ctxRendered],
     ["left pane shows testcase content", leftPane.length > 0],
     ["run created (status shown)", statusText.length > 0],
-    // 審閱優先：未自動執行 —— 開始執行按鈕已顯示 + 待審閱橫幅 + 尚未輪詢訊息。
-    ["review-first: 確認並開始執行 button shown", reviewState.startVisible],
-    ["review-first: review banner present", reviewState.reviewBanner],
-    ["review-first: not auto-started (0 msgs before click)", reviewState.msgsBefore === 0],
-    ["confirm-gate: Enter does NOT start the run", enterResult.startStillVisible && enterResult.noMsgsYet],
-    ["confirm-gate: explicit button click starts the run", confirmResult.startHidden],
+    // 對話式確認閘門（Design Y）：無「開始執行」按鈕；agent 先出計畫並明示 OK/GO。
+    ["no explicit start button (chat-only gate)", !reviewState.startButtonExists],
+    ["no approval buttons (purely conversational)", reviewState.approvalButtons === 0],
+    ["plan-first: agent message rendered on open", reviewState.msgCount >= 1],
+    ["plan-first: agent states the OK/GO keyword", reviewState.planMentionsGo],
+    // 非關鍵字：Enter 送出（像一般對話）但「不算同意」。
+    ["non-keyword Enter sends a message", noteResult.noteSent],
+    ["non-keyword does NOT start execution", notDoneYet],
     ["messages polled + rendered", msgInfo.count >= 2],
-    ["user+assistant roles present", msgInfo.roles.includes("你") && msgInfo.roles.includes("PA Agent")],
+    ["user+agent roles present", msgInfo.roles.includes("工程師") && msgInfo.roles.includes("PA Agent")],
     // Centered two-column modal + scrim.
     ["centered two-column modal", !!modal && modal.cx <= 2 && modal.cy <= 2],
     ["two columns side-by-side (row)", !!modal && modal.cols === "row"],

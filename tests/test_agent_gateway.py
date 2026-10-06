@@ -112,10 +112,12 @@ class GatewayIngestTests(unittest.TestCase):
         self.assertEqual(len(run["commands"]), 1)
         self.assertEqual(len(run["evidence"]), 1)
         self.assertEqual(summary["messages"], 2)
-        # finished means the agent stopped — status is DONE, never a verdict.
-        self.assertEqual(summary["status"], "DONE")
-        self.assertEqual(run["status"], "DONE")
-        self.assertIsNotNone(run["ended_at"])
+        # finished with NO FinishAction means the agent delivered a turn (e.g. the
+        # plan) and is idle awaiting the engineer — NOT "task done". The old
+        # finished->DONE mapping showed a false "完成" with no output.
+        self.assertEqual(summary["status"], "WAITING_FOR_USER")
+        self.assertEqual(run["status"], "WAITING_FOR_USER")
+        self.assertIsNone(run["ended_at"])
 
     def test_finish_action_becomes_final_result_and_agent_message(self):
         summary = self.gateway.ingest("run-1", events=[_FINISH, _STATE_DONE])
@@ -129,6 +131,32 @@ class GatewayIngestTests(unittest.TestCase):
         self.assertEqual(len(finished), 1)
         self.assertEqual(finished[0]["role"], "agent")
         self.assertEqual(finished[0]["text"], "lspci shows 2 GPUs; LnkSta x16")
+
+    def test_plan_turn_without_finish_action_is_waiting_not_done(self):
+        """Regression: a plan turn (agent message, no FinishAction) must NOT be DONE.
+
+        The "completed but nothing produced" report came from mapping the
+        agent-server's per-turn ``finished`` to DONE. In plan mode the agent only
+        delivered its plan and is awaiting OK/GO, so the run is WAITING_FOR_USER.
+        """
+        events = [_MSG_USER, _STATE_RUNNING, _MSG_AGENT, _STATE_DONE]
+        summary = self.gateway.ingest("run-1", events=events)
+        run = self.store.get_run("run-1")
+        self.assertEqual(summary["status"], "WAITING_FOR_USER")
+        self.assertEqual(run["status"], "WAITING_FOR_USER")
+        self.assertIsNone(run["final_result"])
+        # the plan message is the only agent output; no finish message is invented
+        self.assertEqual([m["kind"] for m in run["messages"] if m["role"] == "agent"],
+                         ["message"])
+
+    def test_waiting_approval_is_recorded_once_across_polls(self):
+        """Polling re-ingests the same finished turn; approval must not accumulate."""
+        for _ in range(3):
+            self.gateway.ingest("run-1", events=[_MSG_AGENT, _STATE_DONE])
+        run = self.store.get_run("run-1")
+        approvals = [a for a in run["approvals"]
+                     if a.get("kind") == "confirmation_required"]
+        self.assertEqual(len(approvals), 1)
 
     def test_status_maps_to_waiting_and_records_approval(self):
         summary = self.gateway.ingest("run-1", events=[_STATE_WAIT])
@@ -155,6 +183,92 @@ class GatewayIngestTests(unittest.TestCase):
         self.assertIn("C1", text)
         self.assertIn("DO THIS CAREFULLY", text)
         self.assertIn("pre", text)
+
+    def test_build_instruction_execute_mode_is_unchanged(self):
+        """Default/execute mode must not gain the plan preamble (no regression)."""
+        ctx = {"case_variant_id": "case-x", "testcase": {"code": "C1"},
+               "ai_review": None}
+        text = self.gateway.build_instruction(ctx)
+        self.assertNotIn("進場模式", text)
+        # explicit execute mode is identical to the default
+        self.assertEqual(text, self.gateway.build_instruction(ctx, mode="execute"))
+
+    def test_build_instruction_plan_mode_waits_for_go(self):
+        ctx = {"case_variant_id": "case-x", "testcase": {"code": "C1"},
+               "ai_review": None}
+        text = self.gateway.build_instruction(ctx, mode="plan")
+        self.assertIn("進場模式", text)
+        self.assertIn("不要執行任何指令", text)
+        # The agent must state the go keyword explicitly (engineer must not guess).
+        self.assertIn("OK", text)
+        self.assertIn("GO", text)
+
+
+class _FakeResponse:
+    def __init__(self, payload):
+        self._payload = payload
+
+    def raise_for_status(self):
+        return None
+
+    def json(self):
+        return self._payload
+
+
+class _RecordingClient:
+    """Minimal httpx-like client capturing POSTs for gateway unit tests."""
+
+    def __init__(self, payload=None):
+        self.calls = []
+        self._payload = payload or {"id": "conv-1"}
+
+    def post(self, url, json=None):
+        self.calls.append((url, json))
+        return _FakeResponse(self._payload)
+
+    def get(self, url, params=None):
+        self.calls.append((url, params))
+        return _FakeResponse({"items": []})
+
+
+class GatewayMessageTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.store = AgentRunStore(path=os.path.join(self.tmp.name, 'r.sqlite3'))
+        self.client = _RecordingClient()
+        self.gateway = AgentGateway(self.store, base_url="http://unused",
+                                    client=self.client)
+        ctx = {"run_id": "run-1", "case_variant_id": "case-x",
+               "library_version": "v1", "code": "C1",
+               "testcase": {"code": "C1", "procedure": "do it"},
+               "ai_review": None, "target": {}, "created_at": "2026-10-05T00:00:00Z",
+               "required_documents": [], "user_attachments": [], "schema_version": 1}
+        self.store.create_run(ctx)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_send_user_message_requires_conversation(self):
+        with self.assertRaises(ValueError):
+            self.gateway.send_user_message("run-1", "hello")
+
+    def test_send_user_message_posts_user_event_to_conversation(self):
+        self.store.update_state("run-1", conversation_ref="conv-1", status="RUNNING")
+        cid = self.gateway.send_user_message("run-1", "請補充 PCIe SPEC")
+        self.assertEqual(cid, "conv-1")
+        url, payload = self.client.calls[-1]
+        self.assertEqual(url, "/api/conversations/conv-1/events")
+        self.assertEqual(payload["source"], "user")
+        self.assertEqual(payload["llm_message"]["content"][0]["text"], "請補充 PCIe SPEC")
+        self.assertTrue(payload["run"])
+
+    def test_start_run_plan_mode_sends_plan_preamble(self):
+        self.gateway.start_run("run-1", mode="plan")
+        _, payload = self.client.calls[-1]
+        text = payload["initial_message"]["content"][0]["text"]
+        self.assertIn("進場模式", text)
+        # Plan mode must still run the loop so the agent produces its plan.
+        self.assertTrue(payload["initial_message"]["run"])
 
 
 if __name__ == '__main__':

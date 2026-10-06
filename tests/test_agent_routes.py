@@ -89,6 +89,23 @@ class AgentRunRoutes(unittest.TestCase):
     def test_missing_variant_field_is_422(self):
         self.assertEqual(self.client.post('/api/agent/runs', json={}).status_code, 422)
 
+    def test_post_message_unknown_run_is_404(self):
+        r = self.client.post('/api/agent/runs/does-not-exist/messages', json={'text': 'hi'})
+        self.assertEqual(r.status_code, 404)
+
+    def test_post_message_requires_text(self):
+        vid = self.item['case_variant_id']
+        rid = self.client.post('/api/agent/runs', json={'case_variant_id': vid}).json()['run']['run_id']
+        self.assertEqual(
+            self.client.post(f'/api/agent/runs/{rid}/messages', json={'text': '   '}).status_code, 422)
+
+    def test_post_message_without_conversation_is_409(self):
+        # A freshly created run is PENDING with no bound conversation yet.
+        vid = self.item['case_variant_id']
+        rid = self.client.post('/api/agent/runs', json={'case_variant_id': vid}).json()['run']['run_id']
+        r = self.client.post(f'/api/agent/runs/{rid}/messages', json={'text': 'hello'})
+        self.assertEqual(r.status_code, 409)
+
 
 if __name__ == '__main__':
     unittest.main()

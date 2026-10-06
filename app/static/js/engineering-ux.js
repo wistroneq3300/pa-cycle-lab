@@ -231,7 +231,7 @@
   window.engInspectCase=index=>{inspectedCase=_assignTask.items[index];const panel=document.getElementById('eng-case-detail');if(panel){panel.innerHTML=caseDetails(inspectedCase);panel.scrollTop=0;}document.querySelectorAll('.eng-case-open').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`engInspectCase(${index})`));};
   const baseToggle=assignTaskToggle;
   assignTaskToggle=function(...args){baseToggle(...args);syncCaseSelection();};
-  function syncCaseSelection(){const body=document.getElementById('assign-task-body');if(!body)return;const footer=document.getElementById('rm-dialog-foot');const button=footer?.querySelector('.primary');if(button){button.textContent=`\u7522\u751f\u6307\u4ee4 (${_assignTask.sel.size})`;button.disabled=!_assignTask.sel.size;}body.querySelectorAll('.eng-case-row input').forEach(input=>{input.checked=_assignTask.sel.has(input.getAttribute('data-variant'));});}
+  function syncCaseSelection(){const body=document.getElementById('assign-task-body');if(!body)return;const footer=document.getElementById('rm-dialog-foot');const button=footer?.querySelector('.primary');if(button){button.textContent=`\u25b6 \u4e0b\u4e00\u6b65\uff1a\u9032\u5165 PA Agent (${_assignTask.sel.size})`;button.disabled=!_assignTask.sel.size;}body.querySelectorAll('.eng-case-row input').forEach(input=>{input.checked=_assignTask.sel.has(input.getAttribute('data-variant'));});}
   const baseDialog=showDialog;showDialog=function(...args){const result=baseDialog(...args);syncCaseSelection();return result;};
   document.addEventListener('DOMContentLoaded',()=>{
     if(window.PA_PREVIEW)return;

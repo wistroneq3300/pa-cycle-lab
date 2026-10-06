@@ -25,7 +25,7 @@ from . import targets as targets_module
 from .agent_gateway import AgentGateway
 from .agent_runs import (
     AgentRunStore, STATUS_DONE, STATUS_PASS, STATUS_FAIL, STATUS_BLOCKED,
-    STATUS_ERROR,
+    STATUS_ERROR, STATUS_WAITING_FOR_USER,
 )
 
 # Terminal run statuses: once a run is in one of these, its OpenHands conversation
@@ -34,6 +34,11 @@ from .agent_runs import (
 _TERMINAL_STATUSES = {
     STATUS_DONE, STATUS_ERROR, STATUS_PASS, STATUS_FAIL, STATUS_BLOCKED,
 }
+# The run-start sync also stops at WAITING_FOR_USER: the agent delivered its turn
+# (e.g. the plan) and is idle awaiting the engineer. Polling would only re-ingest
+# the same "finished" turn; the engineer's reply is picked up by
+# _sync_messages_loop instead.
+_SYNC_STOP_STATUSES = _TERMINAL_STATUSES | {STATUS_WAITING_FOR_USER}
 _SYNC_INTERVAL = float(os.environ.get("PA_AGENT_SYNC_INTERVAL", "2.0"))
 _SYNC_MAX_ITERS = int(os.environ.get("PA_AGENT_SYNC_MAX_ITERS", "1500"))  # ~50 min at 2s
 
@@ -54,7 +59,27 @@ def _sync_run_loop(store, gateway, run_id):
         except Exception:  # agent-server blip — skip this tick, keep trying
             pass
         run = store.get_run(run_id)
-        if run is None or run.get("status") in _TERMINAL_STATUSES:
+        if run is None or run.get("status") in _SYNC_STOP_STATUSES:
+            return
+        time.sleep(_SYNC_INTERVAL)
+
+
+def _sync_messages_loop(store, gateway, run_id, *, min_seq=0, max_iters=40):
+    """Bounded ingest after an engineer chat turn, until the agent replies.
+
+    Unlike :func:`_sync_run_loop`, this does not treat a terminal run status as
+    the end: a conversation can finish a plan turn (status DONE) and still accept
+    a follow-up. It stops once a new agent message past ``min_seq`` appears, or
+    after ``max_iters`` ticks so a stuck turn cannot spin forever.
+    """
+    for _ in range(max_iters):
+        try:
+            gateway.ingest(run_id)
+        except Exception:  # agent-server blip — keep trying for the bounded window
+            time.sleep(_SYNC_INTERVAL)
+            continue
+        messages = store.list_messages(run_id)
+        if any(m.get("seq", 0) > min_seq and m.get("role") == "agent" for m in messages):
             return
         time.sleep(_SYNC_INTERVAL)
 
@@ -71,6 +96,11 @@ class AgentRunStartReq(BaseModel):
     auto_run: bool = Field(True, description="Start the agent immediately after creating the conversation")
     workspace_dir: str = Field("", description="Override the agent workspace directory (optional)")
     user_note: str = Field("", description="Free-text instruction from the user, appended to the agent brief")
+    mode: str = Field("execute", description="'plan' presents the plan and waits for GO; 'execute' runs as before")
+
+
+class AgentRunMessageReq(BaseModel):
+    text: str = Field(..., description="Engineer chat turn to append to the run's conversation")
 
 
 class AgentRunIngestReq(BaseModel):
@@ -172,7 +202,7 @@ def install(app, pa, store_getter=None):
         try:
             conversation_id = gateway.start_run(
                 run_id, workspace_dir=req.workspace_dir or None, auto_run=req.auto_run,
-                user_note=req.user_note or "")
+                user_note=req.user_note or "", mode=req.mode or "execute")
         except KeyError:
             raise HTTPException(404, "unknown run_id")
         except Exception as exc:  # agent-server unreachable / rejected
@@ -207,6 +237,35 @@ def install(app, pa, store_getter=None):
         if store.get_run(run_id) is None:
             raise HTTPException(404, "unknown run_id")
         return {"ok": True, "messages": store.list_messages(run_id, limit=limit)}
+
+    @router.post("/api/agent/runs/{run_id}/messages")
+    def post_message(run_id: str, req: AgentRunMessageReq):
+        """Append an engineer chat turn and let the agent reply.
+
+        The turn is recorded locally first (so it renders even before the agent
+        responds), then forwarded to the run's OpenHands conversation. A gateway
+        failure is surfaced as 502 — no fabricated reply is ever stored.
+        """
+        run = store.get_run(run_id)
+        if run is None:
+            raise HTTPException(404, "unknown run_id")
+        text = (req.text or "").strip()
+        if not text:
+            raise HTTPException(422, "text is required")
+        if not run.get("conversation_ref"):
+            raise HTTPException(409, "run has no conversation; start it first")
+        before = store.list_messages(run_id)
+        min_seq = max([m.get("seq", 0) for m in before] or [0])
+        store.add_message(run_id, role="user", text=text)
+        try:
+            gateway.send_user_message(run_id, text)
+        except Exception as exc:  # agent-server unreachable / rejected
+            raise HTTPException(502, f"agent gateway failed: {exc}")
+        threading.Thread(
+            target=_sync_messages_loop, args=(store, gateway, run_id),
+            kwargs={"min_seq": min_seq}, name=f"pa-agent-msg-{run_id}", daemon=True,
+        ).start()
+        return {"ok": True, "run_id": run_id, "messages": store.list_messages(run_id)}
 
     app.include_router(router)
     return store

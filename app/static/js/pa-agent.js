@@ -1,24 +1,28 @@
-/* PA Agent 對話側欄（P3-e）：透過 PA Backend Agent Gateway（/api/agent/*）
-   啟動一個正式 AgentRun（P3-b/c）並輪詢其訊息流。本檔案僅呼叫 PA Backend 的
-   /api/agent/* 端點，絕不直接 iframe／連線 OpenHands 前端 UI。
+/* PA Agent 工作區（P3-e→P3-g）：把「執行指令視窗」升級為
+   「Test Case + Agent Engineering Workspace」。
 
-   真實後端契約（integration/agent_routes.py + agent_runs.py）：
+   設計目標：工程師進場後是在跟一位 PA Agent 一起處理這條 Test Case。
+   左欄＝測試任務（Test Case context，來自既有 case 快照，不改資料語意）；
+   右欄＝真正的 Agent 對話區（計畫、討論、跑前確認、執行結果）。
+
+   後端契約（integration/agent_routes.py + agent_gateway.py）：
      1) POST /api/agent/runs
-            { case_variant_id, node_id?, expected_binding_revision?,
-              required_documents?, user_attachments? }
-            → { ok, run: { run_id, case_variant_id, status, context, ... } }
+            { case_variant_id, node_id?, expected_binding_revision? }
+            → { ok, run: { run_id, status:"PENDING", ... } }
      2) POST /api/agent/runs/{run_id}/start
-            { auto_run?, workspace_dir? }
-            → { ok, run_id, conversation_ref, run }   （gateway 未接時 502）
-     3) GET  /api/agent/runs/{run_id}        → { ok, run }  （含 status / final_result）
-          GET  /api/agent/runs/{run_id}/messages?limit=N → { ok, messages: [{seq,role,kind,text,created_at}] }
-        前端輪詢 (3) 把 messages 以對話卡片呈現；status 進入終態即停止。
+            { auto_run?, workspace_dir?, user_note?, mode? }
+            mode:"plan" → agent 先出計畫並等待工程師（不執行）
+            mode:"execute"（預設）→ 相容舊行為，直接執行
+        註：start 只在建立 conversation 時呼叫一次（gateway 以 conversation_ref 去重）。
+     3) POST /api/agent/runs/{run_id}/messages
+            { text } → 追加一則工程師發言，讓 agent 回覆（真正的多輪對話）
+     4) GET  /api/agent/runs/{run_id}         → { ok, run }（status / final_result）
+        GET  /api/agent/runs/{run_id}/messages?limit=N
+            → { ok, messages: [{seq,role,kind,text,created_at}] }
 
-   run.status 值域（agent_runs.py）：
-     PENDING / RUNNING / WAITING_FOR_USER（進行中）
-     DONE / ERROR（終態）
-   DONE＝agent 停止並產出 Log（待工程師判定），非「測試通過」；PASS/FAIL/BLOCKED
-   已從狀態機退役（工程師看 Log 自行裁定，不在本系統內產生）。
+   run.status 值域：PENDING / RUNNING / WAITING_FOR_USER（進行中）；
+   DONE / ERROR（終態）。DONE＝agent 停止並產出記錄，**不是**測試通過；
+   PASS/FAIL/BLOCKED 由工程師看 log 自行裁定，本系統不代為判定。
 
    命名空間：window.PA_Agent = { open, close }
 */
@@ -29,32 +33,127 @@
   const TERMINAL = new Set(["DONE", "ERROR", "PASS", "FAIL", "BLOCKED"]);
 
   const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  // PASS/FAIL/BLOCKED are retired: the agent only logs, the engineer decides.
-  // DONE means the agent stopped with its log ready for review — not a verdict.
-  const STATUS_LABEL = {
-    PENDING: "待啟動",
-    RUNNING: "執行中…",
-    WAITING_FOR_USER: "等待回覆",
-    DONE: "完成（待工程師判定）",
-    ERROR: "錯誤",
+
+  // ---------- 安全 Markdown 渲染 ----------
+  // agent 回覆常是 Markdown（粗體、表格、行內碼、清單）。直接 esc() 會讓 ** 與 |
+  // 裸露，排版難看。這裡只把「已知安全」的語法轉成白名單標籤，其餘文字一律先
+  // esc()，因此不會產生 XSS 注入點（僅產生我們自己組的 <strong>/<table>/…）。
+  function renderInline(raw) {
+    let s = esc(raw);
+    // 行內碼 `code`（先處理，避免其內容被後續規則改動）
+    const codes = [];
+    s = s.replace(/`([^`]+)`/g, (_, c) => { codes.push(c); return `\u0000${codes.length - 1}\u0000`; });
+    // 連結 [text](http...) — 只允許 http/https
+    s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, t, u) => `<a href="${u}" target="_blank" rel="noopener noreferrer">${t}</a>`);
+    // 粗體 **x** / 斜體 *x*
+    s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    s = s.replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>");
+    // 還原行內碼
+    s = s.replace(/\u0000(\d+)\u0000/g, (_, i) => `<code>${codes[+i]}</code>`);
+    return s;
+  }
+
+  // 將 Markdown 表格區塊（連續以 | 開頭的列）轉成 <table>。
+  function renderTable(lines) {
+    const rows = lines.map(l => l.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map(c => c.trim()));
+    if (rows.length >= 2 && rows[1].every(c => /^:?-{2,}:?$/.test(c))) {
+      const head = rows[0];
+      const body = rows.slice(2);
+      const th = head.map(c => `<th>${renderInline(c)}</th>`).join("");
+      const tb = body.map(r => `<tr>${r.map(c => `<td>${renderInline(c)}</td>`).join("")}</tr>`).join("");
+      return `<table class="pa-md-table"><thead><tr>${th}</tr></thead><tbody>${tb}</tbody></table>`;
+    }
+    return null;
+  }
+
+  function renderMarkdown(text) {
+    const src = String(text ?? "").replace(/\r\n?/g, "\n");
+    const out = [];
+    const lines = src.split("\n");
+    let i = 0;
+    while (i < lines.length) {
+      const line = lines[i];
+      // 圍籬程式碼 ```
+      if (/^\s*```/.test(line)) {
+        const buf = [];
+        i++;
+        while (i < lines.length && !/^\s*```/.test(lines[i])) { buf.push(lines[i]); i++; }
+        i++;
+        out.push(`<pre class="pa-md-pre"><code>${esc(buf.join("\n"))}</code></pre>`);
+        continue;
+      }
+      // 水平線 --- / *** / ___
+      if (/^\s*([-*_])\1{2,}\s*$/.test(line)) { out.push('<hr class="pa-md-hr">'); i++; continue; }
+      // 標題 #..######
+      const h = line.match(/^(#{1,6})\s+(.*)$/);
+      if (h) { const n = h[1].length; out.push(`<h${n} class="pa-md-h">${renderInline(h[2])}</h${n}>`); i++; continue; }
+      // 表格：此行以 | 開頭且下一行是分隔列
+      if (/^\s*\|/.test(line) && i + 1 < lines.length && /^\s*\|?[\s:|-]+\|/.test(lines[i + 1])) {
+        const buf = [line]; i++;
+        while (i < lines.length && /^\s*\|/.test(lines[i])) { buf.push(lines[i]); i++; }
+        const t = renderTable(buf);
+        if (t) { out.push(t); continue; }
+        i -= buf.length; // 不是表格，退回逐行處理
+      }
+      // 無序清單 - * +
+      if (/^\s*[-*+]\s+/.test(line)) {
+        const buf = [];
+        while (i < lines.length && /^\s*[-*+]\s+/.test(lines[i])) { buf.push(lines[i].replace(/^\s*[-*+]\s+/, "")); i++; }
+        out.push(`<ul class="pa-md-ul">${buf.map(x => `<li>${renderInline(x)}</li>`).join("")}</ul>`);
+        continue;
+      }
+      // 有序清單 1. 2.
+      if (/^\s*\d+\.\s+/.test(line)) {
+        const buf = [];
+        while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) { buf.push(lines[i].replace(/^\s*\d+\.\s+/, "")); i++; }
+        out.push(`<ol class="pa-md-ol">${buf.map(x => `<li>${renderInline(x)}</li>`).join("")}</ol>`);
+        continue;
+      }
+      // 引用 > 
+      if (/^\s*>\s?/.test(line)) {
+        const buf = [];
+        while (i < lines.length && /^\s*>\s?/.test(lines[i])) { buf.push(lines[i].replace(/^\s*>\s?/, "")); i++; }
+        out.push(`<blockquote class="pa-md-quote">${renderInline(buf.join(" "))}</blockquote>`);
+        continue;
+      }
+      // 空行
+      if (!line.trim()) { i++; continue; }
+      // 一般段落（連續非空、非特殊行合併）
+      const para = [line];
+      i++;
+      while (i < lines.length && lines[i].trim() && !/^\s*([-*+]\s|\d+\.\s|>|#{1,6}\s|```|\|)/.test(lines[i])) { para.push(lines[i]); i++; }
+      out.push(`<p class="pa-md-p">${renderInline(para.join("\n")).replace(/\n/g, "<br>")}</p>`);
+    }
+    return out.join("");
+  }
+
+
+  // 狀態列：名稱 + 視覺色調。DONE 絕不顯示為 PASS（見檔頭）。
+  const STATUS_META = {
+    PENDING: { label: "準備中", tone: "idle" },
+    RUNNING: { label: "執行中", tone: "busy" },
+    WAITING_FOR_USER: { label: "等待工程師確認", tone: "wait" },
+    DONE: { label: "PA Agent 已完成 · 等待工程師判定", tone: "done" },
+    ERROR: { label: "錯誤", tone: "err" },
   };
-  const ROLE_LABEL = { user: "你", agent: "PA Agent", assistant: "PA Agent", tool: "PA Agent · 工具", system: "系統" };
+  // 訊息角色標籤：工程師 / PA Agent / 系統 / 工具活動 視覺分離。
+  const ROLE_LABEL = { user: "工程師", agent: "PA Agent", assistant: "PA Agent", tool: "工具活動", system: "系統" };
+  const ROLE_CLASS = { user: "eng", agent: "agent", assistant: "agent", tool: "tool", system: "system" };
 
   let root = null;
   let state = {
-    started: false, polling: false, timer: null,
-    runId: null, run: null, renderedSeq: 0,
-    context: null, task: "",
+    runId: null, run: null, renderedSeq: 0, context: null,
+    timer: null, polling: false, started: false,
   };
 
-  // 建立側欄根節點（每次 open 重建，關閉即移除）。
+  // ---------- 根節點 ----------
   function ensureRoot() {
     if (root && document.body.contains(root)) return root;
     root = document.createElement("div");
     root.id = "pa-agent-drawer";
     root.className = "pa-drawer";
     root.setAttribute("role", "complementary");
-    root.setAttribute("aria-label", "PA Agent 對話");
+    root.setAttribute("aria-label", "PA Agent 工作區");
     root.innerHTML = `
       <div class="pa-drawer-scrim" data-close="1" aria-hidden="true"></div>
       <aside class="pa-drawer-panel" role="dialog" aria-modal="true">
@@ -63,25 +162,35 @@
             <span class="pa-drawer-ico" aria-hidden="true">PA</span>
             <div class="pa-drawer-titles">
               <strong>PA Agent</strong>
-              <small id="pa-drawer-status" class="pa-drawer-status">閒置</small>
+              <small id="pa-drawer-status" class="pa-drawer-status pa-status-idle">
+                <span class="pa-status-dot" aria-hidden="true"></span><span id="pa-drawer-status-text">閒置</span>
+              </small>
             </div>
           </div>
           <button type="button" id="pa-drawer-close" class="pa-drawer-close" title="關閉" aria-label="關閉">&times;</button>
         </header>
         <div id="pa-drawer-cols" class="pa-drawer-cols">
           <section id="pa-drawer-left" class="pa-drawer-left">
-            <div class="pa-drawer-left-head">執行計畫（請先審閱，確認後才會開始）</div>
+            <div class="pa-drawer-left-head">
+              <strong>測試任務</strong>
+              <span class="pa-drawer-left-sub">Test Case Context</span>
+            </div>
             <div id="pa-drawer-case" class="pa-drawer-case"></div>
           </section>
           <section class="pa-drawer-right">
             <div id="pa-drawer-body" class="pa-drawer-body" aria-live="polite"></div>
             <footer class="pa-drawer-foot">
-              <textarea id="pa-msg-input" class="pa-msg-input" rows="1"
-                placeholder="可補充給 PA Agent 的備註（選填）…"
-                aria-label="訊息輸入"></textarea>
-              <div class="pa-foot-row">
-                <span id="pa-drawer-hint" class="pa-drawer-hint">PA Agent 不會自動執行；請先審閱左欄計畫再按「確認並開始執行」</span>
-                <button type="button" id="pa-drawer-start" class="pa-drawer-start" hidden>確認並開始執行</button>
+              <div id="pa-approval" class="pa-approval-slot" hidden></div>
+              <div class="pa-input-wrap">
+                <button type="button" id="pa-attach" class="pa-attach" disabled
+                  title="附件功能建置中（PDF / TXT / LOG / SPEC / SOP）" aria-label="附件">📎</button>
+                <textarea id="pa-msg-input" class="pa-msg-input" rows="1"
+                  placeholder="與 PA Agent 對話；同意開始請輸入 OK 或 GO"
+                  aria-label="訊息輸入"></textarea>
+                <button type="button" id="pa-msg-send" class="pa-msg-send" aria-label="送出">送出</button>
+              </div>
+              <div class="pa-foot-hint" id="pa-drawer-hint">
+                Enter 送出 · Shift+Enter 換行。PA Agent 會先說明計畫並等待你同意，輸入 OK / GO 送出後才開始執行。
               </div>
             </footer>
           </section>
@@ -90,62 +199,104 @@
     document.body.appendChild(root);
     root.querySelector("#pa-drawer-close").addEventListener("click", close);
     root.querySelector(".pa-drawer-scrim").addEventListener("click", close);
-    root.querySelector("#pa-drawer-start").addEventListener("click", startRun);
     wireInput();
     document.addEventListener("keydown", onKey);
     return root;
   }
   function onKey(e) { if (e.key === "Escape") close(); }
 
-  // 右欄輸入：多行 textarea（自動增高）。內容會隨「確認並開始執行」一起交給 agent，
-// 不是獨立的聊天訊息（後端沒有 run-message endpoint）；留空則只執行測項本身。
-// 注意：Enter「不會」啟動執行 —— 必須明確按下「確認並開始執行」按鈕，避免誤觸自動跑。
-  function wireInput() {
-    const input = root.querySelector("#pa-msg-input");
-    if (!input) return;
-    const autoGrow = () => {
-      input.style.height = "auto";
-      input.style.height = Math.min(input.scrollHeight, 240) + "px";
-    };
-    input.addEventListener("input", autoGrow);
-    input.addEventListener("keydown", (e) => {
-      if (e.key !== "Enter") return;
-      // Enter 僅換行，不送出（避免未經確認就開始執行）。
-      e.stopPropagation();
-    });
+  // ---------- 對外 API ----------
+  function open(context = {}) {
+    // context: { case_variant_id, node_id?, expected_binding_revision?, branch?, title?, task?, rich?, mode? }
+    state.context = context || {};
+    state.mode = context.mode === "execute" ? "execute" : "plan";
+    state.runId = null; state.run = null; state.renderedSeq = 0;
+    ensureRoot();
+    root.classList.add("open");
+    state.started = true;
+    body().innerHTML = "";
+    setApproval(null);
+    renderLeftPanel();
+    setStatus("PENDING");
+    if (state.context.case_variant_id) {
+      createRun();
+    } else {
+      setStatus("ERROR");
+      body().innerHTML = `<div class="pa-empty">未提供 case_variant_id，無法建立 AgentRun。請從指派結果視窗以該用例開啟。</div>`;
+    }
   }
-  function addUserMessage(text) {
-    const div = document.createElement("div");
-    div.innerHTML = messageCard({ seq: Date.now(), role: "user", kind: "message",
-      text, created_at: new Date().toISOString() });
-    body().appendChild(div.firstElementChild);
-    scrollBottom();
+  function close() {
+    if (!root) return;
+    cancelPolling();
+    state.started = false;
+    root.classList.remove("open");
+    document.removeEventListener("keydown", onKey);
+    setTimeout(() => { if (root && !root.classList.contains("open")) { root.remove(); root = null; } }, 260);
   }
 
-  function setStatus(text, cls = "") {
-    const el = root.querySelector("#pa-drawer-status");
-    el.textContent = text;
-    el.className = "pa-drawer-status" + (cls ? " " + cls : "");
+  // ---------- 左欄：測試任務（Test Case Context）----------
+  // 內容一律來自既有 case 快照（context.rich / context.task），不改變其語意；
+  // 這裡只做「外框 + 章節標題」的重新編排，讓工程師能快速掃視。
+  function renderLeftPanel() {
+    const left = root?.querySelector("#pa-drawer-case");
+    if (!left) return;
+    const c = state.context || {};
+    const rich = typeof c.rich === "string" ? c.rich.trim() : "";
+    const text = typeof c.task === "string" ? c.task : "";
+    const parts = [`<div class="pa-task-meta">${taskMeta(c)}</div>`];
+    if (rich) parts.push(`<div class="pa-case-rich eng-case-detail-wrap">${rich}</div>`);
+    else if (text) parts.push(`<pre class="pa-case-text">${esc(text)}</pre>`);
+    else parts.push(`<div class="pa-case-empty">（無測試任務內容）</div>`);
+    // 參考文件（SPEC / SOP / 附件）：後端尚未支援上傳，誠實標示。
+    parts.push(`<section class="pa-task-refs">
+      <h4>參考文件</h4>
+      <div class="pa-refs-empty">目前沒有附件。SPEC / SOP / LOG 上傳功能建置中。</div>
+    </section>`);
+    left.innerHTML = parts.join("");
   }
+
+  // 測試任務摘要（名稱 / code / variant / node / 測試集）。缺欄位一律顯示「—」。
+  function taskMeta(c) {
+    const rows = [
+      ["測試案例", c.title || "—", false],
+      ["Variant", c.case_variant_id || "—", true],
+      ["目標節點", c.node_id || "—", true],
+      ["測試集", c.branch || "—", false],
+    ];
+    return `<dl class="pa-task-grid">${rows.map(([k, v, mono]) =>
+      `<dt>${esc(k)}</dt><dd${mono ? ' class="pa-mono"' : ""}>${esc(v)}</dd>`).join("")}</dl>`;
+  }
+
+  // ---------- 右欄：訊息渲染 ----------
   function body() { return root.querySelector("#pa-drawer-body"); }
   function scrollBottom() {
     const b = body();
     requestAnimationFrame(() => { b.scrollTop = b.scrollHeight; });
   }
+  function setStatus(status) {
+    const meta = STATUS_META[status] || { label: status || "—", tone: "idle" };
+    const el = root.querySelector("#pa-drawer-status");
+    if (el) el.className = "pa-drawer-status pa-status-" + meta.tone;
+    const t = root.querySelector("#pa-drawer-status-text");
+    if (t) t.textContent = meta.label;
+  }
 
-  // ---------- 訊息卡片 ----------
   function messageCard(msg) {
-    const role = msg.role || "assistant";
+    const role = msg.role || "agent";
     const label = ROLE_LABEL[role] || role;
+    const cls = ROLE_CLASS[role] || "agent";
     const time = msg.created_at ? new Date(msg.created_at).toLocaleTimeString("zh-TW", { hour12: false }) : "";
     const text = msg.text ?? "";
-    let content = "";
+    let content;
     if (role === "tool" || msg.kind === "tool" || msg.kind === "command" || msg.kind === "evidence") {
       content = `<pre class="pa-msg-tool-io">${esc(text).slice(0, 4000) || "（無內容）"}</pre>`;
     } else {
-      content = `<div class="pa-msg-content">${esc(text) || (role === "assistant" ? "（處理中…）" : "")}</div>`;
+      // agent/assistant 與工程師訊息皆可能含 Markdown；以安全渲染器轉成 HTML
+      // （renderMarkdown 內部對所有文字先 esc()，只產生白名單標籤）。
+      const html = text ? renderMarkdown(text) : (role === "agent" || role === "assistant" ? "（處理中…）" : "");
+      content = `<div class="pa-msg-content pa-md">${html}</div>`;
     }
-    return `<div class="pa-msg pa-msg-${esc(role)}">
+    return `<div class="pa-msg pa-msg-${esc(cls)}">
       <div class="pa-msg-head"><span class="pa-msg-role">${esc(label)}</span>${time ? `<span class="pa-msg-time">${esc(time)}</span>` : ""}</div>
       ${content}
     </div>`;
@@ -156,121 +307,139 @@
     body().appendChild(div.firstElementChild);
     scrollBottom();
   }
-  function renderHistory(messages) {
-    // renderHistory 會清空 body，因此重建後要重新置頂「任務上下文」橫幅。
-    body().innerHTML = "";
-    renderContextBanner();
-    state.renderedSeq = 0;
-    for (const m of messages || []) addMessage(m);
-    if (!messages?.length) {
-      body().insertAdjacentHTML("beforeend",
-        `<div class="pa-msg-empty">尚無訊息。PA Agent 建立 run 後會在此顯示對話流。</div>`);
-    }
-  }
-  function renderContextBanner() {
-    const c = state.context;
-    if (!c) return;
-    const lines = [];
-    if (c.title) lines.push("標題：" + c.title);
-    if (c.case_variant_id) lines.push("case_variant_id：" + c.case_variant_id);
-    if (c.node_id) lines.push("node_id：" + c.node_id);
-    if (c.branch) lines.push("branch：" + c.branch);
-    if (c.task && !lines.length) lines.push(c.task);
-    if (!lines.length) return;
+
+  // 右欄開場：系統提示（不是工程師發言，避免 system instruction 被誤顯示成「你」）。
+  function renderSystemIntro() {
+    const c = state.context || {};
     const div = document.createElement("div");
-    div.className = "pa-ctx";
-    div.innerHTML = `<strong>任務上下文</strong><pre>${esc(lines.join("\n"))}</pre>`;
-    body().prepend(div);
+    div.className = "pa-sysnote";
+    div.innerHTML = `<span class="pa-sysnote-tag">系統</span>
+      <span>測試任務已載入${c.title ? "：" + esc(c.title) : ""}。PA Agent 正在準備執行計畫…</span>`;
+    body().appendChild(div);
   }
 
-  // ---------- 審閱優先：先建立（PENDING），不自動執行 ----------
-  // 建立 AgentRun（PENDING）。執行意圖（case/指令）已在左欄呈現，
-  // 使用者審閱後才點右欄「開始執行」呼叫 startRun()。
+  // 摺疊的「執行活動」（命令 / 證據），避免 shell output 淹沒對話。
+  function renderActivity(run) {
+    const cmds = Array.isArray(run?.commands) ? run.commands : [];
+    const evi = Array.isArray(run?.evidence) ? run.evidence : [];
+    let el = body().querySelector(".pa-activity");
+    if (!cmds.length && !evi.length) { if (el) el.remove(); return; }
+    if (!el) {
+      el = document.createElement("details");
+      el.className = "pa-activity";
+      body().appendChild(el);
+    }
+    const lines = [];
+    for (const cm of cmds.slice(-8)) {
+      const t = cm.tool ? `[${cm.tool}] ` : "";
+      lines.push("▶ " + t + String(cm.thought || cm.finish_message || "").trim());
+    }
+    for (const e of evi.slice(-8)) {
+      const c = typeof e.content === "string" ? e.content : JSON.stringify(e.content ?? "");
+      lines.push("   ↳ " + String(c).trim());
+    }
+    el.innerHTML = `<summary class="pa-activity-title">執行活動 · ${cmds.length} 動作 · ${evi.length} 證據</summary>
+      <pre class="pa-msg-tool-io">${esc(lines.join("\n")).slice(0, 6000)}</pre>`;
+  }
+
+  // 等待提示：agent 出計畫、等工程師確認時顯示。純文字提示，**不放任何按鈕**——
+  // 確認流程是對話式的（工程師自己在輸入框打 OK / GO 送出），與一般聊天一致。
+  function setApproval(run) {
+    const slot = root?.querySelector("#pa-approval");
+    if (!slot) return;
+    const waiting = run && run.status === "WAITING_FOR_USER";
+    if (!waiting) { slot.hidden = true; slot.innerHTML = ""; return; }
+    slot.hidden = false;
+    slot.innerHTML = `
+      <div class="pa-approval-hint" role="status">
+        <span class="pa-approval-head">PA Agent 等待你的確認</span>
+        <span class="pa-approval-note">看過計畫後，在下方輸入 <kbd>OK</kbd> 或 <kbd>GO</kbd> 送出即開始執行；若要補充或修改，直接輸入內容即可。</span>
+      </div>`;
+  }
+
+  // ---------- 建立 / 啟動 / 對話 ----------
   async function createRun() {
     const c = state.context || {};
-    const body_ = {
-      case_variant_id: c.case_variant_id || "",
-      node_id: c.node_id || "",
-      expected_binding_revision: c.expected_binding_revision || "",
-    };
     try {
-      setStatus("建立中…", "busy");
+      setStatus("PENDING");
+      renderSystemIntro();
       const res = await fetch(`${API}/runs`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body_),
+        body: JSON.stringify({
+          case_variant_id: c.case_variant_id || "",
+          node_id: c.node_id || "",
+          expected_binding_revision: c.expected_binding_revision || "",
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data?.run?.run_id) throw new Error(data.detail || data.error || ("HTTP " + res.status));
       state.runId = data.run.run_id;
       state.run = data.run;
-      renderHistory([]);
-      const canStart = !!c.node_id;
-      setStatus(canStart ? "待審閱" : "已建立（未啟動）");
-      renderReviewState(canStart, c);
-      scrollBottom();
+      state.renderedSeq = 0;
+      renderActivity(state.run);
+      await startRun(state.mode);   // plan：agent 只講計畫、不執行；execute：相容舊行為
     } catch (e) {
-      setStatus("失敗", "err");
-      body().insertAdjacentHTML("beforeend",
-        `<div class="pa-msg pa-msg-assistant"><div class="pa-msg-head"><span class="pa-msg-role">PA Agent</span></div>
-           <div class="pa-msg-content pa-msg-error">建立 run 失敗：${esc(e.message)}</div></div>`);
-      scrollBottom();
+      setStatus("ERROR");
+      addError("建立 run 失敗：" + e.message);
     }
   }
 
-  // 渲染右欄「待審閱」狀態：未提供 node_id 時說明無法啟動；提供時顯示開始執行按鈕。
-  function renderReviewState(canStart, c = {}) {
-    const startBtn = root?.querySelector("#pa-drawer-start");
-    if (startBtn) { startBtn.hidden = !canStart; startBtn.disabled = false; }
-    body().insertAdjacentHTML("beforeend",
-      `<div class="pa-review">
-         <div class="pa-review-title">待確認 · 尚未開始執行</div>
-         <div class="pa-review-text">PA Agent <strong>尚未執行任何動作</strong>。請先審閱左欄「執行計畫」，確認測試步驟、目標節點與風險無誤後，再按下方「確認並開始執行」。若需補充說明，可先在輸入框留言，該備註會隨計畫一併送出。</div>
-         ${canStart
-           ? `<div class="pa-review-meta">run_id：${esc(state.runId)} · node：${esc(c.node_id || "—")}</div>`
-           : `<div class="pa-review-meta pa-review-warn">未指定 node_id，無法啟動。可稍後從執行紀錄啟動。</div>`}
-       </div>`);
-  }
-
-  // 使用者按下「送出」後才啟動（審閱通過）。輸入框內容若有，一併帶給 agent。
-  async function startRun() {
-    if (!state.runId) return;
-    const startBtn = root?.querySelector("#pa-drawer-start");
-    const input = root?.querySelector("#pa-msg-input");
-    const note = (input?.value || "").trim();
-    if (startBtn) { startBtn.disabled = true; startBtn.textContent = "啟動中…"; }
-    if (note) { addUserMessage(note); input.value = ""; input.style.height = "auto"; }
-    setStatus("啟動中…", "busy");
+  // 啟動對話：mode="plan" 先出計畫等工程師；mode="execute" 維持舊行為直接執行。
+  async function startRun(mode) {
     try {
-      const s = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/start`, {
+      const r = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/start`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ auto_run: true, user_note: note }),
+        body: JSON.stringify({ auto_run: true, mode: mode || "execute" }),
       });
-      const sd = await s.json().catch(() => ({}));
-      if (!s.ok) {
-        // gateway 未接（502）等：run 仍存在，訊息可繼續讀。
-        setStatus("啟動受挫", "err");
-        body().insertAdjacentHTML("beforeend",
-          `<div class="pa-msg pa-msg-assistant"><div class="pa-msg-head"><span class="pa-msg-role">PA Agent</span></div>
-             <div class="pa-msg-content pa-msg-error">啟動失敗：${esc(sd.detail || sd.error || ("HTTP " + s.status))}</div></div>`);
-        if (startBtn) { startBtn.disabled = false; startBtn.textContent = "確認並開始執行"; }
-        scrollBottom();
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        // gateway 未接（502）等：run 仍在，訊息可續讀；誠實提示，不假裝成功。
+        setStatus("ERROR");
+        addError("啟動 PA Agent 失敗：" + (d.detail || d.error || ("HTTP " + r.status)));
         return;
       }
-      state.run = sd.run || state.run;
-      if (startBtn) { startBtn.hidden = true; }
-      setStatus("執行中…", "busy");
+      if (d.run) state.run = d.run;
+      setStatus(state.run?.status || "RUNNING");
       beginPolling();
     } catch (e) {
-      setStatus("啟動受挫", "err");
-      if (startBtn) { startBtn.disabled = false; startBtn.textContent = "確認並開始執行"; }
-      body().insertAdjacentHTML("beforeend",
-        `<div class="pa-msg pa-msg-assistant"><div class="pa-msg-head"><span class="pa-msg-role">PA Agent</span></div>
-           <div class="pa-msg-content pa-msg-error">啟動失敗：${esc(e.message)}</div></div>`);
-      scrollBottom();
+      setStatus("ERROR");
+      addError("啟動 PA Agent 失敗：" + e.message);
     }
   }
 
-  // ---------- 輪詢訊息 ----------
+  // 工程師發言 → 追加到對話，讓 agent 回覆（真正的多輪對話）。
+  async function sendMessage(text) {
+    const input = root?.querySelector("#pa-msg-input");
+    const t = (text || "").trim();
+    if (!t || !state.runId) return;
+    if (input) { input.value = ""; input.style.height = "auto"; }
+    addMessage({ seq: Date.now(), role: "user", kind: "message", text: t, created_at: new Date().toISOString() });
+    const sendBtn = root?.querySelector("#pa-msg-send");
+    if (sendBtn) sendBtn.disabled = true;
+    try {
+      const r = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/messages`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: t }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) addError("訊息送出失敗：" + (d.detail || d.error || ("HTTP " + r.status)));
+      else { setStatus(state.run?.status || "RUNNING"); beginPolling(); }
+    } catch (e) {
+      addError("訊息送出失敗：" + e.message);
+    } finally {
+      if (sendBtn) sendBtn.disabled = false;
+    }
+  }
+
+  function addError(text) {
+    const div = document.createElement("div");
+    div.innerHTML = messageCard({ seq: -Date.now(), role: "agent", kind: "message",
+      text: "⚠ " + text, created_at: new Date().toISOString() });
+    body().appendChild(div.firstElementChild);
+    scrollBottom();
+  }
+
+  // ---------- 輪詢 ----------
   function beginPolling() {
     cancelPolling();
     state.polling = true;
@@ -280,14 +449,12 @@
   async function pollOnce() {
     if (!state.runId) return;
     try {
-      // 訊息（全量重取，以 seq 增量渲染；上限 500 已足夠對話規模）
       const mres = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/messages?limit=500`);
       const md = await mres.json().catch(() => ({}));
       if (!mres.ok) throw new Error(md.detail || ("HTTP " + mres.status));
       for (const m of md.messages || []) {
         if (m.seq > state.renderedSeq) { state.renderedSeq = m.seq; addMessage(m); }
       }
-      // run 狀態
       const rres = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}`);
       const rd = await rres.json().catch(() => ({}));
       if (!rres.ok) throw new Error(rd.detail || ("HTTP " + rres.status));
@@ -295,62 +462,29 @@
       renderActivity(state.run);
       applyRunStatus(state.run);
     } catch (e) {
-      setStatus("連線中…", "busy");
+      // 暫時性連線問題：保留現有畫面，稍後重試。
     }
-  }
-
-  // 執行中的「活動」：agent 的動作（ActionEvent）與工具輸出（ObservationEvent）
-  // 不是 MessageEvent，不會進對話流；若只等訊息，RUNNING 期間右欄會一片空白。
-  // 這裡把最新的命令/證據以單一可變卡片呈現（就地更新，不堆積）。
-  function renderActivity(run) {
-    if (!run) return;
-    const cmds = Array.isArray(run.commands) ? run.commands : [];
-    const evi = Array.isArray(run.evidence) ? run.evidence : [];
-    const lastCmd = cmds[cmds.length - 1];
-    const lastEvi = evi[evi.length - 1];
-    const lines = [];
-    if (lastCmd) {
-      const t = lastCmd.tool ? `[${lastCmd.tool}] ` : "";
-      lines.push("▶ " + t + (lastCmd.thought || lastCmd.finish_message || "").trim());
-    }
-    if (lastEvi) {
-      const c = typeof lastEvi.content === "string" ? lastEvi.content : JSON.stringify(lastEvi.content ?? "");
-      lines.push("   ↳ " + c.trim());
-    }
-    let el = body().querySelector(".pa-activity");
-    if (!lines.length) {
-      if (el) el.remove();
-      return;
-    }
-    if (!el) {
-      el = document.createElement("div");
-      el.className = "pa-activity";
-      body().appendChild(el);
-    }
-    el.innerHTML = `<div class="pa-activity-title">執行活動（${cmds.length} 命令 · ${evi.length} 證據）</div>
-      <pre class="pa-msg-tool-io">${esc(lines.join("\n")).slice(0, 4000)}</pre>`;
-    body().appendChild(el);
-    scrollBottom();
   }
   function applyRunStatus(run) {
     if (!run) return;
     const st = run.status || "PENDING";
-    setStatus(STATUS_LABEL[st] || st, TERMINAL.has(st) ? "" : "busy");
+    setStatus(st);
+    setApproval(run);
     if (TERMINAL.has(st)) {
       cancelPolling();
-      // The agent's log is the deliverable: show it as the closing card so the
-      // engineer can read it and reach their own verdict.
+      setApproval(null);
       if (run.final_result) {
         const div = document.createElement("div");
         div.innerHTML = messageCard({ seq: -1, role: "agent", kind: "finish",
           text: run.final_result, created_at: run.updated_at });
         body().appendChild(div.firstElementChild);
       }
-      if (st === "ERROR" && run.failure_reason) {
-        const div = document.createElement("div");
-        div.innerHTML = messageCard({ seq: -2, role: "assistant", kind: "message",
-          text: "執行錯誤：" + run.failure_reason, created_at: run.updated_at });
-        body().appendChild(div.firstElementChild);
+      if (st === "DONE") {
+        const note = document.createElement("div");
+        note.className = "pa-done-note";
+        note.innerHTML = `<span class="pa-sysnote-tag">系統</span>
+          <span>PA Agent 已完成測試工作並產出結果。<strong>這不代表測試通過</strong>——PASS / FAIL / BLOCKED 請由工程師依上方記錄判定。</span>`;
+        body().appendChild(note);
       }
       scrollBottom();
     }
@@ -360,74 +494,26 @@
     if (state.timer) { clearInterval(state.timer); state.timer = null; }
   }
 
-  // ---------- 對外 API ----------
-  function open(context = {}) {
-    // context: { case_variant_id, node_id?, expected_binding_revision?, branch?, title?, task?, rich? }
-    state.context = context || {};
-    ensureRoot();
-    root.classList.add("open");
-    state.started = true;
-    state.renderedSeq = 0;
-    state.runId = null;
-    state.run = null;
-    body().innerHTML = "";
-    const startBtn = root?.querySelector("#pa-drawer-start");
-    if (startBtn) { startBtn.hidden = true; startBtn.disabled = false; startBtn.textContent = "確認並開始執行"; }
-    // 先填左欄指令內容，再於其上方 prepend 資訊確認卡（若先 renderInfoCard 會被 renderLeftPanel 的 innerHTML 清掉）。
-    renderLeftPanel();
-    renderInfoCard();
-    renderContextBanner();
-    if (state.context.case_variant_id) {
-      // 審閱優先：只建立（PENDING），不自動啟動；使用者點「送出」才啟動。
-      createRun();
-    } else {
-      setStatus("就緒");
-      body().innerHTML = `<div class="pa-msg-empty">未提供 case_variant_id，無法建立 AgentRun。請從指派結果視窗以該用例開啟。</div>`;
-    }
-  }
-  // 左欄頂端：案例資訊確認卡（簡單 information 確認：用例/variant/節點/branch/指令摘要）。
-  function renderInfoCard() {
-    const left = root?.querySelector("#pa-drawer-case");
-    if (!left) return;
-    const c = state.context || {};
-    const title = c.title || "—";
-    const variant = c.case_variant_id || "—";
-    const node = c.node_id || "—";
-    const branch = c.branch || "—";
-    const text = typeof c.task === "string" ? c.task : "";
-    const lineCount = text ? text.split("\n").filter(l => l.trim()).length : 0;
-    const card = document.createElement("div");
-    card.className = "pa-info-card";
-    card.innerHTML = `
-      <div class="pa-info-card-title">📋 執行案例確認</div>
-      <dl class="pa-info-grid">
-        <dt>標題</dt><dd>${esc(title)}</dd>
-        <dt>Variant</dt><dd class="pa-info-mono">${esc(variant)}</dd>
-        <dt>目標節點</dt><dd class="pa-info-mono">${esc(node)}</dd>
-        <dt>分支</dt><dd>${esc(branch)}</dd>
-        <dt>指令規模</dt><dd>${lineCount} 行</dd>
-      </dl>`;
-    left.prepend(card);
-  }
-
-  // 左欄：指派給 PA Agent 的指令（測項內容）＝ rich HTML（無則退回 plain text）。
-  function renderLeftPanel() {
-    const left = root?.querySelector("#pa-drawer-case");
-    if (!left) return;
-    const c = state.context || {};
-    const rich = typeof c.rich === "string" ? c.rich.trim() : "";
-    const text = typeof c.task === "string" ? c.task : "";
-    if (rich) { left.innerHTML = `<div class="pa-case-rich">${rich}</div>`; }
-    else if (text) { left.innerHTML = `<pre class="pa-case-text">${esc(text)}</pre>`; }
-    else { left.innerHTML = `<div class="pa-case-empty">（無指令內容）</div>`; }
-  }
-  function close() {
-    if (!root) return;
-    cancelPolling();
-    state.started = false;
-    root.classList.remove("open");
-    document.removeEventListener("keydown", onKey);
-    setTimeout(() => { if (root && !root.classList.contains("open")) { root.remove(); root = null; } }, 260);
+  // ---------- 輸入框 ----------
+  // 純對話輸入：Enter 送出、Shift+Enter 換行。開窗時 agent 只會先出計畫；
+  // 使用者打 OK / GO（或 開始 / 執行 / 可以 / run）送出後，agent 才會開始執行。
+  // 非關鍵字的內容視為補充或提問，agent 會據此修正計畫、繼續等待同意。
+  function wireInput() {
+    const input = root.querySelector("#pa-msg-input");
+    const sendBtn = root.querySelector("#pa-msg-send");
+    if (!input) return;
+    const autoGrow = () => {
+      input.style.height = "auto";
+      input.style.height = Math.min(input.scrollHeight, 200) + "px";
+    };
+    input.addEventListener("input", autoGrow);
+    input.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" || e.shiftKey || e.isComposing) return;
+      e.preventDefault();
+      e.stopPropagation();
+      sendMessage(input.value);
+    });
+    sendBtn?.addEventListener("click", () => sendMessage(input.value));
   }
 
   window.PA_Agent = Object.freeze({ open, close });

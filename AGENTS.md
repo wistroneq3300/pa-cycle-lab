@@ -384,12 +384,42 @@ READ THIS before touching the PA Agent (chat drawer / AgentRun) path.
 ### PA Agent chat drawer (frontend)
 - `app/static/js/pa-agent.js` (IIFE, exposes `window.PA_Agent`); styles in
   `app/static/css/style.css` (`.pa-drawer*`, `.pa-info-card`, `.pa-msg-input`).
-- One action button `#pa-drawer-start`, labelled 「送出」 (it starts the run). Typing +
-  **Enter** in `#pa-msg-input` fires the same action (Shift+Enter = newline; IME
-  composition guarded). There is NO run-message endpoint — the note rides on start only.
-- Theme: default is DARK (`<html data-theme="dark">`); light-theme overrides live under
-  `:root[data-theme="light"]`. `--card`/`--panel-bg`/`--accent` are NOT defined vars, so
-  their inline fallbacks always apply — set explicit colours, don't rely on them.
-- Bump cache busters in `app/static/index.html` (`style.css?v=...`, `pa-agent.js?v=...`)
-  whenever those two files change, or the browser serves stale assets.
+- **Confirm-gate flow (design "Y", finalised 2026-10-06)**: opening PA Agent sends the
+  **plan mode** instruction — the agent states its plan (short summary + expandable
+  detail) and explicitly tells the engineer to reply ``OK`` / ``GO``. Nothing runs until
+  that. Typing a **non-keyword** message is a supplement/clarify instruction (does NOT
+  execute); typing ``OK``/``GO`` runs. **No approval buttons / policy cards** — it is a
+  plain conversation. There is still NO run-message endpoint (note rides on start only).
+- The single action button is ``#ar-pa-agent`` in `app.js` (multi-case result window).
+  The **single-case** path opens the drawer directly from `assignTaskCopy()`.
+- ``mode="plan"`` still sends ``initial_message.run=true`` — with ``run=false`` the agent
+  produces **nothing** (blank drawer). The plan gate is the prompt preamble, not the flag.
+- **Agent messages are rendered as Markdown** via `renderMarkdown()` in `pa-agent.js`
+  (safe subset: bold/italic, `` `code` ``, fenced code, tables, ul/ol, headings, hr,
+  blockquote, http(s) links). All text is `esc()`-first, so it is **not** an XSS vector.
+  Styles are `.pa-md*` in `style.css`; the container also needs `class="pa-msg-content pa-md"`
+  (`pre-wrap` is overridden to `normal`). Regression test: `tests/pa-agent-markdown.cjs`
+  (13 checks, incl. XSS). Do **not** fall back to raw `esc(text)` — that shows literal
+  `` ** `` / `` | `` and looks broken.
+
+### ★ Multi-layer JS override trap (PA Manager Validation flow, 2026-10-06)
+The assign-task flow is wrapped by **three** layers. Load order in `index.html` decides
+who wins (later = wins): `app.js` → `product-detail.js` → `engineering-ux.js` →
+`workspace-ux.js`. Both `engineering-ux.js` and `workspace-ux.js` capture the previous
+function in an IIFE and re-wrap it:
+- `assignTaskListHtml` (step bar) and `assignTaskCopy` ("確認測項與目標" dialog) are
+  overridden in **both** files.
+- **`engineering-ux.js`'s `syncCaseSelection()` rewrites the dialog's footer primary
+  button text on every `showDialog` call** (it hooks `showDialog`). So the footer button
+  label MUST be changed in `engineering-ux.js`, not only `app.js`/`workspace-ux.js` —
+  otherwise the old label ("產生指令 (N)") reappears.
+- Machine-page Validation intro copy lives in `product-detail.js`.
+Changing one layer is not enough; grep ALL of `app/static/js/*.js` for the string.
+
+### Cache busters / deploy
+- Bump cache busters in `app/static/index.html` (`style.css?v=...`, `pa-agent.js?v=...`,
+  `app.js?v=...`, `workspace-ux.js?v=...`, `engineering-ux.js?v=...`, `product-detail.js?v=...`)
+  **whenever the corresponding file changes**. Changing URL is the only thing that forces
+  browsers off a stale copy; restarting the service alone is NOT enough.
+- Full deploy = edit files + bump `?v=` + `systemctl restart pa-manager-6969-web.service`.
 - E2E: `tests/pa-agent-drawer-e2e.cjs` (mock backend via page.route; currently 22/22).
