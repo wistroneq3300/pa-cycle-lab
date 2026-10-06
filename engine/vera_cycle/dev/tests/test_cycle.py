@@ -91,6 +91,10 @@ class FakeTransport:
         self.calls.append((target.key, 'redfish-clear', path))
         return Command(0, 'OK')
 
+    def redfish_logout(self, target, token, timeout=10):
+        self.calls.append((target.key, 'redfish-logout', token))
+        return Command(0, 'OK')
+
     def action(self, t):
         if not self.no_recovery and not self.fail_command:
             self.boots[t.key] = self.boots.get(t.key, 0) + 1
@@ -839,6 +843,41 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(result['state'],'INCOMPLETE')
         self.assertEqual(result['nodes'][0]['completed'],2)
         self.assertEqual(result['nodes'][0]['loops'][-1]['status'],'PENDING')
+
+    def test_redfish_sessions_are_released_after_each_collection(self):
+        # P1-1 regression: every successful Redfish login must be paired with a
+        # logout so a long, multi-node, multi-loop campaign cannot exhaust the
+        # BMC session table.
+        self.ready()
+        self.session.one_loop(1)
+        self.session.one_loop(2)
+        logins = [c for c in self.fake.calls if c[1] == 'redfish' and c[2] == '/redfish/v1/Systems']
+        logouts = [c for c in self.fake.calls if c[1] == 'redfish-logout']
+        self.assertGreaterEqual(len(logouts), 1)
+        # One logout per discovery: discovery happens once per collection.
+        self.assertEqual(len(logouts), len(logins))
+
+    def test_redfish_logout_failure_is_warn_not_fail_and_keeps_result(self):
+        # P1-1 regression: a failing logout must not overwrite a valid
+        # collection with a false FAIL, and must not re-run any power action.
+        self.ready()
+        actions = []
+        self.fake.on_action = lambda: actions.append(1)
+        before_actions = len(actions)
+        def failing_logout(t, token, timeout=10):
+            self.fake.calls.append((t.key, 'redfish-logout', token))
+            raise RuntimeError('BMC refused logout (fake)')
+        self.fake.redfish_logout = failing_logout
+        record = self.session.one_loop(1)
+        codes = [i['code'] for i in record['issues']]
+        self.assertIn('REDFISH_LOGOUT_FAILED', codes)
+        warn = next(i for i in record['issues'] if i['code'] == 'REDFISH_LOGOUT_FAILED')
+        self.assertEqual(warn['severity'], 'WARN')
+        # The collection itself is untouched: EventLog was collected fine.
+        self.assertNotIn('REDFISH_COLLECTION_FAILED', codes)
+        # Logout must never trigger a power/cycle action: exactly the loop's own
+        # single cycle action occurs, nothing more.
+        self.assertEqual(len(actions), 1)
 
 class LockTests(unittest.TestCase):
     def test_distinct_endpoints_parallel_and_overlap_rejected(self):
