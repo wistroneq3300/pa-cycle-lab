@@ -30,6 +30,12 @@ def classify(items, project, rules):
     return items
 
 def issue_key(item):
+    # ``identity`` lets a family whose issue *code* changes with severity (e.g. a
+    # Redfish event going Warning -> Critical) still compare as the same event,
+    # so it classifies WORSENED instead of NEW. Families without an identity keep
+    # the original code+component(+fingerprint) key.
+    if item.get('identity'):
+        return ('identity', item['component'], item['identity'])
     return (item['code'], item['component'], item['fingerprint']) if item.get('fingerprint') else (item['code'], item['component'])
 
 
@@ -491,6 +497,68 @@ def sel_delta(previous, current):
 # Redfish log entries carry a vendor Severity of OK/Warning/Critical. Rank them
 # like dmesg native severity so both sources share one "worst wins" verdict.
 REDFISH_SEVERITY_RANK = {"ok": 0, "warning": 1, "critical": 2}
+
+def redfish_member_kind(member):
+    """Classify one Redfish collection member.
+
+    Returns "entry" for an expanded object (has Id/Severity/Message), "reference"
+    for a bare ``@odata.id`` link, or "unknown" for anything else. An unknown
+    member is not "zero events": the caller must treat the collection as
+    unreadable rather than silently dropping it.
+    """
+    if not isinstance(member, dict):
+        return "unknown"
+    if member.get("@odata.id") and not any(k in member for k in ("Id", "Severity", "Message")):
+        return "reference"
+    if any(k in member for k in ("Id", "Severity", "Message")):
+        return "entry"
+    return "unknown"
+
+def redfish_collection(payload):
+    """Strictly validate a Redfish collection payload.
+
+    Returns ``(members, valid, reason)``. A structurally broken collection
+    (non-dict, missing/non-list ``Members``, or a member that is neither an
+    expanded entry nor a reference - e.g. ``[null, 7]``) is invalid, and callers
+    must not conclude that any particular service is absent. Only a successfully
+    read, structurally valid collection lets us say a service is NOT PRESENT.
+    """
+    if not isinstance(payload, dict):
+        return [], False, "payload is not a JSON object"
+    members = payload.get("Members")
+    if not isinstance(members, list):
+        return [], False, "collection has no Members list"
+    for index, member in enumerate(members):
+        if redfish_member_kind(member) == "unknown":
+            return [], False, f"Members[{index}] is neither an entry nor a reference"
+    return members, True, ""
+
+def redfish_page_next_link(payload):
+    """Return the ``Members@odata.nextLink`` of a collection page, or "".
+
+    LogServices and log-entry collections can be paginated; a nextLink on page 1
+    must be followed or a service that only appears on page 2 is wrongly reported
+    as NOT PRESENT.
+    """
+    if not isinstance(payload, dict):
+        return ""
+    link = payload.get("Members@odata.nextLink")
+    return str(link) if link else ""
+
+# Redfish members arrive with vendor casing (Id/Severity/Created/Message) and
+# are normalised to lowercase once; read either spelling so no evidence line is
+# blanked when a raw entry reaches a writer through a failure path.
+_REDFISH_FIELDS = {'id': ('id', 'Id'), 'severity': ('severity', 'Severity'),
+                   'created': ('created', 'Created'), 'message': ('message', 'Message'),
+                   'severity_key': ('severity_key', 'Severity')}
+
+def _entry_field(entry, field):
+    if not isinstance(entry, dict):
+        return ""
+    for key in _REDFISH_FIELDS.get(field, (field,)):
+        if key in entry and entry[key] is not None:
+            return entry[key]
+    return ""
 
 def redfish_entries(payload):
     """Parse a Redfish LogService Entries collection into normalised records.
