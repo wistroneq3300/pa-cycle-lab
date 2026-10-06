@@ -918,6 +918,21 @@ class EngineTests(unittest.TestCase):
         # single cycle action occurs, nothing more.
         self.assertEqual(len(actions), 1)
 
+    def test_clean_state_redfish_read_is_history_only(self):
+        # P1-2: the pre-PRE clean-state Redfish read must pass history=True, so
+        # the pre-existing backlog is captured as separate evidence/diagnostics
+        # and does NOT define the PRE baseline (clean-start policy).
+        self.ready()
+        rec = self.session.node['pre']
+        # The pre-clear backlog was recorded as separate diagnostic metadata,
+        # with its own evidence file (not the baseline's).
+        preclear = rec.get('redfish_preclear', {})
+        self.assertIn('eventlog', preclear)
+        self.assertIn('preclear', preclear['eventlog']['evidence'])
+        # The PRE baseline EventLog meta is defined by the post-clear capture and
+        # points at the baseline evidence file, not the pre-clear transcript.
+        self.assertEqual(rec['eventlog_meta']['evidence'], 'tray1_n1/pre_eventlog.txt')
+
 class LockTests(unittest.TestCase):
     def test_distinct_endpoints_parallel_and_overlap_rejected(self):
         with tempfile.TemporaryDirectory() as temp:

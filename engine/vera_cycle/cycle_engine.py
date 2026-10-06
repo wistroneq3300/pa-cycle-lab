@@ -961,9 +961,11 @@ class NodeSession:
             self.sel_command(record, "pre_sel_clear", "clear", save_evidence=False)
         else:
             self.add(record, 'CLEAR_SKIPPED', 'sel', 'PRE SEL read failed; original was not cleared', severity='WARN')
-        # Redfish EventLog/SEL: collect_redfish(clear=True) fetches then clears.
+        # Redfish EventLog/SEL: collect_redfish(clear=True, history=True) fetches
+        # the pre-existing backlog (evidence only, not a PRE finding) and then
+        # clears it, so the clean-state backlog cannot leak into the PRE baseline.
         try:
-            self.collect_redfish(record, clear=True)
+            self.collect_redfish(record, clear=True, history=True)
         except Exception as exc:
             self.add(record, 'CLEAR_SKIPPED', 'eventlog',
                      f'Redfish logs could not be read/cleared before PRE: {exc}', severity='WARN')

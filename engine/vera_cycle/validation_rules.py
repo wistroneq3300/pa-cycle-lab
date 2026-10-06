@@ -490,6 +490,13 @@ def parse_hardware_checks(text, findings):
         cells = line.split('|')
         name = cells[1]
         values = dict(c.split('=', 1) for c in cells[2:] if '=' in c)
+        if name == 'NIC_SLOT' and 'slot' in values:
+            # The per-slot NIC inventory is tracked separately (record['nic_slots'])
+            # and reported through NIC_MISSING / NIC_DEGRADED findings whose
+            # component is 'NIC'. Emitting a NIC_SLOT check here would badge PASS
+            # while the NIC finding is FAIL, because 'NIC_SLOT' never matches the
+            # 'NIC' finding component. Skip it so the report has one authority.
+            continue
         component = values.get('bdf', name)
         state = 'UNSUPPORTED' if values.get('state') == 'unsupported' else 'PASS'
         related = {'CPU_ONLINE': 'CPU', 'MEMORY_VISIBLE': 'DIMM', 'BF4_IDENTITIES': 'BF4'}.get(name, component)

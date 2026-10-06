@@ -166,6 +166,21 @@ class HardwareCheckDetailTests(unittest.TestCase):
         self.assertEqual(details['BF4']['status'], 'FAIL')
         self.assertEqual(details['BF4']['values']['actual'], '0')
 
+    def test_nic_slot_check_is_not_emitted_contradicting_nic_finding(self):
+        # P1-4: NIC_SLOT is inventoried separately and reported through NIC_*
+        # findings whose component is 'NIC'. A NIC_SLOT check badge would always
+        # read PASS (its component never matches 'NIC'), contradicting a NIC FAIL.
+        # It must not be emitted into the hardware checks at all.
+        text = ('CHECK|NIC_SLOT|slot=0002:00:00.0|state=PRESENT|device_type=Vera\n'
+                'CHECK|NIC_SLOT|slot=0003:00:00.0|state=DEGRADED|device_type=NA\n'
+                'CHECK|CPU|actual=2|minimum=2\n')
+        findings = [{'component': 'NIC', 'severity': 'FAIL'}]
+        checks, details = parse_hardware_checks(text, findings)
+        self.assertNotIn('NIC_SLOT', checks)
+        self.assertNotIn('NIC_SLOT', details)
+        # The unrelated check is still parsed normally.
+        self.assertIn('CPU', checks)
+
 
 if __name__ == '__main__':
     unittest.main()
