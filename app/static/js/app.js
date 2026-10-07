@@ -3214,6 +3214,29 @@ const _assignTask = {
   perPage: 100,
 };
 
+function assignTaskActionMeta(count = _assignTask.sel.size) {
+  const n = Number(count || 0);
+  const agentAvailable = n === 1 && window.PA_Agent && typeof window.PA_Agent.open === "function";
+  if (!n) return { kind: "empty", label: "選擇測項", note: "請先勾選至少一筆測試案例。" };
+  if (agentAvailable) return { kind: "agent", label: "交給 PA Agent", note: "PA Agent 會先說明計畫，並等待工程師輸入 OK 或 GO。" };
+  if (n > 1) return { kind: "batch", label: `產生批次指令 (${n})`, note: "目前未啟動 Agent；將產生所有已選測項的批次指令。" };
+  return { kind: "instruction", label: "產生指令", note: "PA Agent 入口目前不可用；只會產生可複製指令。" };
+}
+
+function assignTaskTargetHtml() {
+  const target = assignTaskMach() || {};
+  const operation = typeof operationTarget === "function" ? (operationTarget(target.name || _assignTask.name) || {}) : {};
+  const fields = [
+    ["專案", target.project],
+    ["系統", target.name || _assignTask.name],
+    ["Node", operation.node_id],
+    ["OS IP", operation.os_ip || target.os_ip],
+  ];
+  return `<dl class="assign-target-bar" aria-label="目前指派目標">${fields.map(([label, value]) =>
+    `<div><dt>${esc(label)}</dt><dd${label === "Node" || label === "OS IP" ? ' class="mono"' : ""}>${esc(value || "未提供")}</dd></div>`
+  ).join("")}</dl>`;
+}
+
 function assignTaskMach() {
   return (_assignTask.machine) || machines.find(x => x.name === _assignTask.name) || null;
 }
@@ -3258,14 +3281,7 @@ function assignTaskBack() {
 }
 
 function assignTaskMetaHtml() {
-  const target = assignTaskMach();
-  const ip = target && target.os_ip ? target.os_ip : "\u2014";
-  const user = (target && target.os_user) || "root";
-  const head = `
-    <div style="margin-bottom:14px;padding:12px 14px;background:var(--bg-panel-2);border-radius:10px;font-size:13px">
-      <b>\u76ee\u6a19\u6a5f\u53f0\uff1a</b> ${esc(_assignTask.name)} &nbsp;·&nbsp; <b>OS\u200bIP\uff1a</b>
-      <span class="mono">${esc(ip)}</span> &nbsp;·&nbsp; <b>\u5e33\u865f\uff1a</b><span class="mono">${esc(user)}</span>
-    </div>`;
+  const head = assignTaskTargetHtml();
   if (!_assignTask.meta.length) {
     return head + `<div class="empty">無法載入測試案例，請重試或聯絡管理者。</div>`;
   }
@@ -3310,8 +3326,7 @@ async function assignTaskOpenSheet(sheetName) {
     [
       { txt: "\u25c0 \u56de\u5206\u985e", cls: "btn", fn: () => assignTaskBack() },
       { txt: "\u95dc\u9589", cls: "btn", fn: () => { if (modal) modal.style.width = ""; closeDialog(); } },
-      { txt: `\u25b6 \u4e0b\u4e00\u6b65\uff1a\u9032\u5165 PA Agent (${_assignTask.sel.size})`,
-        cls: "btn-primary primary", fn: () => assignTaskCopy() },
+      { txt: assignTaskActionMeta().label, cls: "btn-primary primary", fn: () => assignTaskCopy() },
     ]);
 }
 
@@ -3334,20 +3349,21 @@ function assignTaskListHtml() {
   const dupCodes = dupCodeSet();
   const rowsHtml = slice.map(r => assignTaskRow(r, dupCodes)).join("");
   const toolbar = `
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+    <div class="assign-toolbar">
       <input id="assign-q" class="assign-search" type="text" placeholder="\u641c\u5c0b code / items / test set"
-        value="${esc(_assignTask.q)}" oninput="assignTaskSearch()" />
+        value="${esc(_assignTask.q)}" oninput="assignTaskSearch(this)"
+        oncompositionstart="this.dataset.composing='1'" oncompositionend="delete this.dataset.composing;assignTaskSearch(this)" />
       <button class="btn small" onclick="assignTaskSelAll()">\u2713 \u5168\u9078\u672c\u9801</button>
       <button class="btn small" onclick="assignTaskSelClear()">\u7a7a \u6e05\u7a7a</button>
       <span class="hint">\u5df2\u9078 <b id="assign-selcount">${selCount}</b> /\u5171 ${_assignTask.items.length}</span>
     </div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px">
+    <div class="assign-pagination">
       <button class="btn small" ${pg<=0?"disabled":""} onclick="assignTaskPage(-1)">\u2039 \u4e0a\u4e00\u9801</button>
       <span class="hint">\u7b2c ${pg+1} / ${totalPages} \u9801 \u00b7 ${filt.length} \u9805${filterMeta?` \u00b7 \u641c\u5c0b: ${esc(_assignTask.q)}`:""}</span>
       <button class="btn small" ${pg>=totalPages-1?"disabled":""} onclick="assignTaskPage(1)">\u4e0b\u4e00\u9801 \u203a</button>
     </div>`;
 
-  return toolbar + `<div class="assign-rows">${rowsHtml || `<div class="empty">\u6c92\u6709\u76f8\u7b26\u6e2c\u9805</div>`}</div>`;
+  return assignTaskTargetHtml() + toolbar + `<div class="assign-rows">${rowsHtml || `<div class="empty">\u6c92\u6709\u76f8\u7b26\u6e2c\u9805</div>`}</div>`;
 }
 
 function dupCodeSet() {
@@ -3381,29 +3397,41 @@ function assignTaskRow(r, dup) {
     </label>`;
 }
 
-function assignTaskSearch() {
-  _assignTask.q = ($("assign-q").value || "");
+function assignTaskUpdateBody({ focusSearch = false, caret = null } = {}) {
+  const taskBody = $("assign-task-body");
+  if (!taskBody) return false;
+  const listTop = taskBody.querySelector(".assign-rows")?.scrollTop || 0;
+  const detailTop = taskBody.querySelector(".eng-case-detail")?.scrollTop || 0;
+  taskBody.innerHTML = assignTaskListHtml();
+  const nextList = taskBody.querySelector(".assign-rows");
+  const nextDetail = taskBody.querySelector(".eng-case-detail");
+  if (nextList) nextList.scrollTop = listTop;
+  if (nextDetail) nextDetail.scrollTop = detailTop;
+  if (focusSearch) {
+    const q = $("assign-q");
+    q?.focus({ preventScroll: true });
+    if (q && Number.isInteger(caret)) q.setSelectionRange(caret, caret);
+  }
+  document.dispatchEvent(new CustomEvent("pa:assign-task-rendered"));
+  return true;
+}
+function assignTaskSearch(input) {
+  const field = input || $("assign-q");
+  if (!field || field.dataset.composing) return;
+  _assignTask.q = (field.value || "");
   _assignTask.page = 0;
-  const dlg = dialogBackdrop();
-  const modal = dlg.querySelector(".modal");
-  if (modal) modal.style.width = "940px";
-  showDialog(`\u2705 \u6307\u6d3e\u4efb\u52d9 \u00b7 ${esc(_assignTask.sheet ? _assignTask.sheet.label : "")}`, `<div id="assign-task-body">${assignTaskListHtml()}</div>`,
-    [
-      { txt: "\u25c0 \u56de\u5206\u985e", cls: "btn", fn: () => assignTaskBack() },
-      { txt: "\u95dc\u9589", cls: "btn", fn: () => { if (modal) modal.style.width = ""; closeDialog(); } },
-      { txt: `\u25b6 \u4e0b\u4e00\u6b65\uff1a\u9032\u5165 PA Agent (${_assignTask.sel.size})`,
-        cls: "btn-primary primary", fn: () => assignTaskCopy() },
-    ]);
+  assignTaskUpdateBody({ focusSearch: true, caret: field.selectionStart });
 }
 function assignTaskPage(dir) {
   _assignTask.page += dir;
+  if (assignTaskUpdateBody()) return;
   const dlg = dialogBackdrop();
   const modal = dlg.querySelector(".modal");
   if (modal) modal.style.width = "940px";
   showDialog(`\u2705 \u6307\u6d3e\u4efb\u52d9 \u00b7 ${esc(_assignTask.sheet ? _assignTask.sheet.label : "")}`, `<div id="assign-task-body">${assignTaskListHtml()}</div>`, [
     { txt: "\u25c0 \u56de\u5206\u985e", cls: "btn", fn: () => assignTaskBack() },
     { txt: "\u95dc\u9589", cls: "btn", fn: () => { if (modal) modal.style.width = ""; closeDialog(); } },
-    { txt: `\u25b6 \u4e0b\u4e00\u6b65\uff1a\u9032\u5165 PA Agent (${_assignTask.sel.size})`, cls: "btn-primary primary", fn: () => assignTaskCopy() },
+    { txt: assignTaskActionMeta().label, cls: "btn-primary primary", fn: () => assignTaskCopy() },
   ]);
 }
 function assignTaskToggle(code, on) {
@@ -3426,13 +3454,14 @@ function assignTaskSelClear() {
   assignTaskReRender();
 }
 function assignTaskReRender() {
+  if (assignTaskUpdateBody()) return;
   const dlg = dialogBackdrop();
   const modal = dlg.querySelector(".modal");
   if (modal) modal.style.width = "940px";
   showDialog(`\u2705 \u6307\u6d3e\u4efb\u52d9 \u00b7 ${esc(_assignTask.sheet ? _assignTask.sheet.label : "")}`, `<div id="assign-task-body">${assignTaskListHtml()}</div>`, [
     { txt: "\u25c0 \u56de\u5206\u985e", cls: "btn", fn: () => assignTaskBack() },
     { txt: "\u95dc\u9589", cls: "btn", fn: () => { if (modal) modal.style.width = ""; closeDialog(); } },
-    { txt: `\u25b6 \u4e0b\u4e00\u6b65\uff1a\u9032\u5165 PA Agent (${_assignTask.sel.size})`, cls: "btn-primary primary", fn: () => assignTaskCopy() },
+    { txt: assignTaskActionMeta().label, cls: "btn-primary primary", fn: () => assignTaskCopy() },
   ]);
 }
 
@@ -3441,7 +3470,8 @@ async function assignTaskCopy() {
   if (!sel.size) { notifyUser("\u8acb\u5148\u52fe\u9078\u81f3\u5c11\u4e00\u9805\u6e2c\u9805\uff01"); return; }
   const mm = _assignTask.sheet || {};
   const m = assignTaskMach();
-  const ip = (m && m.os_ip) || "<OS_IP>";
+  const operation = typeof operationTarget === "function" ? (operationTarget(m?.name || _assignTask.name) || {}) : {};
+  const ip = operation.os_ip || (m && m.os_ip) || "<OS_IP>";
   const user = (m && m.os_user) || "root";
   const pass = (m && m.os_pass && m.os_pass !== "****") ? m.os_pass : "<PASSWORD>";
   const sname = mm.sheet || "";
@@ -3605,7 +3635,8 @@ async function assignTaskCopy() {
   window.uxNotify?.(copied ? "\u6307\u4ee4\u5df2\u7522\u751f\u4e26\u8907\u88fd\uff1b\u5c1a\u672a\u57f7\u884c\u6e2c\u8a66" : "\u6307\u4ee4\u5df2\u7522\u751f\uff1b\u526a\u8cbc\u7c3f\u7121\u6cd5\u5beb\u5165\uff0c\u8acb\u5728\u7d50\u679c\u8996\u7a97\u624b\u52d5\u8907\u88fd", !copied);
 
   // 開仿 User Guide 的浮動小視窗，讓使用者在下方滾動看完整 TEST CASE
-  AssignResultWin.render("\u2705 \u6307\u6d3e\u53ef\u57f7\u884c\u6307\u4ee4 \u00b7 " + built.summary, built.text, built.rich, chosen);
+  const resultTitle = chosen.length > 1 ? "\u6279\u6b21\u6307\u4ee4" : "\u6307\u6d3e\u6307\u4ee4";
+  AssignResultWin.render(`\u2705 ${resultTitle} \u00b7 ${built.summary}`, built.text, built.rich, chosen);
 }
 
 async function assignTaskClip(text) {
@@ -3664,7 +3695,7 @@ function arHlAssignText(text) {
 }
 // [AR-HL v1 END]
 
-// 指派任務結果浮動視窗（下一步：進入 PA Agent） — 仿 User Guide 小視窗
+// 指派任務結果浮動視窗：單選可交給 Agent；多選只提供完整批次指令。
 // ============================================================
 // Rich, sectioned HTML for the assign-result window. Mirrors the Test Case detail
 // panel (same eng-* classes) so the generated command reads as nicely as the
@@ -3780,10 +3811,13 @@ function assignResultRichHtml(chosen, mm, sname, ip, user, dupSet) {
     </article>`;
   }).join("");
 
+  const batch = chosen.length > 1;
   return `<div class="eng-case-detail-wrap">
-    <div class="eng-case-sec"><h4>PA AGENT 指派任務</h4>
+    <div class="eng-case-sec"><h4>${batch ? "批次指令" : "PA AGENT 指派任務"}</h4>
     <p class="eng-case-prose">目標機台：${E([mm.label, sname, ip, user].filter(Boolean).join(" · "))}</p>
-    <p class="eng-case-prose">請在 ${E(ip)}（${E(user)}）上執行以下測項。PA Agent 會透過 SSH 安裝／執行／收集證據；得失判定由您。</p></div>
+    <p class="eng-case-prose">${batch
+      ? `以下包含 ${chosen.length} 筆已選測項的原始批次指令；目前未啟動 Agent，也尚未執行測試。`
+      : `請在 ${E(ip)}（${E(user)}）上執行以下測項。PA Agent 會先提出計畫並等待 OK／GO；得失判定由您。`}</p></div>
     ${cards}
   </div>`;
 }
@@ -3927,7 +3961,15 @@ const AssignResultWin = (() => {
     win._rich = rich || "";
     win._cases = Array.isArray(cases) ? cases : [];
     win.querySelector("#ar-title").textContent = title;
-    win.querySelector("#ar-hint").textContent = "已複製到剪貼簿。請確認完整測試案例、風險與目標後，再貼至執行工具。本頁尚未執行測試。";
+    const agentButton = win.querySelector("#ar-pa-agent");
+    const multi = win._cases.length > 1;
+    win.querySelector("#ar-hint").textContent = multi
+      ? "批次指令已產生並複製；目前未啟動 Agent，也尚未執行測試。"
+      : "指令已複製。請確認完整測試案例、風險與目標；本頁尚未執行測試。";
+    if (agentButton) {
+      agentButton.hidden = multi;
+      agentButton.disabled = false;
+    }
     const pre = win.querySelector("#ar-pre");
     if (rich) { pre.innerHTML = rich; pre.classList.add("ar-rich"); }
     else { pre.innerHTML = arHlAssignText(text); pre.classList.remove("ar-rich"); }

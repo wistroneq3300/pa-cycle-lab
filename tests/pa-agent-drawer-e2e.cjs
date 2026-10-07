@@ -1,13 +1,10 @@
 "use strict";
 /* E2E — P3-e: Assign Task -> PA Agent drawer hand-off (entry point #2).
  *
- * Drives the real production flow: open the genuine assign-task modal
- * (`openAssignTask`) -> pick sheet -> tick TWO cases -> 下一步：進入 PA Agent (2) ->
- * 進入 PA Agent (confirm step). The multi-case path renders the assign-result window; its
- * 🤖 PA Agent 對話 button (`#ar-pa-agent`) must hand the first chosen case to
- * PA_Agent.open, which opens the chat drawer and starts an AgentRun.
- * (A single-case selection short-circuits straight to PA_Agent.open; the
- * multi-case window is the path guarded here.)
+ * Drives both production branches. Multi-select must generate a batch instruction
+ * without starting Agent; single-select must confirm the exact target and hand the
+ * selected case to PA_Agent.open, which opens the chat workspace and starts an
+ * AgentRun in plan mode.
  *
  * We intercept the PA Agent chat API (/api/agent/*) and the app's data APIs
  * with p.route() so no OpenHands session or real backend is required, and we
@@ -270,38 +267,43 @@ async function waitForServer() {
   await page.waitForSelector(".assign-sheet-card", { timeout: 10000 });
   await page.locator(".assign-sheet-card").first().click();
 
-  // Item list; tick the first TWO cases so the multi-case path runs
-  // (single-case selections hand off directly; 2+ open the assign-result
-  // window whose 🤖 PA Agent 對話 button opens the drawer).
+  // Multi-selection must produce a batch instruction and must not start Agent.
   await page.waitForSelector(".eng-case-row input[type=checkbox]", { timeout: 10000 });
   const boxes = page.locator(".eng-case-row input[type=checkbox]");
   await boxes.nth(0).check();
   await boxes.nth(1).check();
+  const batchBtn = page.locator('#rm-dialog-foot .primary:has-text("產生批次指令 (2)")').first();
+  await batchBtn.waitFor({ state: "visible", timeout: 10000 });
+  await batchBtn.click();
+  const batchConfirm = page.locator('#rm-dialog-foot .primary:has-text("產生批次指令 (2)")').first();
+  await batchConfirm.waitFor({ state: "visible", timeout: 10000 });
+  await batchConfirm.click();
+  await page.waitForSelector(".ar-window", { state: "visible", timeout: 10000 });
+  const multiContract = {
+    agentButtonHidden: await page.locator("#ar-pa-agent").isHidden(),
+    drawerClosed: await page.locator("#pa-agent-drawer.open").count() === 0,
+    saysNotStarted: /\u672a\u555f\u52d5 Agent/.test(await page.locator("#ar-hint").textContent()),
+    headingIsBatch: (await page.locator(".ar-rich .eng-case-sec h4").first().textContent()) === "批次指令",
+    introIsBatch: /2 筆已選測項/.test(await page.locator(".ar-rich .eng-case-sec .eng-case-prose").nth(1).textContent()),
+  };
+  await page.locator(".ar-close").click();
 
-  // Footer action reads 下一步：進入 PA Agent (2) once cases are selected.
-  const genBtn = page.locator('button:has-text("下一步：進入 PA Agent")').first();
-  await genBtn.waitFor({ state: "visible", timeout: 10000 });
-  await genBtn.click();
-
-  // workspace-ux wraps assignTaskCopy with a confirm step ("確認測項與目標").
-  // The primary button reads 進入 PA Agent; scope to the dialog footer so it
-  // does not collide with the footer button ("下一步：進入 PA Agent") behind it.
-  const confirmBtn = page.locator('#rm-dialog-foot .primary:has-text("進入 PA Agent")').first();
-  await confirmBtn.waitFor({ state: "visible", timeout: 10000 });
-  await confirmBtn.click();
-
-  // The assign-result window renders; its 🤖 button must hand the FIRST chosen
-  // case (VARIANT) to PA_Agent.open — this is the entry-point #2 bug guard.
-  const paBtn = page.locator("#ar-pa-agent").first();
-  await paBtn.waitFor({ state: "visible", timeout: 10000 });
-  await paBtn.click();
+  // Reopen the same real flow and select one case. Only this path may hand off to Agent.
+  await page.evaluate((m) => window.openAssignTask(m), MACHINE);
+  await page.locator(".assign-sheet-card").first().click();
+  await page.locator(".eng-case-row input[type=checkbox]").first().check();
+  const agentBtn = page.locator('#rm-dialog-foot .primary:has-text("交給 PA Agent")').first();
+  await agentBtn.waitFor({ state: "visible", timeout: 10000 });
+  await agentBtn.click();
+  const agentConfirm = page.locator('#rm-dialog-foot .primary:has-text("交給 PA Agent")').first();
+  await agentConfirm.waitFor({ state: "visible", timeout: 10000 });
+  await agentConfirm.click();
 
   // PA_Agent.open captured with the real hand-off context.
   await page.waitForFunction(() => window.__paOpen !== null, null, { timeout: 15000 });
   opened = await page.evaluate(() => window.__paOpen);
 
-  // The 🤖 window handler titles the run and passes the machine as branch.
-  const EXPECT_TITLE = "PA Agent 分析指派結果 · " + MACHINE;
+  const EXPECT_TITLE = ITEM_LABEL;
 
   // PA Agent drawer visible in the DOM.
   await page.waitForSelector("#pa-agent-drawer.open", { timeout: 10000 });
@@ -409,10 +411,14 @@ async function waitForServer() {
   const doneStatus = finalStatusText.includes("工程師判定");
 
   const checks = [
+    ["multi-select batch action does not expose Agent button", multiContract.agentButtonHidden],
+    ["multi-select batch action does not open Agent", multiContract.drawerClosed],
+    ["multi-select result states Agent was not started", multiContract.saysNotStarted],
+    ["multi-select result is labelled as batch instructions", multiContract.headingIsBatch && multiContract.introIsBatch],
     ["PA_Agent.open captured", !!opened],
-    ["case_variant_id (first chosen case)", opened && opened.case_variant_id === VARIANT],
+    ["single selected case_variant_id", opened && opened.case_variant_id === VARIANT],
     ["node_id", opened && opened.node_id === NODE_ID],
-    ["branch (machine name)", opened && opened.branch === MACHINE],
+    ["branch (test set)", opened && opened.branch === SHEET],
     ["title", opened && opened.title === EXPECT_TITLE],
     ["task carries assignment text", !!(opened && opened.task && opened.task.length > 0)],
     ["drawer element present + open", drawerVisible],

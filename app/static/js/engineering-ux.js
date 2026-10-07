@@ -200,18 +200,18 @@
       <div class="eng-case-id"><code>${esc(r.code)}</code>${r.case_variant_id?`<small class="mono">${esc(String(r.case_variant_id).slice(0,20))}</small>`:''}</div>
       <h3>${esc(r.items||r.test_set||'')}</h3>
       <div class="eng-case-flags">${flags.join('')}</div>
-      <p>\u6b64\u8655\u50c5\u7522\u751f\u6d3e\u5de5\u6307\u4ee4\uff0c\u4e0d\u6703\u57f7\u884c\u6e2c\u8a66\u3002</p>
+      <p>\u76ee\u524d\u53ea\u5728\u700f\u89bd Test Case Library\uff1b\u5c1a\u672a\u555f\u52d5\u6e2c\u8a66\u6216 Agent\u3002</p>
     </header>`;
     const body = rev ? caseReview(r) : '';
-    // Legacy flat fields still matter (criteria / procedure live only here).
+    const criteria = r.criteria ? `<section class="eng-case-sec eng-case-criteria"><h4>\u5224\u5b9a\u6a19\u6e96</h4><p class="eng-case-prose">${esc(r.criteria)}</p></section>` : '';
+    // The original work order still matters, but remains a lower-priority disclosure.
     const legacy = [
-      ['\u5224\u5b9a\u6a19\u6e96', r.criteria],
       ['\u539f\u59cb\u624b\u4f5c\u696d\u55ae\uff08\u53c3\u8003\uff09', r.procedure],
     ].map(([label,value])=>{
       const t = value==null?'':String(value).trim();
       return t ? `<details class="eng-case-fold"><summary>${esc(label)}</summary><pre>${esc(t)}</pre></details>` : '';
     }).join('');
-    return head + body + legacy;
+    return head + criteria + body + legacy;
   }
   // Row label resolves to the five-way classification when the merged review is present,
   // falling back to the legacy YES/PARTIAL/NO tri-state for older rows.
@@ -225,14 +225,15 @@
     const tone = v==='YES'?'green':v==='NO'?'red':'amber';
     return `<span class="eng-badge eng-tone-${tone}">${esc(v)}</span>`;
   };
-  assignTaskRow=function(r,dup){const index=_assignTask.items.indexOf(r);return `<div class="assign-row eng-case-row"><label><input type="checkbox" data-variant="${esc(assignTaskKey(r))}" aria-label="${esc(r.code)}" ${_assignTask.sel.has(assignTaskKey(r))?'checked':''} onchange="assignTaskToggle(${q(assignTaskKey(r))},this.checked)"></label><button type="button" class="eng-case-open" onclick="engInspectCase(${index})"><span>${rowLabel(r)} <code>${esc(r.code)}</code></span><strong>${esc(r.items)}</strong><small>${esc(r.test_set||'')}${dup?.has(r.code)?' \u00b7 \u540c\u78bc\u591a\u7b46':''}</small></button></div>`;};
+  assignTaskRow=function(r,dup){const index=_assignTask.items.indexOf(r),key=assignTaskKey(r),selected=_assignTask.sel.has(key),inspected=r===inspectedCase;return `<div class="assign-row eng-case-row${selected?' is-selected':''}${inspected?' is-inspected':''}" data-case-index="${index}"><label><input type="checkbox" data-variant="${esc(key)}" aria-label="\u9078\u53d6 ${esc(r.code)}" ${selected?'checked':''} onchange="assignTaskToggle(${q(key)},this.checked)"></label><button type="button" class="eng-case-open${inspected?' active':''}" aria-current="${inspected?'true':'false'}" onclick="engInspectCase(${index})"><span>${rowLabel(r)} ${riskBadge(r.ai_review?.risk_level||r.risk)} <code>${esc(r.code)}</code></span><strong>${esc(r.items)}</strong><small>${esc(r.test_set||'')}${dup?.has(r.code)?' \u00b7 \u540c\u78bc\u591a\u7b46':''}</small></button></div>`;};
   const baseTaskList=assignTaskListHtml;
   assignTaskListHtml=function(){const root=document.createElement('div');root.innerHTML=baseTaskList();const rows=root.querySelector('.assign-rows');if(!rows)return root.innerHTML;const layout=document.createElement('div');layout.className='eng-case-layout';rows.before(layout);layout.append(rows);const row=(_assignTask.items||[]).find(r=>r===inspectedCase);layout.insertAdjacentHTML('beforeend',`<aside class="eng-case-detail" id="eng-case-detail" aria-label="\u6e2c\u9805\u5167\u5bb9">${caseDetails(row)}</aside>`);root.querySelector('#assign-q')?.setAttribute('aria-label','\u641c\u5c0b\u6e2c\u8a66\u6848\u4f8b');return root.innerHTML;};
-  window.engInspectCase=index=>{inspectedCase=_assignTask.items[index];const panel=document.getElementById('eng-case-detail');if(panel){panel.innerHTML=caseDetails(inspectedCase);panel.scrollTop=0;}document.querySelectorAll('.eng-case-open').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`engInspectCase(${index})`));};
+  window.engInspectCase=index=>{inspectedCase=_assignTask.items[index];const panel=document.getElementById('eng-case-detail');if(panel){panel.innerHTML=caseDetails(inspectedCase);panel.scrollTop=0;}document.querySelectorAll('.eng-case-row').forEach(row=>{const current=row.dataset.caseIndex===String(index);row.classList.toggle('is-inspected',current);const button=row.querySelector('.eng-case-open');button?.classList.toggle('active',current);button?.setAttribute('aria-current',current?'true':'false');});};
   const baseToggle=assignTaskToggle;
   assignTaskToggle=function(...args){baseToggle(...args);syncCaseSelection();};
-  function syncCaseSelection(){const body=document.getElementById('assign-task-body');if(!body)return;const footer=document.getElementById('rm-dialog-foot');const button=footer?.querySelector('.primary');if(button){button.textContent=`\u25b6 \u4e0b\u4e00\u6b65\uff1a\u9032\u5165 PA Agent (${_assignTask.sel.size})`;button.disabled=!_assignTask.sel.size;}body.querySelectorAll('.eng-case-row input').forEach(input=>{input.checked=_assignTask.sel.has(input.getAttribute('data-variant'));});}
-  const baseDialog=showDialog;showDialog=function(...args){const result=baseDialog(...args);syncCaseSelection();return result;};
+  function syncCaseSelection(){const body=document.getElementById('assign-task-body');if(!body)return;const footer=document.getElementById('rm-dialog-foot');const button=footer?.querySelector('.primary');const action=typeof assignTaskActionMeta==='function'?assignTaskActionMeta():{label:'\u9078\u64c7\u6e2c\u9805',note:''};if(button){button.textContent=action.label;button.disabled=!_assignTask.sel.size;}if(footer&&button){footer.classList.add('assign-action-footer');let note=footer.querySelector('.assign-action-note');if(!note){note=document.createElement('span');note.className='assign-action-note';footer.insertBefore(note,footer.firstChild);}note.textContent=action.note;}body.querySelectorAll('.eng-case-row input').forEach(input=>{const selected=_assignTask.sel.has(input.getAttribute('data-variant'));input.checked=selected;input.closest('.eng-case-row')?.classList.toggle('is-selected',selected);});}
+  const baseDialog=showDialog;showDialog=function(...args){const result=baseDialog(...args);const taskBody=document.getElementById('assign-task-body'),modal=document.querySelector('#rm-dialog .modal'),footer=document.getElementById('rm-dialog-foot');modal?.classList.toggle('assign-task-modal',!!taskBody);if(!taskBody&&footer){footer.classList.remove('assign-action-footer');footer.querySelector('.assign-action-note')?.remove();}syncCaseSelection();return result;};
+  document.addEventListener('pa:assign-task-rendered',syncCaseSelection);
   document.addEventListener('DOMContentLoaded',()=>{
     if(window.PA_PREVIEW)return;
     const side=document.querySelector('.p-side-preview');

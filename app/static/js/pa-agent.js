@@ -144,7 +144,8 @@
   let state = {
     runId: null, run: null, renderedSeq: 0, context: null,
     timer: null, polling: false, started: false, mode: "plan",
-    sending: false, lastSync: 0, stickBottom: true,
+    sending: false, lastSync: 0, stickBottom: true, unread: 0,
+    opener: null, uploads: [],
   };
 
   // Enter 送出與「送出」按鈕共用一個 in-flight 守門，避免連點造成重複送出。
@@ -161,12 +162,12 @@
     root.setAttribute("aria-label", "PA Agent 工作區");
     root.innerHTML = `
       <div class="pa-drawer-scrim" data-close="1" aria-hidden="true"></div>
-      <aside class="pa-drawer-panel" role="dialog" aria-modal="true">
+      <aside class="pa-drawer-panel" role="dialog" aria-modal="true" aria-labelledby="pa-drawer-heading">
         <header class="pa-drawer-head">
           <div class="pa-drawer-title">
             <span class="pa-drawer-ico" aria-hidden="true">PA</span>
             <div class="pa-drawer-titles">
-              <strong>PA Agent</strong>
+              <strong id="pa-drawer-heading">PA Agent</strong>
               <small id="pa-drawer-status" class="pa-drawer-status pa-status-idle">
                 <span class="pa-status-dot" aria-hidden="true"></span><span id="pa-drawer-status-text">閒置</span>
               </small>
@@ -174,6 +175,7 @@
           </div>
           <button type="button" id="pa-drawer-close" class="pa-drawer-close" title="關閉" aria-label="關閉">&times;</button>
         </header>
+        <div id="pa-summary" class="pa-summary" aria-live="polite"></div>
         <div id="pa-drawer-cols" class="pa-drawer-cols">
           <section id="pa-drawer-left" class="pa-drawer-left">
             <div class="pa-drawer-left-head">
@@ -183,8 +185,8 @@
             <div id="pa-drawer-case" class="pa-drawer-case"></div>
           </section>
           <section class="pa-drawer-right">
-            <div id="pa-summary" class="pa-summary" aria-live="polite"></div>
             <div id="pa-drawer-body" class="pa-drawer-body" aria-live="polite"></div>
+            <button type="button" id="pa-new-messages" class="pa-new-messages" hidden>\u6709\u65b0\u8a0a\u606f \u00b7 \u56de\u5230\u6700\u65b0</button>
             <div id="pa-attach-strip" class="pa-attach-strip" hidden></div>
             <footer class="pa-drawer-foot">
               <div id="pa-approval" class="pa-approval-slot" hidden></div>
@@ -215,14 +217,27 @@
     document.addEventListener("keydown", onKey);
     return root;
   }
-  function onKey(e) { if (e.key === "Escape") close(); }
+  function onKey(e) {
+    if (!root?.classList.contains("open")) return;
+    if (e.key === "Escape") { e.preventDefault(); close(); return; }
+    if (e.key !== "Tab") return;
+    const focusable = [...root.querySelectorAll('button:not([disabled]):not([hidden]),textarea:not([disabled]),input:not([disabled]),a[href],summary')]
+      .filter(el => !el.hidden && el.offsetParent !== null);
+    if (!focusable.length) return;
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
 
   // ---------- 對外 API ----------
   async function open(context = {}) {
     // context: { case_variant_id, node_id?, expected_binding_revision?, branch?, title?, task?, rich?, mode? }
+    state.opener = document.activeElement;
     state.context = context || {};
     state.mode = context.mode === "execute" ? "execute" : "plan";
     state.runId = null; state.run = null; state.renderedSeq = 0;
+    state.lastSync = 0; state.stickBottom = true; state.unread = 0; state.uploads = []; state._attachments = [];
+    state._finalShown = null; state._doneNoteShown = null; state._errorShown = null;
     ensureRoot();
     root.classList.add("open");
     state.started = true;
@@ -230,6 +245,7 @@
     setApproval(null);
     renderLeftPanel();
     setStatus("PENDING");
+    requestAnimationFrame(() => root?.querySelector("#pa-drawer-close")?.focus({ preventScroll: true }));
     if (!state.context.case_variant_id) {
       setStatus("ERROR");
       body().innerHTML = `<div class="pa-empty">未提供 case_variant_id，無法建立 AgentRun。請從指派結果視窗以該用例開啟。</div>`;
@@ -274,11 +290,15 @@
   }
   function close() {
     if (!root) return;
+    const opener = state.opener;
     cancelPolling();
     state.started = false;
     root.classList.remove("open");
     document.removeEventListener("keydown", onKey);
-    setTimeout(() => { if (root && !root.classList.contains("open")) { root.remove(); root = null; } }, 260);
+    setTimeout(() => {
+      if (root && !root.classList.contains("open")) { root.remove(); root = null; }
+      if (opener && opener.isConnected && typeof opener.focus === "function") opener.focus({ preventScroll: true });
+    }, 260);
   }
 
   // ---------- 左欄：測試任務（Test Case Context）----------
@@ -333,7 +353,15 @@
   function scrollBottom() {
     if (!state.stickBottom) return;
     const b = body();
+    state.unread = 0;
+    updateNewMessages();
     requestAnimationFrame(() => { b.scrollTop = b.scrollHeight; });
+  }
+  function updateNewMessages() {
+    const button = root?.querySelector("#pa-new-messages");
+    if (!button) return;
+    button.hidden = !state.unread;
+    button.textContent = state.unread ? `${state.unread} 則新訊息 · 回到最新` : "有新訊息 · 回到最新";
   }
   function setStatus(status) {
     const meta = STATUS_META[status] || { label: status || "—", tone: "idle" };
@@ -359,11 +387,19 @@
       dur = secs < 60 ? secs + "s" : (secs < 3600 ? Math.floor(secs / 60) + "m" + (secs % 60) + "s" : Math.floor(secs / 3600) + "h" + Math.floor((secs % 3600) / 60) + "m");
     }
     const sync = state.lastSync ? new Date(state.lastSync).toLocaleTimeString("zh-TW", { hour12: false }) : "—";
+    const shortId = value => {
+      const text = String(value || "");
+      return text.length > 20 ? text.slice(0, 9) + "…" + text.slice(-7) : (text || "—");
+    };
+    const caseText = c.title || c.case_variant_id || "—";
+    const targetText = c.node_id || "—";
+    const runText = r.run_id || state.runId || "—";
     box.innerHTML =
+      `<span class="pa-sum-item pa-sum-case" title="${esc(caseText)}"><b>Case</b>${esc(caseText)}</span>` +
+      `<span class="pa-sum-item" title="${esc(targetText)}"><b>Target</b><span class="pa-mono">${esc(shortId(targetText))}</span></span>` +
+      `<span class="pa-sum-item" title="${esc(runText)}"><b>Run</b><span class="pa-mono">${esc(shortId(runText))}</span></span>` +
       `<span class="pa-sum-item"><b>狀態</b><span class="pa-sum-status pa-status-${st.tone}">${esc(st.label)}</span></span>` +
-      `<span class="pa-sum-item"><b>節點</b>${esc(c.node_id || "—")}</span>` +
-      `<span class="pa-sum-item"><b>測試集</b>${esc(c.branch || "—")}</span>` +
-      `<span class="pa-sum-item"><b>時間</b>${esc(dur)}</span>` +
+      `<span class="pa-sum-item"><b>耗時</b>${esc(dur)}</span>` +
       `<span class="pa-sum-item"><b>最後同步</b>${esc(sync)}</span>` +
       (r.plan_revision ? `<span class="pa-sum-item"><b>計畫版本</b>r${esc(r.plan_revision)}</span>` : "");
   }
@@ -373,28 +409,43 @@
     const strip = root?.querySelector("#pa-attach-strip");
     if (!strip) return;
     state._attachments = atts || [];
-    if (!atts || !atts.length) { strip.hidden = true; strip.innerHTML = ""; return; }
+    const all = [...state._attachments, ...(state.uploads || [])];
+    if (!all.length) { strip.hidden = true; strip.innerHTML = ""; return; }
     strip.hidden = false;
-    strip.innerHTML = atts.map(a => {
-      const thumb = a.kind === "image"
-        ? `<span class="pa-att-thumb">🖼</span>` : `<span class="pa-att-thumb">📄</span>`;
-      const warn = a.status === "unparsed"
-        ? `<span class="pa-att-warn" title="${esc(a.error || "")}">無法解析</span>`
-        : (a.kind === "image" && !a.vision_supported
-            ? `<span class="pa-att-warn">已上傳，目前模型無法直接解析圖片</span>` : "");
+    strip.innerHTML = all.map(a => {
+      const type = `<span class="pa-att-type">${a.kind === "image" ? "IMG" : "FILE"}</span>`;
+      let status = `<span class="pa-att-status">已上傳</span>`;
+      if (a.status === "uploading") status = `<span class="pa-att-status">上傳中</span>`;
+      else if (a.status === "failed") status = `<span class="pa-att-warn" title="${esc(a.error || "")}">上傳失敗</span><button type="button" class="pa-att-retry" data-retry="${esc(a.attachment_id)}">重試</button>`;
+      else if (a.status === "unparsed") status = `<span class="pa-att-warn" title="${esc(a.error || "")}">已上傳 · 無法解析</span>`;
+      else if (a.status === "parsed") status = `<span class="pa-att-status pa-att-ok">已解析</span>`;
+      else if (a.kind === "image" && !a.vision_supported) status = `<span class="pa-att-warn">已上傳 · 模型不支援圖片解析</span>`;
       return `<span class="pa-att" data-id="${esc(a.attachment_id)}">
-        ${thumb}<span class="pa-att-name">${esc(a.name)}</span>
-        <span class="pa-att-size">${fmtSize(a.size)}</span>${warn}
+        ${type}<span class="pa-att-name">${esc(a.name)}</span>
+        <span class="pa-att-size">${fmtSize(a.size)}</span>${status}
         <button type="button" class="pa-att-rm" data-rm="${esc(a.attachment_id)}" title="移除">✕</button>
       </span>`;
     }).join("");
     strip.querySelectorAll("[data-rm]").forEach(btn => btn.addEventListener("click", async () => {
       const id = btn.getAttribute("data-rm");
+      const local = state.uploads.find(item => item.attachment_id === id);
+      if (local) {
+        state.uploads = state.uploads.filter(item => item.attachment_id !== id);
+        renderAttachmentStrip(state._attachments);
+        return;
+      }
       try {
         await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/attachments/${encodeURIComponent(id)}`, { method: "DELETE" });
       } catch (e) { /* ignore */ }
       renderAttachmentStrip(state._attachments.filter(x => x.attachment_id !== id));
       renderLeftPanel();
+    }));
+    strip.querySelectorAll("[data-retry]").forEach(btn => btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-retry");
+      const failed = state.uploads.find(item => item.attachment_id === id);
+      if (!failed?._file) return;
+      state.uploads = state.uploads.filter(item => item.attachment_id !== id);
+      uploadOne(failed._file);
     }));
   }
 
@@ -422,7 +473,8 @@
     const div = document.createElement("div");
     div.innerHTML = messageCard(msg);
     body().appendChild(div.firstElementChild);
-    scrollBottom();
+    if (state.stickBottom) scrollBottom();
+    else { state.unread += 1; updateNewMessages(); }
   }
 
   // 右欄開場：系統提示（不是工程師發言，避免 system instruction 被誤顯示成「你」）。
@@ -533,19 +585,22 @@
     const t = (text || "").trim();
     if (!t || !state.runId) return;
     if (!beginSend()) return;
-    if (input) { input.value = ""; input.style.height = "auto"; }
     state.stickBottom = true;
     addMessage({ seq: Date.now(), role: "user", kind: "message", text: t, created_at: new Date().toISOString() });
     const sendBtn = root?.querySelector("#pa-msg-send");
-    if (sendBtn) sendBtn.disabled = true;
+    let sent = false;
+    if (input) input.disabled = true;
+    if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = "傳送中…"; }
     try {
       const r = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/messages`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: t }),
       });
       const d = await r.json().catch(() => ({}));
-      if (!r.ok) addError("訊息送出失敗：" + (d.detail || d.error || ("HTTP " + r.status)));
+      if (!r.ok) addError("訊息未送出：" + (d.detail || d.error || ("HTTP " + r.status)) + "。內容已保留，可修正後重試。");
       else {
+        sent = true;
+        if (input) { input.value = ""; input.style.height = "auto"; }
         setStatus(state.run?.status || "RUNNING");
         // 補充訊息會建立新的計畫版本；提示工程師 GO 將採用最新版（P0-2）。
         if (d.intent === "question") {
@@ -557,10 +612,11 @@
         beginPolling();
       }
     } catch (e) {
-      addError("訊息送出失敗：" + e.message);
+      addError("訊息未送出：" + e.message + "。內容已保留，可修正後重試。");
     } finally {
       state.sending = false;
-      if (sendBtn) sendBtn.disabled = false;
+      if (input) { input.disabled = false; if (!sent) input.value = t; input.dispatchEvent(new Event("input")); input.focus(); }
+      if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = "送出"; }
     }
   }
 
@@ -643,6 +699,18 @@
           <span>PA Agent 已完成測試工作並產出結果。<strong>這不代表測試通過</strong>——PASS / FAIL / BLOCKED 請由工程師依上方記錄判定。</span>`;
         body().appendChild(note);
       }
+      if (st === "ERROR") {
+        const reason = String(run.failure_reason || "PA Agent 執行失敗；後端未提供進一步原因。");
+        const errorFingerprint = `${run.ended_at || ""}|${reason}`;
+        if (state._errorShown !== errorFingerprint) {
+          state._errorShown = errorFingerprint;
+          const note = document.createElement("div");
+          note.className = "pa-error-note";
+          note.setAttribute("role", "alert");
+          note.innerHTML = `<span class="pa-sysnote-tag">錯誤</span><span>${esc(reason)}</span>`;
+          body().appendChild(note);
+        }
+      }
       scrollBottom();
     }
   }
@@ -676,6 +744,11 @@
     b?.addEventListener("scroll", () => {
       const nearBottom = (b.scrollHeight - b.scrollTop - b.clientHeight) < 60;
       state.stickBottom = nearBottom;
+      if (nearBottom) { state.unread = 0; updateNewMessages(); }
+    });
+    root.querySelector("#pa-new-messages")?.addEventListener("click", () => {
+      state.stickBottom = true;
+      scrollBottom();
     });
   }
 
@@ -731,23 +804,29 @@
     const kind = isImage ? "image" : "file";
     // Optimistic placeholder row so the engineer sees progress immediately.
     const pendingId = "pending-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6);
-    renderAttachmentStrip([...(state._attachments || []),
-      { attachment_id: pendingId, name: file.name || "screenshot.png", size: file.size, kind, status: "uploading", vision_supported: false }]);
+    const pending = { attachment_id: pendingId, name: file.name || "screenshot.png", size: file.size,
+      kind, status: "uploading", vision_supported: false, _file: file };
+    state.uploads = [...(state.uploads || []), pending];
+    renderAttachmentStrip(state._attachments || []);
     try {
       const res = await fetch(
         `${API}/runs/${encodeURIComponent(state.runId)}/attachments?` +
         new URLSearchParams({ name: file.name || "screenshot.png", kind, mime: file.type || "" }),
         { method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: file });
       const d = await res.json().catch(() => ({}));
-      if (!res.ok) { addError("附件上傳失敗：" + (d.detail || d.error || ("HTTP " + res.status))); return; }
+      if (!res.ok) throw new Error(d.detail || d.error || ("HTTP " + res.status));
+      state.uploads = state.uploads.filter(a => a.attachment_id !== pendingId);
       // Refresh from server truth.
-      const list = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/attachments`).then(x => x.json()).catch(() => ({}));
-      renderAttachmentStrip(list.attachments || []);
+      const listRes = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/attachments`);
+      const list = await listRes.json().catch(() => ({}));
+      if (!listRes.ok) addError("附件已上傳，但清單同步失敗：" + (list.detail || ("HTTP " + listRes.status)));
+      renderAttachmentStrip(listRes.ok ? (list.attachments || []) : (state._attachments || []));
       renderLeftPanel();
     } catch (e) {
-      addError("附件上傳失敗：" + e.message);
-    } finally {
-      renderAttachmentStrip((state._attachments || []).filter(a => a.attachment_id !== pendingId));
+      pending.status = "failed";
+      pending.error = e.message;
+      renderAttachmentStrip(state._attachments || []);
+      addError("附件上傳失敗：" + e.message + "。檔案已保留在本畫面，不會自動重試。");
     }
   }
 

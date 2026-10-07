@@ -1,0 +1,100 @@
+{
+  "phase": "before",
+  "base": "http://127.0.0.1:9196",
+  "browser": "154.0.4258.62",
+  "captures": [
+    {
+      "width": 1366,
+      "height": 768,
+      "theme": "light",
+      "errors": [],
+      "unknownRequests": [
+        "GET /api/ai/gpu-alerts"
+      ]
+    },
+    {
+      "width": 1366,
+      "height": 768,
+      "theme": "dark",
+      "errors": [],
+      "unknownRequests": [
+        "GET /api/ai/gpu-alerts"
+      ]
+    },
+    {
+      "width": 1600,
+      "height": 900,
+      "theme": "light",
+      "errors": [],
+      "unknownRequests": [
+        "GET /api/ai/gpu-alerts"
+      ]
+    },
+    {
+      "width": 1600,
+      "height": 900,
+      "theme": "dark",
+      "errors": [],
+      "unknownRequests": [
+        "GET /api/ai/gpu-alerts"
+      ]
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "theme": "light",
+      "errors": [],
+      "unknownRequests": [
+        "GET /api/ai/gpu-alerts"
+      ]
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "theme": "dark",
+      "errors": [],
+      "unknownRequests": [
+        "GET /api/ai/gpu-alerts"
+      ]
+    },
+    {
+      "width": 2560,
+      "height": 1440,
+      "theme": "light",
+      "errors": [],
+      "unknownRequests": [
+        "GET /api/ai/gpu-alerts"
+      ]
+    },
+    {
+      "width": 2560,
+      "height": 1440,
+      "theme": "dark",
+      "errors": [],
+      "unknownRequests": [
+        "GET /api/ai/gpu-alerts"
+      ]
+    },
+    {
+      "width": 3440,
+      "height": 1440,
+      "theme": "light",
+      "errors": [],
+      "unknownRequests": [
+        "GET /api/ai/gpu-alerts"
+      ]
+    },
+    {
+      "width": 3440,
+      "height": 1440,
+      "theme": "dark",
+      "errors": [],
+      "unknownRequests": [
+        "GET /api/ai/gpu-alerts"
+      ]
+    }
+  ],
+  "unknownRequests": [
+    "GET /api/ai/gpu-alerts"
+  ]
+}

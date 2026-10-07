@@ -1,0 +1,1456 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="23" skipped="0" tests="51" time="12.717" timestamp="2026-10-08T00:54:32.466754+08:00" hostname="ShengWu"><testcase classname="tests.test_test_library_contract.ShippedLibrary" name="test_duplicate_codes_are_resolvable_only_by_variant_id" time="1.145" /><testcase classname="tests.test_test_library_contract.ShippedLibrary" name="test_every_row_has_unique_case_variant_id" time="0.001" /><testcase classname="tests.test_test_library_contract.ShippedLibrary" name="test_merged_schema_kept_and_normalised" time="0.001" /><testcase classname="tests.test_test_library_contract.ShippedLibrary" name="test_rows_present" time="0.000" /><testcase classname="tests.test_test_library_contract.ShippedLibrary" name="test_stage_fields_present_for_merged_rows" time="0.492" /><testcase classname="tests.test_test_library_contract.ShippedLibrary" name="test_version_is_stable_across_reloads" time="0.468" /><testcase classname="tests.test_agent_routes.AgentRunRoutes" name="test_active_lookup_requires_case_variant" time="2.215" /><testcase classname="tests.test_agent_routes.AgentRunRoutes" name="test_active_lookup_returns_none_when_no_live_run" time="0.011" /><testcase classname="tests.test_agent_routes.AgentRunRoutes" name="test_active_skips_run_that_produced_a_result" time="0.535" /><testcase classname="tests.test_agent_routes.AgentRunRoutes" name="test_attachment_upload_stores_and_lists" time="0.576" /><testcase classname="tests.test_agent_routes.AgentRunRoutes" name="test_attachment_upload_unknown_run_is_404" time="0.006" /><testcase classname="tests.test_agent_routes.AgentRunRoutes" name="test_create_get_context_roundtrip" time="0.529" /><testcase classname="tests.test_agent_routes.AgentRunRoutes" name="test_list_is_empty_or_list" time="0.006" /><testcase classname="tests.test_agent_routes.AgentRunRoutes" name="test_missing_variant_field_is_422" time="0.005" /><testcase classname="tests.test_agent_routes.AgentRunRoutes" name="test_post_message_requires_text" time="0.533" /><testcase classname="tests.test_agent_routes.AgentRunRoutes" name="test_post_message_unknown_run_is_404" time="0.007" /><testcase classname="tests.test_agent_routes.AgentRunRoutes" name="test_post_message_without_conversation_is_409" time="0.524" /><testcase classname="tests.test_agent_routes.AgentRunRoutes" name="test_supplemental_records_a_revision" time="0.536" /><testcase classname="tests.test_agent_routes.AgentRunRoutes" name="test_unknown_run_is_404" time="0.006" /><testcase classname="tests.test_agent_routes.AgentRunRoutes" name="test_unknown_variant_is_404" time="0.503" /><testcase classname="tests.test_pa_agent_fixes.IntentTests" name="test_bare_approvals_are_go" time="0.001" /><testcase classname="tests.test_pa_agent_fixes.IntentTests" name="test_cancel_tokens" time="0.001" /><testcase classname="tests.test_pa_agent_fixes.IntentTests" name="test_empty_is_question" time="0.001" /><testcase classname="tests.test_pa_agent_fixes.IntentTests" name="test_explicit_rerun" time="0.001" /><testcase classname="tests.test_pa_agent_fixes.IntentTests" name="test_negated_rerun_is_question_not_rerun" time="0.001" /><testcase classname="tests.test_pa_agent_fixes.IntentTests" name="test_question_naming_rerun_stays_question" time="0.001" /><testcase classname="tests.test_pa_agent_fixes.IntentTests" name="test_reask_is_not_rerun" time="0.001" /><testcase classname="tests.test_pa_agent_fixes.ClassificationTests" name="test_blocked_classification" time="0.043"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpcgi_fi6g\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpcgi_fi6g'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCCB80&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpcgi_fi6g\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.ClassificationTests testMethod=test_blocked_classification&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpcgi_fi6g\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpcgi_fi6g\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.ClassificationTests" name="test_classification_reads_from_ai_review_when_snapshot_missing" time="0.037"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpr1iu3u66\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpr1iu3u66'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC724F740&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpr1iu3u66\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.ClassificationTests testMethod=test_classification_reads_from_ai_review_when_snapshot_missing&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpr1iu3u66\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpr1iu3u66\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.ClassificationTests" name="test_fully_automatable_has_no_manual_block" time="0.037"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp4dhp9u5l\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp4dhp9u5l'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC3B27560&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp4dhp9u5l\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.ClassificationTests testMethod=test_fully_automatable_has_no_manual_block&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp4dhp9u5l\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp4dhp9u5l\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.ClassificationTests" name="test_live_library_row_classification_is_detected" time="1.191" /><testcase classname="tests.test_pa_agent_fixes.ClassificationTests" name="test_manual_only_blocks_ssh" time="0.037"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp4pe_b8vd\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp4pe_b8vd'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCC540&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp4pe_b8vd\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.ClassificationTests testMethod=test_manual_only_blocks_ssh&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp4pe_b8vd\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp4pe_b8vd\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.ClassificationTests" name="test_requires_confirmation" time="0.037"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpw14n7v4m\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpw14n7v4m'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC724F100&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpw14n7v4m\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.ClassificationTests testMethod=test_requires_confirmation&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpw14n7v4m\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpw14n7v4m\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.InstructionTests" name="test_artifact_naming_is_not_hardcoded_pcie" time="0.037"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpl82c5r1p\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpl82c5r1p'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCDA80&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpl82c5r1p\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.InstructionTests testMethod=test_artifact_naming_is_not_hardcoded_pcie&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpl82c5r1p\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpl82c5r1p\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.InstructionTests" name="test_no_forced_document_requirement" time="0.037"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp01maf194\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp01maf194'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCC5E0&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp01maf194\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.InstructionTests testMethod=test_no_forced_document_requirement&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp01maf194\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp01maf194\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.SupplementalTests" name="test_context_is_not_mutated_by_extras" time="0.076"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmprc4p1tm4\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmprc4p1tm4'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCE8E0&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmprc4p1tm4\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.SupplementalTests testMethod=test_context_is_not_mutated_by_extras&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmprc4p1tm4\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmprc4p1tm4\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.SupplementalTests" name="test_execution_instruction_injects_latest_revision" time="0.071"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp7h2j_u0k\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp7h2j_u0k'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCD4E0&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp7h2j_u0k\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.SupplementalTests testMethod=test_execution_instruction_injects_latest_revision&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp7h2j_u0k\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp7h2j_u0k\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.SupplementalTests" name="test_run_execution_uses_latest_supplement" time="0.081"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmplxggrg2j\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmplxggrg2j'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCC5E0&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmplxggrg2j\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.SupplementalTests testMethod=test_run_execution_uses_latest_supplement&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmplxggrg2j\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmplxggrg2j\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.SupplementalTests" name="test_supplemental_is_cumulative_and_versioned" time="0.078"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpb0n2khxp\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpb0n2khxp'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCCE00&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpb0n2khxp\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.SupplementalTests testMethod=test_supplemental_is_cumulative_and_versioned&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpb0n2khxp\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpb0n2khxp\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.DedupTests" name="test_final_result_message_is_deduped" time="0.107"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmps53ez0af\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmps53ez0af'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCEF20&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmps53ez0af\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.DedupTests testMethod=test_final_result_message_is_deduped&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmps53ez0af\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmps53ez0af\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.DedupTests" name="test_repeated_ingest_does_not_duplicate_commands_or_evidence" time="0.088"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpw0j14goh\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpw0j14goh'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCF100&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpw0j14goh\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.DedupTests testMethod=test_repeated_ingest_does_not_duplicate_commands_or_evidence&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpw0j14goh\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpw0j14goh\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.AttachmentTests" name="test_attachment_can_be_deleted" time="0.071"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpsqb05dv3\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpsqb05dv3'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCD580&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpsqb05dv3\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.AttachmentTests testMethod=test_attachment_can_be_deleted&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpsqb05dv3\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpsqb05dv3\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.AttachmentTests" name="test_attachment_metadata_and_text_extraction" time="0.065"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp5o5qvi1_\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp5o5qvi1_'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCCAE0&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp5o5qvi1_\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.AttachmentTests testMethod=test_attachment_metadata_and_text_extraction&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp5o5qvi1_\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp5o5qvi1_\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.AttachmentTests" name="test_attachment_text_reaches_instruction" time="0.069"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmprbsfvh0m\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmprbsfvh0m'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCCC20&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmprbsfvh0m\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.AttachmentTests testMethod=test_attachment_text_reaches_instruction&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmprbsfvh0m\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmprbsfvh0m\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.AttachmentTests" name="test_image_without_vision_is_flagged_honestly" time="0.066"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpnbvz4ty9\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpnbvz4ty9'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCC680&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpnbvz4ty9\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.AttachmentTests testMethod=test_image_without_vision_is_flagged_honestly&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpnbvz4ty9\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpnbvz4ty9\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.AttachmentTests" name="test_text_file_uploaded_as_file_still_reaches_instruction" time="0.069"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp59ezrcnj\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp59ezrcnj'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCDEE0&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp59ezrcnj\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.AttachmentTests testMethod=test_text_file_uploaded_as_file_still_reaches_instruction&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp59ezrcnj\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp59ezrcnj\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.RetentionTests" name="test_delete_run_cascades_children" time="0.098"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpy9403kha\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpy9403kha'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCF560&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpy9403kha\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.RetentionTests testMethod=test_delete_run_cascades_children&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpy9403kha\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpy9403kha\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.RetentionTests" name="test_in_flight_runs_are_not_expired" time="0.064"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmptdz147g1\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmptdz147g1'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCF880&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmptdz147g1\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.RetentionTests testMethod=test_in_flight_runs_are_not_expired&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmptdz147g1\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmptdz147g1\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.RetentionTests" name="test_settled_run_past_window_is_expired_and_deleted" time="0.074"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpw9ii5sep\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpw9ii5sep'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCE520&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpw9ii5sep\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.RetentionTests testMethod=test_settled_run_past_window_is_expired_and_deleted&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpw9ii5sep\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmpw9ii5sep\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.ResumeTests" name="test_list_runs_finds_in_flight_run" time="0.065"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp5p220rbb\\r.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp5p220rbb'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCDEE0&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp5p220rbb\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.ResumeTests testMethod=test_list_runs_finds_in_flight_run&gt;
+
+    def tearDown(self):
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp5p220rbb\\r.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp5p220rbb\\r.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase><testcase classname="tests.test_pa_agent_fixes.SyncTests" name="test_sync_keeps_going_while_running" time="0.114"><failure message="PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp9buutwy2\\s.sqlite3'">path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp9buutwy2'
+onexc = &lt;function TemporaryDirectory._rmtree.&lt;locals&gt;.onexc at 0x0000021EC9BCFCE0&gt;
+
+    def _rmtree_unsafe(path, onexc):
+        def onerror(err):
+            onexc(os.scandir, err.filename, err)
+        results = os.walk(path, topdown=False, onerror=onerror, followlinks=os._walk_symlinks_as_files)
+        for dirpath, dirnames, filenames in results:
+            for name in dirnames:
+                fullname = os.path.join(dirpath, name)
+                try:
+                    os.rmdir(fullname)
+                except OSError as err:
+                    onexc(os.rmdir, fullname, err)
+            for name in filenames:
+                fullname = os.path.join(dirpath, name)
+                try:
+&gt;                   os.unlink(fullname)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp9buutwy2\\s.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:633: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;test_pa_agent_fixes.SyncTests testMethod=test_sync_keeps_going_while_running&gt;
+
+    def test_sync_keeps_going_while_running(self):
+        # A run that stays RUNNING for several ticks must not stop the loop on the
+        # first ingest (the long-execution regression).
+        from integration import agent_routes as routes
+
+        self.tmp = tempfile.TemporaryDirectory()
+        store = AgentRunStore(path=os.path.join(self.tmp.name, 's.sqlite3'))
+        store.create_run(_ctx())
+
+        class StubGateway:
+            def __init__(self):
+                self.n = 0
+
+            def ingest(self, run_id):
+                self.n += 1
+                if self.n == 1:
+                    store.update_state(run_id, status="RUNNING")
+                elif self.n &gt;= 4:
+                    store.update_state(run_id, status="DONE")
+                return {}
+
+        old = routes._SYNC_INTERVAL
+        routes._SYNC_INTERVAL = 0.01
+        try:
+            stub = StubGateway()
+            routes._sync_run_loop(store, stub, "run-1")
+        finally:
+            routes._SYNC_INTERVAL = old
+        # It must have ticked at least 4 times (i.e. not stopped after the first).
+        self.assertGreaterEqual(stub.n, 4)
+&gt;       self.tmp.cleanup()
+
+tests\test_pa_agent_fixes.py:405:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:950: in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:930: in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:781: in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\shutil.py:635: in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = &lt;built-in function unlink&gt;
+path = 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp9buutwy2\\s.sqlite3'
+exc = PermissionError(13, '程序無法存取檔案，因為檔案正由另一個程序使用。')
+
+    def onexc(func, path, exc):
+        if isinstance(exc, PermissionError):
+            if repeated and path == name:
+                if ignore_errors:
+                    return
+                raise
+
+            try:
+                if path != name:
+                    _resetperms(_os.path.dirname(path))
+                _resetperms(path)
+
+                try:
+&gt;                   _os.unlink(path)
+E                   PermissionError: [WinError 32] 程序無法存取檔案，因為檔案正由另一個程序使用。: 'C:\\Users\\kobei\\AppData\\Local\\Temp\\tmp9buutwy2\\s.sqlite3'
+
+C:\Users\kobei\AppData\Local\Programs\Python\Python312\Lib\tempfile.py:905: PermissionError</failure></testcase></testsuite></testsuites>
