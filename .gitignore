@@ -18,3 +18,10 @@ app/qa/previews/
 # Data backups and agent-local state (not source)
 app/data/tests.json.bak-*
 .openhands/
+
+# Editor / manual backup residue (never source)
+*.orig
+*.bak
+*.bak-*
+*.bak_*
+backup_before_*/
