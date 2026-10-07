@@ -25,6 +25,7 @@ live agent-server.
 """
 from __future__ import annotations
 
+import base64
 import json
 import os
 
@@ -214,28 +215,129 @@ class AgentGateway:
         self.api_key = api_key or os.environ.get("PA_AGENT_API_KEY") or self._load_key()
         self.settings_dir = (settings_dir or os.environ.get("PA_AGENT_SETTINGS_DIR")
                              or "/srv/pa-agent/settings")
+        # Text default stays qwen3.8-27b. A vision-capable profile is used only
+        # when a message actually carries an image, so image reading works
+        # without changing the default model for ordinary text runs.
         self.llm_profile = (llm_profile or os.environ.get("PA_AGENT_LLM_PROFILE")
                             or "qwen3.8-27b")
+        self.vision_profile = (os.environ.get("PA_AGENT_VISION_PROFILE")
+                               or "qwen3-vl-32b")
         self._client = client
+        # conversation_id -> profile name actually applied, so we do not issue a
+        # redundant switch_llm on every turn.
+        self._applied_profile = {}
 
-    def _llm_config(self):
-        """Load the bound LLM profile so conversations use the PA model.
+    def _llm_config(self, profile=None):
+        """Load a bound LLM profile so conversations use the PA model.
 
         The agent-server requires an explicit agent on create; we build one from
-        the saved profile rather than relying on a server default.
+        the saved profile rather than relying on a server default. ``profile``
+        defaults to the text model; pass the vision profile when the message
+        carries an image.
         """
-        path = os.path.join(self.settings_dir, "profiles", f"{self.llm_profile}.json")
+        name = profile or self.llm_profile
+        path = os.path.join(self.settings_dir, "profiles", f"{name}.json")
         with open(path, encoding="utf-8") as fh:
-            profile = json.load(fh)
-        llm = {"model": profile["model"]}
-        for key in ("api_key", "base_url", "api_version", "max_output_tokens",
-                    "max_input_tokens", "native_tool_calling", "stream"):
-            if profile.get(key) is not None:
-                llm[key] = profile[key]
+            profile_data = json.load(fh)
+        llm = {"model": profile_data["model"]}
+        # Forward every LLM-recognized field from the profile. The critical
+        # ones for image reading are capability_overrides (supports_vision)
+        # and disable_vision; dropping them (as an old 8-key whitelist did)
+        # left the vision model without a declared vision capability.
+        # modify_params is deliberately excluded: the agent-server's LLM-Input
+        # schema has no such field, so it is a local-only knob.
+        for key, value in profile_data.items():
+            if key in ("model", "modify_params"):
+                continue
+            if value is not None:
+                llm[key] = value
         # The qwen3.8-27b server rejects the SDK default reasoning_effort "high"
         # (it accepts xhigh/medium/low). Use a supported value explicitly.
-        llm["reasoning_effort"] = profile.get("reasoning_effort", "medium")
+        llm["reasoning_effort"] = profile_data.get("reasoning_effort", "medium")
+        # The vision model (qwen3-vl, vLLM :8002) is served WITHOUT a tool-call
+        # parser, so it cannot honour native function calling: with
+        # native_tool_calling=True the SDK sends tool_choice:"auto", which that
+        # vLLM instance rejects ("tool_choice: auto" requires a registered
+        # parser; vLLM 0.28 ships none for Qwen-VL). Forcing it to False makes
+        # the SDK mock tool-calling in the prompt and POP tool_choice, so vLLM
+        # works unchanged. This only affects the vision profile — the text
+        # profile (qwen3.8-27b on :8001, which has tool flags) keeps native FC.
+        if name == self.vision_profile:
+            llm["native_tool_calling"] = False
         return llm
+
+    def _profile_for(self, run):
+        """Return the LLM profile a run should use right now.
+
+        Images cannot be read by the text model, so when a run carries any
+        image attachment the vision profile is selected; otherwise the text
+        default is kept. This is evaluated per call so a run that gains an
+        image mid-conversation switches over automatically.
+        """
+        try:
+            attachments = self.store.list_attachments(run["run_id"]) if run else []
+        except Exception:
+            attachments = []
+        if any(a.get("kind") == "image" for a in attachments):
+            return self.vision_profile
+        return self.llm_profile
+
+    def switch_llm(self, conversation_id, profile=None):
+        """Point a live conversation at a different bound LLM profile."""
+        response = self._http().post(
+            f"/api/conversations/{conversation_id}/switch_llm",
+            json={"llm": self._llm_config(profile)},
+        )
+        response.raise_for_status()
+        return True
+
+    def _image_parts(self, run):
+        """Build image content blocks for a run's image attachments.
+
+        The vision model can only read an image if it is sent as an image part,
+        so images are embedded as base64 data URLs (the agent-server runs with a
+        different HOME, so a local file path would not resolve). Files that no
+        longer exist are skipped rather than failing the send.
+        """
+        parts = []
+        try:
+            attachments = self.store.list_attachments(run["run_id"]) if run else []
+        except Exception:
+            attachments = []
+        for att in attachments:
+            if att.get("kind") != "image":
+                continue
+            path = att.get("stored_path")
+            if not path or not os.path.isfile(path):
+                continue
+            try:
+                with open(path, "rb") as fh:
+                    encoded = base64.b64encode(fh.read()).decode("ascii")
+            except OSError:
+                continue
+            mime = att.get("mime") or "image/png"
+            parts.append({"type": "image", "image_urls": [f"data:{mime};base64,{encoded}"]})
+        return parts
+
+    def _ensure_profile(self, run_id, cid):
+        """Switch the live conversation to the profile the run now needs.
+
+        Called before an execution turn so an image added mid-run is read by
+        the vision model even though the conversation was created with the text
+        model. The applied profile is tracked in memory per conversation; the
+        switch is a no-op when the conversation is already on the right model.
+        """
+        run = self.store.get_run(run_id)
+        desired = self._profile_for(run)
+        if self._applied_profile.get(cid) == desired:
+            return
+        try:
+            self.switch_llm(cid, desired)
+        except Exception:
+            # A failed switch must not abort execution; the agent simply runs
+            # with the model it already has.
+            return
+        self._applied_profile[cid] = desired
 
     @staticmethod
     def _load_key():
@@ -520,7 +622,7 @@ class AgentGateway:
             },
             "agent": {
                 "kind": "Agent",
-                "llm": self._llm_config(),
+                "llm": self._llm_config(self._profile_for(run)),
                 # Environment tools must be listed explicitly: with no `tools`,
                 # agent-server 1.49.6 gives the agent only FinishTool/ThinkTool
                 # (see openhands.sdk.tool.builtins.BUILT_IN_TOOLS), so it can
@@ -536,8 +638,11 @@ class AgentGateway:
             },
             "initial_message": {
                 "role": "user",
-                "content": [{"type": "text",
-                             "text": self.build_instruction(context, user_note, mode=mode)}],
+                "content": [
+                    {"type": "text",
+                     "text": self.build_instruction(context, user_note, mode=mode)},
+                    *self._image_parts(run),
+                ],
                 "run": bool(auto_run),
             },
         }
@@ -548,6 +653,9 @@ class AgentGateway:
             run_id, conversation_ref=conversation_id, status="RUNNING",
             started_at=run.get("started_at") or _now(),
         )
+        # The conversation was created on the profile chosen for the run's
+        # current attachment set; remember it so _ensure_profile is a no-op.
+        self._applied_profile[conversation_id] = self._profile_for(run)
         return conversation_id
 
     def _context_with_extras(self, run):
@@ -607,9 +715,15 @@ class AgentGateway:
         cid = run.get("conversation_ref")
         if not cid:
             raise ValueError("run has no conversation; start it first")
+        # A mid-run image must be read by the vision model: point the live
+        # conversation at the right profile before the turn is sent.
+        self._ensure_profile(run_id, cid)
         payload = {
             "role": "user",
-            "content": [{"type": "text", "text": text}],
+            "content": [
+                {"type": "text", "text": text},
+                *self._image_parts(run),
+            ],
             "run": True,
         }
         response = self._http().post(self._MESSAGE_ENDPOINT.format(cid=cid), json=payload)
@@ -632,13 +746,17 @@ class AgentGateway:
         cid = run.get("conversation_ref")
         if not cid:
             raise ValueError("run has no conversation; start it first")
+        self._ensure_profile(run_id, cid)
         context = self._context_with_extras(run)
         header = ("【工程師已確認，請依最新計畫開始執行】" if trigger == "go"
                   else "【工程師要求重新執行本測項】")
         instruction = header + "\n\n" + self.build_instruction(context, mode="execute")
         payload = {
             "role": "user",
-            "content": [{"type": "text", "text": instruction}],
+            "content": [
+                {"type": "text", "text": instruction},
+                *self._image_parts(run),
+            ],
             "run": True,
         }
         response = self._http().post(self._MESSAGE_ENDPOINT.format(cid=cid), json=payload)
@@ -739,15 +857,21 @@ class AgentGateway:
 
         if summary["status"]:
             updates = {"status": summary["status"]}
-            # "finished" is the agent-server's per-turn state: the agent stopped
+            # ``finished`` is the agent-server's per-turn state: the agent stopped
             # and is idle waiting for the next engineer message. It does NOT mean
             # the test task is done. It is only DONE when the turn also carried a
-            # FinishAction (the agent's closing test record). Otherwise the run is
-            # actually blocked on the engineer (in plan mode: awaiting OK/GO), so
-            # map it to WAITING_FOR_USER — claiming "done" with no output was the
-            # "completed but nothing produced" report.
-            if summary["status"] == "DONE" and not finish_log:
-                updates["status"] = "WAITING_FOR_USER"
+            # FinishAction (the agent's closing test record) — either in this batch
+            # (``finish_log``) or a previous one (already persisted as final_result).
+            #
+            # A run that already produced a log must NEVER fall back to
+            # WAITING_FOR_USER: that made a finished run look like it was still
+            # waiting for the engineer, and because WAITING_FOR_USER is treated as
+            # non-terminal, reopening the case resumed the stale run forever.
+            if summary["status"] == "DONE":
+                existing_run = self.store.get_run(run_id) or {}
+                has_result = bool(finish_log) or bool(existing_run.get("final_result"))
+                if not has_result:
+                    updates["status"] = "WAITING_FOR_USER"
             if updates["status"] in {"PASS", "FAIL", "BLOCKED", "DONE", "ERROR"}:
                 updates["ended_at"] = _now()
             # The engineer reads the agent's log to reach a verdict, so persist

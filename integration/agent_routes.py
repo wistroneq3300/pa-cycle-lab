@@ -310,8 +310,19 @@ def install(app, pa, store_getter=None):
         if not case_variant_id:
             raise HTTPException(422, "case_variant_id is required")
         runs = store.list_runs(case_variant_id=case_variant_id, limit=50)
-        live = [r for r in runs
-                if r.get("status") not in _TERMINAL_STATUSES]
+        # Only runs that are genuinely still in flight are resumable. A run that
+        # produced a result (final_result) or already ended is history: reopening
+        # the case must NOT silently drop the engineer back into it. Without the
+        # final_result guard a run left in WAITING_FOR_USER (non-terminal) was
+        # resumed forever, so every reopen showed the same stale conversation.
+        live = []
+        for r in runs:
+            if r.get("status") in _TERMINAL_STATUSES:
+                continue
+            full = store.get_run(r["run_id"]) or {}
+            if full.get("final_result"):
+                continue
+            live.append(r)
         if node_id:
             live = [r for r in live
                     if (store.get_run(r["run_id"]) or {}).get("context", {})
