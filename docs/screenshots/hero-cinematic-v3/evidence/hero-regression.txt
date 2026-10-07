@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "pass": "regression",
+  "results": [
+    "Same canvas, full-rack class assembly, U40 rail insertion, forward/reverse and exact exploded return",
+    "Real forward/reverse scroll, keyboard orbit, idle entry and smooth activity exit",
+    "Replay and WebGL context loss/restoration",
+    "Reduced-motion final pose/replay disabled and complete route cleanup"
+  ],
+  "captures": 0
+}

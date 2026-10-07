@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const replayKey='pa_dashboard_cinematic_played';
+  const replayKey='pa_dashboard_cinematic_v3_played';
   const REFRESH_MS=30000;
   let overview=null,selectedProject='',loading=null,teardown=()=>{};
   const quote=value=>esc(JSON.stringify(String(value)));
@@ -11,21 +11,22 @@
   const projectByName=name=>overview?.projects?.find(project=>project.name===name);
 
   RENDERERS.dashboard=()=>`<main class="vo-overview" aria-label="Product Assurance Overview">
-    <section class="vo-hero" id="core-story" aria-label="專案驗證總覽與 L10 System 到 L11 Rack 展示">
+    <section class="vo-hero" id="core-story" aria-label="專案驗證總覽與 AI infrastructure 整櫃組裝展示">
       <div class="vo-hero-copy">
         <span class="vo-kicker">PRODUCT ASSURANCE OVERVIEW</span>
         <label class="vo-project-select">專案範圍<select data-vo-select aria-label="Dashboard 專案範圍"><option value="">所有專案</option></select></label>
         <div class="vo-hero-heading"><span data-vo-level>全域驗證狀態</span><h1 data-vo-title>正在取得驗證狀態…</h1></div>
-        <div class="vo-hero-counts"><span><b data-vo-systems>—</b> Systems</span><span><b data-vo-nodes>—</b> Nodes</span></div>
+        <div class="vo-hero-summary">
+        <div class="vo-hero-counts"><span><b data-vo-hero-projects>—</b> Projects</span><span><b data-vo-systems>—</b> Systems</span><span><b data-vo-nodes>—</b> Nodes</span></div>
         <p class="vo-hero-issues"><strong data-vo-fail>— FAIL</strong><span data-vo-warn>— WARN</span></p>
         <p class="vo-hero-note" data-vo-summary>巡檢、Cycle 與監控狀態載入中。</p>
+        </div>
         <button class="btn primary" type="button" data-vo-enter>進入系統與專案</button>
       </div>
       <div class="cine-stage vo-scene" id="core-stage" data-phase="system">
-        <div class="cine-core" id="core-visual"><img class="cine-fallback" src="/static/img/server-hero.png" alt="伺服器設備視圖"><canvas id="system-core" tabindex="0" role="img" aria-label="原創 AI 運算機櫃：伺服器對準 U40、沿導軌插入，展示正面、側面與背面結構" aria-describedby="core-interaction-help"></canvas></div>
+        <div class="cine-core" id="core-visual"><img class="cine-fallback" src="/static/img/server-hero.png" alt="伺服器設備視圖"><canvas id="system-core" tabindex="0" role="img" aria-label="AI infrastructure 整櫃組裝：空機櫃、設備辨識、多組同步進場、實體導軌特寫、工程展開與完整機櫃" aria-describedby="core-interaction-help"></canvas><svg class="vo-device-callouts" data-vo-callouts aria-hidden="true"></svg></div>
         <div class="vo-phase"><span data-vo-phase-number>01</span><div><b data-vo-phase-title>L10 SYSTEM</b><small data-vo-phase-detail>SERVER FOCUS</small></div></div>
         <div class="vo-cinematic-progress" aria-hidden="true"><i data-vo-progress></i></div>
-        <div class="vo-scan-key" aria-hidden="true"><span>MANAGEMENT</span><span>COMPUTE</span><span>NVLINK</span><span>POWER</span></div>
         <button class="vo-replay" type="button" data-vo-replay aria-label="重播機櫃電影展示">↻ 重播</button>
         <div class="cine-core-tools" id="core-tools"><span id="core-interaction-help">按住拖曳旋轉 · 方向鍵查看 · Home 重設</span><div><button type="button" data-core-view="rear" aria-label="3D 模型背面視角">背面</button><button type="button" data-core-view="reset" aria-label="重設 3D 模型視角">重設視角</button></div></div>
         <div id="core-system-copy" class="vo-a11y-state" aria-hidden="false">L10 System</div><div id="core-rack-copy" class="vo-a11y-state" inert aria-hidden="true">L11 Rack</div>
@@ -49,6 +50,7 @@
     const item=selectedSummary(),isProject=!!selectedProject;
     root.querySelector('[data-vo-level]').textContent=isProject?(item.level==='L11'?'L11 Validation':'L10 Validation'):'全域驗證狀態';
     root.querySelector('[data-vo-title]').textContent=isProject?item.name:'所有專案';
+    root.querySelector('[data-vo-hero-projects]').textContent=isProject?1:overview.projects.length;
     root.querySelector('[data-vo-systems]').textContent=item.systems;root.querySelector('[data-vo-nodes]').textContent=item.nodes;
     root.querySelector('[data-vo-fail]').textContent=`${item.issues.fail} FAIL`;root.querySelector('[data-vo-warn]').textContent=`${item.issues.warning} WARN`;
     root.querySelector('[data-vo-summary]').textContent=`Cycle ${item.cycle.running} Running · Telemetry ${item.monitoring.reporting} / ${item.monitoring.total}`;
@@ -82,34 +84,31 @@
   const ease=t=>t*t*(3-2*t);
   // The scene owns geometry and camera interpolation. This is the single owner
   // of cinematic time; cinematic.js only mounts/themes the compact scene.
-  const FILM_MS=32000;
-  const filmKeys=[[0,0],[2.2,.035],[5,.12],[7,.23],[10,.40],[11.4,.48],[14,.56],[16.3,.63],[18.2,.70],[20,.74],[22,.79],[25.8,.86],[29,.93],[32,1]];
+  const FILM_MS=24000;
+  const filmKeys=[[0,0],[1.8,.10],[3.6,.19],[4.25,.225],[5.45,.28],[6.45,.34],[9.8,.48],[12.6,.60],[15,.70],[16,.76],[18.5,.84],[19.5,.86],[22,.94],[24,1]];
   const shots=[
-    [0,'server','01','L10 SYSTEM','PRECISION / COMPUTE TRAY'],
-    [.09,'alignment','02','ALIGNMENT','TARGET / U40'],
-    [.23,'engagement','03','RAIL ENGAGEMENT','CHASSIS / RACK INTERFACE'],
-    [.28,'insertion','04','INSERTION','GUIDED CHASSIS TRAVEL'],
-    [.46,'seat','05','MECHANICAL SEAT','U40 / POSITIONED'],
-    [.49,'pullback','06','RACK SCALE','COMPUTE / FABRIC / POWER'],
-    [.56,'front','07','AI INFRASTRUCTURE','HIGH-DENSITY COMPUTE RACK'],
-    [.60,'orbit','08','STRUCTURAL STUDY','DEPTH / RAILS / FRAME'],
-    [.71,'rear','09','REAR ARCHITECTURE','INTERCONNECT / POWER / COOLING'],
-    [.765,'return','10','PRECISION ENGINEERING','RETURN TO FRONT'],
-    [.805,'exploded','11','ASSEMBLY STUDY','EQUIPMENT / STRUCTURE'],
-    [.905,'scan','12','ENGINEERING SCAN','RACK-SCALE ARCHITECTURE'],
-    [.97,'final','13','AI INFRASTRUCTURE','HIGH-DENSITY COMPUTE RACK']
+    [0,'reveal','01','AI INFRASTRUCTURE','REVEAL / 48U ARCHITECTURE'],
+    [.10,'constellation','02','DEVICE CONSTELLATION','COMPUTE / FABRIC / POWER'],
+    [.19,'identify','03','SYSTEM ARCHITECTURE','IDENTIFY / INFRASTRUCTURE COMPONENTS'],
+    [.34,'convergence','04','FULL-RACK ASSEMBLY','COORDINATED EQUIPMENT CONVERGENCE'],
+    [.48,'insertion','05','PRECISION IN MOTION','U40 / TELESCOPING RAIL ENGAGEMENT'],
+    [.60,'pullback','06','RACK-SCALE INTEGRATION','SYNCHRONIZED ASSEMBLY'],
+    [.70,'complete','07','SYSTEM ASSEMBLED','COMPUTE / INTERCONNECT / POWER'],
+    [.76,'exploded','08','ENGINEERING STUDY','ARCHITECTURE LAYERS'],
+    [.86,'return','09','PRECISION ENGINEERING','RETURN / EXACT SEATING'],
+    [.94,'final','10','AI INFRASTRUCTURE','RACK-SCALE COMPUTING']
   ];
   function applyProgress(value){
     const stage=document.getElementById('core-stage'),canvas=document.getElementById('system-core');if(!stage||!canvas)return;
     const progress=clamp(value);canvas.paCoreScene?.setProgress(progress);
-    stage.dataset.phase=progress<.09?'system':progress<.56?'integration':'rack';
+    stage.dataset.phase=progress<.10?'system':progress<.70?'integration':'rack';
     let shot=shots[0];for(const candidate of shots){if(progress<candidate[0])break;shot=candidate;}
     if(stage.dataset.shot!==shot[1]){
       stage.dataset.shot=shot[1];
       stage.querySelector('[data-vo-phase-number]').textContent=shot[2];
       stage.querySelector('[data-vo-phase-title]').textContent=shot[3];
       stage.querySelector('[data-vo-phase-detail]').textContent=shot[4];
-      const system=stage.querySelector('#core-system-copy'),rack=stage.querySelector('#core-rack-copy'),showRack=progress>=.56;
+      const system=stage.querySelector('#core-system-copy'),rack=stage.querySelector('#core-rack-copy'),showRack=progress>=.70;
       system.inert=showRack;system.setAttribute('aria-hidden',String(showRack));
       rack.inert=!showRack;rack.setAttribute('aria-hidden',String(!showRack));
     }
@@ -125,6 +124,7 @@
   }
   function mountOverview(){
     teardown();teardown=()=>{};const root=document.querySelector('.vo-overview'),story=document.getElementById('core-story'),canvas=document.getElementById('system-core');if(!root||!story||!canvas)return;
+    const callouts=window.PAHeroCallouts?.mount(story.querySelector('[data-vo-callouts]'),canvas);
     const select=root.querySelector('[data-vo-select]'),replay=root.querySelector('[data-vo-replay]');select.onchange=()=>{selectedProject=select.value;renderData();};root.querySelector('[data-vo-enter]').onclick=()=>window.cineEnterSelected();replay.onclick=()=>play(true);
     const refreshExisting=!!overview;void loadOverview(refreshExisting,refreshExisting);
     let frame=0,timer=0,refreshTimer=0,disposed=false,mode='stopped',elapsed=0,lastTime=0,lastScroll=scrollY,progress=1,target=1;
@@ -180,7 +180,7 @@
     story.paHeroPlayback={seek,replay:()=>play(true),getState:()=>({progress,target,mode,duration:FILM_MS,reducedMotion:reduced.matches})};
     refreshTimer=setInterval(()=>{if(!document.hidden&&root.isConnected)void loadOverview(true,true);},REFRESH_MS);
     window.addEventListener('scroll',manualScroll,{passive:true});canvas.addEventListener('pointerdown',input,{passive:true});canvas.addEventListener('touchstart',input,{passive:true});canvas.addEventListener('keydown',input);story.addEventListener('wheel',wheel,{passive:true});tools?.addEventListener('click',input);canvas.addEventListener('pa-core-ready',ready);document.addEventListener('visibilitychange',visibilityChange);reduced.addEventListener('change',motionChange);
-    teardown=()=>{disposed=true;cancel();clearInterval(refreshTimer);delete story.paHeroPlayback;window.removeEventListener('scroll',manualScroll);canvas.removeEventListener('pointerdown',input);canvas.removeEventListener('touchstart',input);canvas.removeEventListener('keydown',input);story.removeEventListener('wheel',wheel);tools?.removeEventListener('click',input);canvas.removeEventListener('pa-core-ready',ready);document.removeEventListener('visibilitychange',visibilityChange);reduced.removeEventListener('change',motionChange);};
+    teardown=()=>{disposed=true;cancel();callouts?.destroy();clearInterval(refreshTimer);delete story.paHeroPlayback;window.removeEventListener('scroll',manualScroll);canvas.removeEventListener('pointerdown',input);canvas.removeEventListener('touchstart',input);canvas.removeEventListener('keydown',input);story.removeEventListener('wheel',wheel);tools?.removeEventListener('click',input);canvas.removeEventListener('pa-core-ready',ready);document.removeEventListener('visibilitychange',visibilityChange);reduced.removeEventListener('change',motionChange);};
   }
   window.cineOpenProject=name=>{const project=projectByName(name);productProject(name,project?.level==='L11'?'rack':'system');};
   window.cineEnterSelected=()=>selectedProject?window.cineOpenProject(selectedProject):productLevel('system');

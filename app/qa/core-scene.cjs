@@ -77,12 +77,13 @@ check('Complete finite geometry; stable shared uploads; settled hero waits for i
       for(let n=0;n<12;n++)assert.ok(Number.isFinite(data[offset+n]),'non-finite geometry');
       const normal=Math.hypot(data[offset+3],data[offset+4],data[offset+5]);
       assert.ok(Math.abs(normal-1)<.00001,'surface normal must be normalized');
-      assert.ok(Math.abs(data[offset])<10&&Math.abs(data[offset+1])<10&&Math.abs(data[offset+2])<10,'invalid mesh bounds');
+      const limit=data[offset+11]<-.5?25:10; // Stage atmosphere is wider than the physical rack.
+      assert.ok(Math.abs(data[offset])<limit&&Math.abs(data[offset+1])<limit&&Math.abs(data[offset+2])<limit,'invalid mesh bounds');
     }
   }
   assert.ok(vertices>0&&vertices<2000000,'Geometry must be substantial and bounded');
   assert.equal(Number(h.canvas.dataset.coreVertices),vertices);
-  assert.ok(h.stats().draws>=1);assert.equal(h.frames.size,1,'Close-up moving softbox renders deliberately');
+  assert.ok(h.stats().draws>=1);
   h.scene.setProgress(1);h.flush();assert.equal(h.frames.size,0);
   const idleDraws=h.stats().draws;h.flush(10);assert.equal(h.stats().draws,idleDraws,'Settled hero waits for the idle timer');
   const initialDistance=Number(h.canvas.dataset.coreCameraDistance);
@@ -149,13 +150,14 @@ check('Shared canonical geometry, no left number gutter, and one actual primary 
   const equipmentBuffers=new Set([...h.uploadedByBuffer].filter(([,data])=>Object.values(shared.equipment).some(mesh=>sameGeometry(data,mesh.data))).map(([buffer])=>buffer));
   const frameBuffers=new Set([...h.uploadedByBuffer].filter(([,data])=>sameGeometry(data,shared.frame.data)).map(([buffer])=>buffer));
   assert.ok(computeBuffers.size>0);
-  for(const p of [0,.20,.36,.40,.58,.76,.86,.905,1]){
+  for(const p of [0,.14,.20,.38,.46,.55,.74,.84,.94,1]){
     h.drawRecords.length=0;h.scene.setProgress(p);h.scene.resize();h.frame();
     const current=h.scope.PACoreScene.assemblySnapshot(p),pose=current.placements.find(row=>row.primary);
     const primaryDraws=h.drawRecords.filter(draw=>computeBuffers.has(draw.buffer)&&Math.abs(draw.part[12]-pose.x)<1e-5&&Math.abs(draw.part[13]-pose.y)<1e-5&&Math.abs(draw.part[14]-pose.z)<1e-5);
-    assert.equal(primaryDraws.length,1,'Exactly one rendered primary at progress '+p);
-    near(primaryDraws[0].opacity,1,'Primary must not fade away');
-    if(p===.86||p===.905)for(const row of current.placements){
+    assert.equal(primaryDraws.length,pose.opacity<=.003?0:1,'Primary is revealed once and never duplicated at progress '+p);
+    if(primaryDraws.length)near(primaryDraws[0].opacity,pose.opacity,'Drawn primary matches authored reveal');
+    if(p===0)assert.equal(h.drawRecords.filter(draw=>equipmentBuffers.has(draw.buffer)).length,0,'Opening shot is a real empty rack');
+    if(p===.84||p===.94)for(const row of current.placements){
       const mesh=shared.equipment[row.meshKey];
       const buffers=new Set([...h.uploadedByBuffer].filter(([,data])=>sameGeometry(data,mesh.data)).map(([buffer])=>buffer));
       assert.equal(h.drawRecords.filter(draw=>buffers.has(draw.buffer)&&Math.abs(draw.part[13]-row.y)<1e-5&&Math.abs(draw.part[14]-row.z)<1e-5).length,1,'Actual draw must match exact exploded/returned '+row.name);
@@ -165,24 +167,38 @@ check('Shared canonical geometry, no left number gutter, and one actual primary 
   h.scene.destroy();
 });
 
-check('Forward/reverse insertion: fixed-size primary aligns first, enters once, and holds its slot',()=>{
+check('Full-rack assembly is exactly reversible and every device aligns before physical insertion',()=>{
   const h=harness(),snapshot=h.scope.PACoreScene.assemblySnapshot,forward=[];
-  let previousY=-Infinity,previousZ=Infinity;
+  const final=plain(snapshot(1)),targets=new Map(final.placements.map(row=>[row.name,row]));
+  const visited=new Map(final.placements.map(row=>[row.name,[]]));
   for(let i=0;i<=100;i++){
     const p=i/100,current=plain(snapshot(p));forward.push(current);
     near(current.progress,p,'Snapshot progress');near(current.primaryPose.scale,1,'Do not morph or stretch the hero tray');
-    assert.ok(current.primaryPose.y>=previousY-1e-6,'Vertical alignment is monotonic');
-    assert.ok(current.primaryPose.z<=previousZ+1e-6,'Insertion is monotonic');
-    if(p<=.26)near(current.primaryPose.z,6.60,'Tray stays in front of the rack while aligning');
-    if(p>=.22)near(current.primaryPose.y,current.targetPose.y,'Tray must align with U40 before insertion');
-    if(p>=.46){near(current.primaryPose.z,current.targetPose.z,'Inserted tray stays at rack depth');near(current.primaryPose.y,current.targetPose.y,'Inserted tray stays at target U');}
-    previousY=current.primaryPose.y;previousZ=current.primaryPose.z;
+    assert.equal(new Set(current.placements.map(row=>row.name)).size,41,'Unique hardware identities at every stage');
+    for(const row of current.placements){
+      const target=targets.get(row.name);assert.ok(target,'No floating extra component');
+      assert.equal(row.top,target.top);assert.equal(row.bottom,target.bottom);assert.equal(row.size,target.size);
+      for(const axis of ['x','y','z'])assert.ok(Number.isFinite(row[axis]),'Finite physical pose');
+      if(p<=.74&&row.z<6.60-1e-5){near(row.x,target.x,'Lateral alignment precedes rack entry '+row.name);near(row.y,target.y,'U alignment precedes rack entry '+row.name);}
+      visited.get(row.name).push(row);
+    }
+    if(p>=.60&&p<=.74){near(current.primaryPose.z,current.targetPose.z,'Inserted hero tray seats during the full-rack assembly');near(current.primaryPose.y,current.targetPose.y,'Hero tray seats at actual U40');}
   }
   for(let i=100;i>=0;i--)assert.deepEqual(plain(snapshot(i/100)),forward[i],'Reverse scroll must restore identical geometry at '+i/100);
+  let simultaneous=0,movingClasses=new Set();
+  for(let i=35;i<68;i++){
+    const moving=[];
+    for(const [name,poses]of visited){const a=poses[i],b=poses[i+1];if(Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z)>.015)moving.push(targets.get(name));}
+    simultaneous=Math.max(simultaneous,moving.length);
+    if(moving.length>=4)for(const row of moving)movingClasses.add(row.type);
+  }
+  assert.ok(simultaneous>=6,'Several devices visibly move together in overlapping waves');
+  for(const type of ['server','nvlink','switch','powershelf'])assert.ok(movingClasses.has(type),'Simultaneous motion includes '+type);
+  for(const poses of visited.values())for(let i=35;i<70;i++)assert.ok(poses[i+1].z<=poses[i].z+1e-5,'Assembly depth has controlled forward insertion without overshoot');
   const before=h.uploads.length;
-  for(const p of [0,.2,.4,.76,1,.76,.4,.2,0]){h.scene.setProgress(p);h.frame();near(h.scene.getState().progress,p,'Live scene accepts reversed progress');}
+  for(const p of [0,.2,.4,.55,.74,.84,1,.84,.74,.55,.4,.2,0]){h.scene.setProgress(p);h.frame();near(h.scene.getState().progress,p,'Live scene accepts reversed progress');}
   assert.equal(h.uploads.length,before,'Animation does not allocate new geometry');
-  assert.deepEqual(plain(snapshot(.905).placements),plain(snapshot(.56).placements),'Exploded groups return to exact seated positions');
+  assert.deepEqual(plain(snapshot(.94).placements),plain(snapshot(.74).placements),'Exploded groups return to exact seated positions');
   h.scene.destroy();
 });
 
@@ -195,11 +211,41 @@ check('Actual uploaded telescoping rail meshes overlap throughout physical inser
   }
   assert.equal(rails.length,3,'Fixed, middle and moving rail members are real separate meshes');rails.sort((a,b)=>b.outerX-a.outerX);
   for(let step=0;step<=20;step++){
-    h.drawRecords.length=0;h.scene.setProgress(.26+step*.01);h.frame();
+    h.drawRecords.length=0;h.scene.setProgress(.49+step*.0055);h.frame();
     const pose=h.scene.getState().assembly.primaryPose;
     const intervals=rails.map((rail,index)=>{const draws=h.drawRecords.filter(draw=>draw.buffer===rail.buffer);assert.equal(draws.length,1);near(draws[0].part[14],pose.z*index/2,'Rail stages share the physical insertion axis');return [rail.minZ+draws[0].part[14],rail.maxZ+draws[0].part[14]];});
     assert.ok(intervals[1][0]<=intervals[0][1]&&intervals[1][1]>=intervals[2][0],'Rendered nested rail members remain engaged at step '+step);
   }
+  h.scene.destroy();
+});
+
+check('Actual equipment enclosures never collide during convergence or engineering separation',()=>{
+  const h=harness(),snapshot=h.scope.PACoreScene.assemblySnapshot,rows=snapshot(1).placements;
+  const shared=h.scope.PARackScene.buildEditorialParts(rows.map(row=>({name:row.name,mgx_type:row.type,rack_u:row.top,rack_size:row.size})));
+  for(let step=38;step<=200;step++){
+    const progress=step/200,poses=snapshot(progress).placements;
+    const boxes=poses.map(row=>{const mesh=shared.equipment[row.meshKey];return {name:row.name,min:mesh.min.map((n,i)=>n+[row.x,row.y,row.z][i]),max:mesh.max.map((n,i)=>n+[row.x,row.y,row.z][i])};});
+    for(let a=0;a<boxes.length;a++)for(let b=a+1;b<boxes.length;b++){
+      const x=boxes[a],y=boxes[b],overlap=[0,1,2].map(axis=>Math.min(x.max[axis],y.max[axis])-Math.max(x.min[axis],y.min[axis]));
+      assert.ok(!overlap.every(size=>size>.02),`Hardware collision at ${progress}: ${x.name} / ${y.name} (${overlap})`);
+    }
+  }
+  h.scene.destroy();
+});
+
+check('Four engineering callouts derive counts, representatives and anchors from the projected physical model',()=>{
+  const h=harness();h.scene.setProgress(.27);h.flush();
+  const initial=h.scene.getState(),callouts=initial.callouts;
+  assert.equal(callouts.length,4);assert.equal(new Set(callouts.map(item=>item.type)).size,4);
+  const counts={};for(const row of initial.assembly.placements)counts[row.type]=(counts[row.type]||0)+1;
+  for(const callout of callouts){
+    assert.equal(callout.count,counts[callout.type]);assert.equal(initial.assembly.placements.find(row=>row.name===callout.name)?.type,callout.type);
+    assert.ok(callout.anchor.visible,'Authored identification anchor is in frame');
+    assert.ok(callout.anchors.every(a=>Number.isFinite(a.x)&&Number.isFinite(a.y)&&a.depth>0));
+  }
+  h.scene.setOrbit(.3,.1);h.flush();
+  const changed=h.scene.getState().callouts;
+  assert.ok(changed.some((item,index)=>Math.hypot(item.anchor.x-callouts[index].anchor.x,item.anchor.y-callouts[index].anchor.y)>.01),'Actual camera projection updates anchors');
   h.scene.destroy();
 });
 
@@ -214,14 +260,14 @@ check('Resized and rotated standalone / assembled hardware stays inside the actu
     bounds.set(buffer,{min,max});
   }
   const transform=(matrix,p)=>[0,1,2,3].map(row=>matrix[row]*p[0]+matrix[row+4]*p[1]+matrix[row+8]*p[2]+matrix[row+12]*p[3]);
-  for(const progress of [0,.18,.22,.26,.30,.40,.56,.66,.742,.86,1]){h.scene.setProgress(progress);h.flush();
+  for(const progress of [.07,.20,.27,.38,.46,.55,.68,.74,.84,.94,1]){h.scene.setProgress(progress);h.flush();
   for(const [width,height] of [[810,610],[450,850],[1320,900]])for(const [yaw,pitch] of [[0,0],[Math.PI,0],[Math.PI/2,1.2],[-1.4,-1.13]]){
     h.scene.setOrbit(yaw,pitch);h.resize(width,height);h.flush();h.drawRecords.length=0;h.scene.resize();h.frame();
     assert.equal(h.canvas.width,width);assert.equal(h.canvas.height,height);
     for(const draw of h.drawRecords){const box=bounds.get(draw.buffer);if(!box||draw.opacity<.99)continue;
       // Close-up camera deliberately crops the background rack; the moving
       // compute chassis itself must remain whole at every insertion position.
-      if(progress<.56&&(Math.abs(draw.part[13]-h.scene.getState().assembly.primaryPose.y)>1e-5||Math.abs(draw.part[14]-h.scene.getState().assembly.primaryPose.z)>1e-5))continue;
+      if(progress>=.48&&progress<.68&&(Math.abs(draw.part[13]-h.scene.getState().assembly.primaryPose.y)>1e-5||Math.abs(draw.part[14]-h.scene.getState().assembly.primaryPose.z)>1e-5))continue;
       for(const x of [box.min[0],box.max[0]])for(const y of [box.min[1],box.max[1]])for(const z of [box.min[2],box.max[2]]){
         const clip=transform(draw.projection,transform(draw.model,transform(draw.part,[x,y,z,1])));
         assert.ok(clip.every(Number.isFinite)&&clip[3]>0,'Visible hardware must be in front of the camera');
@@ -294,8 +340,8 @@ check('Idle showcase enters after 6.5 seconds and every input family eases out',
   }
 });
 
-check('Technical scan is bounded and reduced motion disables animated shader effects',()=>{
-  const h=harness();h.scene.setProgress(.93);h.frame();assert.ok(h.uniformValues.uScan>0&&h.uniformValues.uScan<=1);assert.ok(Number.isFinite(h.uniformValues.uScanY));
+check('Restrained lighting avoids scanning HUD effects and reduced motion freezes animated shader light',()=>{
+  const h=harness();h.scene.setProgress(.93);h.frame();assert.equal(h.uniformValues.uScan,0);assert.ok(Number.isFinite(h.uniformValues.uScanY));
   near(Number(h.canvas.dataset.corePrimaryY),h.scene.getState().assembly.primaryPose.y,'Scan must not overwrite U40 primary pose diagnostics');
   h.scene.setProgress(1);h.frame();assert.equal(h.uniformValues.uScan,0);h.scene.destroy();
   const reduced=harness({reduced:true});reduced.scene.setProgress(.93);reduced.frame();assert.equal(reduced.uniformValues.uScan,0);assert.equal(reduced.uniformValues.uTime,0);reduced.scene.destroy();
@@ -312,7 +358,7 @@ check('Slow-frame capability reduction, camera convergence and settled final-pos
   let frames=0;do{h.frame(1000);frames++;}while(h.scene.getState().settling&&frames<40);
   assert.ok(frames<40,'Manual close-up converges even when frames take a second');
   assert.equal(h.scene.getState().camera.view,'middle');assert.equal(h.scene.getState().idle.active,false,'Manual inspection cannot start idle orbit');
-  h.scene.setProgress(.742);h.flush();assert.equal(h.scene.getState().settling,false);
+  h.scene.setProgress(.55);h.flush();assert.equal(h.scene.getState().settling,false);
   h.scene.setProgress(1);let arrivalElapsed=0;
   do{
     h.frame(2000);arrivalElapsed+=2000;

@@ -1,0 +1,43 @@
+{
+  "scope": "Overview Hero V3; isolated synthetic loopback preview; no hardware transport",
+  "baseCommit": "5b481f0b177b67643bfa6520e382356bf8dd2d02",
+  "allExistingTestsPassed": false,
+  "newRegressionDetectedInExecutedChecks": false,
+  "passed": [
+    {"suite": "app/qa/core-scene.cjs", "checks": 18, "log": "core-scene-final.txt", "timing": "After final hardware 1U fastener correction"},
+    {"suite": "app/qa/hero-assembly.cjs behavioral mode", "groups": 4, "log": "hero-regression.txt", "timing": "After hardware and SVG display:none correction"},
+    {"suite": "app/qa/hero-rack-isolation.cjs", "groups": 4, "log": "rack-isolation-final.txt"},
+    {"suite": "app/qa/rack-network-led.cjs", "groups": 10, "log": "final-rack-network-led.txt"},
+    {"suite": "tests/pa-agent-markdown.cjs", "checks": 13, "evidence": "Executed successfully; unchanged renderer"},
+    {"suite": "app/qa/theme-palette.cjs", "status": "passed", "log": "theme-palette.txt"},
+    {"suite": "Hero responsive identification/final", "captures": 20, "viewports": ["1366x768", "1600x900", "1920x1080", "2560x1440", "3440x1440"], "themes": ["dark", "light"], "log": "callout-final.txt", "checks": "Four model-derived class counts/anchors, visible leaders, no label overlaps or leader crossings, final height 70-78%, no clip; SVG and all text have no rendered rectangles outside identification"},
+    {"suite": "Hero responsive convergence/close-up/exploded", "captures": 40, "stages": [4, 5, 6, 9], "viewports": ["1366x768", "1600x900", "1920x1080", "2560x1440", "3440x1440"], "themes": ["dark", "light"], "log": "responsive-final.txt"}
+  ],
+  "pythonSuite": {
+    "command": ".venv/Scripts/python.exe -m pytest tests -q --tb=short",
+    "baseline": {"passed": 273, "failed": 171, "errors": 1, "subtestsPassed": 26, "seconds": 190.82},
+    "final": {"passed": 273, "failed": 171, "errors": 1, "subtestsPassed": 26, "seconds": 188.55},
+    "identicalOutcomes": true,
+    "comparedXmlOutcomeEntries": 442,
+    "comparison": "pytest-comparison.json",
+    "causeDetails": "baseline-failure-causes.json",
+    "knownCauses": [
+      {"entries": 73, "cause": "Missing neutrino_demo_config.sh returns 404"},
+      {"entries": 43, "cause": "Windows WinError 32 open SQLite/temp-file cleanup: 42 failures plus 1 teardown error"},
+      {"entries": 1, "cause": "Missing /srv/pa-agent/settings/profiles/qwen3.8-27b.json"},
+      {"entries": 1, "cause": "Runtime manifest reference to absent engine/vera_cycle/validation_checkers.json"},
+      {"entries": 1, "cause": "Hardware checker script exits 126"},
+      {"entries": 53, "cause": "Other existing route-status, permission filtering, enrollment, reservation/session, profile and legacy transport contract assertions; these are not all environment-only failures"}
+    ]
+  },
+  "existingJsFailures": [
+    {"suite": "app/qa/theme-contract.cjs", "baselineExit": 1, "baselineProof": "Relevant test/input files extracted with git show from exact base commit and executed unchanged", "baselineFailure": "Expected final stylesheet /static/css/workspace-ux.css, actual /static/css/validation-overview.css", "currentFailure": "Same stale last-stylesheet assertion; actual /static/css/hero-callouts.css", "baselineLog": "baseline-theme-contract.txt", "currentLog": "theme-contract.txt"},
+    {"suite": "app/qa/story-adapter.cjs", "baselineExit": 1, "baselineProof": "Relevant test/input files extracted with git show from exact base commit and executed unchanged", "failure": "TypeError: stage.classList.contains is not a function in the tiny DOM mock", "baselineLog": "baseline-story-adapter.txt"},
+    {"suite": "app/qa/gb300-rack.cjs", "baselineExit": 1, "baselineProof": "Executed before V3 UI changes; operational UI labels are unchanged by V3", "failure": "Exact button label 位置／類型 expected once, actual count 0; current operational label is 機櫃位置", "currentRepeatedFailureLog": "gb300-rack-existing-failure.txt", "additionalStaleAssumptions": "Temporary in-memory label adaptation exposed more old status-copy expectations (已連線 versus OS Ping 可達); no application code changed to satisfy old assertions", "replacementCoverage": "Current real-page Rack isolation and existing Rack network/LED suites both pass"}
+  ],
+  "limitations": [
+    "Full Python suite is not green; final outcomes equal measured baseline, including existing failures.",
+    "Browser checks use local Chromium native GL. No physical-GPU FPS certification or target hardware acceptance.",
+    "All synthetic preview responses remain loopback; no production deployment or hardware job was performed."
+  ]
+}

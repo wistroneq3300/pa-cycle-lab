@@ -1,0 +1,17 @@
+evalmachine.<anonymous>:44
+      const compact = stage.classList.contains('vo-scene');
+                                      ^
+
+TypeError: stage.classList.contains is not a function
+    at update (evalmachine.<anonymous>:44:39)
+    at Object.mountStory [as mount] (evalmachine.<anonymous>:79:5)
+    at Object.<anonymous> (C:\Users\kobei\Documents\Codex\2026-10-07\pa-cycle-lab-branch-codex-hero\artifacts\hero-cinematic-v3\baseline-contracts\app\qa\story-adapter.cjs:33:16)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.19.0

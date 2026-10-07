@@ -1,0 +1,1 @@
+PASS real Chart.js palette: Light → Dark → Light resolves in the same update; callbacks, options, dataset colors and disabled legend preserved; theme persistence/event/button updated.

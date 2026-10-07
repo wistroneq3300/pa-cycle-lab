@@ -1,0 +1,4162 @@
+[
+  {
+    "file": "1366x768-dark-03-identification.png",
+    "progress": 0.27,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.3200043737888336,
+      "elevation": 0.12999999523162842,
+      "distance": 59.0936393737793,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -18.43227195739746,
+        7.660552978515625,
+        55.62036895751953
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.1693894289266529,
+      "right": 0.174139267191125,
+      "bottom": -0.5719067088754697,
+      "top": 0.5214340369787372,
+      "heightFraction": 0.5466703729271034,
+      "widthFraction": 0.17176434805888896,
+      "nearest": 54.24493189775111,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.48006247984808,
+      "pixelCount": 466800,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": true,
+      "width": 778.40625,
+      "height": 600,
+      "compact": true,
+      "labels": [
+        {
+          "type": "switch",
+          "name": "editorial-switch-1",
+          "count": 2,
+          "label": "NETWORK SWITCH",
+          "anchor": {
+            "x": 280.1336424277872,
+            "y": 156.65108721863885
+          },
+          "labelBounds": {
+            "left": 119.13364242778721,
+            "right": 226.1336424277872,
+            "top": 124.65108721863885,
+            "bottom": 153.65108721863885
+          },
+          "leader": [
+            {
+              "x": 280.1336424277872,
+              "y": 156.65108721863885
+            },
+            {
+              "x": 256.1336424277872,
+              "y": 156.65108721863885
+            },
+            {
+              "x": 234.1336424277872,
+              "y": 156.65108721863885
+            },
+            {
+              "x": 119.13364242778721,
+              "y": 156.65108721863885
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "server",
+          "name": "editorial-compute-01",
+          "count": 18,
+          "label": "COMPUTE TRAY",
+          "anchor": {
+            "x": 260.2990867214044,
+            "y": 202.50061231108424
+          },
+          "labelBounds": {
+            "left": 116.29908672140442,
+            "right": 206.29908672140442,
+            "top": 170.50061231108424,
+            "bottom": 199.50061231108424
+          },
+          "leader": [
+            {
+              "x": 260.2990867214044,
+              "y": 202.50061231108424
+            },
+            {
+              "x": 236.29908672140442,
+              "y": 202.50061231108424
+            },
+            {
+              "x": 214.29908672140442,
+              "y": 202.50061231108424
+            },
+            {
+              "x": 116.29908672140442,
+              "y": 202.50061231108424
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "nvlink",
+          "name": "editorial-nvlink-01",
+          "count": 9,
+          "label": "NVLINK SWITCH TRAY",
+          "anchor": {
+            "x": 562.6988208014535,
+            "y": 254.91520938254254
+          },
+          "labelBounds": {
+            "left": 635.40625,
+            "right": 760.40625,
+            "top": 222.91520938254254,
+            "bottom": 251.91520938254254
+          },
+          "leader": [
+            {
+              "x": 562.6988208014535,
+              "y": 254.91520938254254
+            },
+            {
+              "x": 605.40625,
+              "y": 254.91520938254254
+            },
+            {
+              "x": 627.40625,
+              "y": 254.91520938254254
+            },
+            {
+              "x": 760.40625,
+              "y": 254.91520938254254
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "powershelf",
+          "name": "editorial-power-8",
+          "count": 8,
+          "label": "POWER SHELF",
+          "anchor": {
+            "x": 634.7848205092412,
+            "y": 449.48206366658354
+          },
+          "labelBounds": {
+            "left": 679.40625,
+            "right": 760.40625,
+            "top": 417.48206366658354,
+            "bottom": 446.48206366658354
+          },
+          "leader": [
+            {
+              "x": 634.7848205092412,
+              "y": 449.48206366658354
+            },
+            {
+              "x": 649.40625,
+              "y": 449.48206366658354
+            },
+            {
+              "x": 671.40625,
+              "y": 449.48206366658354
+            },
+            {
+              "x": 760.40625,
+              "y": 449.48206366658354
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        }
+      ]
+    }
+  },
+  {
+    "file": "1366x768-dark-04-early-convergence.png",
+    "progress": 0.38,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.3600028455257416,
+      "elevation": 0.13999974727630615,
+      "distance": 59.8214111328125,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -20.867517471313477,
+        8.347651481628418,
+        55.438838958740234
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.17393546576852906,
+      "right": 0.17680099851186853,
+      "bottom": -0.5665113126142168,
+      "top": 0.5170289297352557,
+      "heightFraction": 0.5417701211747363,
+      "widthFraction": 0.1753682321401988,
+      "nearest": 54.859485545530056,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.77092741218105,
+      "pixelCount": 466800,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1366x768-dark-05-mid-convergence.png",
+    "progress": 0.46,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.41650110483169556,
+      "elevation": 0.15883369743824005,
+      "distance": 60.62708282470703,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -24.21874237060547,
+        9.589184761047363,
+        54.74617004394531
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.18053583673323617,
+      "right": 0.18075083502573436,
+      "bottom": -0.5615416769568076,
+      "top": 0.5157218003862557,
+      "heightFraction": 0.5386317386715316,
+      "widthFraction": 0.18064333587948528,
+      "nearest": 55.48350673687476,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.93103844542677,
+      "pixelCount": 466800,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1366x768-dark-06-compute-insertion.png",
+    "progress": 0.55,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.7050700783729553,
+      "elevation": 0.2550715208053589,
+      "distance": 15.800344467163086,
+      "target": [
+        0,
+        4.649964332580566,
+        2.9405689239501953
+      ],
+      "eye": [
+        -9.90868854522705,
+        8.636622428894043,
+        14.584251403808594
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -1.0088880194647545,
+      "right": 0.37093976717850785,
+      "bottom": -2.8361518579620415,
+      "top": 0.8623311304199257,
+      "heightFraction": 1.8492414941909836,
+      "widthFraction": 0.6899138933216311,
+      "nearest": 13.296413500544968,
+      "clipped": true
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.73954859856815,
+      "pixelCount": 466800,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1366x768-dark-09-engineering-exploded.png",
+    "progress": 0.84,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.6000011563301086,
+      "elevation": 0.13000132143497467,
+      "distance": 47.4344596862793,
+      "target": [
+        0,
+        0.000049818008847068995,
+        0.00003150417978758924
+      ],
+      "eye": [
+        -26.55754852294922,
+        6.149237632751465,
+        38.81899642944336
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.25899482704509746,
+      "right": 0.2523346071538075,
+      "bottom": -0.7257622722528285,
+      "top": 0.6647512267843073,
+      "heightFraction": 0.695256749518568,
+      "widthFraction": 0.2556647170994525,
+      "nearest": 42.42866089752368,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.71536468847818,
+      "pixelCount": 466800,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1366x768-dark-11-final-hero.png",
+    "progress": 1,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.4799966514110565,
+      "elevation": 0.08500093966722488,
+      "distance": 43.43838119506836,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -19.986391067504883,
+        3.6878585815429688,
+        38.39058303833008
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.25881734291610303,
+      "right": 0.26272674749544317,
+      "bottom": -0.7899937382496267,
+      "top": 0.7493438996967511,
+      "heightFraction": 0.7696688189731888,
+      "widthFraction": 0.26077204520577313,
+      "nearest": 38.79112470935308,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.761818801816677,
+      "pixelCount": 466800,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 48,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1366x768-light-03-identification.png",
+    "progress": 0.27,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.32000336050987244,
+      "elevation": 0.129999041557312,
+      "distance": 59.09364700317383,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -18.432220458984375,
+        7.660498142242432,
+        55.62040328979492
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.16938923227290253,
+      "right": 0.17413910967048626,
+      "bottom": -0.5719065008434144,
+      "top": 0.5214342321361759,
+      "heightFraction": 0.5466703664897952,
+      "widthFraction": 0.17176417097169439,
+      "nearest": 54.24494747816686,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.699168260098077,
+      "pixelCount": 466800,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": true,
+      "width": 778.40625,
+      "height": 600,
+      "compact": true,
+      "labels": [
+        {
+          "type": "switch",
+          "name": "editorial-switch-1",
+          "count": 2,
+          "label": "NETWORK SWITCH",
+          "anchor": {
+            "x": 280.1334512075467,
+            "y": 156.65100943965334
+          },
+          "labelBounds": {
+            "left": 119.13345120754673,
+            "right": 226.13345120754673,
+            "top": 124.65100943965334,
+            "bottom": 153.65100943965334
+          },
+          "leader": [
+            {
+              "x": 280.1334512075467,
+              "y": 156.65100943965334
+            },
+            {
+              "x": 256.1334512075467,
+              "y": 156.65100943965334
+            },
+            {
+              "x": 234.13345120754673,
+              "y": 156.65100943965334
+            },
+            {
+              "x": 119.13345120754673,
+              "y": 156.65100943965334
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "server",
+          "name": "editorial-compute-01",
+          "count": 18,
+          "label": "COMPUTE TRAY",
+          "anchor": {
+            "x": 260.2990355831332,
+            "y": 202.50056482019124
+          },
+          "labelBounds": {
+            "left": 116.29903558313322,
+            "right": 206.29903558313322,
+            "top": 170.50056482019124,
+            "bottom": 199.50056482019124
+          },
+          "leader": [
+            {
+              "x": 260.2990355831332,
+              "y": 202.50056482019124
+            },
+            {
+              "x": 236.29903558313322,
+              "y": 202.50056482019124
+            },
+            {
+              "x": 214.29903558313322,
+              "y": 202.50056482019124
+            },
+            {
+              "x": 116.29903558313322,
+              "y": 202.50056482019124
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "nvlink",
+          "name": "editorial-nvlink-01",
+          "count": 9,
+          "label": "NVLINK SWITCH TRAY",
+          "anchor": {
+            "x": 562.6986721905656,
+            "y": 254.91521864707113
+          },
+          "labelBounds": {
+            "left": 635.40625,
+            "right": 760.40625,
+            "top": 222.91521864707113,
+            "bottom": 251.91521864707113
+          },
+          "leader": [
+            {
+              "x": 562.6986721905656,
+              "y": 254.91521864707113
+            },
+            {
+              "x": 605.40625,
+              "y": 254.91521864707113
+            },
+            {
+              "x": 627.40625,
+              "y": 254.91521864707113
+            },
+            {
+              "x": 760.40625,
+              "y": 254.91521864707113
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "powershelf",
+          "name": "editorial-power-8",
+          "count": 8,
+          "label": "POWER SHELF",
+          "anchor": {
+            "x": 634.7844232363753,
+            "y": 449.48187538829893
+          },
+          "labelBounds": {
+            "left": 679.40625,
+            "right": 760.40625,
+            "top": 417.48187538829893,
+            "bottom": 446.48187538829893
+          },
+          "leader": [
+            {
+              "x": 634.7844232363753,
+              "y": 449.48187538829893
+            },
+            {
+              "x": 649.40625,
+              "y": 449.48187538829893
+            },
+            {
+              "x": 671.40625,
+              "y": 449.48187538829893
+            },
+            {
+              "x": 760.40625,
+              "y": 449.48187538829893
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        }
+      ]
+    }
+  },
+  {
+    "file": "1366x768-light-04-early-convergence.png",
+    "progress": 0.38,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.36000627279281616,
+      "elevation": 0.13999974727630615,
+      "distance": 59.8214111328125,
+      "target": [
+        0,
+        2.1947106632058677e-10,
+        1.3879028482044475e-10
+      ],
+      "eye": [
+        -20.867706298828125,
+        8.347651481628418,
+        55.43876647949219
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.1739359979867243,
+      "right": 0.17680138765828693,
+      "bottom": -0.5665113764398014,
+      "top": 0.5170289321220505,
+      "heightFraction": 0.5417701542809259,
+      "widthFraction": 0.1753686928225056,
+      "nearest": 54.85948212020008,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.76598534908711,
+      "pixelCount": 466800,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1366x768-light-05-mid-convergence.png",
+    "progress": 0.46,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.41650113463401794,
+      "elevation": 0.15883371233940125,
+      "distance": 60.62708282470703,
+      "target": [
+        0,
+        2.4231235846495537e-14,
+        1.532347484306789e-14
+      ],
+      "eye": [
+        -24.2187442779541,
+        9.58918571472168,
+        54.74617004394531
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.18053583796517328,
+      "right": 0.1807508345528098,
+      "bottom": -0.5615416791631561,
+      "top": 0.5157218075229446,
+      "heightFraction": 0.5386317433430503,
+      "widthFraction": 0.18064333625899154,
+      "nearest": 55.483506750911644,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.19087570241295,
+      "pixelCount": 466800,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1366x768-light-06-compute-insertion.png",
+    "progress": 0.55,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.7050700187683105,
+      "elevation": 0.2550715208053589,
+      "distance": 15.800344467163086,
+      "target": [
+        0,
+        4.649964332580566,
+        2.9405689239501953
+      ],
+      "eye": [
+        -9.908687591552734,
+        8.636622428894043,
+        14.58425235748291
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -1.0088878197512745,
+      "right": 0.37093976556371155,
+      "bottom": -2.836151557755386,
+      "top": 0.8623310548318436,
+      "heightFraction": 1.8492413062936148,
+      "widthFraction": 0.689913792657493,
+      "nearest": 13.29641534572596,
+      "clipped": true
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.79012518441368,
+      "pixelCount": 466800,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1366x768-light-09-engineering-exploded.png",
+    "progress": 0.84,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.6000011563301086,
+      "elevation": 0.13000133633613586,
+      "distance": 47.4344596862793,
+      "target": [
+        0,
+        0.00004985117266187444,
+        0.00003152513090753928
+      ],
+      "eye": [
+        -26.55754852294922,
+        6.149238109588623,
+        38.81899642944336
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.2589948284032191,
+      "right": 0.252334607010773,
+      "bottom": -0.7257622752876696,
+      "top": 0.6647512234407218,
+      "heightFraction": 0.6952567493641957,
+      "widthFraction": 0.25566471770699606,
+      "nearest": 42.42866078144363,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.781989706599294,
+      "pixelCount": 466800,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1366x768-light-11-final-hero.png",
+    "progress": 1,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.4799966514110565,
+      "elevation": 0.08500093221664429,
+      "distance": 43.438385009765625,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -19.986392974853516,
+        3.6878585815429688,
+        38.390586853027344
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.2588173207819376,
+      "right": 0.2627267226118306,
+      "bottom": -0.789993660947946,
+      "top": 0.7493438283143397,
+      "heightFraction": 0.7696687446311428,
+      "widthFraction": 0.26077202169688407,
+      "nearest": 38.791128582090366,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.842044150998873,
+      "pixelCount": 466800,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 48,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1600x900-dark-03-identification.png",
+    "progress": 0.27,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.32000333070755005,
+      "elevation": 0.129999041557312,
+      "distance": 59.093650817871094,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -18.432218551635742,
+        7.66049861907959,
+        55.62040710449219
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.17513885121987008,
+      "right": 0.18004995598798995,
+      "bottom": -0.5719064612388046,
+      "top": 0.5214341935877086,
+      "heightFraction": 0.5466703274132566,
+      "widthFraction": 0.17759440360393003,
+      "nearest": 54.24495142876271,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.669683813744147,
+      "pixelCount": 671976,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": true,
+      "width": 918.40625,
+      "height": 732,
+      "compact": true,
+      "labels": [
+        {
+          "type": "switch",
+          "name": "editorial-switch-1",
+          "count": 2,
+          "label": "NETWORK SWITCH",
+          "anchor": {
+            "x": 326.14874574421356,
+            "y": 191.11424530947727
+          },
+          "labelBounds": {
+            "left": 165.14874574421356,
+            "right": 272.14874574421356,
+            "top": 159.11424530947727,
+            "bottom": 188.11424530947727
+          },
+          "leader": [
+            {
+              "x": 326.14874574421356,
+              "y": 191.11424530947727
+            },
+            {
+              "x": 302.14874574421356,
+              "y": 191.11424530947727
+            },
+            {
+              "x": 280.14874574421356,
+              "y": 191.11424530947727
+            },
+            {
+              "x": 165.14874574421356,
+              "y": 191.11424530947727
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "server",
+          "name": "editorial-compute-01",
+          "count": 18,
+          "label": "COMPUTE TRAY",
+          "anchor": {
+            "x": 301.9526808777304,
+            "y": 247.05069774014785
+          },
+          "labelBounds": {
+            "left": 157.95268087773042,
+            "right": 247.95268087773042,
+            "top": 215.05069774014785,
+            "bottom": 244.05069774014785
+          },
+          "leader": [
+            {
+              "x": 301.9526808777304,
+              "y": 247.05069774014785
+            },
+            {
+              "x": 277.9526808777304,
+              "y": 247.05069774014785
+            },
+            {
+              "x": 255.95268087773042,
+              "y": 247.05069774014785
+            },
+            {
+              "x": 157.95268087773042,
+              "y": 247.05069774014785
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "nvlink",
+          "name": "editorial-nvlink-01",
+          "count": 9,
+          "label": "NVLINK SWITCH TRAY",
+          "anchor": {
+            "x": 670.8508225419035,
+            "y": 310.99657046018547
+          },
+          "labelBounds": {
+            "left": 775.40625,
+            "right": 900.40625,
+            "top": 278.99657046018547,
+            "bottom": 307.99657046018547
+          },
+          "leader": [
+            {
+              "x": 670.8508225419035,
+              "y": 310.99657046018547
+            },
+            {
+              "x": 745.40625,
+              "y": 310.99657046018547
+            },
+            {
+              "x": 767.40625,
+              "y": 310.99657046018547
+            },
+            {
+              "x": 900.40625,
+              "y": 310.99657046018547
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "powershelf",
+          "name": "editorial-power-8",
+          "count": 8,
+          "label": "POWER SHELF",
+          "anchor": {
+            "x": 759.017138146495,
+            "y": 540.1373838793468
+          },
+          "labelBounds": {
+            "left": 813.017138146495,
+            "right": 894.017138146495,
+            "top": 508.13738387934677,
+            "bottom": 537.1373838793468
+          },
+          "leader": [
+            {
+              "x": 759.017138146495,
+              "y": 540.1373838793468
+            },
+            {
+              "x": 783.017138146495,
+              "y": 540.1373838793468
+            },
+            {
+              "x": 805.017138146495,
+              "y": 540.1373838793468
+            },
+            {
+              "x": 894.017138146495,
+              "y": 540.1373838793468
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        }
+      ]
+    }
+  },
+  {
+    "file": "1600x900-dark-04-early-convergence.png",
+    "progress": 0.38,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.36000627279281616,
+      "elevation": 0.13999974727630615,
+      "distance": 59.8214111328125,
+      "target": [
+        0,
+        1.573625119100086e-10,
+        9.951370977256957e-11
+      ],
+      "eye": [
+        -20.867706298828125,
+        8.347651481628418,
+        55.43876647949219
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.17983997241460617,
+      "right": 0.18280262319310003,
+      "bottom": -0.5665113764359306,
+      "top": 0.5170289321255402,
+      "heightFraction": 0.5417701542807354,
+      "widthFraction": 0.1813212978038531,
+      "nearest": 54.85948212020008,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.790560783858687,
+      "pixelCount": 671976,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1600x900-dark-05-mid-convergence.png",
+    "progress": 0.46,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.41650113463401794,
+      "elevation": 0.15883369743824005,
+      "distance": 60.62708282470703,
+      "target": [
+        0,
+        7.144245183507772e-15,
+        4.5179140749438806e-15
+      ],
+      "eye": [
+        -24.2187442779541,
+        9.589184761047363,
+        54.74617004394531
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.1866638349849272,
+      "right": 0.1868861295737788,
+      "bottom": -0.5615416756958777,
+      "top": 0.5157218017727624,
+      "heightFraction": 0.53863173873432,
+      "widthFraction": 0.186774982279353,
+      "nearest": 55.48350686699169,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.016143970583542,
+      "pixelCount": 671976,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1600x900-dark-06-compute-insertion.png",
+    "progress": 0.55,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.7050700187683105,
+      "elevation": 0.2550715506076813,
+      "distance": 15.82284164428711,
+      "target": [
+        0,
+        4.649963855743408,
+        2.9405689239501953
+      ],
+      "eye": [
+        -9.922796249389648,
+        8.642298698425293,
+        14.600831031799316
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -1.0418801674884306,
+      "right": 0.3829973695191876,
+      "bottom": -2.832452017859531,
+      "top": 0.8614327201658196,
+      "heightFraction": 1.8469423690126754,
+      "widthFraction": 0.7124387685038092,
+      "nearest": 13.318912290689891,
+      "clipped": true
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.79221296909794,
+      "pixelCount": 671976,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1600x900-dark-09-engineering-exploded.png",
+    "progress": 0.84,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.6000011563301086,
+      "elevation": 0.13000132143497467,
+      "distance": 47.4344596862793,
+      "target": [
+        0,
+        0.000049784823204390705,
+        0.00003148318864987232
+      ],
+      "eye": [
+        -26.55754852294922,
+        6.149237632751465,
+        38.81899642944336
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.2677859889775745,
+      "right": 0.26089970040134886,
+      "bottom": -0.725762269551135,
+      "top": 0.6647512296145264,
+      "heightFraction": 0.6952567495828307,
+      "widthFraction": 0.2643428446894617,
+      "nearest": 42.42866089752368,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.769257337502438,
+      "pixelCount": 671976,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1600x900-dark-11-final-hero.png",
+    "progress": 1,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.4799966514110565,
+      "elevation": 0.08500093966722488,
+      "distance": 43.43838119506836,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -19.986391067504883,
+        3.6878585815429688,
+        38.39058303833008
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.2676024791126346,
+      "right": 0.2716445820470807,
+      "bottom": -0.7899937382496267,
+      "top": 0.7493438996967511,
+      "heightFraction": 0.7696688189731888,
+      "widthFraction": 0.26962353057985766,
+      "nearest": 38.79112470935308,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.812762877461164,
+      "pixelCount": 671976,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 48,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1600x900-light-03-identification.png",
+    "progress": 0.27,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.32000330090522766,
+      "elevation": 0.129999041557312,
+      "distance": 59.093650817871094,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -18.43221664428711,
+        7.66049861907959,
+        55.62040710449219
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.17513884318197437,
+      "right": 0.1800499490916918,
+      "bottom": -0.5719064605481127,
+      "top": 0.5214341929345402,
+      "heightFraction": 0.5466703267413264,
+      "widthFraction": 0.1775943961368331,
+      "nearest": 54.244951496712005,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.66965379989067,
+      "pixelCount": 671976,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": true,
+      "width": 918.40625,
+      "height": 732,
+      "compact": true,
+      "labels": [
+        {
+          "type": "switch",
+          "name": "editorial-switch-1",
+          "count": 2,
+          "label": "NETWORK SWITCH",
+          "anchor": {
+            "x": 326.1487251735375,
+            "y": 191.11424527265436
+          },
+          "labelBounds": {
+            "left": 165.1487251735375,
+            "right": 272.1487251735375,
+            "top": 159.11424527265436,
+            "bottom": 188.11424527265436
+          },
+          "leader": [
+            {
+              "x": 326.1487251735375,
+              "y": 191.11424527265436
+            },
+            {
+              "x": 302.1487251735375,
+              "y": 191.11424527265436
+            },
+            {
+              "x": 280.1487251735375,
+              "y": 191.11424527265436
+            },
+            {
+              "x": 165.1487251735375,
+              "y": 191.11424527265436
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "server",
+          "name": "editorial-compute-01",
+          "count": 18,
+          "label": "COMPUTE TRAY",
+          "anchor": {
+            "x": 301.9526640807419,
+            "y": 247.05069747184933
+          },
+          "labelBounds": {
+            "left": 157.9526640807419,
+            "right": 247.9526640807419,
+            "top": 215.05069747184933,
+            "bottom": 244.05069747184933
+          },
+          "leader": [
+            {
+              "x": 301.9526640807419,
+              "y": 247.05069747184933
+            },
+            {
+              "x": 277.9526640807419,
+              "y": 247.05069747184933
+            },
+            {
+              "x": 255.9526640807419,
+              "y": 247.05069747184933
+            },
+            {
+              "x": 157.9526640807419,
+              "y": 247.05069747184933
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "nvlink",
+          "name": "editorial-nvlink-01",
+          "count": 9,
+          "label": "NVLINK SWITCH TRAY",
+          "anchor": {
+            "x": 670.8508350135256,
+            "y": 310.9965709469261
+          },
+          "labelBounds": {
+            "left": 775.40625,
+            "right": 900.40625,
+            "top": 278.9965709469261,
+            "bottom": 307.9965709469261
+          },
+          "leader": [
+            {
+              "x": 670.8508350135256,
+              "y": 310.9965709469261
+            },
+            {
+              "x": 745.40625,
+              "y": 310.9965709469261
+            },
+            {
+              "x": 767.40625,
+              "y": 310.9965709469261
+            },
+            {
+              "x": 900.40625,
+              "y": 310.9965709469261
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "powershelf",
+          "name": "editorial-power-8",
+          "count": 8,
+          "label": "POWER SHELF",
+          "anchor": {
+            "x": 759.0171470836294,
+            "y": 540.1373853158127
+          },
+          "labelBounds": {
+            "left": 813.0171470836294,
+            "right": 894.0171470836294,
+            "top": 508.1373853158127,
+            "bottom": 537.1373853158127
+          },
+          "leader": [
+            {
+              "x": 759.0171470836294,
+              "y": 540.1373853158127
+            },
+            {
+              "x": 783.0171470836294,
+              "y": 540.1373853158127
+            },
+            {
+              "x": 805.0171470836294,
+              "y": 540.1373853158127
+            },
+            {
+              "x": 894.0171470836294,
+              "y": 540.1373853158127
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        }
+      ]
+    }
+  },
+  {
+    "file": "1600x900-light-04-early-convergence.png",
+    "progress": 0.38,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.3600062429904938,
+      "elevation": 0.13999974727630615,
+      "distance": 59.8214111328125,
+      "target": [
+        0,
+        4.774952655495213e-10,
+        3.0196090072820425e-10
+      ],
+      "eye": [
+        -20.867704391479492,
+        8.347651481628418,
+        55.43876647949219
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.1798399644413676,
+      "right": 0.18280261639181108,
+      "bottom": -0.5665113751852194,
+      "top": 0.5170289321258433,
+      "heightFraction": 0.5417701536555314,
+      "widthFraction": 0.18132129041658934,
+      "nearest": 54.85948218814937,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.884259778909566,
+      "pixelCount": 671976,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1600x900-light-05-mid-convergence.png",
+    "progress": 0.46,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.41650110483169556,
+      "elevation": 0.15883371233940125,
+      "distance": 60.6270866394043,
+      "target": [
+        0,
+        5.896691013078381e-14,
+        3.728978185805511e-14
+      ],
+      "eye": [
+        -24.2187442779541,
+        9.589186668395996,
+        54.74617385864258
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.18666382366641252,
+      "right": 0.18688611773326955,
+      "bottom": -0.5615416129448311,
+      "top": 0.5157217520061604,
+      "heightFraction": 0.5386316824754958,
+      "widthFraction": 0.18677497069984103,
+      "nearest": 55.48351063355821,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.666540800550266,
+      "pixelCount": 671976,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1600x900-light-06-compute-insertion.png",
+    "progress": 0.55,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.7050700187683105,
+      "elevation": 0.2550715208053589,
+      "distance": 15.82284164428711,
+      "target": [
+        0,
+        4.649963855743408,
+        2.9405689239501953
+      ],
+      "eye": [
+        -9.922796249389648,
+        8.642297744750977,
+        14.600831031799316
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -1.0418802477454243,
+      "right": 0.38299740368018353,
+      "bottom": -2.8324524567042477,
+      "top": 0.8614328115440919,
+      "heightFraction": 1.84694263412417,
+      "widthFraction": 0.7124388257128039,
+      "nearest": 13.318910847661442,
+      "clipped": true
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.904994270133383,
+      "pixelCount": 671976,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1600x900-light-09-engineering-exploded.png",
+    "progress": 0.84,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.6000011563301086,
+      "elevation": 0.13000132143497467,
+      "distance": 47.4344596862793,
+      "target": [
+        0,
+        0.000049817957915365696,
+        0.000031504121579928324
+      ],
+      "eye": [
+        -26.55754852294922,
+        6.149237632751465,
+        38.81899642944336
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.267785989739548,
+      "right": 0.26089969958077236,
+      "bottom": -0.7257622722488998,
+      "top": 0.664751226788423,
+      "heightFraction": 0.6952567495186615,
+      "widthFraction": 0.26434284466016017,
+      "nearest": 42.42866089752368,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.899425755770494,
+      "pixelCount": 671976,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1600x900-light-11-final-hero.png",
+    "progress": 1,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.4799966812133789,
+      "elevation": 0.08500093966722488,
+      "distance": 43.43838119506836,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -19.986391067504883,
+        3.6878585815429688,
+        38.39058303833008
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.2676024791126346,
+      "right": 0.2716445820470807,
+      "bottom": -0.7899937382496267,
+      "top": 0.7493438996967511,
+      "heightFraction": 0.7696688189731888,
+      "widthFraction": 0.26962353057985766,
+      "nearest": 38.79112470935308,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.960222503411924,
+      "pixelCount": 671976,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 48,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1920x1080-dark-03-identification.png",
+    "progress": 0.27,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.32000333070755005,
+      "elevation": 0.129999041557312,
+      "distance": 59.09364700317383,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -18.432218551635742,
+        7.660498142242432,
+        55.62040328979492
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.17901065482516104,
+      "right": 0.18403032947865916,
+      "bottom": -0.5719065013090432,
+      "top": 0.5214342302836613,
+      "heightFraction": 0.5466703657963523,
+      "widthFraction": 0.1815204921519101,
+      "nearest": 54.24494754611615,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.669269729360643,
+      "pixelCount": 1020528,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": true,
+      "width": 1118.6015625,
+      "height": 912,
+      "compact": false,
+      "labels": [
+        {
+          "type": "switch",
+          "name": "editorial-switch-1",
+          "count": 2,
+          "label": "NETWORK SWITCH",
+          "anchor": {
+            "x": 393.66040421774505,
+            "y": 238.10937054342008
+          },
+          "labelBounds": {
+            "left": 175.66040421774505,
+            "right": 339.66040421774505,
+            "top": 201.10937054342008,
+            "bottom": 235.10937054342008
+          },
+          "leader": [
+            {
+              "x": 393.66040421774505,
+              "y": 238.10937054342008
+            },
+            {
+              "x": 369.66040421774505,
+              "y": 238.10937054342008
+            },
+            {
+              "x": 347.66040421774505,
+              "y": 238.10937054342008
+            },
+            {
+              "x": 175.66040421774505,
+              "y": 238.10937054342008
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "server",
+          "name": "editorial-compute-01",
+          "count": 18,
+          "label": "COMPUTE TRAY",
+          "anchor": {
+            "x": 363.53849640183864,
+            "y": 307.8007595580861
+          },
+          "labelBounds": {
+            "left": 165.53849640183864,
+            "right": 309.53849640183864,
+            "top": 270.8007595580861,
+            "bottom": 304.8007595580861
+          },
+          "leader": [
+            {
+              "x": 363.53849640183864,
+              "y": 307.8007595580861
+            },
+            {
+              "x": 339.53849640183864,
+              "y": 307.8007595580861
+            },
+            {
+              "x": 317.53849640183864,
+              "y": 307.8007595580861
+            },
+            {
+              "x": 165.53849640183864,
+              "y": 307.8007595580861
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "nvlink",
+          "name": "editorial-nvlink-01",
+          "count": 9,
+          "label": "NVLINK SWITCH TRAY",
+          "anchor": {
+            "x": 822.7826822317719,
+            "y": 387.4710833961848
+          },
+          "labelBounds": {
+            "left": 915.6015625,
+            "right": 1086.6015625,
+            "top": 350.4710833961848,
+            "bottom": 384.4710833961848
+          },
+          "leader": [
+            {
+              "x": 822.7826822317719,
+              "y": 387.4710833961848
+            },
+            {
+              "x": 885.6015625,
+              "y": 387.4710833961848
+            },
+            {
+              "x": 907.6015625,
+              "y": 387.4710833961848
+            },
+            {
+              "x": 1086.6015625,
+              "y": 387.4710833961848
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "powershelf",
+          "name": "editorial-power-8",
+          "count": 8,
+          "label": "POWER SHELF",
+          "anchor": {
+            "x": 932.2570152038894,
+            "y": 683.2125381071878
+          },
+          "labelBounds": {
+            "left": 925.6015625,
+            "right": 1086.6015625,
+            "top": 718.2125381071878,
+            "bottom": 752.2125381071878
+          },
+          "leader": [
+            {
+              "x": 932.2570152038894,
+              "y": 683.2125381071878
+            },
+            {
+              "x": 895.6015625,
+              "y": 755.2125381071878
+            },
+            {
+              "x": 917.6015625,
+              "y": 755.2125381071878
+            },
+            {
+              "x": 1086.6015625,
+              "y": 755.2125381071878
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        }
+      ]
+    }
+  },
+  {
+    "file": "1920x1080-dark-04-early-convergence.png",
+    "progress": 0.38,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.3600062429904938,
+      "elevation": 0.13999974727630615,
+      "distance": 59.821407318115234,
+      "target": [
+        0,
+        9.02472332975357e-11,
+        5.707095560025799e-11
+      ],
+      "eye": [
+        -20.867704391479492,
+        8.347650527954102,
+        55.43876266479492
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.18381569557585226,
+      "right": 0.18684384424526132,
+      "bottom": -0.5665114113275912,
+      "top": 0.517028959122742,
+      "heightFraction": 0.5417701852251666,
+      "widthFraction": 0.18532976991055677,
+      "nearest": 54.85947848953215,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.860768723995317,
+      "pixelCount": 1020528,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1920x1080-dark-05-mid-convergence.png",
+    "progress": 0.46,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.41650107502937317,
+      "elevation": 0.15883371233940125,
+      "distance": 60.627079010009766,
+      "target": [
+        0,
+        7.980292113436184e-15,
+        5.046613405895175e-15
+      ],
+      "eye": [
+        -24.218740463256836,
+        9.58918571472168,
+        54.74616622924805
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.19079042307079577,
+      "right": 0.19101763363410357,
+      "bottom": -0.5615416857559085,
+      "top": 0.5157218144795127,
+      "heightFraction": 0.5386317501177106,
+      "widthFraction": 0.19090402835244968,
+      "nearest": 55.483502888083635,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.666865822298956,
+      "pixelCount": 1020528,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1920x1080-dark-06-compute-insertion.png",
+    "progress": 0.55,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.7050700187683105,
+      "elevation": 0.2550715506076813,
+      "distance": 16.149545669555664,
+      "target": [
+        0,
+        4.649964809417725,
+        2.9405689239501953
+      ],
+      "eye": [
+        -10.127677917480469,
+        8.7247314453125,
+        14.84158706665039
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -1.0466594439730734,
+      "right": 0.3837157308059514,
+      "bottom": -2.779797194872865,
+      "top": 0.8485931628161392,
+      "heightFraction": 1.814195178844502,
+      "widthFraction": 0.7151875873895124,
+      "nearest": 13.645614640769905,
+      "clipped": true
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.91236198111958,
+      "pixelCount": 1020528,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1920x1080-dark-09-engineering-exploded.png",
+    "progress": 0.84,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.6000011563301086,
+      "elevation": 0.13000132143497467,
+      "distance": 47.43446350097656,
+      "target": [
+        0,
+        0.00004978484503226355,
+        0.00003148321047774516
+      ],
+      "eye": [
+        -26.55755043029785,
+        6.149238109588623,
+        38.819000244140625
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.27370590225194663,
+      "right": 0.2666673773368609,
+      "bottom": -0.7257622057350342,
+      "top": 0.6647511714475258,
+      "heightFraction": 0.6952566885912801,
+      "widthFraction": 0.27018663979440377,
+      "nearest": 42.42866471222094,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.818767335928857,
+      "pixelCount": 1020528,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1920x1080-dark-11-final-hero.png",
+    "progress": 1,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.4799966514110565,
+      "elevation": 0.08500093221664429,
+      "distance": 43.438385009765625,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -19.986392974853516,
+        3.6878585815429688,
+        38.390586853027344
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.27351833911956935,
+      "right": 0.27764979794460837,
+      "bottom": -0.789993660947946,
+      "top": 0.7493438283143397,
+      "heightFraction": 0.7696687446311428,
+      "widthFraction": 0.27558406853208883,
+      "nearest": 38.791128582090366,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.833854178626016,
+      "pixelCount": 1020528,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 48,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1920x1080-light-03-identification.png",
+    "progress": 0.27,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.32000333070755005,
+      "elevation": 0.129999041557312,
+      "distance": 59.093650817871094,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -18.432218551635742,
+        7.66049861907959,
+        55.62040710449219
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.17901063561765934,
+      "right": 0.18403030997622238,
+      "bottom": -0.5719064612388046,
+      "top": 0.5214341935877086,
+      "heightFraction": 0.5466703274132566,
+      "widthFraction": 0.18152047279694086,
+      "nearest": 54.24495142876271,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.667781565947212,
+      "pixelCount": 1020528,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": true,
+      "width": 1118.6015625,
+      "height": 912,
+      "compact": false,
+      "labels": [
+        {
+          "type": "switch",
+          "name": "editorial-switch-1",
+          "count": 2,
+          "label": "NETWORK SWITCH",
+          "anchor": {
+            "x": 393.66041803336367,
+            "y": 238.10938768241337
+          },
+          "labelBounds": {
+            "left": 175.66041803336367,
+            "right": 339.66041803336367,
+            "top": 201.10938768241337,
+            "bottom": 235.10938768241337
+          },
+          "leader": [
+            {
+              "x": 393.66041803336367,
+              "y": 238.10938768241337
+            },
+            {
+              "x": 369.66041803336367,
+              "y": 238.10938768241337
+            },
+            {
+              "x": 347.66041803336367,
+              "y": 238.10938768241337
+            },
+            {
+              "x": 175.66041803336367,
+              "y": 238.10938768241337
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "server",
+          "name": "editorial-compute-01",
+          "count": 18,
+          "label": "COMPUTE TRAY",
+          "anchor": {
+            "x": 363.53851147336815,
+            "y": 307.80077001273
+          },
+          "labelBounds": {
+            "left": 165.53851147336815,
+            "right": 309.53851147336815,
+            "top": 270.80077001273,
+            "bottom": 304.80077001273
+          },
+          "leader": [
+            {
+              "x": 363.53851147336815,
+              "y": 307.80077001273
+            },
+            {
+              "x": 339.53851147336815,
+              "y": 307.80077001273
+            },
+            {
+              "x": 317.53851147336815,
+              "y": 307.80077001273
+            },
+            {
+              "x": 165.53851147336815,
+              "y": 307.80077001273
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "nvlink",
+          "name": "editorial-nvlink-01",
+          "count": 9,
+          "label": "NVLINK SWITCH TRAY",
+          "anchor": {
+            "x": 822.7826654581461,
+            "y": 387.47108862586185
+          },
+          "labelBounds": {
+            "left": 915.6015625,
+            "right": 1086.6015625,
+            "top": 350.47108862586185,
+            "bottom": 384.47108862586185
+          },
+          "leader": [
+            {
+              "x": 822.7826654581461,
+              "y": 387.47108862586185
+            },
+            {
+              "x": 885.6015625,
+              "y": 387.47108862586185
+            },
+            {
+              "x": 907.6015625,
+              "y": 387.47108862586185
+            },
+            {
+              "x": 1086.6015625,
+              "y": 387.47108862586185
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "powershelf",
+          "name": "editorial-power-8",
+          "count": 8,
+          "label": "POWER SHELF",
+          "anchor": {
+            "x": 932.2569881301805,
+            "y": 683.2125225296872
+          },
+          "labelBounds": {
+            "left": 925.6015625,
+            "right": 1086.6015625,
+            "top": 718.2125225296872,
+            "bottom": 752.2125225296872
+          },
+          "leader": [
+            {
+              "x": 932.2569881301805,
+              "y": 683.2125225296872
+            },
+            {
+              "x": 895.6015625,
+              "y": 755.2125225296872
+            },
+            {
+              "x": 917.6015625,
+              "y": 755.2125225296872
+            },
+            {
+              "x": 1086.6015625,
+              "y": 755.2125225296872
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        }
+      ]
+    }
+  },
+  {
+    "file": "1920x1080-light-04-early-convergence.png",
+    "progress": 0.38,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.3600062429904938,
+      "elevation": 0.13999974727630615,
+      "distance": 59.8214111328125,
+      "target": [
+        0,
+        8.068515300330148e-11,
+        5.102409814106146e-11
+      ],
+      "eye": [
+        -20.867704391479492,
+        8.347651481628418,
+        55.43876647949219
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.1838156845512008,
+      "right": 0.1868438320033644,
+      "bottom": -0.5665113751604881,
+      "top": 0.5170289321481404,
+      "heightFraction": 0.5417701536543142,
+      "widthFraction": 0.1853297582772826,
+      "nearest": 54.85948218814937,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.876714170617028,
+      "pixelCount": 1020528,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1920x1080-light-05-mid-convergence.png",
+    "progress": 0.46,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.41650113463401794,
+      "elevation": 0.15883369743824005,
+      "distance": 60.6270866394043,
+      "target": [
+        0,
+        1.2440737967524176e-14,
+        7.867338575853929e-15
+      ],
+      "eye": [
+        -24.218746185302734,
+        9.58918571472168,
+        54.74617385864258
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.19079039913330467,
+      "right": 0.19101760720233502,
+      "bottom": -0.5615416387286093,
+      "top": 0.5157217710042266,
+      "heightFraction": 0.538631704866418,
+      "widthFraction": 0.19090400316781986,
+      "nearest": 55.483510681688955,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 18.162926306940584,
+      "pixelCount": 1020528,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1920x1080-light-06-compute-insertion.png",
+    "progress": 0.55,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.7050700783729553,
+      "elevation": 0.2550715208053589,
+      "distance": 16.14954376220703,
+      "target": [
+        0,
+        4.649964809417725,
+        2.9405689239501953
+      ],
+      "eye": [
+        -10.127677917480469,
+        8.724730491638184,
+        14.841585159301758
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -1.0466595530966625,
+      "right": 0.3837157001622375,
+      "bottom": -2.7797975008692064,
+      "top": 0.84859320980939,
+      "heightFraction": 1.8141953553392982,
+      "widthFraction": 0.71518762662945,
+      "nearest": 13.645613027749004,
+      "clipped": true
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.029502681983672,
+      "pixelCount": 1020528,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1920x1080-light-09-engineering-exploded.png",
+    "progress": 0.84,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.6000011563301086,
+      "elevation": 0.13000132143497467,
+      "distance": 47.43446350097656,
+      "target": [
+        0,
+        0.000049851169023895636,
+        0.00003152512726956047
+      ],
+      "eye": [
+        -26.55755043029785,
+        6.149238109588623,
+        38.819000244140625
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.27370590381149135,
+      "right": 0.2666673756573724,
+      "bottom": -0.7257622111348196,
+      "top": 0.6647511657908609,
+      "heightFraction": 0.6952566884628403,
+      "widthFraction": 0.2701866397344319,
+      "nearest": 42.42866471222094,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.03866242036945,
+      "pixelCount": 1020528,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "1920x1080-light-11-final-hero.png",
+    "progress": 1,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.4799966514110565,
+      "elevation": 0.08500093221664429,
+      "distance": 43.438385009765625,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -19.986392974853516,
+        3.6878585815429688,
+        38.390586853027344
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.27351833911956935,
+      "right": 0.27764979794460837,
+      "bottom": -0.789993660947946,
+      "top": 0.7493438283143397,
+      "heightFraction": 0.7696687446311428,
+      "widthFraction": 0.27558406853208883,
+      "nearest": 38.791128582090366,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.137159466860965,
+      "pixelCount": 1020528,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 48,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "2560x1440-dark-03-identification.png",
+    "progress": 0.27,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.32000333070755005,
+      "elevation": 0.129999041557312,
+      "distance": 59.093650817871094,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -18.432218551635742,
+        7.66049861907959,
+        55.62040710449219
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.17829214056367604,
+      "right": 0.18329166738499886,
+      "bottom": -0.5719064612388046,
+      "top": 0.5214341935877086,
+      "heightFraction": 0.5466703274132566,
+      "widthFraction": 0.18079190397433745,
+      "nearest": 54.24495142876271,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.674189123096436,
+      "pixelCount": 1993224,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": true,
+      "width": 1566.6015625,
+      "height": 1272,
+      "compact": false,
+      "labels": [
+        {
+          "type": "switch",
+          "name": "editorial-switch-1",
+          "count": 2,
+          "label": "NETWORK SWITCH",
+          "anchor": {
+            "x": 552.2525377583563,
+            "y": 332.1001639164158
+          },
+          "labelBounds": {
+            "left": 334.2525377583563,
+            "right": 498.2525377583563,
+            "top": 295.1001639164158,
+            "bottom": 329.1001639164158
+          },
+          "leader": [
+            {
+              "x": 552.2525377583563,
+              "y": 332.1001639164158
+            },
+            {
+              "x": 528.2525377583563,
+              "y": 332.1001639164158
+            },
+            {
+              "x": 506.2525377583563,
+              "y": 332.1001639164158
+            },
+            {
+              "x": 334.2525377583563,
+              "y": 332.1001639164158
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "server",
+          "name": "editorial-compute-01",
+          "count": 18,
+          "label": "COMPUTE TRAY",
+          "anchor": {
+            "x": 510.2362109543579,
+            "y": 429.3012120002628
+          },
+          "labelBounds": {
+            "left": 312.2362109543579,
+            "right": 456.2362109543579,
+            "top": 392.3012120002628,
+            "bottom": 426.3012120002628
+          },
+          "leader": [
+            {
+              "x": 510.2362109543579,
+              "y": 429.3012120002628
+            },
+            {
+              "x": 486.2362109543579,
+              "y": 429.3012120002628
+            },
+            {
+              "x": 464.2362109543579,
+              "y": 429.3012120002628
+            },
+            {
+              "x": 312.2362109543579,
+              "y": 429.3012120002628
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "nvlink",
+          "name": "editorial-nvlink-01",
+          "count": 9,
+          "label": "NVLINK SWITCH TRAY",
+          "anchor": {
+            "x": 1150.8258756384953,
+            "y": 540.420270825806
+          },
+          "labelBounds": {
+            "left": 1349.433808288989,
+            "right": 1520.433808288989,
+            "top": 503.420270825806,
+            "bottom": 537.420270825806
+          },
+          "leader": [
+            {
+              "x": 1150.8258756384953,
+              "y": 540.420270825806
+            },
+            {
+              "x": 1319.433808288989,
+              "y": 540.420270825806
+            },
+            {
+              "x": 1341.433808288989,
+              "y": 540.420270825806
+            },
+            {
+              "x": 1520.433808288989,
+              "y": 540.420270825806
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "powershelf",
+          "name": "editorial-power-8",
+          "count": 8,
+          "label": "POWER SHELF",
+          "anchor": {
+            "x": 1303.9261934543886,
+            "y": 938.599390876658
+          },
+          "labelBounds": {
+            "left": 1357.9261934543886,
+            "right": 1518.9261934543886,
+            "top": 901.599390876658,
+            "bottom": 935.599390876658
+          },
+          "leader": [
+            {
+              "x": 1303.9261934543886,
+              "y": 938.599390876658
+            },
+            {
+              "x": 1327.9261934543886,
+              "y": 938.599390876658
+            },
+            {
+              "x": 1349.9261934543886,
+              "y": 938.599390876658
+            },
+            {
+              "x": 1518.9261934543886,
+              "y": 938.599390876658
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        }
+      ]
+    }
+  },
+  {
+    "file": "2560x1440-dark-04-early-convergence.png",
+    "progress": 0.38,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.3600062429904938,
+      "elevation": 0.13999974727630615,
+      "distance": 59.8214111328125,
+      "target": [
+        0,
+        4.274707254836585e-10,
+        2.7032603933108135e-10
+      ],
+      "eye": [
+        -20.867704391479492,
+        8.347651481628418,
+        55.43876647949219
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.183077910272532,
+      "right": 0.18609390325140376,
+      "bottom": -0.5665113751821018,
+      "top": 0.5170289321286541,
+      "heightFraction": 0.541770153655378,
+      "widthFraction": 0.1845859067619679,
+      "nearest": 54.85948218814937,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.235710988251682,
+      "pixelCount": 1993224,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "2560x1440-dark-05-mid-convergence.png",
+    "progress": 0.46,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.41650110483169556,
+      "elevation": 0.15883371233940125,
+      "distance": 60.62708282470703,
+      "target": [
+        0,
+        4.7227396011940634e-14,
+        2.986589382920901e-14
+      ],
+      "eye": [
+        -24.21874237060547,
+        9.58918571472168,
+        54.74617004394531
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.19002462310020082,
+      "right": 0.19025092048259437,
+      "bottom": -0.5615416785046781,
+      "top": 0.5157218080710079,
+      "heightFraction": 0.5386317432878429,
+      "widthFraction": 0.1901377717913976,
+      "nearest": 55.483506818860945,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 18.533648800398627,
+      "pixelCount": 1993224,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "2560x1440-dark-06-compute-insertion.png",
+    "progress": 0.55,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.7050700783729553,
+      "elevation": 0.2550715506076813,
+      "distance": 16.088916778564453,
+      "target": [
+        0,
+        4.649963855743408,
+        2.9405689239501953
+      ],
+      "eye": [
+        -10.0896577835083,
+        8.709433555603027,
+        14.796907424926758
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -1.045785134866576,
+      "right": 0.3835845596525861,
+      "bottom": -2.789420103064386,
+      "top": 0.8509471286749084,
+      "heightFraction": 1.8201836158696474,
+      "widthFraction": 0.714684847259581,
+      "nearest": 13.584985579786244,
+      "clipped": true
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.099470666159057,
+      "pixelCount": 1993224,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "2560x1440-dark-09-engineering-exploded.png",
+    "progress": 0.84,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.6000011563301086,
+      "elevation": 0.13000132143497467,
+      "distance": 47.4344596862793,
+      "target": [
+        0,
+        0.00004985126361134462,
+        0.000031525210943073034
+      ],
+      "eye": [
+        -26.55754852294922,
+        6.149237632751465,
+        38.81899642944336
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.27260735465525554,
+      "right": 0.26559707856670384,
+      "bottom": -0.7257622749597605,
+      "top": 0.6647512239486006,
+      "heightFraction": 0.6952567494541806,
+      "widthFraction": 0.26910221661097966,
+      "nearest": 42.42866089752368,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.976717993060888,
+      "pixelCount": 1993224,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "2560x1440-dark-11-final-hero.png",
+    "progress": 1,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.4799966514110565,
+      "elevation": 0.08500093966722488,
+      "distance": 43.43838119506836,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -19.986391067504883,
+        3.6878585815429688,
+        38.39058303833008
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.2724205376399854,
+      "right": 0.27653541653294905,
+      "bottom": -0.7899937382496267,
+      "top": 0.7493438996967511,
+      "heightFraction": 0.7696688189731888,
+      "widthFraction": 0.27447797708646726,
+      "nearest": 38.79112470935308,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.249038453692144,
+      "pixelCount": 1993224,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 48,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "2560x1440-light-03-identification.png",
+    "progress": 0.27,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.32000333070755005,
+      "elevation": 0.129999041557312,
+      "distance": 59.09364700317383,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -18.432218551635742,
+        7.660498142242432,
+        55.62040328979492
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.1782921597255653,
+      "right": 0.18329168683772049,
+      "bottom": -0.5719065013090432,
+      "top": 0.5214342302836613,
+      "heightFraction": 0.5466703657963523,
+      "widthFraction": 0.1807919232816429,
+      "nearest": 54.24494754611615,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.677522610860148,
+      "pixelCount": 1993224,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": true,
+      "width": 1566.6015625,
+      "height": 1272,
+      "compact": false,
+      "labels": [
+        {
+          "type": "switch",
+          "name": "editorial-switch-1",
+          "count": 2,
+          "label": "NETWORK SWITCH",
+          "anchor": {
+            "x": 552.2525195357656,
+            "y": 332.1001399480778
+          },
+          "labelBounds": {
+            "left": 334.2525195357656,
+            "right": 498.2525195357656,
+            "top": 295.1001399480778,
+            "bottom": 329.1001399480778
+          },
+          "leader": [
+            {
+              "x": 552.2525195357656,
+              "y": 332.1001399480778
+            },
+            {
+              "x": 528.2525195357656,
+              "y": 332.1001399480778
+            },
+            {
+              "x": 506.2525195357656,
+              "y": 332.1001399480778
+            },
+            {
+              "x": 334.2525195357656,
+              "y": 332.1001399480778
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "server",
+          "name": "editorial-compute-01",
+          "count": 18,
+          "label": "COMPUTE TRAY",
+          "anchor": {
+            "x": 510.236191075245,
+            "y": 429.30119695258185
+          },
+          "labelBounds": {
+            "left": 312.236191075245,
+            "right": 456.236191075245,
+            "top": 392.30119695258185,
+            "bottom": 426.30119695258185
+          },
+          "leader": [
+            {
+              "x": 510.236191075245,
+              "y": 429.30119695258185
+            },
+            {
+              "x": 486.236191075245,
+              "y": 429.30119695258185
+            },
+            {
+              "x": 464.236191075245,
+              "y": 429.30119695258185
+            },
+            {
+              "x": 312.236191075245,
+              "y": 429.30119695258185
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "nvlink",
+          "name": "editorial-nvlink-01",
+          "count": 9,
+          "label": "NVLINK SWITCH TRAY",
+          "anchor": {
+            "x": 1150.8259004332576,
+            "y": 540.4202643776025
+          },
+          "labelBounds": {
+            "left": 1349.4338470040025,
+            "right": 1520.4338470040025,
+            "top": 503.4202643776025,
+            "bottom": 537.4202643776025
+          },
+          "leader": [
+            {
+              "x": 1150.8259004332576,
+              "y": 540.4202643776025
+            },
+            {
+              "x": 1319.4338470040025,
+              "y": 540.4202643776025
+            },
+            {
+              "x": 1341.4338470040025,
+              "y": 540.4202643776025
+            },
+            {
+              "x": 1520.4338470040025,
+              "y": 540.4202643776025
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "powershelf",
+          "name": "editorial-power-8",
+          "count": 8,
+          "label": "POWER SHELF",
+          "anchor": {
+            "x": 1303.9262333706015,
+            "y": 938.5994140768734
+          },
+          "labelBounds": {
+            "left": 1357.9262333706015,
+            "right": 1518.9262333706015,
+            "top": 901.5994140768734,
+            "bottom": 935.5994140768734
+          },
+          "leader": [
+            {
+              "x": 1303.9262333706015,
+              "y": 938.5994140768734
+            },
+            {
+              "x": 1327.9262333706015,
+              "y": 938.5994140768734
+            },
+            {
+              "x": 1349.9262333706015,
+              "y": 938.5994140768734
+            },
+            {
+              "x": 1518.9262333706015,
+              "y": 938.5994140768734
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        }
+      ]
+    }
+  },
+  {
+    "file": "2560x1440-light-04-early-convergence.png",
+    "progress": 0.38,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.3600062429904938,
+      "elevation": 0.13999974727630615,
+      "distance": 59.8214111328125,
+      "target": [
+        0,
+        4.274716136620782e-10,
+        2.7032676097604735e-10
+      ],
+      "eye": [
+        -20.867704391479492,
+        8.347651481628418,
+        55.43876647949219
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.183077910272532,
+      "right": 0.18609390325140376,
+      "bottom": -0.5665113751821018,
+      "top": 0.5170289321286541,
+      "heightFraction": 0.541770153655378,
+      "widthFraction": 0.1845859067619679,
+      "nearest": 54.85948218814937,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.41358289809758,
+      "pixelCount": 1993224,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "2560x1440-light-05-mid-convergence.png",
+    "progress": 0.46,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.41650107502937317,
+      "elevation": 0.15883369743824005,
+      "distance": 60.6270866394043,
+      "target": [
+        0,
+        9.977271389443026e-15,
+        6.309478967395608e-15
+      ],
+      "eye": [
+        -24.21874237060547,
+        9.58918571472168,
+        54.74617385864258
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.19002460241158847,
+      "right": 0.19025090140302175,
+      "bottom": -0.5615416427491675,
+      "top": 0.5157217739169765,
+      "heightFraction": 0.5386317083330721,
+      "widthFraction": 0.1901377519073051,
+      "nearest": 55.48351061952132,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 18.107529889493197,
+      "pixelCount": 1993224,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "2560x1440-light-06-compute-insertion.png",
+    "progress": 0.55,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.7050700783729553,
+      "elevation": 0.2550715506076813,
+      "distance": 16.088916778564453,
+      "target": [
+        0,
+        4.649964809417725,
+        2.9405689239501953
+      ],
+      "eye": [
+        -10.0896577835083,
+        8.709434509277344,
+        14.796907424926758
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -1.045785029879062,
+      "right": 0.3835845151621545,
+      "bottom": -2.789420017090877,
+      "top": 0.8509468799082955,
+      "heightFraction": 1.8201834484995862,
+      "widthFraction": 0.7146847725206082,
+      "nearest": 13.584987487134876,
+      "clipped": true
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.283381367147236,
+      "pixelCount": 1993224,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "2560x1440-light-09-engineering-exploded.png",
+    "progress": 0.84,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.6000011563301086,
+      "elevation": 0.13000132143497467,
+      "distance": 47.43446350097656,
+      "target": [
+        0,
+        0.000049784786824602634,
+        0.00003148314863210544
+      ],
+      "eye": [
+        -26.55755043029785,
+        6.149238109588623,
+        38.819000244140625
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.2726073316290635,
+      "right": 0.2655970577211248,
+      "bottom": -0.7257622057304507,
+      "top": 0.6647511714523274,
+      "heightFraction": 0.6952566885913891,
+      "widthFraction": 0.2691021946750941,
+      "nearest": 42.42866471222094,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.3920846947517,
+      "pixelCount": 1993224,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "2560x1440-light-11-final-hero.png",
+    "progress": 1,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.4799966514110565,
+      "elevation": 0.08500093221664429,
+      "distance": 43.43838119506836,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -19.986391067504883,
+        3.6878583431243896,
+        38.39058303833008
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.27242053729082966,
+      "right": 0.2765354161404221,
+      "bottom": -0.7899937369223581,
+      "top": 0.7493439011285522,
+      "heightFraction": 0.7696688190254551,
+      "widthFraction": 0.2744779767156259,
+      "nearest": 38.7911247673931,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.137657169343456,
+      "pixelCount": 1993224,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 48,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "3440x1440-dark-03-identification.png",
+    "progress": 0.27,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.32000330090522766,
+      "elevation": 0.129999041557312,
+      "distance": 59.09364700317383,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -18.43221664428711,
+        7.660498142242432,
+        55.62040328979492
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.1313634377676891,
+      "right": 0.1350470278050164,
+      "bottom": -0.5719065000145004,
+      "top": 0.5214342302568119,
+      "heightFraction": 0.5466703651356561,
+      "widthFraction": 0.13320523278635277,
+      "nearest": 54.244947614065445,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.676527076866375,
+      "pixelCount": 2599995,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": true,
+      "width": 2126.59375,
+      "height": 1272,
+      "compact": false,
+      "labels": [
+        {
+          "type": "switch",
+          "name": "editorial-switch-1",
+          "count": 2,
+          "label": "NETWORK SWITCH",
+          "anchor": {
+            "x": 832.2123007088906,
+            "y": 332.1001399480778
+          },
+          "labelBounds": {
+            "left": 614.2123007088906,
+            "right": 778.2123007088906,
+            "top": 295.1001399480778,
+            "bottom": 329.1001399480778
+          },
+          "leader": [
+            {
+              "x": 832.2123007088906,
+              "y": 332.1001399480778
+            },
+            {
+              "x": 808.2123007088906,
+              "y": 332.1001399480778
+            },
+            {
+              "x": 786.2123007088906,
+              "y": 332.1001399480778
+            },
+            {
+              "x": 614.2123007088906,
+              "y": 332.1001399480778
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "server",
+          "name": "editorial-compute-01",
+          "count": 18,
+          "label": "COMPUTE TRAY",
+          "anchor": {
+            "x": 790.1893715122488,
+            "y": 429.30119695258185
+          },
+          "labelBounds": {
+            "left": 592.1893715122488,
+            "right": 736.1893715122488,
+            "top": 392.30119695258185,
+            "bottom": 426.30119695258185
+          },
+          "leader": [
+            {
+              "x": 790.1893715122488,
+              "y": 429.30119695258185
+            },
+            {
+              "x": 766.1893715122488,
+              "y": 429.30119695258185
+            },
+            {
+              "x": 744.1893715122488,
+              "y": 429.30119695258185
+            },
+            {
+              "x": 592.1893715122488,
+              "y": 429.30119695258185
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "nvlink",
+          "name": "editorial-nvlink-01",
+          "count": 9,
+          "label": "NVLINK SWITCH TRAY",
+          "anchor": {
+            "x": 1430.8797481101092,
+            "y": 540.4202643776025
+          },
+          "labelBounds": {
+            "left": 1629.5104163592896,
+            "right": 1800.5104163592896,
+            "top": 503.4202643776025,
+            "bottom": 537.4202643776025
+          },
+          "leader": [
+            {
+              "x": 1430.8797481101092,
+              "y": 540.4202643776025
+            },
+            {
+              "x": 1599.5104163592896,
+              "y": 540.4202643776025
+            },
+            {
+              "x": 1621.5104163592896,
+              "y": 540.4202643776025
+            },
+            {
+              "x": 1800.5104163592896,
+              "y": 540.4202643776025
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "powershelf",
+          "name": "editorial-power-8",
+          "count": 8,
+          "label": "POWER SHELF",
+          "anchor": {
+            "x": 1584.004136481446,
+            "y": 938.5994140768734
+          },
+          "labelBounds": {
+            "left": 1638.004136481446,
+            "right": 1799.004136481446,
+            "top": 901.5994140768734,
+            "bottom": 935.5994140768734
+          },
+          "leader": [
+            {
+              "x": 1584.004136481446,
+              "y": 938.5994140768734
+            },
+            {
+              "x": 1608.004136481446,
+              "y": 938.5994140768734
+            },
+            {
+              "x": 1630.004136481446,
+              "y": 938.5994140768734
+            },
+            {
+              "x": 1799.004136481446,
+              "y": 938.5994140768734
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        }
+      ]
+    }
+  },
+  {
+    "file": "3440x1440-dark-04-early-convergence.png",
+    "progress": 0.38,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.3600062429904938,
+      "elevation": 0.13999974727630615,
+      "distance": 59.8214111328125,
+      "target": [
+        0,
+        7.213599856337183e-11,
+        4.561772487532423e-11
+      ],
+      "eye": [
+        -20.867704391479492,
+        8.347651481628418,
+        55.43876647949219
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.1348895167243892,
+      "right": 0.13711166248475512,
+      "bottom": -0.5665113751599552,
+      "top": 0.5170289321486208,
+      "heightFraction": 0.541770153654288,
+      "widthFraction": 0.13600058960457218,
+      "nearest": 54.85948218814937,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.243001858032947,
+      "pixelCount": 2599995,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "3440x1440-dark-05-mid-convergence.png",
+    "progress": 0.46,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.41650113463401794,
+      "elevation": 0.15883369743824005,
+      "distance": 60.62708282470703,
+      "target": [
+        0,
+        9.950688954459344e-15,
+        6.292667057458505e-15
+      ],
+      "eye": [
+        -24.2187442779541,
+        9.589184761047363,
+        54.74617004394531
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.14000778135564243,
+      "right": 0.14017451390315525,
+      "bottom": -0.5615416756958779,
+      "top": 0.5157218017727622,
+      "heightFraction": 0.53863173873432,
+      "widthFraction": 0.14009114762939884,
+      "nearest": 55.48350686699169,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 19.107600855328105,
+      "pixelCount": 2599995,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "3440x1440-dark-06-compute-insertion.png",
+    "progress": 0.55,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.7050700783729553,
+      "elevation": 0.2550715208053589,
+      "distance": 15.800344467163086,
+      "target": [
+        0,
+        4.649964809417725,
+        2.9405689239501953
+      ],
+      "eye": [
+        -9.90868854522705,
+        8.636622428894043,
+        14.584251403808594
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.7824051478007218,
+      "right": 0.2876683654905141,
+      "bottom": -2.8361519795926418,
+      "top": 0.8623310089938157,
+      "heightFraction": 1.8492414942932287,
+      "widthFraction": 0.535036756645618,
+      "nearest": 13.296413732705059,
+      "clipped": true
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.30498790939797,
+      "pixelCount": 2599995,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "3440x1440-dark-09-engineering-exploded.png",
+    "progress": 0.84,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.6000011563301086,
+      "elevation": 0.13000133633613586,
+      "distance": 47.4344596862793,
+      "target": [
+        0,
+        0.000049851256335387006,
+        0.00003152521458105184
+      ],
+      "eye": [
+        -26.55754852294922,
+        6.149238109588623,
+        38.81899642944336
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.20085370549663037,
+      "right": 0.19568862127220196,
+      "bottom": -0.7257622752942176,
+      "top": 0.6647512234338623,
+      "heightFraction": 0.6952567493640399,
+      "widthFraction": 0.19827116338441617,
+      "nearest": 42.42866078144363,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.057388086811248,
+      "pixelCount": 2599995,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "3440x1440-dark-11-final-hero.png",
+    "progress": 1,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.4799966514110565,
+      "elevation": 0.08500093966722488,
+      "distance": 43.43838119506836,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -19.986391067504883,
+        3.6878585815429688,
+        38.39058303833008
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.20071606088516192,
+      "right": 0.20374785304419624,
+      "bottom": -0.7899937382496267,
+      "top": 0.7493438996967511,
+      "heightFraction": 0.7696688189731888,
+      "widthFraction": 0.20223195696467908,
+      "nearest": 38.79112470935308,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.509942280119805,
+      "pixelCount": 2599995,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 48,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "3440x1440-light-03-identification.png",
+    "progress": 0.27,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.32000333070755005,
+      "elevation": 0.129999041557312,
+      "distance": 59.09364700317383,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -18.432218551635742,
+        7.660498142242432,
+        55.62040328979492
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.1313634418352928,
+      "right": 0.13504703119821018,
+      "bottom": -0.5719065013090432,
+      "top": 0.5214342302836613,
+      "heightFraction": 0.5466703657963523,
+      "widthFraction": 0.13320523651675148,
+      "nearest": 54.24494754611615,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.699143268620563,
+      "pixelCount": 2599995,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": true,
+      "width": 2126.59375,
+      "height": 1272,
+      "compact": false,
+      "labels": [
+        {
+          "type": "switch",
+          "name": "editorial-switch-1",
+          "count": 2,
+          "label": "NETWORK SWITCH",
+          "anchor": {
+            "x": 832.2123228912665,
+            "y": 332.0999115474017
+          },
+          "labelBounds": {
+            "left": 614.2123228912665,
+            "right": 778.2123228912665,
+            "top": 295.0999115474017,
+            "bottom": 329.0999115474017
+          },
+          "leader": [
+            {
+              "x": 832.2123228912665,
+              "y": 332.0999115474017
+            },
+            {
+              "x": 808.2123228912665,
+              "y": 332.0999115474017
+            },
+            {
+              "x": 786.2123228912665,
+              "y": 332.0999115474017
+            },
+            {
+              "x": 614.2123228912665,
+              "y": 332.0999115474017
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "server",
+          "name": "editorial-compute-01",
+          "count": 18,
+          "label": "COMPUTE TRAY",
+          "anchor": {
+            "x": 790.1893013789845,
+            "y": 429.3010593836464
+          },
+          "labelBounds": {
+            "left": 592.1893013789845,
+            "right": 736.1893013789845,
+            "top": 392.3010593836464,
+            "bottom": 426.3010593836464
+          },
+          "leader": [
+            {
+              "x": 790.1893013789845,
+              "y": 429.3010593836464
+            },
+            {
+              "x": 766.1893013789845,
+              "y": 429.3010593836464
+            },
+            {
+              "x": 744.1893013789845,
+              "y": 429.3010593836464
+            },
+            {
+              "x": 592.1893013789845,
+              "y": 429.3010593836464
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "nvlink",
+          "name": "editorial-nvlink-01",
+          "count": 9,
+          "label": "NVLINK SWITCH TRAY",
+          "anchor": {
+            "x": 1430.8799648184738,
+            "y": 540.4201952630998
+          },
+          "labelBounds": {
+            "left": 1629.5108400247063,
+            "right": 1800.5108400247063,
+            "top": 503.4201952630998,
+            "bottom": 537.4201952630998
+          },
+          "leader": [
+            {
+              "x": 1430.8799648184738,
+              "y": 540.4201952630998
+            },
+            {
+              "x": 1599.5108400247063,
+              "y": 540.4201952630998
+            },
+            {
+              "x": 1621.5108400247063,
+              "y": 540.4201952630998
+            },
+            {
+              "x": 1800.5108400247063,
+              "y": 540.4201952630998
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        },
+        {
+          "type": "powershelf",
+          "name": "editorial-power-8",
+          "count": 8,
+          "label": "POWER SHELF",
+          "anchor": {
+            "x": 1584.0046071549605,
+            "y": 938.5995254695924
+          },
+          "labelBounds": {
+            "left": 1638.0046071549605,
+            "right": 1799.0046071549605,
+            "top": 901.5995254695924,
+            "bottom": 935.5995254695924
+          },
+          "leader": [
+            {
+              "x": 1584.0046071549605,
+              "y": 938.5995254695924
+            },
+            {
+              "x": 1608.0046071549605,
+              "y": 938.5995254695924
+            },
+            {
+              "x": 1630.0046071549605,
+              "y": 938.5995254695924
+            },
+            {
+              "x": 1799.0046071549605,
+              "y": 938.5995254695924
+            }
+          ],
+          "leaderVisible": true,
+          "primaryOpacity": 1,
+          "secondaryOpacity": 1
+        }
+      ]
+    }
+  },
+  {
+    "file": "3440x1440-light-04-early-convergence.png",
+    "progress": 0.38,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.3600062429904938,
+      "elevation": 0.13999974727630615,
+      "distance": 59.821407318115234,
+      "target": [
+        0,
+        8.07389988199958e-11,
+        5.105812994621317e-11
+      ],
+      "eye": [
+        -20.867704391479492,
+        8.347650527954102,
+        55.43876266479492
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.13488952481460428,
+      "right": 0.13711167146823866,
+      "bottom": -0.5665114113269986,
+      "top": 0.5170289591232764,
+      "heightFraction": 0.5417701852251375,
+      "widthFraction": 0.13600059814142146,
+      "nearest": 54.85947848953215,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.182018214598227,
+      "pixelCount": 2599995,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 44,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "3440x1440-light-05-mid-convergence.png",
+    "progress": 0.46,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.41650110483169556,
+      "elevation": 0.15883371233940125,
+      "distance": 60.62708282470703,
+      "target": [
+        0,
+        1.1137416841913456e-14,
+        7.0431352841105e-15
+      ],
+      "eye": [
+        -24.21874237060547,
+        9.58918571472168,
+        54.74617004394531
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.1400076661502614,
+      "right": 0.1401743995626807,
+      "bottom": -0.5615416785046757,
+      "top": 0.51572180807101,
+      "heightFraction": 0.5386317432878429,
+      "widthFraction": 0.14009103285647106,
+      "nearest": 55.483506818860945,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 0.9,
+      "frameMs": 20.16159024656607,
+      "pixelCount": 2104872,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "3440x1440-light-06-compute-insertion.png",
+    "progress": 0.55,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.7050700783729553,
+      "elevation": 0.2550715208053589,
+      "distance": 15.800345420837402,
+      "target": [
+        0,
+        4.649963855743408,
+        2.940568685531616
+      ],
+      "eye": [
+        -9.90868854522705,
+        8.636621475219727,
+        14.584251403808594
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.7827188316243155,
+      "right": 0.28778376124803906,
+      "bottom": -2.836151813495056,
+      "top": 0.8623311416311527,
+      "heightFraction": 1.8492414775631043,
+      "widthFraction": 0.5352512964361773,
+      "nearest": 13.296413732705059,
+      "clipped": true
+    },
+    "quality": {
+      "resolution": 0.8,
+      "frameMs": 17.123555498148036,
+      "pixelCount": 1664664,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "3440x1440-light-09-engineering-exploded.png",
+    "progress": 0.84,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.6000011563301086,
+      "elevation": 0.13000133633613586,
+      "distance": 47.4344596862793,
+      "target": [
+        0,
+        0.00004978474316885695,
+        0.0000314831268042326
+      ],
+      "eye": [
+        -26.55754852294922,
+        6.149238109588623,
+        38.81899642944336
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.2009455611305793,
+      "right": 0.19577811677584467,
+      "bottom": -0.7257622698796988,
+      "top": 0.6647512291059615,
+      "heightFraction": 0.6952567494928301,
+      "widthFraction": 0.19836183895321197,
+      "nearest": 42.42866078144363,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 0.7000000000000001,
+      "frameMs": 17.651232516396842,
+      "pixelCount": 1273707,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 47,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  },
+  {
+    "file": "3440x1440-light-11-final-hero.png",
+    "progress": 1,
+    "view": "authored",
+    "camera": {
+      "yaw": -0.4799966514110565,
+      "elevation": 0.08500093966722488,
+      "distance": 43.43838119506836,
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "eye": [
+        -19.986391067504883,
+        3.6878585815429688,
+        38.39058303833008
+      ],
+      "fov": 0.5,
+      "view": "authored"
+    },
+    "bounds": {
+      "left": -0.20071606088516192,
+      "right": 0.20374785304419624,
+      "bottom": -0.7899937382496267,
+      "top": 0.7493438996967511,
+      "heightFraction": 0.7696688189731888,
+      "widthFraction": 0.20223195696467908,
+      "nearest": 38.79112470935308,
+      "clipped": false
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 17.791180062637316,
+      "pixelCount": 2599995,
+      "adaptive": true
+    },
+    "vertices": 1118502,
+    "drawCalls": 48,
+    "callouts": {
+      "visible": false,
+      "labels": []
+    }
+  }
+]

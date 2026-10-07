@@ -1,0 +1,11 @@
+{
+  "identical_test_outcomes": true,
+  "xml_testcase_count": 442,
+  "changes": {},
+  "xml_counts": {
+    "passed": 270,
+    "failure": 171,
+    "error": 1,
+    "skipped": 0
+  }
+}

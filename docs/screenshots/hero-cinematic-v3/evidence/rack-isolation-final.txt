@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "checks": [
+    "Original 36 components, 48U placement and external CDU remain intact; Overview callouts are isolated",
+    "Perspective/front/rear and both themes preserve exact geometry and compile/render without WebGL errors",
+    "Liquid-flow pause/resume, saved cabling hide/show, zoom and reset retain behavior",
+    "Device focus, expanded Escape, route disposal/re-entry and reduced-motion cooling are unchanged"
+  ]
+}

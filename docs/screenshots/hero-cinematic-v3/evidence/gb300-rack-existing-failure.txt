@@ -1,0 +1,13 @@
+AssertionError [ERR_ASSERTION]: 位置／類型
+
+0 !== 1
+
+    at localizedRack (C:\Users\kobei\Documents\Codex\2026-10-07\pa-cycle-lab-branch-codex-hero\app\qa\gb300-rack.cjs:23:205)
+    at async C:\Users\kobei\Documents\Codex\2026-10-07\pa-cycle-lab-branch-codex-hero\app\qa\gb300-rack.cjs:31:3 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 0,
+  expected: 1,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
