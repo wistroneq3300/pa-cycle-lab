@@ -505,7 +505,17 @@ async def boundary(request:Request,call_next):
     route_category=category(request.method,path)
     if path.startswith('/api/') and '/cycle/' not in path and not path.startswith('/api/cycle/'):
         try:
-            body=await request.json() if request.method in {'POST','PATCH','PUT','DELETE'} and await request.body() else {}
+            ct=(request.headers.get('content-type') or '').lower()
+            has_body=request.method in {'POST','PATCH','PUT','DELETE'} and await request.body()
+            # Non-JSON bodies (e.g. an attachment upload streamed as
+            # application/octet-stream) must not be forced through JSON parsing,
+            # or the upload is rejected with 422 "Invalid request body" before it
+            # reaches its route. Such routes still run project_access.check with an
+            # empty body; their own handling reads the raw stream.
+            if has_body and 'application/json' not in ct:
+                body={}
+            else:
+                body=await request.json() if has_body else {}
             project_access.check(request,pa,body)
         except HTTPException as exc: return JSONResponse({'detail':exc.detail},exc.status_code)
         except ValueError: return JSONResponse({'detail':'Invalid request body'},422)

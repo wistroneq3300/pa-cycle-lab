@@ -423,3 +423,32 @@ Changing one layer is not enough; grep ALL of `app/static/js/*.js` for the strin
   browsers off a stale copy; restarting the service alone is NOT enough.
 - Full deploy = edit files + bump `?v=` + `systemctl restart pa-manager-6969-web.service`.
 - E2E: `tests/pa-agent-drawer-e2e.cjs` (mock backend via page.route; currently 22/22).
+
+### ★ Test Case → PA Agent (2026-10-07 fixes)
+- The reviewed **automation classification** lives ONLY under
+  `ai_review.automation_classification` (surfaced into the run snapshot as
+  `testcase.ai_automation_classification`). Library rows have NO
+  `category`/`manual_only`/`mode` fields — never gate policy on those.
+  Gateway `_classification()` maps it to MANUAL_ONLY / FULLY_AUTOMATABLE /
+  REQUIRES_CONFIRMATION / BLOCKED and the instruction follows it (backend-side).
+- **Intent is state-aware** (`classify_user_intent`): a bare approval token →
+  `go`; a negation/interrogative turn that merely names a rerun verb
+  ("不要重跑", "為什麼要重跑", "重新說明一下") stays `question`. GO while RUNNING is
+  ignored. Non-approval turns are recorded as **supplemental plan revisions**
+  (`agent_run_supplemental`) and answered via the no-loop `ask_agent`; GO/rerun
+  re-inject the LATEST revision so a mid-discussion constraint reaches execution.
+- **Dedup**: command/evidence keyed by source event id in
+  `agent_run_ingested_events`; finish message deduped by event id.
+- **Attachments**: POST `/api/agent/runs/{id}/attachments` (raw body, NOT JSON —
+  the API middleware must not force JSON parsing on non-json content types, see
+  `integration/web.py`). Blobs under `/srv/pa-agent/attachments/<run_id>/`
+  (`PA_AGENT_ATTACHMENTS_DIR`), metadata + extracted text in SQLite. Drag-drop /
+  paste / 📎 in the drawer. Images stored but flagged not-vision-parsable.
+- **Retention**: `PA_AGENT_RETENTION_DAYS` (default 7). POST
+  `/api/agent/maintenance/purge` deletes settled runs past the window + blobs.
+  In-flight runs (RUNNING/WAITING_FOR_USER/PENDING) are never purged.
+- **Close ≠ cancel**: reopening a Test Case hits GET `/api/agent/active` and
+  resumes the same run.
+- These files are in `RUNTIME_ENGINE_FILES.json`, so editing them changes
+  `engine_hash()` (Cycle jobs created before the change fail their check by design).
+- Tests: `tests/test_pa_agent_fixes.py` + the route/gateway/runs suites.

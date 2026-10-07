@@ -143,8 +143,13 @@
   let root = null;
   let state = {
     runId: null, run: null, renderedSeq: 0, context: null,
-    timer: null, polling: false, started: false,
+    timer: null, polling: false, started: false, mode: "plan",
+    sending: false, lastSync: 0, stickBottom: true,
   };
+
+  // Enter 送出與「送出」按鈕共用一個 in-flight 守門，避免連點造成重複送出。
+  function beginSend() { if (state.sending) return false; state.sending = true; return true; }
+  function endSend() { state.sending = false; }
 
   // ---------- 根節點 ----------
   function ensureRoot() {
@@ -178,12 +183,17 @@
             <div id="pa-drawer-case" class="pa-drawer-case"></div>
           </section>
           <section class="pa-drawer-right">
+            <div id="pa-summary" class="pa-summary" aria-live="polite"></div>
             <div id="pa-drawer-body" class="pa-drawer-body" aria-live="polite"></div>
+            <div id="pa-attach-strip" class="pa-attach-strip" hidden></div>
             <footer class="pa-drawer-foot">
               <div id="pa-approval" class="pa-approval-slot" hidden></div>
+              <div id="pa-drop-hint" class="pa-drop-hint">放開以加入附件</div>
               <div class="pa-input-wrap">
-                <button type="button" id="pa-attach" class="pa-attach" disabled
-                  title="附件功能建置中（PDF / TXT / LOG / SPEC / SOP）" aria-label="附件">📎</button>
+                <button type="button" id="pa-attach" class="pa-attach"
+                  title="加入附件（點選、拖曳或貼上圖片）" aria-label="附件">📎</button>
+                <input type="file" id="pa-attach-input" multiple hidden
+                  accept=".png,.jpg,.jpeg,.webp,.txt,.log,.pdf,.json,.csv,.md">
                 <textarea id="pa-msg-input" class="pa-msg-input" rows="1"
                   placeholder="與 PA Agent 對話；同意開始請輸入 OK 或 GO"
                   aria-label="訊息輸入"></textarea>
@@ -191,6 +201,7 @@
               </div>
               <div class="pa-foot-hint" id="pa-drawer-hint">
                 Enter 送出 · Shift+Enter 換行。PA Agent 會先說明計畫並等待你同意，輸入 OK / GO 送出後才開始執行。
+                <span id="pa-sync" class="pa-sync"></span>
               </div>
             </footer>
           </section>
@@ -200,13 +211,14 @@
     root.querySelector("#pa-drawer-close").addEventListener("click", close);
     root.querySelector(".pa-drawer-scrim").addEventListener("click", close);
     wireInput();
+    wireAttachments();
     document.addEventListener("keydown", onKey);
     return root;
   }
   function onKey(e) { if (e.key === "Escape") close(); }
 
   // ---------- 對外 API ----------
-  function open(context = {}) {
+  async function open(context = {}) {
     // context: { case_variant_id, node_id?, expected_binding_revision?, branch?, title?, task?, rich?, mode? }
     state.context = context || {};
     state.mode = context.mode === "execute" ? "execute" : "plan";
@@ -218,11 +230,46 @@
     setApproval(null);
     renderLeftPanel();
     setStatus("PENDING");
-    if (state.context.case_variant_id) {
-      createRun();
-    } else {
+    if (!state.context.case_variant_id) {
       setStatus("ERROR");
       body().innerHTML = `<div class="pa-empty">未提供 case_variant_id，無法建立 AgentRun。請從指派結果視窗以該用例開啟。</div>`;
+      return;
+    }
+    // P1-5：關閉抽屜 ≠ 結束任務。重新開啟同一 Test Case 時，先找進行中的 run，
+    //   找到就接回同一個對話（狀態／訊息／證據），找不到才建立新的。
+    try {
+      const resumed = await resumeRun();
+      if (resumed) return;
+    } catch (e) { /* 找不到 active run 就照常建立新的 */ }
+    createRun();
+  }
+  async function resumeRun() {
+    const c = state.context || {};
+    const q = new URLSearchParams({ case_variant_id: c.case_variant_id || "" });
+    if (c.node_id) q.set("node_id", c.node_id);
+    const res = await fetch(`${API}/active?${q.toString()}`);
+    if (!res.ok) return false;
+    const d = await res.json().catch(() => ({}));
+    const run = d?.run;
+    if (!run || !run.run_id) return false;
+    state.runId = run.run_id;
+    state.run = run;
+    state.renderedSeq = 0;
+    renderActivity(state.run);
+    renderAttachmentStrip(state.run.attachments || []);
+    await loadHistory();
+    setStatus(state.run.status || "PENDING");
+    applyRunStatus(state.run);
+    if (!TERMINAL.has(state.run.status || "")) beginPolling();
+    return true;
+  }
+  async function loadHistory() {
+    const res = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/messages?limit=500`);
+    const d = await res.json().catch(() => ({}));
+    body().innerHTML = "";
+    renderSystemIntro();
+    for (const m of d.messages || []) {
+      if (m.seq > state.renderedSeq) { state.renderedSeq = m.seq; addMessage(m); }
     }
   }
   function close() {
@@ -247,10 +294,18 @@
     if (rich) parts.push(`<div class="pa-case-rich eng-case-detail-wrap">${rich}</div>`);
     else if (text) parts.push(`<pre class="pa-case-text">${esc(text)}</pre>`);
     else parts.push(`<div class="pa-case-empty">（無測試任務內容）</div>`);
-    // 參考文件（SPEC / SOP / 附件）：後端尚未支援上傳，誠實標示。
+    // 參考文件（SPEC / SOP / 附件）：可由右側拖曳／貼上加入；此處顯示目前附件清單。
+    const atts = (state.run && state.run.attachments) || state._attachments || [];
+    const attHtml = atts.length
+      ? `<ul class="pa-ref-list">${atts.map(a =>
+          `<li><span class="pa-ref-name">${esc(a.name)}</span>` +
+          `<span class="pa-ref-size">${fmtSize(a.size)}</span>` +
+          (a.kind === "image" && !a.vision_supported ? `<span class="pa-ref-warn">目前模型無法解析</span>` : "") +
+          `</li>`).join("")}</ul>`
+      : `<div class="pa-refs-empty">尚無附件。可直接把檔案拖進右側對話、貼上圖片，或按 📎 加入 SPEC / SOP / LOG。</div>`;
     parts.push(`<section class="pa-task-refs">
       <h4>參考文件</h4>
-      <div class="pa-refs-empty">目前沒有附件。SPEC / SOP / LOG 上傳功能建置中。</div>
+      ${attHtml}
     </section>`);
     left.innerHTML = parts.join("");
   }
@@ -269,7 +324,14 @@
 
   // ---------- 右欄：訊息渲染 ----------
   function body() { return root.querySelector("#pa-drawer-body"); }
+  function fmtSize(n) {
+    const b = Number(n || 0);
+    if (b < 1024) return b + " B";
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + " KB";
+    return (b / 1024 / 1024).toFixed(1) + " MB";
+  }
   function scrollBottom() {
+    if (!state.stickBottom) return;
     const b = body();
     requestAnimationFrame(() => { b.scrollTop = b.scrollHeight; });
   }
@@ -279,6 +341,61 @@
     if (el) el.className = "pa-drawer-status pa-status-" + meta.tone;
     const t = root.querySelector("#pa-drawer-status-text");
     if (t) t.textContent = meta.label;
+  }
+
+  // 頂部摘要列：Test Case / Project / Node / 狀態 / 時間 / 最後同步（P2）。
+  function renderSummary(run) {
+    const box = root?.querySelector("#pa-summary");
+    if (!box) return;
+    const c = state.context || {};
+    const r = run || state.run || {};
+    const st = STATUS_META[r.status] || STATUS_META.PENDING;
+    const started = r.started_at ? new Date(r.started_at) : null;
+    const ended = r.ended_at ? new Date(r.ended_at) : null;
+    let dur = "—";
+    if (started) {
+      const end = ended || new Date();
+      const secs = Math.max(0, Math.round((end - started) / 1000));
+      dur = secs < 60 ? secs + "s" : (secs < 3600 ? Math.floor(secs / 60) + "m" + (secs % 60) + "s" : Math.floor(secs / 3600) + "h" + Math.floor((secs % 3600) / 60) + "m");
+    }
+    const sync = state.lastSync ? new Date(state.lastSync).toLocaleTimeString("zh-TW", { hour12: false }) : "—";
+    box.innerHTML =
+      `<span class="pa-sum-item"><b>狀態</b><span class="pa-sum-status pa-status-${st.tone}">${esc(st.label)}</span></span>` +
+      `<span class="pa-sum-item"><b>節點</b>${esc(c.node_id || "—")}</span>` +
+      `<span class="pa-sum-item"><b>測試集</b>${esc(c.branch || "—")}</span>` +
+      `<span class="pa-sum-item"><b>時間</b>${esc(dur)}</span>` +
+      `<span class="pa-sum-item"><b>最後同步</b>${esc(sync)}</span>` +
+      (r.plan_revision ? `<span class="pa-sum-item"><b>計畫版本</b>r${esc(r.plan_revision)}</span>` : "");
+  }
+
+  // 附件列（右側、輸入框上方）：顯示本次 run 的附件與上傳狀態。
+  function renderAttachmentStrip(atts) {
+    const strip = root?.querySelector("#pa-attach-strip");
+    if (!strip) return;
+    state._attachments = atts || [];
+    if (!atts || !atts.length) { strip.hidden = true; strip.innerHTML = ""; return; }
+    strip.hidden = false;
+    strip.innerHTML = atts.map(a => {
+      const thumb = a.kind === "image"
+        ? `<span class="pa-att-thumb">🖼</span>` : `<span class="pa-att-thumb">📄</span>`;
+      const warn = a.status === "unparsed"
+        ? `<span class="pa-att-warn" title="${esc(a.error || "")}">無法解析</span>`
+        : (a.kind === "image" && !a.vision_supported
+            ? `<span class="pa-att-warn">已上傳，目前模型無法直接解析圖片</span>` : "");
+      return `<span class="pa-att" data-id="${esc(a.attachment_id)}">
+        ${thumb}<span class="pa-att-name">${esc(a.name)}</span>
+        <span class="pa-att-size">${fmtSize(a.size)}</span>${warn}
+        <button type="button" class="pa-att-rm" data-rm="${esc(a.attachment_id)}" title="移除">✕</button>
+      </span>`;
+    }).join("");
+    strip.querySelectorAll("[data-rm]").forEach(btn => btn.addEventListener("click", async () => {
+      const id = btn.getAttribute("data-rm");
+      try {
+        await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/attachments/${encodeURIComponent(id)}`, { method: "DELETE" });
+      } catch (e) { /* ignore */ }
+      renderAttachmentStrip(state._attachments.filter(x => x.attachment_id !== id));
+      renderLeftPanel();
+    }));
   }
 
   function messageCard(msg) {
@@ -377,6 +494,8 @@
       state.run = data.run;
       state.renderedSeq = 0;
       renderActivity(state.run);
+      renderAttachmentStrip(state.run.attachments || []);
+      renderSummary(state.run);
       await startRun(state.mode);   // plan：agent 只講計畫、不執行；execute：相容舊行為
     } catch (e) {
       setStatus("ERROR");
@@ -408,11 +527,14 @@
   }
 
   // 工程師發言 → 追加到對話，讓 agent 回覆（真正的多輪對話）。
+  // 送出前先做 in-flight 守門，避免 Enter 與按鈕連點造成重複送出（P2）。
   async function sendMessage(text) {
     const input = root?.querySelector("#pa-msg-input");
     const t = (text || "").trim();
     if (!t || !state.runId) return;
+    if (!beginSend()) return;
     if (input) { input.value = ""; input.style.height = "auto"; }
+    state.stickBottom = true;
     addMessage({ seq: Date.now(), role: "user", kind: "message", text: t, created_at: new Date().toISOString() });
     const sendBtn = root?.querySelector("#pa-msg-send");
     if (sendBtn) sendBtn.disabled = true;
@@ -423,12 +545,31 @@
       });
       const d = await r.json().catch(() => ({}));
       if (!r.ok) addError("訊息送出失敗：" + (d.detail || d.error || ("HTTP " + r.status)));
-      else { setStatus(state.run?.status || "RUNNING"); beginPolling(); }
+      else {
+        setStatus(state.run?.status || "RUNNING");
+        // 補充訊息會建立新的計畫版本；提示工程師 GO 將採用最新版（P0-2）。
+        if (d.intent === "question") {
+          appendSystemNote("已記錄為本次計畫的補充內容；輸入 OK / GO 時會採用最新版本的計畫。");
+          fetch(`${API}/runs/${encodeURIComponent(state.runId)}`).then(x => x.json())
+            .then(x => { if (x.run) { state.run = x.run; renderSummary(state.run); } })
+            .catch(() => {});
+        }
+        beginPolling();
+      }
     } catch (e) {
       addError("訊息送出失敗：" + e.message);
     } finally {
+      state.sending = false;
       if (sendBtn) sendBtn.disabled = false;
     }
+  }
+
+  function appendSystemNote(text) {
+    const div = document.createElement("div");
+    div.className = "pa-sysnote";
+    div.innerHTML = `<span class="pa-sysnote-tag">系統</span><span>${esc(text)}</span>`;
+    body().appendChild(div);
+    scrollBottom();
   }
 
   function addError(text) {
@@ -441,10 +582,16 @@
 
   // ---------- 輪詢 ----------
   function beginPolling() {
-    cancelPolling();
     state.polling = true;
+    if (state.timer) return;              // 已在輪詢就不重複開
     pollOnce();
     state.timer = setInterval(pollOnce, POLL_MS);
+  }
+  function setSync(ok) {
+    const el = root?.querySelector("#pa-sync");
+    if (!el) return;
+    el.textContent = ok ? "· 已連線" : "· 連線中斷，重試中";
+    el.className = "pa-sync " + (ok ? "pa-sync-ok" : "pa-sync-bad");
   }
   async function pollOnce() {
     if (!state.runId) return;
@@ -459,10 +606,15 @@
       const rd = await rres.json().catch(() => ({}));
       if (!rres.ok) throw new Error(rd.detail || ("HTTP " + rres.status));
       state.run = rd.run || state.run;
+      state.lastSync = Date.now();
       renderActivity(state.run);
+      renderSummary(state.run);
+      renderAttachmentStrip(state.run.attachments || []);
+      setSync(true);
       applyRunStatus(state.run);
     } catch (e) {
-      // 暫時性連線問題：保留現有畫面，稍後重試。
+      // 暫時性連線問題：保留現有畫面，顯示連線狀態，稍後重試；不要默默吞掉（P2）。
+      setSync(false);
     }
   }
   function applyRunStatus(run) {
@@ -473,13 +625,18 @@
     if (TERMINAL.has(st)) {
       cancelPolling();
       setApproval(null);
-      if (run.final_result) {
+      // final_result 只渲染一次：以 run 的結束時間/內容指紋去重，避免輪詢與
+      // 重新開啟時重複貼同一份結果（P0-7）。
+      const fingerprint = `${run.ended_at || ""}|${(run.final_result || "").length}`;
+      if (run.final_result && state._finalShown !== fingerprint) {
+        state._finalShown = fingerprint;
         const div = document.createElement("div");
         div.innerHTML = messageCard({ seq: -1, role: "agent", kind: "finish",
           text: run.final_result, created_at: run.updated_at });
         body().appendChild(div.firstElementChild);
       }
-      if (st === "DONE") {
+      if (st === "DONE" && state._doneNoteShown !== fingerprint) {
+        state._doneNoteShown = fingerprint;
         const note = document.createElement("div");
         note.className = "pa-done-note";
         note.innerHTML = `<span class="pa-sysnote-tag">系統</span>
@@ -514,6 +671,84 @@
       sendMessage(input.value);
     });
     sendBtn?.addEventListener("click", () => sendMessage(input.value));
+    // 使用者往上閱讀舊訊息時，不要被新訊息強制拉到底（P2）。
+    const b = body();
+    b?.addEventListener("scroll", () => {
+      const nearBottom = (b.scrollHeight - b.scrollTop - b.clientHeight) < 60;
+      state.stickBottom = nearBottom;
+    });
+  }
+
+  // ---------- 附件（P1-1）----------
+  // 三種加入方式：點 📎、拖曳檔案到視窗、Ctrl+V 貼上截圖。上傳後立刻顯示於
+  // 附件列；圖片標示「目前模型無法解析」（除非後端回報支援 vision）。
+  function wireAttachments() {
+    const pick = root.querySelector("#pa-attach");
+    const fileInput = root.querySelector("#pa-attach-input");
+    const panel = root.querySelector(".pa-drawer-panel");
+    const hint = root.querySelector("#pa-drop-hint");
+    pick?.addEventListener("click", () => fileInput?.click());
+    fileInput?.addEventListener("change", () => {
+      uploadFiles(Array.from(fileInput.files || []));
+      fileInput.value = "";
+    });
+    // Drag & drop over the whole panel.
+    ["dragenter", "dragover"].forEach(ev => panel?.addEventListener(ev, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      if (hint) hint.classList.add("show");
+    }));
+    panel?.addEventListener("dragleave", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      if (hint) hint.classList.remove("show");
+    });
+    panel?.addEventListener("drop", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      if (hint) hint.classList.remove("show");
+      const files = Array.from(e.dataTransfer?.files || []);
+      if (files.length) uploadFiles(files);
+    });
+    // Paste screenshot (Ctrl+V) while the drawer is open.
+    root.addEventListener("paste", (e) => {
+      const items = Array.from(e.clipboardData?.items || []);
+      const files = [];
+      for (const it of items) {
+        if (it.kind === "file") {
+          const f = it.getAsFile();
+          if (f) files.push(f);
+        }
+      }
+      if (files.length) { e.preventDefault(); uploadFiles(files); }
+    });
+  }
+
+  const IMAGE_RE = /^image\//;
+  function uploadFiles(files) {
+    if (!state.runId) { addError("請先建立 / 開啟 AgentRun 再上傳附件。"); return; }
+    for (const f of files) uploadOne(f);
+  }
+  async function uploadOne(file) {
+    const isImage = IMAGE_RE.test(file.type) || /\.(png|jpe?g|webp)$/i.test(file.name);
+    const kind = isImage ? "image" : "file";
+    // Optimistic placeholder row so the engineer sees progress immediately.
+    const pendingId = "pending-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6);
+    renderAttachmentStrip([...(state._attachments || []),
+      { attachment_id: pendingId, name: file.name || "screenshot.png", size: file.size, kind, status: "uploading", vision_supported: false }]);
+    try {
+      const res = await fetch(
+        `${API}/runs/${encodeURIComponent(state.runId)}/attachments?` +
+        new URLSearchParams({ name: file.name || "screenshot.png", kind, mime: file.type || "" }),
+        { method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: file });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) { addError("附件上傳失敗：" + (d.detail || d.error || ("HTTP " + res.status))); return; }
+      // Refresh from server truth.
+      const list = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/attachments`).then(x => x.json()).catch(() => ({}));
+      renderAttachmentStrip(list.attachments || []);
+      renderLeftPanel();
+    } catch (e) {
+      addError("附件上傳失敗：" + e.message);
+    } finally {
+      renderAttachmentStrip((state._attachments || []).filter(a => a.attachment_id !== pendingId));
+    }
   }
 
   window.PA_Agent = Object.freeze({ open, close });

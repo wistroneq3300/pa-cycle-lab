@@ -48,45 +48,103 @@ _STATUS_MAP = {
 
 
 # ---------------------------------------------------------------------------
-# Engineer chat-turn intent
+# Engineer chat-turn intent (state-aware)
 # ---------------------------------------------------------------------------
-# A free-text chat turn is one of three things, and they must travel different
-# paths on the agent-server:
+# A free-text chat turn is one of several intents, and they must travel
+# different paths on the agent-server. Classification is deliberately
+# *conservative*: it is far worse to trigger an execution the engineer did not
+# ask for than to ask them to repeat themselves.
 #
-#   "go"       approve execution (OK/GO/開始/執行/…)  -> agent-loop turn
-#   "rerun"    explicit re-run request                -> agent-loop turn
-#   "question" anything else (ask/explain/path/…)     -> ask_agent (no loop)
+#   QUESTION        ask/explain/why/what/how            -> ask_agent (no loop)
+#   PLAN_UPDATE     a supplementary constraint/change   -> record supplemental + ask
+#   APPROVE_EXECUTION  explicit go-ahead (OK/GO/開始…)   -> agent-loop turn
+#   RERUN           explicit re-run request             -> agent-loop turn
+#   CANCEL/STOP     abort the run                        -> state change
+#   NORMAL_CHAT     anything else                        -> ask_agent
 #
-# The distinction is the whole point: an agent-loop turn lets the model emit a
-# FinishAction and re-paste the test record, which is exactly the "I asked a
-# question and it dumped the same report again" complaint. ``ask_agent`` is a
-# single LLM call with no tool loop, so a question can only be answered — it
-# structurally cannot re-run the test.
-_GO_KEYWORDS = ("ok", "go", "開始", "开始", "執行", "执行", "可以", "run", "確認", "确认", "同意")
-# Explicit re-run intent. Deliberately requires a rerun verb; a bare "執行"
-# stays a "go" (some engineers approve with it), which is the safer default.
-_RERUN_KEYWORDS = ("重跑", "重新", "再執行", "再执行", "再跑", "rerun", "re-run", "run again", "重新驗證", "重新验证")
+# The old implementation was ``if keyword in text`` over a keyword tuple that
+# contained "重新", so "重新說明一下" / "重新整理結果" matched as rerun, and
+# "不要重跑" matched as rerun too. Both are wrong and are covered by tests.
+_GO_EXACT = {
+    "ok", "okay", "go", "開始", "开始", "執行", "执行", "可以", "run",
+    "確認執行", "确认执行", "同意", "approved", "approve", "yes", "y",
+}
+_RERUN_EXACT = {
+    "重跑", "再跑", "rerun", "re-run", "run again", "重跑一次", "再執行一次",
+    "重新執行這條測試", "重新執行此測試", "重新驗證", "重新验证", "重新測試",
+    "rerun this test", "重新執行", "重新执行", "重新跑一次",
+}
+_CANCEL_EXACT = {
+    "取消", "停止", "中止", "不要跑", "不要執行", "不要执行", "先不要跑",
+    "stop", "cancel", "abort",
+}
+# Negation / interrogative markers. If a turn contains any of these, it is NOT
+# an approval or a rerun, whatever else it contains ("不要重跑", "為什麼要重跑?").
+_NEGATION_MARKERS = ("不要", "不用", "別", "别", "先不要", "取消", "停止", "中止",
+                     "不執行", "不执行", "先別", "先别", "not", "don't", "do not",
+                     "cancel", "stop")
+_QUESTION_MARKERS = ("為什麼", "为什么", "為何", "为何", "嗎", "吗", "?", "？",
+                     "what", "why", "how", "when", "where", "which", "是否",
+                     "是不是", "能不能", "可不可以", "說明", "说明", "解釋", "解释",
+                     "整理", "總結", "总结", "review")
+
+
+def _strip_punct(text):
+    return text.strip().strip("。.!！~～ 、,，:：;；\t\n\"'“”‘’()（）")
 
 
 def classify_user_intent(text):
-    """Classify an engineer chat turn as ``"go"`` / ``"rerun"`` / ``"question"``.
+    """Classify an engineer chat turn into a state-agnostic intent.
 
-    Pure, case-insensitive, trivially unit-testable. A bare keyword (after
-    stripping surrounding punctuation/whitespace) is treated as approval;
-    a keyword buried inside a sentence is not, so "GO 之後請補充說明" stays a
-    question rather than silently triggering execution.
+    Returns one of ``"go"`` / ``"rerun"`` / ``"cancel"`` / ``"question"``.
+
+    Rules (in order):
+      1. Empty -> ``question``.
+      2. A bare approval token (OK/GO/開始/…) -> ``go``.
+      3. A bare rerun phrase (重跑/rerun this test/…) -> ``rerun``.
+      4. A bare cancel token -> ``cancel``.
+      5. Any turn containing a negation marker is never go/rerun: a question
+         that merely names a rerun verb ("為什麼要重跑") stays a question.
+      6. Otherwise -> ``question`` (safe default: never auto-executes).
     """
     raw = (text or "").strip()
     if not raw:
         return "question"
     lowered = raw.lower()
-    # Normalise a bare "OK." / "GO!" / "ok~" to its keyword form.
-    stripped = lowered.strip("。.!！~～ 、,，:：;；\t\n ")
-    if stripped in _GO_KEYWORDS:
+    stripped = _strip_punct(lowered)
+
+    # Exact-token approvals (a bare "GO!" etc.). Punctuation around it is fine.
+    if stripped in _GO_EXACT:
         return "go"
-    if any(k in lowered for k in _RERUN_KEYWORDS):
+    if stripped in _CANCEL_EXACT:
+        return "cancel"
+    # A rerun phrase must be the whole turn (or an explicit short imperative),
+    # never merely embedded — "重新" inside "重新說明" must not match.
+    if stripped in _RERUN_EXACT:
         return "rerun"
+
+    negated = any(m in lowered for m in _NEGATION_MARKERS)
+    interrogative = any(m in lowered for m in _QUESTION_MARKERS)
+
+    # A negated or interrogative turn is never an approval.
+    if negated or interrogative:
+        return "question"
+
+    # Explicit *imperative* rerun ("請重跑一次" / "重新執行這條測試") — only when
+    # a rerun verb is present and no negation/question guard tripped.
+    if any(k in lowered for k in _RERUN_EXACT):
+        return "rerun"
+
     return "question"
+
+
+def is_approval(text):
+    """True only for an unambiguous go-ahead (used to gate execution)."""
+    return classify_user_intent(text) == "go"
+
+
+def is_cancel(text):
+    return classify_user_intent(text) == "cancel"
 
 
 def _text_of(llm_message):
@@ -261,9 +319,13 @@ class AgentGateway:
             (tc.get("criteria") or "-"),
         ]
 
-        # 人工（MANUAL ONLY）測項：本質是人工目視／物理檢查，沒有可執行的指令。
-        # 若不特別說明，agent 會自行 SSH 猛跑指令，把 context 撐爆而報錯。
-        if self._is_manual_only(tc):
+        cls = self._classification(tc)
+
+        # Classification-driven policy (P0-5). The reviewed classification lives
+        # only under ai_review; it drives what the agent is allowed to do. This
+        # runs in the BACKEND (the instruction is built server-side), not the UI.
+        if cls == "MANUAL_ONLY":
+            # 人工（MANUAL ONLY）測項：本質是人工目視／物理檢查，沒有可執行的指令。
             lines += [
                 "",
                 "【重要：本測項為「人工檢查」(MANUAL ONLY)】",
@@ -275,11 +337,27 @@ class AgentGateway:
                 "  3) 等待工程師提供證據後，再依其內容整理紀錄。",
                 "PASS／FAIL／BLOCKED 一律由工程師裁定。",
             ]
+        elif cls == "BLOCKED":
+            lines += [
+                "",
+                "【本測項標記為 BLOCKED】",
+                "審查結果顯示此測項目前不可執行。請清楚說明阻擋原因（缺少的授權、",
+                "危險操作、缺少的關鍵資訊），在條件解除前不要執行任何受影響的步驟。",
+                "不要為了「有進度」而執行任何未經授權或高風險的動作。",
+            ]
+        elif cls == "REQUIRES_CONFIRMATION":
+            lines += [
+                "",
+                "【本測項需要工程師確認後才執行的部分】",
+                "先說明缺少什麼（例如需要安裝的套件、需要指定的裝置），",
+                "以及哪些部分可以安全地先做。不要因為缺一個項目就整條拒絕執行。",
+                "工程師確認後，只執行被允許的部分；破壞性或安裝性動作一律先問。",
+            ]
 
         # Execution target. Without this the agent has no DUT to run against and
         # will fabricate results; it MUST SSH into the given host to run commands.
         dut = self._dut_block(target)
-        if dut and not self._is_manual_only(tc):
+        if dut and cls != "MANUAL_ONLY":
             lines += ["", dut]
         instruction = (review.get("openhands_instruction")
                        or tc.get("ai_agent_instruction"))
@@ -298,35 +376,93 @@ class AgentGateway:
             "- 動手前先確認測試步驟；有疑慮時先停下詢問，不要自行假設。",
             "- 指令輸出只需摘要重點，勿將整包原始輸出貼回；避免累積過長內容。",
             "- 不得捏造指令輸出；SSH 失敗就據實回報。",
-            "- 工程師的後續訊息若只是提問（要求說明、問路徑、問欄位），直接回答即可，",
-            "  不要重跑指令或重貼已產出的測試記錄；僅在工程師明確要求重跑時才再執行。",
-            "- 產出檔案請「同類合併、避免碎檔」。多顆裝置（如多張 GPU）的原始證據要合併成",
-            "  單一檔案，並用醒目分隔線標出各裝置，例如：",
-            "    * 測試前 lspci -vvv：全部裝置寫入 lspci_vvv_pre.txt，各裝置前加一行",
-            "      「===== 03:00.0 (10de:2901) =====」；",
-            "    * 測試後 lspci -vvv：同樣合併為 lspci_vvv_post.txt；",
-            "    * lspci -nn：合併為 lspci_nn_pre.txt / lspci_nn_post.txt；",
-            "    * 摘要與判定：test_record.txt。",
-            "  除非工程師另有指示，成果目錄一律只保留上述同類合併的檔案（約 5 個），",
-            "  不要為每顆裝置或每個時點各開一個檔案。",
+            "- 不要自行增加原測項未要求的壓力測試或破壞性操作。",
+            "- 不要自行改變測試範圍（scope）。",
+            "",
+            "【資料取得原則（P0-3：不要因為缺文件就拒絕測試）】",
+            "- 「沒有文件」不等於「不能測」。資料足夠就做；能安全收集的就先收集。",
+            "- 缺少 SPEC / SOP / 參考文件時，仍可安全地收集 actual 資訊（例如 lspci）。",
+            "  例：PCIe inventory 測項缺 expected device list 時：",
+            "    * 先安全執行 lspci 收集 actual inventory；",
+            "    * 告訴工程師「實際資訊已收集，但 SPEC compliance 尚無法判定」；",
+            "    * 不要因為缺 SPEC 就拒絕執行整條測試。",
+            "- 若只缺一個關鍵值（例如預期的裝置清單），只問那一個值，",
+            "  不要要求工程師上傳整份 SOP。",
+            "- 但仍必須阻擋（不可執行）：不知道 DUT、不知道要操作哪顆 device、",
+            "  destructive 操作沒有授權、FW flash / PFR / power 等高風險操作沒有必要確認。",
+            "- 「沒有判定依據」不等於「可以自行宣告 PASS」；判定一律交給工程師。",
+            "",
+            "【產出檔案原則（依本測項的證據需求，不要硬套固定檔名）】",
+            "- 依本測項的 logs_to_collect / 證據需求決定要收集哪些檔案，不要所有測項都套用",
+            "  相同的固定檔名（例如不要硬用 lspci_vvv_pre.txt 這種 PCIe 專屬命名）。",
+            "- 同類證據盡量合併、避免產生大量碎檔；原始輸出若很長，摘要重點即可。",
+            "- 產出一個 test_record 摘要檔，說明完成了哪些步驟、哪些沒完成、哪些被跳過、",
+            "  哪些發生錯誤，以及限制（limitations）。",
         ]
+        # Engineer-supplied supplemental context (P0-2). The latest confirmed
+        # revision is injected last so it overrides the plan above; a change the
+        # engineer made during discussion must reach the actual execution.
+        attachment_text = context.get("_attachment_text")
+        if attachment_text and attachment_text.strip():
+            lines += [
+                "",
+                "【工程師提供的附件內容（本次測試請一併參考）】",
+                attachment_text.strip(),
+            ]
+        attachment_index = context.get("_attachment_index") or []
+        vision_unsupported = [a["name"] for a in attachment_index
+                              if a.get("kind") == "image" and not a.get("vision_supported")]
+        if vision_unsupported:
+            lines += [
+                "",
+                "【注意：以下圖片已上傳，但目前模型無法直接解析圖片內容】",
+                "不要假裝已理解圖片內容；如需圖片中的資訊，請工程師以文字說明。",
+                "  - " + "\n  - ".join(vision_unsupported),
+            ]
+        supplemental = context.get("_supplemental_text")
+        if supplemental and supplemental.strip():
+            rev = context.get("_supplemental_revision") or 0
+            lines += [
+                "",
+                f"【工程師補充與修正（plan revision {rev}，優先於上方計畫）】",
+                "以下為工程師在本次對話中補充或修正的內容，若與上方計畫衝突，以此為準：",
+                supplemental.strip(),
+            ]
         if (user_note or "").strip():
             lines += ["", "【工程師備註（請遵循）】", user_note.strip()]
         return "\n".join(lines)
 
     @staticmethod
-    def _is_manual_only(tc):
-        """True when the case is a manual/physical check (no runnable commands).
+    def _classification(tc):
+        """Normalise the reviewed automation classification to a canonical token.
 
-        Library rows carry this as ``category`` == "MANUAL ONLY" (also seen as
-        ``manual_only`` boolean or ``mode``); check all shapes.
+        The classification lives ONLY under ``ai_review.automation_classification``
+        (surfaced into the snapshot as ``ai_automation_classification``); library
+        rows have no ``category`` / ``manual_only`` / ``mode``. Returns one of
+        ``FULLY_AUTOMATABLE`` / ``REQUIRES_CONFIRMATION`` / ``MANUAL_ONLY`` /
+        ``BLOCKED`` / ``UNKNOWN``.
         """
-        cat = str(tc.get("category") or "").upper()
-        if "MANUAL" in cat:
-            return True
-        if tc.get("manual_only") is True:
-            return True
-        return str(tc.get("mode") or "").upper() in {"MANUAL", "MANUAL_ONLY"}
+        raw = str(
+            tc.get("ai_automation_classification")
+            or tc.get("category")
+            or tc.get("mode")
+            or ""
+        ).upper().replace("/", " ").replace("_", " ").strip()
+        collapsed = " ".join(raw.split())
+        if "FULLY" in collapsed or "AUTOMATABLE" in collapsed:
+            return "FULLY_AUTOMATABLE"
+        if "MANUAL" in collapsed:
+            return "MANUAL_ONLY"
+        if "BLOCK" in collapsed:
+            return "BLOCKED"
+        if "REQUIRES" in collapsed or "CONFIRMATION" in collapsed or "PACKAGE" in collapsed:
+            return "REQUIRES_CONFIRMATION"
+        return "UNKNOWN"
+
+    @classmethod
+    def _is_manual_only(cls, tc):
+        """True when the case is a manual/physical check (no runnable commands)."""
+        return cls._classification(tc) == "MANUAL_ONLY"
 
     @staticmethod
     def _dut_block(target):
@@ -376,6 +512,7 @@ class AgentGateway:
         if run.get("conversation_ref"):
             return run["conversation_ref"]
 
+        context = self._context_with_extras(run)
         payload = {
             "workspace": {
                 "kind": "LocalWorkspace",
@@ -400,7 +537,7 @@ class AgentGateway:
             "initial_message": {
                 "role": "user",
                 "content": [{"type": "text",
-                             "text": self.build_instruction(run["context"], user_note, mode=mode)}],
+                             "text": self.build_instruction(context, user_note, mode=mode)}],
                 "run": bool(auto_run),
             },
         }
@@ -412,6 +549,38 @@ class AgentGateway:
             started_at=run.get("started_at") or _now(),
         )
         return conversation_id
+
+    def _context_with_extras(self, run):
+        """Return a copy of the run context carrying supplemental + attachments.
+
+        The sealed AgentRunContext must never be mutated, so the extras the
+        engineer added during the run (supplemental plan revisions, attachment
+        text) are merged into a *copy* used only to render the instruction. This
+        keeps the stored context immutable and hash-verifiable while ensuring the
+        latest confirmed plan drives execution.
+        """
+        run_id = run["run_id"]
+        context = dict(run.get("context") or {})
+        latest = self.store.latest_supplemental(run_id)
+        if latest and (latest.get("text") or "").strip():
+            context["_supplemental_text"] = latest["text"]
+            context["_supplemental_revision"] = latest.get("revision", 0)
+        attachments = self.store.list_attachments(run_id)
+        if attachments:
+            context["_attachment_index"] = attachments
+            extracted = []
+            for a in attachments:
+                # Any attachment whose content was successfully extracted (text
+                # files, parsed PDFs) is handed to the agent; ``kind`` is a UI
+                # label, not a gate on whether the text is usable.
+                if a.get("status") == "ready":
+                    rec = self.store.get_attachment(run_id, a["attachment_id"])
+                    if rec and rec.get("extracted_text"):
+                        extracted.append(
+                            f"--- 附件：{a['name']} ---\n{rec['extracted_text']}")
+            if extracted:
+                context["_attachment_text"] = "\n\n".join(extracted)
+        return context
 
     # Endpoint used to append a user turn to an existing conversation and let the
     # agent respond. Overridable because the exact agent-server route is an
@@ -445,6 +614,36 @@ class AgentGateway:
         }
         response = self._http().post(self._MESSAGE_ENDPOINT.format(cid=cid), json=payload)
         response.raise_for_status()
+        return cid
+
+    def run_execution(self, run_id, *, trigger="go"):
+        """Start an execution turn using the LATEST confirmed plan revision.
+
+        This is the fix for P0-2: a plain chat turn (question) goes through
+        ``ask_agent`` and never reaches execution, so a constraint the engineer
+        stated during discussion could be lost. On GO/rerun we build a *fresh*
+        instruction that folds in the latest supplemental revision + attachments
+        and send it as the execution turn. The agent therefore always executes
+        the plan the engineer last confirmed, not the original one.
+        """
+        run = self.store.get_run(run_id)
+        if run is None:
+            raise KeyError("unknown run_id")
+        cid = run.get("conversation_ref")
+        if not cid:
+            raise ValueError("run has no conversation; start it first")
+        context = self._context_with_extras(run)
+        header = ("【工程師已確認，請依最新計畫開始執行】" if trigger == "go"
+                  else "【工程師要求重新執行本測項】")
+        instruction = header + "\n\n" + self.build_instruction(context, mode="execute")
+        payload = {
+            "role": "user",
+            "content": [{"type": "text", "text": instruction}],
+            "run": True,
+        }
+        response = self._http().post(self._MESSAGE_ENDPOINT.format(cid=cid), json=payload)
+        response.raise_for_status()
+        self.store.update_state(run_id, status="RUNNING")
         return cid
 
     # Endpoint for a *question* turn. ``ask_agent`` is a single LLM call against
@@ -504,6 +703,7 @@ class AgentGateway:
                    "approval_requested": False}
         pending_commands, pending_evidence = [], []
         finish_log = ""
+        finish_event_id = None
         for event in events:
             channel, payload = classify_event(event)
             if channel == "message":
@@ -524,6 +724,7 @@ class AgentGateway:
                 pending_commands.append(payload)
                 if payload.get("finish_message"):
                     finish_log = payload["finish_message"]
+                    finish_event_id = payload.get("event_id")
             elif channel == "evidence":
                 pending_evidence.append(payload)
             elif channel == "status":
@@ -532,11 +733,9 @@ class AgentGateway:
                     summary["status"] = status
 
         if pending_commands:
-            self.store.append_commands(run_id, pending_commands)
-            summary["commands"] = len(pending_commands)
+            summary["commands"] = self.store.append_commands(run_id, pending_commands)
         if pending_evidence:
-            self.store.append_evidence(run_id, pending_evidence)
-            summary["evidence"] = len(pending_evidence)
+            summary["evidence"] = self.store.append_evidence(run_id, pending_evidence)
 
         if summary["status"]:
             updates = {"status": summary["status"]}
@@ -554,11 +753,14 @@ class AgentGateway:
             # The engineer reads the agent's log to reach a verdict, so persist
             # the closing statement as final_result and mirror it into the chat
             # as an agent message (it is a FinishAction, not a MessageEvent, and
-            # would otherwise never reach the drawer body).
+            # would otherwise never reach the drawer body). Deduped by the
+            # FinishAction's source event id so re-polling the same turn does not
+            # render final_result twice.
             if finish_log:
                 updates["final_result"] = finish_log
                 seq = self.store.add_message(
                     run_id, role="agent", text=finish_log, kind="finish",
+                    source_event_id=finish_event_id or f"finish:{run_id}:{len(finish_log)}",
                 )
                 if seq is not None:
                     summary["messages"] += 1

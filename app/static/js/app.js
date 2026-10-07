@@ -3489,7 +3489,7 @@ async function assignTaskCopy() {
     " \u2022 " + wrapBlock(x, width).split("\n").join("\n   ")).join("\n");
   const lines = [];
   lines.push(`\u76ee\u6a19\u6a5f\u53f0\uff1a${mm.label} \u00b7 ${sname} \u00b7 ${ip} \u00b7 ${user}`);
-  lines.push(`\u8acb\u5728 ${ip} \u9019\u53f0 ${user} \u4e3b\u6a5f\u4e0a\u57f7\u884c\u4ee5\u4e0b\u6e2c\u9805\uff08\u60a8\u8907\u88fd\u5f8c\u8cbc\u4e0a\u56de\u5230 OpenHands \u804a\u5929\uff0c\u8b93\u6211 SSH \u4e0a\u53bb\u5b89\u88dd/\u57f7\u884c/\u6536\u96c6\u8b49\u64da\uff1b\u5f97\u5931\u5224\u5b9a\u7531\u60a8\uff09\uff1a`);
+  lines.push(`\u8acb\u5728 ${ip} \u9019\u53f0 ${user} \u4e3b\u6a5f\u4e0a\u57f7\u884c\u4ee5\u4e0b\u6e2c\u9805\uff08\u5728 PA Agent \u5c0d\u8a71\u4e2d\uff0cPA Agent \u6703\u900f\u904e SSH \u5b89\u88dd/\u57f7\u884c/\u6536\u96c6\u8b49\u64da\uff1b\u5f97\u5931\u5224\u5b9a\u7531\u60a8\uff09\uff1a`);
   chosen.forEach((r, i) => {
     const can = String(r.ai_can_execute || "NO").toUpperCase();
     const cmdRaw = collapseBlank(r.ai_commands).trim();
@@ -3574,6 +3574,8 @@ async function assignTaskCopy() {
 
   // P3-e：選取「單一」測項時，交接給 PA Agent 對話視窗（P3-c 後端）。
   // 左欄沿用與多測項同構的指令區塊（完整原始命令 + rich HTML），而非簡短提示。
+  // P0-1：PA Agent 一次只處理一條 Test Case。多選時不進 PA Agent（避免「UI 顯示
+  //   多條、Agent 實際只收到第一條」的落差），只走原本的批次指令複製路徑。
   if (chosen.length === 1) {
     const row = chosen[0];
     const variant = row.case_variant_id || "";
@@ -3781,7 +3783,7 @@ function assignResultRichHtml(chosen, mm, sname, ip, user, dupSet) {
   return `<div class="eng-case-detail-wrap">
     <div class="eng-case-sec"><h4>PA AGENT 指派任務</h4>
     <p class="eng-case-prose">目標機台：${E([mm.label, sname, ip, user].filter(Boolean).join(" · "))}</p>
-    <p class="eng-case-prose">請在 ${E(ip)}（${E(user)}）上執行以下測項。將本內容複製到 OpenHands 聊天，讓 Agent 透過 SSH 安裝／執行／收集證據；得失判定由您。</p></div>
+    <p class="eng-case-prose">請在 ${E(ip)}（${E(user)}）上執行以下測項。PA Agent 會透過 SSH 安裝／執行／收集證據；得失判定由您。</p></div>
     ${cards}
   </div>`;
 }
@@ -3841,14 +3843,21 @@ const AssignResultWin = (() => {
     });
     win.querySelector("#ar-pa-agent").addEventListener("click", () => {
       if (!window.PA_Agent) return;
+      const inst = win.querySelector("#ar-pa-agent");
+      const cases = (win._cases || []);
+      // P0-1：PA Agent 一次只處理一條 Test Case。多選視窗不可用 PA Agent，
+      //   否則會出現「UI 顯示多條、Agent 實際只收到第一條」的落差。
+      if (cases.length > 1) {
+        window.uxNotify?.("PA Agent 一次只處理一條 Test Case，請改為只勾選一條後再進入 PA Agent", true);
+        return;
+      }
       const title = win.querySelector("#ar-title")?.textContent || "";
       const mach = (typeof assignTaskMach === "function") ? assignTaskMach() : null;
       const t = (typeof operationTarget === "function") ? (operationTarget(mach?.name) || {}) : {};
-      // AgentRun 以單一 case_variant_id 為錨點；多測項視窗取第一筆作為 run 錨點，
-      // 其餘測項仍完整保留在 task 文字中，交由 PA Agent 依上下文處理。
-      const first = (win._cases || [])[0] || {};
+      const first = cases[0] || {};
       const variant = first.case_variant_id || "";
       if (!variant) { window.uxNotify?.("此指派沒有可用的 case_variant_id，無法交給 PA Agent", true); return; }
+      if (inst) inst.disabled = true;
       // 開啟左右兩欄的 PA Agent 視窗：左＝測項內容，右＝對話。
       // 指派結果視窗本身即可收起，避免兩個視窗疊在一起。
       const rich = win._rich || "";

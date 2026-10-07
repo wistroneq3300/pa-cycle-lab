@@ -258,8 +258,10 @@ class GatewayMessageTests(unittest.TestCase):
         self.assertEqual(cid, "conv-1")
         url, payload = self.client.calls[-1]
         self.assertEqual(url, "/api/conversations/conv-1/events")
-        self.assertEqual(payload["source"], "user")
-        self.assertEqual(payload["llm_message"]["content"][0]["text"], "請補充 PCIe SPEC")
+        # The agent-server SendMessageRequest shape is role/content/run; an
+        # llm_message field is dropped server-side, so it must not be sent.
+        self.assertEqual(payload["role"], "user")
+        self.assertEqual(payload["content"][0]["text"], "請補充 PCIe SPEC")
         self.assertTrue(payload["run"])
 
     def test_start_run_plan_mode_sends_plan_preamble(self):

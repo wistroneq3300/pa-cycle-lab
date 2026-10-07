@@ -51,7 +51,17 @@ _TESTCASE_FIELDS = (
     "code", "sub_function", "test_set", "items", "procedure", "criteria",
     "risk", "ai_can_execute", "ai_commands", "ai_packages_needed",
     "ai_logs_output", "ai_precheck", "ai_postcheck", "ai_agent_instruction",
+    # The reviewed automation classification (FULLY AUTOMATABLE / REQUIRES
+    # PACKAGE / USER CONFIRMATION / MANUAL ONLY / BLOCKED). The gateway gates
+    # policy on this, and it exists ONLY under ai_review — library rows have no
+    # category/manual_only/mode fields — so it must be copied into the snapshot.
+    "ai_automation_classification",
 )
+
+# Supplemental-context budget: each plan revision is a new immutable snapshot of
+# the engineer's cumulative additions for this run. Bounded so a long discussion
+# cannot grow the table without limit.
+MAX_PLAN_REVISIONS = 50
 
 
 def _now() -> str:
@@ -125,6 +135,50 @@ class AgentRunStore:
                 );
                 CREATE INDEX IF NOT EXISTS idx_agent_messages_run
                     ON agent_run_messages(run_id, seq);
+
+                -- Supplemental context: engineer-supplied additions during the run
+                -- (free text, SOP/SPEC references, limits, attachments). Each
+                -- revision is an immutable, monotonically numbered snapshot of the
+                -- *cumulative* additions. GO executes the latest revision, so a
+                -- mid-discussion change cannot be silently lost by ask_agent turns.
+                CREATE TABLE IF NOT EXISTS agent_run_supplemental (
+                    run_id            TEXT NOT NULL REFERENCES agent_runs(run_id) ON DELETE CASCADE,
+                    revision          INTEGER NOT NULL,
+                    text              TEXT NOT NULL,
+                    attachments_json  TEXT NOT NULL DEFAULT '[]',
+                    created_at        TEXT NOT NULL,
+                    PRIMARY KEY (run_id, revision)
+                );
+
+                -- Ingest dedup: one row per (run, source event id) for command and
+                -- evidence entries. Appending is INSERT-OR-IGNORE against this
+                -- table, so replaying the same OpenHands event never duplicates.
+                CREATE TABLE IF NOT EXISTS agent_run_ingested_events (
+                    run_id            TEXT NOT NULL REFERENCES agent_runs(run_id) ON DELETE CASCADE,
+                    source_event_id   TEXT NOT NULL,
+                    channel           TEXT NOT NULL,
+                    created_at        TEXT NOT NULL,
+                    PRIMARY KEY (run_id, source_event_id)
+                );
+
+                -- Attachments uploaded by the engineer during a run. The blob
+                -- lives on disk under /srv/pa-agent/attachments/<run_id>/; this
+                -- table is the metadata index (name, size, kind, extracted text).
+                CREATE TABLE IF NOT EXISTS agent_run_attachments (
+                    run_id            TEXT NOT NULL REFERENCES agent_runs(run_id) ON DELETE CASCADE,
+                    attachment_id     TEXT NOT NULL,
+                    name              TEXT NOT NULL,
+                    mime              TEXT,
+                    size              INTEGER NOT NULL DEFAULT 0,
+                    kind              TEXT NOT NULL DEFAULT 'file',
+                    stored_path       TEXT,
+                    extracted_text    TEXT,
+                    vision_supported  INTEGER NOT NULL DEFAULT 0,
+                    status            TEXT NOT NULL DEFAULT 'ready',
+                    error             TEXT,
+                    created_at        TEXT NOT NULL,
+                    PRIMARY KEY (run_id, attachment_id)
+                );
                 """
             )
 
@@ -146,6 +200,11 @@ class AgentRunStore:
         variant = case.get("case_variant_id") or variant_id
         testcase = {field: case.get(field) for field in _TESTCASE_FIELDS}
         testcase["sheet"] = case.get("sheet")
+        # The classification lives only under ai_review; lift it so the gateway
+        # (which must not re-parse library internals) can gate policy on it.
+        review = case.get("ai_review") if isinstance(case.get("ai_review"), dict) else {}
+        if not testcase.get("ai_automation_classification"):
+            testcase["ai_automation_classification"] = review.get("automation_classification")
 
         return {
             "schema_version": CONTEXT_SCHEMA_VERSION,
@@ -217,6 +276,10 @@ class AgentRunStore:
             "updated_at": state["updated_at"] if state else None,
         }
         result["messages"] = self.list_messages(run_id)
+        latest = self.latest_supplemental(run_id)
+        result["supplemental"] = latest or {"revision": 0, "text": "", "attachments": []}
+        result["plan_revision"] = (latest or {}).get("revision", 0)
+        result["attachments"] = self.list_attachments(run_id)
         return result
 
     # -- mutable state (advanced by the Gateway) -----------------------------
@@ -249,28 +312,209 @@ class AgentRunStore:
             if cur.rowcount == 0:
                 raise KeyError("unknown run_id")
 
+    def _dedup_new(self, db, run_id, channel, items):
+        """Filter ``items`` to those whose ``event_id`` has not been ingested yet.
+
+        Dedup identity is the OpenHands source event id, recorded in
+        ``agent_run_ingested_events``. Replaying the same event batch (poll
+        overlap, reconnect, manual re-ingest) therefore never appends a second
+        copy. Items without an ``event_id`` are always kept (they carry no
+        identity to dedup on).
+        """
+        fresh = []
+        for item in items:
+            event_id = item.get("event_id") if isinstance(item, dict) else None
+            if not event_id:
+                fresh.append(item)
+                continue
+            cur = db.execute(
+                "INSERT OR IGNORE INTO agent_run_ingested_events "
+                "(run_id, source_event_id, channel, created_at) VALUES (?,?,?,?)",
+                (run_id, str(event_id), channel, _now()),
+            )
+            if cur.rowcount:
+                fresh.append(item)
+        return fresh
+
     def append_commands(self, run_id, commands):
-        """Append command records (tool calls) to the run's evidence trail."""
+        """Append command records (tool calls), deduped by source event id."""
         if not commands:
-            return
+            return 0
         with self._lock, self._connect() as db:
+            fresh = self._dedup_new(db, run_id, "command", commands)
+            if not fresh:
+                return 0
             current = self._get_json_col(db, run_id, "commands_json")
-            current.extend(commands)
+            current.extend(fresh)
             db.execute(
                 "UPDATE agent_run_state SET commands_json=?, updated_at=? WHERE run_id=?",
                 (json.dumps(current, ensure_ascii=False), _now(), run_id),
             )
+        return len(fresh)
 
     def append_evidence(self, run_id, evidence):
+        """Append evidence records, deduped by source event id."""
         if not evidence:
-            return
+            return 0
         with self._lock, self._connect() as db:
+            fresh = self._dedup_new(db, run_id, "evidence", evidence)
+            if not fresh:
+                return 0
             current = self._get_json_col(db, run_id, "evidence_json")
-            current.extend(evidence)
+            current.extend(fresh)
             db.execute(
                 "UPDATE agent_run_state SET evidence_json=?, updated_at=? WHERE run_id=?",
                 (json.dumps(current, ensure_ascii=False), _now(), run_id),
             )
+        return len(fresh)
+
+    # -- supplemental context (engineer additions during the run) ------------
+
+    def add_supplemental(self, run_id, text, attachments=None):
+        """Record a new plan revision carrying the cumulative additions.
+
+        Returns the new revision number. ``text`` is the full accumulated
+        supplemental text (not just the delta) so the latest revision is always
+        self-contained: executing the latest revision can never drop an earlier
+        constraint the engineer stated.
+        """
+        with self._lock, self._connect() as db:
+            row = db.execute(
+                "SELECT COALESCE(MAX(revision),0)+1 AS n FROM agent_run_supplemental "
+                "WHERE run_id=?", (run_id,),
+            ).fetchone()
+            revision = row["n"]
+            db.execute(
+                "INSERT INTO agent_run_supplemental (run_id, revision, text, "
+                "attachments_json, created_at) VALUES (?,?,?,?,?)",
+                (run_id, revision, text,
+                 json.dumps(list(attachments or []), ensure_ascii=False), _now()),
+            )
+            if revision > MAX_PLAN_REVISIONS:
+                db.execute(
+                    "DELETE FROM agent_run_supplemental WHERE run_id=? AND revision<=?",
+                    (run_id, revision - MAX_PLAN_REVISIONS),
+                )
+        return revision
+
+    def latest_supplemental(self, run_id):
+        """Return the newest plan revision dict, or None when none exists."""
+        with self._connect() as db:
+            row = db.execute(
+                "SELECT revision, text, attachments_json, created_at "
+                "FROM agent_run_supplemental WHERE run_id=? "
+                "ORDER BY revision DESC LIMIT 1", (run_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        return {
+            "revision": row["revision"],
+            "text": row["text"],
+            "attachments": json.loads(row["attachments_json"] or "[]"),
+            "created_at": row["created_at"],
+        }
+
+    def list_supplemental(self, run_id):
+        with self._connect() as db:
+            rows = db.execute(
+                "SELECT revision, text, attachments_json, created_at "
+                "FROM agent_run_supplemental WHERE run_id=? ORDER BY revision",
+                (run_id,),
+            ).fetchall()
+        return [{"revision": r["revision"], "text": r["text"],
+                 "attachments": json.loads(r["attachments_json"] or "[]"),
+                 "created_at": r["created_at"]} for r in rows]
+
+    # -- attachments ---------------------------------------------------------
+
+    def add_attachment(self, run_id, *, attachment_id, name, mime="", size=0,
+                       kind="file", stored_path="", extracted_text="",
+                       vision_supported=False, status="ready", error=""):
+        with self._lock, self._connect() as db:
+            db.execute(
+                "INSERT OR REPLACE INTO agent_run_attachments (run_id, attachment_id, "
+                "name, mime, size, kind, stored_path, extracted_text, vision_supported, "
+                "status, error, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                (run_id, attachment_id, name, mime, int(size or 0), kind,
+                 stored_path, extracted_text, 1 if vision_supported else 0,
+                 status, error, _now()),
+            )
+        return attachment_id
+
+    def list_attachments(self, run_id):
+        with self._connect() as db:
+            rows = db.execute(
+                "SELECT attachment_id, name, mime, size, kind, stored_path, "
+                "extracted_text, vision_supported, status, error, created_at "
+                "FROM agent_run_attachments WHERE run_id=? ORDER BY created_at",
+                (run_id,),
+            ).fetchall()
+        return [{"attachment_id": r["attachment_id"], "name": r["name"],
+                 "mime": r["mime"], "size": r["size"], "kind": r["kind"],
+                 "stored_path": r["stored_path"],
+                 "vision_supported": bool(r["vision_supported"]),
+                 "status": r["status"], "error": r["error"],
+                 "created_at": r["created_at"]} for r in rows]
+
+    def get_attachment(self, run_id, attachment_id):
+        for a in self.list_attachments(run_id):
+            if a["attachment_id"] == attachment_id:
+                record = dict(a)
+                with self._connect() as db:
+                    row = db.execute(
+                        "SELECT extracted_text FROM agent_run_attachments "
+                        "WHERE run_id=? AND attachment_id=?",
+                        (run_id, attachment_id),
+                    ).fetchone()
+                record["extracted_text"] = row["extracted_text"] if row else ""
+                return record
+        return None
+
+    def delete_attachment(self, run_id, attachment_id):
+        with self._lock, self._connect() as db:
+            cur = db.execute(
+                "DELETE FROM agent_run_attachments WHERE run_id=? AND attachment_id=?",
+                (run_id, attachment_id),
+            )
+        return cur.rowcount > 0
+
+    # -- retention -----------------------------------------------------------
+
+    def delete_run(self, run_id):
+        """Delete a run and all its child rows (context, state, messages, …)."""
+        with self._lock, self._connect() as db:
+            db.execute("DELETE FROM agent_run_messages WHERE run_id=?", (run_id,))
+            db.execute("DELETE FROM agent_run_supplemental WHERE run_id=?", (run_id,))
+            db.execute("DELETE FROM agent_run_ingested_events WHERE run_id=?", (run_id,))
+            db.execute("DELETE FROM agent_run_attachments WHERE run_id=?", (run_id,))
+            db.execute("DELETE FROM agent_run_state WHERE run_id=?", (run_id,))
+            cur = db.execute("DELETE FROM agent_runs WHERE run_id=?", (run_id,))
+        return cur.rowcount > 0
+
+    def list_expired_runs(self, *, retention_days=None, now=None):
+        """Run ids whose last activity is older than the retention window.
+
+        Only runs that are no longer in flight are eligible: a RUNNING /
+        WAITING_FOR_USER run must never be pruned while a test could still be
+        in progress. Retention defaults to PA_AGENT_RETENTION_DAYS (7).
+        """
+        if retention_days is None:
+            try:
+                retention_days = int(os.environ.get("PA_AGENT_RETENTION_DAYS", "7"))
+            except ValueError:
+                retention_days = 7
+        if now is None:
+            now = datetime.datetime.now(datetime.timezone.utc)
+        cutoff = (now - datetime.timedelta(days=retention_days)).replace(
+            microsecond=0).isoformat()
+        with self._connect() as db:
+            rows = db.execute(
+                "SELECT r.run_id FROM agent_runs r JOIN agent_run_state s "
+                "ON s.run_id=r.run_id WHERE s.updated_at < ? "
+                "AND s.status NOT IN ('RUNNING','WAITING_FOR_USER','PENDING')",
+                (cutoff,),
+            ).fetchall()
+        return [row["run_id"] for row in rows]
 
     def record_approval(self, run_id, approval):
         """Record an approval request or decision (kind/status/...)."""
