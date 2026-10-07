@@ -192,8 +192,8 @@ class NodeSession:
         self.persist(record)
         return record
 
-    def add(self, record, code, component, detail, severity="FAIL", evidence=""):
-        record["issues"].append(issue(code, component, detail, severity, evidence))
+    def add(self, record, code, component, detail, severity="FAIL", evidence="", snippet=""):
+        record["issues"].append(issue(code, component, detail, severity, evidence, snippet))
 
     def command(self, record, stem, role, cmd, sudo=False, timeout=90, check=True,
                 save_evidence=True, record_command=True, include_output=True, filter_output=None, acquired=None):
@@ -617,11 +617,25 @@ class NodeSession:
         import json as _json
         start = text.find("{")
         if start < 0:
-            return {}
+            return None
         try:
             return _json.loads(text[start:])
         except ValueError:
-            return {}
+            return None
+
+    @staticmethod
+    def _redfish_valid_entry(item):
+        """True when a referenced member is a structurally valid LogEntry.
+
+        A JSON-decoded object that carries no event identity/content (e.g. an
+        empty ``{}`` or a payload missing both Id and Message) is unreadable: it
+        is not "an event with no problems". Treating it as a valid OK entry would
+        let a malformed referenced member turn a collection into a false PASS, so
+        it must fail closed instead. A vendor entry with an unknown/blank
+        Severity is still valid - only the identity/content keys are required,
+        so a legacy ``{Id, Message, Severity:""}`` entry is never misjudged.
+        """
+        return isinstance(item, dict) and any(k in item for k in ("Id", "Message"))
 
     def _redfish_stem(self, name):
         return 'eventlog' if name == 'EventLog' else 'redfish_sel'
@@ -711,8 +725,12 @@ class NodeSession:
                 if result.code:
                     return entries, f"reference {ref} could not be fetched (HTTP {getattr(result, 'http_status', 0) or result.code})"
                 target = self._redfish_json(result.output)
-                if not isinstance(target, dict):
-                    return entries, f"reference {ref} is unreadable"
+                if not self._redfish_valid_entry(target):
+                    # A referenced member that is unreadable (truncated JSON,
+                    # empty object, or missing both Id and Message) is a
+                    # collection integrity failure, not "an event with nothing
+                    # wrong". Fail closed so it can never become a false PASS.
+                    return entries, f"reference {ref} is not a valid LogEntry"
                 entries.append(self._redfish_normalise_entry(target))
                 continue
             return entries, f"Members[{index}] has no Id/Severity/Message and no @odata.id"

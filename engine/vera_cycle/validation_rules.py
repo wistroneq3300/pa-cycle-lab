@@ -2,6 +2,7 @@
 import re
 import hashlib
 import json
+import unicodedata
 from collections import Counter
 from cycle_dmesg import dmesg_issues
 
@@ -158,7 +159,7 @@ def sensor_issues(rows):
                            f"{count} rows share this sensor name; review each row", "WARN",
                            snippet="\n".join(_snippet(r) for r in dup_rows)))
     for r in rows:
-        if '\ufffd' in r['name'] or any(ord(c) < 32 for c in r['name']):
+        if '\ufffd' in r['name'] or any(unicodedata.category(c) == 'Cc' for c in r['name']):
             found.append(issue('SENSOR_NAME_MALFORMED', r['name'], 'Sensor identity contains invalid characters', snippet=_snippet(r)))
             continue
         if r.get("format_error"):
