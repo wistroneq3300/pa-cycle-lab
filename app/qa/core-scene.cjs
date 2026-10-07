@@ -14,7 +14,7 @@ const results=[];
 
 function harness({reduced=false,unavailable=false}={}){
   let clock=0,nextFrame=0,draws=0,deletedBuffers=0,deletedPrograms=0,compileFailure=false,nextBuffer=0,activeBuffer=null;
-  const frames=new Map(),events=new Map(),uploads=[],captured=new Set(),dispatched=[],drawRecords=[],uploadedByBuffer=new Map(),uniformValues={};
+  const frames=new Map(),events=new Map(),globalEvents=new Map(),timers=new Map(),uploads=[],captured=new Set(),dispatched=[],drawRecords=[],uploadedByBuffer=new Map(),uniformValues={};
   let canvasSize={width:810,height:610};
   let resizeCallback=()=>{},observerDisconnected=false;
   const gl=new Proxy({
@@ -38,22 +38,24 @@ function harness({reduced=false,unavailable=false}={}){
     releasePointerCapture:id=>{captured.delete(id);events.get('lostpointercapture')?.({pointerId:id});}
   };
   const sandbox={
-    window:{devicePixelRatio:1,addEventListener(){},removeEventListener(){}},
+    window:{devicePixelRatio:1,addEventListener(name,fn){globalEvents.set(name,fn);},removeEventListener(name){globalEvents.delete(name);}},
     Float32Array,Math,Number,String,Object,Array,
     performance:{now:()=>clock},matchMedia:()=>({matches:reduced}),
     ResizeObserver:class{constructor(fn){resizeCallback=fn;}observe(){}disconnect(){observerDisconnected=true;}},
     CustomEvent:class{constructor(type){this.type=type;}},
     requestAnimationFrame:fn=>{frames.set(++nextFrame,fn);return nextFrame;},
-    cancelAnimationFrame:id=>frames.delete(id)
+    cancelAnimationFrame:id=>frames.delete(id),
+    setTimeout:(fn,delay)=>{const id=++nextFrame;timers.set(id,{fn,at:clock+delay});return id;},
+    clearTimeout:id=>timers.delete(id)
   };
   const context=vm.createContext(sandbox);
   vm.runInContext(sharedSource,context,{filename:'rack-equipment-scene.js'});
   vm.runInContext(source,context,{filename:'core-scene.js'});
   const scene=sandbox.window.PACoreScene.mount(canvas);
-  function frame(){const pending=[...frames.values()];frames.clear();clock+=17;pending.forEach(fn=>fn(clock));}
-  function flush(n=40){for(let i=0;i<n;i++)frame();}
+  function frame(step=17){const pending=[...frames.values()];frames.clear();clock+=step;for(const [id,timer]of timers)if(timer.at<=clock){timers.delete(id);timer.fn();}pending.forEach(fn=>fn(clock));}
+  function flush(n=160){for(let i=0;i<n;i++)frame();}
   return {
-    scene,canvas,uploads,events,frames,dispatched,frame,flush,scope:sandbox.window,drawRecords,uploadedByBuffer,
+    scene,canvas,uploads,events,globalEvents,timers,frames,dispatched,frame,flush,scope:sandbox.window,drawRecords,uploadedByBuffer,uniformValues,
     event:(name,event={})=>events.get(name)?.(event),
     resize:(width,height)=>{if(width!==undefined)canvasSize={width,height};resizeCallback();},failCompilation:()=>{compileFailure=true;},
     stats:()=>({draws,deletedBuffers,deletedPrograms,observerDisconnected})
@@ -63,7 +65,7 @@ function check(name,fn){fn();results.push(name);console.log('PASS '+name);}
 const plain=value=>JSON.parse(JSON.stringify(value));
 const near=(actual,expected,message,tolerance=1e-5)=>assert.ok(Math.abs(actual-expected)<tolerance,message+' ('+actual+' vs '+expected+')');
 
-check('Complete finite geometry; stable shared uploads; no idle rendering',()=>{
+check('Complete finite geometry; stable shared uploads; settled hero waits for idle timer',()=>{
   const h=harness();h.frame();
   assert.equal(h.canvas.dataset.coreState,'ready');
   const buffers=h.scene.getState().geometryBuffers;
@@ -80,18 +82,19 @@ check('Complete finite geometry; stable shared uploads; no idle rendering',()=>{
   }
   assert.ok(vertices>0&&vertices<2000000,'Geometry must be substantial and bounded');
   assert.equal(Number(h.canvas.dataset.coreVertices),vertices);
-  assert.ok(h.stats().draws>=1);assert.equal(h.frames.size,0);
-  const idleDraws=h.stats().draws;h.flush();assert.equal(h.stats().draws,idleDraws,'Idle time must not redraw');
+  assert.ok(h.stats().draws>=1);assert.equal(h.frames.size,1,'Close-up moving softbox renders deliberately');
+  h.scene.setProgress(1);h.flush();assert.equal(h.frames.size,0);
+  const idleDraws=h.stats().draws;h.flush(10);assert.equal(h.stats().draws,idleDraws,'Settled hero waits for the idle timer');
   const initialDistance=Number(h.canvas.dataset.coreCameraDistance);
-  h.scene.setOrbit(-1.4,-1.134);h.frame();assert.ok(Number.isFinite(Number(h.canvas.dataset.coreCameraDistance))&&Number(h.canvas.dataset.coreCameraDistance)>0,'Orbit requires a finite camera distance');
-  h.scene.setOrbit(0,0);h.frame();assert.ok(Math.abs(Number(h.canvas.dataset.coreCameraDistance)-initialDistance)<.0001,'authored L10 framing must be preserved');
+  h.scene.setOrbit(-1.4,-1.134);h.flush();assert.ok(Number.isFinite(Number(h.canvas.dataset.coreCameraDistance))&&Number(h.canvas.dataset.coreCameraDistance)>0,'Orbit requires a finite camera distance');
+  h.scene.setOrbit(0,0);h.flush();assert.ok(Math.abs(Number(h.canvas.dataset.coreCameraDistance)-initialDistance)<.001,'Authored hero framing must be preserved within camera settling tolerance');
   const priorDraws=h.stats().draws;
-  h.scene.setProgress(1);h.frame();assert.ok(h.stats().draws>priorDraws,'Assembly must render hardware');
+  h.scene.resize();h.frame();assert.ok(h.stats().draws>priorDraws,'Assembly must render hardware');
   assert.equal(h.uploads.length,buffers,'scroll must not rebuild geometry');
   assert.equal(h.scene.getState().computeTrays,18);assert.equal(h.scene.getState().switchTrays,9);h.scene.destroy();
 });
 
-check('Editorial 48U plan: 41 components / 48U, 18 real 1U slots, reserved 5U blanking panel',()=>{
+check('Editorial 48U plan: 41 components, no CDU, exact neutral lower infrastructure',()=>{
   const h=harness(),snapshot=h.scope.PACoreScene.assemblySnapshot(1),rows=plain(snapshot.placements);
   assert.equal(rows.length,41);
   const counts={},occupied=new Map();
@@ -101,7 +104,9 @@ check('Editorial 48U plan: 41 components / 48U, 18 real 1U slots, reserved 5U bl
     assert.ok(row.top<=48&&row.bottom>=1);
     for(let u=row.bottom;u<=row.top;u++){assert.equal(occupied.has(u),false,'Overlapping editorial slot U'+u);occupied.set(u,row.name);}
   }
-  assert.deepEqual(counts,{blanking:3,switch:2,powershelf:8,server:18,nvlink:9,cdu:1});
+  assert.deepEqual(counts,{blanking:4,switch:2,powershelf:8,server:18,nvlink:9});
+  const lower=rows.find(row=>row.name==='editorial-infrastructure-blank');
+  assert.deepEqual({type:lower.type,top:lower.top,bottom:lower.bottom,size:lower.size},{type:'blanking',top:4,bottom:1,size:4});
   assert.equal(occupied.size,48);assert.equal(snapshot.occupiedU,48);
   assert.deepEqual(Array.from({length:48},(_,i)=>i+1).filter(u=>!occupied.has(u)),[]);
   assert.deepEqual(plain(snapshot.emptyU),[]);
@@ -144,12 +149,17 @@ check('Shared canonical geometry, no left number gutter, and one actual primary 
   const equipmentBuffers=new Set([...h.uploadedByBuffer].filter(([,data])=>Object.values(shared.equipment).some(mesh=>sameGeometry(data,mesh.data))).map(([buffer])=>buffer));
   const frameBuffers=new Set([...h.uploadedByBuffer].filter(([,data])=>sameGeometry(data,shared.frame.data)).map(([buffer])=>buffer));
   assert.ok(computeBuffers.size>0);
-  for(const p of [0,.20,.36,.40,.58,.76,1]){
+  for(const p of [0,.20,.36,.40,.58,.76,.86,.905,1]){
     h.drawRecords.length=0;h.scene.setProgress(p);h.scene.resize();h.frame();
-    const current=h.scope.PACoreScene.assemblySnapshot(p),pose=current.primaryPose;
+    const current=h.scope.PACoreScene.assemblySnapshot(p),pose=current.placements.find(row=>row.primary);
     const primaryDraws=h.drawRecords.filter(draw=>computeBuffers.has(draw.buffer)&&Math.abs(draw.part[12]-pose.x)<1e-5&&Math.abs(draw.part[13]-pose.y)<1e-5&&Math.abs(draw.part[14]-pose.z)<1e-5);
     assert.equal(primaryDraws.length,1,'Exactly one rendered primary at progress '+p);
     near(primaryDraws[0].opacity,1,'Primary must not fade away');
+    if(p===.86||p===.905)for(const row of current.placements){
+      const mesh=shared.equipment[row.meshKey];
+      const buffers=new Set([...h.uploadedByBuffer].filter(([,data])=>sameGeometry(data,mesh.data)).map(([buffer])=>buffer));
+      assert.equal(h.drawRecords.filter(draw=>buffers.has(draw.buffer)&&Math.abs(draw.part[13]-row.y)<1e-5&&Math.abs(draw.part[14]-row.z)<1e-5).length,1,'Actual draw must match exact exploded/returned '+row.name);
+    }
     if(p===1){assert.equal(h.drawRecords.filter(draw=>computeBuffers.has(draw.buffer)).length,18);assert.equal(h.drawRecords.filter(draw=>equipmentBuffers.has(draw.buffer)).length,snapshot.placements.length,'Exactly 41 actual devices, not a duplicate target tray');assert.equal(h.drawRecords.filter(draw=>frameBuffers.has(draw.buffer)).length,1,'Exactly one shared rack frame');}
   }
   h.scene.destroy();
@@ -163,15 +173,33 @@ check('Forward/reverse insertion: fixed-size primary aligns first, enters once, 
     near(current.progress,p,'Snapshot progress');near(current.primaryPose.scale,1,'Do not morph or stretch the hero tray');
     assert.ok(current.primaryPose.y>=previousY-1e-6,'Vertical alignment is monotonic');
     assert.ok(current.primaryPose.z<=previousZ+1e-6,'Insertion is monotonic');
-    if(p<=.36)near(current.primaryPose.z,6.60,'Tray stays in front of the rack while aligning');
-    if(p>=.40)near(current.primaryPose.y,current.targetPose.y,'Tray must align with U40 before insertion');
-    if(p>=.76){near(current.primaryPose.z,current.targetPose.z,'Inserted tray stays at rack depth');near(current.primaryPose.y,current.targetPose.y,'Inserted tray stays at target U');}
+    if(p<=.26)near(current.primaryPose.z,6.60,'Tray stays in front of the rack while aligning');
+    if(p>=.22)near(current.primaryPose.y,current.targetPose.y,'Tray must align with U40 before insertion');
+    if(p>=.46){near(current.primaryPose.z,current.targetPose.z,'Inserted tray stays at rack depth');near(current.primaryPose.y,current.targetPose.y,'Inserted tray stays at target U');}
     previousY=current.primaryPose.y;previousZ=current.primaryPose.z;
   }
   for(let i=100;i>=0;i--)assert.deepEqual(plain(snapshot(i/100)),forward[i],'Reverse scroll must restore identical geometry at '+i/100);
   const before=h.uploads.length;
   for(const p of [0,.2,.4,.76,1,.76,.4,.2,0]){h.scene.setProgress(p);h.frame();near(h.scene.getState().progress,p,'Live scene accepts reversed progress');}
-  assert.equal(h.uploads.length,before,'Animation does not allocate new geometry');assert.equal(h.frames.size,0);
+  assert.equal(h.uploads.length,before,'Animation does not allocate new geometry');
+  assert.deepEqual(plain(snapshot(.905).placements),plain(snapshot(.56).placements),'Exploded groups return to exact seated positions');
+  h.scene.destroy();
+});
+
+check('Actual uploaded telescoping rail meshes overlap throughout physical insertion',()=>{
+  const h=harness(),rails=[];
+  for(const [buffer,data]of h.uploadedByBuffer){
+    let rail=data.length/12===144,minZ=Infinity,maxZ=-Infinity,outerX=0;
+    for(let i=0;i<data.length&&rail;i+=12){rail=Math.abs(data[i])>1.98&&Math.abs(data[i])<2.10&&data[i+1]<-.05;minZ=Math.min(minZ,data[i+2]);maxZ=Math.max(maxZ,data[i+2]);outerX=Math.max(outerX,Math.abs(data[i]));}
+    if(rail)rails.push({buffer,minZ,maxZ,outerX});
+  }
+  assert.equal(rails.length,3,'Fixed, middle and moving rail members are real separate meshes');rails.sort((a,b)=>b.outerX-a.outerX);
+  for(let step=0;step<=20;step++){
+    h.drawRecords.length=0;h.scene.setProgress(.26+step*.01);h.frame();
+    const pose=h.scene.getState().assembly.primaryPose;
+    const intervals=rails.map((rail,index)=>{const draws=h.drawRecords.filter(draw=>draw.buffer===rail.buffer);assert.equal(draws.length,1);near(draws[0].part[14],pose.z*index/2,'Rail stages share the physical insertion axis');return [rail.minZ+draws[0].part[14],rail.maxZ+draws[0].part[14]];});
+    assert.ok(intervals[1][0]<=intervals[0][1]&&intervals[1][1]>=intervals[2][0],'Rendered nested rail members remain engaged at step '+step);
+  }
   h.scene.destroy();
 });
 
@@ -186,34 +214,37 @@ check('Resized and rotated standalone / assembled hardware stays inside the actu
     bounds.set(buffer,{min,max});
   }
   const transform=(matrix,p)=>[0,1,2,3].map(row=>matrix[row]*p[0]+matrix[row+4]*p[1]+matrix[row+8]*p[2]+matrix[row+12]*p[3]);
-  for(const progress of [0,1]){h.scene.setProgress(progress);h.flush();
+  for(const progress of [0,.18,.22,.26,.30,.40,.56,.66,.742,.86,1]){h.scene.setProgress(progress);h.flush();
   for(const [width,height] of [[810,610],[450,850],[1320,900]])for(const [yaw,pitch] of [[0,0],[Math.PI,0],[Math.PI/2,1.2],[-1.4,-1.13]]){
-    h.drawRecords.length=0;h.scene.setOrbit(yaw,pitch);h.resize(width,height);h.frame();
+    h.scene.setOrbit(yaw,pitch);h.resize(width,height);h.flush();h.drawRecords.length=0;h.scene.resize();h.frame();
     assert.equal(h.canvas.width,width);assert.equal(h.canvas.height,height);
     for(const draw of h.drawRecords){const box=bounds.get(draw.buffer);if(!box||draw.opacity<.99)continue;
+      // Close-up camera deliberately crops the background rack; the moving
+      // compute chassis itself must remain whole at every insertion position.
+      if(progress<.56&&(Math.abs(draw.part[13]-h.scene.getState().assembly.primaryPose.y)>1e-5||Math.abs(draw.part[14]-h.scene.getState().assembly.primaryPose.z)>1e-5))continue;
       for(const x of [box.min[0],box.max[0]])for(const y of [box.min[1],box.max[1]])for(const z of [box.min[2],box.max[2]]){
         const clip=transform(draw.projection,transform(draw.model,transform(draw.part,[x,y,z,1])));
         assert.ok(clip.every(Number.isFinite)&&clip[3]>0,'Visible hardware must be in front of the camera');
         for(let axis=0;axis<3;axis++)assert.ok(Math.abs(clip[axis]/clip[3])<=1.0001,'Hardware clipping at '+JSON.stringify({progress,width,height,yaw,pitch,axis,value:clip[axis]/clip[3]}));
       }
     }
-    assert.equal(h.frames.size,0,'Resize and deliberate orbit must not create an idle render loop');
+    if(progress===1)assert.equal(h.frames.size,0,'Settled deliberate orbit waits without drawing');
   }
   }
   h.scene.destroy();
 });
 
 check('Four horizontal quadrants, rear view, top/bottom and release persistence',()=>{
-  const h=harness();h.frame();
+  const h=harness();h.scene.setProgress(1);h.flush();
   for(const yaw of [0,Math.PI/2,Math.PI,-Math.PI/2]){
-    h.scene.setOrbit(yaw,.7);h.frame();
-    const expected=yaw===Math.PI?-Math.PI:yaw;
+    h.scene.setOrbit(yaw,.7);h.flush();
+    const expected=yaw;
     assert.ok(Math.abs(h.scene.getState().yaw-expected)<.00001);
-    h.scene.setPointer(.9,-.8);h.scene.setProgress(0);
+    h.scene.setPointer(.9,-.8);h.scene.setProgress(1);
     assert.equal(h.scene.getState().yaw,expected);assert.equal(h.frames.size,0);
   }
-  h.scene.setOrbit(7*Math.PI,2);h.frame();assert.equal(h.scene.getState().pitch,1.55);
-  h.scene.setOrbit(0,-2);h.frame();assert.equal(h.scene.getState().pitch,-1.55);
+  h.scene.setOrbit(7*Math.PI,2);h.frame();assert.equal(h.scene.getState().pitch,1.2);
+  h.scene.setOrbit(0,-2);h.frame();assert.equal(h.scene.getState().pitch,-1.2);
   h.event('pointerdown',{button:0,pointerId:1,clientX:200,clientY:100});
   h.event('pointermove',{pointerId:1,clientX:420,clientY:320});h.frame();
   assert.equal(h.scene.getState().dragging,true);
@@ -222,21 +253,23 @@ check('Four horizontal quadrants, rear view, top/bottom and release persistence'
   h.scene.destroy();
 });
 
-check('Reversible scroll settles into authored angle and stops scheduling frames',()=>{
-  const h=harness();h.frame();h.scene.setOrbit(1.3,-.8);h.frame();h.scene.setProgress(.5);
-  assert.equal(h.scene.getState().settling,true);h.frame();
-  assert.ok(h.scene.getState().yaw>0&&h.scene.getState().yaw<1.3);h.flush();
+check('Reversible scroll/reset eases camera, uses shortest arc, and settles final hero',()=>{
+  const h=harness();h.frame();h.scene.setOrbit(1.3,-.8);h.flush();const before=h.scene.getState().camera.yaw;h.scene.setProgress(1);h.frame();
+  assert.equal(h.scene.getState().settling,true);
+  assert.ok(Math.abs(h.scene.getState().camera.yaw-before)<.5,'Camera transition has no angle jump');h.flush();
   assert.equal(h.scene.getState().yaw,0);assert.equal(h.scene.getState().pitch,0);assert.equal(h.frames.size,0);
   h.scene.setProgress(1);h.frame();h.scene.setProgress(0);h.frame();assert.equal(h.scene.getState().progress,0);
-  h.scene.setOrbit(Math.PI,.5);h.frame();h.scene.resetOrbit();h.flush();assert.equal(h.scene.getState().yaw,0);assert.equal(h.frames.size,0);h.scene.destroy();
+  h.scene.setProgress(1);h.scene.setOrbit(10*Math.PI+.1,.5);h.flush();const spun=h.scene.getState().camera.yaw;h.scene.resetOrbit();h.frame();
+  assert.ok(Math.abs(h.scene.getState().camera.yaw-spun)<.2,'Reset never rapidly unwinds accumulated turns');
+  h.flush();assert.equal(h.scene.getState().yaw,0);assert.equal(h.frames.size,0);h.scene.destroy();
 });
 
 check('Keyboard orbit and reset; Reduced Motion still permits deliberate inspection',()=>{
   const h=harness({reduced:true});h.frame();let prevented=0;
-  h.event('keydown',{key:'ArrowRight',preventDefault:()=>prevented++});h.frame();assert.equal(h.scene.getState().yaw,.1200000000000001);
+  h.event('keydown',{key:'ArrowRight',preventDefault:()=>prevented++});h.frame();near(h.scene.getState().yaw,.12,'Keyboard yaw increment');
   h.event('keydown',{key:'ArrowDown',shiftKey:true,preventDefault:()=>prevented++});h.frame();assert.equal(h.scene.getState().pitch,.24);
   h.event('keydown',{key:'Home',preventDefault:()=>prevented++});h.frame();assert.equal(h.scene.getState().yaw,0);assert.equal(h.scene.getState().pitch,0);
-  assert.equal(prevented,3);assert.equal(h.scene.getState().settling,false);assert.equal(h.frames.size,0);h.scene.destroy();
+  h.flush(2);assert.equal(prevented,3);assert.equal(h.scene.getState().settling,false);assert.equal(h.frames.size,0);assert.equal(h.timers.size,0,'Reduced motion never arms idle animation');h.scene.destroy();
 });
 
 check('Theme, resize and complete idempotent disposal',()=>{
@@ -244,9 +277,98 @@ check('Theme, resize and complete idempotent disposal',()=>{
   h.scene.setTheme(false);h.frame();assert.equal(h.scene.getState().theme,'dark');h.resize();h.frame();
   assert.equal(h.canvas.width,810);assert.equal(h.canvas.height,610);
   h.scene.setOrbit(1,.3);h.scene.resetOrbit();h.scene.destroy();h.scene.destroy();
-  assert.equal(h.frames.size,0);assert.equal(h.events.size,0);assert.equal(h.stats().deletedBuffers,buffers);assert.equal(h.stats().deletedPrograms,1);
+  assert.equal(h.frames.size,0);assert.equal(h.events.size,0);assert.equal(h.globalEvents.size,0);assert.equal(h.timers.size,0);assert.equal(h.stats().deletedBuffers,buffers);assert.equal(h.stats().deletedPrograms,1);
   assert.equal(h.scene.getState().geometryBuffers,0);
   assert.equal(h.stats().observerDisconnected,true);assert.equal(h.canvas.style.touchAction,'pan-y');assert.equal(h.canvas.dataset.coreState,'disposed');assert.equal(h.canvas.paCoreScene,undefined);
+});
+
+check('Idle showcase enters after 6.5 seconds and every input family eases out',()=>{
+  for(const input of ['pointermove','pointerdown','keydown','wheel','scroll','touchstart','hashchange']){
+    const h=harness();h.scene.setProgress(1);h.flush(380);
+    assert.equal(h.scene.getState().idle.active,false,'No idle motion before requested delay');
+    h.flush(80);assert.equal(h.scene.getState().idle.active,true);assert.ok(h.scene.getState().idle.weight>.5);
+    const before=h.scene.getState();h.globalEvents.get(input)();h.frame();const exiting=h.scene.getState();
+    assert.equal(exiting.idle.exiting,true);assert.ok(exiting.idle.weight>0,'Activity never snaps idle influence to zero');
+    assert.ok(Math.abs(exiting.camera.yaw-before.camera.yaw)<.1,'Activity cannot teleport the camera');
+    h.flush(120);assert.equal(h.scene.getState().idle.active,false);assert.equal(h.scene.getState().idle.weight,0);h.scene.destroy();
+  }
+});
+
+check('Technical scan is bounded and reduced motion disables animated shader effects',()=>{
+  const h=harness();h.scene.setProgress(.93);h.frame();assert.ok(h.uniformValues.uScan>0&&h.uniformValues.uScan<=1);assert.ok(Number.isFinite(h.uniformValues.uScanY));
+  near(Number(h.canvas.dataset.corePrimaryY),h.scene.getState().assembly.primaryPose.y,'Scan must not overwrite U40 primary pose diagnostics');
+  h.scene.setProgress(1);h.frame();assert.equal(h.uniformValues.uScan,0);h.scene.destroy();
+  const reduced=harness({reduced:true});reduced.scene.setProgress(.93);reduced.frame();assert.equal(reduced.uniformValues.uScan,0);assert.equal(reduced.uniformValues.uTime,0);reduced.scene.destroy();
+});
+
+check('Slow-frame capability reduction, camera convergence and settled final-pose idle hold',()=>{
+  const h=harness();h.frame();const pixels=h.scene.getState().quality.pixelCount,buffers=h.uploads.length;
+  h.scene.setProgress(.4);
+  for(let i=0;i<110;i++)h.frame(100);
+  assert.ok(h.scene.getState().quality.resolution<=.701,'Sustained slow rendering reaches the documented quality floor');
+  assert.ok(h.scene.getState().quality.pixelCount<pixels*.51,'Lower capability reduces framebuffer work');
+  assert.equal(h.uploads.length,buffers,'Adaptive rendering never rebuilds geometry');
+  h.scene.setProgress(1);h.scene.setView('middle');
+  let frames=0;do{h.frame(1000);frames++;}while(h.scene.getState().settling&&frames<40);
+  assert.ok(frames<40,'Manual close-up converges even when frames take a second');
+  assert.equal(h.scene.getState().camera.view,'middle');assert.equal(h.scene.getState().idle.active,false,'Manual inspection cannot start idle orbit');
+  h.scene.setProgress(.742);h.flush();assert.equal(h.scene.getState().settling,false);
+  h.scene.setProgress(1);let arrivalElapsed=0;
+  do{
+    h.frame(2000);arrivalElapsed+=2000;
+    assert.equal(h.scene.getState().idle.active,false,'Idle cannot start while the slow camera is still arriving');
+    assert.ok(arrivalElapsed<40000,'The final camera must still converge under slow frames');
+  }while(h.scene.getState().settling);
+  assert.ok(arrivalElapsed>6500,'Exercise arrival slower than the original idle deadline');
+  h.frame(6499);assert.equal(h.scene.getState().idle.active,false,'A complete inactivity hold starts after camera convergence');
+  h.frame(1);assert.equal(h.scene.getState().idle.active,true,'Idle starts only after the settled hero has held for 6.5 seconds');
+  h.scene.destroy();
+});
+
+check('360-degree original equipment, enclosed depth, attached service routing and material families',()=>{
+  const h=harness(),rows=h.scope.PACoreScene.assemblySnapshot(1).placements;
+  const shared=h.scope.PARackScene.buildEditorialParts(rows.map(row=>({name:row.name,mgx_type:row.type,rack_u:row.top,rack_size:row.size})));
+  const quality=shared.quality;
+  assert.ok(quality.front&&quality.side&&quality.rear&&quality.fullDepth&&quality.noCDU&&quality.conceptual);
+  assert.equal(quality.railPairs,37);assert.equal(quality.materialFamilies.length,7);
+  for(const type of ['server:1','nvlink:1','switch:1','powershelf:1']){
+    const mesh=shared.equipment[type],facings={front:0,rear:0,side:0,top:0};
+    assert.ok(mesh.max[2]-mesh.min[2]>4.5,type+' has actual equipment enclosure depth');
+    for(let i=0;i<mesh.data.length;i+=11){if(mesh.data[i+5]>.8)facings.front++;if(mesh.data[i+5]<-.8)facings.rear++;if(Math.abs(mesh.data[i+3])>.8)facings.side++;if(mesh.data[i+4]>.8)facings.top++;}
+    for(const [facing,count]of Object.entries(facings))assert.ok(count>100,type+' has substantial '+facing+' geometry');
+  }
+  assert.ok(shared.infrastructure.data.length>10000&&shared.connections.data.length>10000,'Rear service geometry has dedicated batched meshes');
+  assert.equal(shared.routes.length,quality.routeCount);assert.deepEqual(Object.keys(quality.routeFamilies).sort(),['cooling','interconnect','management','power']);
+  const byName=new Map(rows.map(row=>[row.name,row])),sockets=new Map(shared.sockets.map(socket=>[socket.id,socket]));
+  const derivative=(points,t)=>[0,1,2].map(axis=>3*(1-t)*(1-t)*(points[1][axis]-points[0][axis])+6*(1-t)*t*(points[2][axis]-points[1][axis])+3*t*t*(points[3][axis]-points[2][axis]));
+  const second=(points,t)=>[0,1,2].map(axis=>6*(1-t)*(points[2][axis]-2*points[1][axis]+points[0][axis])+6*t*(points[3][axis]-2*points[2][axis]+points[1][axis]));
+  assert.equal(sockets.size,shared.routes.length*2,'Every cable has two distinct physical service anchors');
+  for(const route of shared.routes){
+    const row=byName.get(route.component);assert.ok(row,'Every cable belongs to a placed component');
+    assert.equal(route.control.length,4,'Routing uses smooth cubic curves');
+    assert.deepEqual(plain(route.control[0]),plain(route.from));assert.deepEqual(plain(route.control[3]),plain(route.to));
+    assert.deepEqual(plain(sockets.get(route.fromSocket)?.position),plain(route.from),'Tray endpoint lands at its connector anchor');
+    assert.deepEqual(plain(sockets.get(route.toSocket)?.position),plain(route.to),'Rack endpoint lands at its service anchor');
+    assert.equal(sockets.get(route.fromSocket).owner,row.name);assert.equal(sockets.get(route.toSocket).owner,'rack-service-structure');
+    assert.ok(Math.abs(route.from[1]-row.y)<.14,'Cable tray endpoint shares its real equipment height');
+    assert.ok(route.radius>.01&&route.radius<.06,'Restrained jacket diameter');
+    const enclosureRear=shared.front-shared.equipment[row.meshKey].depth;
+    for(const point of route.control){for(const coordinate of point)assert.ok(Number.isFinite(coordinate));assert.ok(point[2]+route.radius<enclosureRear,'Entire cubic control hull remains outside the equipment rear enclosure');}
+    assert.ok(route.segments.length>=3,'Service loops use continuously joined arc sections');
+    assert.deepEqual(plain(route.segments[0][0]),plain(route.from));assert.deepEqual(plain(route.segments.at(-1)[3]),plain(route.to));
+    for(let index=0;index<route.segments.length;index++){
+      const segment=route.segments[index];assert.equal(segment.length,4);
+      for(const point of segment)assert.ok(point[2]+route.radius<enclosureRear,'Actual cable sweep remains behind the equipment body');
+      if(index){const prior=route.segments[index-1];assert.deepEqual(plain(prior[3]),plain(segment[0]),'No gap between rendered curve sections');const a=derivative(prior,1),b=derivative(segment,0);assert.ok(a.reduce((sum,value,axis)=>sum+value*b[axis],0)/(Math.hypot(...a)*Math.hypot(...b))>.9999,'No sharp tangent break between rendered cable sections');}
+      for(let sample=0;sample<=24;sample++){
+        const d=derivative(segment,sample/24),dd=second(segment,sample/24),speed=Math.hypot(...d),cross=Math.hypot(d[1]*dd[2]-d[2]*dd[1],d[2]*dd[0]-d[0]*dd[2],d[0]*dd[1]-d[1]*dd[0]);
+        assert.ok(speed>1e-7,'Cable curves never form a cusp');
+        if(cross>1e-9)assert.ok(speed**3/cross>=route.radius*3,`${route.family} bend radius ${speed**3/cross/route.radius}r at segment ${index}, t=${sample/24}; minimum is 3r`);
+      }
+    }
+    for(const endpoint of [route.from,route.to])for(let axis=0;axis<3;axis++)assert.ok(endpoint[axis]>=shared.bounds.min[axis]&&endpoint[axis]<=shared.bounds.max[axis],'Endpoints remain within actual structure bounds');
+  }
+  h.scene.destroy();
 });
 
 check('WebGL unavailable fallback does not install interactive listeners',()=>{

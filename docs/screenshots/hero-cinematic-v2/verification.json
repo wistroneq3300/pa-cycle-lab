@@ -1,0 +1,55 @@
+{
+  "renderer": "Chromium SwiftShader; physical desktop GPU FPS not measured",
+  "coreChecks": "16/16 passed",
+  "browser": {
+    "final": {
+      "passed": true,
+      "results": [
+        "Selected viewport/theme/stage captures, UI separation, framing and zero GL errors"
+      ],
+      "errors": [],
+      "external": [],
+      "captures": 15,
+      "finalRackHeight": {
+        "3440x1440-dark-13-final-hero.png": 0.7645249621590084
+      }
+    },
+    "responsive": {
+      "passed": true,
+      "results": [
+        "Selected viewport/theme/stage captures, UI separation, framing and zero GL errors"
+      ],
+      "errors": [],
+      "external": [],
+      "captures": 75,
+      "finalRackHeight": {
+        "1366x768-dark-13-final-hero.png": 0.7645249607282607,
+        "1440x900-dark-13-final-hero.png": 0.7645249621590084,
+        "1600x900-dark-13-final-hero.png": 0.7645249620586951,
+        "1920x1080-dark-13-final-hero.png": 0.7645249621590084,
+        "2560x1440-dark-13-final-hero.png": 0.7645249620586951
+      }
+    },
+    "light": {
+      "passed": true,
+      "results": [
+        "Selected viewport/theme/stage captures, UI separation, framing and zero GL errors",
+        "Same canvas, U40 alignment/insertion, forward/reverse and exact exploded return",
+        "Real forward/reverse scroll, keyboard orbit, idle entry and smooth activity exit",
+        "Replay and WebGL context loss/restoration",
+        "Reduced-motion final pose/replay disabled and complete route cleanup"
+      ],
+      "errors": [],
+      "external": [],
+      "captures": 18,
+      "finalRackHeight": {
+        "1366x768-light-13-final-hero.png": 0.7645249776310921,
+        "1440x900-light-13-final-hero.png": 0.7645249889241942,
+        "1600x900-light-13-final-hero.png": 0.7645249890203869,
+        "1920x1080-light-13-final-hero.png": 0.764524983798858,
+        "2560x1440-light-13-final-hero.png": 0.7645249776310922,
+        "3440x1440-light-13-final-hero.png": 0.7645249776310922
+      }
+    }
+  }
+}

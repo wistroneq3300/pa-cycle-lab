@@ -173,7 +173,7 @@
     const onTool = event => {
       const button = event.target.closest('[data-core-view]');
       if (!button || button.disabled) return;
-      if (button.dataset.coreView === 'rear') scene?.setOrbit?.(Math.PI,0);
+      if (button.dataset.coreView === 'rear') scene?.setView?.('rear');
       else scene?.resetOrbit?.();
     };
     document.getElementById('core-tools').addEventListener('click', onTool);

@@ -158,6 +158,21 @@
     const minutes=Math.min(1440,Math.max(1,Number(url.searchParams.get('minutes'))||60));
     const sampleNow=Math.floor(Date.now()/1000),ts=Array.from({length:25},(_,i)=>sampleNow-minutes*60+i*minutes*60/24),wave=(base,amp)=>ts.map((_,i)=>Math.round((base+Math.sin(i*.65)*amp+Math.cos(i*.19)*amp*.3)*10)/10);
     let body={};try{body=JSON.parse(options.body||'{}');}catch{}
+    // Synthetic overview evidence for the isolated design preview only. These
+    // representative validation counts never reach the production API.
+    if(path==='/api/validation/overview'&&method==='GET'){
+      const counts=[10,8,5,4,2,8];
+      const rows=projects.map((project,index)=>{
+        const systems=scenario==='normal'?(counts[index]||0):machines.filter(machine=>machine.project===project.name).length;
+        const nodes=systems+(scenario==='normal'&&index===5?16:0),checked=Math.max(0,nodes-2);
+        return {name:project.name,level:project.level==='rack'?'L11':'L10',systems,nodes,
+          issues:{fail:index===0?2:0,warning:index===1?3:0},validation:{checked,total:nodes,pass:Math.max(0,checked-2)},
+          cycle:{running:index===0?1:0,completed:systems},monitoring:{reporting:Math.max(0,nodes-1),total:nodes},last_validation:now};
+      });
+      const totals={systems:0,nodes:0,issues:{fail:0,warning:0},validation:{checked:0,total:0,pass:0},cycle:{running:0,completed:0},monitoring:{reporting:0,total:0}};
+      for(const row of rows){totals.systems+=row.systems;totals.nodes+=row.nodes;for(const key of ['issues','validation','cycle','monitoring'])for(const field of Object.keys(totals[key]))totals[key][field]+=row[key][field];}
+      return response({totals,projects:rows,issues:[],recent_runs:[],synthetic:true});
+    }
     const topologyPingMatch=path.match(/^\/api\/projects\/(.+)\/topology\/ping$/);
     if(topologyPingMatch){
       const name=topologyPingMatch[1],current=topologyDocs.get(name)||{revision:0,racks:[]};
