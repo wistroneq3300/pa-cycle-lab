@@ -115,6 +115,22 @@ class AgentRunRoutes(unittest.TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertIsNone(r.json()['run'])
 
+    def test_active_skips_run_that_produced_a_result(self):
+        """A run with a final_result is history, not a live run to resume.
+
+        Regression: a finished run could sit in WAITING_FOR_USER (non-terminal),
+        so /active happily returned it and every reopen dropped the engineer back
+        into the same stale conversation. A persisted result disqualifies it.
+        """
+        from integration.agent_runs import AgentRunStore
+        vid = self.item['case_variant_id']
+        rid = self.client.post('/api/agent/runs', json={'case_variant_id': vid}).json()['run']['run_id']
+        store = AgentRunStore()
+        store.update_state(rid, status='WAITING_FOR_USER', final_result='log: all good')
+        active = self.client.get('/api/agent/active', params={'case_variant_id': vid})
+        self.assertEqual(active.status_code, 200)
+        self.assertIsNone(active.json()['run'])
+
     def test_supplemental_records_a_revision(self):
         vid = self.item['case_variant_id']
         rid = self.client.post('/api/agent/runs', json={'case_variant_id': vid}).json()['run']['run_id']

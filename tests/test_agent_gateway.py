@@ -149,6 +149,26 @@ class GatewayIngestTests(unittest.TestCase):
         self.assertEqual([m["kind"] for m in run["messages"] if m["role"] == "agent"],
                          ["message"])
 
+    def test_finished_after_result_stays_done_not_waiting(self):
+        """A run that already produced a result must never fall back to WAITING.
+
+        Regression: the agent-server emits ``finished`` per turn. After a
+        FinishAction produced the log (status DONE), a later turn that stops
+        without a new FinishAction used to flip the run back to WAITING_FOR_USER.
+        Because WAITING_FOR_USER is non-terminal, the finished run was then
+        treated as live and reopened forever — every reopen showed the same stale
+        conversation. A persisted final_result must keep the run DONE.
+        """
+        self.gateway.ingest("run-1", events=[_FINISH, _STATE_DONE])
+        self.assertEqual(self.store.get_run("run-1")["status"], "DONE")
+        # a subsequent idle turn, no new FinishAction
+        summary = self.gateway.ingest("run-1", events=[_STATE_DONE])
+        run = self.store.get_run("run-1")
+        self.assertEqual(summary["status"], "DONE")
+        self.assertEqual(run["status"], "DONE")
+        self.assertEqual(run["final_result"], "lspci shows 2 GPUs; LnkSta x16")
+        self.assertIsNotNone(run["ended_at"])
+
     def test_waiting_approval_is_recorded_once_across_polls(self):
         """Polling re-ingests the same finished turn; approval must not accumulate."""
         for _ in range(3):
