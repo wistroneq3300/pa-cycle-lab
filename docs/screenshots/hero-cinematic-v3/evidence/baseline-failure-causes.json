@@ -1,0 +1,226 @@
+[
+  {
+    "count": 73,
+    "message": "AssertionError: 404 != 200 : {\"detail\":\"\u627e\u4e0d\u5230 checker \u8173\u672c C:\\\\Users\\\\kobei\\\\Documents\\\\Codex\\\\2026-10-07\\\\pa-cycle-lab-branch-codex-hero\\\\engine\\\\vera_cycle/neutrino_demo_config.sh\uff0c\u8acb\u5148\u653e\u7f6e\u8a72\u5c08\u6848\u7684 neutrino_demo_config.sh\"}",
+    "examples": [
+      "tests.test_console.ConsoleTests::test_artifact_references_reuse_path_boundary",
+      "tests.test_console.ConsoleTests::test_concurrent_ordering_and_terminal_is_last",
+      "tests.test_console.ConsoleTests::test_console_reads_and_download_never_change_job_or_locks"
+    ]
+  },
+  {
+    "count": 42,
+    "message": "PermissionError: [WinError 32] \u7a0b\u5e8f\u7121\u6cd5\u5b58\u53d6\u6a94\u6848\uff0c\u56e0\u70ba\u6a94\u6848\u6b63\u7531\u53e6\u4e00\u500b\u7a0b\u5e8f\u4f7f\u7528\u3002: '<Windows path>'",
+    "examples": [
+      "tests.test_agent_gateway.GatewayIngestTests::test_build_instruction_execute_mode_is_unchanged",
+      "tests.test_agent_gateway.GatewayIngestTests::test_build_instruction_includes_case_and_review",
+      "tests.test_agent_gateway.GatewayIngestTests::test_build_instruction_plan_mode_waits_for_go"
+    ]
+  },
+  {
+    "count": 21,
+    "message": "AssertionError: 404 != 409",
+    "examples": [
+      "tests.test_integration.IntegrationTests::test_shared_aux_scope_rejected_before_any_job",
+      "tests.test_run2.Run2Tests::test_legacy_remote_boundary_and_future_routes_default_deny",
+      "tests.test_run2.Run2Tests::test_legacy_remote_boundary_and_future_routes_default_deny"
+    ]
+  },
+  {
+    "count": 4,
+    "message": "AssertionError: 405 != 409",
+    "examples": [
+      "tests.test_run2.Run2Tests::test_legacy_remote_boundary_and_future_routes_default_deny",
+      "tests.test_run2.Run2Tests::test_legacy_remote_boundary_and_future_routes_default_deny",
+      "tests.test_run2.Run2Tests::test_legacy_remote_boundary_and_future_routes_default_deny"
+    ]
+  },
+  {
+    "count": 3,
+    "message": "AssertionError: False is not true",
+    "examples": [
+      "tests.test_independent_inspection.Independent::test_new_check_version_does_not_rewrite_old_snapshot",
+      "tests.test_native.NativeTests::test_create_and_binding_edit_serialize_at_route_boundary",
+      "tests.test_validation_edges.Edges::test_two_projects_and_existing_naboo_use_their_own_checker"
+    ]
+  },
+  {
+    "count": 2,
+    "message": "AssertionError: 200 != 409",
+    "examples": [
+      "tests.test_integration.IntegrationTests::test_local_transport_boundaries_and_csrf",
+      "tests.test_run2.Run2Tests::test_legacy_remote_boundary_and_future_routes_default_deny"
+    ]
+  },
+  {
+    "count": 2,
+    "message": "AssertionError: {} is not true",
+    "examples": [
+      "tests.test_platform_sessions.PlatformSessions::test_bridge_hard_death_closes_actual_proxy_and_releases_finished_session",
+      "tests.test_run2.Run2Tests::test_control_result_database_failure_keeps_reservation"
+    ]
+  },
+  {
+    "count": 2,
+    "message": "AssertionError: 0 != 1",
+    "examples": [
+      "tests.test_platform_sessions.PlatformSessions::test_kvm_web_hard_death_retains_the_same_controller_scope",
+      "tests.test_platform_sessions.PlatformSessions::test_web_hard_death_retains_queryable_session_until_verified_reconciliation"
+    ]
+  },
+  {
+    "count": 2,
+    "message": "AssertionError: 422 != 200",
+    "examples": [
+      "tests.test_run2.Run2Tests::test_invalid_imported_endpoint_can_be_repaired_when_idle",
+      "tests.test_run2.Run2Tests::test_inventory_early_validation_and_passive_exemption"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "FileNotFoundError: [Errno 2] No such file or directory: '/srv/pa-agent/settings\\\\profiles\\\\qwen3.8-27b.json'",
+    "examples": [
+      "tests.test_agent_gateway.GatewayMessageTests::test_start_run_plan_mode_sends_plan_preamble"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "failed on teardown with \"PermissionError: [WinError 32] \u7a0b\u5e8f\u7121\u6cd5\u5b58\u53d6\u6a94\u6848\uff0c\u56e0\u70ba\u6a94\u6848\u6b63\u7531\u53e6\u4e00\u500b\u7a0b\u5e8f\u4f7f\u7528\u3002: '<Windows path>'\"",
+    "examples": [
+      "tests.test_agent_gateway.GatewayMessageTests::test_start_run_plan_mode_sends_plan_preamble"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "AssertionError: False is not true : [('NOT_READY', [{'code': 'CONFIG_FAILED', 'component': 'hardware', 'detail': 'Hardware script exited 126', 'severity': 'FAIL', 'evidence': '', 'snippet': '', 'rule_id': 'CONFIG_FAILED', 'rule_version': '3ea6ed56788ed713fcc19268535958d9ab73684bcfe52dd99260dc76ad4227b3', 'component_id': 'hardware', 'verdict_determinable': True, 'evidence_ref': {'snapshot_id': 'e73",
+    "examples": [
+      "tests.test_independent_inspection.Independent::test_no_cycle_required_and_all_sources_have_new_evidence"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "KeyError: 'id'",
+    "examples": [
+      "tests.test_integration.IntegrationTests::test_idempotency_and_conflicting_reuse"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "AssertionError: 404 != 422",
+    "examples": [
+      "tests.test_integration.IntegrationTests::test_input_and_project_isolation"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "KeyError: 'targets'",
+    "examples": [
+      "tests.test_native.NativeTests::test_128_targets_and_node_filter"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "AssertionError: 404 != 503",
+    "examples": [
+      "tests.test_native.NativeTests::test_live_cannot_use_environment_operator_as_caller"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "AssertionError: 'node:4aa97f460cb85f8da7a4bb9a88b4f87d' not found in {}",
+    "examples": [
+      "tests.test_native.NativeTests::test_session_reservations_are_canonical_and_authorized"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "AssertionError: 409 != 200 : {\"detail\":\"Endpoint, credential or command is outside the enrollment manifest\"}",
+    "examples": [
+      "tests.test_platform_enrollment.PlatformEnrollment::test_new_chassis_four_slots_uses_only_supplied_credentials"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "integration.store.Conflict: Runtime manifest is missing: engine/vera_cycle/validation_checkers.json",
+    "examples": [
+      "tests.test_platform_history.PlatformHistory::test_css_changes_do_not_change_execution_hash"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "AssertionError: Lists differ: [404, 404] != [200, 200]\n\nFirst differing element 0:\n404\n200\n\n- [404, 404]\n+ [200, 200]",
+    "examples": [
+      "tests.test_platform_multiuser.PlatformMultiuser::test_same_node_race_has_one_reservation_and_one_persisted_blocked_request"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "AssertionError: Lists differ: ['A', 'B'] != ['A']\n\nFirst list contains 1 additional elements.\nFirst extra element 1:\n'B'\n\n- ['A', 'B']\n+ ['A']",
+    "examples": [
+      "tests.test_platform_permissions.PlatformPermissions::test_lists_filter_before_counts_and_cache_cannot_bypass_project"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "AssertionError: Items in the first set but not the second:\n'B'",
+    "examples": [
+      "tests.test_platform_permissions.PlatformPermissions::test_project_reader_does_not_need_global_data_permission"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "AssertionError: 'ERROR' != 'AWAITING_CONFIRMATION'\n- ERROR\n+ AWAITING_CONFIRMATION\n : Execution failed: CheckerMissing",
+    "examples": [
+      "tests.test_platform_profiles.PlatformProfiles::test_legacy_job_without_profile_snapshot_keeps_pre_confirmation"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "AssertionError: 'COLLECTED' != 'DEFERRED'\n- COLLECTED\n+ DEFERRED",
+    "examples": [
+      "tests.test_platform_telemetry.PlatformTelemetry::test_cpu_samples_without_cycle_are_node_bound_and_reservations_defer"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "AssertionError: Items in the second set but not the first:\n'cycle-unknown'\n'session-unknown'",
+    "examples": [
+      "tests.test_platform_telemetry.PlatformTelemetry::test_observation_restart_requires_os_ownership_and_keeps_control_locks"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "AssertionError: Conflict not raised",
+    "examples": [
+      "tests.test_run2.Run2Tests::test_ambiguous_response_survives_reopen_and_blocks_all_actions"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "AssertionError: 'ssh_run' unexpectedly found in {'ssh_run', 'run_control_cmd', '_ipmi_cmd'} : C:\\Users\\kobei\\Documents\\Codex\\2026-10-07\\pa-cycle-lab-branch-codex-hero\\integration\\web.py",
+    "examples": [
+      "tests.test_run2.Run2Tests::test_credential_permission_validation_and_transport_boundary"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "AssertionError: 422 != 503",
+    "examples": [
+      "tests.test_run2.Run2Tests::test_inventory_save_failure_rolls_back_memory"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "AssertionError: 422 != 409",
+    "examples": [
+      "tests.test_run2.Run2Tests::test_legacy_remote_boundary_and_future_routes_default_deny"
+    ]
+  },
+  {
+    "count": 1,
+    "message": "AssertionError: legacy scan",
+    "examples": [
+      "tests.test_run2.Run2Tests::test_metadata_and_startup_never_use_legacy_live_transport"
+    ]
+  }
+]

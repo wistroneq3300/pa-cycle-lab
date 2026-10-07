@@ -1,0 +1,11 @@
+/* Scoped to the Overview renderer; never used by Rack Management. */
+.vo-scene .vo-device-callouts{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;pointer-events:none;visibility:hidden;z-index:3;font-family:inherit}
+.vo-device-callouts .vo-callout-leader{fill:none;stroke:rgba(209,225,232,.32);stroke-width:.75;vector-effect:non-scaling-stroke;stroke-linecap:round}
+.vo-device-callouts .vo-callout-anchor{fill:rgba(211,227,234,.55)}
+.vo-device-callouts .vo-callout-primary{fill:rgba(221,231,237,.62);font-weight:500;letter-spacing:.12em}
+.vo-device-callouts .vo-callout-secondary{fill:rgba(212,225,232,.38);font-weight:400;letter-spacing:.14em}
+[data-theme="light"] .vo-device-callouts .vo-callout-leader{stroke:rgba(36,60,74,.34)}
+[data-theme="light"] .vo-device-callouts .vo-callout-anchor{fill:rgba(36,60,74,.55)}
+[data-theme="light"] .vo-device-callouts .vo-callout-primary{fill:rgba(23,46,61,.64)}
+[data-theme="light"] .vo-device-callouts .vo-callout-secondary{fill:rgba(23,46,61,.43)}
+@media(prefers-reduced-motion:reduce){.vo-scene .vo-device-callouts{display:none}}

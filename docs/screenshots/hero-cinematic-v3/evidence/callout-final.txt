@@ -1,0 +1,28 @@
+CAPTURE qa/1366x768-dark-03-identification.png
+CAPTURE qa/1366x768-dark-11-final-hero.png
+CAPTURE qa/1366x768-light-03-identification.png
+CAPTURE qa/1366x768-light-11-final-hero.png
+CAPTURE qa/1600x900-dark-03-identification.png
+CAPTURE qa/1600x900-dark-11-final-hero.png
+CAPTURE qa/1600x900-light-03-identification.png
+CAPTURE qa/1600x900-light-11-final-hero.png
+CAPTURE qa/1920x1080-dark-03-identification.png
+CAPTURE qa/1920x1080-dark-11-final-hero.png
+CAPTURE qa/1920x1080-light-03-identification.png
+CAPTURE qa/1920x1080-light-11-final-hero.png
+CAPTURE qa/2560x1440-dark-03-identification.png
+CAPTURE qa/2560x1440-dark-11-final-hero.png
+CAPTURE qa/2560x1440-light-03-identification.png
+CAPTURE qa/2560x1440-light-11-final-hero.png
+CAPTURE qa/3440x1440-dark-03-identification.png
+CAPTURE qa/3440x1440-dark-11-final-hero.png
+CAPTURE qa/3440x1440-light-03-identification.png
+CAPTURE qa/3440x1440-light-11-final-hero.png
+{
+  "passed": true,
+  "pass": "qa",
+  "results": [
+    "Selected viewport/theme/stage captures, UI separation, framing and zero GL errors"
+  ],
+  "captures": 20
+}

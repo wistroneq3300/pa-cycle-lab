@@ -707,7 +707,47 @@
   // Homepage asset: original engineering interpretation of public DGX GB rack
   // exterior references, not a vendor port map, CAD file, or cooling topology.
   // Operational inventory geometry above deliberately retains its own behavior.
-  const E={skin:[.235,.265,.285],lid:[.31,.34,.36],fold:[.15,.18,.20],frame:[.082,.105,.12],edge:[.48,.525,.55],polymer:[.033,.047,.055],jacket:[.070,.091,.102],rear:[.255,.29,.31],seam:[.012,.021,.026]};
+  const E={skin:[.235,.265,.285],lid:[.31,.34,.36],fold:[.15,.18,.20],frame:[.082,.105,.12],edge:[.48,.525,.55],port:[.68,.71,.73],portInner:[.31,.34,.35],polymer:[.033,.047,.055],jacket:[.070,.091,.102],rear:[.255,.29,.31],seam:[.012,.021,.026]};
+  function editorialPerforation(m,x,y,z,w,h,color=C.gold,front=1,pitch=.028,backing=true){
+    // Punched sheet, with real-depth grille bars over a recessed dark plenum.
+    // At inspection distance the aperture edges catch a different highlight
+    // from the sheet; no emissive pixels or photographic texture is involved.
+    const cols=Math.max(2,Math.round(w/pitch)),rows=Math.max(2,Math.round(h/pitch)),dx=w/cols,dy=h/rows;
+    if(backing)m.box(x,y,z-front*.010,w,h,.010,E.seam,.06);
+    for(let c=0;c<=cols;c++)m.box(x-w/2+c*dx,y,z,dx*.23,h,.010,color,.76);
+    for(let r=0;r<=rows;r++)m.box(x,y-h/2+r*dy,z+front*.001,w,dy*.24,.010,color,.76);
+  }
+  function editorialCage(m,x,y,z,w=.224,h=.067,front=1){
+    // Nickel-plated connector cage, independent of the bronze carrier plate.
+    // Separate folded walls, spring tabs and an internal tongue preserve a
+    // silver port surround and a genuinely recessed dark connector mouth.
+    const B=m.box,t=.007,Z=d=>z+front*d;
+    B(x,y,Z(-.006),w+.020,h+.014,.012,E.portInner,.79);
+    B(x,y,Z(.001),w-.010,h-.006,.009,E.seam,.06);
+    for(const s of [-1,1]){
+      B(x+s*(w/2-t/2),y,Z(.018),t,h,.039,E.port,.90);
+      B(x,y+s*(h/2-t/2),Z(.019),w,t,.041,E.port,.90);
+      B(x+s*(w*.42),y,Z(.035),.010,h*.39,.009,E.portInner,.82);
+    }
+    B(x,y-h*.24,Z(.025),w*.74,.007,.021,E.portInner,.70);
+    for(let i=0;i<8;i++)B(x-w*.32+i*w*.091,y-h*.22,Z(.037),.003,.011,.005,[.40,.34,.20],.80);
+    for(let i=0;i<4;i++)B(x-w*.31+i*w*.207,y+h*.43,Z(.043),w*.088,.005,.004,E.portInner,.67);
+    B(x,y-h*.46,Z(.044),w*.42,.006,.011,E.port,.88);
+  }
+  function editorialRJ45(m,x,y,z,w=.097,h=.081,front=1,inverted=false){
+    // 8P8C stepped throat: silver shield, keyed polymer insert, eight sprung
+    // contacts, latch recess and paired tiny light pipes. Not a QSFP rectangle.
+    const B=m.box,Z=d=>z+front*d,flip=inverted?-1:1,t=.006;
+    B(x,y,Z(-.005),w+.012,h+.010,.012,E.portInner,.79);
+    B(x,y,Z(.004),w-.007,h-.007,.012,E.seam,.04);
+    for(const s of [-1,1]){B(x+s*(w/2-t/2),y,Z(.023),t,h,.039,E.port,.88);B(x,y+s*(h/2-t/2),Z(.024),w,t,.042,E.port,.88);}
+    const keyY=y-flip*h*.29;
+    for(const s of [-1,1])B(x+s*w*.29,keyY,Z(.033),w*.22,h*.26,.020,E.polymer,.16);
+    B(x,y+flip*h*.20,Z(.025),w*.76,h*.10,.014,E.polymer,.16);
+    for(let i=0;i<8;i++)B(x-w*.285+i*w*.0815,y+flip*h*.17,Z(.038),w*.032,h*.17,.007,[.41,.36,.22],.83);
+    B(x,y-flip*h*.40,Z(.040),w*.33,h*.11,.010,E.portInner,.75);
+    for(const s of [-1,1])B(x+s*w*.37,y+flip*h*.37,Z(.047),w*.13,h*.09,.004,s<0?[.20,.31,.17]:[.34,.29,.17],.22);
+  }
   function editorialSweep(mesh,control,r,color,metal=.12,steps=20,sides=8){
     // A continuous cubic sweep with parallel-transported section normals. No
     // per-segment cylinder caps, faceted elbow joints, or runtime allocations.
@@ -743,16 +783,30 @@
     const B=m.box,V=m.bevel,T=m.tube,z=FRONT+.089;
     V(0,0,z-.018,3.90,h-.014,.097,C.gold,.019,.85);
     B(0,h/2-.014,z+.036,3.67,.013,.020,C.goldEdge,.88);
-    for(const [x,w] of [[-1.275,1.07],[1.155,1.005]])grille(m,x,.006,z+.036,w,h-.060,C.goldEdge);
+    for(const [x,w] of [[-1.275,1.07],[1.235,1.005]])editorialPerforation(m,x,.006,z+.036,w,h-.064,C.gold);
     // Fine mesh is interrupted by genuinely recessed service cages, carriers,
     // ejectors and seams. No branding or exact proprietary port names.
     V(-.047,0,z+.042,1.14,h-.049,.035,C.darkGold,.008,.70);
-    for(let i=0;i<8;i++){const x=-.535+i*.139;V(x,0,z+.065,.118,h-.055,.040,C.goldEdge,.009,.87);B(x,0,z+.089,.080,h-.097,.012,C.gold,.80);B(x+.044,0,z+.094,.010,h-.071,.009,E.seam,.10);B(x,-h*.28,z+.104,.064,.021,.023,C.goldEdge,.80);B(x,h*.27,z+.102,.072,.008,.008,C.darkGold,.65);}
-    for(const [x,y,w,ph] of [[-1.52,-.057,.244,.067],[-1.13,-.057,.244,.067],[.995,-.057,.244,.067],[1.37,-.057,.244,.067],[-.778,-.046,.105,.080],[.629,-.017,.098,.068]])qsfp(m,x,y,z+.063,w,ph,1,C.goldEdge);
-    for(const [x,w] of [[.98,.10],[1.235,.187],[1.466,.187]])qsfp(m,x,.070,z+.063,w,.043,1,C.goldEdge);
-    B(.63,-.076,z+.094,.109,.018,.017,E.polymer,.1);V(.63,.072,z+.059,.114,.037,.015,E.rear,.006,.70);
-    for(const y of [-.050,.006,.063])B(.743,y,z+.092,.022,.022,.016,E.edge,.76);
-    m.statusLens(.743,.098,z+.100,.007,.012,[.10,.34,.28],E.fold,true);
+    for(let i=0;i<8;i++){
+      const x=-.535+i*.139;
+      V(x,0,z+.065,.118,h-.055,.040,C.goldEdge,.006,.87);B(x,0,z+.089,.080,h-.097,.012,C.gold,.80);
+      B(x+.044,0,z+.094,.010,h-.071,.009,E.seam,.10);B(x,-h*.28,z+.104,.064,.021,.023,C.goldEdge,.80);B(x,h*.27,z+.102,.072,.008,.008,C.darkGold,.65);
+      B(x-.021,-.007,z+.099,.008,.035,.007,E.polymer,.13);B(x-.020,.003,z+.103,.004,.007,.003,[.15,.23,.10],.2);
+      // Paired carrier sections sit within four removable storage cages.
+      if(i%2===0)B(x-.067,0,z+.096,.009,h-.040,.019,C.darkGold,.67);
+    }
+    // Supplied reference orientation: left lower dual cage with RJ45 to its
+    // right; upper-right DPU is reversed (RJ45 to its left); lower-right pair.
+    // The photo does not establish a BF3/BF4 SKU; no speculative label is added.
+    for(const [x,y,w,ph] of [[-1.52,-.054,.244,.068],[-1.13,-.054,.244,.068],[.995,-.058,.244,.068],[1.37,-.058,.244,.068],[1.235,.064,.187,.046],[1.466,.064,.187,.046]])editorialCage(m,x,y,z+.054,w,ph);
+    editorialRJ45(m,-.778,-.048,z+.052,.101,.078);
+    editorialRJ45(m,.960,.062,z+.052,.099,.075,1,true);
+    // Silver central management stack, distinct from adjacent storage latches.
+    V(.635,0,z+.047,.149,h-.043,.016,C.gold,.006,.77);
+    for(const y of [-.051,.042])editorialRJ45(m,.623,y,z+.054,.092,.071);
+    for(const y of [-.061,-.013,.049]){B(.737,y,z+.070,.027,.021,.014,E.port,.82);B(.737,y,z+.081,.018,.012,.010,E.seam,.06);}
+    m.statusLens(.742,.092,z+.082,.005,.010,[.10,.26,.17],E.fold,false);
+    for(const x of [-1.723,-.862,.854,1.606]){B(x,-.099,z+.062,.039,.007,.005,C.darkGold,.43);m.disc(x,-.087,z+.071,.005,E.portInner,.8,8);}
     // Broad front outriggers sit below the service apertures, as load-bearing
     // folded pull handles. Their two long negative spaces remain truly open.
     const handleY=-h/2+.023,handleZ=FRONT+.169;
@@ -765,19 +819,83 @@
       for(const sy of [-1,1])screw(m,side*1.962,sy*(h/2-.048),z+.117);
     }
   }
+  function editorialNvlinkFront(m,h){
+    const B=m.box,V=m.bevel,z=FRONT+.09;
+    // GB rack switch reference: ventilated upper sheet, compact service strip
+    // at lower left, and a quiet broad lower panel. Its fabric mates at rear;
+    // the front must not look like another bank of compute NICs or drives.
+    V(0,0,z-.021,3.90,h-.014,.094,C.gold,.016,.83);
+    editorialPerforation(m,0,.055,z+.034,3.42,.091,C.gold,1,.024);
+    B(0,h/2-.014,z+.044,3.65,.012,.023,C.goldEdge,.88);
+    B(-1.631,-.047,z+.049,.105,.046,.022,E.port,.84);B(-1.631,-.047,z+.065,.087,.025,.015,E.seam,.08);B(-1.631,-.048,z+.073,.070,.005,.016,E.portInner,.67);
+    for(let i=0;i<5;i++)editorialRJ45(m,-1.413+i*.187,-.046,z+.040,.095,.073);
+    for(let i=0;i<4;i++){const x=.715+i*.132;m.statusLens(x,-.045,z+.057,.0045,.009,[.13,.30,.14],C.darkGold,false);B(x,-.081,z+.048,.036,.004,.004,C.darkGold,.35);}
+    for(const x of [-1.76,-.425,1.52])screw(m,x,-.072,z+.056);
+    for(const side of [-1,1]){
+      V(side*1.868,0,z+.033,.171,h-.014,.145,C.gold,.029,.84);
+      m.tube([side*1.854,-h/2+.018,z+.09],[side*1.854,h/2-.018,z+.09],.043,C.goldEdge,20,.88);
+      B(side*1.945,0,z+.075,.014,h-.051,.034,E.edge,.83);
+      screw(m,side*1.967,0,z+.093);
+    }
+    for(const x of [-.91,.91])editorialPullOpening(m,x,-h/2+.022,FRONT+.168,1.66,.204,.037,.023);
+    for(const x of [-1.80,0,1.80])V(x,-h/2+.021,FRONT+.167,x===0?.15:.12,.023,.204,C.goldEdge,.008,.85);
+  }
+  function editorialPowerFront(m,h){
+    const B=m.box,V=m.bevel,z=FRONT+.085;
+    V(0,0,z-.026,3.91,h-.012,.115,E.frame,.012,-.7);
+    V(-1.782,0,z+.036,.184,h-.034,.060,E.polymer,.006,-.7);
+    editorialRJ45(m,-1.785,.010,z+.064,.090,.092);
+    B(-1.785,.097,z+.074,.112,.015,.087,E.fold,.64);
+    m.statusLens(-1.785,-.080,z+.075,.006,.010,[.28,.13,.08],E.fold,false);
+    for(let i=0;i<6;i++){
+      const x=-1.400+i*.582,moduleW=.560,fh=h-.036;
+      V(x,0,z+.025,moduleW,h-.020,.075,E.frame,.010,-.7);
+      B(x-.018,0,z+.070,.440,fh,.012,E.seam,.07);
+      // Fan blades stay behind the punched guard, with a turned hub and a
+      // circular inlet shadow visible through the rectangular grille apertures.
+      fan(m,x-.015,0,z+.077,.098);
+      editorialPerforation(m,x-.015,0,z+.121,.435,fh-.012,[.16,.185,.20],1,.027,false);
+      V(x+.240,0,z+.100,.057,h-.020,.091,E.polymer,.007,-.7);
+      B(x+.243,0,z+.150,.011,h*.65,.014,E.fold,.75);
+      B(x+.240,-h*.32,z+.150,.039,.018,.022,E.edge,.79);
+      for(const sy of [-1,1])B(x-.202,sy*.045,z+.139,.015,.014,.010,sy>0?[.22,.32,.17]:[.14,.22,.12],.23);
+      B(x-.202,-.088,z+.140,.016,.006,.004,E.edge,.40);
+      for(const sy of [-1,1])m.disc(x+.239,sy*.086,z+.154,.006,E.edge,.72,8);
+    }
+    for(const side of [-1,1]){B(side*1.981,0,z+.007,.125,h-.020,.092,E.frame,-.7);screw(m,side*2.003,0,z+.060);}
+  }
+  function editorialNetworkFront(m,h){
+    const B=m.box,V=m.bevel,z=FRONT+.085;
+    // The GB rack's management TOR has three blocks of 16 copper ports and a
+    // four-cage uplink block. The operational inventory's SN2700 mesh is intact.
+    V(0,0,z-.024,3.90,h-.013,.105,C.gold,.013,.80);
+    editorialPerforation(m,-.090,.102,z+.035,3.51,.029,C.gold,1,.030);
+    for(let bank=0;bank<3;bank++){
+      const center=-1.233+bank*.980;
+      V(center,-.005,z+.038,.951,.178,.020,E.portInner,.004,.80);
+      for(let col=0;col<8;col++)for(const row of [-1,1])editorialRJ45(m,center-.412+col*.118,-.005+row*.045,z+.054,.108,.071,1,row<0);
+    }
+    V(1.425,-.005,z+.039,.332,.179,.022,E.portInner,.006,.80);
+    for(const x of [1.341,1.509])for(const y of [-.051,.041])editorialCage(m,x,y,z+.052,.152,.067);
+    for(const y of [-.054,-.013,.029,.070])m.statusLens(1.644,y,z+.054,.004,.008,[.17,.29,.11],C.darkGold,false);
+    for(const y of [-.055,.048])editorialRJ45(m,1.776,y,z+.049,.099,.077);
+    for(const side of [-1,1]){V(side*1.948,0,z+.010,.088,h-.020,.095,C.gold,.008,.78);B(side*1.876,0,z+.031,.023,h-.035,.074,E.polymer,.25);screw(m,side*2.004,0,z+.055);}
+  }
   function createEditorialEquipment(item){
     const base=createEquipment(item),m=meshBuilder(),B=m.box,V=m.bevel,T=m.tube,h=item.height,type=item.mgx_type;
     const depth=type==='blanking'?(item.size>1?5.94:.18):({server:5.85,nvlink:5.95,switch:4.55,powershelf:4.95}[type]||base.depth),rear=FRONT-depth;
-    // Retain the established differentiated front design; replace the entire
-    // enclosure and rear. Copy only front-facing facade triangles, never the
-    // old simple rear blocks or their exposed copper "port" decorations.
-    if(type!=='server')for(let i=0;i<base.mesh.data.length;i+=33)if(base.mesh.data[i+2]>FRONT+.041&&base.mesh.data[i+13]>FRONT+.041&&base.mesh.data[i+24]>FRONT+.041)for(let j=0;j<33;j++)m.data.push(base.mesh.data[i+j]);
+    // Homepage facades are independently authored from the inspected photos;
+    // never modify the operational inventory renderer or its port topology.
+    if(!['server','nvlink','powershelf','switch'].includes(type))for(let i=0;i<base.mesh.data.length;i+=33)if(base.mesh.data[i+2]>FRONT+.041&&base.mesh.data[i+13]>FRONT+.041&&base.mesh.data[i+24]>FRONT+.041)for(let j=0;j<33;j++)m.data.push(base.mesh.data[i+j]);
     if(type==='server'){
       V(0,0,FRONT-depth/2,3.94,h,depth,E.skin,.019,.82);
       for(const side of [-1,1]){V(side*2.002,0,FRONT+.016,.126,h+.008,.105,E.rear,.014,.84);for(const sy of [-1,1])screw(m,side*2.004,sy*h*.35,FRONT+.073);}
     }else chassis(m,h,depth,type==='blanking'?E.fold:E.skin);
     V(0,0,FRONT+.045,3.93,h-.009,.08,type==='server'||type==='nvlink'?C.gold:E.frame,.014,.78);
     if(type==='server')editorialComputeFront(m,h);
+    if(type==='nvlink')editorialNvlinkFront(m,h);
+    if(type==='powershelf')editorialPowerFront(m,h);
+    if(type==='switch')editorialNetworkFront(m,h);
     if(depth>.5){
       // Folded lids, rolled edges, recessed long panels and supported drawer
       // slides make the enclosure legible from side, top and middle close-ups.
@@ -790,8 +908,18 @@
         // U40's authored nested rail members are drawn by the story renderer.
       }
       if(type!=='server'){
-        for(const x of [-1.38,1.38]){V(x,h/2+.004,FRONT-depth/2,.035,.011,depth-.56,E.lid,.004,.82);B(x+.047,h/2+.011,FRONT-depth/2,.009,.004,depth-.64,E.fold,.50);}
-        for(const z of [FRONT-.32,rear+.28])B(0,h/2+.010,z,3.68,.005,.014,E.fold,.65);
+        const lidY=h/2+.007;
+        for(const z of [FRONT-.32,rear+.28])B(0,lidY,z,3.68,.004,.009,E.fold,.65);
+        // Plain folded silver lids and small captive fasteners, not ornamental
+        // raised ribs. Power cartridge seams follow the six actual front bays.
+        const seams=type==='powershelf'?[-1.68,-1.098,-.516,.066,.648,1.23,1.792]:[-1.91,1.91];
+        for(const x of seams)B(x,lidY,FRONT-depth/2,.007,.003,depth-.26,E.fold,.56);
+        for(const x of [-1.75,1.75])for(let i=0;i<5;i++){
+          const z=FRONT-.18-i*(depth-.38)/4;
+          T([x,lidY-.003,z],[x,lidY+.003,z],.009,E.edge,10,.81);B(x,lidY+.004,z,.010,.002,.003,E.fold,.51);
+        }
+        if(type==='nvlink')for(const z of [FRONT-.52,FRONT-.80])for(const x of [-1.45,-.73,0,.73,1.45]){T([x,lidY-.003,z],[x,lidY+.003,z],.008,E.edge,8,.80);B(x,lidY+.004,z,.010,.002,.003,E.fold,.51);}
+        if(type==='switch'||type==='powershelf')for(const side of [-1,1])for(let i=0;i<15;i++)B(side*2.003,0,rear+.34+i*.068,.009,h*.39,.023,E.seam,.12);
       }else{
         V(0,h/2+.001,FRONT-depth/2-.015,3.885,.010,depth-.068,[.555,.578,.59],.004,.81);
         const lidY=h/2+.007;
@@ -818,24 +946,61 @@
       const count=type==='server'?4:8,pitch=type==='server'?.54:.31,start=type==='server'?-1.08:-1.085;
       for(let i=0;i<count;i++){
         const x=type==='server'?(i<2?start+i*pitch:.54+(i-2)*pitch):start+i*pitch,w=type==='server'?.40:.258;
-        V(x,0,rear-.072,w,.186,.067,E.fold,.010,.72);B(x,0,rear-.114,w-.036,.125,.031,E.polymer,.09);
-        B(x,.070,rear-.132,w-.050,.018,.027,E.edge,.84);B(x,-.069,rear-.132,w-.050,.014,.027,E.edge,.84);
-        for(const s of [-1,1])B(x+s*(w/2-.023),0,rear-.137,.014,.139,.017,E.edge,.77);
-        // Blind-mate contact cartridge vocabulary; the contacts are deliberately
-        // unlabelled and do not claim any exact proprietary pin arrangement.
-        for(let p=0;p<6;p++)B(x-w*.33+p*w*.132,0,rear-.136,.010,.071,.007,[.32,.27,.17],.7);
-        B(x+w*.31,.074,rear-.153,.026,.037,.031,E.polymer,.18);
+        V(x,0,rear-.072,w,.193,.067,E.edge,.009,.82);
+        V(x,-.026,rear-.119,w-.024,.108,.051,E.polymer,.005,.17);
+        B(x,-.021,rear-.149,w-.057,.046,.013,E.seam,.05);
+        for(const sy of [-1,1])B(x,-.021+sy*.034,rear-.156,w-.070,.009,.019,E.fold,.73);
+        // The official rear photograph shows four broad black blind-mate
+        // blocks with paired guides above, not exposed copper Ethernet cages.
+        for(const s of [-1,1]){
+          const px=x+s*w*.29;
+          T([px,.064,rear-.108],[px,.064,rear-.144],.036,E.polymer,14,.20);
+          T([px,.064,rear-.145],[px,.064,rear-.151],.025,E.portInner,14,.73);
+          T([px,.064,rear-.151],[px,.064,rear-.153],.014,E.seam,12,.08);
+        }
+        for(let p=0;p<12;p++)B(x-w*.32+p*w*.0582,-.031,rear-.158,.003,.011,.004,[.33,.28,.18],.72);
+        for(const s of [-1,1])B(x+s*(w/2-.020),-.011,rear-.151,.011,.058,.011,E.port,.83);
       }
       for(const side of [-1,1]){
+        V(side*1.69,0,rear-.062,.191,.224,.044,E.edge,.008,.81);
         fluidPort(m,side*1.69,0,rear-.046,.050,-1);
-        V(side*.22,0,rear-.087,.22,.20,.10,E.polymer,.014,.18);B(side*.22,0,rear-.147,.119,.091,.023,E.fold,.55);
+        T([side*1.69,0,rear-.150],[side*1.69,0,rear-.179],.064,E.port,18,.86);
+        for(const sy of [-1,1])screw(m,side*1.753,sy*.078,rear-.093,-1);
+        B(side*1.841,0,rear-.091,.053,.122,.067,E.fold,.72);
       }
-      // Low-profile folded pull bridges have open clearance beneath each grip.
-      if(type==='nvlink'){for(const x of [-1.29,1.24]){for(const s of [-1,1])V(x+s*.265,h*.39,FRONT+.178,.060,.036,.118,C.goldEdge,.009,.9);V(x,h*.39,FRONT+.243,.57,.025,.031,C.goldEdge,.009,.87);}m.statusLens(1.68,h*.24,FRONT+.135,.010,.017,[.11,.31,.28],E.edge,true);}
+      V(.122,0,rear-.077,.347,.222,.070,E.edge,.009,.82);
+      V(.155,0,rear-.132,.233,.187,.066,E.polymer,.007,.16);
+      B(.180,-.008,rear-.171,.115,.100,.018,E.seam,.05);
+      for(const x of [.127,.227])B(x,-.011,rear-.184,.013,.070,.011,E.fold,.77);
     }else if(type==='powershelf'){
-      for(let i=0;i<6;i++){const x=-1.43+i*.57;V(x,0,rear-.068,.525,h-.038,.097,E.fold,.011,.67);B(x,0,rear-.121,.34,h*.55,.021,E.polymer,.10);B(x,0,rear-.140,.16,h*.30,.021,[.28,.23,.15],.7);for(const s of [-1,1])B(x+s*.218,0,rear-.13,.023,h*.62,.046,E.edge,.83);}
+      for(let i=0;i<6;i++){
+        const x=-1.405+i*.582;
+        V(x,0,rear-.068,.552,h-.038,.097,E.rear,.009,.79);
+        V(x+.057,0,rear-.121,.205,.147,.073,E.polymer,.009,.18);
+        B(x+.057,0,rear-.163,.145,.104,.020,E.seam,.05);
+        for(const sy of [-1,1])B(x+.057,sy*.065,rear-.174,.151,.009,.016,E.portInner,.79);
+        for(const [dx,dy] of [[-.037,-.018],[.037,-.018],[0,.029]])B(x+.057+dx,dy,rear-.178,.008,.039,.012,E.port,.82);
+        editorialPerforation(m,x-.172,0,rear-.127,.108,h-.075,E.rear,-1,.027);
+        B(x+.249,0,rear-.135,.013,h-.071,.029,E.port,.81);
+        B(x+.215,-.078,rear-.163,.038,.013,.022,E.polymer,.28);
+      }
+      for(const y of [-.051,.047])editorialRJ45(m,-1.782,y,rear-.095,.091,.073,-1);
     }else if(type==='switch'){
-      for(let i=0;i<5;i++){const x=-1.38+i*.68;V(x,0,rear-.074,.60,h-.038,.11,E.fold,.015,.70);grille(m,x,0,rear-.133,.46,h*.64,E.rear,-1);B(x+.25,0,rear-.158,.033,h*.58,.035,E.edge,.8);}
+      // Replaceable rear fan cassettes and two power bays are distinct from
+      // the dense silver network connectors on the cold-aisle service face.
+      for(let i=0;i<4;i++){
+        const x=-.448+i*.412;
+        V(x,0,rear-.074,.389,h-.039,.104,E.fold,.010,.74);
+        editorialPerforation(m,x-.010,0,rear-.136,.282,h-.073,E.rear,-1,.025);
+        B(x+.153,0,rear-.162,.021,h-.083,.045,E.polymer,.20);B(x+.153,0,rear-.188,.009,h*.45,.008,E.edge,.8);
+      }
+      for(const x of [-1.396,1.456]){
+        V(x,0,rear-.074,.691,h-.035,.106,E.rear,.010,.78);
+        editorialPerforation(m,x-.137,0,rear-.136,.239,h-.077,E.rear,-1,.026);
+        V(x+.126,0,rear-.133,.167,.145,.046,E.polymer,.007,.15);B(x+.126,0,rear-.162,.120,.102,.018,E.seam,.05);
+        for(const dx of [-.031,.031])B(x+.126+dx,-.007,rear-.178,.008,.037,.011,E.port,.82);
+        B(x+.126,.033,rear-.178,.009,.028,.011,E.port,.82);B(x+.294,0,rear-.144,.015,h-.085,.050,E.edge,.80);
+      }
     }else if(type==='blanking'&&item.size>1){
       // Neutral utility / structural bay. No CDU, HMI, fluid ports or pump body.
       V(0,0,rear-.059,3.72,h-.055,.10,E.frame,.022,-.7);
@@ -885,9 +1050,34 @@
       for(const y of [-6.72,6.70]){T([x,y,-3.54],[x,y+side*.025,-3.83],.103,E.edge,16,.84);T([x,y+side*.025,-3.82],[x,y+side*.025,-3.875],.074,E.polymer,16,.12);}
       // Shrouded cartridge carriers and ladder combs organize rear interconnect
       // without portraying generic Ethernet patch leads as NVIDIA's topology.
-      V(side*.99,0,-3.455,.43,13.52,.12,E.frame,.018,-.7);
-      for(const offset of [-1,1])B(side*.99+offset*.219,0,-3.515,.025,13.43,.075,E.edge,.80);
+      V(side*.99,0,-3.455,.88,13.52,.12,E.frame,.018,-.7);
+      for(const offset of [-1,0,1])B(side*.99+offset*.427,0,-3.515,.025,13.43,.075,E.edge,.80);
       for(let i=0;i<45;i++){const y=-6.6+i*.30;B(side*.99,y,-3.570,.38,.045,.095,E.fold,.68);B(side*1.315,y,-3.615,.14,.047,.25,E.fold,.69);B(side*1.35,y,-3.75,.21,.047,.022,E.edge,.73);}
+    }
+    // Public NVIDIA backplane photograph: four densely populated cartridge
+    // columns, punched silver carrier flanges and black blind-mate blocks.
+    // Both faces are modeled so empty-rack depth and rear inspection carry
+    // actual infrastructure. These are bounded supports, never loose cables.
+    for(const item of items.filter(p=>p.mgx_type==='server'||p.mgx_type==='nvlink')){
+      const y=item.y;
+      for(const side of [-1,1])for(const col of [0,1]){
+        const x=side*(.77+col*.43),w=.393;
+        for(const front of [-1,1]){
+          const z=front>0?-3.356:-3.566,Z=d=>z+front*d;
+          V(x,y,z,w,.252,.033,E.rear,.006,.80);
+          B(x,y,Z(.022),w-.065,.148,.016,E.seam,.08);
+          for(const sy of [-1,1]){
+            B(x,y+sy*.097,Z(.023),w-.018,.037,.018,E.edge,.82);
+            for(let i=0;i<10;i++)B(x-.165+i*.0366,y+sy*.097,Z(.035),.015,.019,.007,E.seam,.09);
+            V(x,y+sy*.051,Z(.041),w-.094,.028,.031,E.fold,.004,.78);
+          }
+          for(const sx of [-1,1]){
+            B(x+sx*.176,y,Z(.027),.023,.180,.025,E.edge,.82);
+            infrastructure.tube([x+sx*.157,y+(.072),Z(.034)],[x+sx*.157,y+.072,Z(.041)],.010,E.port,10,.80);
+          }
+          for(let row=0;row<2;row++)for(let pin=0;pin<12;pin++)B(x-.125+pin*.0227,y+(row-.5)*.021,Z(.035),.006,.008,.006,[.35,.31,.22],.70);
+        }
+      }
     }
     for(const y of [-7.02,7.02])V(0,y,-3.50,4.10,.16,.22,E.frame,.018,-.7);
     // A narrow insulating shroud, isolated copper strips and regular protective

@@ -1,0 +1,12 @@
+[
+  {
+    "name": "theme-contract",
+    "base": "5b481f0b177b67643bfa6520e382356bf8dd2d02",
+    "status": 1
+  },
+  {
+    "name": "story-adapter",
+    "base": "5b481f0b177b67643bfa6520e382356bf8dd2d02",
+    "status": 1
+  }
+]

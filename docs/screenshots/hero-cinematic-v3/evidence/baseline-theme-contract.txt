@@ -1,0 +1,33 @@
+PASS 01 Light CSS has balanced declarations and every selector is light-scoped
+PASS 02 Pearl Light has distinct light surfaces and retained Wistron brand anchors
+PASS 03 Sampled text and small 3D controls meet 4.5:1 on their opaque material bases
+node:assert:152
+  throw new AssertionError(obj);
+  ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ '/static/css/validation-overview.css'
+- '/static/css/workspace-ux.css'
+               ^
+
+    at C:\Users\kobei\Documents\Codex\2026-10-07\pa-cycle-lab-branch-codex-hero\artifacts\hero-cinematic-v3\baseline-contracts\app\qa\theme-contract.cjs:178:10
+    at check (C:\Users\kobei\Documents\Codex\2026-10-07\pa-cycle-lab-branch-codex-hero\artifacts\hero-cinematic-v3\baseline-contracts\app\qa\theme-contract.cjs:20:18)
+    at Object.<anonymous> (C:\Users\kobei\Documents\Codex\2026-10-07\pa-cycle-lab-branch-codex-hero\artifacts\hero-cinematic-v3\baseline-contracts\app\qa\theme-contract.cjs:175:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '/static/css/validation-overview.css',
+  expected: '/static/css/workspace-ux.css',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

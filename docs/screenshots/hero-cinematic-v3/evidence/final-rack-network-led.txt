@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "checks": [
+    "Saved topology becomes 69 physical cables: 64 shared server RJ45, one switch interconnect, three Power Shelf and one CDU management cable; power/cooling use the left duct and passive panels have no LED",
+    "Real Rack Ping button uses synthetic response: all four OS targets up -> green, any failed node -> red, no IP -> gray; switch/CDU/power-shelf management IPs are represented",
+    {
+      "check": "LED pixels blink; reduced motion, offscreen and rear view stop the animation",
+      "changingStatusPixels": 914
+    },
+    "WebGL context loss stops LED animation; restoration rebuilds saved cables and Ping colors",
+    "3D cables and LEDs fit desktop/front/rear/perspective and 390/320px light/dark layouts",
+    "Integrated lens finish close-ups cover Switch green/red, Power Shelf green/red/gray and Server in light/dark; shallow contact geometry retains approved centers and clears ports/fans",
+    "Successful topology save immediately refreshes cables and clears outdated Ping LEDs without remounting the scene",
+    "Switching projects disposes old scene and keeps saved cable/Ping state scoped to its project",
+    "Delayed topology and Rack Ping responses are ignored after changing project, even when the transport ignores abort",
+    "Saving topology while Ping is running resets the button, clears the summary/LEDs and ignores the superseded response"
+  ]
+}

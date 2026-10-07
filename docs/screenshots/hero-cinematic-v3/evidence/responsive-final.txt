@@ -1,0 +1,48 @@
+CAPTURE qa/1366x768-dark-04-early-convergence.png
+CAPTURE qa/1366x768-dark-05-mid-convergence.png
+CAPTURE qa/1366x768-dark-06-compute-insertion.png
+CAPTURE qa/1366x768-dark-09-engineering-exploded.png
+CAPTURE qa/1366x768-light-04-early-convergence.png
+CAPTURE qa/1366x768-light-05-mid-convergence.png
+CAPTURE qa/1366x768-light-06-compute-insertion.png
+CAPTURE qa/1366x768-light-09-engineering-exploded.png
+CAPTURE qa/1600x900-dark-04-early-convergence.png
+CAPTURE qa/1600x900-dark-05-mid-convergence.png
+CAPTURE qa/1600x900-dark-06-compute-insertion.png
+CAPTURE qa/1600x900-dark-09-engineering-exploded.png
+CAPTURE qa/1600x900-light-04-early-convergence.png
+CAPTURE qa/1600x900-light-05-mid-convergence.png
+CAPTURE qa/1600x900-light-06-compute-insertion.png
+CAPTURE qa/1600x900-light-09-engineering-exploded.png
+CAPTURE qa/1920x1080-dark-04-early-convergence.png
+CAPTURE qa/1920x1080-dark-05-mid-convergence.png
+CAPTURE qa/1920x1080-dark-06-compute-insertion.png
+CAPTURE qa/1920x1080-dark-09-engineering-exploded.png
+CAPTURE qa/1920x1080-light-04-early-convergence.png
+CAPTURE qa/1920x1080-light-05-mid-convergence.png
+CAPTURE qa/1920x1080-light-06-compute-insertion.png
+CAPTURE qa/1920x1080-light-09-engineering-exploded.png
+CAPTURE qa/2560x1440-dark-04-early-convergence.png
+CAPTURE qa/2560x1440-dark-05-mid-convergence.png
+CAPTURE qa/2560x1440-dark-06-compute-insertion.png
+CAPTURE qa/2560x1440-dark-09-engineering-exploded.png
+CAPTURE qa/2560x1440-light-04-early-convergence.png
+CAPTURE qa/2560x1440-light-05-mid-convergence.png
+CAPTURE qa/2560x1440-light-06-compute-insertion.png
+CAPTURE qa/2560x1440-light-09-engineering-exploded.png
+CAPTURE qa/3440x1440-dark-04-early-convergence.png
+CAPTURE qa/3440x1440-dark-05-mid-convergence.png
+CAPTURE qa/3440x1440-dark-06-compute-insertion.png
+CAPTURE qa/3440x1440-dark-09-engineering-exploded.png
+CAPTURE qa/3440x1440-light-04-early-convergence.png
+CAPTURE qa/3440x1440-light-05-mid-convergence.png
+CAPTURE qa/3440x1440-light-06-compute-insertion.png
+CAPTURE qa/3440x1440-light-09-engineering-exploded.png
+{
+  "passed": true,
+  "pass": "qa",
+  "results": [
+    "Selected viewport/theme/stage captures, UI separation, framing and zero GL errors"
+  ],
+  "captures": 40
+}
