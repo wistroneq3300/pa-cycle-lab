@@ -704,28 +704,276 @@
       destroy(){if(disposed)return;disposed=true;visibilityObserver?.disconnect();document.removeEventListener('visibilitychange',onVisibility);reduced.removeEventListener('change',onVisibility);if(frame)cancelAnimationFrame(frame);frame=0;drag=null;ro?.disconnect();window.removeEventListener('resize',requestDraw);listeners.forEach(([name,fn])=>canvas.removeEventListener(name,fn));canvas.style.touchAction=oldTouchAction;release();canvas.dataset.rackState='disposed';canvas.dataset.flowAnimated='false';canvas.dataset.decorativeAnimated='false';canvas.dataset.pingAnimated='false';delete canvas.paRackScene;}
     };canvas.paRackScene=api;sync();requestDraw();return api;
   }
+  // Homepage asset: original engineering interpretation of public DGX GB rack
+  // exterior references, not a vendor port map, CAD file, or cooling topology.
+  // Operational inventory geometry above deliberately retains its own behavior.
+  const E={skin:[.235,.265,.285],lid:[.31,.34,.36],fold:[.15,.18,.20],frame:[.082,.105,.12],edge:[.48,.525,.55],polymer:[.033,.047,.055],jacket:[.070,.091,.102],rear:[.255,.29,.31],seam:[.012,.021,.026]};
+  function editorialSweep(mesh,control,r,color,metal=.12,steps=20,sides=8){
+    // A continuous cubic sweep with parallel-transported section normals. No
+    // per-segment cylinder caps, faceted elbow joints, or runtime allocations.
+    const normalize=v=>{const n=Math.hypot(...v);return v.map(x=>x/n);},cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],rings=[];
+    let previous=null;
+    for(let i=0;i<=steps;i++){
+      const t=i/steps,q=1-t,p=[0,1,2].map(k=>q*q*q*control[0][k]+3*q*q*t*control[1][k]+3*q*t*t*control[2][k]+t*t*t*control[3][k]);
+      const tangent=normalize([0,1,2].map(k=>3*q*q*(control[1][k]-control[0][k])+6*q*t*(control[2][k]-control[1][k])+3*t*t*(control[3][k]-control[2][k])));
+      let u=previous?previous.map((v,k)=>v-tangent[k]*previous.reduce((s,x,j)=>s+x*tangent[j],0)):cross(tangent,Math.abs(tangent[1])<.9?[0,1,0]:[1,0,0]);
+      u=normalize(u);previous=u;const v=cross(tangent,u);
+      rings.push(Array.from({length:sides},(_,j)=>{const a=j/sides*TAU,n=u.map((x,k)=>x*Math.cos(a)+v[k]*Math.sin(a));return {p:p.map((x,k)=>x+r*n[k]),n};}));
+    }
+    const emit=v=>mesh.data.push(...v.p,...v.n,...color,metal,0);
+    for(let i=1;i<rings.length;i++)for(let j=0;j<sides;j++){const k=(j+1)%sides,a=rings[i-1][j],b=rings[i-1][k],c=rings[i][k],d=rings[i][j];[a,b,c,a,c,d].forEach(emit);}
+  }
+  function editorialPullOpening(mesh,x,y,z,width,depth,band,thickness){
+    // A real extruded obround annulus in the horizontal x/z plane. Light can
+    // pass through its opening; neither the opening nor its wall is a decal.
+    const points=[],radius=depth/2,halfStraight=width/2-radius,innerRadius=radius-band;
+    for(const side of [-1,1])for(let i=0;i<=20;i++){const a=(side<0?Math.PI/2:-Math.PI/2)+i/20*Math.PI;points.push({a,center:x+side*halfStraight});}
+    const p=(q,r,h)=>[q.center+Math.cos(q.a)*r,y+h,z+Math.sin(q.a)*r],emit=(point,normal)=>mesh.data.push(...point,...normal,...C.goldEdge,.86,0);
+    const quad=(a,b,c,d,n)=>[a,b,c,a,c,d].forEach(v=>emit(v,n));
+    for(let i=0;i<points.length;i++){
+      const a=points[i],b=points[(i+1)%points.length],top=thickness/2,bottom=-top,mid=(a.a+b.a)/2,n=[Math.cos(mid),0,Math.sin(mid)];
+      quad(p(a,radius,top),p(b,radius,top),p(b,innerRadius,top),p(a,innerRadius,top),[0,1,0]);
+      quad(p(a,innerRadius,bottom),p(b,innerRadius,bottom),p(b,radius,bottom),p(a,radius,bottom),[0,-1,0]);
+      const edgeNormal=a.center!==b.center?[0,0,p(a,radius,0)[2]>z?1:-1]:n;
+      quad(p(a,radius,bottom),p(b,radius,bottom),p(b,radius,top),p(a,radius,top),edgeNormal);
+      quad(p(a,innerRadius,top),p(b,innerRadius,top),p(b,innerRadius,bottom),p(a,innerRadius,bottom),edgeNormal.map(v=>-v));
+    }
+  }
+  function editorialComputeFront(m,h){
+    const B=m.box,V=m.bevel,T=m.tube,z=FRONT+.089;
+    V(0,0,z-.018,3.90,h-.014,.097,C.gold,.019,.85);
+    B(0,h/2-.014,z+.036,3.67,.013,.020,C.goldEdge,.88);
+    for(const [x,w] of [[-1.275,1.07],[1.155,1.005]])grille(m,x,.006,z+.036,w,h-.060,C.goldEdge);
+    // Fine mesh is interrupted by genuinely recessed service cages, carriers,
+    // ejectors and seams. No branding or exact proprietary port names.
+    V(-.047,0,z+.042,1.14,h-.049,.035,C.darkGold,.008,.70);
+    for(let i=0;i<8;i++){const x=-.535+i*.139;V(x,0,z+.065,.118,h-.055,.040,C.goldEdge,.009,.87);B(x,0,z+.089,.080,h-.097,.012,C.gold,.80);B(x+.044,0,z+.094,.010,h-.071,.009,E.seam,.10);B(x,-h*.28,z+.104,.064,.021,.023,C.goldEdge,.80);B(x,h*.27,z+.102,.072,.008,.008,C.darkGold,.65);}
+    for(const [x,y,w,ph] of [[-1.52,-.057,.244,.067],[-1.13,-.057,.244,.067],[.995,-.057,.244,.067],[1.37,-.057,.244,.067],[-.778,-.046,.105,.080],[.629,-.017,.098,.068]])qsfp(m,x,y,z+.063,w,ph,1,C.goldEdge);
+    for(const [x,w] of [[.98,.10],[1.235,.187],[1.466,.187]])qsfp(m,x,.070,z+.063,w,.043,1,C.goldEdge);
+    B(.63,-.076,z+.094,.109,.018,.017,E.polymer,.1);V(.63,.072,z+.059,.114,.037,.015,E.rear,.006,.70);
+    for(const y of [-.050,.006,.063])B(.743,y,z+.092,.022,.022,.016,E.edge,.76);
+    m.statusLens(.743,.098,z+.100,.007,.012,[.10,.34,.28],E.fold,true);
+    // Broad front outriggers sit below the service apertures, as load-bearing
+    // folded pull handles. Their two long negative spaces remain truly open.
+    const handleY=-h/2+.023,handleZ=FRONT+.169;
+    for(const x of [-.91,.91])editorialPullOpening(m,x,handleY,handleZ,1.66,.208,.043,.026);
+    for(const x of [-1.80,0,1.80])V(x,handleY,handleZ,x===0?.19:.145,.027,.208,C.goldEdge,.010,.85);
+    for(const side of [-1,1]){
+      V(side*1.875,0,z+.045,.156,h-.006,.177,C.gold,.043,.83);
+      T([side*1.858,-h/2+.021,z+.104],[side*1.858,h/2-.021,z+.104],.051,C.goldEdge,24,.87);
+      B(side*1.958,0,z+.088,.021,h-.049,.032,E.edge,.84);
+      for(const sy of [-1,1])screw(m,side*1.962,sy*(h/2-.048),z+.117);
+    }
+  }
+  function createEditorialEquipment(item){
+    const base=createEquipment(item),m=meshBuilder(),B=m.box,V=m.bevel,T=m.tube,h=item.height,type=item.mgx_type;
+    const depth=type==='blanking'?(item.size>1?5.94:.18):({server:5.85,nvlink:5.95,switch:4.55,powershelf:4.95}[type]||base.depth),rear=FRONT-depth;
+    // Retain the established differentiated front design; replace the entire
+    // enclosure and rear. Copy only front-facing facade triangles, never the
+    // old simple rear blocks or their exposed copper "port" decorations.
+    if(type!=='server')for(let i=0;i<base.mesh.data.length;i+=33)if(base.mesh.data[i+2]>FRONT+.041&&base.mesh.data[i+13]>FRONT+.041&&base.mesh.data[i+24]>FRONT+.041)for(let j=0;j<33;j++)m.data.push(base.mesh.data[i+j]);
+    if(type==='server'){
+      V(0,0,FRONT-depth/2,3.94,h,depth,E.skin,.019,.82);
+      for(const side of [-1,1]){V(side*2.002,0,FRONT+.016,.126,h+.008,.105,E.rear,.014,.84);for(const sy of [-1,1])screw(m,side*2.004,sy*h*.35,FRONT+.073);}
+    }else chassis(m,h,depth,type==='blanking'?E.fold:E.skin);
+    V(0,0,FRONT+.045,3.93,h-.009,.08,type==='server'||type==='nvlink'?C.gold:E.frame,.014,.78);
+    if(type==='server')editorialComputeFront(m,h);
+    if(depth>.5){
+      // Folded lids, rolled edges, recessed long panels and supported drawer
+      // slides make the enclosure legible from side, top and middle close-ups.
+      for(const side of [-1,1]){
+        B(side*1.985,0,FRONT-depth/2,.018,Math.max(.065,h-.08),depth-.15,E.fold,.72);
+        B(side*1.998,-h*.28,FRONT-depth/2,.022,.024,depth-.13,E.edge,.85);
+        B(side*1.999,h*.27,FRONT-depth/2,.012,.011,depth-.18,E.seam,.16);
+        for(let i=0;i<5;i++){const z=FRONT-.40-i*(depth-.75)/4;B(side*2.005,0,z,.013,Math.min(.105,h*.43),.030,E.rear,.75);T([side*1.992,h*.12,z],[side*2.013,h*.12,z],.012,E.edge,8,.75);}
+        // The folded chassis edge slides on the separate fixed rack support.
+        // U40's authored nested rail members are drawn by the story renderer.
+      }
+      if(type!=='server'){
+        for(const x of [-1.38,1.38]){V(x,h/2+.004,FRONT-depth/2,.035,.011,depth-.56,E.lid,.004,.82);B(x+.047,h/2+.011,FRONT-depth/2,.009,.004,depth-.64,E.fold,.50);}
+        for(const z of [FRONT-.32,rear+.28])B(0,h/2+.010,z,3.68,.005,.014,E.fold,.65);
+      }else{
+        V(0,h/2+.001,FRONT-depth/2-.015,3.885,.010,depth-.068,[.555,.578,.59],.004,.81);
+        const lidY=h/2+.007;
+        for(const side of [-1,1]){
+          for(let i=0;i<7;i++){const z=rear+.22+i*(depth-.52)/6;T([side*1.804,lidY-.003,z],[side*1.804,lidY+.003,z],.010,E.edge,10,.79);B(side*1.804,lidY+.004,z,.012,.002,.003,E.fold,.55);}
+          const latchX=side*1.615,latchZ=rear+depth*.46;
+          for(const s of [-1,1]){V(latchX+s*.093,lidY+.001,latchZ,.033,.009,.245,E.fold,.009,.62);V(latchX,lidY+.001,latchZ+s*.111,.155,.009,.023,E.fold,.007,.62);}
+          B(latchX,lidY+.001,latchZ,.153,.002,.194,E.polymer,.15);V(latchX,lidY+.003,latchZ-.026,.061,.003,.057,E.edge,.010,.73);B(latchX,lidY+.005,latchZ-.026,.007,.001,.030,E.fold,.35);
+        }
+        // A denser fastening pattern only near the service end leaves a calm,
+        // subtly brushed center panel, matching the reference's engineering.
+        for(let row=0;row<3;row++)for(let col=0;col<9;col++){
+          if(row===2&&col%2)continue;const x=-1.58+col*.395,z=FRONT-.19-row*.23;
+          T([x,lidY-.003,z],[x,lidY+.003,z],.010,E.edge,10,.81);B(x,lidY+.004,z,.012,.002,.003,E.fold,.53);
+        }
+      }
+      // Rear folded perimeter encloses the full depth; every service region is
+      // recessed into this bounded tray rather than hovering behind a face.
+      V(0,0,rear-.014,3.88,h-.012,.067,E.rear,.012,.79);
+      B(0,h/2-.016,rear-.055,3.72,.019,.025,E.edge,.8);B(0,-h/2+.021,rear-.057,3.74,.018,.029,E.fold,.78);
+      for(const side of [-1,1]){B(side*1.892,0,rear-.069,.045,h-.028,.054,E.fold,.75);screw(m,side*1.887,0,rear-.105,-1);}
+    }
+    if(type==='server'||type==='nvlink'){
+      const count=type==='server'?4:8,pitch=type==='server'?.54:.31,start=type==='server'?-1.08:-1.085;
+      for(let i=0;i<count;i++){
+        const x=type==='server'?(i<2?start+i*pitch:.54+(i-2)*pitch):start+i*pitch,w=type==='server'?.40:.258;
+        V(x,0,rear-.072,w,.186,.067,E.fold,.010,.72);B(x,0,rear-.114,w-.036,.125,.031,E.polymer,.09);
+        B(x,.070,rear-.132,w-.050,.018,.027,E.edge,.84);B(x,-.069,rear-.132,w-.050,.014,.027,E.edge,.84);
+        for(const s of [-1,1])B(x+s*(w/2-.023),0,rear-.137,.014,.139,.017,E.edge,.77);
+        // Blind-mate contact cartridge vocabulary; the contacts are deliberately
+        // unlabelled and do not claim any exact proprietary pin arrangement.
+        for(let p=0;p<6;p++)B(x-w*.33+p*w*.132,0,rear-.136,.010,.071,.007,[.32,.27,.17],.7);
+        B(x+w*.31,.074,rear-.153,.026,.037,.031,E.polymer,.18);
+      }
+      for(const side of [-1,1]){
+        fluidPort(m,side*1.69,0,rear-.046,.050,-1);
+        V(side*.22,0,rear-.087,.22,.20,.10,E.polymer,.014,.18);B(side*.22,0,rear-.147,.119,.091,.023,E.fold,.55);
+      }
+      // Low-profile folded pull bridges have open clearance beneath each grip.
+      if(type==='nvlink'){for(const x of [-1.29,1.24]){for(const s of [-1,1])V(x+s*.265,h*.39,FRONT+.178,.060,.036,.118,C.goldEdge,.009,.9);V(x,h*.39,FRONT+.243,.57,.025,.031,C.goldEdge,.009,.87);}m.statusLens(1.68,h*.24,FRONT+.135,.010,.017,[.11,.31,.28],E.edge,true);}
+    }else if(type==='powershelf'){
+      for(let i=0;i<6;i++){const x=-1.43+i*.57;V(x,0,rear-.068,.525,h-.038,.097,E.fold,.011,.67);B(x,0,rear-.121,.34,h*.55,.021,E.polymer,.10);B(x,0,rear-.140,.16,h*.30,.021,[.28,.23,.15],.7);for(const s of [-1,1])B(x+s*.218,0,rear-.13,.023,h*.62,.046,E.edge,.83);}
+    }else if(type==='switch'){
+      for(let i=0;i<5;i++){const x=-1.38+i*.68;V(x,0,rear-.074,.60,h-.038,.11,E.fold,.015,.70);grille(m,x,0,rear-.133,.46,h*.64,E.rear,-1);B(x+.25,0,rear-.158,.033,h*.58,.035,E.edge,.8);}
+    }else if(type==='blanking'&&item.size>1){
+      // Neutral utility / structural bay. No CDU, HMI, fluid ports or pump body.
+      V(0,0,rear-.059,3.72,h-.055,.10,E.frame,.022,-.7);
+      for(const x of [-1.20,0,1.20]){B(x,0,rear-.116,.016,h-.17,.020,E.seam,.1);for(const sy of [-1,1])screw(m,x+.34,sy*(h/2-.095),rear-.12,-1);}
+      for(const side of [-1,1]){B(side*1.72,0,rear-.127,.075,Math.min(.45,h*.55),.040,E.fold,.7);B(side*1.72,0,rear-.151,.026,Math.min(.30,h*.38),.022,E.edge,.8);}
+    }
+    const min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
+    for(let i=0;i<m.data.length;i+=11)for(let axis=0;axis<3;axis++){min[axis]=Math.min(min[axis],m.data[i+axis]);max[axis]=Math.max(max[axis],m.data[i+axis]);}
+    return {mesh:m,depth,rear,min,max};
+  }
+  function createEditorialStructure(items){
+    const frame=createFrame(),infrastructure=meshBuilder(),connections=meshBuilder(),routes=[],sockets=[],F=frame.box,FV=frame.bevel,B=infrastructure.box,V=infrastructure.bevel,T=infrastructure.tube;
+    // Removable roof service skin: the thin shadow joint and captive fixings
+    // distinguish a fabricated closure from an undetailed solid slab. Its top
+    // stays below the existing corner lugs; no envelope or rack U changes.
+    FV(0,7.601,0,4.19,.010,6.13,E.seam,.005,.16);
+    FV(0,7.608,0,4.145,.012,6.085,[.067,.084,.096],.009,-.7);
+    for(const side of [-1,1])for(const z of [-2.79,-.94,.94,2.79]){
+      const x=side*1.937;
+      frame.tube([x,7.612,z],[x,7.617,z],.032,E.fold,14,.57);
+      frame.tube([x,7.616,z],[x,7.621,z],.022,E.edge,14,.71);
+      F(x,7.621,z,.025,.0015,.005,E.seam,.12);
+    }
+    // Partial removable side covers retain the weight of a cabinet while the
+    // inspection aperture exposes actual chassis and supported drawer depth.
+    for(const side of [-1,1]){
+      for(const [y,h] of [[-4.82,4.33],[.03,5.27],[4.91,4.30]])for(const [z,d] of [[1.90,2.18],[-2.44,1.16]]){
+        FV(side*2.205,y,z,.055,h,d,E.frame,.020,-.7);
+        F(side*2.238,y+h/2-.028,z,.011,.019,d-.05,E.fold,.55);
+        F(side*2.243,y-h/2+.019,z,.011,.012,d-.05,E.seam,.15);
+        for(const end of [-1,1])F(side*2.244,y,z+end*(d/2-.039),.010,h-.075,.016,E.fold,.58);
+        for(const sy of [-1,1])for(const sz of [-1,1])frame.tube([side*2.228,y+sy*(h/2-.15),z+sz*(d/2-.11)],[side*2.255,y+sy*(h/2-.15),z+sz*(d/2-.11)],.018,E.edge,8,.70);
+      }
+      // Folded aperture returns, chassis supports and structural cross-members.
+      for(const z of [-1.84,.78])FV(side*2.203,0,z,.115,14.20,.085,E.fold,.014,.80);
+      for(const item of items){if(item.mgx_type==='blanking')continue;const y=item.y-item.height/2+.028;F(side*2.055,y,.035,.072,.033,6.00,E.fold,.8);F(side*2.083,y-.011,.035,.015,.009,5.97,E.edge,.85);}
+      for(const y of [-6.95,-2.70,2.80,7.00]){F(side*2.225,y,-.56,.045,.072,2.48,E.fold,.75);F(side*2.252,y,-.56,.013,.027,2.31,E.edge,.75);}
+      // Rear service frame extends behind the rear posts; all guides attach to
+      // these members and never hover unattached in the rear camera view.
+      V(side*2.02,0,-3.47,.13,14.26,.18,E.frame,.024,-.7);
+      for(const y of [-6.94,-3.30,.30,3.90,6.99]){V(side*2.02,y,-3.24,.17,.16,.58,E.fold,.019,.80);T([side*2.02,y,-3.57],[side*2.02,y,-3.585],.027,E.edge,8,.80);}
+      // Paired outer metal manifolds: capped external building-loop interfaces
+      // with no CDU inside or beside this conceptual compute rack.
+      const x=side*1.78;
+      T([x,-6.72,-3.54],[x,6.69,-3.54],.085,E.rear,16,.82);
+      for(const y of [-6.45,-4.18,-1.78,.62,3.02,5.42,6.47]){V(x,y,-3.46,.245,.085,.29,E.fold,.015,.72);T([x,y,-3.60],[x,y,-3.642],.108,E.edge,16,.80);}
+      for(const y of [-6.72,6.70]){T([x,y,-3.54],[x,y+side*.025,-3.83],.103,E.edge,16,.84);T([x,y+side*.025,-3.82],[x,y+side*.025,-3.875],.074,E.polymer,16,.12);}
+      // Shrouded cartridge carriers and ladder combs organize rear interconnect
+      // without portraying generic Ethernet patch leads as NVIDIA's topology.
+      V(side*.99,0,-3.455,.43,13.52,.12,E.frame,.018,-.7);
+      for(const offset of [-1,1])B(side*.99+offset*.219,0,-3.515,.025,13.43,.075,E.edge,.80);
+      for(let i=0;i<45;i++){const y=-6.6+i*.30;B(side*.99,y,-3.570,.38,.045,.095,E.fold,.68);B(side*1.315,y,-3.615,.14,.047,.25,E.fold,.69);B(side*1.35,y,-3.75,.21,.047,.022,E.edge,.73);}
+    }
+    for(const y of [-7.02,7.02])V(0,y,-3.50,4.10,.16,.22,E.frame,.018,-.7);
+    // A narrow insulating shroud, isolated copper strips and regular protective
+    // bridges suggest high-current distribution; no household PDU sockets.
+    V(0,0,-3.47,.30,13.75,.17,E.polymer,.022,.18);
+    for(const s of [-1,1])B(s*.057,0,-3.57,.066,13.61,.033,[.29,.235,.155],.82);
+    for(let i=0;i<24;i++){const y=-6.6+i*.57;V(0,y,-3.61,.34,.080,.13,E.frame,.012,-.7);for(const s of [-1,1])T([s*.13,y,-3.673],[s*.13,y,-3.686],.017,E.edge,8,.75);}
+    // The two top service U retain a bounded rear header instead of exposing a
+    // void above the management trays. Lower bay remains a neutral enclosure.
+    V(0,6.90,-3.19,3.91,.45,.17,E.fold,.023,.70);
+    for(let i=0;i<19;i++)B(-1.70+i*.19,6.90,-3.285,.071,.28,.020,E.seam,.10);
+    const route=(family,item,from,to,control,radius,color,metal=.12)=>{
+      // An entry bend followed by a proper semicircular service loop avoids a
+      // cubic spline's tight teardrop apex. The two arc cubics use the standard
+      // circle factor; all joints share position and tangent direction.
+      const side=from[0]<0?-1:1,arcX=family==='cooling'?side*1.34:family==='power'?.38:family==='management'?side*1.52:from[0];
+      const z=Math.min(from[2],to[2])-.08,a=[arcX,from[1],z],b=[to[0],to[1],z],direction=Math.sign(b[0]-a[0]),bendRadius=Math.abs(b[0]-a[0])/2,k=.5522847498;
+      const mid=[(a[0]+b[0])/2,(a[1]+b[1])/2,z-bendRadius],dz=z-from[2],ez=to[2]-z;
+      const segments=[
+        [from,[from[0],from[1],from[2]+dz*.36],[a[0],a[1],z-dz*.36],a],
+        [a,[a[0],a[1],z-k*bendRadius],[mid[0]-direction*k*bendRadius,mid[1],mid[2]],mid],
+        [mid,[mid[0]+direction*k*bendRadius,mid[1],mid[2]],[b[0],b[1],z-k*bendRadius],b],
+        [b,[b[0],b[1],z+ez/3],[b[0],b[1],z+ez*2/3],to]
+      ];
+      segments.forEach((segment,index)=>editorialSweep(connections,segment,radius,color,metal,index===3?2:8));
+      const id=item.name+'-'+family+'-'+routes.length,fromSocket=id+'-tray',toSocket=id+'-rack';
+      // The same points construct the physical end collars and the verification
+      // anchors. The sweep centerline ends inside each connector's solid shell.
+      for(const [socketId,position,owner] of [[fromSocket,from,item.name],[toSocket,to,'rack-service-structure']])sockets.push(Object.freeze({id:socketId,position:Object.freeze([...position]),owner}));
+      // `control` remains the coarse routing envelope for existing inspectors;
+      // `segments` is the exact continuously joined rendered centerline.
+      routes.push(Object.freeze({family,component:item.name,from:Object.freeze(from),to:Object.freeze(to),fromSocket,toSocket,control:Object.freeze(control.map(p=>Object.freeze(p))),segments:Object.freeze(segments.map(segment=>Object.freeze(segment.map(p=>Object.freeze(p))))),radius,bendRadius,bendRatio:bendRadius/radius,terminated:true}));
+    };
+    const connector=(x,y,z,w=.15,h=.095)=>{connections.bevel(x,y,z,w,h,.14,E.polymer,.016,.16);connections.box(x,y+h*.55,z-.022,w*.62,.015,.061,E.edge,.65);connections.box(x,y,z-.080,w*.70,h*.69,.034,E.jacket,.14);};
+    for(const item of items){
+      const {mgx_type:type,y}=item,depth={server:5.85,nvlink:5.95,powershelf:4.95,switch:4.55}[type];if(!depth)continue;const rear=FRONT-depth;
+      if(type==='server'||type==='nvlink')for(const side of [-1,1]){
+        // Short service loops terminate at the rear tray and the rack's fixed
+        // cartridge lane. Cubic tangent continuity gives a consistent bend.
+        for(let pair=0;pair<2;pair++){
+          const x=side*(.56+pair*.14),dy=(pair-.5)*.060,from=[x,y+dy,rear-.20],to=[side*(.935+pair*.105),y+dy-.015,-3.64];
+          connector(x,y+dy,rear-.166,.105,.059);connector(to[0],to[1],-3.595,.09,.062);
+          route('interconnect',item,from,to,[from,[x,y+dy,rear-.66],[side*(.91+pair*.11),y+dy-.15,-4.00-pair*.055],to],.019,pair?E.jacket:[.10,.126,.137]);
+        }
+        const from=[side*1.69,y,rear-.245],to=[side*1.78,y-.040,-3.69];
+        T([side*1.78,y-.040,-3.54],to,.044,E.edge,12,.83);
+        route('cooling',item,from,to,[from,[side*1.45,y,rear-.74],[side*1.46,y-.040,-4.04],to],.034,E.jacket,.14);
+        // Small retained collars visually separate elastomer from turned metal.
+        connections.tube([side*1.69,y,rear-.210],from,.045,E.edge,12,.83);
+      }
+      if(type==='server'||type==='nvlink'||type==='powershelf'){
+        const from=[.22,y,rear-.184],to=[.115,y,-3.635];connector(from[0],y,from[2]+.023,.125,.095);
+        V(to[0],y,-3.60,.132,.105,.11,E.polymer,.010,.18);B(to[0],y,-3.660,.083,.065,.025,E.fold,.55);
+        route('power',item,from,to,[from,[.42,y,rear-.67],[.45,y-.035,-3.92],to],.031,[.08,.073,.065],.11);
+      }
+      if(type==='switch'){
+        for(const side of [-1,1]){const from=[side*1.39,y,rear-.17],to=[side*1.35,y-.04,-3.68];connector(from[0],y,from[2]+.030);B(to[0],to[1],to[2]+.035,.17,.15,.14,E.polymer,.18);route('management',item,from,to,[from,[side*1.39,y,rear-.90],[side*1.48,y-.04,-3.94],to],.020,E.jacket);}
+      }
+    }
+    return {frame,infrastructure,connections,routes,sockets};
+  }
   // CPU-only geometry sharing for the homepage editorial scene. This factory
   // does not mount a canvas, read application state or mutate a live placement.
   // Identical type/size meshes are built once so an editorial rack can reuse
   // the operational model quality without duplicating all of its geometry.
   function buildEditorialParts(records){
-    const inspected=inspectPlacement(records.filter(i=>i.rack_mount!=='external'));
+    const inspected=inspectPlacement(records.filter(i=>i.rack_mount!=='external'&&i.mgx_type!=='cdu'));
     if(inspected.invalid.length||inspected.unplaced.length)throw new Error('Editorial rack requires valid, non-overlapping placed components');
     const equipment={},placements=inspected.valid.map(item=>{
       const meshKey=item.mgx_type+':'+item.size;
       if(!equipment[meshKey]){
-        const built=createEquipment(item);
+        const built=createEditorialEquipment(item);
         equipment[meshKey]=Object.freeze({data:new Float32Array(built.mesh.data),depth:built.depth,min:Object.freeze([...built.min]),max:Object.freeze([...built.max])});
       }
       return Object.freeze({name:item.name,type:item.mgx_type,top:item.top,bottom:item.bottom,size:item.size,y:item.y,height:item.height,meshKey});
     });
-    const editorialFrame=createFrame(),rear=createCooling(inspected.valid);
-    for(let i=0;i<rear.water.data.length;i+=11){rear.water.data[i+9]=.25;rear.water.data[i+10]=.45;}
-    for(let i=0;i<rear.shell.data.length;i+=11)rear.shell.data[i+9]=-3;
-    for(const mesh of [rear.solid,rear.water,rear.shell])for(const value of mesh.data)editorialFrame.data.push(value);
+    const structure=createEditorialStructure(inspected.valid),min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
+    const include=(data,y=0)=>{for(let i=0;i<data.length;i+=11)for(let axis=0;axis<3;axis++){const v=data[i+axis]+(axis===1?y:0);min[axis]=Math.min(min[axis],v);max[axis]=Math.max(max[axis],v);}};
+    for(const key of ['frame','infrastructure','connections'])include(structure[key].data);
+    for(const item of placements)include(equipment[item.meshKey].data,item.y);
+    const vertices=Object.freeze({frame:structure.frame.data.length/11,infrastructure:structure.infrastructure.data.length/11,connections:structure.connections.data.length/11,equipment:Object.freeze(Object.fromEntries(Object.entries(equipment).map(([key,value])=>[key,value.data.length/11])))});
+    const routeFamilies=Object.freeze(structure.routes.reduce((counts,route)=>(counts[route.family]=(counts[route.family]||0)+1,counts),{}));
+    const quality=Object.freeze({front:true,side:true,rear:true,fullDepth:true,noCDU:true,railPairs:inspected.valid.filter(i=>i.mgx_type!=='blanking').length,routeCount:structure.routes.length,routeFamilies,vertices,materialFamilies:Object.freeze(['brushed-anodized-metal','powder-coated-steel','chassis-metal','matte-polymer','cable-jacket','recessed-grille','status-lens']),conceptual:true});
     return Object.freeze({stride:11,unit:U,front:FRONT,
-      frame:Object.freeze({data:new Float32Array(editorialFrame.data)}),equipment:Object.freeze(equipment),placements:Object.freeze(placements),occupiedU:inspected.occupiedU,
-      bounds:Object.freeze({min:Object.freeze([-2.30,-7.85,-4.62]),max:Object.freeze([2.30,7.83,3.39])})});
+      frame:Object.freeze({data:new Float32Array(structure.frame.data)}),infrastructure:Object.freeze({data:new Float32Array(structure.infrastructure.data)}),connections:Object.freeze({data:new Float32Array(structure.connections.data)}),equipment:Object.freeze(equipment),placements:Object.freeze(placements),occupiedU:inspected.occupiedU,quality,metadata:quality,routes:Object.freeze(structure.routes),sockets:Object.freeze(structure.sockets),
+      bounds:Object.freeze({min:Object.freeze(min),max:Object.freeze(max)})});
   }
   window.PARackScene=Object.freeze({mount,inspectPlacement,inspectNetworkCabling,buildEditorialParts});
 })();

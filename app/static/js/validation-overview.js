@@ -22,10 +22,11 @@
         <button class="btn primary" type="button" data-vo-enter>進入系統與專案</button>
       </div>
       <div class="cine-stage vo-scene" id="core-stage" data-phase="system">
-        <div class="cine-core" id="core-visual"><img class="cine-fallback" src="/static/img/server-hero.png" alt="伺服器設備視圖"><canvas id="system-core" tabindex="0" role="img" aria-label="伺服器對準 U40、插入並拉遠顯示完整機櫃的 3D 動畫" aria-describedby="core-interaction-help"></canvas></div>
+        <div class="cine-core" id="core-visual"><img class="cine-fallback" src="/static/img/server-hero.png" alt="伺服器設備視圖"><canvas id="system-core" tabindex="0" role="img" aria-label="原創 AI 運算機櫃：伺服器對準 U40、沿導軌插入，展示正面、側面與背面結構" aria-describedby="core-interaction-help"></canvas></div>
         <div class="vo-phase"><span data-vo-phase-number>01</span><div><b data-vo-phase-title>L10 SYSTEM</b><small data-vo-phase-detail>SERVER FOCUS</small></div></div>
         <div class="vo-cinematic-progress" aria-hidden="true"><i data-vo-progress></i></div>
-        <button class="vo-replay" type="button" data-vo-replay aria-label="重播 Server 到 Rack 動畫">↻ 重播</button>
+        <div class="vo-scan-key" aria-hidden="true"><span>MANAGEMENT</span><span>COMPUTE</span><span>NVLINK</span><span>POWER</span></div>
+        <button class="vo-replay" type="button" data-vo-replay aria-label="重播機櫃電影展示">↻ 重播</button>
         <div class="cine-core-tools" id="core-tools"><span id="core-interaction-help">按住拖曳旋轉 · 方向鍵查看 · Home 重設</span><div><button type="button" data-core-view="rear" aria-label="3D 模型背面視角">背面</button><button type="button" data-core-view="reset" aria-label="重設 3D 模型視角">重設視角</button></div></div>
         <div id="core-system-copy" class="vo-a11y-state" aria-hidden="false">L10 System</div><div id="core-rack-copy" class="vo-a11y-state" inert aria-hidden="true">L11 Rack</div>
       </div>
@@ -77,38 +78,109 @@
     }).finally(()=>{loading=null;});return loading;
   }
 
+  const clamp=value=>Math.max(0,Math.min(1,Number(value)||0));
+  const ease=t=>t*t*(3-2*t);
+  // The scene owns geometry and camera interpolation. This is the single owner
+  // of cinematic time; cinematic.js only mounts/themes the compact scene.
+  const FILM_MS=32000;
+  const filmKeys=[[0,0],[2.2,.035],[5,.12],[7,.23],[10,.40],[11.4,.48],[14,.56],[16.3,.63],[18.2,.70],[20,.74],[22,.79],[25.8,.86],[29,.93],[32,1]];
+  const shots=[
+    [0,'server','01','L10 SYSTEM','PRECISION / COMPUTE TRAY'],
+    [.09,'alignment','02','ALIGNMENT','TARGET / U40'],
+    [.23,'engagement','03','RAIL ENGAGEMENT','CHASSIS / RACK INTERFACE'],
+    [.28,'insertion','04','INSERTION','GUIDED CHASSIS TRAVEL'],
+    [.46,'seat','05','MECHANICAL SEAT','U40 / POSITIONED'],
+    [.49,'pullback','06','RACK SCALE','COMPUTE / FABRIC / POWER'],
+    [.56,'front','07','AI INFRASTRUCTURE','HIGH-DENSITY COMPUTE RACK'],
+    [.60,'orbit','08','STRUCTURAL STUDY','DEPTH / RAILS / FRAME'],
+    [.71,'rear','09','REAR ARCHITECTURE','INTERCONNECT / POWER / COOLING'],
+    [.765,'return','10','PRECISION ENGINEERING','RETURN TO FRONT'],
+    [.805,'exploded','11','ASSEMBLY STUDY','EQUIPMENT / STRUCTURE'],
+    [.905,'scan','12','ENGINEERING SCAN','RACK-SCALE ARCHITECTURE'],
+    [.97,'final','13','AI INFRASTRUCTURE','HIGH-DENSITY COMPUTE RACK']
+  ];
   function applyProgress(value){
     const stage=document.getElementById('core-stage'),canvas=document.getElementById('system-core');if(!stage||!canvas)return;
-    const progress=Math.max(0,Math.min(1,value));canvas.paCoreScene?.setProgress(progress);stage.dataset.phase=progress<.12?'system':progress<.78?'integration':'rack';
-    stage.querySelector('[data-vo-progress]')?.style.setProperty('width',`${Math.round(progress*100)}%`);
-    const number=stage.querySelector('[data-vo-phase-number]'),title=stage.querySelector('[data-vo-phase-title]'),detail=stage.querySelector('[data-vo-phase-detail]');
-    if(progress<.12){number.textContent='01';title.textContent='L10 SYSTEM';detail.textContent='SERVER FOCUS';}
-    else if(progress<.78){number.textContent='01 → 02';title.textContent='INTEGRATION';detail.textContent=progress<.4?'ALIGN TO U40':'SYSTEM → RACK';}
-    else{number.textContent='02';title.textContent='L11 RACK';detail.textContent='FULL RACK';}
+    const progress=clamp(value);canvas.paCoreScene?.setProgress(progress);
+    stage.dataset.phase=progress<.09?'system':progress<.56?'integration':'rack';
+    let shot=shots[0];for(const candidate of shots){if(progress<candidate[0])break;shot=candidate;}
+    if(stage.dataset.shot!==shot[1]){
+      stage.dataset.shot=shot[1];
+      stage.querySelector('[data-vo-phase-number]').textContent=shot[2];
+      stage.querySelector('[data-vo-phase-title]').textContent=shot[3];
+      stage.querySelector('[data-vo-phase-detail]').textContent=shot[4];
+      const system=stage.querySelector('#core-system-copy'),rack=stage.querySelector('#core-rack-copy'),showRack=progress>=.56;
+      system.inert=showRack;system.setAttribute('aria-hidden',String(showRack));
+      rack.inert=!showRack;rack.setAttribute('aria-hidden',String(!showRack));
+    }
+    stage.querySelector('[data-vo-progress]').style.transform=`scaleX(${progress.toFixed(4)})`;
   }
-  const ease=t=>t*t*(3-2*t);
-  function timedProgress(t){
-    if(t<.15)return 0;
-    if(t<.38)return ease((t-.15)/.23)*.38;
-    if(t<.72)return .38+ease((t-.38)/.34)*.38;
-    if(t<.82)return .76;
-    return .76+ease((t-.82)/.18)*.24;
+  function timedProgress(milliseconds){
+    const seconds=milliseconds/1000;
+    for(let i=1;i<filmKeys.length;i++){
+      const [end,p1]=filmKeys[i], [start,p0]=filmKeys[i-1];
+      if(seconds<=end)return p0+(p1-p0)*ease(clamp((seconds-start)/(end-start)));
+    }
+    return 1;
   }
   function mountOverview(){
     teardown();teardown=()=>{};const root=document.querySelector('.vo-overview'),story=document.getElementById('core-story'),canvas=document.getElementById('system-core');if(!root||!story||!canvas)return;
-    const select=root.querySelector('[data-vo-select]');select.onchange=()=>{selectedProject=select.value;renderData();};root.querySelector('[data-vo-enter]').onclick=()=>window.cineEnterSelected();root.querySelector('[data-vo-replay]').onclick=()=>play(true);
+    const select=root.querySelector('[data-vo-select]'),replay=root.querySelector('[data-vo-replay]');select.onchange=()=>{selectedProject=select.value;renderData();};root.querySelector('[data-vo-enter]').onclick=()=>window.cineEnterSelected();replay.onclick=()=>play(true);
     const refreshExisting=!!overview;void loadOverview(refreshExisting,refreshExisting);
-    let frame=0,timer=0,refreshTimer=0,cancelled=false,start=0;
-    const cancel=()=>{cancelled=true;clearTimeout(timer);cancelAnimationFrame(frame);};
-    const manualScroll=()=>{cancel();const top=story.getBoundingClientRect().top,progress=Math.max(0,Math.min(1,(80-top)/Math.max(420,story.offsetHeight*.75)));applyProgress(progress);};
-    const input=()=>cancel();
-    const tick=now=>{if(cancelled)return;if(!start)start=now;const t=Math.min(1,(now-start)/5600);applyProgress(timedProgress(t));if(t<1)frame=requestAnimationFrame(tick);};
-    function play(force=false){cancel();cancelled=false;start=0;applyProgress(0);try{sessionStorage.setItem(replayKey,'1');}catch{}timer=setTimeout(()=>{if(!cancelled)frame=requestAnimationFrame(tick);},force?80:800);}
+    let frame=0,timer=0,refreshTimer=0,disposed=false,mode='stopped',elapsed=0,lastTime=0,lastScroll=scrollY,progress=1,target=1;
+    const write=value=>{progress=clamp(value);applyProgress(progress);};
+    const cancel=()=>{mode='stopped';clearTimeout(timer);cancelAnimationFrame(frame);frame=0;lastTime=0;};
+    const schedule=()=>{if(!disposed&&!frame&&!document.hidden)frame=requestAnimationFrame(tick);};
+    function tick(now){
+      frame=0;if(disposed||document.hidden||mode==='stopped')return;
+      const dt=lastTime?Math.min(80,now-lastTime):0;lastTime=now;
+      if(mode==='film'){
+        elapsed=Math.min(FILM_MS,elapsed+dt);write(timedProgress(elapsed));
+        if(elapsed===FILM_MS){mode='stopped';lastTime=0;return;}
+      }else{
+        const next=progress+(target-progress)*(1-Math.exp(-dt/90));
+        write(Math.abs(target-next)<.00015?target:next);
+        if(progress===target){mode='stopped';lastTime=0;return;}
+      }
+      schedule();
+    }
+    function seek(value){cancel();target=reduced.matches?1:clamp(value);write(target);lastScroll=scrollY;}
+    const manualScroll=()=>{
+      const nextScroll=scrollY,delta=nextScroll-lastScroll;lastScroll=nextScroll;
+      if(disposed||Math.abs(delta)<.5)return;
+      if(reduced.matches){seek(1);return;}
+      // Take over at the current cinematic position. Using absolute document Y
+      // here used to snap a completed rack back into a server on first scroll.
+      if(mode!=='scroll'){
+        const actual=canvas.paCoreScene?.getState?.().progress;
+        cancel();if(Number.isFinite(actual))progress=actual;target=progress;
+      }
+      target=clamp(target+delta/Math.max(540,story.offsetHeight*.85));mode='scroll';schedule();
+    };
+    const input=()=>{cancel();};
+    const wheel=()=>{if(mode==='film')cancel();};
+    const tools=story.querySelector('#core-tools');
+    function play(force=false){
+      if(reduced.matches){seek(1);return;}
+      cancel();elapsed=0;target=0;write(0);lastScroll=scrollY;
+      try{sessionStorage.setItem(replayKey,'1');}catch{}
+      mode='film';timer=setTimeout(schedule,force?80:800);
+    }
+    const motionChange=()=>{
+      replay.disabled=reduced.matches;replay.setAttribute('aria-disabled',String(reduced.matches));
+      replay.title=reduced.matches?'已依減少動態效果偏好停用重播':'重播機櫃電影展示';
+      if(reduced.matches)seek(1);
+    };
+    const visibilityChange=()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;lastTime=0;}else if(mode!=='stopped')schedule();};
+    const ready=()=>applyProgress(progress);
     let played=false;try{played=sessionStorage.getItem(replayKey)==='1';}catch{}
-    if(reduced.matches||played)applyProgress(1);else play();
+    motionChange();if(reduced.matches||played)seek(1);else play();
+    // Deterministic public playback control also lets QA exercise the real
+    // phase labels, scan overlay and progress ownership when seeking a shot.
+    story.paHeroPlayback={seek,replay:()=>play(true),getState:()=>({progress,target,mode,duration:FILM_MS,reducedMotion:reduced.matches})};
     refreshTimer=setInterval(()=>{if(!document.hidden&&root.isConnected)void loadOverview(true,true);},REFRESH_MS);
-    window.addEventListener('scroll',manualScroll,{passive:true});canvas.addEventListener('pointerdown',input,{passive:true});canvas.addEventListener('touchstart',input,{passive:true});canvas.addEventListener('keydown',input);story.addEventListener('wheel',input,{passive:true});
-    teardown=()=>{cancel();clearInterval(refreshTimer);window.removeEventListener('scroll',manualScroll);canvas.removeEventListener('pointerdown',input);canvas.removeEventListener('touchstart',input);canvas.removeEventListener('keydown',input);story.removeEventListener('wheel',input);};
+    window.addEventListener('scroll',manualScroll,{passive:true});canvas.addEventListener('pointerdown',input,{passive:true});canvas.addEventListener('touchstart',input,{passive:true});canvas.addEventListener('keydown',input);story.addEventListener('wheel',wheel,{passive:true});tools?.addEventListener('click',input);canvas.addEventListener('pa-core-ready',ready);document.addEventListener('visibilitychange',visibilityChange);reduced.addEventListener('change',motionChange);
+    teardown=()=>{disposed=true;cancel();clearInterval(refreshTimer);delete story.paHeroPlayback;window.removeEventListener('scroll',manualScroll);canvas.removeEventListener('pointerdown',input);canvas.removeEventListener('touchstart',input);canvas.removeEventListener('keydown',input);story.removeEventListener('wheel',wheel);tools?.removeEventListener('click',input);canvas.removeEventListener('pa-core-ready',ready);document.removeEventListener('visibilitychange',visibilityChange);reduced.removeEventListener('change',motionChange);};
   }
   window.cineOpenProject=name=>{const project=projectByName(name);productProject(name,project?.level==='L11'?'rack':'system');};
   window.cineEnterSelected=()=>selectedProject?window.cineOpenProject(selectedProject):productLevel('system');
