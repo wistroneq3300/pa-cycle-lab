@@ -709,7 +709,7 @@ async function runViewport(browser, base, serverUnknown, browserVersion, width, 
       await scrollPanel(page, "#pd-panel-sensors");
       await capture({ key: "s05-system-health", sId: "S05", region: "System Sensors / Firmware", state: "host_a / health" });
 
-      if (groupSelected("S10", "S13")) {
+      if (groupSelected("S10", "S13", "s13-evidence-viewer")) {
         await page.locator("#pd-inspection [data-view]").click();
         await page.locator(".pd-inspection-issue").waitFor();
         await page.locator(".pd-inspection-issue summary").first().click();
@@ -720,7 +720,29 @@ async function runViewport(browser, base, serverUnknown, browserVersion, width, 
           try {
             await page.locator("[data-evidence-open]").first().click();
             await page.locator('.pa-evidence-modal [data-status][data-state="loaded"]').waitFor({ timeout: 3000 });
-            await capture({ key: "s13-evidence-viewer", sId: "S13", region: "Read-only evidence viewer", state: "saved inspection evidence loaded", gaps: [coverage.S13.reason] });
+            const evidenceBeforeScroll = await page.locator(".pa-evidence-modal").evaluate(dialog => {
+              const box = dialog.getBoundingClientRect();
+              return { pageScrollY: scrollY, viewportHeight: innerHeight, top: box.top, bottom: box.bottom, fullyInViewport: box.top >= 0 && box.bottom <= innerHeight };
+            });
+            await page.evaluate(() => scrollTo(0, 0));
+            await settle(page, 40);
+            const evidenceLayout = await page.locator(".pa-evidence-modal").evaluate(dialog => {
+              const rect = element => {
+                if (!element) return null;
+                const box = element.getBoundingClientRect();
+                return { left: box.left, top: box.top, right: box.right, bottom: box.bottom, width: box.width, height: box.height };
+              };
+              const footer = dialog.querySelector("footer");
+              const footerRect = footer?.getBoundingClientRect();
+              return {
+                viewport: { width: innerWidth, height: innerHeight },
+                dialog: rect(dialog), footer: rect(footer),
+                footerFullyInViewport: !!footerRect && footerRect.top >= 0 && footerRect.bottom <= innerHeight,
+              };
+            });
+            assert(evidenceBeforeScroll.fullyInViewport, "S13 Evidence: dialog must remain inside the viewport when opened from a scrolled issue");
+            assert(evidenceLayout.footerFullyInViewport, "S13 Evidence: footer actions must remain inside the viewport at the requested zoom");
+            await capture({ key: "s13-evidence-viewer", sId: "S13", region: "Read-only evidence viewer", state: "saved inspection evidence loaded", details: { evidenceBeforeScroll, evidenceLayout }, reachabilitySelector: ".pa-evidence-modal [data-download]", gaps: [coverage.S13.reason] });
           } catch (error) {
             manifest.scenarioFailures.push({
               key: "s13-evidence-viewer", surfaceId: "S13", width, height, theme,

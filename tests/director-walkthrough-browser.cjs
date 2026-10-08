@@ -225,6 +225,20 @@ async function installProvider(page, cycleSeed, round) {
       }
       if (method === "GET" && /^\/api\/cycle\/runs\/[^/]+$/.test(path)) return json(job);
       if (method === "GET" && /\/api\/projects\/[^/]+\/cycle\/jobs\/[^/]+$/.test(path)) return json(job);
+      if (method === "GET" && /^\/api\/projects\/[^/]+\/cycle\/jobs\/[^/]+\/console-summary$/.test(path)) {
+        const nodes = job.targets.map(target => {
+          const rows = events.filter(event => event.machine_id === target.name);
+          const loop = rows.reduce((latest, event) => Math.max(latest, Number(event.loop || 0)), 0);
+          const latest = rows.filter(event => Number(event.loop || 0) === loop);
+          const completed = [
+            ["ACTION", "COMMAND_DISPATCHED"],
+            ["RECOVERY", "RECOVERY_DETECTED"],
+            ["POST", "POST_COMPLETED"],
+          ].filter(([, type]) => latest.some(event => event.event_type === type)).map(([phase]) => phase);
+          return { machine_id: target.name, loop, completed, markers: latest.slice(-2) };
+        });
+        return json({ nodes, basis: "typed events, latest loop per node" });
+      }
       if (method === "POST" && /\/api\/projects\/[^/]+\/cycle\/jobs\/[^/]+\/confirm$/.test(path)) {
         const body = JSON.parse(options.body || "{}"); trace.mutations.push({ action: "cycle-confirm", method, path, body });
         job.state = "RUNNING"; job.health = cycleSeed.job.health; job.nodes = JSON.parse(JSON.stringify(cycleSeed.job.nodes)); job.heartbeat = Math.floor(Date.now() / 1000);
@@ -397,12 +411,23 @@ async function runRound(browser, base, round, cycleSeed) {
       await boxes.nth(0).check(); await boxes.nth(1).check();
       assert.match(await page.locator("#rm-dialog-foot .primary").innerText(), /批次指令/);
       await page.locator("#rm-dialog-foot .primary").click();
-      const nextSurface = await page.waitForFunction(() => {
-        const result = document.querySelector(".ar-window");
-        if (result && getComputedStyle(result).display !== "none") return "result";
-        if (document.getElementById("rm-dialog-title")?.textContent.includes("確認測項")) return "confirm";
-        return false;
-      }).then(handle => handle.jsonValue());
+      let nextSurface;
+      try {
+        nextSurface = await page.waitForFunction(() => {
+          const result = document.querySelector(".ar-window");
+          if (result && getComputedStyle(result).display !== "none") return "result";
+          const title = document.getElementById("rm-dialog-title")?.textContent || "";
+          if (title.includes("確認測項") || title.includes("確認批次指令範圍")) return "confirm";
+          return false;
+        }).then(handle => handle.jsonValue());
+      } catch (error) {
+        const diagnostic = await page.evaluate(() => ({
+          title: document.getElementById("rm-dialog-title")?.textContent || "",
+          footer: document.getElementById("rm-dialog-foot")?.innerText || "",
+          resultDisplay: document.querySelector(".ar-window") ? getComputedStyle(document.querySelector(".ar-window")).display : "missing",
+        }));
+        throw new Error(`Batch transition was not recognized: ${JSON.stringify(diagnostic)}`, { cause: error });
+      }
       if (nextSurface === "confirm") {
         assert.match(await page.locator("#rm-dialog-foot .primary").innerText(), /批次指令/);
         await page.locator("#rm-dialog-foot .primary").click();
