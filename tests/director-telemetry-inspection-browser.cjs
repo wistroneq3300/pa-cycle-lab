@@ -86,22 +86,27 @@ function telemetryPayload(id) {
 
 function inspectionSnapshot(mode) {
   if (mode === 'error') return null;
+  const disabled = mode === 'disabled';
+  const matrix = [
+    { node_id:'node-ready',node_label:'N1',check_name:'Kernel / dmesg',status:'FAIL',health_status:'FAIL',required:true,expected:'0 critical events',observed:'1',last_checked:now-30,evidence_available:true,evidence_ref:{snapshot_id:'snapshot-director'},detail:'Synthetic N1 failure 1.' },
+    { node_id:'node-ready',node_label:'N1',check_name:'PCIe Inventory',status:'FAIL',health_status:'FAIL',required:true,expected:'8',observed:'7',last_checked:now-30,evidence_available:true,evidence_ref:{snapshot_id:'snapshot-director'},detail:'Expected 8 / Observed 7' },
+    { node_id:'node-ready',node_label:'N1',check_name:'SSD Inventory',status:'FAIL',health_status:'FAIL',required:true,expected:'2',observed:'1',last_checked:now-30,evidence_available:true,evidence_ref:{snapshot_id:'snapshot-director'},detail:'Synthetic N1 failure 3.' },
+    { node_id:'node-ready',node_label:'N1',check_name:'GPU / NVLink',status:'NOT_APPLICABLE',health_status:'UNKNOWN',required:false,expected:null,observed:null,last_checked:now-30,evidence_available:true,evidence_ref:{snapshot_id:'snapshot-director'},detail:'此 Project 不適用。' },
+    { node_id:'node-stale',node_label:'N2',check_name:'Kernel / dmesg',status:'PASS',health_status:'PASS',required:true,expected:'No matching rule',observed:'0',last_checked:now-40,evidence_available:true,evidence_ref:{snapshot_id:'snapshot-director'},detail:'N2 completed without findings.' },
+    { node_id:'node-stale',node_label:'N2',check_name:'PCIe Inventory',status:'PASS',health_status:'PASS',required:true,expected:'8',observed:'8',last_checked:now-40,evidence_available:true,evidence_ref:{snapshot_id:'snapshot-director'},detail:'N2 inventory matches.' },
+    { node_id:'node-nodata',node_label:'N3',check_name:'SEL / Event Log',status:'WARN',health_status:'WARN',required:true,expected:null,observed:'1 warning',last_checked:now-50,evidence_available:true,evidence_ref:{snapshot_id:'snapshot-director'},detail:'Synthetic N3 warning 1.' },
+    { node_id:'node-nodata',node_label:'N3',check_name:'Sensors',status:'WARN',health_status:'WARN',required:true,expected:'Nominal',observed:'Review',last_checked:now-50,evidence_available:true,evidence_ref:{snapshot_id:'snapshot-director'},detail:'Synthetic N3 warning 2.' },
+  ].map(row=>disabled&&row.required?{...row,status:'NOT_MONITORED'}:row);
   return {
     error: '', running: false, delayed: false,
-    config: { enabled: true, node_overrides: {}, ai_enabled: true, thresholds: {}, interval_seconds: 120, deep_seconds: 600, sensor_seconds: 120, firmware_seconds: 3600, duration_seconds: 120, recovery_samples: 2, stale_seconds: 300, hysteresis: 5 },
-    summary: { fail: mode === 'current' ? 1 : 0, warning: mode === 'current' || mode === 'ai-missing' ? 1 : 0 },
+    config: { enabled: !disabled, node_overrides: {}, ai_enabled: true, thresholds: {}, interval_seconds: 120, deep_seconds: 600, sensor_seconds: 120, firmware_seconds: 3600, duration_seconds: 120, recovery_samples: 2, stale_seconds: 300, hysteresis: 5 },
+    summary: { fail: 3, warning: 2 },
     lifecycle_counts: { recovered: mode === 'recovered' ? 1 : 0, archived: 3 },
-    nodes: [{ node_id: 'node-ready', label: 'N1 / n1-director-long-hostname.validation.example' }],
+    nodes: [{ node_id: 'node-ready', label: 'N1 / n1-director-long-hostname.validation.example' },{ node_id: 'node-stale', label: 'N2' },{ node_id: 'node-nodata', label: 'N3' }],
     identity: {}, identity_history: [],
     coverage: [{ node_id: 'node-ready', source: 'Redfish', state: mode === 'recovered' ? 'PARTIAL' : 'FRESH', collected_at: now - 30, duration: 1.7, detail: mode === 'recovered' ? 'One source unavailable; retained prior observation.' : 'EventLog and sensor observations collected.', services: ['EventLog', 'SEL', 'Journal', 'LifecycleLog'] }],
     coverage_summary: { completed: 3, required: 4, coverage: 75, pass: 1, warn: 1, fail: 1, not_monitored: 0 },
-    check_matrix: [
-      { node_id:'node-ready',node_label:'N1',check_name:'Kernel / dmesg',status:'PASS',health_status:'PASS',required:true,expected:'No matching rule',observed:'0',last_checked:now-30,evidence_available:true,evidence_ref:{snapshot_id:'snapshot-director'},detail:'無符合規則的異常。' },
-      { node_id:'node-ready',node_label:'N1',check_name:'PCIe Inventory',status:'FAIL',health_status:'FAIL',required:true,expected:'8',observed:'7',last_checked:now-30,evidence_available:true,evidence_ref:{snapshot_id:'snapshot-director'},detail:'Expected 8 / Observed 7' },
-      { node_id:'node-ready',node_label:'N1',check_name:'SEL / Event Log',status:'WARN',health_status:'WARN',required:true,expected:null,observed:null,last_checked:now-30,evidence_available:true,evidence_ref:{snapshot_id:'snapshot-director'},detail:'發現既有事件；Severity 未變更。' },
-      { node_id:'node-ready',node_label:'N1',check_name:'Boot Identity',status:'NO_DATA',health_status:'UNKNOWN',required:true,expected:'Valid Boot ID',observed:null,last_checked:null,evidence_available:false,evidence_ref:null,detail:'等待有效 Boot ID。' },
-      { node_id:'node-ready',node_label:'N1',check_name:'GPU / NVLink',status:'NOT_APPLICABLE',health_status:'UNKNOWN',required:false,expected:null,observed:null,last_checked:now-30,evidence_available:true,evidence_ref:{snapshot_id:'snapshot-director'},detail:'此 Project 不適用。' },
-    ],
+    check_matrix: matrix,
     progress: [], last_fast_at: now - 30, last_completed_at: now - 30, last_deep_at: now - 120,
   };
 }
@@ -195,6 +200,21 @@ async function json(route, body, status = 200) {
     await setViewport(1920, 'light');
     await shot('telemetry-ready-1920-light', page.locator('.tp-workspace'));
     assert.equal(await page.locator('.tn-ai [data-ai-state]').innerText(), '分析完成');
+    assert.match(await page.locator('[data-health-scope]').innerText(), /Node Scope · N1/);
+    assert.equal(await page.locator('[data-health-counts]').innerText(), '3 FAIL / 0 WARN');
+
+    await selectTelemetry('node-stale');
+    await page.waitForFunction(() => document.querySelector('[data-health-scope]')?.textContent.includes('N2'));
+    assert.equal(await page.locator('[data-health-counts]').innerText(), '0 FAIL / 0 WARN', 'N2 must not inherit N1/N3 findings');
+    await shot('telemetry-node-scope-n2-1920-light', page.locator('.tn-health'));
+    await selectTelemetry('node-nodata');
+    await page.waitForFunction(() => document.querySelector('[data-health-scope]')?.textContent.includes('N3'));
+    assert.equal(await page.locator('[data-health-counts]').innerText(), '0 FAIL / 2 WARN');
+    inspectionMode='disabled';await selectTelemetry('node-ready');
+    await page.waitForFunction(() => document.querySelector('[data-health-state]')?.textContent==='NOT MONITORED');
+    assert.equal(await page.locator('[data-health-counts]').innerText(), '3 FAIL / 0 WARN', 'disabled Inspection must retain historical Node findings');
+    assert.equal(await page.locator('.tn-ai [data-ai-state]').innerText(), '分析完成', 'Inspection disablement must not block Telemetry AI');
+    inspectionMode='current';
 
     await setViewport(1366, 'dark');
     for (const [id, label] of [['node-stale', 'stale'], ['node-nodata', 'no-data'], ['node-query', 'query-error'], ['node-na', 'not-applicable']]) {
@@ -237,7 +257,7 @@ async function json(route, body, status = 200) {
       await page.locator(`#pd-inspection [data-issue-id="issue-${mode}"]`).waitFor();
       await page.locator('#pd-inspection [data-issue-id]').first().evaluate(element => { element.open = true; });
       await shot(`inspection-${mode}-1920-light`, page.locator('#pd-inspection'));
-      assert.equal(await page.locator('#pd-inspection [data-matrix] tr').count(),5);
+      assert.equal(await page.locator('#pd-inspection [data-matrix] tr').count(),8);
       assert.match(await page.locator('#pd-inspection [data-matrix]').innerText(),/Expected 8 \/ Observed 7[\s\S]*NOT APPLICABLE/);
       const text = await page.locator('#pd-inspection [data-issue-id]').first().innerText();
       assert.doesNotMatch(text, /undefined|null|NaN/);
