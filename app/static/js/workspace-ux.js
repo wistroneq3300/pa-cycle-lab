@@ -5,12 +5,22 @@
   const read=(key,fallback)=>{try{return JSON.parse(sessionStorage.getItem(key))??fallback;}catch{return fallback;}};
   const save=(key,value)=>{try{sessionStorage.setItem(key,JSON.stringify(value));}catch{}};
   const icon=kind=>'<svg class="ux-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">'+({config:'<path d="M5 5h14v5H5zm0 9h14v5H5zM8 7.5h1m-1 9h1"/>',connect:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 21h8m-4-5v5"/>',power:'<path d="M12 2v10m-5-7a9 9 0 1 0 10 0"/>'}[kind]||'')+'</svg>';
+  const persistWorkspaceError=message=>{
+    const scope=document.getElementById('content');if(!scope)return;
+    let region=scope.querySelector(':scope > .ux-workspace-errors');
+    if(!region){region=document.createElement('section');region.className='ux-workspace-errors';region.setAttribute('aria-label','工作區錯誤');scope.prepend(region);}
+    const existing=[...region.querySelectorAll('.ux-workspace-error span')].find(node=>node.textContent===message);if(existing)return existing.closest('.ux-workspace-error');
+    const item=document.createElement('div');item.className='ux-workspace-error';item.setAttribute('role','alert');
+    const text=document.createElement('span');text.textContent=message;item.append(text);
+    const dismiss=document.createElement('button');dismiss.type='button';dismiss.className='btn small';dismiss.textContent='關閉';dismiss.onclick=()=>{item.remove();if(!region.children.length)region.remove();};item.append(dismiss);region.append(item);return item;
+  };
   window.uxNotify=(message,error=false)=>{
     let host=document.getElementById('ux-notifications');
     if(!host){host=document.createElement('div');host.id='ux-notifications';host.setAttribute('aria-live','polite');document.body.append(host);}
     const item=document.createElement('div');item.className='ux-notice'+(error?' is-error':'');item.setAttribute('role',error?'alert':'status');
     const text=document.createElement('span');text.textContent=message;item.append(text);
     const dismiss=document.createElement('button');dismiss.type='button';dismiss.textContent='\u95dc\u9589';dismiss.onclick=()=>item.remove();item.append(dismiss);host.append(item);
+    if(error)persistWorkspaceError(String(message));
     if(!error)setTimeout(()=>item.remove(),8000);
     return item;
   };
@@ -24,9 +34,18 @@
   const originalClose=closeDialog;
   closeDialog=function(){if(window.uxPendingConfirm){const cancel=window.uxPendingConfirm;window.uxPendingConfirm=null;cancel();return;}return originalClose();};
   document.addEventListener('keydown',e=>{
-    if(e.key!=='Escape'||e.defaultPrevented||e.isComposing)return;
     const backdrop=document.getElementById('rm-dialog');
     if(!backdrop||getComputedStyle(backdrop).display==='none')return;
+    if(e.key==='Tab'){
+      const focusable=[...backdrop.querySelectorAll('button:not([disabled]):not([hidden]),input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])')].filter(element=>element.offsetParent!==null);
+      if(!focusable.length){e.preventDefault();backdrop.querySelector('.rm-modal')?.focus();return;}
+      const first=focusable[0],last=focusable.at(-1);
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+      else if(!backdrop.contains(document.activeElement)){e.preventDefault();first.focus();}
+      return;
+    }
+    if(e.key!=='Escape'||e.defaultPrevented||e.isComposing)return;
     if(backdrop.getAttribute('aria-busy')==='true'||backdrop.querySelector('.xterm,canvas,#power-batch-progress'))return;
     e.preventDefault();closeDialog();
   });

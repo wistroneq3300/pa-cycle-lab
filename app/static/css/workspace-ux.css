@@ -1,4 +1,5 @@
 /* Shared workspace tokens and responsive shell. */
+.ux-workspace-errors{display:grid;gap:8px;margin:0 0 16px}.ux-workspace-error{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:12px 14px;border:1px solid color-mix(in srgb,var(--red,#c34650) 42%,var(--border));border-radius:8px;background:color-mix(in srgb,var(--red,#c34650) 8%,var(--bg-panel));color:var(--text);font-size:13px;line-height:1.55}.ux-workspace-error>span{min-width:0;overflow-wrap:anywhere}.ux-workspace-error>.btn{flex:none}
 :root{--ux-radius:10px;--ux-gap:16px;--ux-body:13px;--ux-label:12px}
 .btn,.input,button,select,input{font-size:var(--ux-body)}
 .btn{min-height:36px;gap:7px;border-radius:7px}

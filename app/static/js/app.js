@@ -1044,17 +1044,20 @@ function dialogBackdrop() {
   let b = $("rm-dialog");
   if (b) return b;
   b = document.createElement("div");
-  b.className = "modal-backdrop"; b.id = "rm-dialog"; b.style.display = "none";
-  b.innerHTML = `<div class="modal rm-modal"><div class="modal-head"><div class="modal-title" id="rm-dialog-title"></div><button class="btn small" onclick="closeDialog()">✕</button></div><div class="modal-body" id="rm-dialog-body"></div><div class="modal-foot" id="rm-dialog-foot"></div></div>`;
+  b.className = "modal-backdrop"; b.id = "rm-dialog"; b.style.display = "none"; b.setAttribute("aria-hidden", "true");
+  b.innerHTML = `<div class="modal rm-modal" role="dialog" aria-modal="true" aria-labelledby="rm-dialog-title" tabindex="-1"><div class="modal-head"><div class="modal-title" id="rm-dialog-title"></div><button type="button" class="btn small" aria-label="關閉對話框" onclick="closeDialog()">✕</button></div><div class="modal-body" id="rm-dialog-body"></div><div class="modal-foot" id="rm-dialog-foot"></div></div>`;
   document.body.appendChild(b);
   return b;
 }
 let dialogRevision = 0;
+let dialogOpener = null;
 function showDialog(title, bodyHtml, actions) {
   const revision = ++dialogRevision;
   const b = dialogBackdrop();
+  if (getComputedStyle(b).display === "none") dialogOpener = document.activeElement;
   delete $("rm-dialog-foot").dataset.busy;
   b.removeAttribute("aria-busy");
+  b.removeAttribute("aria-hidden");
   $("rm-dialog-title").textContent = title;
   $("rm-dialog-body").innerHTML = bodyHtml;
   const foot = $("rm-dialog-foot");
@@ -1096,8 +1099,22 @@ function showDialog(title, bodyHtml, actions) {
     foot.appendChild(btn);
   });
   b.style.display = "flex";
+  requestAnimationFrame(() => {
+    if (revision !== dialogRevision || getComputedStyle(b).display === "none") return;
+    const first = $("rm-dialog-body").querySelector("input:not([disabled]),select:not([disabled]),textarea:not([disabled]),button:not([disabled]),a[href]")
+      || foot.querySelector(".primary:not([disabled]),button:not([disabled])")
+      || b.querySelector(".modal-head button:not([disabled])");
+    first?.focus({ preventScroll: true });
+  });
 }
-function closeDialog() { const b = $("rm-dialog"); if (b) b.style.display = "none"; rackMoveTargetType = null; }
+function closeDialog() {
+  const b = $("rm-dialog");
+  if (b) { b.style.display = "none"; b.setAttribute("aria-hidden", "true"); b.removeAttribute("aria-busy"); }
+  dialogRevision++;
+  rackMoveTargetType = null;
+  const opener = dialogOpener; dialogOpener = null;
+  if (opener?.isConnected && typeof opener.focus === "function") requestAnimationFrame(() => opener.focus({ preventScroll: true }));
+}
 
 function pageRack() {
   // 已從機櫃移除(rack_u<=0)的 L11 只留在 System Manager，不繪製在機櫃上

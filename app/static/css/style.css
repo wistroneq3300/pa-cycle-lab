@@ -290,6 +290,8 @@ table.t{width:100%;border-collapse:collapse}
 /* ===== Modal ===== */
 .modal-backdrop{position:fixed;inset:0;background:rgba(8,20,32,.5);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:50}
 .modal{background:var(--bg-panel);border:1px solid var(--border);border-radius:14px;width:500px;max-width:94vw;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.rm-modal{display:flex;flex-direction:column;width:min(640px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:hidden}
+.rm-modal>.modal-head,.rm-modal>.modal-foot{flex:none}.rm-modal>.modal-body{flex:1;min-height:0;overflow:auto}
 .modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, color-mix(in srgb, var(--bg-panel-2) 90%, var(--accent-blue-bg)), var(--bg-panel));border-radius:14px 14px 0 0}
 .modal-title{font-size:15px;font-weight:800;letter-spacing:.2px}
 .modal-title::before{content:"";display:inline-block;width:4px;height:16px;border-radius:2px;background:var(--logo-grad);margin-right:9px;vertical-align:-2px}
@@ -959,7 +961,6 @@ input#f-bmc-pass:autofill{
 .rack-card.mgx-network-card{border-left:3px solid #f97316}
 .rack-card.mgx-blanking-card{border-left:3px dashed #6b7280;background:repeating-linear-gradient(45deg,var(--bg-panel),var(--bg-panel) 6px,var(--bg-panel-2) 6px,var(--bg-panel-2) 12px)}
 .rack-mgx{font-size:11px;color:var(--text-faint);margin:6px 0 2px}
-.rm-modal .modal{width:560px;max-width:94vw}
 .rm-modal-body{font-size:13px}
 
 /* ===== 專案 收合 ===== */
