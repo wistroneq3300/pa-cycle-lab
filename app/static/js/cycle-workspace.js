@@ -15,7 +15,7 @@
   // Colour a value by its meaning: PASS/OK green, WARN/amber, FAIL/BLOCKED red,
   // anything in-flight/neutral muted. Used for the progress table badges.
   const HEALTH_CLASS=v=>{const s=String(v??'').toUpperCase();return s==='PASS'||s==='OK'||s==='EXERCISED'?'cw-ok':s==='WARN'?'cw-warn':s==='FAIL'||s==='BLOCKED'||s==='ERROR'?'cw-fail':s==='DONE'||s==='COMPLETE'?'cw-done':'cw-idle';};
-  let root, generation=0, controller, timer, consoleView, selected=new Set(), inventory=[], current, preselect={}, offset=0, key, progressRows=new Map(), progressSignature="", workspaceErrors=new Map();
+  let root, generation=0, controller, timer, consoleView, zipView, selected=new Set(), inventory=[], current, preselect={}, offset=0, key, progressRows=new Map(), progressSignature="", workspaceErrors=new Map();
   const $=id=>root?.querySelector('#'+id);
   // crypto.randomUUID is only defined in secure contexts (HTTPS / localhost); fall back
   // for plain http://<ip>:6969 so job creation never dies on idempotency-key generation.
@@ -37,7 +37,7 @@
     if($('cw-error')){const text=[...workspaceErrors.values()].join(' · ');$('cw-error').textContent=text;$('cw-error').hidden=!text;}
   }
   function link(route){location.hash='#/cycle'+(route?'/'+route:'');}
-  function dispose(){generation++;clearTimeout(timer);controller?.abort();consoleView?.close();consoleView=null;root=null;progressRows.clear();progressSignature="";}
+  function dispose(){generation++;clearTimeout(timer);clearTimeout(zipView?.timer);controller?.abort();consoleView?.close();consoleView=null;zipView=null;root=null;progressRows.clear();progressSignature="";}
   function shell(){return `<section id="cycle-workspace" class="cycle-workspace"><header class="cw-head"><div><h1>Cycle 驗證</h1><p>Rack / Chassis / Node · PRE → 確認 → 執行 → 證據</p></div><nav><a class="btn" href="#/cycle">任務紀錄</a><a class="btn primary" href="#/cycle/new">建立 Cycle</a></nav></header><p id="cw-error" role="alert" hidden></p><main id="cw-body"><p role="status">載入 Cycle 工作區…</p></main></section>`;}
   async function mount(){
     dispose();root=document.getElementById('cycle-workspace');if(!root)return;
@@ -122,12 +122,16 @@
   }
   async function run(id){
     const g=generation;current=await api('/api/cycle/runs/'+encodeURIComponent(id));if(g!==generation)return;
-    $('cw-body').innerHTML=`<p id="cw-environment" class="cw-environment"></p><div class="cw-run-head"><div><h2 id="cw-run-title"></h2><p id="cw-run-context" class="cw-run-context"></p><code id="cw-run-id"></code></div><div class="cw-actions"><button class="btn cw-stop" id="cw-stop">停止：不再派送新動作</button><button class="btn" id="cw-console-toggle" aria-expanded="false" title="開啟執行紀錄（不會改變任務）">開啟 Live Console</button><small class="cw-console-safety">開啟或收合 Console 都不會停止任務</small></div></div><p id="cw-freshness" class="cw-freshness" role="status"></p><dl id="cw-summary" class="cw-summary" aria-label="Cycle 任務狀態"></dl><section id="cw-reconciliation" hidden><h2>結果未知／待核對／相關資源仍占用</h2><p>核對操作紀錄、殘存程序與實際影響範圍後，才能釋放資源。不會重新送出電源命令。</p><button class="btn" id="cw-review-action">檢視待核對動作</button><div id="cw-review-body"></div></section><details id="cw-pre-shell"><summary>PRE 結果與影響範圍</summary><section id="cw-pre"></section></details><div id="cw-console" class="cycle-console" hidden></div><h2>機框與節點執行進度</h2><p class="cw-progress-glossary">目前輪次、有效輪數與硬體健康分開呈現。展開節點可查看嘗試、POST、Boot、問題數與覆蓋。執行狀態與硬體驗證結果分開判定。</p><div id="cw-progress" class="cw-scroll"></div><details class="cw-artifacts"><summary>證據與報告</summary><p id="cw-evidence-state" class="cw-evidence-state" role="status">尚未載入證據清單。</p><button class="btn" id="cw-evidence">載入證據清單</button><ul id="cw-files"></ul></details>`;
+    $('cw-body').innerHTML=`<p id="cw-environment" class="cw-environment"></p><div class="cw-run-head"><div><h2 id="cw-run-title"></h2><p id="cw-run-context" class="cw-run-context"></p><code id="cw-run-id"></code></div><div class="cw-actions"><button class="btn cw-stop" id="cw-stop">停止：不再派送新動作</button><button class="btn" id="cw-console-toggle" aria-expanded="false" title="開啟執行紀錄（不會改變任務）">開啟 Live Console</button><small class="cw-console-safety">開啟或收合 Console 都不會停止任務</small></div></div><p id="cw-freshness" class="cw-freshness" role="status"></p><dl id="cw-summary" class="cw-summary" aria-label="Cycle 任務狀態"></dl><section id="cw-reconciliation" hidden><h2>結果未知／待核對／相關資源仍占用</h2><p>核對操作紀錄、殘存程序與實際影響範圍後，才能釋放資源。不會重新送出電源命令。</p><button class="btn" id="cw-review-action">檢視待核對動作</button><div id="cw-review-body"></div></section><details id="cw-pre-shell"><summary>PRE 結果與影響範圍</summary><section id="cw-pre"></section></details><div id="cw-console" class="cycle-console" hidden></div><h2>機框與節點執行進度</h2><p class="cw-progress-glossary">目前輪次、有效輪數與硬體健康分開呈現。展開節點可查看嘗試、POST、Boot、問題數與覆蓋。執行狀態與硬體驗證結果分開判定。</p><div id="cw-progress" class="cw-scroll"></div><section class="cw-artifacts" aria-labelledby="cw-test-results-title"><div class="cw-results-head"><div><h2 id="cw-test-results-title">Test Results</h2><p>報告、Evidence 與 Log 進入工作區後自動載入，異常項目優先。</p></div><div class="cw-results-actions"><button class="btn" id="cw-full-zip">Download Full ZIP</button><button class="btn" id="cw-evidence" hidden>載入更多</button></div></div><p id="cw-zip-state" class="cw-evidence-state" role="status"></p><p id="cw-evidence-state" class="cw-evidence-state" role="status">正在載入報告與 Evidence…</p><ul id="cw-files"></ul></section>`;
     consoleView=new CycleConsole($('cw-console'),$('cw-console-toggle'));const url=`/api/projects/${encodeURIComponent(current.project)}/cycle/jobs/${id}`;
+    const size=value=>value==null?'—':value>=1073741824?(value/1073741824).toFixed(2)+' GB':value>=1048576?(value/1048576).toFixed(1)+' MB':value>=1024?(value/1024).toFixed(1)+' KB':value+' B';
+    zipView={state:null,timer:null,setJob(job){const button=$('cw-full-zip'),status=$('cw-zip-state');if(!button)return;const allowed=['COMPLETE','INCOMPLETE','ERROR','RECONCILIATION_REQUIRED'].includes(job.state);button.disabled=!allowed;status.textContent=job.state==='STOP_REQUESTED'?'等待 Runner 安全收尾後才可準備 Full ZIP。':!allowed?'任務終態後可準備整個 Run 的 Full ZIP。':status.textContent;if(allowed&&!this.loaded){this.loaded=true;void this.refresh();}},async refresh(){clearTimeout(this.timer);try{const value=await api(url+'/full-zip');if(g!==generation)return;this.state=value;this.render();if(['PREPARING','COMPRESSING'].includes(value.state))this.timer=setTimeout(()=>this.refresh(),1500);}catch(e){if(g===generation){$('cw-zip-state').textContent=e.message;$('cw-zip-state').dataset.state='error';}}},render(){const value=this.state||{},button=$('cw-full-zip'),status=$('cw-zip-state');if(value.state==='READY'){button.disabled=false;button.textContent='Download Full ZIP';status.dataset.state='ready';status.textContent=`Ready · ${value.file_count} 個檔案 · 原始 ${size(value.original_size)} · ZIP ${size(value.zip_size)}`;}else if(['PREPARING','COMPRESSING'].includes(value.state)){button.disabled=true;button.textContent=value.state==='PREPARING'?'Preparing…':'Compressing…';status.dataset.state='loading';status.textContent=`${value.state} · ${value.files_completed||0} / ${value.file_count||0} · 原始 ${size(value.original_size)}`;}else if(value.state==='FAILED'){button.disabled=false;button.textContent='重試 Download Full ZIP';status.dataset.state='error';status.textContent=value.error||'Full ZIP 準備失敗。';}else{button.textContent='Download Full ZIP';}},};
+    $('cw-full-zip').onclick=async()=>{if(zipView.state?.state==='READY'){location.href=url+'/full-zip/download';return;}const needsConfirm=['ERROR','RECONCILIATION_REQUIRED'].includes(current.state);if(needsConfirm&&!await window.uxConfirm('此任務的執行或核對狀態異常。確認 Runner 已停止且已檢查資料一致性後，再準備 Full ZIP。'))return;try{zipView.state=await api(url+'/full-zip',{confirm_inconsistent:needsConfirm});zipView.render();zipView.timer=setTimeout(()=>zipView.refresh(),800);}catch(e){error(e,'zip');}};
     $('cw-stop').onclick=async()=>{const button=$('cw-stop');error(null,'action');button.disabled=true;button.textContent='送出停止請求…';try{current=await api(url+'/stop',{});if(g===generation)paint(url);}catch(e){if(g===generation){error(e,'action');paint(url);}}};
-    $('cw-evidence').onclick=async()=>{const button=$('cw-evidence'),state=$('cw-evidence-state');button.disabled=true;button.textContent='載入證據清單…';state.textContent='正在載入證據與報告清單…';state.dataset.state='loading';error(null,'evidence');try{const result=await api(url+'/artifacts');if(g!==generation)return;
+    let artifactOffset=0,artifactRecords=[];
+    $('cw-evidence').onclick=async()=>{const button=$('cw-evidence'),state=$('cw-evidence-state');button.disabled=true;button.textContent='載入中…';state.textContent='正在載入報告與 Evidence…';state.dataset.state='loading';error(null,'evidence');try{const result=await api(url+`/artifacts?offset=${artifactOffset}&limit=200`);if(g!==generation)return;
       const reportPattern=/(^|\/)(CYCLE_REVIEW_REPORT|cycle_summary|job_final|known_issues|new_issues|worsened_issues|report|summary)(?:[._-]|\/|$)/i;
-      const manifest=new Map((Array.isArray(result.manifest)?result.manifest:[]).map(item=>[String(item.path||''),item]));
+      const pageManifest=new Map((Array.isArray(result.manifest)?result.manifest:[]).map(item=>[String(item.path||''),item]));for(const path of (result.files||[]))if(!artifactRecords.some(record=>record.path===path))artifactRecords.push({path,entry:pageManifest.get(path)});artifactOffset+=result.files?.length||0;const manifest=new Map(artifactRecords.map(record=>[record.path,record.entry]));
       const friendlyName=file=>({
         'CYCLE_REVIEW_REPORT.html':'Cycle Review 報告 · HTML','CYCLE_REVIEW_REPORT.md':'Cycle Review 報告 · Markdown',
         'cycle_summary.json':'Cycle 摘要 · JSON','cycle_summary.txt':'Cycle 摘要 · 文字','job_final.json':'最終執行結果 · JSON',
@@ -135,39 +139,41 @@
         'report.json':'輪次結果 · JSON','node_summary.txt':'節點摘要 · 文字'
       }[file]||file);
       const artifactStage=parts=>{const part=parts[1]||'';if(/^loop\d+$/i.test(part))return part.toUpperCase();if(/^start$/i.test(part))return 'START';if(/^pre(?:[_\-.]|$)/i.test(part))return 'PRE';if(/^node_summary/i.test(part))return 'SUMMARY';return parts.length>2?'EVIDENCE':'';};
-      const groups=new Map(),files=Array.isArray(result.files)?result.files:[];
+      const groups=new Map(),files=artifactRecords.map(record=>record.path);
       files.forEach((rawPath,index)=>{
         const path=String(rawPath??''),parts=path.split('/').filter(Boolean),file=parts.at(-1)||path,entry=manifest.get(path),isReport=parts.length===1&&(entry?.kind==='html-report'||reportPattern.test(file)),isTarget=parts.length>1&&/^(tray|chassis|rack|node|machine)(?:[-_]|\d)/i.test(parts[0]),stage=isTarget?artifactStage(parts):'';
         const key=isReport?'reports':parts.length<2?'run':isTarget?`target:${parts[0]}:${stage||'root'}`:`evidence:${parts[0]}`;
         const title=isReport?'報告與摘要':parts.length<2?'執行紀錄':isTarget?`目標 / ${parts[0]}${stage?' · '+stage:''}`:`證據 / ${parts[0]}`;
-        if(!groups.has(key))groups.set(key,{key,title,order:isReport?0:parts.length<2?1:2,first:index,files:[]});
-        groups.get(key).files.push({path,file,isReport});
+        const attention=['WARN','FAIL'].includes(entry?.verdict)||/(^|[\/_-])(new_issues|worsened_issues)([\/_\-.]|$)/i.test(path);
+        if(!groups.has(key))groups.set(key,{key,title,order:isReport?0:attention?1:parts.length<2?2:3,first:index,files:[]});
+        groups.get(key).files.push({path,file,isReport,attention,kind:entry?.kind||'raw-evidence'});
       });
       const list=$('cw-files');list.replaceChildren();
       [...groups.values()].sort((a,b)=>a.order-b.order||a.first-b.first).forEach(group=>{
         const groupItem=document.createElement('li'),disclosure=document.createElement('details'),summary=document.createElement('summary'),groupList=document.createElement('ul');
-        groupItem.className='cw-artifact-group';disclosure.className='cw-artifact-group-details';disclosure.open=group.order===0;summary.className='cw-artifact-group-summary';summary.textContent=`${group.title} · ${group.files.length}`;groupList.className='cw-artifact-group-list';
-        group.files.forEach(({path,file,isReport})=>{const item=document.createElement('li'),a=document.createElement('a'),name=document.createElement('span'),pathLabel=document.createElement('small');item.className='cw-artifact-item';a.className=isReport?'cw-artifact-report':'cw-artifact-link';name.className='cw-artifact-title';pathLabel.className='cw-artifact-path';name.textContent=friendlyName(file);pathLabel.textContent=path;a.title=path;a.href=url+'/files/'+path.split('/').map(encodeURIComponent).join('/');a.target='_blank';a.rel='noopener';a.append(name,pathLabel);item.append(a);groupList.append(item);});
+        groupItem.className='cw-artifact-group';disclosure.className='cw-artifact-group-details';disclosure.open=group.order<=1;summary.className='cw-artifact-group-summary';summary.textContent=`${group.title} · ${group.files.length}`;groupList.className='cw-artifact-group-list';
+        group.files.sort((a,b)=>Number(b.attention)-Number(a.attention)||a.path.localeCompare(b.path,undefined,{numeric:true})).forEach(({path,file,isReport,attention,kind})=>{const item=document.createElement('li'),a=document.createElement('a'),name=document.createElement('span'),pathLabel=document.createElement('small');item.className='cw-artifact-item';item.dataset.attention=attention?'true':'false';item.dataset.kind=kind;a.className=isReport?'cw-artifact-report':'cw-artifact-link';name.className='cw-artifact-title';pathLabel.className='cw-artifact-path';name.textContent=friendlyName(file);pathLabel.textContent=path;a.title=path;a.href=url+'/files/'+path.split('/').map(encodeURIComponent).join('/');a.target='_blank';a.rel='noopener';a.append(name,pathLabel);item.append(a);groupList.append(item);});
         disclosure.append(summary,groupList);groupItem.append(disclosure);list.append(groupItem);
       });
       // Filters use manifest paths, never construct a new download target.
       $('cw-evidence-filters')?.remove();
       const filters=document.createElement('div');filters.id='cw-evidence-filters';filters.className='cw-evidence-filters';
-      filters.innerHTML='<label>目標<select id="cw-evidence-node"><option value="">全部目標與任務報告</option></select></label><label>階段 / 輪次<select id="cw-evidence-phase"><option value="">全部階段</option></select></label><label class="cw-search">搜尋檔名或路徑<input id="cw-evidence-search" type="search" placeholder="例如 dmesg、sensor、report"></label><p id="cw-evidence-count" role="status" aria-live="polite"></p>';
+      filters.innerHTML='<label>Node<select id="cw-evidence-node"><option value="">全部 Node 與任務報告</option></select></label><label>Loop / Phase<select id="cw-evidence-phase"><option value="">全部階段</option></select></label><label>Evidence Type<select id="cw-evidence-type"><option value="">全部類型</option><option value="html-report">Official HTML Report</option><option value="structured-result">Structured Result</option><option value="raw-evidence">Log / Evidence</option></select></label><label>Verdict<select id="cw-evidence-verdict"><option value="">全部結果</option><option value="attention">WARN / FAIL 優先</option></select></label><label class="cw-search">檔名搜尋<input id="cw-evidence-search" type="search" placeholder="例如 dmesg、sensor、report"></label><p id="cw-evidence-count" role="status" aria-live="polite"></p>';
       list.before(filters);
-      const items=[...list.querySelectorAll('.cw-artifact-item')].map(item=>{const path=item.querySelector('a').title,parts=path.split('/');return {item,path,node:parts.length>1?parts[0]:'任務報告',phase:artifactStage(parts)||'執行摘要'};});
+      const items=[...list.querySelectorAll('.cw-artifact-item')].map(item=>{const path=item.querySelector('a').title,parts=path.split('/');return {item,path,node:parts.length>1?parts[0]:'任務報告',phase:artifactStage(parts)||'執行摘要',kind:item.dataset.kind,attention:item.dataset.attention==='true'};});
       const nodeSelect=$('cw-evidence-node'),phaseSelect=$('cw-evidence-phase');
       [...new Set(items.map(i=>i.node))].sort().forEach(v=>nodeSelect.add(new Option(v,v)));
       const filterFiles=()=>{
-        const node=nodeSelect.value,phase=phaseSelect.value,q=$('cw-evidence-search').value.toLowerCase();let count=0;
-        items.forEach(i=>{i.item.hidden=!!((node&&node!==i.node)||(phase&&phase!==i.phase)||(q&&!i.path.toLowerCase().includes(q)));if(!i.item.hidden)count++;});
-        list.querySelectorAll('.cw-artifact-group').forEach(group=>{group.hidden=![...group.querySelectorAll('.cw-artifact-item')].some(i=>!i.hidden);if(node||phase||q)group.querySelector('details').open=!group.hidden;});
+        const node=nodeSelect.value,phase=phaseSelect.value,type=$('cw-evidence-type').value,verdict=$('cw-evidence-verdict').value,q=$('cw-evidence-search').value.toLowerCase();let count=0;
+        items.forEach(i=>{i.item.hidden=!!((node&&node!==i.node)||(phase&&phase!==i.phase)||(type&&type!==i.kind)||(verdict==='attention'&&!i.attention)||(q&&!i.path.toLowerCase().includes(q)));if(!i.item.hidden)count++;});
+        list.querySelectorAll('.cw-artifact-group').forEach(group=>{group.hidden=![...group.querySelectorAll('.cw-artifact-item')].some(i=>!i.hidden);if(node||phase||type||verdict||q)group.querySelector('details').open=!group.hidden;});
         $('cw-evidence-count').textContent=`${count} / ${items.length} 份證據${count?'':' · 沒有符合的檔案，請調整篩選'}`;
       };
       const phases=()=>{const old=phaseSelect.value;phaseSelect.replaceChildren(new Option('全部階段',''),...[...new Set(items.filter(i=>!nodeSelect.value||i.node===nodeSelect.value).map(i=>i.phase))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).map(v=>new Option(v,v)));if([...phaseSelect.options].some(o=>o.value===old))phaseSelect.value=old;};
-      nodeSelect.onchange=()=>{phases();filterFiles();};phaseSelect.onchange=filterFiles;$('cw-evidence-search').oninput=filterFiles;phases();filterFiles();
-      state.textContent=files.length?`已載入 ${files.length} 份證據與報告入口。連結會開啟後端提供的完整檔案。`:'這個任務目前尚無可用的證據或報告。';state.dataset.state=files.length?'ready':'empty';button.textContent='重新載入證據清單';button.disabled=false;
-    }catch(e){if(g===generation){state.textContent=`證據清單載入失敗：${e.message||'未提供'}`;state.dataset.state='error';button.textContent='重試載入證據清單';button.disabled=false;error(e,'evidence');}}};
+      nodeSelect.onchange=()=>{phases();filterFiles();};phaseSelect.onchange=filterFiles;$('cw-evidence-type').onchange=filterFiles;$('cw-evidence-verdict').onchange=filterFiles;$('cw-evidence-search').oninput=filterFiles;phases();filterFiles();
+      const total=Number.isFinite(result.total)?result.total:files.length;state.textContent=files.length?`已載入 ${files.length} / ${total} 份報告與 Evidence。`:'這個任務目前尚無可用的報告或 Evidence。';state.dataset.state=files.length?'ready':'empty';button.textContent='載入更多';button.hidden=!result.has_more;button.disabled=false;
+    }catch(e){if(g===generation){state.textContent=`Test Results 載入失敗：${e.message||'未提供'}`;state.dataset.state='error';button.textContent='重試載入';button.hidden=false;button.disabled=false;error(e,'evidence');}}};
+    void $('cw-evidence').onclick();
     $('cw-review-action').onclick=async()=>{const reviewButton=$('cw-review-action');reviewButton.disabled=true;reviewButton.textContent='載入待核對動作…';error(null,'action');
       try{
         const review=await api(url+'/reconciliation');if(g!==generation)return;
@@ -213,6 +219,7 @@
     $('cw-reconciliation').hidden=j.state!=='RECONCILIATION_REQUIRED';
     paintProgress(j);
     consoleView.setJob(j,url);
+    zipView?.setJob(j);
   }
   function paintProgress(j){
     const signature=j.targets.map(t=>t.name).join('|');

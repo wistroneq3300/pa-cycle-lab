@@ -88,7 +88,6 @@ const out=path.resolve('artifacts/shared-validation/acceptance');fs.mkdirSync(ou
   data=await state();assert.equal(job.state,'COMPLETE');assert(job.profile_snapshot.checker.includes('DIMM_EXPECTED=20'));
   assert.equal(require('node:crypto').createHash('sha256').update(job.profile_snapshot.checker).digest('hex'),latest.inspection.checker_hash);
   assert.deepEqual(data.cycle_runs.find(j=>j.id===oldJob.id).profile_snapshot,oldJob.profile_snapshot);
-  await page.locator('.cw-artifacts > summary').click();await page.locator('#cw-evidence').click();
   const report=page.locator('#cw-files a[href$=".html"]').first();await report.waitFor();await page.goto(new URL(await report.getAttribute('href'),base).href);await page.waitForTimeout(1800);
   await page.screenshot({path:path.join(out,'cycle-report.png'),fullPage:false});
   results.push({case:'C',passed:true,old_run_id:oldJob.id,old_checker_preserved:true,run_id:job.id,checker_hash:latest.inspection.checker_hash});await end('C-shared-rules-cycle');

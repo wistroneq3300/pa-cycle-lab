@@ -330,13 +330,11 @@ async function waitForZoomEvidence(page) {
     await page.waitForFunction(() => document.querySelectorAll(".cycle-console-row").length > 0);
     await captureGrid("run-console", ".live-console [data-part=download]", ["#cw-console-toggle", ".live-console [data-part=copy]"]);
 
-    const artifactsPanel = page.locator(".cw-artifacts");
-    if (!(await artifactsPanel.getAttribute("open"))) await artifactsPanel.locator("summary").click();
-    await page.locator("#cw-evidence").click();
     await page.locator("#cw-evidence-count").waitFor({ state: "visible" });
+    assert.equal(await page.locator("#cw-test-results-title").innerText(), "Test Results");
     assert.equal(await page.locator(".cw-artifact-report").count(), 2);
     assert.equal(await page.locator(".cw-artifact-link").count(), 1);
-    await captureGrid("evidence", "#cw-evidence", ["#cw-files a"]);
+    await captureGrid("evidence", ".cw-results-head", ["#cw-files a"]);
 
     for (const count of [1, 4, 32, 128]) {
       const job = jobs.get(count);

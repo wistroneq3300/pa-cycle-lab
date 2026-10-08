@@ -90,7 +90,7 @@ const forbidden=/Sheng Wu|Wistron team|Local environment|FastAPI|DESIGN PREVIEW|
    assert.match(await page.locator('.live-console-note').innerText(),/台灣時間（UTC\+8）/);
    await page.locator('[data-part=full]').click();assert.equal(await page.locator('[data-part=full]').getAttribute('aria-pressed'),'true');
    await page.locator('[data-part=pause]').click();assert.equal(await page.locator('[data-part=pause]').innerText(),'繼續檢視');await page.locator('[data-part=pause]').click();
-   await page.locator('.cw-artifacts>summary').click();await page.locator('#cw-evidence').click();await page.locator('#cw-files a').first().waitFor();await capture('cycle-evidence');
+   await page.locator('#cw-files a').first().waitFor();await capture('cycle-evidence');
    empty=true;await page.goto(base+'/#/cycle/new');await page.locator('#cw-matrix').waitFor();assert.equal(await page.locator('.cw-node').count(),0);await page.locator('#cw-matrix').scrollIntoViewIfNeeded();await capture('cycle-empty');
    unavailable=true;await page.reload();await page.locator('#cw-retry').waitFor();await capture('cycle-error');
    await page.goto(base+'/static/kvm_solo.html');await page.locator('#overlay').waitFor();await capture('kvm-solo-unconfigured');

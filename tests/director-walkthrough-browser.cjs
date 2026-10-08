@@ -454,9 +454,6 @@ async function runRound(browser, base, round, cycleSeed) {
       await page.locator("#cw-console-toggle").click();
       await page.waitForFunction(() => document.querySelectorAll(".cycle-console-row").length > 0);
       await shot("cycle-console");
-      const artifacts = page.locator(".cw-artifacts");
-      if (!(await artifacts.getAttribute("open"))) await artifacts.locator("summary").click();
-      await page.locator("#cw-evidence").click();
       await page.locator(".cw-artifact-report").first().waitFor();
       const [report] = await Promise.all([context.waitForEvent("page"), page.locator(".cw-artifact-report").first().click()]);
       await report.waitForLoadState("domcontentloaded");

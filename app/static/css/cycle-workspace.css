@@ -94,6 +94,7 @@
 #cycle-workspace .cw-progress-detail-grid>div:last-child{grid-column:1/-1}
 #cycle-workspace .cw-progress-glossary{font-size:12px;color:var(--cw-muted)}
 #cycle-workspace .cw-artifacts{margin-top:24px;border-block:1px solid var(--border);padding:16px 0}
+#cycle-workspace .cw-results-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px}#cycle-workspace .cw-results-head h2{margin:0 0 5px}#cycle-workspace .cw-results-head p{max-width:68ch;margin:0;color:var(--cw-muted);font-size:12px}#cycle-workspace .cw-results-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 #cycle-workspace #cw-files{padding:0;list-style:none}
 #cycle-workspace .cw-artifact-group{border-bottom:1px solid var(--border);list-style:none;padding:10px 0}
 #cycle-workspace .cw-artifact-group-list{padding:12px 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;list-style:none}
@@ -101,6 +102,7 @@
 #cycle-workspace .cw-artifact-title{display:block;font-size:13px}
 #cycle-workspace .cw-artifact-path{display:block;font-size:11px;color:var(--cw-muted);margin-top:5px}
 #cycle-workspace .cw-artifact-report{background:var(--cw-tint);border-radius:5px}
+#cycle-workspace .cw-artifact-item[data-attention=true] .cw-artifact-title{color:var(--cw-warn);font-weight:700}
 /* Project validation: Wistron blue/green, editorial spacing, explicit review. */
 #cycle-workspace .cw-eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;color:var(--cw-link)}
 #cycle-workspace .cw-create-intro,#cycle-workspace .cw-history-heading{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:30px 0 22px}
@@ -184,8 +186,10 @@
 #cycle-workspace .cw-evidence-state[data-state=loading]{color:var(--cw-link)}
 #cycle-workspace .cw-evidence-state[data-state=error]{color:var(--cw-fail)}
 #cycle-workspace .cw-evidence-state[data-state=empty]{color:var(--cw-warn)}
+#cycle-workspace .cw-evidence-state[data-state=ready]{color:var(--cw-pass)}
 @media(max-width:1450px){#cycle-workspace .cw-setup-layout{grid-template-columns:minmax(0,1fr) 270px;gap:26px}#cycle-workspace .cw-review{padding:20px}#cycle-workspace .cw-create-intro h2{font-size:23px}#cycle-workspace .cw-nodes{grid-template-columns:repeat(2,minmax(0,1fr))}#cycle-workspace .cw-scope-actions .cw-search{min-width:220px}#cycle-workspace .cw-scope-actions>label:first-child{max-width:230px}#cycle-workspace .cw-matrix{max-height:420px}}
 @media(max-width:1100px){.cw-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.cw-summary>div:nth-child(2){border-inline-end:0}.cw-summary>div:nth-child(-n+2){border-bottom:1px solid var(--border)}#cycle-workspace .cw-setup-layout{grid-template-columns:1fr}#cycle-workspace .cw-review{position:static}.cw-run-head>.cw-actions{justify-content:flex-start;max-width:none}.cw-console-safety{text-align:left}}
+@media(max-width:760px){#cycle-workspace .cw-results-head{align-items:stretch;flex-direction:column}#cycle-workspace .cw-artifact-group-list{grid-template-columns:1fr}}
 
 @media(prefers-reduced-motion:reduce){#cycle-workspace *,#cycle-workspace *::before,#cycle-workspace *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 #cycle-workspace .cw-config-section label:has(#cw-project){grid-column:1/-1}

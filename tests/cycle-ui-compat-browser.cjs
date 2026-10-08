@@ -64,7 +64,7 @@ const old=file=>cp.execFileSync('git',['show',`${baseline}:${file}`],{encoding:'
     assert.equal(await details.getAttribute('open'),'');assert.equal(await p.evaluate(()=>document.activeElement.parentElement.dataset.node),identity);
     const n=job.nodes.find(n=>n.machine_id===identity);
     const values=await details.locator('dd').allTextContents();assert.equal(values[0],String(n.attempts||0));assert.equal(values[1],String(n.completed||0));assert.equal(values[2],String(n.boot_confirmed||0));assert.equal(values.length,5);
-    await p.locator('.cw-artifacts>summary').click();await p.locator('#cw-evidence').click();await p.locator('#cw-evidence-node').waitFor();
+    await p.locator('#cw-evidence-node').waitFor();assert.equal(await p.locator('#cw-test-results-title').innerText(),'Test Results');
     const files=await(await p.request.get(base+'/api/projects/'+encodeURIComponent(job.project)+'/cycle/jobs/'+job.id+'/artifacts')).json();assert.equal(await p.locator('#cw-files a').count(),files.files.length);
     await p.locator('#cw-evidence-search').fill('not-a-real-file');assert.match(await p.locator('#cw-evidence-count').innerText(),/^0 /);await p.locator('#cw-evidence-search').fill('');
     for(const width of [1366,1920])for(const theme of ['light','dark']){

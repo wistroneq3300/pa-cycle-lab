@@ -46,7 +46,7 @@
         <div class="lc-columns" aria-hidden="true"><span>SEQ</span><span>TIME</span><span>NODE</span><span>STATE</span><span>STAGE</span><span>EVENT</span></div><p hidden data-part="error" role="alert"></p>
         <div class="live-console-view" data-part="log" role="log" aria-live="off" tabindex="0" aria-label="Cycle 驗證紀錄"></div>
         <div class="live-console-foot"><span class="lc-mode" data-part="status" role="status"></span><button class="btn" data-part="latest" hidden>跳至最新</button><span class="lc-feedback" data-part="feedback" role="status" aria-live="polite"></span><span class="lc-count" data-part="count"></span></div>
-        <p class="live-console-note">時間以台灣時間（UTC+8）顯示。畫面最多顯示 2,000 行。Summary 顯示重點摘要；Full 顯示原始事件。暫停檢視或關閉 Console 不會停止任務。完整紀錄可下載，原始證據保存在「證據與報告」。</p>`;
+        <p class="live-console-note">時間以台灣時間（UTC+8）顯示。畫面最多顯示 2,000 行。Summary 顯示重點摘要；Full 顯示原始事件。暫停檢視或關閉 Console 不會停止任務。完整紀錄可下載，原始 Evidence 保存在 Test Results。</p>`;
       this.part=name=>root.querySelector(`[data-part="${name}"]`);
       this.fleet=new CycleFleet(this.part('fleet'),()=>{this.node=this.fleet.node;this.render(true);});
       this.part('latest').onclick=()=>{this.auto=true;this.paused=false;this.part('pause').setAttribute('aria-pressed','false');this.part('pause').textContent='暫停檢視';this.render(true);this.bottom();this.status();};

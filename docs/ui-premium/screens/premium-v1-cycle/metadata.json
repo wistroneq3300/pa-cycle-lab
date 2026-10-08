@@ -1,0 +1,328 @@
+{
+  "result": "PASS",
+  "mode": "loopback synthetic fixture; no hardware transport",
+  "base_sha": "88d73de30fbca488982b2247be5ee7e37e8e51f0",
+  "working_tree": true,
+  "assets": {
+    "app/static/js/cycle-workspace.js": "84445252ff6b321bd0d82faac902e11f5a358cb2441df27d3538a92c3711e761",
+    "app/static/js/cycle-console.js": "ee69a8e28ee2de00026844be7cd909b9ce58b4169975de8c6ae817300f486103",
+    "app/static/js/cycle-fleet.js": "04754c859a3a4ad50f0068b8d8c8c7b0bbe0742c3cc8d7bc9323e86f8c39e82d",
+    "app/static/css/cycle-workspace.css": "04cdad520868854a35b578442d751b18d9142d1644c9deceb330d962f82e5203",
+    "app/static/css/validation-console.css": "6f7849623cae557ed9c517f2bb2f04f42183a6210f7e71b30339810287ac7e2a"
+  },
+  "browser": "Microsoft Edge / Playwright",
+  "os": "Windows",
+  "browser_zoom": "100%",
+  "device_scale_factor": 1,
+  "screenshot_capture": "viewport; fixed shell elements are not stitched",
+  "css_viewports": [
+    "1366x768",
+    "1920x1080"
+  ],
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "real_125_percent_zoom": "NOT_TESTED_IN_THIS_HARNESS",
+  "fixtures": [
+    1,
+    4,
+    32,
+    128
+  ],
+  "actions": [
+    {
+      "action": "create",
+      "method": "POST",
+      "path": "/api/cycle/runs",
+      "body": {
+        "project": "Neutrino Demo",
+        "machine_ids": [
+          "6f4e0e34-c3859a4590975b4c98314c57ec0a33c6",
+          "6f4e0e34-16dcd2180fe55aa88ab2c09b0d3179df",
+          "6f4e0e34-4aa97f460cb85f8da7a4bb9a88b4f87d",
+          "6f4e0e34-5ef03184c29757d88ce8bcfdc423bb0e"
+        ],
+        "cycle_profile": "neutrino",
+        "cycle_mode": "reboot",
+        "channel": "inband",
+        "limits": {
+          "loops": 2,
+          "hours": 0
+        },
+        "idempotency_key": "6bb6415b-ac80-4c3f-9060-a604b56506d0"
+      }
+    },
+    {
+      "action": "confirm",
+      "method": "POST",
+      "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261009_013100_e4d729/confirm",
+      "body": {
+        "version": "director-pre-v1",
+        "machine_ids": [
+          "6f4e0e34-c3859a4590975b4c98314c57ec0a33c6",
+          "6f4e0e34-16dcd2180fe55aa88ab2c09b0d3179df",
+          "6f4e0e34-4aa97f460cb85f8da7a4bb9a88b4f87d",
+          "6f4e0e34-5ef03184c29757d88ce8bcfdc423bb0e"
+        ]
+      }
+    },
+    {
+      "action": "stop",
+      "method": "POST",
+      "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261009_013100_e4d729/stop",
+      "body": {}
+    },
+    {
+      "action": "reconcile",
+      "method": "POST",
+      "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261009_013100_e4d729/reconcile",
+      "body": {
+        "reason": "已核對 synthetic 動作與保留範圍",
+        "reviewed_actions_hash": "director-hash"
+      }
+    },
+    {
+      "action": "full-zip",
+      "method": "POST",
+      "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261009_013100_e4d729/full-zip",
+      "body": {
+        "confirm_inconsistent": false
+      }
+    },
+    {
+      "action": "delete",
+      "method": "DELETE",
+      "path": "/api/cycle/runs/neutrino_demo_power_cycle_outband_20261009_013100_e4d729",
+      "body": null
+    }
+  ],
+  "captures": [
+    {
+      "file": "create-1366-light.png",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "screenshot_pixels": {
+        "width": 1366,
+        "height": 768
+      },
+      "theme": "light",
+      "browser_zoom": "100%",
+      "device_scale_factor": 1
+    },
+    {
+      "file": "create-1366-dark.png",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "screenshot_pixels": {
+        "width": 1366,
+        "height": 768
+      },
+      "theme": "dark",
+      "browser_zoom": "100%",
+      "device_scale_factor": 1
+    },
+    {
+      "file": "create-1920-light.png",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "screenshot_pixels": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "browser_zoom": "100%",
+      "device_scale_factor": 1
+    },
+    {
+      "file": "create-1920-dark.png",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "screenshot_pixels": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "browser_zoom": "100%",
+      "device_scale_factor": 1
+    },
+    {
+      "file": "pre-confirm-1366-dark.png",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "screenshot_pixels": {
+        "width": 1366,
+        "height": 768
+      },
+      "theme": "dark",
+      "browser_zoom": "100%",
+      "device_scale_factor": 1
+    },
+    {
+      "file": "run-evidence-1920-light.png",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "screenshot_pixels": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "browser_zoom": "100%",
+      "device_scale_factor": 1
+    },
+    {
+      "file": "run-console-1366-light.png",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "screenshot_pixels": {
+        "width": 1366,
+        "height": 768
+      },
+      "theme": "light",
+      "browser_zoom": "100%",
+      "device_scale_factor": 1
+    },
+    {
+      "file": "run-console-1366-dark.png",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "screenshot_pixels": {
+        "width": 1366,
+        "height": 768
+      },
+      "theme": "dark",
+      "browser_zoom": "100%",
+      "device_scale_factor": 1
+    },
+    {
+      "file": "run-console-1920-light.png",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "screenshot_pixels": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "browser_zoom": "100%",
+      "device_scale_factor": 1
+    },
+    {
+      "file": "run-console-1920-dark.png",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "screenshot_pixels": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "browser_zoom": "100%",
+      "device_scale_factor": 1
+    },
+    {
+      "file": "evidence-error-1920-light.png",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "screenshot_pixels": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "browser_zoom": "100%",
+      "device_scale_factor": 1
+    },
+    {
+      "file": "copy-failure-1366-dark.png",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "screenshot_pixels": {
+        "width": 1366,
+        "height": 768
+      },
+      "theme": "dark",
+      "browser_zoom": "100%",
+      "device_scale_factor": 1
+    },
+    {
+      "file": "fleet-128-1920-dark.png",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "screenshot_pixels": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "browser_zoom": "100%",
+      "device_scale_factor": 1
+    },
+    {
+      "file": "reconcile-1366-dark.png",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "screenshot_pixels": {
+        "width": 1366,
+        "height": 768
+      },
+      "theme": "dark",
+      "browser_zoom": "100%",
+      "device_scale_factor": 1
+    },
+    {
+      "file": "full-zip-ready-3440-dark.png",
+      "viewport": {
+        "width": 3440,
+        "height": 1440
+      },
+      "screenshot_pixels": {
+        "width": 3440,
+        "height": 1440
+      },
+      "theme": "dark",
+      "browser_zoom": "100%",
+      "device_scale_factor": 1
+    },
+    {
+      "file": "history-1366-light.png",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "screenshot_pixels": {
+        "width": 1366,
+        "height": 768
+      },
+      "theme": "light",
+      "browser_zoom": "100%",
+      "device_scale_factor": 1
+    }
+  ],
+  "unknown_requests": [],
+  "page_errors": []
+}

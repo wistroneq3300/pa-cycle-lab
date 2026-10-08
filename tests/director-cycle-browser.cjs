@@ -37,7 +37,7 @@ const clone = value => JSON.parse(JSON.stringify(value));
   });
   const page = await context.newPage();
   const pageErrors = [], unknown = [], calls = [], captures = [];
-  let failArtifacts = false;
+  let failArtifacts = false, zipPolls = 0;
   page.on('pageerror', error => pageErrors.push(error.message));
 
   const run4 = jobs.get(4);
@@ -60,9 +60,9 @@ const clone = value => JSON.parse(JSON.stringify(value));
     ],
     manifest: [
       { path: 'CYCLE_REVIEW_REPORT.html', kind: 'html-report' },
-      { path: 'cycle_summary.json', kind: 'summary' },
+      { path: 'cycle_summary.json', kind: 'structured-result', verdict: 'FAIL' },
       { path: 'node/loop4/dmesg.txt', kind: 'raw-evidence' }
-    ]
+    ], total: 3, has_more: false
   };
 
   await page.route('**/api/**', async route => {
@@ -104,6 +104,14 @@ const clone = value => JSON.parse(JSON.stringify(value));
     }
     const reconcile = pathname.match(/^\/api\/projects\/[^/]+\/cycle\/jobs\/([^/]+)\/reconciliation$/);
     if (method === 'GET' && reconcile) return route.fulfill({ json: { actions: [{ operation: 'power_cycle', result: 'unknown' }], reviewed_actions_hash: 'director-hash' } });
+    if (method === 'GET' && /\/full-zip$/.test(pathname)) {
+      zipPolls++;
+      return route.fulfill({ json: zipPolls>1?{state:'READY',file_count:3,files_completed:3,original_size:4096,zip_size:2048}:{state:'NOT_REQUESTED'} });
+    }
+    if (method === 'POST' && /\/full-zip$/.test(pathname)) {
+      calls.push({action:'full-zip',method,path:pathname,body:req.postDataJSON()});zipPolls=1;
+      return route.fulfill({status:202,json:{state:'COMPRESSING',file_count:3,files_completed:1,original_size:4096,zip_size:null}});
+    }
     if (method === 'GET' && /\/artifacts$/.test(pathname)) {
       if (failArtifacts) return route.fulfill({ status: 503, json: { detail: 'Synthetic evidence source unavailable' } });
       return route.fulfill({ json: artifactFixture });
@@ -180,9 +188,9 @@ const clone = value => JSON.parse(JSON.stringify(value));
     await cycleConsole.locator('[data-part=live]').click();
     assert.match(await cycleConsole.locator('[data-part=status]').innerText(), /LIVE/);
 
-    await page.locator('.cw-artifacts>summary').click();
-    await page.locator('#cw-evidence').click();
     await page.locator('#cw-evidence-count').waitFor();
+    assert.equal(await page.locator('#cw-test-results-title').innerText(), 'Test Results');
+    assert(await page.locator('#cw-full-zip').isDisabled(), 'RUNNING must not allow Full ZIP');
     assert.match(await page.locator('#cw-evidence-state').innerText(), /已載入/);
     assert.equal(await page.locator('.cw-artifact-report').count(), 2);
     assert.equal(await page.locator('.cw-artifact-link').count(), 1);
@@ -196,7 +204,7 @@ const clone = value => JSON.parse(JSON.stringify(value));
     // A source failure must remain visible in the workspace while the already
     // loaded evidence links stay available for manual inspection.
     failArtifacts = true;
-    await page.locator('#cw-evidence').click();
+    await page.evaluate(() => document.querySelector('#cw-evidence').click());
     await page.waitForFunction(() => document.querySelector('#cw-evidence-state')?.dataset.state === 'error');
     assert.match(await page.locator('#cw-evidence-state').innerText(), /Synthetic evidence source unavailable/);
     assert(await page.locator('#cw-files a').count() > 0, 'Evidence failure must not erase already loaded links');
@@ -274,6 +282,12 @@ const clone = value => JSON.parse(JSON.stringify(value));
     await reconciliationForm.locator('button[type=submit]').click();
     await page.waitForFunction(() => document.querySelector('#cw-summary')?.textContent.includes('Incomplete'));
     assert.equal(calls.filter(call => call.action === 'reconcile').length, 1);
+    await page.locator('#cw-full-zip').click();
+    await page.waitForFunction(() => document.querySelector('#cw-zip-state')?.dataset.state === 'ready');
+    assert.match(await page.locator('#cw-zip-state').innerText(),/Ready · 3 個檔案 · 原始 4\.0 KB · ZIP 2\.0 KB/);
+    assert.equal(calls.filter(call => call.action === 'full-zip').length,1);
+    await page.locator('.cw-artifacts').scrollIntoViewIfNeeded();
+    await capture('full-zip-ready',3440,1440,'dark');
 
     await page.goto(`${base}/#/cycle`);await page.locator('.cw-del').waitFor();
     await page.evaluate(() => scrollTo(0, 0));
@@ -293,6 +307,7 @@ const clone = value => JSON.parse(JSON.stringify(value));
     assert.equal(calls.filter(call => call.action === 'confirm').length, 1);
     assert.equal(calls.filter(call => call.action === 'stop').length, 1);
     assert.equal(calls.filter(call => call.action === 'reconcile').length, 1);
+    assert.equal(calls.filter(call => call.action === 'full-zip').length, 1);
     assert.equal(calls.filter(call => call.action === 'delete').length, 1);
     if (captureDir) {
       const metadata = {
