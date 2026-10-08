@@ -2658,7 +2658,7 @@ async function machineLoadSensors(name, refresh = false) {
       if (newScroll && keepTop) newScroll.scrollTop = keepTop; // 保留捲動位置，避免重繪跳回頂部
     }
     // 感測器有資料（含背景刷新中）即自動觸發一次 Sensor AI 診斷
-    if (d && !d.error && d.sensors && (d.sensors.total || d.sensors.ok)) sensorAnalyze(name);
+    if (d && !d.error && d.sensors && (d.sensors.total != null || d.sensors.ok != null)) sensorAnalyze(name);
     if (d.error) return;                         // 出錯就停（不再輪詢）
     if (d.loading) {
       // refreshing（回舊值）或尚無資料 → 排下一輪；無資料時更快
@@ -2682,6 +2682,12 @@ function machineSensorsHtml(d, base, name) {
   const critRow = (s.critical_entries || []).map(l => `<li>🔴 ${esc(l)}</li>`).join("");
   const warnRow = (s.warning_entries || []).map(l => `<li>🟠 ${esc(l)}</li>`).join("");
   const nsRow = (s.ns && s.ns > 0) ? `<li class="no-alert" style="color:var(--text-dim)">⚠️ ${s.ns} 筆感測器 No Reading（ns，未讀取到數值）</li>` : "";
+  const sensorCount = value => value != null && Number.isFinite(Number(value)) ? String(Number(value)) : '未取得';
+  const countsKnown = ['critical', 'warning', 'ok', 'ns'].every(key => s[key] != null && Number.isFinite(Number(s[key])));
+  const noAbnormal = countsKnown && Number(s.critical) === 0 && Number(s.warning) === 0 && Number(s.ns) === 0;
+  const alertSummary = critRow + warnRow + nsRow || (noAbnormal
+    ? `<li class="no-alert">✔ 無異常感測器（無 Critical / Warning / No Reading）</li>`
+    : `<li class="no-alert">感測器摘要尚未取得完整計數，不能判定為無異常。</li>`);
   // 完整 SDR：放固定高度框內可往下拉，避免網頁過長
   const allRows = (s.entries || []).map(l => `<tr><td class="mono">${esc(l)}</td></tr>`).join("");
   const sdrBox = s.entries && s.entries.length
@@ -2692,12 +2698,12 @@ function machineSensorsHtml(d, base, name) {
     : "";
   return `
     <div class="sensor-kpis">
-      <div class="sensor-kpi ${s.critical>0?'bad':''}"><b>${s.critical||0}</b><span>Critical</span></div>
-      <div class="sensor-kpi ${s.warning>0?'warn':''}"><b>${s.warning||0}</b><span>Warning</span></div>
-      <div class="sensor-kpi"><b>${s.ok||0}</b><span>${s.ns>0 ? `OK (+${s.ns||0} ns)` : "OK"}</span></div>
+      <div class="sensor-kpi ${s.critical>0?'bad':''}"><b>${sensorCount(s.critical)}</b><span>Critical</span></div>
+      <div class="sensor-kpi ${s.warning>0?'warn':''}"><b>${sensorCount(s.warning)}</b><span>Warning</span></div>
+      <div class="sensor-kpi"><b>${sensorCount(s.ok)}</b><span>${s.ns>0 ? `OK (+${sensorCount(s.ns)} ns)` : "OK"}</span></div>
     </div>
     <ul class="alerts" style="margin-top:10px">
-      ${(critRow + warnRow + nsRow) || `<li class="no-alert">✔ 無異常感測器（無 Critical / Warning / No Reading）</li>`}
+      ${alertSummary}
     </ul>
     <div class="tel-ai sensor-ai" id="sensor-ai">${sensorAiResult[name] ?? (sensorAiDone.has(name) ? "感測器分析尚無結果" : "正在分析感測器資料…")}</div>
     ${d.refreshing ? `<span class="hint">（快取已過期，背景重新抓取中…）</span>` : ""}
@@ -3636,7 +3642,7 @@ async function assignTaskCopy() {
 
   // 開仿 User Guide 的浮動小視窗，讓使用者在下方滾動看完整 TEST CASE
   const resultTitle = chosen.length > 1 ? "\u6279\u6b21\u6307\u4ee4" : "\u6307\u6d3e\u6307\u4ee4";
-  AssignResultWin.render(`\u2705 ${resultTitle} \u00b7 ${built.summary}`, built.text, built.rich, chosen);
+  AssignResultWin.render(`${resultTitle} \u00b7 ${built.summary}`, built.text, built.rich, chosen, copied);
 }
 
 async function assignTaskClip(text) {
@@ -3847,7 +3853,7 @@ const AssignResultWin = (() => {
     body.appendChild(pre);
     const foot = el("div", "ar-foot");
     foot.innerHTML =
-      '<span class="ar-hint" id="ar-hint"></span>' +
+      '<span class="ar-hint" id="ar-hint" role="status" aria-live="polite"></span>' +
       '<button class="btn small" id="ar-copy-all" title="複製全部指令文字">\ud83d\udccb 複製全部</button>' +
       '<button class="btn small btn-good" id="ar-pa-agent" title="進入 PA Agent（先出計畫，經你同意後才執行）">🤖 進入 PA Agent</button>';
     content.appendChild(body);
@@ -3868,12 +3874,16 @@ const AssignResultWin = (() => {
       if (bt.dataset.act === "close") close();
       else if (bt.dataset.act === "max") toggleMax();
     });
-    win.querySelector("#ar-copy-all").addEventListener("click", async () => {
-      await assignTaskClip(win._text || "");
+    win.querySelector("#ar-copy-all").addEventListener("click", async (event) => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      const copied = await assignTaskClip(win._text || "");
       const hint = win.querySelector("#ar-hint");
-      const prev = hint.textContent;
-      hint.textContent = "\u2705 \u5df2\u8907\u88fd\u5230\u526a\u8cbc\u7c3f";
-      setTimeout(() => { hint.textContent = prev; }, 1600);
+      hint.dataset.state = copied ? "success" : "error";
+      hint.textContent = copied
+        ? "\u5df2\u8907\u88fd\u5230\u526a\u8cbc\u7c3f\u3002"
+        : "\u526a\u8cbc\u7c3f\u5beb\u5165\u5931\u6557\uff1b\u6307\u4ee4\u5167\u5bb9\u4ecd\u4fdd\u7559\uff0c\u53ef\u624b\u52d5\u9078\u53d6\u6216\u91cd\u8a66\u3002";
+      button.disabled = false;
     });
     win.querySelector("#ar-pa-agent").addEventListener("click", () => {
       if (!window.PA_Agent) return;
@@ -3955,7 +3965,7 @@ const AssignResultWin = (() => {
     }
   }
 
-  function render(title, text, rich, cases) {
+  function render(title, text, rich, cases, copied) {
     if (!win) build();
     win._text = text;
     win._rich = rich || "";
@@ -3963,9 +3973,15 @@ const AssignResultWin = (() => {
     win.querySelector("#ar-title").textContent = title;
     const agentButton = win.querySelector("#ar-pa-agent");
     const multi = win._cases.length > 1;
-    win.querySelector("#ar-hint").textContent = multi
-      ? "批次指令已產生並複製；目前未啟動 Agent，也尚未執行測試。"
-      : "指令已複製。請確認完整測試案例、風險與目標；本頁尚未執行測試。";
+    const hint = win.querySelector("#ar-hint");
+    hint.dataset.state = copied ? "success" : "error";
+    hint.textContent = copied
+      ? (multi
+        ? "批次指令已產生並複製；目前未啟動 Agent，也尚未執行測試。"
+        : "指令已複製。請確認完整測試案例、風險與目標；本頁尚未執行測試。")
+      : (multi
+        ? "批次指令已產生，但剪貼簿寫入失敗；目前未啟動 Agent，也尚未執行測試。"
+        : "指令已產生，但剪貼簿寫入失敗；內容仍保留在視窗內。");
     if (agentButton) {
       agentButton.hidden = multi;
       agentButton.disabled = false;

@@ -4,6 +4,7 @@
   let mounted=null,lastView=null,closeViewerTimer;
   const identityLabels={SUCCESS:'讀取成功',AUTH_FAILED:'登入驗證失敗',MISSING_DATA:'身分資料不完整',IDENTITY_REQUIRES_CONFIRMATION:'Identity 需確認'};
   const stamp=v=>v?new Date(v*1000).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false}):'尚未取得';
+  const valueOrMissing=v=>v != null && v !== '' && Number.isFinite(Number(v))?String(Number(v)):'未取得';
   const labels={EXPECTED_OFFLINE:'Cycle 預期恢復中',FRESH:'資料有效',MISSING:'尚無節點資料',STALE:'資料過舊',UNAVAILABLE:'來源無法使用',NOT_COVERED:'尚未涵蓋',BACKLOG:'事件補讀中',TIMED_OUT:'採集逾時',INVALID:'觀測欄位不完整',FAILED:'採集失敗',PARTIAL:'部分資料／觀測缺口',NOT_READY:'尚未就緒',NOT_CONFIGURED:'尚未設定',NOT_SUPPORTED:'來源不支援',WAITING_READY:'開機恢復中 · 等待檢查',INTERRUPTED:'開機世代改變 · 本批不完整',SHARED:'共用控制器資料',IDENTITY_MISMATCH:'節點身分與設定不符',TRUNCATED:'資料超過採集上限'};
   Object.assign(labels,identityLabels);
   // A capped Redfish LogService is PARTIAL for a specific, actionable reason:
@@ -125,10 +126,10 @@
       r.querySelector('[data-error]').textContent=data.error||'';
       r.querySelector('[data-status]').textContent=data.delayed?'採集時間較長 · 仍在處理':data.running?'採集中…':data.config.enabled?`已啟用 · Fast ${data.config.interval_seconds}s / Deep ${data.config.deep_seconds||600}s`:'排程未啟用';
       r.querySelector('[data-run]').disabled=!!data.running;
-      r.querySelector('[data-fail]').textContent=data.summary.fail;r.querySelector('[data-warning]').textContent=data.summary.warning;
+      r.querySelector('[data-fail]').textContent=valueOrMissing(data.summary?.fail);r.querySelector('[data-warning]').textContent=valueOrMissing(data.summary?.warning);
       const summary=r.closest('.pd-workspace')?.querySelector('[data-health-summary]');
-      if(summary)summary.textContent=`${data.summary.fail} FAIL · ${data.summary.warning} Warning`;
-      r.querySelector('[data-history-count]').textContent=`最近恢復 ${data.lifecycle_counts?.recovered||0} · 歷史問題 ${data.lifecycle_counts?.archived||0}`;
+      if(summary)summary.textContent=`${valueOrMissing(data.summary?.fail)} FAIL · ${valueOrMissing(data.summary?.warning)} Warning`;
+      r.querySelector('[data-history-count]').textContent=`最近恢復 ${valueOrMissing(data.lifecycle_counts?.recovered)} · 歷史問題 ${valueOrMissing(data.lifecycle_counts?.archived)}`;
       r.querySelector('[data-time]').textContent='最近 Fast：'+stamp(data.last_fast_at||data.last_completed_at)+' · Deep：'+stamp(data.last_deep_at)+' · UTC+8';
       r.querySelector('[data-version]').textContent='Project Checker：'+(data.checker_hash?data.checker_hash.slice(0,12):'未設定')+' · 共用核心：'+(data.shared_core_version?data.shared_core_version.slice(0,12):'尚未採集');
       r.querySelector('[data-progress]').textContent=data.running?(data.progress||[]).map(p=>(data.nodes.find(n=>n.node_id===p.node_id)?.label||p.node_id)+' · '+p.source+' · '+(p.state==='COLLECTING'?'採集中':labels[p.state]||p.state)).join(' ／ '):'';
@@ -160,13 +161,15 @@
     const signature=JSON.stringify(analysis||{});if(root.dataset.signature===signature)return;root.dataset.signature=signature;root.replaceChildren();
     const state=analysis?.state||'NOT_REQUESTED',header=document.createElement('header'),title=document.createElement('h4'),status=document.createElement('span');title.textContent='AI 輔助判讀';status.dataset.aiState='';status.dataset.state=state;
     status.textContent={NOT_REQUESTED:'尚未分析',QUEUED:'等待分析',RUNNING:'分析中…',COMPLETE:'完成 '+stamp(analysis?.completed_at),UNAVAILABLE:'服務暫時無法使用',ERROR:'分析失敗'}[state]||state;header.append(title,status);root.append(header);
-    const result=analysis?.result;
-    if(result){const sections=document.createElement('div');sections.className='pd-ai-sections';
-      for(const [label,values] of [['可能原因',result.possible_causes],['建議檢查',result.recommended_checks]]){const section=document.createElement('section'),h=document.createElement('h5'),list=document.createElement('ol');h.textContent=label;for(const value of values||[]){const li=document.createElement('li');li.textContent=value;list.append(li);}section.append(h,list);sections.append(section);}
-      for(const [label,text,cls] of [['判讀',result.conclusion,'pd-ai-conclusion'],['判讀限制 / 確認程度',result.confidence_note,'pd-ai-basis'],['分析依據',(result.based_on||[]).join(' · '),'pd-ai-basis']]){const p=document.createElement('p');p.className=cls;p.textContent=label+'：'+text;sections.append(p);}root.append(sections);
-    }else if(analysis?.text){const p=document.createElement('p');p.textContent=analysis.text;root.append(p);}
-    if(analysis?.error){const p=document.createElement('p');p.textContent=analysis.error+' · '+analysis.error_category;root.append(p);}
-    if(analysis?.based_on){const p=document.createElement('p');p.className='pd-ai-basis';p.textContent='依據觀測：'+stamp(analysis.based_on.last_seen_at)+' · '+(analysis.based_on.source||'已保存證據')+'。AI 建議不改變規則判定。';root.append(p);}
+    const result=analysis?.result,text=v=>typeof v==='string'?v.trim():'',list=v=>Array.isArray(v)?v.map(text).filter(Boolean):[];
+    if(result&&typeof result==='object'){const sections=document.createElement('div');sections.className='pd-ai-sections';
+      for(const [label,values] of [['可能原因',list(result.possible_causes)],['建議檢查',list(result.recommended_checks)]]){if(!values.length)continue;const section=document.createElement('section'),h=document.createElement('h5'),items=document.createElement('ol');h.textContent=label;for(const value of values){const li=document.createElement('li');li.textContent=value;items.append(li);}section.append(h,items);sections.append(section);}
+      const conclusion=document.createElement('p');conclusion.className='pd-ai-conclusion';conclusion.textContent='判讀：'+(text(result.conclusion)||'未提供');sections.append(conclusion);
+      for(const [label,value,cls] of [['判讀限制 / 確認程度',text(result.confidence_note),'pd-ai-basis'],['分析依據',list(result.based_on).join(' · '),'pd-ai-basis']]){if(!value)continue;const p=document.createElement('p');p.className=cls;p.textContent=label+'：'+value;sections.append(p);}root.append(sections);
+    }else if(text(analysis?.text)){const p=document.createElement('p');p.textContent=text(analysis.text);root.append(p);}
+    else if(state==='COMPLETE'){const p=document.createElement('p');p.textContent='未提供分析內容。';root.append(p);}
+    if(text(analysis?.error)){const p=document.createElement('p'),category=text(analysis.error_category);p.textContent=category?text(analysis.error)+' · '+category:text(analysis.error);root.append(p);}
+    if(analysis?.based_on&&typeof analysis.based_on==='object'){const p=document.createElement('p');p.className='pd-ai-basis';p.textContent='依據觀測：'+stamp(analysis.based_on.last_seen_at)+' · '+(text(analysis.based_on.source)||'已保存證據')+'。AI 建議不改變規則判定。';root.append(p);}
   }
   function renderIssues(ctx){
     const r=ctx.root,list=r.querySelector('[data-list]'),opened=new Set([...(ctx.restoreOpen||[]),...[...list.querySelectorAll('details[open]')].map(e=>e.dataset.issueId)]);ctx.restoreOpen=null;list.replaceChildren();
@@ -179,7 +182,7 @@
       const ruleLabel={'cpu.utilization.high':'CPU 持續高使用率','memory.utilization.high':'記憶體持續高使用率','gpu.utilization.high':'GPU 持續高使用率','vram.utilization.high':'VRAM 持續高使用率'}[issue.rule]||(issue.rule.startsWith('DMESG_')?'核心日誌硬體錯誤':issue.rule);
       summary.textContent=`${issue.status==='ARCHIVED'?'已封存':issue.status==='RECOVERED'?'已恢復':issue.severity==='FAIL'?'FAIL':'WARN'} · ${label} · ${issue.component} · ${ruleLabel}`;detail.append(summary);
       const facts=document.createElement('p');facts.textContent=issue.facts;detail.append(facts);
-      const timing=document.createElement('p');timing.textContent=`首次 ${stamp(issue.first_seen_at)} · 最後觀測 ${stamp(issue.last_seen_at)} · 恢復 ${issue.resolved_at?stamp(issue.resolved_at):'尚未恢復'} · 發生 ${issue.occurrences||0} 次 · 觀測 ${issue.observations||0} 次 · 復發 ${issue.recurrences} 次${issue.occurrence_precision==='uncertain'?' · 來源切換，事件次數未能精確確認':issue.occurrence_precision==='lower_bound'?' · ring buffer 次數為可確認下限':''}`;detail.append(timing);
+      const timing=document.createElement('p');timing.textContent=`首次 ${stamp(issue.first_seen_at)} · 最後觀測 ${stamp(issue.last_seen_at)} · 恢復 ${issue.resolved_at?stamp(issue.resolved_at):'尚未恢復'} · 發生 ${valueOrMissing(issue.occurrences)} 次 · 觀測 ${valueOrMissing(issue.observations)} 次 · 復發 ${valueOrMissing(issue.recurrences)} 次${issue.occurrence_precision==='uncertain'?' · 來源切換，事件次數未能精確確認':issue.occurrence_precision==='lower_bound'?' · ring buffer 次數為可確認下限':''}`;detail.append(timing);
       const evidence=document.createElement('pre');evidence.textContent='證據來源：'+(issue.evidence||'未提供');detail.append(evidence);
       if(issue.evidence_ref?.snapshot_id){const button=document.createElement('button');button.type='button';button.className='btn small';button.dataset.evidenceOpen='';button.textContent='查看原始證據';button.onclick=()=>window.InspectionEvidence.open(ctx.base,issue.evidence_ref.snapshot_id,label+' · '+issue.component);detail.append(button);}
       if(issue.evidence_ref?.run_id){const link=document.createElement('a');link.href='#/cycle/runs/'+encodeURIComponent(issue.evidence_ref.run_id);link.textContent='開啟來源任務與證據';detail.append(link);}

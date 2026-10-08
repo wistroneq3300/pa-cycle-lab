@@ -84,8 +84,14 @@
   function targetBadge(d,n,field){const target=pingTarget(d.id,n.id,field);return target?pingBadge(target.alive?'up':'down'):!n[field]?pingBadge('unconfigured'):pingBadge('unchecked');}
   function pingResultSummary() {
     if(!state.ping)return `<section class="nt-ping-summary nt-ping-idle" role="status" aria-live="polite"><strong>\u5c1a\u672a\u6aa2\u67e5 IP</strong><span>\u5132\u5b58\u62d3\u64b2\u5f8c\uff0c\u53ef\u5728\u9019\u88e1\u6aa2\u67e5\u9023\u7dda\u8a2d\u5099\u7684 IP \u662f\u5426\u53ef\u9054\u3002</span></section>`;
-    const configured=Number(state.ping.summary?.configured)||0,alive=Number(state.ping.summary?.alive)||0,down=Number(state.ping.summary?.down)||0,unique=Number(state.ping.summary?.unique_ips)||0;
-    const meta=`<span>${configured} \u500b IP \u00b7 \u53ef\u9054 ${alive} \u00b7 \u7121\u56de\u61c9 ${down} \u00b7 \u4e0d\u91cd\u8907 IP ${unique} \u00b7 ${Number(state.ping.duration_ms)||0} ms</span>`;
+    const summary=state.ping.summary,required=['configured','alive','down','unique_ips'];
+    if(!summary || required.some(key=>summary[key] == null || !Number.isFinite(Number(summary[key])))){
+      const reason=state.ping.error||state.ping.detail||'Ping \u56de\u61c9\u672a\u63d0\u4f9b\u5b8c\u6574\u7d71\u8a08\u3002';
+      return `<section class="nt-ping-summary nt-ping-failed" role="alert"><strong>Ping \u7d50\u679c\u5c1a\u7121\u6cd5\u5224\u8b80</strong><span>${h(reason)}</span></section>`;
+    }
+    const configured=Number(summary.configured),alive=Number(summary.alive),down=Number(summary.down),unique=Number(summary.unique_ips);
+    const duration=state.ping.duration_ms != null && Number.isFinite(Number(state.ping.duration_ms))?`${Number(state.ping.duration_ms)} ms`:'\u672a\u53d6\u5f97';
+    const meta=`<span>${configured} \u500b IP \u00b7 \u53ef\u9054 ${alive} \u00b7 \u7121\u56de\u61c9 ${down} \u00b7 \u4e0d\u91cd\u8907 IP ${unique} \u00b7 \u8017\u6642 ${duration}</span>`;
     if(!configured)return `<section class="nt-ping-summary nt-ping-empty" role="status" aria-live="polite"><strong>\u6c92\u6709\u53ef\u6aa2\u67e5\u7684 IP</strong><span>\u8acb\u5148\u70ba\u9019\u500b\u6a5f\u6ac3\u7684\u8a2d\u5099\u8a2d\u5b9a IP\u3002</span>${meta}</section>`;
     if(!down)return `<section class="nt-ping-summary nt-ping-success" role="status" aria-live="polite"><strong>\u5168\u90e8 ${configured} \u500b IP \u7686\u53ef\u9054</strong>${meta}</section>`;
     const devices=rack()?.devices||[],failures=(state.ping.targets||[]).filter(target=>target.alive===false).map(target=>{

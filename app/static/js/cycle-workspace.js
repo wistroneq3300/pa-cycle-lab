@@ -55,7 +55,7 @@
     $('cw-body').querySelectorAll('.cw-del').forEach(b=>b.onclick=()=>deleteRun(b.dataset.id,b.dataset.project,b));
   }
   async function deleteRun(id,project,button){
-    if(!confirm(`確定刪除任務 ${project} · ${runSuffix({id,project})}？\n此動作會一併刪除該任務的證據與 log 資料夾，無法復原。`))return;
+    if(!await window.uxConfirm(`Project：${project}\nRun：${runSuffix({id,project})}\n\n此動作會一併刪除該任務的 Evidence 與 log 資料夾，而且無法復原。`))return;
     button.disabled=true;
     try{
       const r=await fetch('/api/cycle/runs/'+encodeURIComponent(id),{method:'DELETE',cache:'no-store',signal:controller?.signal});
@@ -236,15 +236,17 @@
       const n=nodes.get(t.name)||{},row=progressRows.get(t.name);
       row.label.textContent=(t.node||t.slot_key)+' · '+stateLabel(n.stage||j.state);
       text(row.reason,n.stop_reason||'');
-      const values=[n.loop||0,n.attempts||0,n.completed||0,n.boot_confirmed||0,n.valid_cycles||0,
-        stateLabel(n.health||'UNKNOWN')+' / '+stateLabel(n.cumulative_health||'UNKNOWN'),(n.first_this_round??'—')+' / '+(n.unique_issues||0),
-        stateLabel(n.coverage||(n.attempts?'EXERCISED':'NOT_EXERCISED'))+(n.coverage_reason?' · '+n.coverage_reason:'')];
+      const count=value=>value == null || value === '' || !Number.isFinite(Number(value)) ? '未取得' : Number(value);
+      const coverage=n.coverage || (n.attempts != null ? (Number(n.attempts)>0?'EXERCISED':'NOT_EXERCISED') : 'UNKNOWN');
+      const values=[count(n.loop),count(n.attempts),count(n.completed),count(n.boot_confirmed),count(n.valid_cycles),
+        stateLabel(n.health||'UNKNOWN')+' / '+stateLabel(n.cumulative_health||'UNKNOWN'),count(n.first_this_round)+' / '+count(n.unique_issues),
+        stateLabel(coverage)+(n.coverage_reason?' · '+n.coverage_reason:'')];
       values.forEach((value,i)=>text(row.cells[i],value));
       // Health (idx 5), issues (idx 6) and coverage (idx 7) carry a verdict, so
       // colour them; loop counters stay plain numbers.
       badge(row.cells[5],values[5],HEALTH_CLASS(n.cumulative_health||n.health));
-      badge(row.cells[6],values[6],(n.unique_issues||n.first_this_round)?'cw-fail':'cw-ok');
-      badge(row.cells[7],values[7],HEALTH_CLASS(n.coverage||(n.attempts?'EXERCISED':'NOT_EXERCISED')));
+      badge(row.cells[6],values[6],n.unique_issues == null && n.first_this_round == null ? 'cw-idle' : (Number(n.unique_issues)>0||Number(n.first_this_round)>0)?'cw-fail':'cw-ok');
+      badge(row.cells[7],values[7],HEALTH_CLASS(coverage));
       row.stage.textContent='';row.stage.className='cw-rowstage '+HEALTH_CLASS(n.cumulative_health||n.health);
     }
   }

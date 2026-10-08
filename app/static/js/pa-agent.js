@@ -467,6 +467,7 @@
       else if (a.status === "failed") status = `<span class="pa-att-warn" title="${esc(a.error || "")}">上傳失敗</span><button type="button" class="pa-att-retry" data-retry="${id}">重試</button>`;
       else if (a.status === "unparsed") status = `<span class="pa-att-warn" title="${esc(a.error || "")}">無法解析</span>`;
       else if (a.kind === "image" && !a.vision_supported) status = `<span class="pa-att-warn">模型不支援圖片解析</span>`;
+      if (a._deleteError) status += `<span class="pa-att-warn" role="alert">移除失敗：${esc(a._deleteError)}</span>`;
       const rm = `<button type="button" class="pa-att-rm" data-rm="${id}" title="移除">✕</button>`;
       if (a.kind === "image") {
         // Local picks preview from the in-memory File; stored ones come from the run.
@@ -490,11 +491,19 @@
         renderAttachmentStrip(state._attachments);
         return;
       }
+      const stored = state._attachments.find(item => item.attachment_id === id);
+      if (stored) delete stored._deleteError;
+      btn.disabled = true;
       try {
-        await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/attachments/${encodeURIComponent(id)}`, { method: "DELETE" });
-      } catch (e) { /* ignore */ }
-      renderAttachmentStrip(state._attachments.filter(x => x.attachment_id !== id));
-      renderLeftPanel();
+        const response = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/attachments/${encodeURIComponent(id)}`, { method: "DELETE" });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.detail || data.error || ("HTTP " + response.status));
+        renderAttachmentStrip(state._attachments.filter(x => x.attachment_id !== id));
+        renderLeftPanel();
+      } catch (e) {
+        if (stored) stored._deleteError = e.message || "後端未確認刪除";
+        renderAttachmentStrip(state._attachments);
+      }
     }));
     strip.querySelectorAll("[data-retry]").forEach(btn => btn.addEventListener("click", () => {
       const id = btn.getAttribute("data-retry");
@@ -532,6 +541,17 @@
     return `<div class="pa-msg-atts">${items}</div>`;
   }
 
+  function loadedTextPreview(value, limit) {
+    const text = String(value ?? "");
+    const preview = text.slice(0, limit);
+    const clipped = text.length > limit;
+    return `<div class="pa-output-preview">
+      ${clipped ? `<p class="pa-output-disclosure" role="note">目前顯示預覽 ${preview.length.toLocaleString()} / ${text.length.toLocaleString()} 字；內容已截斷。</p>` : ""}
+      <pre class="pa-msg-tool-io">${esc(preview) || "（無內容）"}</pre>
+      ${clipped ? `<details class="pa-output-full"><summary>展開已載入全文</summary><pre class="pa-msg-tool-io">${esc(text)}</pre></details>` : ""}
+    </div>`;
+  }
+
   function messageCard(msg) {
     const role = msg.role || "agent";
     const label = ROLE_LABEL[role] || role;
@@ -541,7 +561,7 @@
     const atts = attachmentChips(msg.attachments);
     let content;
     if (role === "tool" || msg.kind === "tool" || msg.kind === "command" || msg.kind === "evidence") {
-      content = `<pre class="pa-msg-tool-io">${esc(text).slice(0, 4000) || "（無內容）"}</pre>`;
+      content = loadedTextPreview(text, 4000);
     } else {
       // agent/assistant 與工程師訊息皆可能含 Markdown；以安全渲染器轉成 HTML
       // （renderMarkdown 內部對所有文字先 esc()，只產生白名單標籤）。
@@ -601,17 +621,29 @@
       el.className = "pa-activity";
       body().appendChild(el);
     }
-    const lines = [];
-    for (const cm of cmds.slice(-8)) {
-      const t = cm.tool ? `[${cm.tool}] ` : "";
-      lines.push("▶ " + t + String(cm.thought || cm.finish_message || "").trim());
+    const activityLine = (value, evidence = false) => {
+      if (evidence) {
+        const content = typeof value.content === "string" ? value.content : JSON.stringify(value.content ?? "");
+        return "   ↳ " + String(content).trim();
+      }
+      const tool = value.tool ? `[${value.tool}] ` : "";
+      return "▶ " + tool + String(value.thought || value.finish_message || "").trim();
+    };
+    const shownCommands = cmds.slice(-8), shownEvidence = evi.slice(-8), lines = [];
+    for (const cm of shownCommands) {
+      lines.push(activityLine(cm));
     }
-    for (const e of evi.slice(-8)) {
-      const c = typeof e.content === "string" ? e.content : JSON.stringify(e.content ?? "");
-      lines.push("   ↳ " + String(c).trim());
+    for (const e of shownEvidence) {
+      lines.push(activityLine(e, true));
     }
+    const previewText = lines.join("\n"), clippedText = previewText.length > 6000;
+    const countLimited = shownCommands.length < cmds.length || shownEvidence.length < evi.length;
+    const fullText = [...cmds.map(cm => activityLine(cm)), ...evi.map(item => activityLine(item, true))].join("\n");
+    const disclosure = `顯示最近 ${shownCommands.length} / ${cmds.length} 個動作、${shownEvidence.length} / ${evi.length} 筆證據${clippedText ? `；文字預覽 6,000 / ${previewText.length.toLocaleString()} 字` : ""}。`;
     el.innerHTML = `<summary class="pa-activity-title">執行活動 · ${cmds.length} 動作 · ${evi.length} 證據</summary>
-      <pre class="pa-msg-tool-io">${esc(lines.join("\n")).slice(0, 6000)}</pre>`;
+      <p class="pa-output-disclosure" role="note">${esc(disclosure)}</p>
+      <pre class="pa-msg-tool-io">${esc(previewText.slice(0, 6000)) || "（無內容）"}</pre>
+      ${countLimited || clippedText ? `<details class="pa-output-full"><summary>展開本次已載入內容</summary><pre class="pa-msg-tool-io">${esc(fullText) || "（無內容）"}</pre></details>` : ""}`;
   }
 
   // 等待提示：agent 出計畫、等工程師確認時顯示。純文字提示，**不放任何按鈕**——

@@ -82,6 +82,7 @@ async function mockApi(page, state, unknown) {
       os: [{ slot: 0, label: "N1", ip: "192.0.2.21", node_id: NODE, expected_binding_revision: "mock-rev-1" }],
     }] });
     if (key === "/api/projects") return json(route, { projects: [] });
+    if (key === "/api/ai/gpu-alerts") return json(route, { alerts: [] });
     if (key === "/api/testlibrary/meta") return json(route, { version: "capture-v1", sheets: [{
       sheet: SHEET, label: "Platform Validation", count: cases.length, auto: 1, partial: 1, no: 0,
     }] });
@@ -98,6 +99,13 @@ async function mockApi(page, state, unknown) {
       return json(route, { ok: true, messages: [
       { seq: 1, role: "agent", kind: "message", created_at: "2026-10-08T00:00:00+08:00", text: "## 執行計畫\n\n1. 核對目標節點與 PCIe topology\n2. 執行 `lspci -nn`\n3. 收集 LnkCap / LnkSta 證據\n\n| 項目 | 處理 |\n|---|---|\n| 原始證據 | 完整保留 |\n| 得失判定 | 由工程師確認 |\n\n若同意開始，請回覆 **OK** 或 **GO**。" },
       ] });
+    }
+    if (url.pathname === "/api/agent/runs/premium-ui-run-1/attachments/unconsumed" && method === "GET") {
+      return json(route, { ok: true, attachments: state.attachments || [] });
+    }
+    if (url.pathname === "/api/agent/runs/premium-ui-run-1/attachments/att-image/raw" && method === "GET") {
+      return route.fulfill({ status: 200, contentType: "image/png", body: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64") });
     }
     if (url.pathname === "/api/agent/runs/premium-ui-run-1" && method === "GET") return json(route, { ok: true, run: {
       run_id: "premium-ui-run-1", status: state.agentStatus, started_at: "2026-10-08T00:00:00+08:00",
