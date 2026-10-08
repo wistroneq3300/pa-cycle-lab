@@ -1,4 +1,6 @@
 import json
+import subprocess
+import sys
 import tempfile
 import unittest
 import zipfile
@@ -41,6 +43,13 @@ class FullRunZip(unittest.TestCase):
             self.assertEqual({row['path'] for row in manifest['files']},names-{'FULL_ZIP_MANIFEST.json'})
             self.assertTrue(all(len(row['sha256'])==64 for row in manifest['files']))
 
+    def test_incomplete_zip_is_allowed_after_runner_and_writer_stop(self):
+        result=self.service.request({'id':'run-123','state':'INCOMPLETE'})
+        self.assertIn(result['state'],{'PREPARING','COMPRESSING','READY'})
+        self.service.active['run-123'].result(timeout=10)
+        self.assertEqual(self.service.status('run-123')['state'],'READY')
+        self.assertTrue(self.service.path('run-123').is_file())
+
     def test_running_and_stop_requested_are_blocked(self):
         for state in ('RUNNING','STOP_REQUESTED'):
             with self.subTest(state=state),self.assertRaises(ValueError):
@@ -48,17 +57,51 @@ class FullRunZip(unittest.TestCase):
 
     def test_terminal_run_without_final_html_is_not_exported(self):
         (self.run/'CYCLE_REVIEW_REPORT.html').unlink()
-        self.service.request({'id':'run-123','state':'COMPLETE'})
-        self.service.active['run-123'].result(timeout=10)
-        self.assertEqual(self.service.status('run-123')['state'],'FAILED')
+        with self.assertRaisesRegex(ValueError,'Final HTML report'):
+            self.service.request({'id':'run-123','state':'COMPLETE'})
         self.assertFalse(self.service.path('run-123').exists())
 
     def test_error_requires_explicit_consistency_confirmation(self):
         with self.assertRaises(ValueError):
             self.service.request({'id':'run-123','state':'ERROR'})
-        self.service.request({'id':'run-123','state':'ERROR'},confirm=True)
+        with self.assertRaisesRegex(ValueError,'campaign.json'):
+            self.service.request({'id':'run-123','state':'ERROR'},confirm=True)
+        (self.run/'campaign.json').write_text('{"run_id":"cycle-run-123","state":"ERROR"}',encoding='utf-8')
+        (self.run/'job_final.json').write_text('{"id":"run-123","state":"ERROR"}',encoding='utf-8')
+        self.service.request({'id':'run-123','run_id':'cycle-run-123','state':'ERROR'},confirm=True)
         self.service.active['run-123'].result(timeout=10)
         self.assertEqual(self.service.status('run-123')['state'],'READY')
+
+    def test_reconciliation_requires_matching_final_snapshots_and_evidence(self):
+        (self.run/'campaign.json').write_text('{"run_id":"cycle-run-123","state":"ERROR"}',encoding='utf-8')
+        (self.run/'job_final.json').write_text('{"id":"run-123","state":"RECONCILIATION_REQUIRED"}',encoding='utf-8')
+        with self.assertRaisesRegex(ValueError,'不一致'):
+            self.service.request({'id':'run-123','run_id':'cycle-run-123','state':'RECONCILIATION_REQUIRED'},confirm=True)
+        (self.run/'campaign.json').write_text('{"run_id":"cycle-run-123","state":"RECONCILIATION_REQUIRED"}',encoding='utf-8')
+        (self.run/'node-1'/'loop001'/'report.json').unlink()
+        with self.assertRaisesRegex(ValueError,'Run Evidence'):
+            self.service.request({'id':'run-123','run_id':'cycle-run-123','state':'RECONCILIATION_REQUIRED'},confirm=True)
+
+    def test_terminal_states_reject_an_active_runner(self):
+        self.service.worker_active=lambda _job_id:True
+        for state in ('COMPLETE','INCOMPLETE','ERROR','RECONCILIATION_REQUIRED'):
+            with self.subTest(state=state),self.assertRaisesRegex(ValueError,'Runner 仍在執行'):
+                self.service.request({'id':'run-123','state':state},confirm=state in {'ERROR','RECONCILIATION_REQUIRED'})
+
+    def test_exceptional_archive_rejects_concurrent_report_writer(self):
+        (self.run/'campaign.json').write_text('{"run_id":"cycle-run-123","state":"ERROR"}',encoding='utf-8')
+        (self.run/'job_final.json').write_text('{"id":"run-123","state":"ERROR"}',encoding='utf-8')
+        code=("from cycle_storage import report_writer_lock\n"
+              "import sys,time\n"
+              "with report_writer_lock(sys.argv[1]):\n"
+              " print('LOCKED',flush=True);time.sleep(10)\n")
+        process=subprocess.Popen([sys.executable,'-c',code,str(self.run)],stdout=subprocess.PIPE,text=True)
+        try:
+            self.assertEqual(process.stdout.readline().strip(),'LOCKED')
+            with self.assertRaisesRegex(ValueError,'Report Writer'):
+                self.service.request({'id':'run-123','run_id':'cycle-run-123','state':'ERROR'},confirm=True)
+        finally:
+            process.terminate();process.wait(timeout=5)
 
     def test_four_nodes_ten_loops_large_manifest_is_complete(self):
         for node in range(1,5):
