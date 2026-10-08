@@ -2,14 +2,14 @@
 (() => {
   'use strict';
   const colors=['#2785ad','#329780','#ba8533','#8566b0','#bf6473','#547eb8','#878537','#7c7470'];
-  const periods=new Map();
+  const periods=new Map(),seriesVisibility=new Map();
   const labels={READY:'資料有效',NO_DATA:'尚無資料',STALE:'資料過舊',QUERY_ERROR:'查詢未完成',NOT_APPLICABLE:'不適用',LOADING:'載入中'};
   const stamp=v=>v?new Date(v*1000).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false}):'尚未取得';
   const number=(v,u)=>v==null?'未取得':u==='B/s'?v>=1e9?(v/1e9).toFixed(1)+' GB/s':v>=1e6?(v/1e6).toFixed(1)+' MB/s':v>=1e3?(v/1e3).toFixed(1)+' KB/s':v.toFixed(1)+' B/s':v.toFixed(1)+' '+u;
   const responseError=async(response,fallback)=>{const raw=await response.json().catch(()=>({})),data=raw&&typeof raw==='object'?raw:{};return new Error(data.detail||data.error||fallback);};
   class Dashboard {
     constructor(root,node,name){
-      this.root=root;this.node=node;this.name=name||'';this.charts=new Map();this.seriesVisibility=new Map();this.period=periods.get(node.node_id)||'1h';this.abort=new AbortController();this.closed=false;
+      this.root=root;this.node=node;this.name=name||'';this.charts=new Map();this.seriesVisibility=seriesVisibility;this.period=periods.get(node.node_id)||'1h';this.abort=new AbortController();this.closed=false;
       const ranges=[['10m','10 分鐘'],['30m','30 分鐘'],['1h','1 小時'],['6h','6 小時'],['12h','12 小時'],['24h','24 小時'],['2d','2 天'],['7d','7 天'],['30d','30 天']];
       root.innerHTML='<div class="tn-toolbar"><div><h3>效能趨勢</h3><p data-sample>正在取得中央監控資料…</p></div><label>時間範圍 <select aria-label="Telemetry 時間範圍">'+ranges.map(([v,t])=>'<option value="'+v+'">'+t+'</option>').join('')+'</select></label></div>'
         +'<section class="tn-ai" aria-label="遙測 AI 分析"><div class="tn-ai-head"><h4>遙測 AI 分析</h4><div class="tn-ai-actions"><span data-ai-state>等待分析</span><button class="btn small" type="button" data-ai-retry hidden>重新分析</button></div></div><div class="tn-ai-body" data-ai>正在分析此範圍的監控趨勢…</div></section>'
@@ -46,9 +46,9 @@
         const response=await fetch('/api/telemetry/nodes/'+encodeURIComponent(this.node.node_id)+'/charts?period='+period,{signal:this.request.signal});
         if(!response.ok)throw await responseError(response,'無法取得中央監控資料，請稍後重試。');
         const data=await response.json();if(this.closed||period!==this.period)return;
-        this.data=data;this.root.querySelector('[data-chart-error]').textContent=['BUSY','LOADING'].includes(data.state)?'查詢進行中，稍後自動更新。':'';
+        this.data=data;const chartError=this.root.querySelector('[data-chart-error]');chartError.textContent=['BUSY','LOADING'].includes(data.state)?'查詢進行中，稍後自動更新。':'';chartError.dataset.state=['BUSY','LOADING'].includes(data.state)?'loading':'';
         if(data.panels?.length)this.repaint();
-      }catch(e){if(e.name!=='AbortError'&&!this.closed)this.root.querySelector('[data-chart-error]').textContent=e.message;}
+      }catch(e){if(e.name!=='AbortError'&&!this.closed){const chartError=this.root.querySelector('[data-chart-error]');chartError.textContent=e.message;chartError.dataset.state='error';}}
       finally{if(!this.closed){this.root.setAttribute('aria-busy','false');this.timer=setTimeout(()=>this.load(),30000);}}
     }
     repaint(){

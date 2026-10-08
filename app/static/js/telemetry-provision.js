@@ -203,6 +203,9 @@
       this.$('[data-detail]').textContent=node.state==='NOT_CONFIGURED'?'此節點尚未連接中央效能監控。Host 與 GPU 監控可分別啟用。':node.detail;
       this.$('[data-target]').textContent=`${node.slot} · ${node.hostname||'尚未取得 hostname'} · ${node.os_ip}`;this.$('[data-time]').textContent='最後確認 '+time(node.checked_at);
       const host=node.components?.host||'NOT_CONFIGURED',gpu=node.components?.gpu||{state:'NOT_CONFIGURED'};
+      const prometheus=node.components?.prometheus||'NOT_CONFIGURED';
+      this.root.dataset.monitoringReady=String(host==='READY'&&prometheus==='READY');
+      this.root.dataset.telemetryState=node.state||'NOT_CONFIGURED';
       const hostCard=this.root.querySelector('[data-component="host"]'),gpuCard=this.root.querySelector('[data-component="gpu"]');
       hostCard.querySelector('[data-component-state]').textContent=stateLabel(host);hostCard.dataset.state=host;
       gpuCard.querySelector('[data-component-state]').textContent=stateLabel(gpu.state);gpuCard.dataset.state=gpu.state;

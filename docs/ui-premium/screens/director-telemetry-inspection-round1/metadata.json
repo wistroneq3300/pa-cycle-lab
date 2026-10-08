@@ -1,0 +1,73 @@
+{
+  "tested_sha": "ee8fcd57a6c5914c55a07c63f1b33003cefa3c27",
+  "program_ref": "ee8fcd57a6c5914c55a07c63f1b33003cefa3c27+working-tree",
+  "working_tree_modified": true,
+  "base": "http://127.0.0.1:9196",
+  "mode": "loopback synthetic fixtures; no hardware requests",
+  "round": "round1",
+  "viewports": [
+    "1920x1080 light",
+    "1366x768 dark"
+  ],
+  "states": {
+    "telemetry": [
+      "READY",
+      "STALE",
+      "NO_DATA",
+      "QUERY_ERROR",
+      "NOT_APPLICABLE"
+    ],
+    "inspection": [
+      "current",
+      "recovered",
+      "AI missing fields",
+      "source error"
+    ]
+  },
+  "owner_requests": [
+    "GET /static/css/inspection-refinement.css?v=20261008-director-observe1",
+    "GET /static/js/inspection-evidence.js?v=20261008-director-truth1",
+    "GET /api/machine/chassis-01/inspection",
+    "GET /api/telemetry/systems/chassis-01/nodes",
+    "GET /api/machine/chassis-01/telemetry/analyze?minutes=60&node_id=node-ready",
+    "GET /api/telemetry/nodes/node-ready/charts?period=1h",
+    "GET /api/telemetry/nodes/node-ready",
+    "GET /api/machine/chassis-01/telemetry/analyze?minutes=60&node_id=node-ready",
+    "GET /api/telemetry/nodes/node-ready/charts?period=1h",
+    "GET /api/telemetry/nodes/node-ready",
+    "GET /api/machine/chassis-01/telemetry/analyze?minutes=60&node_id=node-stale",
+    "GET /api/telemetry/nodes/node-stale/charts?period=1h",
+    "GET /api/telemetry/nodes/node-stale",
+    "GET /api/machine/chassis-01/telemetry/analyze?minutes=60&node_id=node-nodata",
+    "GET /api/telemetry/nodes/node-nodata/charts?period=1h",
+    "GET /api/telemetry/nodes/node-nodata",
+    "GET /api/machine/chassis-01/telemetry/analyze?minutes=60&node_id=node-query",
+    "GET /api/telemetry/nodes/node-query/charts?period=1h",
+    "GET /api/telemetry/nodes/node-query",
+    "GET /api/machine/chassis-01/telemetry/analyze?minutes=60&node_id=node-na",
+    "GET /api/telemetry/nodes/node-na/charts?period=1h",
+    "GET /api/telemetry/nodes/node-na",
+    "GET /api/machine/chassis-01/telemetry/analyze?minutes=60&node_id=node-ready",
+    "GET /api/telemetry/nodes/node-ready/charts?period=1h",
+    "GET /api/telemetry/nodes/node-ready",
+    "GET /api/machine/chassis-01/telemetry/analyze?minutes=360&node_id=node-ready",
+    "GET /api/telemetry/nodes/node-ready/charts?period=6h",
+    "GET /api/machine/chassis-01/telemetry/analyze?minutes=60&node_id=node-na",
+    "GET /api/telemetry/nodes/node-na/charts?period=1h",
+    "GET /api/telemetry/nodes/node-na",
+    "GET /api/machine/chassis-01/telemetry/analyze?minutes=360&node_id=node-ready",
+    "GET /api/telemetry/nodes/node-ready/charts?period=6h",
+    "GET /api/telemetry/nodes/node-ready",
+    "GET /api/machine/chassis-01/telemetry/analyze?minutes=60&node_id=node-stale",
+    "GET /api/telemetry/nodes/node-stale/charts?period=1h",
+    "GET /api/telemetry/nodes/node-stale",
+    "GET /api/machine/chassis-01/inspection",
+    "GET /api/machine/chassis-01/inspection/issues?offset=0&limit=50&status=current&node_id=&search=",
+    "GET /api/machine/chassis-01/inspection",
+    "GET /api/machine/chassis-01/inspection/issues?offset=0&limit=50&status=current&node_id=&search=",
+    "GET /api/machine/chassis-01/inspection",
+    "GET /api/machine/chassis-01/inspection/issues?offset=0&limit=50&status=current&node_id=&search=",
+    "GET /api/machine/chassis-01/inspection"
+  ],
+  "browser_errors": []
+}
