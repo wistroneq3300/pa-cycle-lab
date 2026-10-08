@@ -164,6 +164,8 @@ class InspectionService:
             if entry.get('collected_at') is not None:
                 entry['age_seconds']=max(0,self.clock()-entry['collected_at'])
                 if entry.get('state')=='FRESH' and entry['age_seconds']>entry.get('freshness_seconds',result['config']['stale_seconds']): entry['state']='STALE'
+        matrix=self.store.check_matrix(system['id'],system['nodes'],self.clock())
+        result.update(check_matrix=matrix['rows'],coverage_summary=matrix['summary'])
         with self._guard:
             active=self._active.get(system['id'])
             result['running']=bool(active and not active[0].done())
@@ -187,9 +189,13 @@ class InspectionService:
             with process_lock(lock):
                 entered=True
                 saved=self.store.system(sid); config=saved['config']
-                if scheduled and (not config['enabled'] or saved['next_due']>self.clock()): return None
+                nodes=system.get('nodes',[])
+                has_enabled_node=(any(self.store.node_enabled(config,node['node_id']) for node in nodes) if nodes
+                                  else bool(config['enabled'] or any(config.get('node_overrides',{}).values())))
+                if scheduled and (not has_enabled_node or saved['next_due']>self.clock()): return None
                 config['_report_cursors']=copy.deepcopy(saved.get('source_cursors',{}))
                 config['_full']=not scheduled
+                config['_scheduled']=scheduled
                 observations,coverage,context=self.source(system,config,self.clock())
                 result=InspectionEvaluator(self.store,self.clock).evaluate(sid,observations,coverage,context,self.secrets(),source_cursors=config['_report_cursors'],batch=config.get('_batch'))
                 if hasattr(self.source,'evidence'): self.store.prune(sid,self.source.evidence,self.clock())

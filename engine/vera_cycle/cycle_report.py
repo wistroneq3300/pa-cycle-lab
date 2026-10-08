@@ -11,6 +11,7 @@ from pathlib import Path
 from urllib.parse import quote
 
 from cycle_core import aggregate_issues, atomic_write, health, node_records, records_health, now, write_json
+from cycle_storage import report_writer_lock, reject_live_rebuild
 
 ASSETS = Path(__file__).parent
 
@@ -719,6 +720,11 @@ def render_html(campaign, console_log=''):
     <main id="main">{overview}{node_panel}{issues_panel}</main><footer><p>Generated {esc(now())}. Offline report. Keep this HTML with its evidence folders to use log links.</p><p>Hardware script SHA-256: <code>{esc(campaign['script_sha256'])}</code></p></footer><script>{js}</script></body></html>'''
 
 def write_reports(root, campaign):
+    with report_writer_lock(root,wait=True):
+        return _write_reports(root,campaign)
+
+
+def _write_reports(root, campaign):
     root = Path(root)
     # Missing-file annotations belong to the rendered snapshot, not reviewed PRE.
     campaign = copy.deepcopy(campaign)
@@ -770,22 +776,22 @@ def write_reports(root, campaign):
         console_log = ''
     atomic_write(root / "CYCLE_REVIEW_REPORT.html", render_html(campaign, console_log))
 
-def rebuild(root):
-    root = Path(root)
-    campaign = json.loads((root / 'campaign.json').read_text(encoding='utf-8'))
-    for node in campaign['nodes']:
-        start_path = root / node['key'] / 'start' / 'report.json'
-        if start_path.exists():
-            node['start'] = json.loads(start_path.read_text(encoding='utf-8'))
-        pre_path = root / node['key'] / 'pre_report.json'
-        if pre_path.exists():
-            node['pre'] = json.loads(pre_path.read_text(encoding='utf-8'))
-        node['loops'] = [json.loads(p.read_text(encoding='utf-8')) for p in sorted((root / node['key']).glob('loop*/report.json'))]
-        node['completed'] = sum(r.get('post_complete', False) for r in node['loops'])
-        node['attempts'] = sum(bool(r.get('action')) for r in node['loops'])
-        node['boot_confirmed'] = sum(r.get('boot_confirmed', False) for r in node['loops'])
-        node['valid_cycles'] = sum(r.get('valid_cycle', False) for r in node['loops'])
-    if campaign['state'] == 'RUNNING':
-        campaign.update(state='INCOMPLETE', finished=now(), stop_reason='Recovered journal; original process did not finalize this campaign')
-    write_reports(root, campaign)
-    return campaign
+def rebuild(root,runtime_root=None):
+    with report_writer_lock(root):
+        root = Path(root)
+        campaign = json.loads((root / 'campaign.json').read_text(encoding='utf-8'))
+        reject_live_rebuild(root,campaign,runtime_root)
+        for node in campaign['nodes']:
+            start_path = root / node['key'] / 'start' / 'report.json'
+            if start_path.exists(): node['start'] = json.loads(start_path.read_text(encoding='utf-8'))
+            pre_path = root / node['key'] / 'pre_report.json'
+            if pre_path.exists(): node['pre'] = json.loads(pre_path.read_text(encoding='utf-8'))
+            node['loops'] = [json.loads(p.read_text(encoding='utf-8')) for p in sorted((root / node['key']).glob('loop*/report.json'))]
+            node['completed'] = sum(r.get('post_complete', False) for r in node['loops'])
+            node['attempts'] = sum(bool(r.get('action')) for r in node['loops'])
+            node['boot_confirmed'] = sum(r.get('boot_confirmed', False) for r in node['loops'])
+            node['valid_cycles'] = sum(r.get('valid_cycle', False) for r in node['loops'])
+        if campaign['state'] == 'RUNNING':
+            campaign.update(state='INCOMPLETE', finished=now(), stop_reason='Recovered journal; original process did not finalize this campaign')
+        _write_reports(root,campaign)
+        return campaign

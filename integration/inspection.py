@@ -22,7 +22,8 @@ DEFAULTS = dict(enabled=False, interval_seconds=120, duration_seconds=120,
                 recovery_samples=2, stale_seconds=300, ai_enabled=False,
                 deep_seconds=600, sensor_seconds=300, firmware_seconds=1800,
                 readiness_seconds=600, retention_days=30,
-                thresholds={'cpu':90, 'memory':95, 'gpu':95, 'vram':95}, hysteresis=5)
+                thresholds={'cpu':90, 'memory':95, 'gpu':95, 'vram':95}, hysteresis=5,
+                node_overrides={})
 
 
 def validate_config(previous, changes):
@@ -32,6 +33,10 @@ def validate_config(previous, changes):
     for name,value in changes.items():
         if name in {'enabled','ai_enabled'}:
             if type(value) is not bool: raise ValueError(name+' 必須為布林值')
+        elif name=='node_overrides':
+            if not isinstance(value,dict) or any(not isinstance(k,str) or not k or type(v) is not bool for k,v in value.items()):
+                raise ValueError('節點巡檢覆寫設定無效')
+            value=dict(value)
         elif name=='thresholds':
             if not isinstance(value,dict) or value.keys()-DEFAULTS['thresholds'].keys(): raise ValueError('門檻欄位無效')
             if any(type(v) not in {int,float} or not math.isfinite(v) or not 1<=v<=100 for v in value.values()): raise ValueError('使用率門檻須介於 1–100%')
@@ -140,9 +145,15 @@ class InspectionStore:
                 WHERE system_id=? AND json_extract(data,'$.status')='ACTIVE'
             ) WHERE node_id IS NOT NULL AND node_id!=''""",(system_id,system_id)).fetchall()
             rows=db.execute("SELECT data FROM inspection_items WHERE "+active+" ORDER BY CASE json_extract(data,'$.severity') WHEN 'FAIL' THEN 0 ELSE 1 END,json_extract(data,'$.last_seen_at') DESC LIMIT ?",(system_id,max(0,int(limit)))).fetchall()
+            all_active=db.execute("SELECT data FROM inspection_items WHERE "+active,(system_id,)).fetchall()
         counts={'fail':0,'warning':0}
         for row in count_rows: counts['fail' if row['severity']=='FAIL' else 'warning']+=row['n']
-        return {'counts':counts,'node_ids':{row['node_id'] for row in node_rows},'issues':[json.loads(row[0]) for row in rows]}
+        by_severity={'fail':set(),'warning':set()}
+        for row in all_active:
+            issue=json.loads(row[0]); bucket='fail' if issue.get('severity')=='FAIL' else 'warning'
+            by_severity[bucket].update(node for node in [issue.get('node_id'),*(issue.get('affected_nodes') or [])] if node)
+        return {'counts':counts,'node_ids':{row['node_id'] for row in node_rows},'node_ids_by_severity':by_severity,
+                'issues':[json.loads(row[0]) for row in rows]}
 
     def progress(self,system_id,node_id,data):
         with self.tx() as db:
@@ -195,7 +206,109 @@ class InspectionStore:
 
     def enabled(self):
         with self.tx(False) as db:
-            return [json.loads(r[0]) for r in db.execute("SELECT data FROM inspection_systems WHERE json_extract(data,'$.config.enabled')=1")]
+            rows=[json.loads(r[0]) for r in db.execute('SELECT data FROM inspection_systems')]
+            return [item for item in rows if item.get('config',{}).get('enabled') or any(item.get('config',{}).get('node_overrides',{}).values())]
+
+    @staticmethod
+    def node_enabled(config,node_id):
+        return config.get('node_overrides',{}).get(node_id,config.get('enabled',False))
+
+    @staticmethod
+    def _coverage_entry_required(entry):
+        source=str(entry.get('source',''))
+        if source.startswith('Input ') or source in {'Cycle context','Telemetry','BMC sources','Inspection'}:
+            return False
+        return entry.get('state') not in {'NOT_CONFIGURED','NOT_SUPPORTED'}
+
+    def coverage_nodes(self,system_id,bindings=None,now=None):
+        """Return current per-node Coverage without changing hardware verdicts.
+
+        Coverage is complete only when every required, project-derived source has
+        a fresh successful collection. WARN and FAIL are completed checks; stale,
+        missing, partial or failed acquisition is not. Optional/not-applicable
+        sources never enter the denominator.
+        """
+        current=time.time() if now is None else now
+        with self.tx(False) as db:
+            system=self.system(system_id,db); config=system['config']
+        states=self.node_state(system_id) if bindings is not None else {}
+        grouped={}
+        for entry in system.get('coverage',[]):
+            node_id=entry.get('node_id')
+            if not node_id or not self._coverage_entry_required(entry): continue
+            if bindings is not None:
+                state=states.get(node_id,{})
+                version=state.get('version')
+                if node_id not in bindings or not isinstance(version,(list,tuple)) or len(version)<4 or version[3]!=bindings[node_id]:
+                    continue
+            item=dict(entry)
+            if item.get('state')=='FRESH' and item.get('collected_at') is not None:
+                if current-item['collected_at']>item.get('freshness_seconds',config['stale_seconds']): item['state']='STALE'
+            grouped.setdefault(node_id,[]).append(item)
+        result={}
+        for node_id,entries in grouped.items():
+            enabled=self.node_enabled(config,node_id)
+            required=len(entries)
+            completed=sum(entry.get('state') in {'FRESH','SHARED'} for entry in entries) if enabled else 0
+            result[node_id]=dict(enabled=enabled,required=required,completed=completed,
+                                 coverage=round(100*completed/required,1) if required else 0,
+                                 valid=bool(enabled and required and completed==required),
+                                 last_inspection=max((entry.get('collected_at') or 0 for entry in entries),default=0) or None)
+        return result
+
+    def check_matrix(self,system_id,nodes=(),now=None):
+        """Build a read model from existing source snapshots and checker output."""
+        current=time.time() if now is None else now
+        with self.tx(False) as db:
+            system=self.system(system_id,db); config=system['config']; rows=[]
+            labels={node.get('node_id'):node.get('label') or node.get('node_id') for node in nodes}
+            for entry in system.get('coverage',[]):
+                node_id=entry.get('node_id')
+                source=str(entry.get('source',''))
+                if not node_id or source.startswith('Input ') or source in {'Cycle context','Telemetry','BMC sources','Inspection'}: continue
+                enabled=self.node_enabled(config,node_id)
+                state=entry.get('state','MISSING')
+                stale=state=='STALE' or (state=='FRESH' and entry.get('collected_at') is not None and current-entry['collected_at']>entry.get('freshness_seconds',config['stale_seconds']))
+                ref=entry.get('evidence_ref') or {}; snapshot=None
+                if ref.get('snapshot_id'):
+                    found=db.execute('SELECT data FROM inspection_snapshots WHERE id=? AND system_id=?',(ref['snapshot_id'],system_id)).fetchone()
+                    if found: snapshot=json.loads(found[0])
+                findings=(snapshot or {}).get('findings') or []
+                health='FAIL' if any(f.get('severity')=='FAIL' for f in findings) else 'WARN' if any(f.get('severity') in {'WARN','WARNING'} for f in findings) else 'PASS'
+                if not enabled: status='NOT_MONITORED'
+                elif state in {'NOT_CONFIGURED','NOT_SUPPORTED'}: status='NOT_APPLICABLE'
+                elif stale: status='STALE'
+                elif state in {'FRESH','SHARED'} and snapshot: status=health
+                else: status='NO_DATA'
+                applicable=state not in {'NOT_CONFIGURED','NOT_SUPPORTED'}
+                base=dict(node_id=node_id,node_label=labels.get(node_id,node_id),source=entry.get('source'),
+                          last_checked=entry.get('collected_at'),evidence_available=bool(snapshot),evidence_ref=ref or None,
+                          required=applicable,health_status=health if snapshot else 'UNKNOWN')
+                details=(snapshot or {}).get('data') if entry.get('source')=='Hardware' else None
+                if isinstance(details,dict) and details:
+                    for check_id,detail in details.items():
+                        values=detail.get('values') or {}; verdict=detail.get('status','UNKNOWN')
+                        check_applicable=verdict not in {'UNSUPPORTED','NOT_APPLICABLE'}
+                        check_status='NOT_APPLICABLE' if not check_applicable else verdict if verdict in {'PASS','WARN','FAIL'} else 'UNKNOWN'
+                        if not enabled: check_status='NOT_MONITORED'
+                        elif stale: check_status='STALE'
+                        matching=next((f for f in findings if f.get('component') in {values.get('bdf'),detail.get('name'),check_id}),None)
+                        rows.append(dict(base,check_id=f'{node_id}:Hardware:{check_id}',check_name=detail.get('name') or check_id,
+                                         status=check_status,health_status=verdict if verdict in {'PASS','WARN','FAIL'} else 'UNKNOWN',
+                                         required=check_applicable,expected=values.get('exact',values.get('minimum')),
+                                         observed=values.get('actual'),detail=(matching or {}).get('detail') or detail.get('raw','')))
+                    continue
+                rows.append(dict(base,check_id=f'{node_id}:{entry.get("source")}',check_name=entry.get('source') or '檢查項目',
+                                 status=status,expected=None,observed=None,
+                                 detail=entry.get('detail') or ((findings[0].get('detail') if findings else '') or '')))
+        required=[row for row in rows if row['required']]
+        completed=[row for row in required if row['status'] in {'PASS','WARN','FAIL'}]
+        return {'rows':rows,'summary':{'completed':len(completed),'required':len(required),
+                'coverage':round(100*len(completed)/len(required),1) if required else 0,
+                'pass':sum(row.get('health_status')=='PASS' for row in rows),
+                'warn':sum(row.get('health_status')=='WARN' for row in rows),
+                'fail':sum(row.get('health_status')=='FAIL' for row in rows),
+                'not_monitored':sum(row['status']=='NOT_MONITORED' for row in rows)}}
 
     def archive_recovered(self,now):
         with self.tx() as db:

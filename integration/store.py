@@ -127,6 +127,7 @@ class Store:
                 CREATE TABLE IF NOT EXISTS input_sessions(id TEXT PRIMARY KEY, updated REAL NOT NULL, data TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS artifact_index(job_id TEXT NOT NULL, artifact_id TEXT NOT NULL,
                     signature TEXT NOT NULL, data TEXT NOT NULL, PRIMARY KEY(job_id,artifact_id));
+                CREATE TABLE IF NOT EXISTS cycle_exports(job_id TEXT PRIMARY KEY, updated REAL NOT NULL, data TEXT NOT NULL);
                 CREATE INDEX IF NOT EXISTS events_job_sequence ON events(job_id,seq);
                 CREATE INDEX IF NOT EXISTS events_job_machine_sequence ON events(job_id,json_extract(data,'$.machine_id'),seq);
             ''')
@@ -268,6 +269,15 @@ class Store:
             if artifact_id is not None:
                 query+=' AND artifact_id=?';args+=(artifact_id,)
             return {r['artifact_id']:(r['signature'],json.loads(r['data'])) for r in db.execute(query,args)}
+
+    def export_status(self,job_id,value=None):
+        with self.tx(write=value is not None) as db:
+            if value is not None:
+                payload=dict(value,job_id=job_id,updated_at=time.time())
+                db.execute('INSERT OR REPLACE INTO cycle_exports VALUES(?,?,?)',(job_id,payload['updated_at'],encode(payload)))
+                return payload
+            row=db.execute('SELECT data FROM cycle_exports WHERE job_id=?',(job_id,)).fetchone()
+            return json.loads(row[0]) if row else None
 
     def index_artifacts(self, job_id, entries):
         if not entries: return
@@ -535,7 +545,7 @@ class Store:
             if job['state'] not in TERMINAL:
                 raise Conflict('Only stopped or finished runs can be deleted')
             project=job['project']
-            for table in ('events','node_status','actions','artifact_index'):
+            for table in ('events','node_status','actions','artifact_index','cycle_exports'):
                 db.execute(f'DELETE FROM {table} WHERE job_id=?',(job_id,))
             db.execute('DELETE FROM locks WHERE owner=?',(job_id,))
             db.execute('DELETE FROM jobs WHERE id=?',(job_id,))

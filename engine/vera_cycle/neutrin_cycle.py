@@ -31,6 +31,7 @@ from cycle_core import (
 from cycle_engine import NodeSession
 from cycle_report import duration, elapsed, rebuild, status, write_reports
 from cycle_runtime import EndpointLocks, RunRegistry, list_running, request_stop
+from cycle_storage import writer_identity
 from cycle_transport import Transport
 
 BASE = Path(__file__).resolve().parent
@@ -282,6 +283,7 @@ def campaign(options, targets, credentials, confirm=input, transport_factory=Tra
             atomic_write(output / f'{options.project}_config.snapshot.sh', script.decode('utf-8'))
             atomic_write(output / 'issue_policy.snapshot.md', policy_text)
             data = dict(run_id=run_id, project=options.project, started=now(), finished=None,
+                        writer_owner=writer_identity(),
                         tool_version=(BASE / 'VERSION').read_text().strip(),
                         state='RUNNING', stop_reason='', cycle_mode=options.cycle_mode, channel=options.channel,
                         limits=dict(loops=options.loops, hours=options.hours), script_sha256=digest(script),

@@ -142,6 +142,10 @@ def install(app,pa,store_getter):
     @router.patch('/settings')
     def settings(name:str,body:dict,request:Request):
         svc,system=target(name,request,'operate')
+        if isinstance(body,dict) and 'node_overrides' in body:
+            known={node['node_id'] for node in system['nodes']}
+            if not isinstance(body['node_overrides'],dict) or set(body['node_overrides'])-known:
+                raise HTTPException(422,'節點巡檢覆寫只能指定此系統的節點')
         try: svc.store.configure(system['id'],body,request.state.actor)
         except ValueError as exc: raise HTTPException(422,str(exc))
         return svc.snapshot(name)

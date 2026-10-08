@@ -33,6 +33,10 @@ class IndependentSource:
         # Resolve all bindings and freeze one checker/policy before any remote IO.
         targets=self.targets(system); frozen=self.profile(system)
         previous=self.store.node_state(system['id']); version=core_version()
+        skipped=[]
+        if config.get('_scheduled'):
+            skipped=[target for target in targets if not self.store.node_enabled(config,target['node_id'])]
+            targets=[target for target in targets if self.store.node_enabled(config,target['node_id'])]
         controller_cache={}; controller_lock=threading.Lock()
         def collect(target):
             old=previous.get(target['node_id'],{})
@@ -48,7 +52,7 @@ class IndependentSource:
         def collect_group(group): return [collect(t) for t in group]
         with ThreadPoolExecutor(max_workers=4,thread_name_prefix='inspection-node') as pool:
             results=[r for group in pool.map(collect_group,groups.values()) for r in group]
-        observations=[]; coverage=[]; snapshots=[]; states={}
+        observations=[]; coverage=[dict(node_id=t['node_id'],source='Inspection',state='NOT_MONITORED',detail='此節點的排程巡檢已停用') for t in skipped]; snapshots=[]; states={}
         for result in results:
             observations+=result['observations']; coverage+=result['coverage']; snapshots+=result['snapshots']; states[result['node_id']]=result['state']
         # Shared-controller findings use controller identity, not one issue per OS.

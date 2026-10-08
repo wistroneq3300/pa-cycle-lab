@@ -885,7 +885,7 @@ class EngineTests(unittest.TestCase):
         self.assertIn('&lt;script&gt;alert(1)&lt;/script&gt;',page)
         self.assertIn('KNOWN',page)
         self.assertTrue((output/'known_issues.md').exists())
-        console_log = (output/'console.log').read_text()
+        console_log = (output/'console.log').read_text(encoding='utf-8')
         self.assertEqual(console_log.count('| PRE |'), 1)
         self.assertIn('| log clearing | PASS', console_log)
         self.assertEqual(rebuild(output)['state'],'COMPLETE')
@@ -899,7 +899,7 @@ class EngineTests(unittest.TestCase):
             self.run_campaign()
         output=next(self.options.output.iterdir())
         self.assertTrue(output.name.startswith('neutrino_power_cycle_inband_20260929_160000_'),output.name)
-        self.assertIn('Time zone: UTC+8 (local time in Run ID',(output/'console.log').read_text())
+        self.assertIn('Time zone: UTC+8 (local time in Run ID',(output/'console.log').read_text(encoding='utf-8'))
 
     def test_graceful_stop_keeps_current_loop_post(self):
         def callback():
@@ -945,6 +945,9 @@ class EngineTests(unittest.TestCase):
         path=output/'campaign.json'
         data=json.loads(path.read_text())
         data['state']='RUNNING'
+        # Recovery represents a former writer; the active test process must not
+        # be mistaken for a live campaign owner.
+        data['writer_owner']['process_token']='terminated-test-owner'
         write_json(path,data)
         partial=new_record('LOOP 3');partial['loop']=3
         write_json(output/'tray1_n1'/'loop0003'/'report.json',partial)

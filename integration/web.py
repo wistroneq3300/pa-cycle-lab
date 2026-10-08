@@ -41,6 +41,8 @@ if MODE=='synthetic':
 app=pa.app
 app.title='PA Validation Platform - Cycle Integration'
 store=Store()
+from .full_zip import FullZipService
+full_zip_service=FullZipService(store,ARTIFACTS)
 # One ordering for inventory mutation and snapshot/reservation acquisition.
 from . import inventory as inventory_module
 pa._DATA_LOCK=inventory_module.MUTEX
@@ -349,7 +351,10 @@ def download_events(project:str,job_id:str):
                                       'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'})
 
 def public_artifact(path):
-    return not any(p.startswith('.') or any(word in p.lower() for word in ('credential','password','secret','private_key','id_rsa','id_ed25519')) for p in Path(path).parts)
+    value=Path(path)
+    return value.suffix.lower() not in {'.lock','.tmp','.part','.zip'} and not any(
+        p.startswith('.') or any(word in p.lower() for word in ('credential','password','secret','private_key','id_rsa','id_ed25519'))
+        for p in value.parts)
 
 
 def artifact_path(job_id,path):
@@ -359,13 +364,29 @@ def artifact_path(job_id,path):
         raise HTTPException(404,'找不到報告檔案')
     return candidate
 
+def artifact_verdict(path):
+    """Read only bounded structured results; never infer verdicts from log prose."""
+    if path.suffix.lower()!='.json' or path.stat().st_size>2*1024*1024: return None
+    try: payload=json.loads(path.read_text(encoding='utf-8'))
+    except (OSError,ValueError,UnicodeError): return None
+    if not isinstance(payload,dict): return None
+    candidates=[payload.get('health'),payload.get('verdict'),payload.get('status')]
+    summary=payload.get('summary')
+    if isinstance(summary,dict): candidates.extend([summary.get('health'),summary.get('verdict'),summary.get('status')])
+    issues=payload.get('issues')
+    if isinstance(issues,list):
+        severities={str(issue.get('severity','')).upper() for issue in issues if isinstance(issue,dict)}
+        candidates.insert(0,'FAIL' if 'FAIL' in severities else 'WARN' if severities.intersection({'WARN','WARNING'}) else None)
+    return next((str(value).upper() for value in candidates if str(value).upper() in {'PASS','WARN','FAIL'}),None)
+
 @router.get('/api/projects/{project}/cycle/jobs/{job_id}/artifacts')
-def artifacts(project:str,job_id:str):
+def artifacts(project:str,job_id:str,offset:int=Query(0,ge=0),limit:int=Query(200,ge=1,le=500)):
     job=scoped(project,job_id)
     base=ARTIFACTS/job_id
-    files=[p.relative_to(base).as_posix() for p in sorted(base.rglob('*')) if p.is_file()
+    all_files=[p.relative_to(base).as_posix() for p in sorted(base.rglob('*')) if p.is_file()
                      and public_artifact(p.relative_to(base))
                      and p.resolve().is_relative_to(base.resolve())]
+    files=all_files[offset:offset+limit]
     import hashlib
     indexed=store.artifact_index(job_id)
     manifest=[];changed=[]
@@ -385,10 +406,31 @@ def artifacts(project:str,job_id:str):
         if signature()!=before: raise HTTPException(409,'Evidence is being written; retry manifest')
         item=dict(artifact_id=artifact_id,path=path,size=file.stat().st_size,sha256=digest.hexdigest(),
                   engine_hash=job['engine_hash'],
-                  kind='html-report' if file.suffix=='.html' else 'structured-result' if file.suffix=='.json' else 'raw-evidence')
+                  kind='html-report' if file.suffix=='.html' else 'structured-result' if file.suffix=='.json' else 'raw-evidence',
+                  verdict=artifact_verdict(file))
         manifest.append(item);changed.append((before,item))
     store.index_artifacts(job_id,changed)
-    return dict(files=files,manifest=manifest)
+    return dict(files=files,manifest=manifest,offset=offset,limit=limit,total=len(all_files),
+                has_more=offset+limit<len(all_files))
+
+@router.get('/api/projects/{project}/cycle/jobs/{job_id}/full-zip')
+def full_zip_status(project:str,job_id:str):
+    scoped(project,job_id);status=full_zip_service.status(job_id)
+    if status.get('state')=='READY': status['download_url']=f'/api/projects/{project}/cycle/jobs/{job_id}/full-zip/download'
+    return status
+
+@router.post('/api/projects/{project}/cycle/jobs/{job_id}/full-zip',status_code=202)
+def prepare_full_zip(project:str,job_id:str,body:dict):
+    job=scoped(project,job_id)
+    try: status=full_zip_service.request(job,bool(body.get('confirm_inconsistent')))
+    except ValueError as exc: raise HTTPException(409,str(exc))
+    return status
+
+@router.get('/api/projects/{project}/cycle/jobs/{job_id}/full-zip/download')
+def download_full_zip(project:str,job_id:str):
+    scoped(project,job_id);status=full_zip_service.status(job_id);path=full_zip_service.path(job_id)
+    if status.get('state')!='READY' or not path.is_file(): raise HTTPException(409,'Full ZIP 尚未準備完成。')
+    return FileResponse(path,media_type='application/zip',filename=job_id+'.zip',headers={'X-Content-Type-Options':'nosniff'})
 
 @router.get('/api/projects/{project}/cycle/jobs/{job_id}/artifact/{artifact_id}')
 def download_artifact(project:str,job_id:str,artifact_id:str):
@@ -615,6 +657,7 @@ def native_delete(job_id:str,request:Request):
     target=(ARTIFACTS/job_id).resolve()
     if target.is_relative_to(ARTIFACTS.resolve()) and target.name==job_id:
         shutil.rmtree(target,ignore_errors=True)
+    full_zip_service.remove(job_id)
     return {'id':job_id,'project':project,'deleted':True}
 
 @router.post('/api/cycle/runs')
@@ -709,7 +752,11 @@ def validation_overview(request:Request):
         allowed.append(name)
     projects={name:dict(name=name,systems=0,nodes=0,level='L10',issues={'fail':0,'warning':0},
                         validation={'checked':0,'pass':0,'total':0},cycle={'running':0,'completed':0},
-                        monitoring={'reporting':0,'total':0},last_validation=None) for name in allowed}
+                        monitoring={'reporting':0,'total':0},last_validation=None,
+                        inspection={'affected_nodes':0,'fail_count':0,'fail_rate':None,'coverage':0,
+                                    'completed_checks':0,'required_checks':0,'last_inspection':None,
+                                    'health_status':'UNKNOWN'},_inspection_fail_nodes=set(),_inspection_valid_nodes=set(),
+                        _inspection_monitored_nodes=set()) for name in allowed}
     targets=[target for target in node_inventory(pa) if target.get('project') in projects and target.get('node_id')]
     targets_by_node={target['node_id']:target for target in targets}
     bindings_by_node={target['node_id']:target.get('revision') for target in targets}
@@ -727,10 +774,22 @@ def validation_overview(request:Request):
         active=inspection.store.active_issue_state(system['id'])
         canonical_ids={target['node_id'] for target in targets if target.get('chassis_id')==system['id'] and target.get('project')==system.get('project')}
         successful=inspection.store.successful_nodes(system['id'],bindings_by_node)
+        coverage_nodes=inspection.store.coverage_nodes(system['id'],bindings_by_node,overview_at)
         checked_ids=canonical_ids.intersection(successful)
         issue_nodes=active['node_ids']
         project['issues']['fail']+=active['counts']['fail']
         project['issues']['warning']+=active['counts']['warning']
+        project['inspection']['fail_count']+=active['counts']['fail']
+        project['_inspection_fail_nodes'].update(active['node_ids_by_severity']['fail'].intersection(canonical_ids))
+        for node_id,data in coverage_nodes.items():
+            if node_id not in canonical_ids: continue
+            project['inspection']['completed_checks']+=data['completed']
+            project['inspection']['required_checks']+=data['required']
+            if data['enabled']: project['_inspection_monitored_nodes'].add(node_id)
+            if data['valid']: project['_inspection_valid_nodes'].add(node_id)
+            completed_at=data.get('last_inspection')
+            if completed_at and (project['inspection']['last_inspection'] is None or completed_at>project['inspection']['last_inspection']):
+                project['inspection']['last_inspection']=completed_at
         for issue in active['issues']:
             severity='FAIL' if issue.get('severity')=='FAIL' else 'WARNING'
             affected=set(issue.get('affected_nodes') or [])
@@ -761,11 +820,27 @@ def validation_overview(request:Request):
         elif job.get('state')=='COMPLETE': project['cycle']['completed']+=1
         recent.append({key:job.get(key) for key in ('id','project','state','health','created_at','updated_at')})
     rows=list(projects.values())
+    for row in rows:
+        inspection_row=row['inspection']; valid=row.pop('_inspection_valid_nodes'); fail_nodes=row.pop('_inspection_fail_nodes'); monitored=row.pop('_inspection_monitored_nodes')
+        inspection_row['affected_nodes']=len(fail_nodes)
+        inspection_row['coverage']=round(100*inspection_row['completed_checks']/inspection_row['required_checks'],1) if inspection_row['required_checks'] else 0
+        inspection_row['fail_rate']=round(100*len(fail_nodes.intersection(valid))/len(valid),1) if valid else None
+        if inspection_row['fail_count']: inspection_row['health_status']='FAIL'
+        elif row['issues']['warning']: inspection_row['health_status']='WARN'
+        elif not monitored: inspection_row['health_status']='NOT_MONITORED'
+        elif not valid: inspection_row['health_status']='UNKNOWN'
+        else: inspection_row['health_status']='PASS'
+        row['inspection_priority']=[inspection_row['fail_count'],inspection_row['affected_nodes'],inspection_row['fail_rate'] or 0,100-inspection_row['coverage']]
+    rows.sort(key=lambda row:tuple(-value for value in row['inspection_priority'])+(row['name'].lower(),))
     totals=dict(projects=len(rows),systems=sum(row['systems'] for row in rows),nodes=sum(row['nodes'] for row in rows),
                 issues={'fail':sum(row['issues']['fail'] for row in rows),'warning':sum(row['issues']['warning'] for row in rows)},
                 validation={'checked':sum(row['validation']['checked'] for row in rows),'pass':sum(row['validation']['pass'] for row in rows),'total':sum(row['validation']['total'] for row in rows)},
                 cycle={'running':sum(row['cycle']['running'] for row in rows),'completed':sum(row['cycle']['completed'] for row in rows)},
-                monitoring={'reporting':sum(row['monitoring']['reporting'] for row in rows),'total':sum(row['monitoring']['total'] for row in rows)})
+                monitoring={'reporting':sum(row['monitoring']['reporting'] for row in rows),'total':sum(row['monitoring']['total'] for row in rows)},
+                inspection={'affected_nodes':sum(row['inspection']['affected_nodes'] for row in rows),
+                            'fail_count':sum(row['inspection']['fail_count'] for row in rows),
+                            'completed_checks':sum(row['inspection']['completed_checks'] for row in rows),
+                            'required_checks':sum(row['inspection']['required_checks'] for row in rows)})
     issue_rows.sort(key=lambda issue:(0 if issue['severity']=='FAIL' else 1,-(issue.get('last_seen_at') or 0)))
     recent.sort(key=lambda job:job.get('updated_at') or job.get('created_at') or 0,reverse=True)
     return {'generated_at':overview_at,'totals':totals,'projects':rows,'issues':issue_rows[:50],'recent_runs':recent[:10]}
