@@ -26,7 +26,7 @@
     };
     return [
       ['CPU', cpuCount != null ? quantity(cpuCount, 'socket') : '尚未取得', reportedText(hw.cpu?.model) || '來源未回報 CPU 型號'],
-      ['MEMORY', dimmCount != null ? quantity(dimmCount, 'DIMM') : (reportedText(os.mem) || '尚未取得'), [dimmCount != null ? quantity(dimmCount, 'DIMM') : '', ...(Array.isArray(hw.dimm?.types) ? hw.dimm.types : []), ...(Array.isArray(hw.dimm?.manufacturers) ? hw.dimm.manufacturers : [])].filter(Boolean).join(' · ') || '來源未回報 DIMM 配置'],
+      ['MEMORY', reportedText(os.mem) || (dimmCount != null ? quantity(dimmCount, 'DIMM') : '尚未取得'), [dimmCount != null ? quantity(dimmCount, 'DIMM') : '', ...(Array.isArray(hw.dimm?.types) ? hw.dimm.types : []), ...(Array.isArray(hw.dimm?.manufacturers) ? hw.dimm.manufacturers : [])].filter(Boolean).join(' · ') || '來源未回報 DIMM 配置'],
       list('ssd', 'STORAGE', 'drive', items => [...new Set(items.map(item => reportedText(item.model)).filter(Boolean))].join(' / ') || '已回報儲存裝置，型號未提供'),
       list('nic', 'NETWORK', 'entry', items => String(items[0] || '').replace(/^[\da-f:.]+\s+/i, '') || '已回報網路裝置'),
       list('gpu', 'GPU', 'GPU', items => [...new Set(items.map(item => reportedText(item.name)).filter(Boolean))].join(' / ') || '已回報 GPU，型號未提供')
