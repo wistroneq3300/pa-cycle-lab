@@ -1,8 +1,9 @@
 {
-  "tested_sha": "ee8fcd57a6c5914c55a07c63f1b33003cefa3c27",
-  "program_ref": "ee8fcd57a6c5914c55a07c63f1b33003cefa3c27+working-tree",
-  "working_tree_modified": true,
-  "base": "http://127.0.0.1:9196",
+  "tested_sha": "fe8208867144b28f4e057606f5e2699b228a8056",
+  "program_ref": "fe8208867144b28f4e057606f5e2699b228a8056",
+  "baseline": true,
+  "working_tree_modified": false,
+  "base": "http://127.0.0.1:9197",
   "mode": "loopback synthetic fixtures; no hardware requests",
   "round": "round1",
   "viewports": [
@@ -25,8 +26,8 @@
     ]
   },
   "owner_requests": [
-    "GET /static/css/inspection-refinement.css?v=20261008-director-observe1",
-    "GET /static/js/inspection-evidence.js?v=20261008-director-truth1",
+    "GET /static/css/inspection-refinement.css?v=20261005b",
+    "GET /static/js/inspection-evidence.js?v=20261005b",
     "GET /api/machine/chassis-01/inspection",
     "GET /api/telemetry/systems/chassis-01/nodes",
     "GET /api/machine/chassis-01/telemetry/analyze?minutes=60&node_id=node-ready",
