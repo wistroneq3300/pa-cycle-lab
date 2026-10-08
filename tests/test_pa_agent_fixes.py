@@ -116,6 +116,21 @@ class IntentTests(unittest.TestCase):
         self.assertEqual(classify_user_intent(""), "question")
         self.assertFalse(is_approval(""))
 
+    def test_go_inside_sentence_is_go(self):
+        # Regression: "那你先GO吧" was classified as a question, so a real go-ahead
+        # inside a sentence never started execution.
+        for t in ("那你先GO吧", "好, 開始吧", "please go ahead", "那就執行吧", "OK 可以"):
+            self.assertEqual(classify_user_intent(t), "go", t)
+
+    def test_go_substring_of_word_is_not_go(self):
+        # The widened match must stay word-bounded so ordinary words are untouched.
+        for t in ("good morning", "logo design", "google it", "runtime error"):
+            self.assertEqual(classify_user_intent(t), "question", t)
+
+    def test_negated_or_questioned_go_stays_question(self):
+        for t in ("不要GO吧", "先不要執行", "要不要GO?", "為什麼要GO"):
+            self.assertEqual(classify_user_intent(t), "question", t)
+
 
 # --------------------------------------------------------------------------
 # R5 — classification gates policy
@@ -403,6 +418,272 @@ class SyncTests(unittest.TestCase):
         # It must have ticked at least 4 times (i.e. not stopped after the first).
         self.assertGreaterEqual(stub.n, 4)
         self.tmp.cleanup()
+
+
+    def test_sync_does_not_stop_early_while_running(self):
+        # Regression: a run stuck (stale) at RUNNING because the sync thread gave up
+        # silently swallowed the engineer's GO. The loop must keep ingesting while
+        # the status is RUNNING (no idle-stop), and only settle once it changes.
+        from integration import agent_routes as routes
+
+        tmp = tempfile.TemporaryDirectory()
+        store = AgentRunStore(path=os.path.join(tmp.name, 'stale.sqlite3'))
+        store.create_run(_ctx())
+
+        class StubGateway:
+            def __init__(self):
+                self.n = 0
+
+            def ingest(self, run_id):
+                self.n += 1
+                # Stay RUNNING for 8 ticks, then finish.
+                store.update_state(run_id, status="RUNNING" if self.n < 8 else "DONE")
+                return {}
+
+        old = routes._SYNC_INTERVAL
+        routes._SYNC_INTERVAL = 0.01
+        try:
+            stub = StubGateway()
+            routes._sync_run_loop(store, stub, "run-1")
+        finally:
+            routes._SYNC_INTERVAL = old
+            tmp.cleanup()
+        # Must not have stopped after _SYNC_IDLE_STOP ticks while still RUNNING.
+        self.assertGreaterEqual(stub.n, 8)
+
+
+class StaleRunningGoTests(_Base):
+    """A GO must not be silently dropped when the run's status is stale-RUNNING.
+
+    The route converges the status by calling ``gateway.ingest`` before applying
+    the P0-4 "GO while RUNNING is ignored" gate. This test proves that primitive:
+    ingesting a finished turn flips a stale RUNNING run to a non-RUNNING status,
+    so the gate would then let the GO through to ``run_execution``.
+    """
+
+    def test_ingest_converges_stale_running(self):
+        store = self.store
+        store.create_run(_ctx())
+        store.update_state("run-1", conversation_ref="conv-1", status="RUNNING")
+
+        events = [
+            {"kind": "ConversationStateUpdateEvent", "key": "execution_status",
+             "value": "finished"},
+            {"kind": "MessageEvent", "source": "agent",
+             "llm_message": {"role": "assistant",
+                             "content": [{"type": "text", "text": "plan done"}]},
+             "id": "ev-finish"},
+        ]
+        gw = AgentGateway(store, base_url="http://unused",
+                          client=_StubEventsClient(events))
+        gw.ingest("run-1")
+        # No FinishAction in the turn, so ``finished`` settles to WAITING_FOR_USER,
+        # never staying RUNNING — the GO gate would accept the next command.
+        self.assertNotEqual(store.get_run("run-1").get("status"), "RUNNING")
+
+
+class _StubEventsClient:
+    def __init__(self, events):
+        self._events = events
+
+    def get(self, url, params=None):
+        return _FakeResponse({"items": self._events})
+
+    def post(self, url, json=None):
+        return _FakeResponse({"id": "conv-1"})
+
+
+# --------------------------------------------------------------------------
+# R8/R9b — a question turn still carries the image to the vision model
+# --------------------------------------------------------------------------
+class AskAgentImageTests(_Base):
+    def _run_with_image(self):
+        store = self.store
+        store.create_run(_ctx())
+        store.update_state("run-1", conversation_ref="conv-1", status="WAITING_FOR_USER")
+        folder = os.path.join(self.tmp.name, "att")
+        os.makedirs(folder, exist_ok=True)
+        path = os.path.join(folder, "spec.png")
+        with open(path, "wb") as fh:
+            fh.write(b"\x89PNG\r\n\x1a\n fake")
+        store.add_attachment("run-1", attachment_id="a1", name="spec.png",
+                             mime="image/png", size=12, kind="image", stored_path=path,
+                             extracted_text="", vision_supported=True, status="ready",
+                             error="")
+
+    def test_ask_agent_attaches_image_parts(self):
+        self._run_with_image()
+        self.gateway.ask_agent("run-1", "你看的到圖嗎?")
+        # Find the ask_agent POST and confirm it carried image content.
+        url, payload = self.client.calls[-1]
+        self.assertIn("ask_agent", url)
+        self.assertEqual(payload["question"], "你看的到圖嗎?")
+        content = payload.get("content") or []
+        self.assertTrue(any(p.get("type") == "image" for p in content),
+                        "image part missing from ask_agent payload")
+
+    def test_ask_agent_without_image_stays_text_only(self):
+        store = self.store
+        store.create_run(_ctx())
+        store.update_state("run-1", conversation_ref="conv-1", status="WAITING_FOR_USER")
+        self.gateway.ask_agent("run-1", "hello")
+        url, payload = self.client.calls[-1]
+        self.assertNotIn("content", payload)
+
+    def test_send_user_message_carries_image_parts(self):
+        # The image-question path relies on this: send_user_message must embed
+        # the uploaded image so the vision model can actually read it (ask_agent
+        # silently drops image content, its schema only has `question`).
+        import base64
+        self.store.create_run(_ctx())
+        self.store.update_state("run-1", conversation_ref="conv-1", status="WAITING_FOR_USER")
+        path = os.path.join(self.tmp.name, "shot.png")
+        with open(path, "wb") as fh:
+            fh.write(base64.b64decode(
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="))
+        self.store.add_attachment("run-1", attachment_id="i1", name="shot.png",
+                                  mime="image/png", size=68, kind="image",
+                                  stored_path=path, vision_supported=True, status="ready")
+        self.gateway._ensure_profile = lambda *a, **k: None
+        self.gateway.send_user_message("run-1", "看的到圖嗎?")
+        url, payload = self.client.calls[-1]
+        types = [p.get("type") for p in payload["content"]]
+        self.assertIn("image", types)
+        self.assertTrue(payload.get("run"))
+
+
+# --------------------------------------------------------------------------
+# R13 — vision availability is derived from the wired profile (Bug: image
+#       "not received" was caused by a bare env flag defaulting to False).
+# --------------------------------------------------------------------------
+class VisionAvailabilityTests(unittest.TestCase):
+    def test_vision_available_true_when_profile_declares_supports_vision(self):
+        tmp = tempfile.TemporaryDirectory()
+        try:
+            prof = os.path.join(tmp.name, "profiles")
+            os.makedirs(prof)
+            with open(os.path.join(prof, "qwen3-vl-32b.json"), "w") as fh:
+                fh.write('{"capability_overrides": {"supports_vision": true}}')
+            g = AgentGateway(AgentRunStore(path=os.path.join(tmp.name, "r.sqlite3")),
+                             settings_dir=tmp.name, llm_profile="qwen3.8-27b")
+            self.assertTrue(g.vision_available())
+        finally:
+            tmp.cleanup()
+
+    def test_vision_available_false_when_no_supports_vision(self):
+        tmp = tempfile.TemporaryDirectory()
+        try:
+            prof = os.path.join(tmp.name, "profiles")
+            os.makedirs(prof)
+            with open(os.path.join(prof, "qwen3-vl-32b.json"), "w") as fh:
+                fh.write('{"capability_overrides": {}}')
+            g = AgentGateway(AgentRunStore(path=os.path.join(tmp.name, "r.sqlite3")),
+                             settings_dir=tmp.name)
+            self.assertFalse(g.vision_available())
+        finally:
+            tmp.cleanup()
+
+    def test_vision_available_false_when_profile_missing(self):
+        tmp = tempfile.TemporaryDirectory()
+        try:
+            g = AgentGateway(AgentRunStore(path=os.path.join(tmp.name, "r.sqlite3")),
+                             settings_dir=tmp.name)
+            self.assertFalse(g.vision_available())
+        finally:
+            tmp.cleanup()
+
+
+class ImageInstructionTests(_Base):
+    def test_vision_image_gets_positive_note_and_no_false_caveat(self):
+        self.store.create_run(_ctx())
+        self.store.add_attachment("run-1", attachment_id="i1", name="rack.png",
+                                  mime="image/png", size=10, kind="image",
+                                  stored_path="/tmp/p", vision_supported=True,
+                                  status="ready")
+        ctx = self.gateway._context_with_extras(self.store.get_run("run-1"))
+        text = self.gateway.build_instruction(ctx)
+        self.assertIn("工程師已附上圖片", text)
+        self.assertIn("rack.png", text)
+        self.assertNotIn("無法直接解析圖片", text)
+
+    def test_nonvision_image_keeps_honest_caveat(self):
+        self.store.create_run(_ctx())
+        self.store.add_attachment("run-1", attachment_id="i1", name="rack.png",
+                                  mime="image/png", size=10, kind="image",
+                                  stored_path="/tmp/p", vision_supported=False,
+                                  status="ready")
+        ctx = self.gateway._context_with_extras(self.store.get_run("run-1"))
+        text = self.gateway.build_instruction(ctx)
+        self.assertIn("無法直接解析圖片", text)
+        self.assertNotIn("工程師已附上圖片", text)
+
+
+# --------------------------------------------------------------------------
+# R14 — output files are English + written to the DUT path
+# --------------------------------------------------------------------------
+class OutputRuleTests(_Base):
+    def _tc(self):
+        return {"code": "Wistron-Performance CPU-00001-V003", "procedure": "p"}
+
+    def _target(self):
+        return {"os_ip": "10.0.0.9", "os_user": "root3", "os_port": 22,
+                "os_password": "pw", "project": "PA-cycle", "node_id": "n1"}
+
+    def test_instruction_requires_english_files(self):
+        text = self.gateway.build_instruction(_ctx(tc=self._tc(), target=self._target()))
+        self.assertIn("一律使用英文", text)
+
+    def test_instruction_names_dut_output_dir(self):
+        text = self.gateway.build_instruction(_ctx(tc=self._tc(), target=self._target()))
+        self.assertIn("/home/PAagent/PA-cycle/Wistron-Performance CPU-00001-V003", text)
+
+    def test_no_output_dir_without_project_or_code(self):
+        self.assertEqual(self.gateway._dut_output_dir({"os_ip": "1.2.3.4"}, {"code": "C1"}), "")
+        self.assertEqual(self.gateway._dut_output_dir(self._target(), {}), "")
+
+    def test_output_dir_sanitises_slashes(self):
+        got = self.gateway._dut_output_dir(
+            {"os_ip": "1.2.3.4", "project": "a/b"}, {"code": "c/d"})
+        self.assertEqual(got, "/home/PAagent/a_b/c_d")
+
+    def test_execution_instruction_carries_output_rules(self):
+        self.store.create_run(_ctx(tc=self._tc(), target=self._target()))
+        run = self.store.get_run("run-1")
+        self.store.update_state("run-1", conversation_ref="conv-1", status="WAITING_FOR_USER")
+        self.gateway._ensure_profile = lambda *a, **k: None
+        self.gateway.run_execution("run-1")
+        url, payload = self.client.calls[-1]
+        text = payload["content"][0]["text"]
+        self.assertIn("/home/PAagent/PA-cycle/", text)
+        self.assertIn("一律使用英文", text)
+
+
+# --------------------------------------------------------------------------
+# R15 — user turn attachments are persisted + returned so the drawer can render
+#       the uploaded image inside the conversation.
+# --------------------------------------------------------------------------
+class MessageAttachmentTests(_Base):
+    def test_add_message_persists_and_lists_attachments(self):
+        self.store.create_run(_ctx())
+        atts = [{"attachment_id": "i1", "name": "rack.png", "kind": "image"}]
+        self.store.add_message("run-1", role="user", text="看這張", attachments=atts)
+        msgs = self.store.list_messages("run-1")
+        self.assertEqual(msgs[-1]["attachments"], atts)
+
+    def test_messages_without_attachments_default_to_empty_list(self):
+        self.store.create_run(_ctx())
+        self.store.add_message("run-1", role="agent", text="hi")
+        msgs = self.store.list_messages("run-1")
+        self.assertEqual(msgs[-1]["attachments"], [])
+
+    def test_claim_preserves_attachments(self):
+        self.store.create_run(_ctx())
+        atts = [{"attachment_id": "i1", "name": "rack.png", "kind": "image"}]
+        self.store.add_message("run-1", role="user", text="看這張", attachments=atts)
+        self.store.claim_pending_user_message("run-1", "看這張", "evt-9")
+        msgs = self.store.list_messages("run-1")
+        self.assertEqual(msgs[-1]["attachments"], atts)
+        self.assertEqual(len(msgs), 1)
 
 
 if __name__ == '__main__':

@@ -20,6 +20,7 @@ import time
 import uuid
 
 from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from . import targets as targets_module
@@ -68,7 +69,7 @@ def _sync_run_loop(store, gateway, run_id):
     last_status = None
     for _ in range(_SYNC_MAX_ITERS):
         try:
-            summary = gateway.ingest(run_id)
+            gateway.ingest(run_id)
         except Exception:  # agent-server blip — skip this tick, keep trying
             time.sleep(_SYNC_INTERVAL)
             continue
@@ -78,9 +79,17 @@ def _sync_run_loop(store, gateway, run_id):
         status = run.get("status")
         if status in _TERMINAL_STATUSES or status == STATUS_WAITING_FOR_USER:
             return
-        # If the agent went quiet while still RUNNING, stop after a few ticks so
-        # a stuck run does not pin a thread forever. A status change resets it.
-        if status == last_status:
+        # While the run is still RUNNING the agent may be mid-execution (a long
+        # FIO run talks once and then works for minutes), so keep ingesting until
+        # it settles. Do NOT stop just because the status has not changed yet —
+        # that stranded runs at RUNNING, which then silently swallowed the
+        # engineer's GO (post_message's P0-4 gate). Only stop once the run has
+        # left RUNNING and gone idle for a few ticks, so a wedged non-RUNNING run
+        # does not pin a thread forever.
+        if status == "RUNNING":
+            idle = 0
+            last_status = status
+        elif status == last_status:
             idle += 1
             if idle >= _SYNC_IDLE_STOP:
                 return
@@ -88,6 +97,39 @@ def _sync_run_loop(store, gateway, run_id):
             idle = 0
             last_status = status
         time.sleep(_SYNC_INTERVAL)
+
+
+def _ask_with_images_loop(store, gateway, run_id, text, images, *, max_iters=None):
+    """Deliver an image question once the agent is free, then collect the reply.
+
+    An image question must ride the message endpoint (ask_agent drops images),
+    but sending it while the agent is still mid-turn — typically while it is
+    writing the entry plan — folds the picture into that turn and the "can you
+    see this?" question is answered by the plan instead. So wait for the run to
+    settle first, then send the turn and sync the answer.
+    """
+    budget = max_iters if max_iters is not None else _SYNC_MAX_ITERS
+    # 1) wait out any in-progress turn (bounded so a stuck run cannot hang here)
+    for _ in range(budget):
+        run = store.get_run(run_id)
+        if run is None:
+            return
+        if run.get("status") != "RUNNING":
+            break
+        try:
+            gateway.ingest(run_id)
+        except Exception:
+            pass
+        time.sleep(_SYNC_INTERVAL)
+    before = store.list_messages(run_id)
+    min_seq = max([m.get("seq", 0) for m in before] or [0])
+    # 2) send the question with only this turn's images
+    try:
+        gateway.send_user_message(run_id, text, attachments=images)
+    except Exception:
+        return
+    # 3) collect the reply like any other turn
+    _sync_messages_loop(store, gateway, run_id, min_seq=min_seq)
 
 
 def _sync_messages_loop(store, gateway, run_id, *, min_seq=0, max_iters=None):
@@ -205,6 +247,18 @@ def install(app, pa, store_getter=None):
     store = AgentRunStore()
     gateway = AgentGateway(store)
 
+    # Whether uploaded images can actually be read by the agent is a property of
+    # the wired vision profile, not a bare env flag. Deriving it from the gateway
+    # (with an explicit env override for forcing it off) stops the UI/instruction
+    # from claiming "the model cannot parse images" when a vision model is in fact
+    # available -- that false caveat is what made the agent tell the engineer it
+    # never received the screenshot.
+    global _VISION_ENABLED
+    _VISION_ENABLED = gateway.vision_available()
+    _override = os.environ.get("PA_AGENT_VISION_ENABLED")
+    if _override is not None:
+        _VISION_ENABLED = _override.strip().lower() in {"1", "true", "yes"}
+
     def _library():
         library = pa._load_testlib()
         if library is None:
@@ -258,6 +312,26 @@ def install(app, pa, store_getter=None):
             raise HTTPException(404, "unknown run_id")
         return {"ok": True, "context": run["context"],
                 "context_verified": store.verify_context(run_id)}
+
+    @router.delete("/api/agent/runs/{run_id}")
+    def delete_run(run_id: str):
+        """Delete a run's record: conversation, execution log and uploaded files.
+
+        This clears ONLY the PA-agent bookkeeping for the run — the chat turns,
+        the run state/commands/evidence and the files the engineer uploaded to
+        the drawer (stored under the server's attachment dir). It deliberately
+        does NOT touch anything on the DUT: the test logs the agent wrote under
+        ``/home/PAagent/<project>/<case>/`` stay exactly where they are.
+
+        Why: a run left in WAITING_FOR_USER keeps resuming on reopen, so a later
+        engineer sees a previous person's conversation instead of a clean start.
+        Deleting the run lets the next open create a fresh one.
+        """
+        if store.get_run(run_id) is None:
+            raise HTTPException(404, "unknown run_id")
+        _cleanup_expired_attachments(run_id)
+        store.delete_run(run_id)
+        return {"ok": True, "run_id": run_id, "deleted": True}
 
     @router.post("/api/agent/runs/{run_id}/start")
     def start_run(run_id: str, req: AgentRunStartReq):
@@ -361,15 +435,30 @@ def install(app, pa, store_getter=None):
         status = run.get("status") or "PENDING"
 
         # State-aware gating (P0-4). Only WAITING_FOR_USER accepts a go; a GO
-        # arriving while RUNNING must not launch a second execution.
+        # arriving while RUNNING must not launch a second execution. But a run can
+        # be *stale*-RUNNING: the agent already finished its plan turn (the
+        # agent-server reports "finished") while our background sync missed it, so
+        # the status here is behind reality. Converge first by ingesting pending
+        # events, else a legitimate GO is silently swallowed as "ignored_running".
         if intent == "go" and status == "RUNNING":
-            store.add_message(run_id, role="user", text=text)
-            return {"ok": True, "run_id": run_id, "intent": "ignored_running",
-                    "messages": store.list_messages(run_id)}
+            try:
+                gateway.ingest(run_id)
+            except Exception:
+                pass
+            run = store.get_run(run_id) or run
+            status = run.get("status") or status
+            if status == "RUNNING":
+                store.add_message(run_id, role="user", text=text,
+                                  attachments=store.list_unconsumed_attachments(run_id))
+                return {"ok": True, "run_id": run_id, "intent": "ignored_running",
+                        "messages": store.list_messages(run_id)}
 
         before = store.list_messages(run_id)
         min_seq = max([m.get("seq", 0) for m in before] or [0])
-        store.add_message(run_id, role="user", text=text)
+        # Claim only the attachments uploaded since the last turn, so the image
+        # renders on the bubble that carried it instead of every later bubble.
+        turn_atts = store.list_unconsumed_attachments(run_id)
+        store.add_message(run_id, role="user", text=text, attachments=turn_atts)
 
         if intent == "cancel":
             store.record_approval(run_id, {"kind": "cancel", "status": "approved",
@@ -393,12 +482,28 @@ def install(app, pa, store_getter=None):
             # constraint stated mid-discussion is not lost) and answer it without
             # an agent loop.
             _record_supplemental(store, run_id, run, text)
-            try:
-                answer = gateway.ask_agent(run_id, text)
-            except Exception as exc:  # agent-server unreachable / rejected
-                raise HTTPException(502, f"agent gateway failed: {exc}")
-            if answer:
-                store.add_message(run_id, role="agent", text=answer)
+            turn_images = [a for a in turn_atts if a.get("kind") == "image"]
+            if turn_images:
+                # The ask_agent endpoint accepts only plain text (its schema has a
+                # single ``question`` field) and silently drops image parts, so a
+                # "can you see this picture?" turn would always answer "no image"
+                # even though the upload succeeded. Route image questions through
+                # the message endpoint, whose SendMessageRequest carries text +
+                # image content — the same path execution turns use. The reply
+                # arrives via the sync loop, exactly like a GO turn. Only THIS
+                # turn's uploads ride along, so the agent reads the new picture
+                # rather than every image ever uploaded to the run.
+                threading.Thread(
+                    target=_ask_with_images_loop, args=(store, gateway, run_id, text, turn_images),
+                    name=f"pa-agent-img-{run_id}", daemon=True,
+                ).start()
+            else:
+                try:
+                    answer = gateway.ask_agent(run_id, text)
+                except Exception as exc:  # agent-server unreachable / rejected
+                    raise HTTPException(502, f"agent gateway failed: {exc}")
+                if answer:
+                    store.add_message(run_id, role="agent", text=answer)
 
         return {"ok": True, "run_id": run_id, "intent": intent,
                 "messages": store.list_messages(run_id)}
@@ -459,6 +564,30 @@ def install(app, pa, store_getter=None):
             raise HTTPException(404, "unknown run_id")
         return {"ok": True, "attachments": store.list_attachments(run_id)}
 
+    @router.get("/api/agent/runs/{run_id}/attachments/unconsumed")
+    def list_unconsumed_attachments(run_id: str):
+        """Uploads not yet carried by any turn — the composer's preview strip.
+
+        This is what the engineer still has pending to send. Once a turn sends
+        them they drop out, so the strip never re-shows a picture that already
+        rode an earlier message.
+        """
+        if store.get_run(run_id) is None:
+            raise HTTPException(404, "unknown run_id")
+        return {"ok": True, "attachments": store.list_unconsumed_attachments(run_id)}
+
+    @router.get("/api/agent/runs/{run_id}/attachments/{attachment_id}/raw")
+    def get_attachment_raw(run_id: str, attachment_id: str):
+        """Serve an attachment's bytes so the drawer can render an uploaded image."""
+        meta = store.get_attachment(run_id, attachment_id)
+        if meta is None:
+            raise HTTPException(404, "unknown attachment")
+        path = meta.get("stored_path")
+        if not path or not os.path.isfile(path):
+            raise HTTPException(404, "attachment file missing")
+        return FileResponse(path, media_type=meta.get("mime") or "application/octet-stream",
+                            filename=meta.get("name") or attachment_id)
+
     @router.delete("/api/agent/runs/{run_id}/attachments/{attachment_id}")
     def delete_attachment(run_id: str, attachment_id: str):
         meta = store.get_attachment(run_id, attachment_id)
@@ -495,8 +624,10 @@ _TEXT_MIMES = {
 }
 _TEXT_EXTS = {".txt", ".log", ".md", ".json", ".csv"}
 _IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp"}
-# The current PA model (qwen3.8-27b) has no vision; set True only when a
-# vision-capable profile is wired so the UI can stop showing the caveat.
+# Whether the wired agent can actually read image attachments. This is set for
+# real inside install() from the vision profile (TRUE when a supports_vision
+# profile is configured); PA_AGENT_VISION_ENABLED can still force it on/off.
+# Defaults to False only until install() runs, so an import-time read is safe.
 _VISION_ENABLED = os.environ.get("PA_AGENT_VISION_ENABLED", "").lower() in {"1", "true", "yes"}
 
 

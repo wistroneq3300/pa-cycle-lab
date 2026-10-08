@@ -28,6 +28,7 @@ from __future__ import annotations
 import base64
 import json
 import os
+import re
 
 # OpenHands execution status -> PA run status. ``waiting_for_confirmation`` and
 # ``paused`` both mean the run is blocked on an operator, i.e. WAITING_FOR_USER.
@@ -131,12 +132,35 @@ def classify_user_intent(text):
     if negated or interrogative:
         return "question"
 
+    # A sentence that *contains* a go-ahead as a whole word/phrase, e.g.
+    # "那你先GO吧" / "好, 開始吧" / "please go ahead". The keyword must be a
+    # standalone token (word boundary for latin, or a known CJK phrase) so
+    # "good" / "logo" / "google" never match. Negation/interrogation already
+    # returned above, so "不要GO吧" / "要不要GO?" stay questions.
+    if _contains_go_token(lowered):
+        return "go"
+
     # Explicit *imperative* rerun ("請重跑一次" / "重新執行這條測試") — only when
     # a rerun verb is present and no negation/question guard tripped.
     if any(k in lowered for k in _RERUN_EXACT):
         return "rerun"
 
     return "question"
+
+
+# Latin go tokens that must match on a word boundary so they cannot be a
+# substring of another word ("go" in "logo"/"good", "run" in "runtime").
+_GO_LATIN_RE = re.compile(r"(?<![a-z])(ok|okay|go|run|yes|y|approve|approved)(?![a-z])")
+# CJK go phrases. These are matched as substrings because they carry no word
+# boundaries; they are specific enough not to appear inside unrelated words.
+_GO_CJK = ("開始", "开始", "執行", "执行", "確認執行", "确认执行", "同意", "可以")
+
+
+def _contains_go_token(lowered):
+    """True when *lowered* contains a standalone go-ahead token."""
+    if _GO_LATIN_RE.search(lowered):
+        return True
+    return any(k in lowered for k in _GO_CJK)
 
 
 def is_approval(text):
@@ -266,6 +290,24 @@ class AgentGateway:
             llm["native_tool_calling"] = False
         return llm
 
+    def vision_available(self):
+        """Return True when a vision-capable profile is actually wired up.
+
+        Images can only be read if the agent runs on a model that declares
+        ``supports_vision``. This inspects the configured vision profile file so
+        the UI/instruction can honestly say "the image will be read" instead of
+        always emitting a caveat that the model cannot parse images (which made
+        the agent tell the engineer it never received the screenshot).
+        """
+        path = os.path.join(self.settings_dir, "profiles", f"{self.vision_profile}.json")
+        try:
+            with open(path, encoding="utf-8") as fh:
+                data = json.load(fh)
+        except (OSError, ValueError):
+            return False
+        caps = data.get("capability_overrides") or {}
+        return bool(caps.get("supports_vision")) and not data.get("disable_vision")
+
     def _profile_for(self, run):
         """Return the LLM profile a run should use right now.
 
@@ -291,19 +333,23 @@ class AgentGateway:
         response.raise_for_status()
         return True
 
-    def _image_parts(self, run):
+    def _image_parts(self, run, attachments=None):
         """Build image content blocks for a run's image attachments.
 
         The vision model can only read an image if it is sent as an image part,
         so images are embedded as base64 data URLs (the agent-server runs with a
         different HOME, so a local file path would not resolve). Files that no
         longer exist are skipped rather than failing the send.
+
+        ``attachments`` narrows the set to the current turn's uploads; when it is
+        omitted every image on the run is used (execution turns want them all).
         """
         parts = []
-        try:
-            attachments = self.store.list_attachments(run["run_id"]) if run else []
-        except Exception:
-            attachments = []
+        if attachments is None:
+            try:
+                attachments = self.store.list_attachments(run["run_id"]) if run else []
+            except Exception:
+                attachments = []
         for att in attachments:
             if att.get("kind") != "image":
                 continue
@@ -500,7 +546,31 @@ class AgentGateway:
             "- 同類證據盡量合併、避免產生大量碎檔；原始輸出若很長，摘要重點即可。",
             "- 產出一個 test_record 摘要檔，說明完成了哪些步驟、哪些沒完成、哪些被跳過、",
             "  哪些發生錯誤，以及限制（limitations）。",
+            "",
+            "【紀錄檔案語言：一律使用英文】",
+            "- 你寫入檔案的所有內容（test_record、log 摘要、註解、欄位名稱、說明文字）",
+            "  一律使用英文；檔名也必須是英文。",
+            "- 只有「對話回覆」使用繁體中文；寫進檔案的內容不要在中文與英文之間混用。",
+            "- 指令輸出、原始 log、程式碼可保留原文，不需翻譯。",
+            "",
         ]
+        out_dir = self._dut_output_dir(target, tc)
+        if out_dir:
+            ip = (target or {}).get("os_ip") or ""
+            user = (target or {}).get("os_user") or "root"
+            port = (target or {}).get("os_port") or 22
+            lines += [
+                "【紀錄檔案輸出位置（DUT 上的固定路徑）】",
+                "所有產出的紀錄檔一律寫入 DUT 上的下列目錄（請先在 DUT 上建立目錄再寫入）：",
+                f"  {out_dir}",
+                "寫入範例（在 DUT 上執行，路徑含空白請用引號）：",
+                f"  sshpass -p '<password>' ssh -o StrictHostKeyChecking=no -p {port} "
+                f"{user}@{ip} 'mkdir -p \"{out_dir}\"'",
+                f"  sshpass -p '<password>' ssh -o StrictHostKeyChecking=no -p {port} "
+                f"{user}@{ip} 'cat > \"{out_dir}/test_record.md\"' <<'EOF'  # 內容一律英文",
+                "不要寫到本機工作區、/tmp 或其他未指定的路徑。",
+                "",
+            ]
         # Engineer-supplied supplemental context (P0-2). The latest confirmed
         # revision is injected last so it overrides the plan above; a change the
         # engineer made during discussion must reach the actual execution.
@@ -512,6 +582,16 @@ class AgentGateway:
                 attachment_text.strip(),
             ]
         attachment_index = context.get("_attachment_index") or []
+        vision_images = [a["name"] for a in attachment_index
+                         if a.get("kind") == "image" and a.get("vision_supported")]
+        if vision_images:
+            lines += [
+                "",
+                "【工程師已附上圖片（本次測試請查看並參考）】",
+                "以下圖片已隨本訊息附上，你可直接讀取內容：",
+                "  - " + "\n  - ".join(vision_images),
+                "若圖片是 DUT 外觀、標籤、序號或接線等實體證據，請依圖片內容研判並納入紀錄。",
+            ]
         vision_unsupported = [a["name"] for a in attachment_index
                               if a.get("kind") == "image" and not a.get("vision_supported")]
         if vision_unsupported:
@@ -593,6 +673,27 @@ class AgentGateway:
             "If SSH fails, report the failure as the log; never invent command output.",
         ]
         return "\n".join(lines)
+
+    @staticmethod
+    def _dut_output_dir(target, tc):
+        """Return the DUT directory where test-record files must be written.
+
+        Layout: ``/home/PAagent/<project>/<testcase-code>``. The project comes
+        from the resolved target; the leaf is the test case code. Returns "" when
+        we cannot form a stable path (no DUT, or no project/code), so the
+        instruction simply omits the output-location block rather than inventing
+        a wrong path.
+        """
+        if not (target or {}).get("os_ip"):
+            return ""
+        project = str((target or {}).get("project") or "").strip()
+        code = str((tc or {}).get("code") or "").strip()
+        if not project or not code:
+            return ""
+        # Keep each path segment safe: no whitespace/../ that could escape the base.
+        project = project.replace("/", "_").strip() or "PAagent"
+        code = code.replace("/", "_").strip()
+        return f"/home/PAagent/{project}/{code}"
 
     def start_run(self, run_id, *, workspace_dir=None, auto_run=True, user_note="",
                   mode="execute"):
@@ -696,12 +797,16 @@ class AgentGateway:
     _MESSAGE_ENDPOINT = os.environ.get(
         "PA_AGENT_MESSAGE_ENDPOINT", "/api/conversations/{cid}/events")
 
-    def send_user_message(self, run_id, text):
+    def send_user_message(self, run_id, text, attachments=None):
         """Append an engineer chat turn to the run's conversation and let it run.
 
         Returns the conversation id. Raises ValueError when the run has no
         bound conversation. Never fabricates a reply — the agent's response
         arrives through :meth:`ingest` like any other event.
+
+        ``attachments`` narrows which images ride this turn; when omitted the
+        run's whole image set is sent. A question should pass only its own new
+        uploads so the agent does not re-read a picture from an earlier turn.
 
         The body must be the server's ``SendMessageRequest`` shape
         (``role``/``content``/``run``). Sending a raw ``MessageEvent``
@@ -722,7 +827,7 @@ class AgentGateway:
             "role": "user",
             "content": [
                 {"type": "text", "text": text},
-                *self._image_parts(run),
+                *self._image_parts(run, attachments),
             ],
             "run": True,
         }
@@ -778,6 +883,12 @@ class AgentGateway:
         conversation nor triggers a run loop. The reply is a plain string; the
         caller records it as an agent chat message. Raises ValueError when the
         run has no bound conversation.
+
+        A question is still a turn on the conversation, so a run carrying an image
+        must be answered by the vision profile with the image attached — otherwise
+        "can you see the picture?" would always answer "no" even after a successful
+        upload. The content is therefore sent as message parts (text + images)
+        when the server supports it; ``question`` stays the plain-text fallback.
         """
         run = self.store.get_run(run_id)
         if run is None:
@@ -785,8 +896,16 @@ class AgentGateway:
         cid = run.get("conversation_ref")
         if not cid:
             raise ValueError("run has no conversation; start it first")
+        self._ensure_profile(run_id, cid)
+        images = self._image_parts(run)
+        payload = {"question": question}
+        if images:
+            payload["content"] = [
+                {"type": "text", "text": question},
+                *images,
+            ]
         response = self._http().post(
-            self._ASK_ENDPOINT.format(cid=cid), json={"question": question})
+            self._ASK_ENDPOINT.format(cid=cid), json=payload)
         response.raise_for_status()
         data = response.json() or {}
         return (data.get("response") or "").strip()

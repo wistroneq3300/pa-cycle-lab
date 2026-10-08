@@ -107,6 +107,32 @@ class AgentRunRoutes(unittest.TestCase):
         r = self.client.post(f'/api/agent/runs/{rid}/messages', json={'text': 'hello'})
         self.assertEqual(r.status_code, 409)
 
+    def test_delete_run_removes_it_and_is_idempotent(self):
+        vid = self.item['case_variant_id']
+        rid = self.client.post('/api/agent/runs', json={'case_variant_id': vid}).json()['run']['run_id']
+        self.assertEqual(self.client.get(f'/api/agent/runs/{rid}').status_code, 200)
+        d = self.client.delete(f'/api/agent/runs/{rid}')
+        self.assertEqual(d.status_code, 200)
+        self.assertTrue(d.json()['deleted'])
+        # gone afterwards, and a second delete is a clean 404
+        self.assertEqual(self.client.get(f'/api/agent/runs/{rid}').status_code, 404)
+        self.assertEqual(self.client.delete(f'/api/agent/runs/{rid}').status_code, 404)
+
+    def test_delete_unknown_run_is_404(self):
+        self.assertEqual(self.client.delete('/api/agent/runs/nope').status_code, 404)
+
+    def test_delete_run_frees_the_active_slot(self):
+        # After deleting, the case no longer has an in-flight run to resume, so a
+        # fresh open creates a brand-new conversation (the reported symptom was a
+        # previous engineer's conversation being resumed).
+        vid = self.item['case_variant_id']
+        rid = self.client.post('/api/agent/runs', json={'case_variant_id': vid}).json()['run']['run_id']
+        self.client.delete(f'/api/agent/runs/{rid}')
+        # The deleted run must no longer be the resumable one for this case
+        # (sibling tests may leave other runs, so assert on identity, not None).
+        active = self.client.get('/api/agent/active', params={'case_variant_id': vid}).json()
+        self.assertNotEqual((active.get('run') or {}).get('run_id'), rid)
+
     def test_active_lookup_requires_case_variant(self):
         self.assertEqual(self.client.get('/api/agent/active').status_code, 422)
 
@@ -162,6 +188,26 @@ class AgentRunRoutes(unittest.TestCase):
     def test_attachment_upload_unknown_run_is_404(self):
         r = self.client.post('/api/agent/runs/nope/attachments',
                              params={'name': 'x.txt'}, content=b'x')
+        self.assertEqual(r.status_code, 404)
+
+    def test_unconsumed_lists_fresh_upload(self):
+        vid = self.item['case_variant_id']
+        rid = self.client.post('/api/agent/runs', json={'case_variant_id': vid}).json()['run']['run_id']
+        up = self.client.post(
+            f'/api/agent/runs/{rid}/attachments',
+            params={'name': 'pic.png', 'kind': 'image', 'mime': 'image/png'},
+            content=b'\x89PNG\r\n\x1a\nFakeImageBytes')
+        self.assertEqual(up.status_code, 200, up.text)
+        aid = up.json()['attachment']['attachment_id']
+        # A fresh upload is pending to send, so it shows in the preview set.
+        pending = self.client.get(f'/api/agent/runs/{rid}/attachments/unconsumed').json()['attachments']
+        self.assertEqual([a['attachment_id'] for a in pending], [aid])
+        # The full list still holds it (consumption is a separate concept).
+        self.assertEqual(
+            len(self.client.get(f'/api/agent/runs/{rid}/attachments').json()['attachments']), 1)
+
+    def test_unconsumed_unknown_run_is_404(self):
+        r = self.client.get('/api/agent/runs/nope/attachments/unconsumed')
         self.assertEqual(r.status_code, 404)
 
 

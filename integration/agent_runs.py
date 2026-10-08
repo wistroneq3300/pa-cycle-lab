@@ -130,6 +130,7 @@ class AgentRunStore:
                     kind              TEXT NOT NULL,
                     text              TEXT NOT NULL,
                     source_event_id   TEXT,
+                    attachments_json  TEXT NOT NULL DEFAULT '[]',
                     created_at        TEXT NOT NULL,
                     PRIMARY KEY (run_id, seq)
                 );
@@ -181,8 +182,14 @@ class AgentRunStore:
                 );
                 """
             )
-
-    # -- context construction ------------------------------------------------
+            # Migration for DBs created before messages carried attachments.
+            cols = {r["name"] for r in db.execute(
+                "PRAGMA table_info(agent_run_messages)").fetchall()}
+            if "attachments_json" not in cols:
+                db.execute(
+                    "ALTER TABLE agent_run_messages "
+                    "ADD COLUMN attachments_json TEXT NOT NULL DEFAULT '[]'"
+                )
 
     def build_context(self, library, variant_id, *, target=None,
                       required_documents=None, user_attachments=None, run_id=None):
@@ -456,6 +463,44 @@ class AgentRunStore:
                  "status": r["status"], "error": r["error"],
                  "created_at": r["created_at"]} for r in rows]
 
+    def list_unconsumed_attachments(self, run_id):
+        """Attachments not yet carried by any chat turn.
+
+        An upload belongs to the engineer's turn the first time a message is sent
+        after it landed. Reusing the whole attachment list for every turn would
+        re-render the same image on every bubble and make the agent re-read the
+        same picture on each question, so each turn claims only the new ones.
+        """
+        with self._connect() as db:
+            rows = db.execute(
+                "SELECT attachment_id, name, mime, size, kind, stored_path, "
+                "extracted_text, vision_supported, status, error, created_at "
+                "FROM agent_run_attachments WHERE run_id=? "
+                "AND status <> 'failed' ORDER BY created_at",
+                (run_id,),
+            ).fetchall()
+            consumed = set()
+            for m in db.execute(
+                    "SELECT attachments_json FROM agent_run_messages WHERE run_id=?",
+                    (run_id,)):
+                try:
+                    for a in json.loads(m["attachments_json"] or "[]"):
+                        if isinstance(a, dict) and a.get("attachment_id"):
+                            consumed.add(a["attachment_id"])
+                except (ValueError, TypeError):
+                    continue
+        out = []
+        for r in rows:
+            if r["attachment_id"] in consumed:
+                continue
+            out.append({"attachment_id": r["attachment_id"], "name": r["name"],
+                        "mime": r["mime"], "size": r["size"], "kind": r["kind"],
+                        "stored_path": r["stored_path"],
+                        "vision_supported": bool(r["vision_supported"]),
+                        "status": r["status"], "error": r["error"],
+                        "created_at": r["created_at"]})
+        return out
+
     def get_attachment(self, run_id, attachment_id):
         for a in self.list_attachments(run_id):
             if a["attachment_id"] == attachment_id:
@@ -527,8 +572,13 @@ class AgentRunStore:
             )
 
     def add_message(self, run_id, *, role, text, kind="message",
-                    source_event_id=None):
-        """Append a chat message. ``source_event_id`` dedups replays/coalescing."""
+                    source_event_id=None, attachments=None):
+        """Append a chat message. ``source_event_id`` dedups replays/coalescing.
+
+        ``attachments`` is an optional list of attachment metadata dicts (or
+        ids) rendered with the bubble — used so an engineer's uploaded image
+        shows up in the conversation next to the turn that carried it.
+        """
         with self._lock, self._connect() as db:
             if source_event_id:
                 dup = db.execute(
@@ -544,8 +594,9 @@ class AgentRunStore:
             seq = row["n"]
             db.execute(
                 "INSERT INTO agent_run_messages (run_id, seq, role, kind, text, "
-                "source_event_id, created_at) VALUES (?,?,?,?,?,?,?)",
-                (run_id, seq, role, kind, text, source_event_id, _now()),
+                "source_event_id, attachments_json, created_at) VALUES (?,?,?,?,?,?,?,?)",
+                (run_id, seq, role, kind, text, source_event_id,
+                 json.dumps(attachments or [], ensure_ascii=False), _now()),
             )
         return seq
 
@@ -588,10 +639,20 @@ class AgentRunStore:
     def list_messages(self, run_id, limit=500):
         with self._connect() as db:
             rows = db.execute(
-                "SELECT seq, role, kind, text, created_at FROM agent_run_messages "
+                "SELECT seq, role, kind, text, attachments_json, created_at "
+                "FROM agent_run_messages "
                 "WHERE run_id=? ORDER BY seq LIMIT ?", (run_id, int(limit)),
             ).fetchall()
-        return [dict(r) for r in rows]
+        out = []
+        for r in rows:
+            m = {"seq": r["seq"], "role": r["role"], "kind": r["kind"],
+                 "text": r["text"], "created_at": r["created_at"]}
+            try:
+                m["attachments"] = json.loads(r["attachments_json"] or "[]")
+            except (TypeError, ValueError):
+                m["attachments"] = []
+            out.append(m)
+        return out
 
     def list_runs(self, *, case_variant_id=None, status=None, limit=100):
         clauses, params = [], []

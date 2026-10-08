@@ -146,6 +146,13 @@
     timer: null, polling: false, started: false, mode: "plan",
     sending: false, lastSync: 0, stickBottom: true, unread: 0,
     opener: null, uploads: [],
+    // Optimistic user turns that were shown locally before the server echoed
+    // them back. Keyed by text so the poll can adopt the server copy instead of
+    // rendering it a second time (which showed every line twice).
+    pendingUser: [],
+    // 對話剛建立、PA Agent 還沒說第一句之前，先鎖住輸入，避免工程師的話被塞進
+    // 進行中的那一輪。agent 講完第一句（或 run 進入終端狀態）就解鎖。
+    awaitingFirstReply: false,
   };
 
   // Enter 送出與「送出」按鈕共用一個 in-flight 守門，避免連點造成重複送出。
@@ -200,6 +207,12 @@
                   placeholder="與 PA Agent 對話；同意開始請輸入 OK 或 GO"
                   aria-label="訊息輸入"></textarea>
                 <button type="button" id="pa-msg-send" class="pa-msg-send" aria-label="送出">送出</button>
+                <button type="button" id="pa-run-delete" class="pa-run-delete"
+                  title="刪除這筆對話紀錄，重新開始（不影響 DUT 上的測試檔案）"
+                  aria-label="刪除對話">🗑</button>
+              </div>
+              <div class="pa-compose-gate" id="pa-compose-gate" hidden>
+                <span class="pa-gate-dot" aria-hidden="true"></span>PA Agent 正在準備計畫…等它說明完再開始輸入
               </div>
               <div class="pa-foot-hint" id="pa-drawer-hint">
                 Enter 送出 · Shift+Enter 換行。PA Agent 會先說明計畫並等待你同意，輸入 OK / GO 送出後才開始執行。
@@ -212,6 +225,7 @@
     document.body.appendChild(root);
     root.querySelector("#pa-drawer-close").addEventListener("click", close);
     root.querySelector(".pa-drawer-scrim").addEventListener("click", close);
+    root.querySelector("#pa-run-delete").addEventListener("click", deleteRun);
     wireInput();
     wireAttachments();
     document.addEventListener("keydown", onKey);
@@ -237,6 +251,7 @@
     state.mode = context.mode === "execute" ? "execute" : "plan";
     state.runId = null; state.run = null; state.renderedSeq = 0;
     state.lastSync = 0; state.stickBottom = true; state.unread = 0; state.uploads = []; state._attachments = [];
+    state.pendingUser = [];
     state._finalShown = null; state._doneNoteShown = null; state._errorShown = null;
     ensureRoot();
     root.classList.add("open");
@@ -245,6 +260,9 @@
     setApproval(null);
     renderLeftPanel();
     setStatus("PENDING");
+    // 先鎖住輸入：PA Agent 還沒說第一句之前不讓工程師送訊息。接回舊對話或
+    // agent 開口後，addMessage 會自動解鎖。
+    setComposerEnabled(false);
     requestAnimationFrame(() => root?.querySelector("#pa-drawer-close")?.focus({ preventScroll: true }));
     if (!state.context.case_variant_id) {
       setStatus("ERROR");
@@ -272,7 +290,7 @@
     state.run = run;
     state.renderedSeq = 0;
     renderActivity(state.run);
-    renderAttachmentStrip(state.run.attachments || []);
+    refreshStrip();
     await loadHistory();
     setStatus(state.run.status || "PENDING");
     applyRunStatus(state.run);
@@ -404,7 +422,36 @@
       (r.plan_revision ? `<span class="pa-sum-item"><b>計畫版本</b>r${esc(r.plan_revision)}</span>` : "");
   }
 
-  // 附件列（右側、輸入框上方）：顯示本次 run 的附件與上傳狀態。
+  // 刪除本筆 run 的對話與紀錄，讓下一次開啟是乾淨的一筆。
+  // 只清 PA Agent 自己的紀錄（訊息／狀態／上傳附件），不動 DUT 上的測試 log。
+  async function deleteRun() {
+    if (!state.runId) return;
+    const ok = window.confirm(
+      "確定要刪除這筆對話紀錄嗎？\n\n" +
+      "• 會刪除：本筆對話訊息、執行紀錄、你上傳的附件\n" +
+      "• 不會刪除：DUT 上的測試檔案（/home/PAagent/…）\n\n" +
+      "刪除後重新開啟這個 Test Case 會建立一筆全新的對話。");
+    if (!ok) return;
+    try {
+      const res = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}`, { method: "DELETE" });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.detail || d.error || ("HTTP " + res.status));
+      // Reset the drawer to a clean state and rebuild the run from scratch.
+      state.runId = null; state.run = null; state.renderedSeq = 0;
+      state.uploads = []; state._attachments = []; state.pendingUser = [];
+      body().innerHTML = "";
+      setApproval(null);
+      renderAttachmentStrip([]);
+      setStatus("PENDING");
+      renderSystemIntro();
+      await createRun();
+    } catch (e) {
+      addError("刪除對話失敗：" + e.message);
+    }
+  }
+
+  // 附件列（右側、輸入框上方）：顯示「這一輪還沒送出」的附件與上傳狀態。
+  // 圖片以縮圖預覽呈現（如 OpenHands），檔案才用名稱 chip；送出後即從此列消失。
   function renderAttachmentStrip(atts) {
     const strip = root?.querySelector("#pa-attach-strip");
     if (!strip) return;
@@ -413,17 +460,26 @@
     if (!all.length) { strip.hidden = true; strip.innerHTML = ""; return; }
     strip.hidden = false;
     strip.innerHTML = all.map(a => {
-      const type = `<span class="pa-att-type">${a.kind === "image" ? "IMG" : "FILE"}</span>`;
-      let status = `<span class="pa-att-status">已上傳</span>`;
+      const id = esc(a.attachment_id);
+      // Transient / problem states keep a small label; a ready attachment shows none.
+      let status = "";
       if (a.status === "uploading") status = `<span class="pa-att-status">上傳中</span>`;
-      else if (a.status === "failed") status = `<span class="pa-att-warn" title="${esc(a.error || "")}">上傳失敗</span><button type="button" class="pa-att-retry" data-retry="${esc(a.attachment_id)}">重試</button>`;
-      else if (a.status === "unparsed") status = `<span class="pa-att-warn" title="${esc(a.error || "")}">已上傳 · 無法解析</span>`;
-      else if (a.status === "parsed") status = `<span class="pa-att-status pa-att-ok">已解析</span>`;
-      else if (a.kind === "image" && !a.vision_supported) status = `<span class="pa-att-warn">已上傳 · 模型不支援圖片解析</span>`;
-      return `<span class="pa-att" data-id="${esc(a.attachment_id)}">
-        ${type}<span class="pa-att-name">${esc(a.name)}</span>
-        <span class="pa-att-size">${fmtSize(a.size)}</span>${status}
-        <button type="button" class="pa-att-rm" data-rm="${esc(a.attachment_id)}" title="移除">✕</button>
+      else if (a.status === "failed") status = `<span class="pa-att-warn" title="${esc(a.error || "")}">上傳失敗</span><button type="button" class="pa-att-retry" data-retry="${id}">重試</button>`;
+      else if (a.status === "unparsed") status = `<span class="pa-att-warn" title="${esc(a.error || "")}">無法解析</span>`;
+      else if (a.kind === "image" && !a.vision_supported) status = `<span class="pa-att-warn">模型不支援圖片解析</span>`;
+      const rm = `<button type="button" class="pa-att-rm" data-rm="${id}" title="移除">✕</button>`;
+      if (a.kind === "image") {
+        // Local picks preview from the in-memory File; stored ones come from the run.
+        const src = a._previewUrl
+          || `${API}/runs/${encodeURIComponent(state.runId)}/attachments/${encodeURIComponent(a.attachment_id)}/raw`;
+        return `<span class="pa-att pa-att-thumb" data-id="${id}">
+          <img class="pa-att-thumb-img" src="${esc(src)}" alt="${esc(a.name)}" loading="lazy" />
+          <span class="pa-att-thumb-meta">${status}${rm}</span>
+        </span>`;
+      }
+      return `<span class="pa-att" data-id="${id}">
+        <span class="pa-att-name">${esc(a.name)}</span>
+        <span class="pa-att-size">${fmtSize(a.size)}</span>${status}${rm}
       </span>`;
     }).join("");
     strip.querySelectorAll("[data-rm]").forEach(btn => btn.addEventListener("click", async () => {
@@ -449,12 +505,40 @@
     }));
   }
 
+  // 以「尚未送出」的附件刷新預覽列。送出過的圖不會再回來，避免同一張圖重複出現。
+  async function refreshStrip() {
+    if (!state.runId) { renderAttachmentStrip([]); return; }
+    try {
+      const res = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/attachments/unconsumed`);
+      const d = await res.json().catch(() => ({}));
+      if (res.ok) renderAttachmentStrip(d.attachments || []);
+    } catch (e) { /* 保持現狀，下次輪詢再試 */ }
+  }
+
+  function attachmentChips(atts) {
+    if (!Array.isArray(atts) || !atts.length) return "";
+    const items = atts.map(a => {
+      const id = esc(a.attachment_id || a.attachmentId || "");
+      const name = esc(a.name || "attachment");
+      const isImg = a.kind === "image";
+      if (isImg) {
+        const url = `${API}/runs/${encodeURIComponent(state.runId)}/attachments/${encodeURIComponent(a.attachment_id)}/raw`;
+        return `<a class="pa-msg-att pa-msg-att-img" href="${url}" target="_blank" rel="noopener" title="${name}">
+          <img src="${url}" alt="${name}" loading="lazy" />
+        </a>`;
+      }
+      return `<span class="pa-msg-att pa-msg-att-file" title="${name}">📎 ${name}</span>`;
+    }).join("");
+    return `<div class="pa-msg-atts">${items}</div>`;
+  }
+
   function messageCard(msg) {
     const role = msg.role || "agent";
     const label = ROLE_LABEL[role] || role;
     const cls = ROLE_CLASS[role] || "agent";
     const time = msg.created_at ? new Date(msg.created_at).toLocaleTimeString("zh-TW", { hour12: false }) : "";
     const text = msg.text ?? "";
+    const atts = attachmentChips(msg.attachments);
     let content;
     if (role === "tool" || msg.kind === "tool" || msg.kind === "command" || msg.kind === "evidence") {
       content = `<pre class="pa-msg-tool-io">${esc(text).slice(0, 4000) || "（無內容）"}</pre>`;
@@ -466,15 +550,34 @@
     }
     return `<div class="pa-msg pa-msg-${esc(cls)}">
       <div class="pa-msg-head"><span class="pa-msg-role">${esc(label)}</span>${time ? `<span class="pa-msg-time">${esc(time)}</span>` : ""}</div>
-      ${content}
+      ${atts}${content}
     </div>`;
   }
   function addMessage(msg) {
     const div = document.createElement("div");
     div.innerHTML = messageCard(msg);
-    body().appendChild(div.firstElementChild);
+    const el = div.firstElementChild;
+    if (msg && msg.pending) el.setAttribute("data-pending", "1");
+    body().appendChild(el);
+    // Agent 講了第一句（真正有內容，不是「（處理中…）」佔位）就解鎖輸入框，
+    // 並收掉「思考中」提示 —— 它已經開口了。
+    if ((msg.role === "agent" || msg.role === "assistant") && (msg.text || "").trim()) {
+      setThinking(false);
+      unlockComposer();
+    }
     if (state.stickBottom) scrollBottom();
     else { state.unread += 1; updateNewMessages(); }
+  }
+
+  // Drop the local optimistic copy of a user turn once the server echoes it back,
+  // so pollOnce can render the canonical row without producing a duplicate.
+  function adoptPendingUser(text) {
+    const i = state.pendingUser.indexOf(text);
+    if (i === -1) return false;
+    state.pendingUser.splice(i, 1);
+    const el = body()?.querySelector('[data-pending="1"]');
+    if (el) el.remove();
+    return true;
   }
 
   // 右欄開場：系統提示（不是工程師發言，避免 system instruction 被誤顯示成「你」）。
@@ -546,7 +649,7 @@
       state.run = data.run;
       state.renderedSeq = 0;
       renderActivity(state.run);
-      renderAttachmentStrip(state.run.attachments || []);
+      refreshStrip();
       renderSummary(state.run);
       await startRun(state.mode);   // plan：agent 只講計畫、不執行；execute：相容舊行為
     } catch (e) {
@@ -586,7 +689,13 @@
     if (!t || !state.runId) return;
     if (!beginSend()) return;
     state.stickBottom = true;
-    addMessage({ seq: Date.now(), role: "user", kind: "message", text: t, created_at: new Date().toISOString() });
+    state.pendingUser.push(t);
+    // Only the files attached for THIS send ride the optimistic bubble — not
+    // every file ever uploaded to the run, which would stamp the same image on
+    // each new message.
+    const optimisticAtts = (state.uploads || []).filter(a => a.status !== "failed");
+    addMessage({ seq: Date.now(), role: "user", kind: "message", text: t, pending: true,
+      attachments: optimisticAtts, created_at: new Date().toISOString() });
     const sendBtn = root?.querySelector("#pa-msg-send");
     let sent = false;
     if (input) input.disabled = true;
@@ -600,8 +709,15 @@
       if (!r.ok) addError("訊息未送出：" + (d.detail || d.error || ("HTTP " + r.status)) + "。內容已保留，可修正後重試。");
       else {
         sent = true;
-        if (input) { input.value = ""; input.style.height = "auto"; }
+        if (input) { input.value = ""; autoGrowInput(input); }
+        // This turn consumed its uploads: clear the local pending list and
+        // re-fetch the unconsumed set so the sent image leaves the preview strip
+        // and cannot ride the next message.
+        state.uploads = [];
+        refreshStrip();
         setStatus(state.run?.status || "RUNNING");
+        // 立即顯示「思考中」，不用等下一次輪詢才有回饋。
+        setThinking(true);
         // 補充訊息會建立新的計畫版本；提示工程師 GO 將採用最新版（P0-2）。
         if (d.intent === "question") {
           appendSystemNote("已記錄為本次計畫的補充內容；輸入 OK / GO 時會採用最新版本的計畫。");
@@ -615,6 +731,15 @@
       addError("訊息未送出：" + e.message + "。內容已保留，可修正後重試。");
     } finally {
       state.sending = false;
+      // On failure the turn never reached the server, so the optimistic copy must
+      // drop its pending marker: a later poll will never adopt it, and the next
+      // successful send of the same text must not remove the wrong row.
+      if (!sent) {
+        const i = state.pendingUser.indexOf(t);
+        if (i !== -1) state.pendingUser.splice(i, 1);
+        const el = body()?.querySelector('[data-pending="1"]');
+        if (el) el.removeAttribute("data-pending");
+      }
       if (input) { input.disabled = false; if (!sent) input.value = t; input.dispatchEvent(new Event("input")); input.focus(); }
       if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = "送出"; }
     }
@@ -633,6 +758,27 @@
     div.innerHTML = messageCard({ seq: -Date.now(), role: "agent", kind: "message",
       text: "⚠ " + text, created_at: new Date().toISOString() });
     body().appendChild(div.firstElementChild);
+    scrollBottom();
+  }
+
+  // 「思考中」提示：agent 還在跑（RUNNING）且尚未吐出下一則訊息時，在對話底部
+  // 顯示一個動畫泡泡，讓工程師知道它正在忙、不是卡住。離開 RUNNING 或 agent
+  // 一開口就移除。
+  function setThinking(on, label) {
+    const b = body();
+    if (!b) return;
+    let el = b.querySelector(".pa-typing");
+    if (!on) { if (el) el.remove(); return; }
+    const text = label || "PA Agent 正在思考";
+    if (el) { el.querySelector(".pa-typing-text").textContent = text; return; }
+    el = document.createElement("div");
+    el.className = "pa-typing";
+    el.setAttribute("role", "status");
+    el.setAttribute("aria-live", "polite");
+    el.innerHTML = `<span class="pa-typing-role">PA Agent</span>
+      <span class="pa-typing-text">${esc(text)}</span>
+      <span class="pa-typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>`;
+    b.appendChild(el);
     scrollBottom();
   }
 
@@ -656,7 +802,13 @@
       const md = await mres.json().catch(() => ({}));
       if (!mres.ok) throw new Error(md.detail || ("HTTP " + mres.status));
       for (const m of md.messages || []) {
-        if (m.seq > state.renderedSeq) { state.renderedSeq = m.seq; addMessage(m); }
+        if (m.seq > state.renderedSeq) {
+          // A user turn we optimistically rendered before the server echoed it:
+          // drop the local copy, then render the canonical server row below.
+          if (m.role === "user" && state.pendingUser.includes(m.text)) adoptPendingUser(m.text);
+          state.renderedSeq = m.seq;
+          addMessage(m);
+        }
       }
       const rres = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}`);
       const rd = await rres.json().catch(() => ({}));
@@ -665,7 +817,7 @@
       state.lastSync = Date.now();
       renderActivity(state.run);
       renderSummary(state.run);
-      renderAttachmentStrip(state.run.attachments || []);
+      refreshStrip();
       setSync(true);
       applyRunStatus(state.run);
     } catch (e) {
@@ -678,6 +830,12 @@
     const st = run.status || "PENDING";
     setStatus(st);
     setApproval(run);
+    // 思考中提示：run 在跑就顯示；一旦進入等待確認 / 終端 / 錯誤就收掉。
+    const busy = st === "RUNNING" || st === "PENDING";
+    setThinking(busy);
+    // 安全解鎖：run 進入終端狀態或出錯時，就算 agent 沒正常開口，也要讓工程師
+    // 能輸入／追問，不能把輸入框永久鎖住。
+    if (TERMINAL.has(st) || st === "ERROR" || st === "WAITING_FOR_USER") unlockComposer();
     if (TERMINAL.has(st)) {
       cancelPolling();
       setApproval(null);
@@ -723,15 +881,49 @@
   // 純對話輸入：Enter 送出、Shift+Enter 換行。開窗時 agent 只會先出計畫；
   // 使用者打 OK / GO（或 開始 / 執行 / 可以 / run）送出後，agent 才會開始執行。
   // 非關鍵字的內容視為補充或提問，agent 會據此修正計畫、繼續等待同意。
+  //
+  // 鎖定：剛建立對話、PA Agent 還沒說第一句之前，輸入框與送出鈕先停用，避免
+  // 工程師的訊息被併進 agent 正在寫計畫的那一輪。agent 一開口就解鎖。
+  function setComposerEnabled(enabled) {
+    const input = root?.querySelector("#pa-msg-input");
+    const sendBtn = root?.querySelector("#pa-msg-send");
+    const attach = root?.querySelector("#pa-attach");
+    const gate = root?.querySelector("#pa-compose-gate");
+    state.awaitingFirstReply = !enabled;
+    if (input) {
+      input.disabled = !enabled;
+      if (enabled) autoGrowInput(input);
+    }
+    if (sendBtn) sendBtn.disabled = !enabled;
+    if (attach) attach.disabled = !enabled;
+    if (gate) gate.hidden = enabled;
+    const panel = root?.querySelector(".pa-drawer-panel");
+    panel?.classList.toggle("pa-awaiting-reply", !enabled);
+  }
+  function unlockComposer() {
+    if (!state.awaitingFirstReply) return;
+    setComposerEnabled(true);
+    root?.querySelector("#pa-msg-input")?.focus({ preventScroll: true });
+  }
+
+  // ---------- 輸入框 ----------
+  // 打很多字時輸入框自動長高（最多約 12 行，超過就內部捲動），不會擠掉對話區。
+  const INPUT_MAX_PX = 320;
+  function autoGrowInput(input) {
+    if (!input) return;
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, INPUT_MAX_PX) + "px";
+    input.style.overflowY = input.scrollHeight > INPUT_MAX_PX ? "auto" : "hidden";
+  }
+
   function wireInput() {
     const input = root.querySelector("#pa-msg-input");
     const sendBtn = root.querySelector("#pa-msg-send");
     if (!input) return;
-    const autoGrow = () => {
-      input.style.height = "auto";
-      input.style.height = Math.min(input.scrollHeight, 200) + "px";
-    };
+    const autoGrow = () => autoGrowInput(input);
     input.addEventListener("input", autoGrow);
+    // 有些瀏覽器在貼上 / 程式設值後才量到新高度，補一次。
+    input.addEventListener("change", autoGrow);
     input.addEventListener("keydown", (e) => {
       if (e.key !== "Enter" || e.shiftKey || e.isComposing) return;
       e.preventDefault();
@@ -739,6 +931,7 @@
       sendMessage(input.value);
     });
     sendBtn?.addEventListener("click", () => sendMessage(input.value));
+    autoGrow();
     // 使用者往上閱讀舊訊息時，不要被新訊息強制拉到底（P2）。
     const b = body();
     b?.addEventListener("scroll", () => {
@@ -806,6 +999,9 @@
     const pendingId = "pending-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6);
     const pending = { attachment_id: pendingId, name: file.name || "screenshot.png", size: file.size,
       kind, status: "uploading", vision_supported: false, _file: file };
+    if (kind === "image") {
+      try { pending._previewUrl = URL.createObjectURL(file); } catch (e) { /* older browsers */ }
+    }
     state.uploads = [...(state.uploads || []), pending];
     renderAttachmentStrip(state._attachments || []);
     try {
@@ -815,9 +1011,11 @@
         { method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: file });
       const d = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(d.detail || d.error || ("HTTP " + res.status));
+      const local = state.uploads.find(a => a.attachment_id === pendingId);
+      if (local?._previewUrl) { try { URL.revokeObjectURL(local._previewUrl); } catch (e) { /* ignore */ } }
       state.uploads = state.uploads.filter(a => a.attachment_id !== pendingId);
-      // Refresh from server truth.
-      const listRes = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/attachments`);
+      // Refresh from server truth (unconsumed set — what is still pending to send).
+      const listRes = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/attachments/unconsumed`);
       const list = await listRes.json().catch(() => ({}));
       if (!listRes.ok) addError("附件已上傳，但清單同步失敗：" + (list.detail || ("HTTP " + listRes.status)));
       renderAttachmentStrip(listRes.ok ? (list.attachments || []) : (state._attachments || []));

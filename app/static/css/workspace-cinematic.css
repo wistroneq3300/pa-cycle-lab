@@ -187,13 +187,13 @@
 .modal-backdrop .assign-sheet-badges .badge { font-size:10px; background:#07131b60!important; border:1px solid #71899430; border-radius:4px; padding:3px 6px; }
 .modal-backdrop .assign-search { flex:1; min-width:270px; }
 .modal-backdrop .assign-rows { padding-right:6px; gap:8px; scrollbar-color:#4d6878 #101f2b; }
-.modal-backdrop .assign-row { padding:15px; border-radius:6px; background:#142631!important; border-color:#54748845!important; gap:14px; transition:background .15s,border-color .15s; }
+.modal-backdrop .assign-row { padding:16px 18px; min-height:104px; border-radius:6px; background:#142631!important; border-color:#54748845!important; gap:14px; transition:background .15s,border-color .15s; }
 .modal-backdrop .assign-row:hover { background:#1a3342!important; border-color:#77a4ba80!important; }
 .modal-backdrop .assign-row:has(input:checked) { background:#203729!important; border-color:#86ad5a80!important; box-shadow:inset 2px 0 #a1cc56; }
 .modal-backdrop .assign-row-title { font-size:12px; color:#dce9f0; }
 .modal-backdrop .assign-items { font-size:13px; color:#d7e5ed; }
-.modal-backdrop .assign-row-sub { color:#93b0c1; font-size:11px; margin-top:8px; }
-.modal-backdrop .assign-row-cmd { color:#829eaf; font-size:11px; line-height:1.7; margin-top:6px; }
+.modal-backdrop .assign-row-sub { color:#93b0c1; font-size:11px; }
+.modal-backdrop .assign-row-cmd { color:#829eaf; font-size:11px; line-height:1.7; }
 .modal-backdrop .assign-row-title .badge { border-radius:3px; font-size:9px; padding:3px 5px; }
 .modal-backdrop :is(.term-statusbar,.term-pane-label,.bc-topbar,.bc-statusbar,.bc-pane-label) { background:#12232e!important; border-color:#4f71874a!important; color:#a4bdcd!important; font-size:11px; }
 .modal-backdrop :is(.term-body,.bc-body) { background:#09121a; padding:12px; gap:11px; }
