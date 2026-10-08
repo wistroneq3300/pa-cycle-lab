@@ -78,6 +78,10 @@ class FullRunZip(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'不一致'):
             self.service.request({'id':'run-123','run_id':'cycle-run-123','state':'RECONCILIATION_REQUIRED'},confirm=True)
         (self.run/'campaign.json').write_text('{"run_id":"cycle-run-123","state":"RECONCILIATION_REQUIRED"}',encoding='utf-8')
+        (self.run/'job_final.json').write_text('{"id":"other-run","state":"RECONCILIATION_REQUIRED"}',encoding='utf-8')
+        with self.assertRaisesRegex(ValueError,'Job ID'):
+            self.service.request({'id':'run-123','run_id':'cycle-run-123','state':'RECONCILIATION_REQUIRED'},confirm=True)
+        (self.run/'job_final.json').write_text('{"id":"run-123","state":"RECONCILIATION_REQUIRED"}',encoding='utf-8')
         (self.run/'node-1'/'loop001'/'report.json').unlink()
         with self.assertRaisesRegex(ValueError,'Run Evidence'):
             self.service.request({'id':'run-123','run_id':'cycle-run-123','state':'RECONCILIATION_REQUIRED'},confirm=True)

@@ -82,6 +82,8 @@ class FullZipService:
         state=job['state']
         if campaign.get('state')!=state or final.get('state')!=state:
             raise ValueError('異常終態與 final snapshots 不一致，拒絕正式封存。')
+        if final.get('id')!=job['id']:
+            raise ValueError('Job ID 與 job_final.json 不一致，拒絕正式封存。')
         if job.get('run_id') and campaign.get('run_id')!=job['run_id']:
             raise ValueError('Run ID 與 campaign.json 不一致，拒絕正式封存。')
         evidence=any(path.is_file() and len(path.relative_to(root).parts)>1 and deliverable(path.relative_to(root))
