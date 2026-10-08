@@ -1,6 +1,6 @@
 /* Engineering surfaces; remote framebuffer pixels are never recolored. */
-:root{--ew-surface:#12242e;--ew-raised:#1b303b;--ew-line:#354e5b;--ew-text:#e2edf1;--ew-muted:#a2b8c3;--ew-blue:#82c9e2;--ew-green:#c0df8c}
-:root[data-theme="light"]{--ew-surface:#f5f7f6;--ew-raised:#e5ecee;--ew-line:#b8c9d0;--ew-text:#183744;--ew-muted:#4c6672;--ew-blue:#006c93;--ew-green:#365c16}
+:root{--ew-surface:#12242e;--ew-raised:#1b303b;--ew-line:#354e5b;--ew-text:#e2edf1;--ew-muted:#a2b8c3;--ew-blue:#82c9e2;--ew-green:#c0df8c;--ew-danger:#ff8992;--ew-danger-on-dark:#ff8992}
+:root[data-theme="light"]{--ew-surface:#f5f7f6;--ew-raised:#e5ecee;--ew-line:#b8c9d0;--ew-text:#183744;--ew-muted:#4c6672;--ew-blue:#006c93;--ew-green:#365c16;--ew-danger:#b32638}
 .pd-hardware-body .os-scroll{max-height:none;overflow:visible;padding:0}
 .pd-hardware-body .hw-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
 .pd-hardware-body .ew-inventory-section{position:relative;display:grid;grid-template-columns:112px minmax(0,1fr);background:var(--ew-surface);border:1px solid var(--ew-line);border-radius:14px;overflow:hidden;box-shadow:inset 0 1px 0 #ffffff12,0 8px 24px #00000008}

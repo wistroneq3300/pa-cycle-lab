@@ -177,6 +177,15 @@
 .modal-backdrop table.t th { background:#152733!important; color:#9fb8c6!important; font-size:11px; font-weight:500; border-color:#536d7b40!important; }
 .modal-backdrop table.t td { background:transparent!important; color:#bacdd8!important; border-color:#536d7b33!important; padding:12px 10px; font-size:12px; }
 .modal-backdrop table.t tr:hover td { background:#1c35443b!important; }
+#project-modal .modal { width:min(900px,calc(100vw - 48px)); }
+#project-modal table.t { width:100%; table-layout:fixed; }
+#project-modal table.t :is(th,td) { overflow-wrap:anywhere; word-break:break-word; vertical-align:top; }
+#project-modal table.t :is(th,td):nth-child(1) { width:30%; }
+#project-modal table.t :is(th,td):nth-child(2) { width:27%; }
+#project-modal table.t :is(th,td):nth-child(3) { width:13%; }
+#project-modal table.t :is(th,td):nth-child(4) { width:30%; }
+#project-modal table.t td:last-child { white-space:normal!important; }
+#project-modal table.t td:last-child .btn+.btn { margin-left:6px; }
 .modal-backdrop .assign-sheet-grid { gap:13px; }
 .modal-backdrop .assign-sheet-card { padding:22px 20px; background:linear-gradient(145deg,#21333f,#172630)!important; border-color:#607d8e50!important; border-radius:8px; box-shadow:inset 0 1px #dff2fd08; transition:border-color .2s,transform .2s; }
 .modal-backdrop .assign-sheet-card:hover { border-color:#8cae7780!important; transform:translateY(-2px); box-shadow:0 7px 18px #0003; }

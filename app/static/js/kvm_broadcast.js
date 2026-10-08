@@ -395,7 +395,7 @@ function spxCard(name, bmcSubdomain) {
       <span style="width:8px;height:8px;border-radius:50%;background:#7a4a4a;flex:0 0 auto"></span>
       <span style="font-size:11px;font-weight:700;color:#e8c46a;background:#2a2014;border:1px solid #4a3a28;border-radius:4px;padding:1px 6px;flex:0 0 auto">SP-X</span>
       <b class="spx-name" style="font-size:13px;color:#dfe6f0"></b>
-      <span class="spx-bmc" style="color:#5a6b80;font-size:11px"></span>
+      <span class="spx-bmc" style="color:var(--ew-muted,#a2b8c3);font-size:11px"></span>
     </div>
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;color:#9fb0c4;text-align:center">
       <b style="color:#e88a8f;font-size:14px">MegaRAC SP-X</b>
@@ -431,12 +431,12 @@ function offlineCard(name, baseLabel, ip, reason) {
   box.innerHTML = `
     <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid #223043;background:#131a24">
       <span style="width:8px;height:8px;border-radius:50%;background:#e05656;flex:0 0 auto"></span>
-      <span style="font-size:11px;font-weight:700;color:#e05656;background:#2a2014;border:1px solid #4a3a28;border-radius:4px;padding:1px 6px;flex:0 0 auto">未開啟</span>
+      <span style="font-size:11px;font-weight:700;color:var(--ew-danger-on-dark,#ff8992);background:#2a2014;border:1px solid #4a3a28;border-radius:4px;padding:1px 6px;flex:0 0 auto">未開啟</span>
       <b class="oc-name" style="font-size:13px;color:#dfe6f0"></b>
-      <span class="oc-bmc" style="color:#5a6b80;font-size:11px"></span>
+      <span class="oc-bmc" style="color:var(--ew-muted,#a2b8c3);font-size:11px"></span>
     </div>
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;color:#9fb0c4;text-align:center">
-      <b style="color:#e05656;font-size:14px">⚠ 本機未連線</b>
+      <b style="color:var(--ew-danger,#ff8992);font-size:14px">⚠ 本機未連線</b>
       <div class="oc-reason" style="font-size:12px;line-height:1.7;max-width:360px"></div>
     </div>`;
   box.querySelector(".oc-name").textContent = name;

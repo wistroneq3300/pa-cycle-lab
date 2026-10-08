@@ -17,6 +17,7 @@
 .eng-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;line-height:1.5;white-space:nowrap;border:1px solid transparent}
 .eng-tone-green{background:#c0df8c22;color:var(--ew-green);border-color:#c0df8c55}
 .eng-tone-amber{background:#e6b45522;color:#e6b455;border-color:#e6b45555}
+:root[data-theme="light"] .eng-tone-amber{color:#765000;border-color:#b7832f66}
 .eng-tone-blue{background:#82c9e222;color:var(--ew-blue);border-color:#82c9e255}
 .eng-tone-red{background:#e07a7a22;color:#e07a7a;border-color:#e07a7a55}
 .eng-tone-muted{background:var(--ew-raised);color:var(--ew-muted);border-color:var(--ew-line)}

@@ -1253,6 +1253,7 @@ tr.has-gpu-alert td{box-shadow:inset 0 2px 0 0 #ff6a3d}
 .pa-status-wait{color:var(--yellow,#f5a623)}
 .pa-status-done{color:var(--green,#3fbf7f)}
 .pa-status-err{color:var(--red,#ff5a52)}
+:root[data-theme="light"] .pa-status-wait{color:#875d00}
 @keyframes pa-pulse{0%,100%{opacity:1}50%{opacity:.45}}
 .pa-drawer-close{flex:none;width:28px;height:28px;border-radius:6px;border:1px solid var(--border);
   background:transparent;color:var(--text-dim,#9aa2b1);font-size:18px;line-height:1;cursor:pointer}
@@ -1387,9 +1388,9 @@ tr.has-gpu-alert td{box-shadow:inset 0 2px 0 0 #ff6a3d}
 .pa-msg-input:focus{outline:none;border-color:var(--accent,#4aa3ff)}
 .pa-msg-input:disabled{opacity:.55;cursor:not-allowed;background:color-mix(in srgb,var(--panel-bg,#14161a) 88%,var(--text,#e6e9ef) 12%)}
 .pa-msg-input::placeholder{color:var(--text-faint,#6b7180)}
-.pa-msg-send{flex:none;white-space:nowrap;padding:9px 16px;background:var(--accent,#4aa3ff);color:#fff;border:none;
+.pa-msg-send{flex:none;white-space:nowrap;padding:9px 16px;background:#0a7d78;color:#fff;border:none;
   border-radius:8px;cursor:pointer;font:inherit;font-size:13px;font-weight:600}
-.pa-msg-send:hover:not(:disabled){filter:brightness(1.08)}
+.pa-msg-send:hover:not(:disabled){background:color-mix(in srgb,#0a7d78 88%,#000)}
 .pa-msg-send:disabled{opacity:.55;cursor:not-allowed}
 /* 對話剛建立、agent 還沒回第一句前：顯示鎖定提示。 */
 .pa-compose-gate{display:flex;align-items:center;gap:8px;margin:0 2px 7px;padding:7px 11px;border-radius:8px;
@@ -1448,6 +1449,7 @@ tr.has-gpu-alert td{box-shadow:inset 0 2px 0 0 #ff6a3d}
 :root[data-theme="light"] .pa-info-grid dt{color:var(--text-dim,#5b626e)}
 :root[data-theme="light"] .pa-info-grid dd{color:var(--text,#1a1d22)}
 :root[data-theme="light"] .pa-msg-input{background:var(--card,#fff);color:var(--text,#1a1d22)}
+:root[data-theme="light"] .pa-attach{background:var(--card,#fff);color:#315462}
 :root[data-theme="light"] .pa-msg-tool{background:rgba(0,0,0,.03)}
 :root[data-theme="light"] .pa-drawer-scrim{background:rgba(30,40,60,.3)}
 @media(max-width:820px){

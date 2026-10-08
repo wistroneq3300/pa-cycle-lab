@@ -181,7 +181,7 @@
 :root[data-theme="light"] .p-workspace-tabs em {color:#325f73;background:#ffffff87;border-color:#b5cbd4}
 :root[data-theme="light"] .p-search>span {color:#567e8e}
 :root[data-theme="light"] .p-project-strip button {background:#eef3f2;border-color:#b9cbd2;color:#476675}
-:root[data-theme="light"] .p-project-strip b {color:#5c7680}
+:root[data-theme="light"] .p-project-strip b {color:#516b75}
 :root[data-theme="light"] .p-project-strip button.active {background:#e4eedb;border-color:#a7c184;color:#426624}
 :root[data-theme="light"] .proj-card {background:#f8faf7!important;border-color:#bdcdd2!important;box-shadow:var(--p-shadow)!important}
 :root[data-theme="light"] .proj-card-head {background:linear-gradient(115deg,#e2ebec,#f0f4f1)!important;border-color:#b5cbd2!important;box-shadow:inset 0 1px #fff}
@@ -194,7 +194,7 @@
 :root[data-theme="light"] .proj-card table.t tr:hover td {background:#006c9307!important}
 :root[data-theme="light"] .proj-card .mach-linkbox {color:#006387!important}
 :root[data-theme="light"] .p-ip {color:#3e6372}
-:root[data-theme="light"] .p-ip small {color:#627e89}
+:root[data-theme="light"] .p-ip small {color:#536e78}
 :root[data-theme="light"] .p-row-menu summary {border-color:#b7cbd3;background:#e8eff0;color:#3c6373}
 :root[data-theme="light"] .p-row-menu>div {background:#f4f8f5;border-color:#a9c2cc;box-shadow:0 16px 36px #183d5033}
 :root[data-theme="light"] .proj-card.sort-over {border-color:#006c93!important;background:#e3edef!important}
@@ -253,7 +253,10 @@
 :root[data-theme="light"] .pd-workspace .pd-original-section .t td {color:#3d6476!important;border-color:#cfdee3}
 :root[data-theme="light"] .pd-workspace .pd-original-section .t td:first-child {color:#597582!important}
 :root[data-theme="light"] .pd-workspace .pd-original-section .sensor-kpi {background:#e6efef!important}
-:root[data-theme="light"] .pd-workspace .pd-original-section .sensor-kpi>span {color:#4f7180}
+:root[data-theme="light"] .pd-workspace .pd-original-section .sensor-kpi>b {color:#203b49}
+:root[data-theme="light"] .pd-workspace .pd-original-section .sensor-kpi.bad>b {color:#a93d36}
+:root[data-theme="light"] .pd-workspace .pd-original-section .sensor-kpi.warn>b {color:#805700}
+:root[data-theme="light"] .pd-workspace .pd-original-section .sensor-kpi>span {color:#456674}
 :root[data-theme="light"] .pd-workspace .pd-original-section :is(.sensor-ai,.tel-ai) {color:#346c80!important;background:#006c9307!important;border-color:#a4c6d380!important}
 :root[data-theme="light"] .pd-workspace .pd-original-section .sdr-scroll {background:#edf3f0!important}
 :root[data-theme="light"] .pd-workspace .pd-original-section .sdr-table td {color:#436b7c!important}
@@ -363,6 +366,8 @@
 :root[data-theme="light"] .modal-backdrop .term-head .hint,
 :root[data-theme="light"] .modal-backdrop .bc-head .hint {color:#507488!important}
 :root[data-theme="light"] .modal-backdrop .bc-topbar .hint {color:#a3bdca!important}
+:root[data-theme="light"] .modal-backdrop .bc-bcastbar .bc-bc-label {color:#b9d7e4}
+:root[data-theme="light"] .modal-backdrop #bc-status-txt {color:#c0d0d9!important}
 :root[data-theme="light"] .modal-backdrop .term-statusbar .term-badge.ok {color:#b3d98c;background:#a1cc5614}
 :root[data-theme="light"] .modal-backdrop .term-statusbar .term-badge.err {color:#efaea5;background:#da7a6517}
 
