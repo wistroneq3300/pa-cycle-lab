@@ -24,7 +24,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from . import targets as targets_module
-from .agent_gateway import AgentGateway, classify_user_intent
+from .agent_gateway import AgentGateway, classify_user_intent, is_substantive_revision
 from .agent_runs import (
     AgentRunStore, STATUS_DONE, STATUS_PASS, STATUS_FAIL, STATUS_BLOCKED,
     STATUS_ERROR, STATUS_WAITING_FOR_USER,
@@ -478,10 +478,13 @@ def install(app, pa, store_getter=None):
                 kwargs={"min_seq": min_seq}, name=f"pa-agent-msg-{run_id}", daemon=True,
             ).start()
         else:
-            # Non-approval turn: record it as supplemental context (so a
-            # constraint stated mid-discussion is not lost) and answer it without
-            # an agent loop.
-            _record_supplemental(store, run_id, run, text)
+            # Non-approval turn. A *substantive* addition (a SPEC value, a scope
+            # limit, an extra log to collect) is recorded as a plan revision so a
+            # constraint stated mid-discussion is not lost (P0-2). Small talk and
+            # pure questions are NOT revisions: recording「你好」as a revision made
+            # the agent answer「計畫確認（Plan v2）」and demand another GO forever.
+            if is_substantive_revision(text):
+                _record_supplemental(store, run_id, run, text)
             turn_images = [a for a in turn_atts if a.get("kind") == "image"]
             if turn_images:
                 # The ask_agent endpoint accepts only plain text (its schema has a

@@ -30,6 +30,7 @@ sys.path.insert(0, ROOT)
 
 from integration.agent_gateway import (  # noqa: E402
     AgentGateway, classify_user_intent, is_approval, is_cancel,
+    is_agent_instruction, is_substantive_revision,
 )
 from integration.agent_runs import AgentRunStore  # noqa: E402
 
@@ -251,6 +252,68 @@ class SupplementalTests(_Base):
         after = self.store.get_run("run-1")["context"]
         self.assertEqual(before, after)
         self.assertTrue(self.store.verify_context("run-1"))
+
+
+# --------------------------------------------------------------------------
+# R13 — no GO-swallow loop: chit-chat must not become a plan revision, and our
+# own instructions must not render as engineer bubbles
+# --------------------------------------------------------------------------
+class NoConfirmLoopTests(_Base):
+    def test_smalltalk_is_not_a_revision(self):
+        for t in ("你好", "謝謝", "hi", "哈哈", "在嗎", "test"):
+            self.assertFalse(is_substantive_revision(t), t)
+
+    def test_question_is_not_a_revision(self):
+        # A question is answered, not folded into the plan (that was the loop).
+        for t in ("這樣對嗎?", "為什麼要驗 PCIe", "可以說明嗎", "this ok?"):
+            self.assertFalse(is_substantive_revision(t), t)
+
+    def test_filler_is_not_a_revision(self):
+        for t in ("喔", "好", "嗯嗯", "ok"):
+            self.assertFalse(is_substantive_revision(t), t)
+
+    def test_real_constraint_is_a_revision(self):
+        # The engineer only wants a revision recorded when they supply something.
+        for t in ("只測 slot 1", "另外要收集 dmesg", "SPEC: Gen5 x16",
+                  "限制在 node A", "PCIe 期望值 Gen5 x16"):
+            self.assertTrue(is_substantive_revision(t), t)
+
+    def test_execution_and_plan_instructions_are_detected(self):
+        self.assertTrue(is_agent_instruction(
+            "【工程師已確認，請依最新計畫開始執行】\n\n你是 PA Agent…"))
+        self.assertTrue(is_agent_instruction(
+            "【進場模式：先說明計畫，等工程師同意後才執行】\n在收到…"))
+        self.assertTrue(is_agent_instruction(
+            "【工程師要求重新執行本測項】\n\n你是 PA Agent…"))
+
+    def test_engineer_chat_is_not_an_instruction(self):
+        for t in ("你好", "GO", "只測 slot 1", "幫我看一下"):
+            self.assertFalse(is_agent_instruction(t), t)
+
+    def test_instruction_is_stored_as_system_not_user(self):
+        # The agent-server echoes our plan instruction as a user MessageEvent.
+        # ingest must re-label it so the drawer does not print a "工程師" bubble.
+        self.store.create_run(_ctx())
+        events = [{
+            "id": "evt-1", "kind": "MessageEvent", "source": "user",
+            "llm_message": {"role": "user", "content": [
+                {"type": "text",
+                 "text": "【工程師已確認，請依最新計畫開始執行】\n你是 PA Agent…"}]},
+        }]
+        self.gateway.ingest("run-1", events=events, conversation_id="conv-1")
+        msgs = self.store.list_messages("run-1")
+        self.assertEqual([m["role"] for m in msgs], ["system"])
+
+    def test_engineer_turn_stays_user(self):
+        self.store.create_run(_ctx())
+        events = [{
+            "id": "evt-2", "kind": "MessageEvent", "source": "user",
+            "llm_message": {"role": "user", "content": [
+                {"type": "text", "text": "只測 slot 1"}]},
+        }]
+        self.gateway.ingest("run-1", events=events, conversation_id="conv-1")
+        msgs = self.store.list_messages("run-1")
+        self.assertEqual([m["role"] for m in msgs], ["user"])
 
 
 # --------------------------------------------------------------------------

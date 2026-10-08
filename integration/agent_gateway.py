@@ -163,6 +163,58 @@ def _contains_go_token(lowered):
     return any(k in lowered for k in _GO_CJK)
 
 
+# Markers that identify a message *we* generated to drive the agent (the plan
+# preamble / the execution instruction), as opposed to the engineer typing in the
+# drawer. The agent-server echoes these back as user MessageEvents; ingest must
+# not surface them as "工程師" chat bubbles (they are system instructions, and a
+# 3–4 KB block repeated on every GO drowns the actual conversation).
+_INSTRUCTION_MARKERS = (
+    "【進場模式：先說明計畫，等工程師同意後才執行】",
+    "【工程師已確認，請依最新計畫開始執行】",
+    "【工程師要求重新執行本測項】",
+)
+
+
+def is_agent_instruction(text):
+    """True when *text* is an internal instruction we sent, not engineer chat."""
+    head = (text or "").lstrip()[:80]
+    return any(head.startswith(m) for m in _INSTRUCTION_MARKERS)
+
+
+# Words that carry no plan content. A turn made only of these must not become a
+# "plan revision" — otherwise a casual「你好」makes the agent believe the plan
+# changed and re-ask for confirmation instead of executing (the GO-swallow loop).
+_TRIVIAL_CHAT = {
+    "你好", "您好", "hi", "hello", "hey", "哈囉", "哈罗", "在嗎", "在吗",
+    "謝謝", "谢谢", "thanks", "thank you", "thx", "收到",
+    "哈哈", "呵呵", "測試", "测试", "test", "嗨",
+}
+
+
+def is_substantive_revision(text):
+    """True only when an engineer turn plausibly adds a constraint / spec / SOP.
+
+    A question or small talk is *not* a plan change: recording it as one is what
+    made the agent reply「計畫確認（Plan v2）」and demand another GO forever. The
+    engineer only wants a revision recorded when they actually supply something
+    (a SPEC value, a scope limit, an extra log to collect, …).
+    """
+    raw = (text or "").strip()
+    if not raw:
+        return False
+    stripped = _strip_punct(raw.lower())
+    if stripped in _TRIVIAL_CHAT:
+        return False
+    lowered = raw.lower()
+    # A question is answered, not folded into the plan.
+    if any(m in lowered for m in _QUESTION_MARKERS):
+        return False
+    # Very short non-question turns are almost always filler ("喔", "好", "嗯嗯").
+    if len(stripped) <= 2:
+        return False
+    return True
+
+
 def is_approval(text):
     """True only for an unambiguous go-ahead (used to gate execution)."""
     return classify_user_intent(text) == "go"
@@ -424,12 +476,15 @@ class AgentGateway:
         "  3) 需要工程師提供的資料（SPEC / SOP / 附件等），若不需要請說明；",
         "  4) 風險評估（是否 read-only、是否有破壞性動作）。",
         "說明完畢後停下來等待，並在最後清楚告訴工程師：「要開始請回覆 OK 或 GO」。",
-        "工程師收到後若提出問題或補充資訊，你應據此修正計畫，再等待下一次同意。",
+        "工程師若提出問題或要求補充說明，直接針對問題回答即可，不要重貼整份計畫、",
+        "也不要重新徵求同意；只有當工程師實際提供 SPEC / SOP / 附件或明確修正測試範圍時，",
+        "才據以修正計畫（簡短說明修改了哪一點即可，無需重貼全文），然後等待下一次同意。",
         "當工程師回覆「OK」或「GO」表示可以執行時，直接依你剛才說明的計畫執行，",
-        "不需要再次詢問；執行完畢後產出測試記錄。",
+        "不要再一次複述計畫、也不要求二次確認（只認「OK / GO」，不要因為閒聊而重新確認）；",
+        "執行完畢後產出測試記錄。",
         "計畫執行完（已產出測試記錄）之後，若工程師只是「提問」（例如問檔案路徑、",
-        "問某欄位的意義、要求補充說明），請直接針對問題作答，不要重跑測試、不要重新",
-        "執行指令、也不要重貼同一份測試記錄。只有當工程師明確要求「重跑、重新驗證、",
+        "問某欄位的意義、要求補充說明）或純粹寒暄，請直接針對內容回應，不要重跑測試、",
+        "不要重新執行指令、也不要重貼同一份測試記錄。只有當工程師明確要求「重跑、重新驗證、",
         "再執行一次、補充新的檢查項目」時，才再度執行並產出新的記錄。",
         "",
     ]
@@ -945,14 +1000,20 @@ class AgentGateway:
             channel, payload = classify_event(event)
             if channel == "message":
                 seq = None
+                role = payload["role"]
+                # Our own plan/execution instructions are echoed back by the
+                # agent-server as *user* events. Surface them as system notes so
+                # the drawer does not print a 3–4 KB "工程師" bubble on every GO.
+                if role == "user" and is_agent_instruction(payload["text"]):
+                    role = "system"
                 # A user turn was echoed locally by the route on send; adopt it
                 # rather than inserting a duplicate when its event comes back.
-                if payload["role"] == "user" and payload.get("event_id"):
+                if role == "user" and payload.get("event_id"):
                     seq = self.store.claim_pending_user_message(
                         run_id, payload["text"], payload["event_id"])
                 if seq is None:
                     seq = self.store.add_message(
-                        run_id, role=payload["role"], text=payload["text"],
+                        run_id, role=role, text=payload["text"],
                         source_event_id=payload.get("event_id"),
                     )
                 if seq is not None:
