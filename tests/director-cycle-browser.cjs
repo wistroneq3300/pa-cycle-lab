@@ -39,6 +39,7 @@ const clone = value => JSON.parse(JSON.stringify(value));
   const pageErrors = [], unknown = [], calls = [], captures = [];
   let failArtifacts = false, zipPolls = 0;
   page.on('pageerror', error => pageErrors.push(error.message));
+  await context.route('**/files/CYCLE_REVIEW_REPORT.html', route => route.fulfill({status:200,contentType:'text/html',body:'<!doctype html><title>Official Cycle Review</title><h1>CYCLE_REVIEW_REPORT</h1>'}));
 
   const run4 = jobs.get(4);
   const current = new Map([...jobs].map(([count, job]) => [job.id, clone(job)]));
@@ -52,18 +53,9 @@ const clone = value => JSON.parse(JSON.stringify(value));
       targets: run4.targets.map(target => ({ ...target, reasons: [] }))
     }]
   };
-  const artifactFixture = {
-    files: [
-      'CYCLE_REVIEW_REPORT.html',
-      'cycle_summary.json',
-      'node/loop4/dmesg.txt'
-    ],
-    manifest: [
-      { path: 'CYCLE_REVIEW_REPORT.html', kind: 'html-report' },
-      { path: 'cycle_summary.json', kind: 'structured-result', verdict: 'FAIL' },
-      { path: 'node/loop4/dmesg.txt', kind: 'raw-evidence' }
-    ], total: 3, has_more: false
-  };
+  const artifactFiles=['CYCLE_REVIEW_REPORT.html','cycle_summary.json','console.log'];
+  for(let node=1;node<=4;node++)for(let loop=1;loop<=10;loop++)for(let evidence=0;evidence<16;evidence++)artifactFiles.push(`node-${node}/loop${String(loop).padStart(4,'0')}/evidence-${String(evidence).padStart(2,'0')}.log`);
+  const artifactManifest=artifactFiles.map(path=>({path,kind:path.endsWith('.html')?'html-report':path.endsWith('.json')?'structured-result':'raw-evidence',verdict:path==='cycle_summary.json'?'FAIL':/evidence-00\.log$/.test(path)?'FAIL':/evidence-01\.log$/.test(path)?'WARN':undefined}));
 
   await page.route('**/api/**', async route => {
     const req = route.request(), method = req.method(), url = new URL(req.url());
@@ -114,7 +106,8 @@ const clone = value => JSON.parse(JSON.stringify(value));
     }
     if (method === 'GET' && /\/artifacts$/.test(pathname)) {
       if (failArtifacts) return route.fulfill({ status: 503, json: { detail: 'Synthetic evidence source unavailable' } });
-      return route.fulfill({ json: artifactFixture });
+      const offset=Number(url.searchParams.get('offset')||0),limit=Number(url.searchParams.get('limit')||200),files=artifactFiles.slice(offset,offset+limit),selected=new Set(files);
+      return route.fulfill({ json: {files,manifest:artifactManifest.filter(item=>selected.has(item.path)),offset,limit,total:artifactFiles.length,has_more:offset+files.length<artifactFiles.length} });
     }
     if (method === 'GET' && ['/api/machines', '/api/projects', '/api/ai/gpu-alerts'].includes(pathname)) return route.continue();
     if (method === 'GET' && /^\/api\/projects\/[^/]+\/cycle\/jobs\//.test(pathname)) return route.continue();
@@ -193,8 +186,19 @@ const clone = value => JSON.parse(JSON.stringify(value));
     assert(await page.locator('#cw-full-zip').isDisabled(), 'RUNNING must not allow Full ZIP');
     assert.match(await page.locator('#cw-evidence-state').innerText(), /已載入/);
     assert.equal(await page.locator('.cw-artifact-report').count(), 2);
-    assert.equal(await page.locator('.cw-artifact-link').count(), 1);
+    assert.equal(await page.locator('.cw-artifact-link').count(), 198);
+    assert.equal(await page.locator('#cw-files details').count(),0,'Test Results must not require nested disclosures');
+    const [officialReport]=await Promise.all([context.waitForEvent('page'),page.locator('a[title="CYCLE_REVIEW_REPORT.html"]').click()]);
+    await officialReport.waitForLoadState('domcontentloaded');assert.match(await officialReport.locator('body').innerText(),/CYCLE_REVIEW_REPORT/);await officialReport.close();
+    for(const expected of [400,600,643]){await page.locator('#cw-evidence').click();await page.waitForFunction(count=>document.querySelector('#cw-evidence-state')?.textContent.includes(`${count} / 643`),expected);}
+    assert.match(await page.locator('#cw-evidence-state').innerText(),/643 \/ 643/);
+    await page.locator('#cw-evidence-node').selectOption('node-4');await page.locator('#cw-evidence-phase').selectOption('LOOP0010');
+    assert.equal(await page.locator('#cw-files .cw-artifact-item:visible').count(),16);
+    await page.locator('#cw-evidence-search').fill('evidence-15');assert.equal(await page.locator('#cw-files .cw-artifact-item:visible').count(),1);
+    assert.match(await page.locator('#cw-files .cw-artifact-item:visible').innerText(),/node-4\/loop0010\/evidence-15\.log/);
     await page.locator('.cw-artifacts').scrollIntoViewIfNeeded();
+    await capture('test-results-filtered',1920,1080,'light');
+    await page.locator('#cw-evidence-search').fill('');
     await capture('run-evidence', 1920, 1080, 'light');
     for (const [width, height] of [[1366, 768], [1920, 1080]]) for (const theme of ['light', 'dark']) {
       await page.locator('#cw-console').scrollIntoViewIfNeeded();

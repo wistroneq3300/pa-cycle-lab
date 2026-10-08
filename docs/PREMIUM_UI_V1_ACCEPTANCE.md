@@ -12,6 +12,46 @@ This acceptance used loopback Synthetic fixtures only. It did not execute a
 hardware Power action, install an Exporter, contact a DUT, restart a production
 service, deploy Live, or claim that the separate P0 security work is resolved.
 
+## Final necessary fixes (review base `4b8b34c`)
+
+The fetched branch and remote HEAD matched the review base before these
+changes. The final pass made only the following three corrections:
+
+- **P1-01 — Node-scoped Hardware Health:** the Telemetry card now calculates
+  FAIL/WARN, Coverage, Last Inspected and state from the selected Node's
+  `check_matrix` rows. N1 = 3 FAIL, N2 = 0 FAIL and N3 = 2 WARN were exercised;
+  selecting N2 showed `Node Scope · N2` and `0 FAIL / 0 WARN`. System-only
+  fallback is explicitly labeled System Scope. NOT MONITORED retains the
+  historical findings and Telemetry AI continues independently.
+- **P1-02 — Full ZIP terminal consistency:** user confirmation remains
+  necessary for ERROR / RECONCILIATION_REQUIRED but is no longer sufficient.
+  The service also proves the Runner stopped, obtains the Report Writer lock,
+  reads matching `campaign.json` / `job_final.json`, requires Final HTML and
+  nested Run Evidence, detects source mutation, and verifies ZIP members
+  against the SHA-256 manifest before Ready. COMPLETE and safely stopped
+  INCOMPLETE retain their normal flow.
+- **P2-01 — direct Test Results:** nested file-group `<details>` were removed.
+  Results render directly, WARN/FAIL remain prioritized, filters operate on
+  the current paged set, and loading another 200-file page preserves the
+  selected filters. The Official HTML report still opens in a new tab.
+
+Final-fix verification:
+
+| Area | Result | Evidence |
+|---|---|---|
+| Full ZIP / report lock / Telemetry targeted Python | PASS | 18 passed, 6 subtests passed |
+| Multi-Node Telemetry / Inspection Browser | PASS | READY/STALE/NO DATA/QUERY ERROR/N/A, disabled Inspection + AI independence |
+| 4 Nodes × 10 Loops Test Results Browser | PASS | 643 synthetic files; direct N4 / LOOP0010 / evidence-15 lookup; Official HTML new tab |
+| Cycle Browser regressions | PASS | create/confirm/stop/reconcile/Full ZIP/delete; 17 captures |
+| Runtime manifest / syntax / whitespace | PASS | 213 runtime files; `py_compile`, `node --check`, `git diff --check` |
+| Broader `tests/test_integration.py` | FAIL (known prerequisite) | 6 passed / 20 failed; missing `engine/vera_cycle/neutrino_demo_config.sh`, already documented before this pass |
+| Live Hardware / production restart / deploy | SKIP | Explicitly prohibited and not required for Synthetic acceptance |
+
+Final-fix screenshots:
+
+- `docs/ui-premium/screens/director-telemetry-inspection-premium-v1-final-fixes/`
+- `docs/ui-premium/screens/premium-v1-final-fixes-cycle/`
+
 ## Delivered surfaces
 
 1. Inspection Coverage / Dashboard

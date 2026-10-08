@@ -139,38 +139,31 @@
         'report.json':'輪次結果 · JSON','node_summary.txt':'節點摘要 · 文字'
       }[file]||file);
       const artifactStage=parts=>{const part=parts[1]||'';if(/^loop\d+$/i.test(part))return part.toUpperCase();if(/^start$/i.test(part))return 'START';if(/^pre(?:[_\-.]|$)/i.test(part))return 'PRE';if(/^node_summary/i.test(part))return 'SUMMARY';return parts.length>2?'EVIDENCE':'';};
-      const groups=new Map(),files=artifactRecords.map(record=>record.path);
+      const files=artifactRecords.map(record=>record.path),rows=[];
       files.forEach((rawPath,index)=>{
         const path=String(rawPath??''),parts=path.split('/').filter(Boolean),file=parts.at(-1)||path,entry=manifest.get(path),isReport=parts.length===1&&(entry?.kind==='html-report'||reportPattern.test(file)),isTarget=parts.length>1&&/^(tray|chassis|rack|node|machine)(?:[-_]|\d)/i.test(parts[0]),stage=isTarget?artifactStage(parts):'';
-        const key=isReport?'reports':parts.length<2?'run':isTarget?`target:${parts[0]}:${stage||'root'}`:`evidence:${parts[0]}`;
-        const title=isReport?'報告與摘要':parts.length<2?'執行紀錄':isTarget?`目標 / ${parts[0]}${stage?' · '+stage:''}`:`證據 / ${parts[0]}`;
         const attention=['WARN','FAIL'].includes(entry?.verdict)||/(^|[\/_-])(new_issues|worsened_issues)([\/_\-.]|$)/i.test(path);
-        if(!groups.has(key))groups.set(key,{key,title,order:isReport?0:attention?1:parts.length<2?2:3,first:index,files:[]});
-        groups.get(key).files.push({path,file,isReport,attention,kind:entry?.kind||'raw-evidence'});
+        rows.push({path,file,isReport,attention,kind:entry?.kind||'raw-evidence',verdict:entry?.verdict||'',node:parts.length>1?parts[0]:'任務報告',phase:artifactStage(parts)||'執行摘要',index});
       });
       const list=$('cw-files');list.replaceChildren();
-      [...groups.values()].sort((a,b)=>a.order-b.order||a.first-b.first).forEach(group=>{
-        const groupItem=document.createElement('li'),disclosure=document.createElement('details'),summary=document.createElement('summary'),groupList=document.createElement('ul');
-        groupItem.className='cw-artifact-group';disclosure.className='cw-artifact-group-details';disclosure.open=group.order<=1;summary.className='cw-artifact-group-summary';summary.textContent=`${group.title} · ${group.files.length}`;groupList.className='cw-artifact-group-list';
-        group.files.sort((a,b)=>Number(b.attention)-Number(a.attention)||a.path.localeCompare(b.path,undefined,{numeric:true})).forEach(({path,file,isReport,attention,kind})=>{const item=document.createElement('li'),a=document.createElement('a'),name=document.createElement('span'),pathLabel=document.createElement('small');item.className='cw-artifact-item';item.dataset.attention=attention?'true':'false';item.dataset.kind=kind;a.className=isReport?'cw-artifact-report':'cw-artifact-link';name.className='cw-artifact-title';pathLabel.className='cw-artifact-path';name.textContent=friendlyName(file);pathLabel.textContent=path;a.title=path;a.href=url+'/files/'+path.split('/').map(encodeURIComponent).join('/');a.target='_blank';a.rel='noopener';a.append(name,pathLabel);item.append(a);groupList.append(item);});
-        disclosure.append(summary,groupList);groupItem.append(disclosure);list.append(groupItem);
-      });
+      const rank=row=>row.file==='CYCLE_REVIEW_REPORT.html'?0:row.attention?1:row.isReport?2:3;
+      rows.sort((a,b)=>rank(a)-rank(b)||a.path.localeCompare(b.path,undefined,{numeric:true})).forEach(({path,file,isReport,attention,kind,verdict,node,phase})=>{const item=document.createElement('li'),a=document.createElement('a'),name=document.createElement('span'),pathLabel=document.createElement('small');item.className='cw-artifact-item';item.dataset.attention=attention?'true':'false';item.dataset.kind=kind;item.dataset.node=node;item.dataset.phase=phase;a.className=isReport?'cw-artifact-report':'cw-artifact-link';name.className='cw-artifact-title';pathLabel.className='cw-artifact-path';name.textContent=friendlyName(file);pathLabel.textContent=path;a.title=path;a.href=url+'/files/'+path.split('/').map(encodeURIComponent).join('/');a.target='_blank';a.rel='noopener';a.append(name,pathLabel);if(attention){const badge=document.createElement('span');badge.className='cw-artifact-verdict';badge.textContent=verdict||'WARN / FAIL';a.append(badge);}item.append(a);list.append(item);});
       // Filters use manifest paths, never construct a new download target.
+      const previous={node:$('cw-evidence-node')?.value||'',phase:$('cw-evidence-phase')?.value||'',type:$('cw-evidence-type')?.value||'',verdict:$('cw-evidence-verdict')?.value||'',search:$('cw-evidence-search')?.value||''};
       $('cw-evidence-filters')?.remove();
       const filters=document.createElement('div');filters.id='cw-evidence-filters';filters.className='cw-evidence-filters';
       filters.innerHTML='<label>Node<select id="cw-evidence-node"><option value="">全部 Node 與任務報告</option></select></label><label>Loop / Phase<select id="cw-evidence-phase"><option value="">全部階段</option></select></label><label>Evidence Type<select id="cw-evidence-type"><option value="">全部類型</option><option value="html-report">Official HTML Report</option><option value="structured-result">Structured Result</option><option value="raw-evidence">Log / Evidence</option></select></label><label>Verdict<select id="cw-evidence-verdict"><option value="">全部結果</option><option value="attention">WARN / FAIL 優先</option></select></label><label class="cw-search">檔名搜尋<input id="cw-evidence-search" type="search" placeholder="例如 dmesg、sensor、report"></label><p id="cw-evidence-count" role="status" aria-live="polite"></p>';
       list.before(filters);
-      const items=[...list.querySelectorAll('.cw-artifact-item')].map(item=>{const path=item.querySelector('a').title,parts=path.split('/');return {item,path,node:parts.length>1?parts[0]:'任務報告',phase:artifactStage(parts)||'執行摘要',kind:item.dataset.kind,attention:item.dataset.attention==='true'};});
+      const items=[...list.querySelectorAll('.cw-artifact-item')].map(item=>({item,path:item.querySelector('a').title,node:item.dataset.node,phase:item.dataset.phase,kind:item.dataset.kind,attention:item.dataset.attention==='true'}));
       const nodeSelect=$('cw-evidence-node'),phaseSelect=$('cw-evidence-phase');
       [...new Set(items.map(i=>i.node))].sort().forEach(v=>nodeSelect.add(new Option(v,v)));
       const filterFiles=()=>{
         const node=nodeSelect.value,phase=phaseSelect.value,type=$('cw-evidence-type').value,verdict=$('cw-evidence-verdict').value,q=$('cw-evidence-search').value.toLowerCase();let count=0;
         items.forEach(i=>{i.item.hidden=!!((node&&node!==i.node)||(phase&&phase!==i.phase)||(type&&type!==i.kind)||(verdict==='attention'&&!i.attention)||(q&&!i.path.toLowerCase().includes(q)));if(!i.item.hidden)count++;});
-        list.querySelectorAll('.cw-artifact-group').forEach(group=>{group.hidden=![...group.querySelectorAll('.cw-artifact-item')].some(i=>!i.hidden);if(node||phase||type||verdict||q)group.querySelector('details').open=!group.hidden;});
         $('cw-evidence-count').textContent=`${count} / ${items.length} 份證據${count?'':' · 沒有符合的檔案，請調整篩選'}`;
       };
       const phases=()=>{const old=phaseSelect.value;phaseSelect.replaceChildren(new Option('全部階段',''),...[...new Set(items.filter(i=>!nodeSelect.value||i.node===nodeSelect.value).map(i=>i.phase))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).map(v=>new Option(v,v)));if([...phaseSelect.options].some(o=>o.value===old))phaseSelect.value=old;};
-      nodeSelect.onchange=()=>{phases();filterFiles();};phaseSelect.onchange=filterFiles;$('cw-evidence-type').onchange=filterFiles;$('cw-evidence-verdict').onchange=filterFiles;$('cw-evidence-search').oninput=filterFiles;phases();filterFiles();
+      nodeSelect.onchange=()=>{phases();filterFiles();};phaseSelect.onchange=filterFiles;$('cw-evidence-type').onchange=filterFiles;$('cw-evidence-verdict').onchange=filterFiles;$('cw-evidence-search').oninput=filterFiles;if([...nodeSelect.options].some(o=>o.value===previous.node))nodeSelect.value=previous.node;phases();if([...phaseSelect.options].some(o=>o.value===previous.phase))phaseSelect.value=previous.phase;$('cw-evidence-type').value=previous.type;$('cw-evidence-verdict').value=previous.verdict;$('cw-evidence-search').value=previous.search;filterFiles();
       const total=Number.isFinite(result.total)?result.total:files.length;state.textContent=files.length?`已載入 ${files.length} / ${total} 份報告與 Evidence。`:'這個任務目前尚無可用的報告或 Evidence。';state.dataset.state=files.length?'ready':'empty';button.textContent='載入更多';button.hidden=!result.has_more;button.disabled=false;
     }catch(e){if(g===generation){state.textContent=`Test Results 載入失敗：${e.message||'未提供'}`;state.dataset.state='error';button.textContent='重試載入';button.hidden=false;button.disabled=false;error(e,'evidence');}}};
     void $('cw-evidence').onclick();

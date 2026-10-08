@@ -1,5 +1,33 @@
 # PROJECT_STATUS — PA Cycle Lab native Next integration
 
+## 2026-10-09 Premium UI V1 final necessary fixes
+
+Review base and fetched remote HEAD were both
+`4b8b34cf5fbcc84673c3f576119d0c4c65838090` on
+`codex/platform-premium-ui-v1`. Work remained limited to P1-01, P1-02 and
+P2-01; no production service was restarted, no Live deployment or hardware
+Power action was performed, and the separate P0 work is not claimed fixed.
+
+- Telemetry Hardware Health now derives FAIL/WARN, Coverage, Last Inspected
+  and state from the selected Node's matrix rows. If only a system aggregate
+  exists, the card explicitly switches to System Scope. Disabled Inspection
+  remains NOT MONITORED while historical Node findings stay visible.
+- Full ZIP now fails closed when Runner liveness cannot be proven, a Runner or
+  Report Writer is active, final HTML is missing, or abnormal terminal
+  snapshots/Evidence cannot be consistently read. Hashing and compression run
+  under the existing writer lock; source signatures and ZIP content are
+  checked against the SHA-256 manifest. COMPLETE and safely stopped INCOMPLETE
+  remain supported.
+- Test Results is a direct, paged Evidence list instead of nested disclosure
+  groups. Official HTML stays a new-tab link; Node, Loop/Phase, type, verdict
+  and filename filters persist while additional 200-file pages are loaded.
+- Targeted Python: 18 passed plus 6 subtests. Browser: Telemetry/Inspection
+  PASS and Cycle PASS with 643 synthetic files, Official Report new tab and 17
+  captures. Runtime manifest: PASS (213 files). The broader Integration suite
+  remains 6 PASS / 20 FAIL because the repository still lacks the documented
+  `engine/vera_cycle/neutrino_demo_config.sh` fixture; it was not fabricated or
+  converted to SKIP. Synthetic results are not Live Hardware acceptance.
+
 ## 2026-10-09 Premium UI four-surface integration
 
 Branch `codex/platform-premium-ui-v1`; implementation started from remote
