@@ -155,6 +155,62 @@
     awaitingFirstReply: false,
   };
 
+  // Every drawer open owns an immutable frontend session.  The backend run is
+  // deliberately independent: closing the drawer never asks the backend to
+  // stop it.  We abort only safe read requests and discard every late result
+  // (including side-effecting requests that are allowed to finish) once a new
+  // drawer session has replaced the originating one.
+  let activeSession = null;
+  let nextSessionId = 0;
+
+  function beginSession() {
+    const previous = activeSession;
+    activeSession = {
+      id: ++nextSessionId,
+      controller: typeof AbortController === "function" ? new AbortController() : null,
+    };
+    previous?.controller?.abort();
+    return activeSession;
+  }
+
+  function endSession() {
+    const previous = activeSession;
+    activeSession = null;
+    previous?.controller?.abort();
+  }
+
+  function isCurrentSession(session, runId) {
+    return !!session && session === activeSession && state.started &&
+      !!root?.classList.contains("open") &&
+      (runId === undefined || state.runId === runId);
+  }
+
+  function staleSession(session, error, runId) {
+    return !isCurrentSession(session, runId) || error?.name === "AbortError" || error?._paStaleSession;
+  }
+
+  function sessionFetch(session, url, options = {}, abortable = true) {
+    if (!isCurrentSession(session)) {
+      const error = new Error("stale PA Agent drawer session");
+      error._paStaleSession = true;
+      return Promise.reject(error);
+    }
+    const requestOptions = { ...options };
+    // POST/DELETE requests are intentionally not transport-aborted: they may
+    // already be executing server-side and must never be retried implicitly.
+    if (abortable && session.controller && !requestOptions.signal) {
+      requestOptions.signal = session.controller.signal;
+    }
+    return fetch(url, requestOptions);
+  }
+
+  function revokeUploadPreviews(uploads) {
+    for (const item of uploads || []) {
+      if (!item?._previewUrl) continue;
+      try { URL.revokeObjectURL(item._previewUrl); } catch (e) { /* ignore */ }
+    }
+  }
+
   // Enter 送出與「送出」按鈕共用一個 in-flight 守門，避免連點造成重複送出。
   function beginSend() { if (state.sending) return false; state.sending = true; return true; }
   function endSend() { state.sending = false; }
@@ -246,24 +302,37 @@
   // ---------- 對外 API ----------
   async function open(context = {}) {
     // context: { case_variant_id, node_id?, expected_binding_revision?, branch?, title?, task?, rich?, mode? }
+    cancelPolling();
+    revokeUploadPreviews(state.uploads);
+    const session = beginSession();
     state.opener = document.activeElement;
     state.context = context || {};
     state.mode = context.mode === "execute" ? "execute" : "plan";
     state.runId = null; state.run = null; state.renderedSeq = 0;
     state.lastSync = 0; state.stickBottom = true; state.unread = 0; state.uploads = []; state._attachments = [];
     state.pendingUser = [];
+    state.sending = false;
     state._finalShown = null; state._doneNoteShown = null; state._errorShown = null;
     ensureRoot();
     root.classList.add("open");
     state.started = true;
     body().innerHTML = "";
+    const summary = root.querySelector("#pa-summary");
+    if (summary) summary.innerHTML = "";
+    const sync = root.querySelector("#pa-sync");
+    if (sync) { sync.textContent = ""; sync.className = "pa-sync"; }
+    renderAttachmentStrip([]);
     setApproval(null);
     renderLeftPanel();
     setStatus("PENDING");
     // 先鎖住輸入：PA Agent 還沒說第一句之前不讓工程師送訊息。接回舊對話或
     // agent 開口後，addMessage 會自動解鎖。
     setComposerEnabled(false);
-    requestAnimationFrame(() => root?.querySelector("#pa-drawer-close")?.focus({ preventScroll: true }));
+    document.removeEventListener("keydown", onKey);
+    document.addEventListener("keydown", onKey);
+    requestAnimationFrame(() => {
+      if (isCurrentSession(session)) root?.querySelector("#pa-drawer-close")?.focus({ preventScroll: true });
+    });
     if (!state.context.case_variant_id) {
       setStatus("ERROR");
       body().innerHTML = `<div class="pa-empty">未提供 case_variant_id，無法建立 AgentRun。請從指派結果視窗以該用例開啟。</div>`;
@@ -272,34 +341,42 @@
     // P1-5：關閉抽屜 ≠ 結束任務。重新開啟同一 Test Case 時，先找進行中的 run，
     //   找到就接回同一個對話（狀態／訊息／證據），找不到才建立新的。
     try {
-      const resumed = await resumeRun();
+      const resumed = await resumeRun(session);
+      if (!isCurrentSession(session)) return;
       if (resumed) return;
-    } catch (e) { /* 找不到 active run 就照常建立新的 */ }
-    createRun();
+    } catch (e) {
+      if (staleSession(session, e)) return;
+      // 找不到 active run 就照常建立新的。
+    }
+    if (isCurrentSession(session)) void createRun(session);
   }
-  async function resumeRun() {
-    const c = state.context || {};
+  async function resumeRun(session) {
+    const c = { ...(state.context || {}) };
     const q = new URLSearchParams({ case_variant_id: c.case_variant_id || "" });
     if (c.node_id) q.set("node_id", c.node_id);
-    const res = await fetch(`${API}/active?${q.toString()}`);
+    const res = await sessionFetch(session, `${API}/active?${q.toString()}`);
     if (!res.ok) return false;
     const d = await res.json().catch(() => ({}));
+    if (!isCurrentSession(session)) return false;
     const run = d?.run;
     if (!run || !run.run_id) return false;
-    state.runId = run.run_id;
+    const runId = run.run_id;
+    state.runId = runId;
     state.run = run;
     state.renderedSeq = 0;
     renderActivity(state.run);
-    refreshStrip();
-    await loadHistory();
+    void refreshStrip(session, runId);
+    await loadHistory(session, runId);
+    if (!isCurrentSession(session, runId)) return false;
     setStatus(state.run.status || "PENDING");
     applyRunStatus(state.run);
-    if (!TERMINAL.has(state.run.status || "")) beginPolling();
+    if (!TERMINAL.has(state.run.status || "")) beginPolling(session, runId);
     return true;
   }
-  async function loadHistory() {
-    const res = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/messages?limit=500`);
+  async function loadHistory(session, runId) {
+    const res = await sessionFetch(session, `${API}/runs/${encodeURIComponent(runId)}/messages?limit=500`);
     const d = await res.json().catch(() => ({}));
+    if (!isCurrentSession(session, runId)) return;
     body().innerHTML = "";
     renderSystemIntro();
     for (const m of d.messages || []) {
@@ -309,13 +386,18 @@
   function close() {
     if (!root) return;
     const opener = state.opener;
+    const closingRoot = root;
     cancelPolling();
     state.started = false;
-    root.classList.remove("open");
+    endSession();
+    closingRoot.classList.remove("open");
     document.removeEventListener("keydown", onKey);
     setTimeout(() => {
-      if (root && !root.classList.contains("open")) { root.remove(); root = null; }
-      if (opener && opener.isConnected && typeof opener.focus === "function") opener.focus({ preventScroll: true });
+      if (root === closingRoot && !closingRoot.classList.contains("open")) {
+        closingRoot.remove();
+        root = null;
+        if (opener && opener.isConnected && typeof opener.focus === "function") opener.focus({ preventScroll: true });
+      }
     }, 260);
   }
 
@@ -426,6 +508,8 @@
   // 只清 PA Agent 自己的紀錄（訊息／狀態／上傳附件），不動 DUT 上的測試 log。
   async function deleteRun() {
     if (!state.runId) return;
+    const session = activeSession;
+    const runId = state.runId;
     const ok = window.confirm(
       "確定要刪除這筆對話紀錄嗎？\n\n" +
       "• 會刪除：本筆對話訊息、執行紀錄、你上傳的附件\n" +
@@ -433,19 +517,23 @@
       "刪除後重新開啟這個 Test Case 會建立一筆全新的對話。");
     if (!ok) return;
     try {
-      const res = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}`, { method: "DELETE" });
+      const res = await sessionFetch(session, `${API}/runs/${encodeURIComponent(runId)}`, { method: "DELETE" }, false);
       const d = await res.json().catch(() => ({}));
+      if (!isCurrentSession(session, runId)) return;
       if (!res.ok) throw new Error(d.detail || d.error || ("HTTP " + res.status));
       // Reset the drawer to a clean state and rebuild the run from scratch.
+      cancelPolling();
       state.runId = null; state.run = null; state.renderedSeq = 0;
+      revokeUploadPreviews(state.uploads);
       state.uploads = []; state._attachments = []; state.pendingUser = [];
       body().innerHTML = "";
       setApproval(null);
       renderAttachmentStrip([]);
       setStatus("PENDING");
       renderSystemIntro();
-      await createRun();
+      await createRun(session);
     } catch (e) {
+      if (staleSession(session, e, runId)) return;
       addError("刪除對話失敗：" + e.message);
     }
   }
@@ -484,6 +572,8 @@
       </span>`;
     }).join("");
     strip.querySelectorAll("[data-rm]").forEach(btn => btn.addEventListener("click", async () => {
+      const session = activeSession;
+      const runId = state.runId;
       const id = btn.getAttribute("data-rm");
       const local = state.uploads.find(item => item.attachment_id === id);
       if (local) {
@@ -495,12 +585,16 @@
       if (stored) delete stored._deleteError;
       btn.disabled = true;
       try {
-        const response = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/attachments/${encodeURIComponent(id)}`, { method: "DELETE" });
+        const response = await sessionFetch(session,
+          `${API}/runs/${encodeURIComponent(runId)}/attachments/${encodeURIComponent(id)}`,
+          { method: "DELETE" }, false);
         const data = await response.json().catch(() => ({}));
+        if (!isCurrentSession(session, runId)) return;
         if (!response.ok) throw new Error(data.detail || data.error || ("HTTP " + response.status));
         renderAttachmentStrip(state._attachments.filter(x => x.attachment_id !== id));
         renderLeftPanel();
       } catch (e) {
+        if (staleSession(session, e, runId)) return;
         if (stored) stored._deleteError = e.message || "後端未確認刪除";
         renderAttachmentStrip(state._attachments);
       }
@@ -510,18 +604,24 @@
       const failed = state.uploads.find(item => item.attachment_id === id);
       if (!failed?._file) return;
       state.uploads = state.uploads.filter(item => item.attachment_id !== id);
-      uploadOne(failed._file);
+      void uploadOne(failed._file, activeSession, state.runId);
     }));
   }
 
   // 以「尚未送出」的附件刷新預覽列。送出過的圖不會再回來，避免同一張圖重複出現。
-  async function refreshStrip() {
-    if (!state.runId) { renderAttachmentStrip([]); return; }
+  async function refreshStrip(session = activeSession, runId = state.runId) {
+    if (!runId) {
+      if (isCurrentSession(session)) renderAttachmentStrip([]);
+      return;
+    }
     try {
-      const res = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/attachments/unconsumed`);
+      const res = await sessionFetch(session, `${API}/runs/${encodeURIComponent(runId)}/attachments/unconsumed`);
       const d = await res.json().catch(() => ({}));
+      if (!isCurrentSession(session, runId)) return;
       if (res.ok) renderAttachmentStrip(d.attachments || []);
-    } catch (e) { /* 保持現狀，下次輪詢再試 */ }
+    } catch (e) {
+      if (!staleSession(session, e, runId)) { /* 保持現狀，下次輪詢再試 */ }
+    }
   }
 
   function attachmentChips(atts) {
@@ -662,42 +762,59 @@
   }
 
   // ---------- 建立 / 啟動 / 對話 ----------
-  async function createRun() {
-    const c = state.context || {};
+  async function createRun(session = activeSession) {
+    const c = { ...(state.context || {}) };
+    const mode = c.mode === "execute" ? "execute" : "plan";
     try {
+      if (!isCurrentSession(session)) return;
       setStatus("PENDING");
       renderSystemIntro();
-      const res = await fetch(`${API}/runs`, {
+      const res = await sessionFetch(session, `${API}/runs`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           case_variant_id: c.case_variant_id || "",
           node_id: c.node_id || "",
           expected_binding_revision: c.expected_binding_revision || "",
         }),
-      });
+      }, false);
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data?.run?.run_id) throw new Error(data.detail || data.error || ("HTTP " + res.status));
-      state.runId = data.run.run_id;
+      if (!res.ok || !data?.run?.run_id) {
+        if (!isCurrentSession(session)) return;
+        throw new Error(data.detail || data.error || ("HTTP " + res.status));
+      }
+      const runId = data.run.run_id;
+      // Creation already succeeded server-side.  If the drawer closed while the
+      // response was in flight, finish the one requested start without touching
+      // any drawer state; this preserves the backend run across close/reopen.
+      if (!isCurrentSession(session)) {
+        await startRun(session, runId, mode, true);
+        return;
+      }
+      state.runId = runId;
       state.run = data.run;
       state.renderedSeq = 0;
       renderActivity(state.run);
-      refreshStrip();
+      void refreshStrip(session, runId);
       renderSummary(state.run);
-      await startRun(state.mode);   // plan：agent 只講計畫、不執行；execute：相容舊行為
+      await startRun(session, runId, mode);   // plan：agent 只講計畫、不執行；execute：相容舊行為
     } catch (e) {
+      if (staleSession(session, e)) return;
       setStatus("ERROR");
       addError("建立 run 失敗：" + e.message);
     }
   }
 
   // 啟動對話：mode="plan" 先出計畫等工程師；mode="execute" 維持舊行為直接執行。
-  async function startRun(mode) {
+  async function startRun(session, runId, mode, detached = false) {
     try {
-      const r = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/start`, {
+      const url = `${API}/runs/${encodeURIComponent(runId)}/start`;
+      const options = {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ auto_run: true, mode: mode || "execute" }),
-      });
+      };
+      const r = detached ? await fetch(url, options) : await sessionFetch(session, url, options, false);
       const d = await r.json().catch(() => ({}));
+      if (!isCurrentSession(session, runId)) return;
       if (!r.ok) {
         // gateway 未接（502）等：run 仍在，訊息可續讀；誠實提示，不假裝成功。
         setStatus("ERROR");
@@ -706,8 +823,9 @@
       }
       if (d.run) state.run = d.run;
       setStatus(state.run?.status || "RUNNING");
-      beginPolling();
+      beginPolling(session, runId);
     } catch (e) {
+      if (staleSession(session, e, runId)) return;
       setStatus("ERROR");
       addError("啟動 PA Agent 失敗：" + e.message);
     }
@@ -719,6 +837,9 @@
     const input = root?.querySelector("#pa-msg-input");
     const t = (text || "").trim();
     if (!t || !state.runId) return;
+    const session = activeSession;
+    const runId = state.runId;
+    if (!isCurrentSession(session, runId)) return;
     if (!beginSend()) return;
     state.stickBottom = true;
     state.pendingUser.push(t);
@@ -733,11 +854,12 @@
     if (input) input.disabled = true;
     if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = "傳送中…"; }
     try {
-      const r = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/messages`, {
+      const r = await sessionFetch(session, `${API}/runs/${encodeURIComponent(runId)}/messages`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: t }),
-      });
+      }, false);
       const d = await r.json().catch(() => ({}));
+      if (!isCurrentSession(session, runId)) return;
       if (!r.ok) addError("訊息未送出：" + (d.detail || d.error || ("HTTP " + r.status)) + "。內容已保留，可修正後重試。");
       else {
         sent = true;
@@ -746,22 +868,22 @@
         // re-fetch the unconsumed set so the sent image leaves the preview strip
         // and cannot ride the next message.
         state.uploads = [];
-        refreshStrip();
+        void refreshStrip(session, runId);
         setStatus(state.run?.status || "RUNNING");
         // 立即顯示「思考中」，不用等下一次輪詢才有回饋。
         setThinking(true);
         // 補充訊息會建立新的計畫版本；提示工程師 GO 將採用最新版（P0-2）。
         if (d.intent === "question") {
           appendSystemNote("已記錄為本次計畫的補充內容；輸入 OK / GO 時會採用最新版本的計畫。");
-          fetch(`${API}/runs/${encodeURIComponent(state.runId)}`).then(x => x.json())
-            .then(x => { if (x.run) { state.run = x.run; renderSummary(state.run); } })
-            .catch(() => {});
+          void refreshRunSummary(session, runId);
         }
-        beginPolling();
+        beginPolling(session, runId);
       }
     } catch (e) {
+      if (staleSession(session, e, runId)) return;
       addError("訊息未送出：" + e.message + "。內容已保留，可修正後重試。");
     } finally {
+      if (!isCurrentSession(session, runId)) return;
       state.sending = false;
       // On failure the turn never reached the server, so the optimistic copy must
       // drop its pending marker: a later poll will never adopt it, and the next
@@ -774,6 +896,17 @@
       }
       if (input) { input.disabled = false; if (!sent) input.value = t; input.dispatchEvent(new Event("input")); input.focus(); }
       if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = "送出"; }
+    }
+  }
+
+  async function refreshRunSummary(session, runId) {
+    try {
+      const response = await sessionFetch(session, `${API}/runs/${encodeURIComponent(runId)}`);
+      const data = await response.json().catch(() => ({}));
+      if (!isCurrentSession(session, runId)) return;
+      if (data.run) { state.run = data.run; renderSummary(state.run); }
+    } catch (e) {
+      if (!staleSession(session, e, runId)) { /* polling remains authoritative */ }
     }
   }
 
@@ -815,11 +948,12 @@
   }
 
   // ---------- 輪詢 ----------
-  function beginPolling() {
+  function beginPolling(session = activeSession, runId = state.runId) {
+    if (!isCurrentSession(session, runId)) return;
     state.polling = true;
     if (state.timer) return;              // 已在輪詢就不重複開
-    pollOnce();
-    state.timer = setInterval(pollOnce, POLL_MS);
+    void pollOnce(session, runId);
+    state.timer = setInterval(() => { void pollOnce(session, runId); }, POLL_MS);
   }
   function setSync(ok) {
     const el = root?.querySelector("#pa-sync");
@@ -827,11 +961,12 @@
     el.textContent = ok ? "· 已連線" : "· 連線中斷，重試中";
     el.className = "pa-sync " + (ok ? "pa-sync-ok" : "pa-sync-bad");
   }
-  async function pollOnce() {
-    if (!state.runId) return;
+  async function pollOnce(session = activeSession, runId = state.runId) {
+    if (!runId || !isCurrentSession(session, runId)) return;
     try {
-      const mres = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/messages?limit=500`);
+      const mres = await sessionFetch(session, `${API}/runs/${encodeURIComponent(runId)}/messages?limit=500`);
       const md = await mres.json().catch(() => ({}));
+      if (!isCurrentSession(session, runId)) return;
       if (!mres.ok) throw new Error(md.detail || ("HTTP " + mres.status));
       for (const m of md.messages || []) {
         if (m.seq > state.renderedSeq) {
@@ -842,17 +977,19 @@
           addMessage(m);
         }
       }
-      const rres = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}`);
+      const rres = await sessionFetch(session, `${API}/runs/${encodeURIComponent(runId)}`);
       const rd = await rres.json().catch(() => ({}));
+      if (!isCurrentSession(session, runId)) return;
       if (!rres.ok) throw new Error(rd.detail || ("HTTP " + rres.status));
       state.run = rd.run || state.run;
       state.lastSync = Date.now();
       renderActivity(state.run);
       renderSummary(state.run);
-      refreshStrip();
+      void refreshStrip(session, runId);
       setSync(true);
       applyRunStatus(state.run);
     } catch (e) {
+      if (staleSession(session, e, runId)) return;
       // 暫時性連線問題：保留現有畫面，顯示連線狀態，稍後重試；不要默默吞掉（P2）。
       setSync(false);
     }
@@ -1022,9 +1159,13 @@
   const IMAGE_RE = /^image\//;
   function uploadFiles(files) {
     if (!state.runId) { addError("請先建立 / 開啟 AgentRun 再上傳附件。"); return; }
-    for (const f of files) uploadOne(f);
+    const session = activeSession;
+    const runId = state.runId;
+    if (!isCurrentSession(session, runId)) return;
+    for (const f of files) void uploadOne(f, session, runId);
   }
-  async function uploadOne(file) {
+  async function uploadOne(file, session = activeSession, runId = state.runId) {
+    if (!isCurrentSession(session, runId)) return;
     const isImage = IMAGE_RE.test(file.type) || /\.(png|jpe?g|webp)$/i.test(file.name);
     const kind = isImage ? "image" : "file";
     // Optimistic placeholder row so the engineer sees progress immediately.
@@ -1037,22 +1178,31 @@
     state.uploads = [...(state.uploads || []), pending];
     renderAttachmentStrip(state._attachments || []);
     try {
-      const res = await fetch(
-        `${API}/runs/${encodeURIComponent(state.runId)}/attachments?` +
+      const res = await sessionFetch(session,
+        `${API}/runs/${encodeURIComponent(runId)}/attachments?` +
         new URLSearchParams({ name: file.name || "screenshot.png", kind, mime: file.type || "" }),
-        { method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: file });
+        { method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: file }, false);
       const d = await res.json().catch(() => ({}));
+      if (!isCurrentSession(session, runId)) {
+        revokeUploadPreviews([pending]);
+        return;
+      }
       if (!res.ok) throw new Error(d.detail || d.error || ("HTTP " + res.status));
       const local = state.uploads.find(a => a.attachment_id === pendingId);
       if (local?._previewUrl) { try { URL.revokeObjectURL(local._previewUrl); } catch (e) { /* ignore */ } }
       state.uploads = state.uploads.filter(a => a.attachment_id !== pendingId);
       // Refresh from server truth (unconsumed set — what is still pending to send).
-      const listRes = await fetch(`${API}/runs/${encodeURIComponent(state.runId)}/attachments/unconsumed`);
+      const listRes = await sessionFetch(session, `${API}/runs/${encodeURIComponent(runId)}/attachments/unconsumed`);
       const list = await listRes.json().catch(() => ({}));
+      if (!isCurrentSession(session, runId)) return;
       if (!listRes.ok) addError("附件已上傳，但清單同步失敗：" + (list.detail || ("HTTP " + listRes.status)));
       renderAttachmentStrip(listRes.ok ? (list.attachments || []) : (state._attachments || []));
       renderLeftPanel();
     } catch (e) {
+      if (staleSession(session, e, runId)) {
+        revokeUploadPreviews([pending]);
+        return;
+      }
       pending.status = "failed";
       pending.error = e.message;
       renderAttachmentStrip(state._attachments || []);
