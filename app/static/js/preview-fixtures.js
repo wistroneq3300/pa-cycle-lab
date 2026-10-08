@@ -218,6 +218,9 @@
       if(path.endsWith('/meta'))return response({total:library.total,sheets:sheets.map(s=>({sheet:s.name,label:s.label,count:s.items.length,auto:s.items.filter(i=>i.ai_can_execute==='YES').length,partial:s.items.filter(i=>i.ai_can_execute==='PARTIAL').length,no:s.items.filter(i=>i.ai_can_execute==='NO').length}))});
       return response(sheets.find(s=>s.name===url.searchParams.get('sheet'))||{items:[]});
     }
+    // Director-owned Inspection/Telemetry fixtures stay strict and observable
+    // at the browser route layer instead of being replaced by generic preview data.
+    if(path.startsWith('/api/telemetry/')||path.includes('/inspection')||path.endsWith('/telemetry/analyze'))return nativeFetch(input,options);
     if(path.endsWith('/analyze')){await pause(180);return response({analysis:'[模擬分析] 範例溫度與電力讀值穩定。請選擇系統及時間範圍檢查指標。此結果未連線至設備。',counts:{total:6,ok:6,ns:0,warning:0,critical:0}});}
     if(path.includes('/copilot'))return response({reply:'[Design preview] L10 System Level and L11 Rack Level are separate project groups. Choose a project to review its systems, telemetry and operations.',answer:'[Design preview] Select a project to inspect its managed systems.'});
     if(path.includes('/rack/')&&path.endsWith('/telemetry')){

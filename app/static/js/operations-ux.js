@@ -139,14 +139,14 @@ document.addEventListener('click',e=>{
       const placement=rackIsExternal(m)?'\u6a5f\u6ac3\u53f3\u5074\uff08\u5916\u7f6e\uff09':Number(m.rack_u)>0?`U${m.rack_u}\u2013U1 / ${m.rack_size}U`:'\u5c1a\u672a\u653e\u7f6e';
       if(ops)ops.insertAdjacentHTML('afterbegin',`<section class="operation-target"><strong>CDU</strong><p>\u7ba1\u7406 IP\uff1a${esc(m.bmc_ip||m.os_ip||'\u672a\u8a2d\u5b9a')}</p><p>${placement}</p><p>\u6c34\u6eab\u3001\u6d41\u91cf\u3001\u6c34\u58d3\uff1a不提供量測資料</p></section>`);
       const connections=root.querySelector('.pd-connect-panel');
-      if(connections)connections.innerHTML=`<div class="operation-target"><strong>\u7ba1\u7406 IP</strong><p>${esc(m.bmc_ip||m.os_ip||'\u672a\u8a2d\u5b9a')}</p><p>\u5b89\u88dd\u4f4d\u7f6e\uff1a${placement}</p><p>此類 CDU 不提供遙測資料</p></div>`;
+      if(connections)connections.innerHTML=`<div class="operation-target"><strong>\u7ba1\u7406 IP</strong><p>${esc(m.bmc_ip||m.os_ip||'\u672a\u8a2d\u5b9a')}</p><p>\u5b89\u88dd\u4f4d\u7f6e\uff1a${placement}</p><p>此類 CDU 不提供 Telemetry 資料</p></div>`;
       root.querySelectorAll('.pd-diagnostic,.pd-showcase-copy button').forEach(n=>n.remove());
       const telemetry=root.querySelector('#pd-panel-telemetry');
       if(telemetry)telemetry.innerHTML='<section class="operation-target"><h2>CDU \u76e3\u63a7</h2><p>\u6d41\u91cf (L/min) / \u9032\u51fa\u6c34\u6eab / \u6c34\u58d3</p><p>此類設備不提供即時量測值。</p></section>';
       const caption=root.querySelector('.pd-stage-caption');if(caption)caption.textContent=rackIsExternal(m)?'外置 CDU 設備視圖':'機架式 CDU 設備視圖';
       const heading=root.querySelector('.pd-ops-heading h2');if(heading)heading.textContent='\u8a2d\u5099\u8cc7\u8a0a';
       const context=root.querySelector('.pd-ops-context');if(context)context.textContent=`${m.project||''} / CDU / ${placement}`;
-      if(info)info.textContent=`\u7ba1\u7406 IP: ${m.bmc_ip||m.os_ip||'\u672a\u8a2d\u5b9a'} / 不提供遙測資料`;
+      if(info)info.textContent=`\u7ba1\u7406 IP: ${m.bmc_ip||m.os_ip||'\u672a\u8a2d\u5b9a'} / 不提供 Telemetry 資料`;
     }
     if(!equipmentIsServer(m)){
       root.querySelectorAll('.pd-operation-group,.pd-power-group,.equipment-actions').forEach(n=>n.remove());

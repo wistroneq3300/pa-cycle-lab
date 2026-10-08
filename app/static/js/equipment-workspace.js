@@ -200,7 +200,7 @@
     target.querySelector('.ew-inspector-actions .btn:not(.primary)').onclick=()=>equipmentRackPlacement(m.name);
     if(!scene?.supported)target.querySelector('.ew-focus').disabled=true;
     target.querySelector('dl').insertAdjacentHTML('beforeend',`<div><dt>\u9023\u7dda\uff0f\u96fb\u6e90\u72c0\u614b</dt><dd>OS ${m.os_ip?status(m.os_alive):'\u672a\u8a2d\u5b9a'}<br>BMC ${m.bmc_ip?status(m.bmc_alive):'\u672a\u8a2d\u5b9a'}<br>\u96fb\u6e90 ${esc(powerLabel(m.power_state ?? m.power))}</dd></div>`);
-    if(type==='cdu')target.querySelector('dl').innerHTML=`<div><dt>\u5b89\u88dd\u4f4d\u7f6e</dt><dd>${range}</dd></div><div><dt>\u7ba1\u7406 IP</dt><dd>${esc(m.os_ip||m.bmc_ip||'\u672a\u8a2d\u5b9a')}</dd></div><div><dt>\u63a1\u96c6\u72c0\u614b</dt><dd>此類 CDU 不提供遙測資料</dd></div>`;
+    if(type==='cdu')target.querySelector('dl').innerHTML=`<div><dt>\u5b89\u88dd\u4f4d\u7f6e</dt><dd>${range}</dd></div><div><dt>\u7ba1\u7406 IP</dt><dd>${esc(m.os_ip||m.bmc_ip||'\u672a\u8a2d\u5b9a')}</dd></div><div><dt>\u63a1\u96c6\u72c0\u614b</dt><dd>此類 CDU 不提供 Telemetry 資料</dd></div>`;
     if(type!=='blanking'){
       const ping=pingRecord(m),counts=ping?.ping_counts;
       const detail=counts?`${counts.alive} / ${counts.configured} \u500b\u5df2\u8a2d\u5b9a IP \u53ef\u9054`:'';

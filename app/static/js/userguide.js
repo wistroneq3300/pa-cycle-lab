@@ -5,7 +5,7 @@ const USER_GUIDE = (() => {
   let opener = null;
 
   async function loadTemplate() {
-    const r = await fetch('/static/userguide_template.html?v=20261008-director-guide1', { cache: 'no-cache' });
+    const r = await fetch('/static/userguide_template.html?v=20261009-premium-v1', { cache: 'no-cache' });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     let t = (await r.text());
     // 檔案是被 <script type="text/userguide-html"> 包住的內嵌模板，取裡面的 HTML

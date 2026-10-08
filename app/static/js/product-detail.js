@@ -48,7 +48,7 @@
     const headingNode = node.querySelector(':scope > .card-title');
     if (headingNode) {
       if (headingNode.classList.contains('tel-card-title')) {
-        headingNode.querySelector('span').innerHTML = `效能遙測 <span class="hint" id="tel-window"></span>`;
+        headingNode.querySelector('span').innerHTML = `Telemetry <span class="hint" id="tel-window"></span>`;
       } else headingNode.textContent = heading;
     }
     return node.outerHTML;
@@ -62,7 +62,7 @@
   }
   function kv(label, value, cls = '') { const shown=value === '' || value == null ? '未取得' : value; return `<div class="pd-key-value ${cls}"><span>${label}</span><strong>${esc(shown)}</strong></div>`; }
   function stateDot(online, label) { return `<span class="pd-state ${online === true ? 'pd-state-online' : online === false ? 'pd-state-offline' : ''}"><i></i>${online===true?'Ping \u53ef\u9054':online===false?'Ping \u672a\u56de\u61c9':'\u5c1a\u672a\u89c0\u6e2c'}</span>`; }
-  let tabs = [['overview','Overview','概覽'],['hardware','Inventory','硬體'],['osslots','Nodes','節點'],['sensors','Health','健康狀態'],['telemetry','Telemetry','遙測'],['tasks','Validation','驗證']];
+  let tabs = [['overview','Overview','概覽'],['hardware','Inventory','硬體'],['osslots','Nodes','節點'],['sensors','Health','健康狀態'],['telemetry','Telemetry','監控'],['tasks','Validation','驗證']];
   // Keep the asynchronously produced report attached to its new workspace panel.
   sensorAnalyze = async function(name) {
     await originalSensorAnalyze(name);
@@ -214,7 +214,7 @@
           </div>
         </div>
       </div>`;
-    const panels = {overview,hardware:hardwarePanel,osslots:osSlotsPanel,sensors:sensorsPanel,telemetry:`${title('系統效能','遙測','<span class="pd-section-note">CPU / DIMM / SSD / NIC / GPU</span>')}${equipmentIsServer(m) && !m.passive ? (window.TelemetryProvision?.card(name,activeOs) || '') : ''}`,tasks:tasksPanel};
+    const panels = {overview,hardware:hardwarePanel,osslots:osSlotsPanel,sensors:sensorsPanel,telemetry:`${title('系統效能','Telemetry','<span class="pd-section-note">CPU / Memory / GPU / Network / Disk</span>')}${equipmentIsServer(m) && !m.passive ? (window.TelemetryProvision?.card(name,activeOs) || '') : ''}`,tasks:tasksPanel};
     return `<div class="pd-workspace" data-system="${esc(name)}"><div class="pd-breadcrumb"><button onclick="machineBack()">系統與專案</button><span>/</span><button onclick="machineBack()">${esc(b.project || '未分類')}</button><span>/</span><strong>${esc(name)}</strong></div><header class="pd-system-header"><div class="pd-system-title"><span class="pd-eyebrow">${level} ${rack ? 'RACK LEVEL' : 'SYSTEM LEVEL'} / 系統工作區</span><h1>${esc(name)}<span class="pd-level-pill">${level}</span></h1><p>${esc(identity.label || os.distro || '系統平台')} <span>·</span> ${esc(hw.cpu?.model || b.mgx_type || '受管系統')}</p></div>${osDropdown}<div class="pd-header-status">${stateDot(b.os_alive,b.os_alive ? 'System online' : 'System offline')}<div><span>專案</span><b>${esc(b.project || '未分類')}</b></div></div></header><div class="pd-workspace-grid"><div class="pd-main"><nav class="pd-tabs" role="tablist" aria-label="系統工作區">${viewTabs.map(([key,label,zh]) => `<button id="pd-tab-${key}" role="tab" aria-selected="${selected===key}" aria-controls="pd-panel-${key}" tabindex="${selected===key?'0':'-1'}" class="${selected===key?'is-active':''}" data-pd-tab="${key}" onclick="productDetailTab('${key}')"><span>${label}</span><small>${zh}</small></button>`).join('')}</nav>${viewTabs.map(([key]) => `<section id="pd-panel-${key}" role="tabpanel" aria-labelledby="pd-tab-${key}" class="pd-tab-panel${selected===key?' is-active':''}"${selected!==key?' hidden':''}>${panels[key]}</section>`).join('')}</div><aside class="pd-operations p-surface"><div class="pd-ops-heading"><span class="pd-eyebrow">操作</span><h2>系統操作</h2><span class="pd-command-line"></span></div><div class="pd-operation-group">${operationButton(findAction('openTermDialog'),'Terminal','terminal',true)}${b.bmc_ip ? `<button class="pd-operation" onclick="window.openKvmSolo && window.openKvmSolo(${quote(name)})">${glyph('monitor','▣')}<span>KVM</span><b>↗</b></button>`:''}</div>${rackSpecificationAction ? `<details class="pd-ops-disclosure pd-settings"><summary><span>設備設定</span><b aria-hidden="true">⌄</b></summary><div>${rackSpecificationAction}</div></details>` : ''}${powerActions ? `<details class="pd-ops-disclosure pd-power-group"><summary><span>電源控制</span><b aria-hidden="true">⌄</b></summary><div class="pd-power-content">${powerActions.outerHTML}</div></details>`:''}<div class="pd-ops-context">${kv('專案層級',rack?'L11 / Rack Level':'L10 / System Level')}${kv('設備類型',b.mgx_type || 'server')}${rack && b.rack_u ? kv('機櫃位置',`U${b.rack_u} · ${b.rack_size || 1}U`) : kv('運作時間',os.uptime)}</div><div class="pd-refresh-action">${operationButton(findAction('machineRefresh'),'重新整理','refresh')}</div></aside></div></div>`;
   };
   window.productDetailTab = function(key, focusTab = false) {

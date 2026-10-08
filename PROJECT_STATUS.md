@@ -1,5 +1,56 @@
 # PROJECT_STATUS — PA Cycle Lab native Next integration
 
+## 2026-10-09 Premium UI four-surface integration
+
+Branch `codex/platform-premium-ui-v1`; implementation started from remote
+`88d73de30fbca488982b2247be5ee7e37e8e51f0`. Vera Cycle behavior was compared
+against reference main `01185fe0926da84511a1022a3f13a760a4a5c089` before the
+minimal report-writer synchronization. No deployment, production service
+restart, real DUT command, Power operation, Live Telemetry installation or P0
+security claim was made.
+
+- Inspection now derives its matrix from the existing Project checker,
+  snapshots and Evidence. PASS/WARN/FAIL count as completed Coverage;
+  NOT APPLICABLE is excluded; STALE, NO DATA and disabled sources never become
+  PASS. Project default scheduling, per-Node overrides and immediate manual
+  Inspection retain the 120-second default and do not alter Telemetry.
+- Dashboard retains Hero V3 and the Server → Rack scene. Recent Activity was
+  replaced by a compact risk-sorted Project Inspection Health Top 5 with
+  affected Nodes, FAIL count/rate, Coverage, last Inspection and status.
+- Cycle uses the existing `CYCLE_REVIEW_REPORT.html` entry. Report publication
+  now has a cross-process writer lock and live-owner rebuild refusal. Test
+  Results auto-loads paged, cached Artifact metadata and offers Node,
+  Loop/Phase, type, verdict and filename filters.
+- Full Run ZIP is a separate one-worker background export, Deflate level 6,
+  with persistent Preparing/Compressing/Ready/Failed state, terminal-state
+  gates, relative paths and a SHA-256 manifest. It excludes credentials,
+  private keys, locks, temporary files and nested ZIP files; original Evidence
+  is not removed.
+- Telemetry retains its Prometheus/DCGM charts, Exporter workflow and retry
+  behavior. It adds a read-only Hardware Health card and explicit Data
+  Freshness. AI output separates direct Metrics Evidence, AI inference,
+  suggested action and evidence limits; it does not run Inspection or change a
+  hardware verdict.
+- Active operator copy follows Traditional Chinese plus standard engineering
+  terms. API keys, JSON fields, database schema, internal enums, test IDs and
+  commands were not globally replaced. Premium navigation, Sidebar, colors,
+  Console and animation architecture are retained.
+- Synthetic verification: 4 Nodes × 10 Loops × 16 Evidence files produced a
+  643-file ZIP with complete manifest; 25 targeted Python tests passed plus 2
+  subtests. The full Vera engine suite passed 271 tests with 26 existing
+  environment skips (Bash hardware scripts, Live Evidence and Linux cross-UID)
+  after Windows UTF-8 test reads were made explicit. Browser suites passed for
+  Dashboard/Inspection Health/Hero at 1366×768, 1920×1080 and 3440×1440 in
+  Light/Dark; Telemetry/Inspection state truth; and Cycle 1/4/32/128 Node
+  Console, Test Results and Full ZIP states. Screenshots are under
+  `docs/ui-premium/screens/`.
+- Retained baseline limitations are reported, not hidden: the direct 46-test
+  Inspection/Telemetry command still has three pre-existing Windows fixture
+  failures (route completion timing and checker exit 126) plus the existing
+  package-style `test_telemetry_native_gpu` import error. The separate P0-scope
+  permission suite remains 5 PASS / 2 known project-filter FAIL and was not
+  modified or claimed fixed. Synthetic evidence is not Live Hardware acceptance.
+
 ## 2026-10-04 PA Validation Platform consolidation
 
 Branch `astra-console-import`; integrated on top of remote commit `5ec9249`.

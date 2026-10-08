@@ -4218,7 +4218,9 @@ def machine_telemetry_analyze(name: str, minutes: int = 60, node_id: str = ""):
         "請用繁體中文，回覆**非常簡短**的一段話（2~3 句內，勿超過 3 句），語氣平實：\n"
         "1) 先一句：整體『正常』還是『有異常警訊』。\n"
         "2) 若有異常或趨勢在上升，簡短點出最需『會診』的 1 個指標、之後 30~60 分鐘該留意什麼；若一切持平正常則不需列。\n"
-        "3) 不要列點、不要給指令、不要重複列出所有數值。"
+        "3) 不要列點、不要給指令、不要重複列出所有數值。\n"
+        "4) 只能根據提供的 Prometheus／DCGM Metrics；不得聲稱觀測到 Xid、SEL、PCIe、dmesg 或其他未提供的硬體事件。\n"
+        "5) 根因只能標示為可能性；證據不足時必須明確說明。"
     )
     user_prompt = "以下為該機台最近數分鐘的監控摘要（含趨勢）：\n" + summary + "\n請給簡短分析："
     try:
@@ -4227,7 +4229,15 @@ def machine_telemetry_analyze(name: str, minutes: int = 60, node_id: str = ""):
             return {"ok": False, "error": "AI 未產生內容"}
     except Exception as e:
         return {"ok": False, "error": f"AI 分析失敗: {e}"}
-    return {"ok": True, "summary": summary, "analysis": txt, "minutes": int(minutes)}
+    return {"ok": True, "summary": summary, "analysis": txt, "minutes": int(minutes),
+            "analysis_result": {
+                "finding": txt,
+                "evidence": summary,
+                "possible_cause": "AI 依監控趨勢推論；目前 Metrics 不足以單獨建立硬體根因。",
+                "suggested_action": "先檢視同時間的原始趨勢；若需硬體證據，請開啟已存在的 Inspection 結果核對。",
+                "evidence_source": "Prometheus / DCGM Metrics",
+                "evidence_limit": "本分析未讀取或新增 Xid、SEL / Event Log、PCIe 或其他 Inspection Evidence。"
+            }}
 
 
 # ---- 靜態前端 ----

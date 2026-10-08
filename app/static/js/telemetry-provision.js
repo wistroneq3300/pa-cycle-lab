@@ -17,7 +17,7 @@
       this.root=root;this.abort=new AbortController();this.cursor=0;this.rows=[];this.follow=true;this.pipeline={};this.unread=0;
       this.closed=false;this.consoleOpen=false;this.name=root.dataset.system;this.node=null;this.job=null;
       this.stageQueue=[];this.stageTimer=null;
-      root.innerHTML=`<header class="tp-heading"><div><h3>節點遙測 <span data-state class="tp-state">載入中</span></h3><p data-detail aria-live="polite">正在取得節點設定…</p></div><label class="tp-node">監控節點<select aria-label="Telemetry 節點" data-node><option value="">選擇節點</option></select></label></header>
+      root.innerHTML=`<header class="tp-heading"><div><h3>Node Telemetry <span data-state class="tp-state">載入中</span></h3><p data-detail aria-live="polite">正在取得節點設定…</p></div><label class="tp-node">監控節點<select aria-label="Telemetry 節點" data-node><option value="">選擇節點</option></select></label></header>
         <div class="tp-context"><span data-target></span><span data-time></span></div>
         <div class="tp-components">
           <section class="tp-component" data-component="host"><div><span class="tp-kicker">HOST</span><h4>主機監控 · Node Exporter</h4><p>CPU / Memory / Disk / Network</p></div><strong data-component-state>尚未檢查</strong><div class="tp-component-actions"><button class="btn primary" data-enable-scope="host" disabled>安裝 / 啟用</button><details><summary>手動安裝說明</summary><div class="tp-manual" data-host-manual><p>請先選擇節點以取得此節點的安裝與連線資訊。</p></div></details></div></section>
@@ -277,7 +277,7 @@
     }
   }
   window.TelemetryProvision={
-    card:(name,slot)=>`<section class="tp-workspace p-surface" data-system="${esc(name)}" data-slot="${slot==null?'':'N'+Number(slot)}" aria-label="節點遙測"></section>`,
+    card:(name,slot)=>`<section class="tp-workspace p-surface" data-system="${esc(name)}" data-slot="${slot==null?'':'N'+Number(slot)}" aria-label="Node Telemetry"></section>`,
     mount(){const root=document.querySelector('#pd-panel-telemetry:not([hidden]) .tp-workspace');if(current?.root===root)return;current?.dispose();current=root?new View(root):null;},
     dispose(){current?.dispose();current=null;}
   };

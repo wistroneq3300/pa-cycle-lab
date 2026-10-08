@@ -88,12 +88,20 @@ function inspectionSnapshot(mode) {
   if (mode === 'error') return null;
   return {
     error: '', running: false, delayed: false,
-    config: { enabled: true, ai_enabled: true, thresholds: {}, interval_seconds: 120, deep_seconds: 600, sensor_seconds: 120, firmware_seconds: 3600, duration_seconds: 120, recovery_samples: 2, stale_seconds: 300, hysteresis: 5 },
+    config: { enabled: true, node_overrides: {}, ai_enabled: true, thresholds: {}, interval_seconds: 120, deep_seconds: 600, sensor_seconds: 120, firmware_seconds: 3600, duration_seconds: 120, recovery_samples: 2, stale_seconds: 300, hysteresis: 5 },
     summary: { fail: mode === 'current' ? 1 : 0, warning: mode === 'current' || mode === 'ai-missing' ? 1 : 0 },
     lifecycle_counts: { recovered: mode === 'recovered' ? 1 : 0, archived: 3 },
     nodes: [{ node_id: 'node-ready', label: 'N1 / n1-director-long-hostname.validation.example' }],
     identity: {}, identity_history: [],
     coverage: [{ node_id: 'node-ready', source: 'Redfish', state: mode === 'recovered' ? 'PARTIAL' : 'FRESH', collected_at: now - 30, duration: 1.7, detail: mode === 'recovered' ? 'One source unavailable; retained prior observation.' : 'EventLog and sensor observations collected.', services: ['EventLog', 'SEL', 'Journal', 'LifecycleLog'] }],
+    coverage_summary: { completed: 3, required: 4, coverage: 75, pass: 1, warn: 1, fail: 1, not_monitored: 0 },
+    check_matrix: [
+      { node_id:'node-ready',node_label:'N1',check_name:'Kernel / dmesg',status:'PASS',health_status:'PASS',required:true,expected:'No matching rule',observed:'0',last_checked:now-30,evidence_available:true,evidence_ref:{snapshot_id:'snapshot-director'},detail:'無符合規則的異常。' },
+      { node_id:'node-ready',node_label:'N1',check_name:'PCIe Inventory',status:'FAIL',health_status:'FAIL',required:true,expected:'8',observed:'7',last_checked:now-30,evidence_available:true,evidence_ref:{snapshot_id:'snapshot-director'},detail:'Expected 8 / Observed 7' },
+      { node_id:'node-ready',node_label:'N1',check_name:'SEL / Event Log',status:'WARN',health_status:'WARN',required:true,expected:null,observed:null,last_checked:now-30,evidence_available:true,evidence_ref:{snapshot_id:'snapshot-director'},detail:'發現既有事件；Severity 未變更。' },
+      { node_id:'node-ready',node_label:'N1',check_name:'Boot Identity',status:'NO_DATA',health_status:'UNKNOWN',required:true,expected:'Valid Boot ID',observed:null,last_checked:null,evidence_available:false,evidence_ref:null,detail:'等待有效 Boot ID。' },
+      { node_id:'node-ready',node_label:'N1',check_name:'GPU / NVLink',status:'NOT_APPLICABLE',health_status:'UNKNOWN',required:false,expected:null,observed:null,last_checked:now-30,evidence_available:true,evidence_ref:{snapshot_id:'snapshot-director'},detail:'此 Project 不適用。' },
+    ],
     progress: [], last_fast_at: now - 30, last_completed_at: now - 30, last_deep_at: now - 120,
   };
 }
@@ -129,7 +137,7 @@ async function json(route, body, status = 200) {
     const request = route.request(), url = new URL(request.url()), method = request.method();
     if (url.origin !== base) return route.continue();
     if (url.pathname.startsWith('/api/telemetry/') || url.pathname.includes('/telemetry/analyze') || url.pathname.includes('/inspection')) ownerRequests.push(`${method} ${url.pathname}${url.search}`);
-    if (method === 'GET' && url.pathname === '/api/telemetry/systems/chassis-01/nodes') return json(route, { nodes: telemetryNodes });
+    if (method === 'GET' && url.pathname === '/api/telemetry/systems/host_a/nodes') return json(route, { nodes: telemetryNodes });
     if (method === 'GET' && /^\/api\/telemetry\/nodes\/[^/]+$/.test(url.pathname)) {
       const id = decodeURIComponent(url.pathname.split('/').at(-1));
       const node = telemetryNodes.find(candidate => candidate.node_id === id);
@@ -138,18 +146,18 @@ async function json(route, body, status = 200) {
     if (method === 'GET' && /^\/api\/telemetry\/nodes\/[^/]+\/charts$/.test(url.pathname)) {
       const id = decodeURIComponent(url.pathname.split('/').at(-2)); return json(route, telemetryPayload(id));
     }
-    if (method === 'GET' && url.pathname === '/api/machine/chassis-01/telemetry/analyze') {
+    if (method === 'GET' && url.pathname === '/api/machine/host_a/telemetry/analyze') {
       const id = url.searchParams.get('node_id');
       if (id === 'node-ready' || id === 'node-na') return json(route, { ok: true, analysis: '已取得有效趨勢摘要。此內容為 AI 輔助判讀，不改變硬體驗證判定。' });
       if (id === 'node-query') return json(route, { ok: false, error: 'AI analysis backend unavailable (fixture)' });
       return json(route, { ok: true });
     }
-    if (method === 'GET' && url.pathname === '/api/machine/chassis-01/inspection') {
+    if (method === 'GET' && url.pathname === '/api/machine/host_a/inspection') {
       if (inspectionMode === 'error') return json(route, { detail: 'Inspection source unavailable (fixture)' }, 503);
       return json(route, inspectionSnapshot(inspectionMode));
     }
-    if (method === 'GET' && url.pathname === '/api/machine/chassis-01/inspection/issues') return json(route, { issues: inspectionIssues(inspectionMode) });
-    if (url.pathname.includes('/api/machine/chassis-01/inspection')) throw new Error(`STRICT INSPECTION MOCK: unexpected ${method} ${url.pathname}`);
+    if (method === 'GET' && url.pathname === '/api/machine/host_a/inspection/issues') return json(route, { issues: inspectionIssues(inspectionMode) });
+    if (url.pathname.includes('/api/machine/host_a/inspection')) throw new Error(`STRICT INSPECTION MOCK: unexpected ${method} ${url.pathname}`);
     return route.continue();
   });
 
@@ -170,15 +178,16 @@ async function json(route, body, status = 200) {
   }
   async function mountInspection(mode) {
     inspectionMode = mode;
-    await page.evaluate(() => { window.SystemInspection.dispose(); window.SystemInspection.mount('chassis-01'); });
+    await page.evaluate(() => { window.SystemInspection.dispose(); window.SystemInspection.mount('host_a'); });
     if (mode === 'error') await page.waitForFunction(() => document.querySelector('#pd-inspection [data-error]')?.textContent.includes('Inspection source unavailable'));
     else await page.waitForFunction(() => document.querySelector('#pd-inspection [data-status]')?.textContent && !document.querySelector('#pd-inspection [data-status]').textContent.includes('讀取中'));
   }
 
   try {
-    await page.goto(`${base}/#/dashboard`);
-    await page.waitForFunction(() => typeof openMachine === 'function');
-    await page.evaluate(() => openMachine('chassis-01'));
+    await page.goto(`${base}/?preview=normal#/dashboard`);
+    await page.waitForFunction(() => window.PA_PREVIEW?.scenario === 'normal' && typeof openMachine === 'function');
+    await page.waitForTimeout(250);
+    await page.evaluate(() => openMachine('host_a'));
     await page.locator('.pd-system-header').waitFor();
     await page.locator('#pd-tab-telemetry').click();
     await page.locator('.tp-workspace [data-node]').waitFor();
@@ -228,6 +237,8 @@ async function json(route, body, status = 200) {
       await page.locator(`#pd-inspection [data-issue-id="issue-${mode}"]`).waitFor();
       await page.locator('#pd-inspection [data-issue-id]').first().evaluate(element => { element.open = true; });
       await shot(`inspection-${mode}-1920-light`, page.locator('#pd-inspection'));
+      assert.equal(await page.locator('#pd-inspection [data-matrix] tr').count(),5);
+      assert.match(await page.locator('#pd-inspection [data-matrix]').innerText(),/Expected 8 \/ Observed 7[\s\S]*NOT APPLICABLE/);
       const text = await page.locator('#pd-inspection [data-issue-id]').first().innerText();
       assert.doesNotMatch(text, /undefined|null|NaN/);
     }

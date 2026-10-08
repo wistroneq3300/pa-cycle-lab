@@ -33,7 +33,7 @@
 <li><a href="#ug-kvm">KVM 遠端畫面與同步操作</a></li>
 <li><a href="#ug-tasks">Test Library：PA Agent 與 Batch Instructions</a></li>
 <li><a href="#ug-cycle">Cycle：PRE、停止與 Recovery</a></li>
-<li><a href="#ug-reports">證據、報告與下載</a></li>
+<li><a href="#ug-reports">Test Results、Evidence 與下載</a></li>
 <li><a href="#ug-ai">AI 助理與摘要功能</a></li>
 <li><a href="#ug-sec">儲存範圍、多人協作與容量</a></li>
 <li><a href="#ug-faq">常見問題與排查順序</a></li>
@@ -41,7 +41,7 @@
 </nav>
 </section>
 <section class="ug-sec" id="ug-nav"><h2>2. 首頁、搜尋與專案管理</h2>
-<p>首頁「總覽」整理專案驗證狀態、需要處理的 FAIL／WARNING、Cycle 執行與遙測涵蓋率。OS Ping 可達只表示網路連線成功，不代表硬體健康或驗證通過。</p>
+<p>首頁「總覽」整理 Project Inspection Health、需要處理的 FAIL／WARN、Cycle 執行與 Telemetry 狀態。Coverage 與 Hardware Health 分開判讀；OS Ping 可達只表示網路連線成功，不代表硬體健康或驗證通過。</p>
 <ol><li>在系統與專案清單選擇 L10／L11、專案或狀態條件。</li>
 <li>輸入專案名稱、設備名稱、OS IP 或 BMC IP 搜尋；找不到時先清除篩選。</li>
 <li>點設備進系統詳情，點整櫃入口進「機櫃管理」。瀏覽器上一頁可回到先前頁面。</li>
@@ -53,11 +53,11 @@
 <li>伺服器填入 OS IP、SSH 使用者、密碼與連接埠；SSH 一般為 22。依需要填 BMC 資料。</li>
 <li>送出後系統會驗證 SSH 並讀取主機名稱；若提供 BMC IP，也會檢查相關連線。失敗時依錯誤修正位址或認證，不要把 Ping 成功當作 SSH 成功。</li>
 <li>確認 MGX／設備類型及機櫃規格，再完成配置。</li></ol>
-<table class="ug-table"><tr><th>類型</th><th>用途與差異</th></tr><tr><td>Server 伺服器</td><td>OS／BMC 配對、多 OS 節點、硬體資訊與伺服器操作。</td></tr><tr><td>Switch、NVLink、Network</td><td>交換器、NVLink 設備及其他網路設備；操作依能力設定。</td></tr><tr><td>Power Shelf、PDU</td><td>電源設備；管理網路與實際供電線分開處理。</td></tr><tr><td>CDU、Storage</td><td>冷卻分配設備、儲存設備；遙測取決於採集器支援。</td></tr><tr><td>Blank Panel 空白面板</td><td>佔用 U 空間的被動面板，不做 Ping、SSH、電源操作或 LED 狀態。</td></tr></table>
+<table class="ug-table"><tr><th>類型</th><th>用途與差異</th></tr><tr><td>Server 伺服器</td><td>OS／BMC 配對、多 OS 節點、硬體資訊與伺服器操作。</td></tr><tr><td>Switch、NVLink、Network</td><td>交換器、NVLink 設備及其他網路設備；操作依能力設定。</td></tr><tr><td>Power Shelf、PDU</td><td>電源設備；管理網路與實際供電線分開處理。</td></tr><tr><td>CDU、Storage</td><td>冷卻分配設備、儲存設備；Telemetry 取決於 Exporter 支援。</td></tr><tr><td>Blank Panel 空白面板</td><td>佔用 U 空間的被動面板，不做 Ping、SSH、電源操作或 LED 狀態。</td></tr></table>
 <p>分類未確認時，先明確選擇類型。不可因為設備有 IP，就假設它支援伺服器的開關機指令。</p>
 </section>
 <section class="ug-sec" id="ug-l10"><h2>4. 單機詳情與操作目標</h2>
-<p>系統詳情包含概覽、硬體、節點、健康狀態、遙測與驗證。多節點設備在「節點」頁維持各實體槽位的獨立身分；右側「操作」依設備能力提供 Terminal、KVM、設備設定與電源控制。</p>
+<p>系統詳情包含概覽、硬體、Node、Hardware Health、Telemetry 與驗證。多節點設備在「節點」頁維持各實體槽位的獨立身分；右側「操作」依設備能力提供 Terminal、KVM、設備設定與電源控制。</p>
 <ol><li>先看設備名稱、專案層級、元件類型及右側「目前操作目標」。</li>
 <li>多 OS 設備先選目前 OS；畫面的 OS IP、配對 BMC 與後續操作會隨目標改變。</li>
 <li>硬體頁查看 CPU、記憶體、磁碟、NIC、GPU 與韌體等實際採集資訊；空白或破折號表示未取得，不是數值零。</li>
@@ -230,9 +230,10 @@
 <li>若顯示「結果未知／待核對／相關資源仍占用」，先檢視待核對動作、實際影響範圍與殘存程序，再填寫核對依據並依權限請求釋放；Recovery 不會重新送出電源命令。</li></ol>
 <p>停止、中斷、INCOMPLETE 或待核對的任務仍保留既有證據。只有終態任務可刪除；刪除會一併移除該任務的 Evidence 與 log，而且無法復原。</p>
 </section>
-<section class="ug-sec" id="ug-reports"><h2>24. 證據、報告與下載</h2>
-<ol><li>Cycle 任務展開「證據與報告」，按「載入證據清單」。先看「報告與摘要」，再依目標、PRE／START／LOOP／SUMMARY 等階段及檔名篩選原始檔。</li>
+<section class="ug-sec" id="ug-reports"><h2>24. Test Results、Evidence 與下載</h2>
+<ol><li>進入 Cycle 任務後，Test Results 會自動載入第一批報告與 Evidence。先看 Official HTML Report，再依 Node、Loop／Phase、Evidence Type、WARN／FAIL 與檔名篩選；大量檔案可按「載入更多」。</li>
 <li>Cycle Review 報告、Cycle 摘要、最終執行結果、已知／新增／惡化問題與各輪 JSON 都是保存的執行資料；仍須連同健康與覆蓋判讀，不能只因有報告就標記 PASS。</li>
+<li>Download Full ZIP 只在安全終態提供，下載整個 Run 的允許交付資料與 Manifest；RUNNING／STOP_REQUESTED 不可建立。ERROR／RECONCILIATION_REQUIRED 必須先確認 Runner 已停止及資料一致性。</li>
 <li>Live Console 可依節點、Errors 與文字篩選，並切換 Summary／Full、暫停檢視或查找 History；畫面只保存有限筆瀏覽內容，需要完整紀錄時使用 Console 的下載功能。</li>
 <li>Telemetry 啟用 Console 使用「下載完整紀錄」；Inspection 原始證據預覽若截斷，使用「下載完整證據」。下載前核對系統、Node、來源與時間。</li>
 <li>網路拓樸的 JSON 匯出用於保留目前草稿／配置；目前沒有對應匯入介面。它不是 Cycle 測試報告，也不是實體接線驗證證明。</li></ol>
@@ -252,7 +253,7 @@
 <section class="ug-sec" id="ug-faq"><h2>27. 常見問題與排查順序</h2>
 <h3>儲存後圖上沒有東西？</h3><p>先確認專案及拓樸 Rack，並按過「儲存拓樸」，不是只有套用草稿。3D 另需設備對應到庫存、已上架且兩端有效；自訂設備不會憑空變成實體模型。</p>
 <h3>四個節點只畫兩條線正常嗎？</h3><p>正常，若實際只有兩個共享管理 RJ45。節點數影響位址與檢查結果，不等於實體線數；請核對埠的節點映射。</p>
-<h3>Ping 成功，但 SSH、KVM 或遙測失敗？</h3><p>分別檢查 SSH／BMC 認證、協定、橋接服務及採集器。ICMP 可達不代表這些服務正常。</p>
+<h3>Ping 成功，但 SSH、KVM 或 Telemetry 失敗？</h3><p>分別檢查 SSH／BMC 認證、協定、橋接服務及 Exporter。ICMP 可達不代表這些服務正常。</p>
 <h3>Ping 沒回應但設備有電？</h3><p>檢查 IP、網段路由、防火牆及 ICMP 是否允許，再查設備。LED 反映可達性，不能當電源量測。</p>
 <h3>沒有紅綠閃燈，或一直灰色？</h3><p>先執行 Ping Rack，確認設備已上架、有可用管理 IP 且不是空白面板。若顏色正確但不閃，檢查是否啟用減少動態效果、暫停動畫或頁面不在前景。</p>
 <h3>升 L11 或修正高度無法儲存？</h3><p>檢查目標專案、1～48U 範圍、碰撞與資料是否已被其他人修改。外置 CDU 用專用安裝設定，不能當一般 0U Server。</p>

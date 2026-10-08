@@ -420,7 +420,7 @@ function rackCopilotHtml() {
       <div class="rack-cop-body" id="rackcop-box">
         <div class="cop-msg ai">
           <span class="cop-avatar ai">AI</span>
-          <div class="cop-bubble ai">目前查詢範圍：<b>${esc(proj) || "尚未選擇專案"}</b>。<br>可查詢設備狀態、連線與遙測資訊。</div>
+          <div class="cop-bubble ai">目前查詢範圍：<b>${esc(proj) || "尚未選擇專案"}</b>。<br>可查詢設備狀態、連線與 Telemetry 資訊。</div>
         </div>
       </div>
       <div class="rack-cop-input">
@@ -3098,13 +3098,13 @@ function pageMachine() {
             <option value="43200">30 天</option>
           </select>
         </label>
-        <span class="tel-ai-hint">遙測 AI 分析</span>
+        <span class="tel-ai-hint">Telemetry AI Analysis</span>
       </div>
       <div class="tel-ai" id="tel-ai">正在分析此範圍的監控趨勢…</div>
       <div class="tel-status" id="tel-status" role="status" aria-live="polite"></div>
       <div class="tel-grid" id="tel-grid">
         <div class="tel-block" data-open="1">
-          <div class="tel-block-head"><span class="tel-label">CPU <em>（中央處理器）</em></span></div>
+          <div class="tel-block-head"><span class="tel-label">CPU</span></div>
           <div class="tel-block-body">
             <div class="chart-box"><div class="chart-title">CPU 使用率 <span class="unit">＝ 各核心忙碌比例的平均，0~100%</span></div><canvas id="tel-cpu"></canvas></div>
             <div class="chart-box"><div class="chart-title">CPU 溫度 <span class="unit">＝ 包裝溫度（x86_pkg_temp / lm-sensors），無感測器時留空</span></div><canvas id="tel-cputemp"></canvas></div>
