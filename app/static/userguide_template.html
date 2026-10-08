@@ -8,7 +8,8 @@
 <li>設定實際 U 高度，再把 L11 設備放到機櫃位置；CDU 另外選擇內置或外置。</li>
 <li>進入「網路拓樸」，匯入設備、設定節點與實體埠、配對接線，再儲存拓樸。</li>
 <li>用「檢查 IP」確認節點可達，用「整櫃連線檢查」查看整櫃摘要及 3D 指示燈。</li>
-<li>需要操作設備時，先核對「目前操作目標」，再開 Terminal、KVM 或執行電源操作。</li></ol>
+<li>需要操作設備時，先核對「目前操作目標」的 Node、OS Slot 與位址，再開 Terminal、KVM 或執行電源操作。</li>
+<li>進行驗證時，先分辨 Test Library 的單選 PA Agent 流程、多選批次指令，以及需要 PRE 確認的 Cycle 流程。</li></ol>
 <p><b>先分清楚：</b>規劃接線是設計；已確認連線是人工確認；Ping 是 IP 可達性；SSH 認證成功是帳號登入成功；它們都不能單獨證明設備健康或實際電源狀態。</p>
 <nav aria-label="手冊目錄"><h3>章節目錄</h3><ol class="ug-toc" start="2"><li><a href="#ug-nav">首頁、搜尋與專案管理</a></li>
 <li><a href="#ug-add">新增系統與設備分類</a></li>
@@ -24,14 +25,16 @@
 <li><a href="#ug-naboo">新專案配置流程</a></li>
 <li><a href="#ug-ping">網路拓樸的「檢查 IP」</a></li>
 <li><a href="#ug-rack-ping">整櫃連線檢查、失敗摘要與 3D LED</a></li>
-<li><a href="#ug-telemetry">Telemetry 遙測與整櫃彙總</a></li>
-<li><a href="#ug-sensors">感測器、硬體診斷與警示</a></li>
+<li><a href="#ug-telemetry">Telemetry、Node Exporter 與 DCGM Exporter</a></li>
+<li><a href="#ug-inspection">系統巡檢、Inspection 與原始證據</a></li>
 <li><a href="#ug-terminal">SSH Terminal 單機操作</a></li>
 <li><a href="#ug-broad">廣播終端與多機指令</a></li>
 <li><a href="#ug-power">電源控制與批次結果</a></li>
 <li><a href="#ug-kvm">KVM 遠端畫面與同步操作</a></li>
-<li><a href="#ug-tasks">Test Library 與驗證任務</a></li>
-<li><a href="#ug-ai">AI 助理 與摘要功能</a></li>
+<li><a href="#ug-tasks">Test Library：PA Agent 與 Batch Instructions</a></li>
+<li><a href="#ug-cycle">Cycle：PRE、停止與 Recovery</a></li>
+<li><a href="#ug-reports">證據、報告與下載</a></li>
+<li><a href="#ug-ai">AI 助理與摘要功能</a></li>
 <li><a href="#ug-sec">儲存範圍、多人協作與容量</a></li>
 <li><a href="#ug-faq">常見問題與排查順序</a></li>
 <li><a href="#ug-key">快捷鍵與閱讀提示</a></li></ol>
@@ -61,9 +64,9 @@
 <li>需要最新資料時使用重新整理；記錄採集時間，分辨快取與新結果。</li></ol>
 <p>設備視圖用於位置與類型辨識；實際配置與狀態以系統回報資料為準。MAC 僅在有對應觀測資料時顯示。系統診斷提供檢查結果，不會自動修復硬體。</p>
 </section>
-<section class="ug-sec" id="ug-os"><h2>5. 多節點與操作目標</h2>
+<section class="ug-sec" id="ug-os"><h2>5. Node、OS Slot 與操作目標</h2>
 <p>一台實體 Server 可以有多個節點；不是每個專案都固定四個。「節點」管理各節點的 OS 與配對 BMC。切換目前節點只會改變操作目標，不會修改既有 Cycle 任務。</p>
-<ol><li>進入設備詳情的 OS Slots，核對實體槽位與已安裝節點。</li>
+<ol><li>進入設備詳情的「節點（Nodes）」頁，核對實體 OS Slot 與已安裝節點。</li>
 <li>新增節點並填寫連線資訊。可先建立計畫節點，或選擇授權探測後建立；建檔不代表硬體已驗證。</li>
 <li>檢查辨識結果與配對 BMC；未取得時編輯補齊。</li>
 <li>逐一切換目前 OS，確認右側目標的 OS／BMC 位址正確。</li>
@@ -155,34 +158,39 @@
 <p>指示燈位於有電設備的機身，空白面板沒有。這是<b>Ping 可達性視覺化，不是真實電源感測值</b>。作業系統關閉 ICMP 時，即使設備有電也可能紅燈。減少動態效果設定會使燈保持靜態；CDU 藍色裝飾燈條與這個狀態不同。</p>
 <p>結果是本次檢查快照，切換專案或儲存拓樸後需重新檢查，不是持續自動監控。大量目標會分批並行；失敗會重試一次。單次上限為 2048 個不重複 IP、4096 個目標欄位，最多 64 個並行探測，並非限制在 512 埠。</p>
 </section>
-<section class="ug-sec" id="ug-telemetry"><h2>16. Telemetry 遙測與整櫃彙總</h2>
-<ol><li>系統詳情開遙測，或在「機櫃管理」切到 Telemetry。</li>
-<li>選時間範圍與設備，依 CPU、記憶體、GPU、磁碟、網路等群組閱讀。</li>
-<li>使用全部／常用／資料需確認等篩選，以及展開／收合群組，減少不相關資訊。</li>
-<li>先看採樣時間與資料是否持續更新，再比較利用率、溫度、功率與趨勢。</li></ol>
-<p>整櫃彙總以該專案 L11 設備為範圍。資料缺少或最後樣本過舊會需要確認；「沒有資料」不是 0%，也不能直接判定設備壞掉。</p>
-<p><b>支援範圍：</b>欄位是否有數值取決於實際採集器、設備能力及連線。CDU、Switch、PDU 與 Power Shelf 的專用指標依設備支援範圍提供；沒有量測資料時不顯示為零或正常。</p>
+<section class="ug-sec" id="ug-telemetry"><h2>16. Telemetry、Node Exporter 與 DCGM Exporter</h2>
+<ol><li>先在系統詳情確認目前 Node／OS Slot，再開 Telemetry；整櫃視圖則在「機櫃管理」切到 Telemetry。</li>
+<li>Host 監控使用 Node Exporter；GPU 監控使用 DCGM Exporter。兩者是獨立狀態，可分別安裝、啟用或重新檢查。</li>
+<li>按「安裝／啟用」前核對目標節點與維護時段。作業可能在該節點安裝或啟動服務，並向中央 Prometheus 登記；既有健康 Exporter 會沿用。</li>
+<li>自動處理不適用或失敗時展開「手動安裝說明」，依頁面提供的節點端與 PA Manager 端檢查步驟操作，再回來重新檢查。</li>
+<li>「查看安裝紀錄」是唯讀 Console；關閉紀錄或離開頁面不會停止已送出的啟用作業，可從同一節點重新開啟並下載完整紀錄。</li>
+<li>選時間範圍與圖表群組，先看採樣時間與狀態，再比較 CPU、記憶體、GPU、磁碟、網路、溫度與功率趨勢。</li></ol>
+<p>CPU-only 節點的 GPU 狀態可為「不適用」，不需要安裝 DCGM Exporter。Host 已就緒、GPU 需要處理時，Host 圖表仍可使用；不要把兩者合併判成整個節點失敗。</p>
+<p>「尚無資料」、「資料過舊」與「查詢未完成」都不是 0%，也不代表健康。整櫃彙總以該專案 L11 設備為範圍；欄位是否有值仍取決於採集器、設備能力、Prometheus 連線及實際樣本。</p>
 </section>
-<section class="ug-sec" id="ug-sensors"><h2>17. 感測器、硬體診斷與警示</h2>
-<p>感測器頁可搜尋名稱、按正常／需確認等狀態篩選，查看原始讀值、單位與採集時間。先核對原始值與設備規格，再解讀 AI 摘要。</p>
-<ol><li>確認目前 OS／BMC 目標，重新取得資料。</li>
-<li>找出異常項目及時間，分辨「真的超出範圍」與「採集失敗／未支援」。</li>
-<li>需要進一步資訊時執行系統診斷，再比對 Terminal 或設備管理介面。</li></ol>
-<p>頂列 GPU 等警示須有對應觀測資料才有意義。資料停止更新、認證失敗與硬體異常是不同問題；診斷與 AI 結論應保留來源及時間。</p>
+<section class="ug-sec" id="ug-inspection"><h2>17. 系統巡檢、Inspection 與原始證據</h2>
+<p>系統巡檢會用已保存且可歸屬目前系統／節點的硬體、事件與 Telemetry 資料做唯讀檢查；不會因巡檢本身改變設備電源狀態。</p>
+<ol><li>先確認目前系統與巡檢涵蓋清單中的節點，查看巡檢是否啟用、最近完成時間、規則版本與資料完整度。</li>
+<li>展開「資料來源與涵蓋範圍」，分辨資料有效、過舊、缺少、部分涵蓋、來源無法使用或 Cycle 預期恢復中。</li>
+<li>按「立即巡檢」要求新一輪觀測；按「查看問題」後可依節點、狀態與關鍵字篩選目前問題、最近恢復及歷史紀錄。</li>
+<li>「已知悉」、「標記已知問題」與「暫停通知 24 小時」只更新處理標記，不會改寫原始規則結果或修復硬體。</li>
+<li>AI 輔助判讀可等待、完成、失敗或手動重新分析；它提供建議，不會改變 FAIL／WARN 規則判定。</li>
+<li>有來源快照時按「查看原始證據」。預覽為唯讀，可搜尋、跳到下一筆、複製已載入內容；若顯示截斷，使用「下載完整證據」取得全文。</li></ol>
+<p>資料未支援、採集失敗、身分不一致與硬體異常是不同狀態。原始證據的來源、採集時間及截斷說明應與問題紀錄一起核對；預覽載入失敗不代表原檔已不存在。</p>
 </section>
 <section class="ug-sec" id="ug-terminal"><h2>18. SSH Terminal 單機操作</h2>
 <ol><li>核對右側目前目標及 OS Slot，再開 Terminal。</li>
 <li>依介面選 OS、BMC 或雙視窗；非伺服器若缺認證，先補連線資料。</li>
 <li>等待連線成功後再輸入命令；可縮放或展開視窗。</li>
 <li>結束後關閉工作階段。</li></ol>
-<p>Terminal 需要 SSH 服務、有效帳密與橋接服務正常。Ping 成功但 Terminal 失敗時，先檢查 SSH 埠、帳號、權限與服務，不要直接更換拓樸線路。輸入的命令會在真實設備執行，尤其確認多 OS 的目標。</p>
+<p>Terminal 需要 SSH 服務、有效帳密與橋接服務正常。Ping 成功但 Terminal 失敗時，先檢查 SSH 埠、帳號、權限與服務，不要直接更換拓樸線路。若目前連線指向實體設備，輸入會直接送往該目標；務必先確認環境標示、Node 與 OS Slot。</p>
 </section>
 <section class="ug-sec" id="ug-broad"><h2>19. 廣播終端與多機指令</h2>
 <ol><li>從單機／機櫃入口開廣播終端，勾選需要的設備或 OS 節點。</li>
 <li>等各面板連線就緒；多 OS 會區分到對應節點。</li>
 <li>選單機輸入或廣播模式，再次核對接收對象。</li>
 <li>先用讀取型命令確認目標，再執行真正需要的工作。</li></ol>
-<p>廣播會把輸入送往選定且連線的目標，不是模擬。歷史命令不代表目前選取範圍與上次相同；重送前重新檢查。可以關閉個別面板，斷線目標需先恢復連線。</p>
+<p>廣播會把輸入送往目前選定且已連線的目標；是否連到實體設備取決於目前部署與連線狀態。歷史命令不代表這次選取範圍與上次相同；重送前重新檢查。可以關閉個別面板，斷線目標需先恢復連線。</p>
 </section>
 <section class="ug-sec" id="ug-power"><h2>20. 電源控制與批次結果</h2>
 <p>伺服器可依能力提供開機、關機、Reboot 與 AUX Cycle（影響範圍依設備設定核對）。Switch、CDU、Power Shelf 等只提供已支援或已配置的操作；空白面板沒有這些功能。</p>
@@ -201,36 +209,60 @@
 <p>候選設備數不等於已連線數。同步僅適用實際相容並已連線的 RFB 面板；不相容設備會顯示原因。目前 SP-X／MegaRAC IVTP 在此介面不支援。</p>
 <p>一般連線錯誤會有限次重試；認證失敗要先修正認證，手動重新連線即可。黑畫面或超時請確認 BMC、協定與 KVM 橋接服務，不代表 OS 一定離線。</p>
 </section>
-<section class="ug-sec" id="ug-tasks"><h2>22. Test Library 與驗證任務</h2>
-<ol><li>從系統詳情的「驗證」頁開啟 Test Library。</li>
-<li>選分類／工作表，搜尋測項並翻頁，查看自動、部分自動或手動等適用性。</li>
-<li>閱讀套件、前置條件、步驟、指令與判定標準，再勾選所需項目。</li>
-<li>產生並複製測試指令內容，核對設備、OS、路徑及待填參數。</li>
-<li>在你選定的 Terminal 或外部執行工具操作，保存輸出並依判定標準確認結果。</li></ol>
-<p><b>指派／複製不等於已執行，也不代表 PASS。</b>複製內容不會自動啟動外部執行工具。切換分類時選取範圍會更新，複製前再核對測項。資料庫空白或載入失敗時，請檢查部署的測試資料與後端載入狀態。</p>
+<section class="ug-sec" id="ug-tasks"><h2>22. Test Library：PA Agent 與 Batch Instructions</h2>
+<ol><li>從系統詳情的「驗證」頁開啟 Test Library，先核對上方目前指派目標的專案、系統、Node 與 OS IP。</li>
+<li>選分類／工作表，搜尋測項並翻頁；閱讀套件、前置條件、步驟、指令、預期證據、恢復程序與判定標準。</li>
+<li><b>只選一筆：</b>主要動作是「交給 PA Agent」。開窗後 PA Agent 先提出執行計畫並停在等待確認，不會因開窗就執行。</li>
+<li>審閱計畫後，由工程師在對話框<b>手動輸入 <code>OK</code> 或 <code>GO</code> 並按 Enter</b>才開始；Shift＋Enter 換行。若輸入補充或問題，Agent 會更新計畫並繼續等待最新版本的確認。</li>
+<li><b>選兩筆以上：</b>主要動作改為「產生批次指令 (N)」（Batch Instructions）。它只整理並複製全部已選測項，不會開 PA Agent，也不會執行命令。</li>
+<li>若單選時 PA Agent 入口不可用，介面只產生可複製指令。請在選定的 Terminal 或外部工具操作並保存輸出。</li></ol>
+<p><b>PA Agent 顯示 DONE，只表示 Agent 已停止工作並產出記錄，狀態仍是「等待工程師判定」，不是 PASS。</b>工程師必須依命令紀錄、證據、預期結果與例外情況判定 PASS／FAIL／BLOCKED。指派、複製或送出 OK／GO 也都不等於測試通過。</p>
+<p>切換分類或工作表會更新選取範圍，送出前重新核對。測試案例無法載入時請重試；不要用空白清單推斷該系統沒有測項。</p>
 </section>
-<section class="ug-sec" id="ug-ai"><h2>23. AI 助理與摘要功能</h2>
+<section class="ug-sec" id="ug-cycle"><h2>23. Cycle：PRE、停止與 Recovery</h2>
+<ol><li>從 Cycle 工作區或機框／節點入口建立任務，選專案、Reboot／DC Power Cycle／AUX Cycle、Inband／Outband、輪次或時數，再勾選 Chassis 下的 Node。</li>
+<li>先讀環境標示：「測試模式」不操作實體設備；只有經部署與能力確認且畫面標示 LIVE 的任務才可視為硬體連線流程。</li>
+<li>建立任務後系統先執行並保存 PRE。LIVE PRE 可能安裝依賴或上傳驗證腳本；PRE 完成不代表硬體已通過。</li>
+<li>審閱 PRE 版本、每個目標的 findings、排除原因、可執行清單及完整影響範圍，再按「確認這份 PRE 與完整影響範圍，開始執行」。確認綁定同一份 PRE，資料變更時應重新審閱。</li>
+<li>執行中分開看任務狀態、累積健康、有效輪數、Boot／POST 與覆蓋；<code>COMPLETE</code> 是執行終點，不自動等於硬體 PASS。</li>
+<li>「停止：不再派送新動作」只阻止後續派送。已派送的動作仍會收尾或進入 Recovery；不要把按下停止當作所有設備已立即停止。</li>
+<li>瀏覽器斷線或關閉頁面不會證明 worker 已停止。回到同一任務查看 heartbeat、停止原因與節點進度；Live Console 是唯讀，關閉 Console 也不會停止任務。</li>
+<li>若顯示「結果未知／待核對／相關資源仍占用」，先檢視待核對動作、實際影響範圍與殘存程序，再填寫核對依據並依權限請求釋放；Recovery 不會重新送出電源命令。</li></ol>
+<p>停止、中斷、INCOMPLETE 或待核對的任務仍保留既有證據。只有終態任務可刪除；刪除會一併移除該任務的 Evidence 與 log，而且無法復原。</p>
+</section>
+<section class="ug-sec" id="ug-reports"><h2>24. 證據、報告與下載</h2>
+<ol><li>Cycle 任務展開「證據與報告」，按「載入證據清單」。先看「報告與摘要」，再依目標、PRE／START／LOOP／SUMMARY 等階段及檔名篩選原始檔。</li>
+<li>Cycle Review 報告、Cycle 摘要、最終執行結果、已知／新增／惡化問題與各輪 JSON 都是保存的執行資料；仍須連同健康與覆蓋判讀，不能只因有報告就標記 PASS。</li>
+<li>Live Console 可依節點、Errors 與文字篩選，並切換 Summary／Full、暫停檢視或查找 History；畫面只保存有限筆瀏覽內容，需要完整紀錄時使用 Console 的下載功能。</li>
+<li>Telemetry 啟用 Console 使用「下載完整紀錄」；Inspection 原始證據預覽若截斷，使用「下載完整證據」。下載前核對系統、Node、來源與時間。</li>
+<li>網路拓樸的 JSON 匯出用於保留目前草稿／配置；目前沒有對應匯入介面。它不是 Cycle 測試報告，也不是實體接線驗證證明。</li></ol>
+<p>報告與下載可能包含內部名稱、IP、命令輸出或硬體識別。分享前依公司規範處理敏感資訊，不要附上帳號密碼；下載失敗時保留畫面上的任務 ID、檔名與錯誤訊息再重試。</p>
+</section>
+<section class="ug-sec" id="ug-ai"><h2>25. AI 助理與摘要功能</h2>
 <p>AI 助理可協助查詢專案、設備連線狀態與系統摘要。先確認目前專案或設備，再提出查詢。</p>
 <ul><li>以原始資料、採樣時間及工具輸出核對分析結果。</li><li>可查詢範圍依帳號權限及可用資料決定；分析結果不會取代硬體驗證。</li><li>無法完成分析時，可先查看原始紀錄，並請管理者檢查服務狀態。</li></ul>
 <p>資料處理位置依部署設定決定；提交敏感資訊前，請確認公司使用規範與服務設定。</p>
 </section>
-<section class="ug-sec" id="ug-sec"><h2>24. 儲存範圍、多人協作與容量</h2>
-<table class="ug-table"><tr><th>資料</th><th>保存與更新方式</th></tr><tr><td>庫存、節點、配置</td><td>由對應表單儲存到後端；管理 IP 紀錄不會修改設備網路設定。</td></tr><tr><td>拓樸草稿</td><td>先套用，再儲存整份拓樸；匯出 JSON 可保留規劃。</td></tr><tr><td>拓樸設備快照</td><td>庫存改名、搬移、刪除或節點變更後，需核對快照與實體對應。</td></tr><tr><td>Ping 結果</td><td>本次快照，依操作重跑；不是持續監控、硬體健康或驗證通過的證據。</td></tr><tr><td>手冊位置、部分顯示偏好</td><td>存在目前瀏覽器；換裝置或清除網站資料後可能重設。</td></tr></table>
+<section class="ug-sec" id="ug-sec"><h2>26. 儲存範圍、多人協作與容量</h2>
+<p>下表列出主要資料，不是所有部署資料的完整清單；實際保留期限與下載權限依部署政策。</p>
+<table class="ug-table"><tr><th>資料</th><th>保存與更新方式</th></tr><tr><td>庫存、Node、OS Slot、配置</td><td>由對應表單儲存到後端；管理 IP 紀錄不會修改設備網路設定。</td></tr><tr><td>拓樸草稿</td><td>先套用，再儲存整份拓樸；匯出 JSON 可保留規劃。</td></tr><tr><td>拓樸設備快照</td><td>庫存改名、搬移、刪除或節點變更後，需核對快照與實體對應。</td></tr><tr><td>Ping 結果</td><td>本次快照，依操作重跑；不是持續監控、硬體健康或驗證通過的證據。</td></tr><tr><td>PA Agent 對話、附件與活動</td><td>依 Agent run 保存；DONE 不改寫成 PASS。刪除或保留方式依部署權限與政策。</td></tr><tr><td>Telemetry 啟用紀錄</td><td>依節點與作業保存，重開頁面可續看可用紀錄；完整紀錄可由唯讀 Console 下載。</td></tr><tr><td>Cycle PRE、執行紀錄與證據</td><td>依任務持久保存；停止或中斷不會自動刪除。刪除終態任務時會一併移除且無法復原。</td></tr><tr><td>Inspection 問題與證據</td><td>保留狀態、恢復歷史、處理標記與來源快照；處理標記不會改寫原始觀測。</td></tr><tr><td>手冊位置、部分顯示偏好</td><td>存在目前瀏覽器；換裝置或清除網站資料後可能重設。</td></tr></table>
 <p>每專案最多 32 個拓樸 Rack；每 Rack 最多 256 個設備與 2048 條線；每設備最多 64 個節點與 256 個埠。拓樸標籤最多 160 字元，IP 使用有效 IPv4／IPv6。超出單一 Rack 規劃容量時先分組，並留意跨組接線需求。</p>
 <p>拓樸用來保存位址與接線，不填帳號密碼。分享匯出檔或截圖前留意內部名稱與 IP。多人修改遇版本衝突時保留草稿再核對，不要直接覆蓋他人規劃。</p>
 </section>
-<section class="ug-sec" id="ug-faq"><h2>25. 常見問題與排查順序</h2>
+<section class="ug-sec" id="ug-faq"><h2>27. 常見問題與排查順序</h2>
 <h3>儲存後圖上沒有東西？</h3><p>先確認專案及拓樸 Rack，並按過「儲存拓樸」，不是只有套用草稿。3D 另需設備對應到庫存、已上架且兩端有效；自訂設備不會憑空變成實體模型。</p>
 <h3>四個節點只畫兩條線正常嗎？</h3><p>正常，若實際只有兩個共享管理 RJ45。節點數影響位址與檢查結果，不等於實體線數；請核對埠的節點映射。</p>
 <h3>Ping 成功，但 SSH、KVM 或遙測失敗？</h3><p>分別檢查 SSH／BMC 認證、協定、橋接服務及採集器。ICMP 可達不代表這些服務正常。</p>
 <h3>Ping 沒回應但設備有電？</h3><p>檢查 IP、網段路由、防火牆及 ICMP 是否允許，再查設備。LED 反映可達性，不能當電源量測。</p>
 <h3>沒有紅綠閃燈，或一直灰色？</h3><p>先執行 Ping Rack，確認設備已上架、有可用管理 IP 且不是空白面板。若顏色正確但不閃，檢查是否啟用減少動態效果、暫停動畫或頁面不在前景。</p>
 <h3>升 L11 或修正高度無法儲存？</h3><p>檢查目標專案、1～48U 範圍、碰撞與資料是否已被其他人修改。外置 CDU 用專用安裝設定，不能當一般 0U Server。</p>
+<h3>PA Agent 顯示 DONE，為什麼還不是 PASS？</h3><p>DONE 只表示 Agent 已停止工作並產出記錄。請由工程師核對 Test Case 的判定標準、命令紀錄與證據，再決定 PASS、FAIL 或 BLOCKED。</p>
+<h3>Cycle 按了停止，為什麼還有動作在收尾？</h3><p>停止只阻止新動作派送；已派送的操作仍要完成收尾或 Recovery。回到任務查看 heartbeat、節點階段與待核對狀態，不要重複送出電源命令。</p>
 <h3>頁面無法載入或操作失敗？</h3><p>先保留錯誤訊息與操作時間，再重新整理頁面。若持續發生，請提供目前專案、設備與操作步驟給管理者。</p>
 <h3>畫面與使用手冊不一致？</h3><p>請重新整理頁面，並向管理者確認目前使用的系統版本。</p>
 </section>
-<section class="ug-sec" id="ug-key"><h2>26. 快捷鍵與閱讀提示</h2>
-<table class="ug-table"><tr><th>操作</th><th>用途</th></tr><tr><td>?</td><td>非文字輸入狀態開啟使用手冊。</td></tr><tr><td>手冊搜尋</td><td>依整段內容篩選，例如 OS Slot、CDU、檢查 IP、已確認、KVM。清空恢復全部。</td></tr><tr><td>手冊目錄連結</td><td>跳到指定章節，不切換目前系統頁面。</td></tr><tr><td>手冊標題列與右下角</td><td>拖動位置與調整大小；最小化後點標題列還原。</td></tr><tr><td>3D 方向鍵／Shift＋方向鍵</td><td>畫布聚焦時旋轉；Home 重設，＋／－縮放。</td></tr></table>
+<section class="ug-sec" id="ug-key"><h2>28. 快捷鍵與閱讀提示</h2>
+<table class="ug-table"><tr><th>操作</th><th>用途</th></tr><tr><td>?</td><td>一般頁面焦點開啟使用手冊；在輸入欄、可編輯內容、Terminal、廣播終端或 KVM 操作中不會攔截按鍵。</td></tr><tr><td>手冊搜尋</td><td>依整段內容篩選，例如 OS Slot、PA Agent、PRE、Exporter、Evidence、KVM。清空恢復全部。</td></tr><tr><td>手冊目錄連結</td><td>跳到指定章節，不切換目前系統頁面。</td></tr><tr><td>手冊標題列與右下角</td><td>拖動位置與調整大小；最小化後可點標題列，或再次啟用同一個最小化控制來還原。</td></tr><tr><td>3D 方向鍵／Shift＋方向鍵</td><td>畫布聚焦時旋轉；Home 重設，＋／－縮放。</td></tr></table>
 <p>遇問題時提供：專案、設備、目前 OS 節點、操作名稱、錯誤訊息與時間；不要附上帳密。先分辨配置問題、位址可達性、登入認證及服務整合，可更快找到原因。</p>
 </section>
 </div>
