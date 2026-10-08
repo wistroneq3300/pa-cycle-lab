@@ -37,7 +37,7 @@ security claim was made.
   Console and animation architecture are retained.
 - Synthetic verification: 4 Nodes × 10 Loops × 16 Evidence files produced a
   643-file ZIP with complete manifest; 25 targeted Python tests passed plus 2
-  subtests. The full Vera engine suite passed 271 tests with 26 existing
+  subtests. The full Vera engine suite ran 271 tests: 245 passed and 26 existing
   environment skips (Bash hardware scripts, Live Evidence and Linux cross-UID)
   after Windows UTF-8 test reads were made explicit. Browser suites passed for
   Dashboard/Inspection Health/Hero at 1366×768, 1920×1080 and 3440×1440 in

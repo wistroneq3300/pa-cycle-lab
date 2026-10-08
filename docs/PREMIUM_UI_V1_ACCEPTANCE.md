@@ -63,7 +63,7 @@ service, deploy Live, or claim that the separate P0 security work is resolved.
 | Area | Result | Evidence |
 |---|---|---|
 | Targeted Python regression | PASS | 25 passed, 6 warnings, 2 subtests passed |
-| Full Vera engine regression | PASS | 271 passed, 26 existing environment skips |
+| Full Vera engine regression | PASS | 271 run: 245 passed, 26 existing environment skips |
 | Synthetic Full ZIP scale | PASS | 4 Nodes × 10 Loops × 16 Evidence; 643 manifest files |
 | Dashboard browser | PASS | 1366×768, 1920×1080, 3440×1440; Light/Dark; Hero final phase |
 | Telemetry / Inspection browser | PASS | State truth, matrix, AI Evidence, error/empty handling |
