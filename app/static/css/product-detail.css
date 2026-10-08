@@ -9,9 +9,14 @@
 .pd-os-intro { margin-bottom: 16px; font-size: 13px; line-height: 1.6; }
 .pd-os-intro p { margin: 4px 0; }
 .pd-os-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; table-layout: fixed; }
-.pd-os-table-wrap { overflow-x: auto; margin-bottom: 16px; min-width: 0; max-width: 100%; }
+.pd-os-table-wrap { overflow-x: auto; margin-bottom: 16px; min-width: 0; max-width: 100%; border-block: 1px solid rgba(148,163,184,.12); scrollbar-gutter: stable; scrollbar-width: thin; }
+.pd-os-table-wrap:focus-visible { outline: 2px solid var(--p-accent,#0088a9); outline-offset: 3px; }
 .pd-os-table th, .pd-os-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid rgba(148,163,184,.12); font-size: 13px; overflow: hidden; }
 .pd-os-table th { color: var(--p-muted, #94a3b8); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .4px; position: sticky; top: 0; background: var(--p-panel, #111b27); }
+.pd-os-table th:first-child,.pd-os-table td:first-child { position: sticky; left: 0; z-index: 2; background: var(--p-panel,#111b27); }
+.pd-os-table th:last-child,.pd-os-table td:last-child { position: sticky; right: 0; z-index: 2; background: var(--p-panel,#111b27); box-shadow: -10px 0 14px -14px rgba(15,23,42,.75); }
+.pd-os-table th:first-child,.pd-os-table th:last-child { z-index: 3; }
+.pd-os-table tr.pd-os-row-active td:first-child,.pd-os-table tr.pd-os-row-active td:last-child { background: color-mix(in srgb,var(--p-panel,#111b27) 92%,var(--p-accent,#0088a9) 8%); }
 .pd-os-row-active { background: color-mix(in srgb,var(--p-accent,#0088a9) 8%,transparent); }
 .pd-os-slot-num { font-weight: 700; margin-right: 6px; color: var(--p-text, #f1f5f9); font-size: 15px; }
 .pd-os-active-tag { font-size: 10px; background: color-mix(in srgb,var(--p-accent,#0088a9) 18%,transparent); color: var(--p-accent,#0088a9); border:1px solid color-mix(in srgb,var(--p-accent,#0088a9) 44%,transparent); padding: 1px 6px; border-radius: 4px; font-weight: 700; vertical-align: middle; }
@@ -52,8 +57,8 @@
 .pd-os-probe-btn { flex: 0 0 auto; flex-shrink: 0; white-space: nowrap; background: none; border: 1px solid var(--p-accent, #38bdf8); color: var(--p-accent, #38bdf8); border-radius: 5px; padding: 4px 8px; font-size: 12px; cursor: pointer; vertical-align: middle; }
 .pd-os-probe-btn:hover { background: rgba(0,108,147,.12); }
 .pd-os-probe-btn:disabled { opacity: .5; cursor: wait; }
-.pd-os-actions { display: flex; gap: 4px; }
-.pd-os-actions .btn { flex: 0 0 auto; }
+.pd-os-actions { display: flex; flex-direction: column; gap: 5px; align-items: stretch; }
+.pd-os-actions .btn { flex: 0 0 auto; width: 100%; justify-content: center; white-space: nowrap; }
 .pd-os-add { border-top: 1px solid rgba(148,163,184,.12); padding-top: 16px; }
 .pd-os-add-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .pd-os-add-row .pd-os-input { width: auto; flex: 1; min-width: 120px; }

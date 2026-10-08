@@ -196,7 +196,7 @@
     const osSlotsPanel = `${title('MULTI-NODE CHASSIS','節點管理',`<span class="pd-section-note">1 機框 = ${osList.length} 個已安裝節點 · 控制器依硬體拓樸綁定</span>`)}
       <div class="pd-os-manage p-surface">
         <div class="pd-os-intro"><p>每個實體槽位維持獨立節點身分。切換目前節點只會改變操作目標，不會修改既有 Cycle 任務。</p><p class="pd-dim">BMC、KVM 與電源控制依實際硬體拓樸綁定。節點退役後保留歷史紀錄；更換實體節點時會建立新的資產身分。</p></div>
-        <div class="pd-os-table-wrap">
+        <div class="pd-os-table-wrap" role="region" aria-label="節點連線資料，可水平捲動" tabindex="0">
         <table class="pd-os-table"><colgroup><col style="width:60px"><col style="width:198px"><col style="width:160px"><col style="width:90px"><col style="width:124px"><col style="width:160px"><col style="width:90px"><col style="width:120px"><col style="width:74px"><col style="width:128px"></colgroup><thead><tr><th>槽位</th><th>標籤</th><th>OS IP</th><th>OS 帳號</th><th>OS 憑證</th><th>BMC IP</th><th>BMC 帳號</th><th>BMC 憑證</th><th>OS 狀態</th><th>操作</th></tr></thead><tbody>${osRows || '<tr><td colspan="10" class="pd-dim">尚未安裝節點；可新增節點。</td></tr>'}</tbody></table>
         </div>
         <div class="pd-os-add">
