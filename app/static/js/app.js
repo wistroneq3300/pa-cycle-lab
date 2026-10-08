@@ -5272,7 +5272,8 @@ function buildNav() {
   });
 }
 $("theme-toggle")?.addEventListener("click", () => applyTheme(root.dataset.theme === "dark" ? "light" : "dark"));
-window.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeAdd(); closeProjectModal(); } });
+// Escape for the two static form modals is scoped to their own backdrops by
+// workspace-cinematic.js.  Do not intercept Terminal/KVM/Broadcast keystrokes.
 function initRowMenuGuard() {
   // 「•••」列選單：開啟時若面板超出右側捲動容器/視窗右緣，就向左校正，避免破框溢出。
   // 注意 toggle 事件不冒泡，只能用 capture phase（第三參數 true）在 document 層捕獲。

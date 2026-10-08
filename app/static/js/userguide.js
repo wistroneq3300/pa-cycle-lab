@@ -133,6 +133,7 @@ const USER_GUIDE = (() => {
     });
     win.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
+      if (e.isComposing) return;
       e.preventDefault();
       e.stopPropagation();
       closeAll();

@@ -68,6 +68,19 @@
     if (!modal) return;
     const entry = { open: false, opener: null, queued: false };
     dialogState.set(backdrop, entry);
+    // The add/project forms predate the shared dialog helper.  Give only these
+    // two form surfaces the same IME-safe Escape contract without intercepting
+    // keys intended for Terminal, Broadcast or KVM remote-control surfaces.
+    const closeStaticForm = {
+      'add-modal': () => globalThis.closeAdd?.(),
+      'project-modal': () => globalThis.closeProjectModal?.(),
+    }[backdrop.id];
+    if (closeStaticForm) backdrop.addEventListener('keydown', event => {
+      if (event.key !== 'Escape' || event.defaultPrevented || event.isComposing) return;
+      event.preventDefault();
+      event.stopPropagation();
+      closeStaticForm();
+    });
     const updateVisibility = () => {
       const open = visible(backdrop);
       if (open && !entry.open) {

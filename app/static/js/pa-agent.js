@@ -289,7 +289,10 @@
   }
   function onKey(e) {
     if (!root?.classList.contains("open")) return;
-    if (e.key === "Escape") { e.preventDefault(); close(); return; }
+    if (e.key === "Escape") {
+      if (e.isComposing) return;
+      e.preventDefault(); close(); return;
+    }
     if (e.key !== "Tab") return;
     const focusable = [...root.querySelectorAll('button:not([disabled]):not([hidden]),textarea:not([disabled]),input:not([disabled]),a[href],summary')]
       .filter(el => !el.hidden && el.offsetParent !== null);

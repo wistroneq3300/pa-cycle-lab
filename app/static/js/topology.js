@@ -59,7 +59,7 @@
     root.addEventListener('keydown',event=>{
       const target=event.target.closest('g[data-action]');
       if(target&&['Enter',' '].includes(event.key)){event.preventDefault();action(target.dataset.action,target.dataset.key).catch(error);return;}
-      if(event.key==='Escape'){event.stopImmediatePropagation();event.preventDefault();if(state.editor){action('cancel');}else close();}
+      if(event.key==='Escape'){if(event.isComposing)return;event.stopImmediatePropagation();event.preventDefault();if(state.editor){action('cancel');}else close();}
       if(event.key==='Tab'){const list=[...root.querySelectorAll('button,input,select,textarea,[tabindex="0"]')].filter(e=>!e.disabled&&e.offsetParent!==null);const first=list[0],last=list.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}}
     });
     try { state.doc=await api('/api/projects/'+encodeURIComponent(project)+'/topology');state.rack=state.doc.racks[0]?.id || '';render(); }
