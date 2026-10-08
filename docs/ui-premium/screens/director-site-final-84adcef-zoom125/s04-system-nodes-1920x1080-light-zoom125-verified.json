@@ -1,0 +1,324 @@
+{
+  "schema": "director-site-capture/v2",
+  "phase": "final-84adcef-zoom125",
+  "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+  "region": "System detail / Nodes",
+  "surfaceId": "S04",
+  "frozenMarker": null,
+  "routeState": {
+    "route": "#/machine/host_a",
+    "state": "host_a / OS slots; horizontal table end focused",
+    "details": {
+      "nodeReachability": {
+        "role": "region",
+        "tabIndex": 0,
+        "scrollLeft": 248.8000030517578,
+        "scrollWidth": 1204,
+        "clientWidth": 947,
+        "bodyHorizontalOverflowPx": 0,
+        "wrapperBox": {
+          "left": 270.8000183105469,
+          "top": 332.3500061035156,
+          "right": 1226.2000427246094,
+          "bottom": 476.95001220703125,
+          "width": 955.4000244140625,
+          "height": 144.60000610351562
+        },
+        "actionCellBox": {
+          "left": 1098,
+          "top": 365.95001220703125,
+          "right": 1226,
+          "bottom": 459.75001525878906,
+          "width": 128,
+          "height": 93.80000305175781
+        },
+        "actionButtonBox": {
+          "left": 1108,
+          "top": 414.95001220703125,
+          "right": 1216,
+          "bottom": 450.95001220703125,
+          "width": 108,
+          "height": 36
+        },
+        "actionCellInsideWrapper": true,
+        "actionCellInsideViewport": true,
+        "actionButtonInsideWrapper": true,
+        "actionButtonInsideViewport": true
+      }
+    }
+  },
+  "app": {
+    "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-final-capture-84adcef",
+    "commit": "84adcef5f5383cf9737680e7f811a57eeb29783f",
+    "dirty": false
+  },
+  "browser": {
+    "version": "154.0.4258.62",
+    "theme": "light",
+    "browserZoomRequested": 1.25,
+    "browserZoom": 1.25,
+    "browserZoomEvidence": {
+      "status": "applied",
+      "requested": 1.25,
+      "actual": 1.25,
+      "tabId": 1821719525,
+      "settingsError": null,
+      "setZoomError": null,
+      "getZoomError": null,
+      "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+      "getZoomReturned": 1.25
+    },
+    "devicePixelRatio": 1.25,
+    "visualViewport": {
+      "width": 1536,
+      "height": 864,
+      "scale": 1,
+      "offsetLeft": 0,
+      "offsetTop": 0
+    },
+    "osScaling": {
+      "status": "measured-registry",
+      "platform": "win32",
+      "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+      "appliedDpi": 192,
+      "scaleFactor": 2,
+      "percent": 200,
+      "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+    }
+  },
+  "viewportRequested": {
+    "width": 1920,
+    "height": 1080
+  },
+  "viewportCss": {
+    "width": 1536,
+    "height": 864
+  },
+  "png": {
+    "file": "s04-system-nodes-1920x1080-light-zoom125-verified.png",
+    "width": 1920,
+    "height": 1080,
+    "sha256": "9f6e7e5cb8c59bbcbd2b30934691b4172388da0cec4e0071173ceded1561cba4"
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "externalRequests": [],
+  "unknownRequests": [],
+  "failedRequests": [],
+  "notices": [],
+  "reachability": {
+    "documentWidth": 1536,
+    "bodyHorizontalOverflowPx": 0,
+    "visibleFocusableCount": 42,
+    "visibleFocusableInViewportCount": 40,
+    "primary": {
+      "selector": "#pd-panel-osslots .pd-os-table-wrap tbody tr:last-child td:last-child button:last-child",
+      "exists": true,
+      "visible": true,
+      "focusable": true,
+      "focused": true,
+      "inViewport": true,
+      "rect": {
+        "top": 414.95,
+        "right": 1216,
+        "bottom": 450.95,
+        "left": 1108,
+        "width": 108,
+        "height": 36
+      }
+    }
+  },
+  "contrastAudit": {
+    "status": "partial",
+    "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+    "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+    "scope": "Own text nodes visibly intersecting the captured viewport",
+    "thresholds": {
+      "normalText": 4.5,
+      "largeText": 3,
+      "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+    },
+    "exclusions": [
+      "image/canvas/SVG/video",
+      "disabled or aria-disabled",
+      "opacity/filter/blend/backdrop effects",
+      "pseudo-element text"
+    ],
+    "limitations": [
+      "CSS background images/gradients are approximated using their computed backgroundColor layers."
+    ],
+    "counts": {
+      "scannedElements": 1256,
+      "auditedTextElements": 90,
+      "violations": 13,
+      "skippedNoOwnText": 737,
+      "skippedNotVisibleInViewport": 412,
+      "skippedMediaOrVector": 2,
+      "skippedDisabled": 1,
+      "approximatedComplexBackground": 91,
+      "skippedOpacityOrEffect": 14,
+      "skippedUnparsedColor": 0
+    },
+    "violations": [
+      {
+        "selector": "div.pd-workspace > header.pd-system-header > div.pd-header-status:nth-of-type(3) > div.observation:nth-of-type(1) > small",
+        "text": "ICMP · 來源未提供時間",
+        "ratio": 4.49,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 10.8333,
+        "fontWeight": 400,
+        "foreground": "rgb(89, 113, 124)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace > header.pd-system-header > div.pd-header-status:nth-of-type(3) > div.observation:nth-of-type(2) > small",
+        "text": "ICMP · 來源未提供時間",
+        "ratio": 4.49,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 10.8333,
+        "fontWeight": 400,
+        "foreground": "rgb(89, 113, 124)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > div.pd-operation-group:nth-of-type(2) > button.pd-operation.pd-operation-primary:nth-of-type(1) > span:nth-of-type(1)",
+        "text": "↗",
+        "ratio": 1.09,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(245, 250, 251)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > div.pd-operation-group:nth-of-type(2) > button.pd-operation.pd-operation-primary:nth-of-type(1) > span:nth-of-type(2)",
+        "text": "Terminal",
+        "ratio": 1.09,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(245, 250, 251)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > div.pd-operation-group:nth-of-type(2) > button.pd-operation.pd-operation-primary:nth-of-type(1) > b",
+        "text": "↗",
+        "ratio": 1.06,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(213, 237, 244)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > div.pd-operation-group:nth-of-type(2) > button.pd-operation:nth-of-type(2) > b",
+        "text": "↗",
+        "ratio": 3.75,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(92, 127, 143)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > details.pd-ops-disclosure.pd-settings:nth-of-type(1) > summary > b",
+        "text": "⌄",
+        "ratio": 3.32,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(104, 135, 154)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "aside.pd-operations.p-surface > details.pd-ops-disclosure.pd-settings:nth-of-type(1) > div > button.pd-operation.pd-rack-specification > b",
+        "text": "↗",
+        "ratio": 3.75,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(92, 127, 143)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > details.pd-ops-disclosure.pd-power-group:nth-of-type(2) > summary > b",
+        "text": "⌄",
+        "ratio": 3.32,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(104, 135, 154)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > div.pd-ops-context:nth-of-type(3) > div.pd-key-value:nth-of-type(1) > span",
+        "text": "專案層級",
+        "ratio": 4.26,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 9,
+        "fontWeight": 400,
+        "foreground": "rgb(90, 117, 130)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > div.pd-ops-context:nth-of-type(3) > div.pd-key-value:nth-of-type(2) > span",
+        "text": "設備類型",
+        "ratio": 4.26,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 9,
+        "fontWeight": 400,
+        "foreground": "rgb(90, 117, 130)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > div.pd-ops-context:nth-of-type(3) > div.pd-key-value:nth-of-type(3) > span",
+        "text": "運作時間",
+        "ratio": 4.26,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 9,
+        "fontWeight": 400,
+        "foreground": "rgb(90, 117, 130)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > div.pd-refresh-action:nth-of-type(4) > button.pd-operation > b",
+        "text": "↗",
+        "ratio": 3.75,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(92, 127, 143)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      }
+    ],
+    "violationsTruncated": false
+  },
+  "gaps": [],
+  "capturedAt": "2026-10-08T04:00:00.000Z"
+}

@@ -1,0 +1,140 @@
+{
+  "schema": "director-site-capture/v2",
+  "phase": "final-84adcef-zoom125",
+  "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+  "region": "System Validation",
+  "surfaceId": "S06",
+  "frozenMarker": null,
+  "routeState": {
+    "route": "#/machine/host_a",
+    "state": "host_a / Test Library entry",
+    "details": null
+  },
+  "app": {
+    "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-final-capture-84adcef",
+    "commit": "84adcef5f5383cf9737680e7f811a57eeb29783f",
+    "dirty": false
+  },
+  "browser": {
+    "version": "154.0.4258.62",
+    "theme": "dark",
+    "browserZoomRequested": 1.25,
+    "browserZoom": 1.25,
+    "browserZoomEvidence": {
+      "status": "applied",
+      "requested": 1.25,
+      "actual": 1.25,
+      "tabId": 548334943,
+      "settingsError": null,
+      "setZoomError": null,
+      "getZoomError": null,
+      "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+      "getZoomReturned": 1.25
+    },
+    "devicePixelRatio": 1.25,
+    "visualViewport": {
+      "width": 1092.800048828125,
+      "height": 614.4000244140625,
+      "scale": 1,
+      "offsetLeft": 0,
+      "offsetTop": 0
+    },
+    "osScaling": {
+      "status": "measured-registry",
+      "platform": "win32",
+      "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+      "appliedDpi": 192,
+      "scaleFactor": 2,
+      "percent": 200,
+      "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+    }
+  },
+  "viewportRequested": {
+    "width": 1366,
+    "height": 768
+  },
+  "viewportCss": {
+    "width": 1093,
+    "height": 614
+  },
+  "png": {
+    "file": "s06-system-validation-1366x768-dark-zoom125-verified.png",
+    "width": 1366,
+    "height": 768,
+    "sha256": "a2fe84cc3ed0c1276e89cfc0f458ba906c693f3a95722a18ffc40aabe96698d2"
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "externalRequests": [],
+  "unknownRequests": [],
+  "failedRequests": [],
+  "notices": [],
+  "reachability": {
+    "documentWidth": 1093,
+    "bodyHorizontalOverflowPx": 0,
+    "visibleFocusableCount": 34,
+    "visibleFocusableInViewportCount": 18,
+    "primary": null
+  },
+  "contrastAudit": {
+    "status": "partial",
+    "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+    "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+    "scope": "Own text nodes visibly intersecting the captured viewport",
+    "thresholds": {
+      "normalText": 4.5,
+      "largeText": 3,
+      "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+    },
+    "exclusions": [
+      "image/canvas/SVG/video",
+      "disabled or aria-disabled",
+      "opacity/filter/blend/backdrop effects",
+      "pseudo-element text"
+    ],
+    "limitations": [
+      "CSS background images/gradients are approximated using their computed backgroundColor layers."
+    ],
+    "counts": {
+      "scannedElements": 1522,
+      "auditedTextElements": 71,
+      "violations": 2,
+      "skippedNoOwnText": 826,
+      "skippedNotVisibleInViewport": 607,
+      "skippedMediaOrVector": 2,
+      "skippedDisabled": 3,
+      "approximatedComplexBackground": 75,
+      "skippedOpacityOrEffect": 13,
+      "skippedUnparsedColor": 0
+    },
+    "violations": [
+      {
+        "selector": "div.pd-main > section.pd-tab-panel.is-active:nth-of-type(6) > div.pd-task-intro.p-surface:nth-of-type(2) > div:nth-of-type(1) > button.pd-primary-btn",
+        "text": "開啟 Test Library",
+        "ratio": 1.09,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(21, 37, 9)",
+        "background": "rgb(17, 26, 33)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "section.pd-tab-panel.is-active:nth-of-type(6) > div.pd-task-intro.p-surface:nth-of-type(2) > div:nth-of-type(1) > button.pd-primary-btn > span",
+        "text": "↗",
+        "ratio": 1.09,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(21, 37, 9)",
+        "background": "rgb(17, 26, 33)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      }
+    ],
+    "violationsTruncated": false
+  },
+  "gaps": [],
+  "capturedAt": "2026-10-08T04:00:00.000Z"
+}

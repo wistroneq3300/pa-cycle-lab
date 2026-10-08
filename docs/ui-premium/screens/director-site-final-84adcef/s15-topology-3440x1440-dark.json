@@ -1,0 +1,240 @@
+{
+  "schema": "director-site-capture/v2",
+  "phase": "final-84adcef",
+  "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+  "region": "Network Topology",
+  "surfaceId": "S15",
+  "frozenMarker": null,
+  "routeState": {
+    "route": "#/rack/Naboo",
+    "state": "Naboo stored topology / rack-network preview",
+    "details": null
+  },
+  "app": {
+    "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-final-capture-84adcef",
+    "commit": "84adcef5f5383cf9737680e7f811a57eeb29783f",
+    "dirty": false
+  },
+  "browser": {
+    "version": "154.0.4258.62",
+    "theme": "dark",
+    "browserZoomRequested": 1,
+    "browserZoom": 1,
+    "browserZoomEvidence": {
+      "status": "default-100",
+      "requested": 1,
+      "actual": 1,
+      "source": "Fresh browser context/profile with no zoom mutation",
+      "getZoomReturned": 1
+    },
+    "devicePixelRatio": 1,
+    "visualViewport": {
+      "width": 3440,
+      "height": 1440,
+      "scale": 1,
+      "offsetLeft": 0,
+      "offsetTop": 0
+    },
+    "osScaling": {
+      "status": "measured-registry",
+      "platform": "win32",
+      "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+      "appliedDpi": 192,
+      "scaleFactor": 2,
+      "percent": 200,
+      "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+    }
+  },
+  "viewportRequested": {
+    "width": 3440,
+    "height": 1440
+  },
+  "viewportCss": {
+    "width": 3440,
+    "height": 1440
+  },
+  "png": {
+    "file": "s15-topology-3440x1440-dark.png",
+    "width": 3440,
+    "height": 1440,
+    "sha256": "4a171be8f1b49bcc0b44885f80169405ff1eae13e70bef83b3a2117b7247072c"
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "externalRequests": [],
+  "unknownRequests": [],
+  "failedRequests": [],
+  "notices": [
+    {
+      "kind": "alert",
+      "message": "KVM 無法同步廣播\n\nDirector fake provider keeps every KVM connection offline.\n\n偵測結果：\n  SERVER-04U - RFB fixture / RFB\n  SERVER-03U - RFB fixture / RFB\n  SERVER-02U - RFB fixture / RFB\n  SERVER-01 - RFB fixture / RFB\n  SERVER-02 - RFB fixture / RFB\n  SERVER-03 - RFB fixture / RFB\n  SERVER-04 - RFB fixture / RFB\n  SERVER-05 - RFB fixture / RFB\n  SERVER-06 - RFB fixture / RFB\n  SERVER-07 - RFB fixture / RFB\n  SERVER-08 - RFB fixture / RFB\n  SERVER-09 - RFB fixture / RFB\n\n本頁仍會開啟，但只連線可同步的 RFB 系統。"
+    }
+  ],
+  "reachability": {
+    "documentWidth": 3440,
+    "bodyHorizontalOverflowPx": 0,
+    "visibleFocusableCount": 343,
+    "visibleFocusableInViewportCount": 108,
+    "primary": {
+      "selector": ".nt-window [data-action=\"close\"]",
+      "exists": true,
+      "visible": true,
+      "focusable": true,
+      "focused": true,
+      "inViewport": true,
+      "rect": {
+        "top": 74.05,
+        "right": 2495,
+        "bottom": 113.05,
+        "left": 2437,
+        "width": 58,
+        "height": 39
+      }
+    }
+  },
+  "contrastAudit": {
+    "status": "partial",
+    "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+    "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+    "scope": "Own text nodes visibly intersecting the captured viewport",
+    "thresholds": {
+      "normalText": 4.5,
+      "largeText": 3,
+      "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+    },
+    "exclusions": [
+      "image/canvas/SVG/video",
+      "disabled or aria-disabled",
+      "opacity/filter/blend/backdrop effects",
+      "pseudo-element text"
+    ],
+    "limitations": [
+      "CSS background images/gradients are approximated using their computed backgroundColor layers."
+    ],
+    "counts": {
+      "scannedElements": 2529,
+      "auditedTextElements": 219,
+      "violations": 9,
+      "skippedNoOwnText": 1280,
+      "skippedNotVisibleInViewport": 873,
+      "skippedMediaOrVector": 147,
+      "skippedDisabled": 0,
+      "approximatedComplexBackground": 135,
+      "skippedOpacityOrEffect": 8,
+      "skippedUnparsedColor": 2
+    },
+    "violations": [
+      {
+        "selector": "#rack-ping-btn",
+        "text": "整櫃連線檢查",
+        "ratio": 1.08,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 13,
+        "fontWeight": 500,
+        "foreground": "rgb(23, 36, 20)",
+        "background": "rgb(17, 27, 35)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.rack-hero:nth-of-type(1) > div.ux-rack-toolbar:nth-of-type(2) > section.ux-action-group:nth-of-type(2) > div > button.btn.primary:nth-of-type(2)",
+        "text": "廣播終端",
+        "ratio": 1.08,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 13,
+        "fontWeight": 500,
+        "foreground": "rgb(23, 36, 20)",
+        "background": "rgb(17, 27, 35)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.layout:nth-of-type(1) > main.main > div.content > div.ew-view-switch:nth-of-type(4) > button.btn.primary:nth-of-type(1)",
+        "text": "3D 機櫃",
+        "ratio": 1.18,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 13,
+        "fontWeight": 500,
+        "foreground": "rgb(23, 36, 20)",
+        "background": "rgb(9, 16, 23)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "#ew-rack-add",
+        "text": "＋ 新增至機櫃",
+        "ratio": 1.18,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 13,
+        "fontWeight": 500,
+        "foreground": "rgb(23, 36, 20)",
+        "background": "rgb(9, 16, 23)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.content > section.ew-rack-deck.p-surface > div.ew-rack-stage > div.ew-rack-viewport:nth-of-type(2) > span.ew-stage-mark",
+        "text": "48U",
+        "ratio": 4.25,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 22,
+        "fontWeight": 400,
+        "foreground": "rgb(113, 135, 149)",
+        "background": "rgb(18, 36, 46)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "section.ew-rack-deck.p-surface > div.ew-rack-stage > div.ew-rack-viewport:nth-of-type(2) > span.ew-stage-mark > small",
+        "text": "配置模型",
+        "ratio": 4.25,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 8,
+        "fontWeight": 400,
+        "foreground": "rgb(113, 135, 149)",
+        "background": "rgb(18, 36, 46)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "section.ew-rack-deck.p-surface > aside.ew-rack-aside > div > div.ew-inspector-actions:nth-of-type(3) > button.btn.primary:nth-of-type(1)",
+        "text": "開啟元件詳情",
+        "ratio": 1.01,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 500,
+        "foreground": "rgb(23, 36, 20)",
+        "background": "rgb(18, 36, 46)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "body > div.nt-overlay:nth-of-type(14) > section.nt-window > div.nt-toolbar:nth-of-type(1) > button.btn.primary:nth-of-type(5)",
+        "text": "儲存拓撲",
+        "ratio": 1.18,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 13,
+        "fontWeight": 500,
+        "foreground": "rgb(23, 36, 20)",
+        "background": "rgb(9, 16, 23)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "body > div.nt-overlay:nth-of-type(14) > section.nt-window > div.nt-toolbar:nth-of-type(3) > button.btn.primary:nth-of-type(5)",
+        "text": "檢查 IP",
+        "ratio": 1.18,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 13,
+        "fontWeight": 500,
+        "foreground": "rgb(23, 36, 20)",
+        "background": "rgb(9, 16, 23)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      }
+    ],
+    "violationsTruncated": false
+  },
+  "gaps": [],
+  "capturedAt": "2026-10-08T04:00:00.000Z"
+}

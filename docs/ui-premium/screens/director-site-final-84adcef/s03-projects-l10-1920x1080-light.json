@@ -1,0 +1,111 @@
+{
+  "schema": "director-site-capture/v2",
+  "phase": "final-84adcef",
+  "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+  "region": "Systems / Projects",
+  "surfaceId": "S03",
+  "frozenMarker": null,
+  "routeState": {
+    "route": "#/projects",
+    "state": "L10 System Level",
+    "details": null
+  },
+  "app": {
+    "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-final-capture-84adcef",
+    "commit": "84adcef5f5383cf9737680e7f811a57eeb29783f",
+    "dirty": false
+  },
+  "browser": {
+    "version": "154.0.4258.62",
+    "theme": "light",
+    "browserZoomRequested": 1,
+    "browserZoom": 1,
+    "browserZoomEvidence": {
+      "status": "default-100",
+      "requested": 1,
+      "actual": 1,
+      "source": "Fresh browser context/profile with no zoom mutation",
+      "getZoomReturned": 1
+    },
+    "devicePixelRatio": 1,
+    "visualViewport": {
+      "width": 1920,
+      "height": 1080,
+      "scale": 1,
+      "offsetLeft": 0,
+      "offsetTop": 0
+    },
+    "osScaling": {
+      "status": "measured-registry",
+      "platform": "win32",
+      "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+      "appliedDpi": 192,
+      "scaleFactor": 2,
+      "percent": 200,
+      "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+    }
+  },
+  "viewportRequested": {
+    "width": 1920,
+    "height": 1080
+  },
+  "viewportCss": {
+    "width": 1920,
+    "height": 1080
+  },
+  "png": {
+    "file": "s03-projects-l10-1920x1080-light.png",
+    "width": 1920,
+    "height": 1080,
+    "sha256": "9bf1ae862c30480cad28e5c97218829eb480e187f85dc35a89ac25540b725cdd"
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "externalRequests": [],
+  "unknownRequests": [],
+  "failedRequests": [],
+  "notices": [],
+  "reachability": {
+    "documentWidth": 1920,
+    "bodyHorizontalOverflowPx": 0,
+    "visibleFocusableCount": 107,
+    "visibleFocusableInViewportCount": 52,
+    "primary": null
+  },
+  "contrastAudit": {
+    "status": "partial",
+    "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+    "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+    "scope": "Own text nodes visibly intersecting the captured viewport",
+    "thresholds": {
+      "normalText": 4.5,
+      "largeText": 3,
+      "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+    },
+    "exclusions": [
+      "image/canvas/SVG/video",
+      "disabled or aria-disabled",
+      "opacity/filter/blend/backdrop effects",
+      "pseudo-element text"
+    ],
+    "limitations": [
+      "CSS background images/gradients are approximated using their computed backgroundColor layers."
+    ],
+    "counts": {
+      "scannedElements": 905,
+      "auditedTextElements": 150,
+      "violations": 0,
+      "skippedNoOwnText": 395,
+      "skippedNotVisibleInViewport": 351,
+      "skippedMediaOrVector": 0,
+      "skippedDisabled": 0,
+      "approximatedComplexBackground": 73,
+      "skippedOpacityOrEffect": 9,
+      "skippedUnparsedColor": 0
+    },
+    "violations": [],
+    "violationsTruncated": false
+  },
+  "gaps": [],
+  "capturedAt": "2026-10-08T04:00:00.000Z"
+}

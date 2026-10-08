@@ -1,0 +1,155 @@
+{
+  "schema": "director-site-capture/v2",
+  "phase": "final-84adcef-zoom125",
+  "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+  "region": "Broadcast terminal frame",
+  "surfaceId": "S11",
+  "frozenMarker": null,
+  "routeState": {
+    "route": "#/machine/host_a",
+    "state": "two systems; preview WebSocket provider",
+    "details": null
+  },
+  "app": {
+    "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-final-capture-84adcef",
+    "commit": "84adcef5f5383cf9737680e7f811a57eeb29783f",
+    "dirty": false
+  },
+  "browser": {
+    "version": "154.0.4258.62",
+    "theme": "dark",
+    "browserZoomRequested": 1.25,
+    "browserZoom": 1.25,
+    "browserZoomEvidence": {
+      "status": "applied",
+      "requested": 1.25,
+      "actual": 1.25,
+      "tabId": 1316576105,
+      "settingsError": null,
+      "setZoomError": null,
+      "getZoomError": null,
+      "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+      "getZoomReturned": 1.25
+    },
+    "devicePixelRatio": 1.25,
+    "visualViewport": {
+      "width": 1536,
+      "height": 864,
+      "scale": 1,
+      "offsetLeft": 0,
+      "offsetTop": 0
+    },
+    "osScaling": {
+      "status": "measured-registry",
+      "platform": "win32",
+      "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+      "appliedDpi": 192,
+      "scaleFactor": 2,
+      "percent": 200,
+      "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+    }
+  },
+  "viewportRequested": {
+    "width": 1920,
+    "height": 1080
+  },
+  "viewportCss": {
+    "width": 1536,
+    "height": 864
+  },
+  "png": {
+    "file": "s11-broadcast-frame-1920x1080-dark-zoom125-verified.png",
+    "width": 1920,
+    "height": 1080,
+    "sha256": "7aa5c0329b09908a6c45a527e6de1a65a003a1fcd0ec8b5f6c042fff169f4c28"
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "externalRequests": [],
+  "unknownRequests": [],
+  "failedRequests": [],
+  "notices": [],
+  "reachability": {
+    "documentWidth": 1536,
+    "bodyHorizontalOverflowPx": 0,
+    "visibleFocusableCount": 41,
+    "visibleFocusableInViewportCount": 34,
+    "primary": {
+      "selector": "#bc-modal button",
+      "exists": true,
+      "visible": true,
+      "focusable": true,
+      "focused": true,
+      "inViewport": true,
+      "rect": {
+        "top": 90.93,
+        "right": 245.08,
+        "bottom": 122.93,
+        "left": 213.08,
+        "width": 32,
+        "height": 32
+      }
+    }
+  },
+  "contrastAudit": {
+    "status": "partial",
+    "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+    "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+    "scope": "Own text nodes visibly intersecting the captured viewport",
+    "thresholds": {
+      "normalText": 4.5,
+      "largeText": 3,
+      "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+    },
+    "exclusions": [
+      "image/canvas/SVG/video",
+      "disabled or aria-disabled",
+      "opacity/filter/blend/backdrop effects",
+      "pseudo-element text"
+    ],
+    "limitations": [
+      "CSS background images/gradients are approximated using their computed backgroundColor layers."
+    ],
+    "counts": {
+      "scannedElements": 2847,
+      "auditedTextElements": 104,
+      "violations": 2,
+      "skippedNoOwnText": 1540,
+      "skippedNotVisibleInViewport": 1179,
+      "skippedMediaOrVector": 2,
+      "skippedDisabled": 4,
+      "approximatedComplexBackground": 99,
+      "skippedOpacityOrEffect": 18,
+      "skippedUnparsedColor": 0
+    },
+    "violations": [
+      {
+        "selector": "div.pd-main > section.pd-tab-panel.is-active:nth-of-type(6) > div.pd-task-intro.p-surface:nth-of-type(2) > div:nth-of-type(1) > button.pd-primary-btn",
+        "text": "開啟 Test Library",
+        "ratio": 1.09,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(21, 37, 9)",
+        "background": "rgb(17, 26, 33)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "section.pd-tab-panel.is-active:nth-of-type(6) > div.pd-task-intro.p-surface:nth-of-type(2) > div:nth-of-type(1) > button.pd-primary-btn > span",
+        "text": "↗",
+        "ratio": 1.09,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(21, 37, 9)",
+        "background": "rgb(17, 26, 33)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      }
+    ],
+    "violationsTruncated": false
+  },
+  "gaps": [],
+  "capturedAt": "2026-10-08T04:00:00.000Z"
+}

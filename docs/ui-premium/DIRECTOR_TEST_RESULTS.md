@@ -6,8 +6,9 @@
 - Browser: Microsoft Edge / Chromium `154.0.4258.62` through Playwright.
 - UI fixture: loopback static/synthetic providers. No DUT, SSH, RFB, power, firmware, exporter installation or live Cycle dispatch.
 - Baseline program: `fe8208867144b28f4e057606f5e2699b228a8056` for Director Phase C/D.
-- Current committed product program: `419f9ca071bdabefc2e3e23dc0582bf8154f32ee` (`eeed293` is the preceding overlay Escape/IME commit).
-- Broad/focused manifests retain their capture-time SHA and `dirty` value; none is relabelled as clean-final-SHA evidence.
+- Current product-code commit: `88cf814972c9eeccc85c6ca603f425518c5d4541` (scope-local Evidence viewport containment); preceding visual hardening: `419f9ca071bdabefc2e3e23dc0582bf8154f32ee`; overlay Escape/IME commit: `eeed293`.
+- Clean broad-capture program/evidence base: `84adcef5f5383cf9737680e7f811a57eeb29783f`. Historical manifests retain their capture-time SHA/dirty value; the final 100% and true-125% manifests independently record this exact SHA with `dirty:false`.
+- Clean final walkthrough harness/program: `3ef6962f793bac5f6df119ed7353a8c9a69607fc`, `dirty:false`.
 
 ## Python baseline / final
 
@@ -34,10 +35,10 @@ The baseline was rerun with the same 880-case collection as after; the earlier p
 |---|---:|---:|---:|---:|---:|---:|---:|
 | Baseline `fe82088` | 880 | 583 | 196 | 1 | 26 | 74 | 844.664 s |
 | Intermediate `b38646e + working tree` | 880 | 582 | 197 | 1 | 26 | 74 | 168.578 s |
-| Final product `419f9ca` | 880 | 585 | 194 | 1 | 26 | 74 | 186.596 s |
+| Latest full-suite run `419f9ca` | 880 | 585 | 194 | 1 | 26 | 74 | 186.596 s |
 | Focused state-truth | 57 | 57 | 0 | 0 | 0 | 0 | 14.778 s |
 
-Exact `classname::name` status-map comparison from baseline to final records four FAIL → PASS and two PASS → FAIL keys.
+Exact `classname::name` status-map comparison from baseline to the latest full-suite run records four FAIL → PASS and two PASS → FAIL keys. The later `88cf814` CSS-only Evidence fix is covered by browser evidence, not another full Python rerun.
 
 FAIL → PASS:
 
@@ -92,7 +93,7 @@ No assertion was deleted, skipped or weakened to make the suite green. Baseline 
 | `operations_regression.cjs`, `theme-palette.cjs`, `userguide.cjs` | PASS | Existing operations/theme/guide contracts. |
 | `theme-contract.cjs` | PASS 5/5 after test correction | Old test incorrectly assumed prior CSS ordering/English theme title; product behavior was source-checked before updating assertion. |
 | hardware identity pure mapping | PASS after `d65d9ee` | Reported memory capacity remains the main value. |
-| `tests/director-walkthrough-browser.cjs` | FAIL in all 3 rounds | First eight steps pass consistently: Overview/theme/refresh, Project→System→Node→Inventory, Inspection Evidence 503 persistent then reopen success, Telemetry READY, single Agent GO→DONE awaiting judgment, Agent close/reopen. Multi-select Batch CTA wording is correct, but click produces no recognizable confirm/result within 15 seconds. Later Cycle/Terminal/KVM/Rack/Topology/Guide steps are NOT-RUN. |
+| `tests/director-walkthrough-browser.cjs` | PASS in all 3 rounds; 13/13 named steps per round | Clean `3ef6962` run completes Overview/theme/refresh, Project→System→Node→Inventory, Inspection Evidence 503 persistent then reopen success, Telemetry, single Agent GO→DONE awaiting judgment, Agent reopen, multi-select Batch without Agent execution, Cycle PRE/Console/Report entry, Terminal/Broadcast/KVM frames, Rack/Topology return/reopen and User Guide. Unknown/external/page/console errors are 0; server unknown requests are empty. Synthetic only. |
 
 Executed suites that are not green release evidence:
 
@@ -111,6 +112,8 @@ Executed suites that are not green release evidence:
 | `screens/director-site-after-b38646e/capture-manifest.json` | 144 | 100% | 0 scenario/viewport/zoom failures and 0 page/console/unknown/external errors; S08 gap and S12/S13 partial remain; app is dirty. |
 | `screens/director-site-before-fe82088-zoom125/capture-manifest.json` | 92 | true 125% | MV3 `chrome.tabs.setZoom/getZoom`; actual 1.25; 4 S13 scenario failures, 0 zoom failures. |
 | `screens/director-site-after-b38646e-zoom125/capture-manifest.json` | 96 | true 125% | Actual 1.25; 0 scenario/viewport/zoom/page/console/network/unknown failures; app is dirty. Covers 1366/1920 light/dark, not 3440 at 125%. |
+| `screens/director-site-final-84adcef/capture-manifest.json` | 150 | 100% | 1366/1920/3440, light/dark; requested/actual zoom 1; exact app SHA `84adcef`, `dirty:false`; 0 scenario/viewport/zoom/page/console/external/unknown/failed-request failures; `hardwareDispatches:0`. S08/S12/S13 limitations remain explicit. Evidence dialog/footer/download reachability is asserted. |
+| `screens/director-site-final-84adcef-zoom125/capture-manifest.json` | 100 | true 125% | 1366/1920, light/dark; MV3 requested/actual 1.25; exact app SHA `84adcef`, `dirty:false`; 0 scenario/viewport/zoom/page/console/external/unknown/failed-request failures; `hardwareDispatches:0`. Evidence metadata asserts dialog/footer fully in viewport and download exists/visible/focusable/in viewport. |
 | `screens/cycle-after/metadata.json` | 15 | 100% | 1366/1920, light/dark, 1/4/32/128 synthetic data, zero page errors/unknown requests. |
 | Telemetry/Inspection round metadata | 20 total round images | 100% | Two rounds, 1366 dark and 1920 light, no browser errors. |
 | `screens/director-modal-surfaces/metadata.json` | 11 PNGs | 100% | 10 current-state captures plus one preserved project-before; 11/11 deterministic checks PASS. Inventory-level result remains PARTIAL because dedicated/owner cross-products are separate. |
@@ -120,15 +123,13 @@ Executed suites that are not green release evidence:
 | `screens/director-contrast-after{,-zoom125}/capture-manifest.json` | 68 + 68 | 100% + true 125% | Owner-scoped post-hardening matrix; targeted solid-background violations are 0. Gradient/image-approximated findings and full-WCAG exclusions remain. |
 | `screens/director-zoom200/site/capture-manifest.json` | 28 | true 200% browser zoom | Actual `getZoom=2`; 1366×768 screenshot / 683×384 CSS viewport / DPR 2; no scenario/viewport/zoom/page/console/unknown/external failure; static S08/S12/S13 limitations remain explicit. |
 | `screens/director-zoom200/cycle/metadata.json` | 16 | true 200% browser zoom | Create/PRE/Console/Evidence; actual zoom 2, CSS viewport 683×384, DPR 2; PASS synthetic fixture. |
-| `screens/director-walkthrough/metadata.json` | 6 screenshots | 100% | Three consistent FAIL rounds at `419f9ca + dirty`. Evidence-error and Agent-DONE images exist for each round. Static external/page/unknown counts are 0; provider trace was not harvested and is not independent proof. |
+| `screens/director-walkthrough-final-3ef6962/metadata.json` | 12 screenshots | 100% | Three PASS rounds, 13/13 named steps each, exact app SHA `3ef6962`, `dirty:false`. Includes Evidence-error, Agent-DONE, Cycle Console and User Guide screenshots per round; unknown/external/page/console errors are 0 and server unknown requests are empty. Synthetic loopback/no hardware. |
 
-Pending at document time:
+Still pending at document time:
 
-- Final clean-SHA 100% recapture.
-- Final clean-SHA true-125% recapture. The current after-125 manifest is working-tree evidence only.
 - Test Case / Agent true-125% beyond the site harness’s 1366/1920 combinations; the five-width dedicated set remains 100%.
 - Physical director display/projector.
-- Three **passing** complete continuous walkthroughs. Three attempts were recorded, but all fail at the Batch transition and stop before later surfaces.
+- Complete S12 owner × role × submit/error/reopen cross-product and full S13 formal Report/SOP state matrix.
 
 The completed 200% evidence is **browser zoom**, not an OS text-only setting and not a physical-display validation.
 
@@ -141,7 +142,7 @@ The broad site harness uses computed foreground/background alpha composition wit
 - Full Python status-map delta: 4 FAIL → PASS and 2 PASS → FAIL. The two new engine observations are not attributed to UI after unchanged engine hashes and focused reruns, but they remain recorded; the suite is not green.
 - Full Python suite: non-green.
 - Focused UI truth/race/lifecycle/modal/zoom/targeted-contrast suites: green for their named fixtures.
-- Integrated walkthrough: FAIL 3/3 at multi-select Batch transition; later required surfaces NOT-RUN.
-- Required full-site final-SHA, complete S12 owner/role/error and S13 coverage, physical display and a passing continuous walkthrough: incomplete.
+- Integrated synthetic walkthrough: PASS 3/3, 13/13 named steps per round, zero unknown/external/page/console errors.
+- Clean full-site 100%/true-125% capture identity and synthetic continuous walkthrough are complete. Full S12 owner/role/error and S13 formal Report/SOP coverage plus physical display remain incomplete.
 
 Overall test disposition: **NOT_READY**.

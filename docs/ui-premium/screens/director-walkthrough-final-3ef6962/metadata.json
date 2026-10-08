@@ -1,0 +1,630 @@
+{
+  "schema": "director-walkthrough/v1",
+  "result": "PASS",
+  "mode": "strict loopback synthetic fixtures; no hardware transport",
+  "app": {
+    "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-final-capture-84adcef",
+    "sha": "3ef6962f793bac5f6df119ed7353a8c9a69607fc",
+    "dirty": false
+  },
+  "browser": {
+    "name": "Microsoft Edge via Playwright",
+    "version": "154.0.4258.62",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "deviceScaleFactor": 1
+  },
+  "staticServer": {
+    "host": "127.0.0.1",
+    "ephemeralPort": true,
+    "unknownRequests": []
+  },
+  "cycleSeed": {
+    "origin": "http://127.0.0.1:19520",
+    "endpoint": "/__validation/campaign",
+    "mode": "synthetic"
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "status": "PASS",
+      "steps": [
+        {
+          "name": "overview",
+          "status": "PASS",
+          "durationMs": 1651,
+          "details": null
+        },
+        {
+          "name": "theme-toggle",
+          "status": "PASS",
+          "durationMs": 428,
+          "details": {
+            "before": "dark",
+            "after": "light"
+          }
+        },
+        {
+          "name": "refresh-and-provider-reinstall",
+          "status": "PASS",
+          "durationMs": 1300,
+          "details": null
+        },
+        {
+          "name": "project-system-node-inventory",
+          "status": "PASS",
+          "durationMs": 1465,
+          "details": null
+        },
+        {
+          "name": "inspection-evidence-failure-reopen",
+          "status": "PASS",
+          "durationMs": 1222,
+          "details": null
+        },
+        {
+          "name": "telemetry-ready",
+          "status": "PASS",
+          "durationMs": 111,
+          "details": null
+        },
+        {
+          "name": "test-case-single-agent-go-done",
+          "status": "PASS",
+          "durationMs": 2708,
+          "details": null
+        },
+        {
+          "name": "agent-close-reopen",
+          "status": "PASS",
+          "durationMs": 589,
+          "details": null
+        },
+        {
+          "name": "test-case-multi-batch-no-agent",
+          "status": "PASS",
+          "durationMs": 366,
+          "details": null
+        },
+        {
+          "name": "cycle-pre-confirm-console-report",
+          "status": "PASS",
+          "durationMs": 1233,
+          "details": null
+        },
+        {
+          "name": "terminal-broadcast-kvm-frames",
+          "status": "PASS",
+          "durationMs": 828,
+          "details": null
+        },
+        {
+          "name": "rack-topology-return-reopen",
+          "status": "PASS",
+          "durationMs": 2958,
+          "details": null
+        },
+        {
+          "name": "user-guide",
+          "status": "PASS",
+          "durationMs": 935,
+          "details": null
+        }
+      ],
+      "screenshots": [
+        {
+          "file": "round-1-evidence-error.png",
+          "sha256": "6a79fa97bfb064819676c5a5eedc99d7266d17ac3af22bf83b97e519f8b5e285",
+          "width": 1366,
+          "height": 768,
+          "route": "#/machine/host_a"
+        },
+        {
+          "file": "round-1-agent-done.png",
+          "sha256": "f108d24be6a7fdde226a2c4e43d236e332ea55b8aff6f9558874c1edcb75a30c",
+          "width": 1366,
+          "height": 768,
+          "route": "#/machine/host_a"
+        },
+        {
+          "file": "round-1-cycle-console.png",
+          "sha256": "0bc1d78ea79d1f0d46cd322e732f51f3898b73bad7ae255a9de229f4a365cda6",
+          "width": 1366,
+          "height": 768,
+          "route": "#/cycle/runs/neutrino_demo_power_cycle_outband_20261008_161752_289d5c"
+        },
+        {
+          "file": "round-1-user-guide.png",
+          "sha256": "463fae428256c24d50c9b937864dd622d51c0f6d48e293c6d2f6f6c9343c5b4b",
+          "width": 1366,
+          "height": 768,
+          "route": "#/rack/Naboo"
+        }
+      ],
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "mutations": [
+        {
+          "action": "agent-create",
+          "method": "POST",
+          "path": "/api/agent/runs",
+          "body": {
+            "case_variant_id": "director-walkthrough-case-1-1",
+            "node_id": "",
+            "expected_binding_revision": ""
+          }
+        },
+        {
+          "action": "agent-start-plan",
+          "method": "POST",
+          "path": "/api/agent/runs/director-walkthrough-agent-1/start",
+          "body": {
+            "auto_run": true,
+            "mode": "plan"
+          }
+        },
+        {
+          "action": "agent-message",
+          "method": "POST",
+          "path": "/api/agent/runs/director-walkthrough-agent-1/messages",
+          "body": {
+            "text": "GO"
+          }
+        },
+        {
+          "action": "cycle-create",
+          "method": "POST",
+          "path": "/api/cycle/runs",
+          "body": {
+            "project": "Neutrino Demo",
+            "machine_ids": [
+              "a59e276c-c3859a4590975b4c98314c57ec0a33c6",
+              "a59e276c-16dcd2180fe55aa88ab2c09b0d3179df",
+              "a59e276c-4aa97f460cb85f8da7a4bb9a88b4f87d",
+              "a59e276c-5ef03184c29757d88ce8bcfdc423bb0e"
+            ],
+            "cycle_profile": "neutrino",
+            "cycle_mode": "reboot",
+            "channel": "inband",
+            "limits": {
+              "loops": 2,
+              "hours": 0
+            },
+            "idempotency_key": "0385b81d-697f-41f3-a9d9-737b7d68c262"
+          }
+        },
+        {
+          "action": "cycle-confirm",
+          "method": "POST",
+          "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261008_161752_289d5c/confirm",
+          "body": {
+            "version": "walkthrough-pre-1",
+            "machine_ids": [
+              "a59e276c-c3859a4590975b4c98314c57ec0a33c6",
+              "a59e276c-16dcd2180fe55aa88ab2c09b0d3179df",
+              "a59e276c-4aa97f460cb85f8da7a4bb9a88b4f87d",
+              "a59e276c-5ef03184c29757d88ce8bcfdc423bb0e"
+            ]
+          }
+        }
+      ],
+      "expectedFailures": [
+        {
+          "path": "/api/machine/host_a/inspection/evidence/director-walkthrough-evidence/view",
+          "status": 503,
+          "reason": "deliberate persistent-error / reopen scenario"
+        }
+      ],
+      "notRun": [
+        "Physical display/projector and OS text-only scaling were not exercised.",
+        "No real hardware, SSH, BMC, KVM framebuffer, Gateway or OpenHands provider was contacted.",
+        "The synthetic report proves the existing entry opens; it does not validate production report generation or saved-file completion."
+      ]
+    },
+    {
+      "round": 2,
+      "status": "PASS",
+      "steps": [
+        {
+          "name": "overview",
+          "status": "PASS",
+          "durationMs": 769,
+          "details": null
+        },
+        {
+          "name": "theme-toggle",
+          "status": "PASS",
+          "durationMs": 694,
+          "details": {
+            "before": "dark",
+            "after": "light"
+          }
+        },
+        {
+          "name": "refresh-and-provider-reinstall",
+          "status": "PASS",
+          "durationMs": 1125,
+          "details": null
+        },
+        {
+          "name": "project-system-node-inventory",
+          "status": "PASS",
+          "durationMs": 1402,
+          "details": null
+        },
+        {
+          "name": "inspection-evidence-failure-reopen",
+          "status": "PASS",
+          "durationMs": 879,
+          "details": null
+        },
+        {
+          "name": "telemetry-ready",
+          "status": "PASS",
+          "durationMs": 101,
+          "details": null
+        },
+        {
+          "name": "test-case-single-agent-go-done",
+          "status": "PASS",
+          "durationMs": 2549,
+          "details": null
+        },
+        {
+          "name": "agent-close-reopen",
+          "status": "PASS",
+          "durationMs": 595,
+          "details": null
+        },
+        {
+          "name": "test-case-multi-batch-no-agent",
+          "status": "PASS",
+          "durationMs": 346,
+          "details": null
+        },
+        {
+          "name": "cycle-pre-confirm-console-report",
+          "status": "PASS",
+          "durationMs": 984,
+          "details": null
+        },
+        {
+          "name": "terminal-broadcast-kvm-frames",
+          "status": "PASS",
+          "durationMs": 753,
+          "details": null
+        },
+        {
+          "name": "rack-topology-return-reopen",
+          "status": "PASS",
+          "durationMs": 1990,
+          "details": null
+        },
+        {
+          "name": "user-guide",
+          "status": "PASS",
+          "durationMs": 828,
+          "details": null
+        }
+      ],
+      "screenshots": [
+        {
+          "file": "round-2-evidence-error.png",
+          "sha256": "6a79fa97bfb064819676c5a5eedc99d7266d17ac3af22bf83b97e519f8b5e285",
+          "width": 1366,
+          "height": 768,
+          "route": "#/machine/host_a"
+        },
+        {
+          "file": "round-2-agent-done.png",
+          "sha256": "74ced75a3b1c6d0b70699663c44fe4db4d8ecc198dcfa5c9a1b76dd9c822d2c6",
+          "width": 1366,
+          "height": 768,
+          "route": "#/machine/host_a"
+        },
+        {
+          "file": "round-2-cycle-console.png",
+          "sha256": "da7f01ccfb0eabb1918d453d0813c69e12bbe85e8a506f995c4d8d0ed732ad96",
+          "width": 1366,
+          "height": 768,
+          "route": "#/cycle/runs/neutrino_demo_power_cycle_outband_20261008_161809_b8119b"
+        },
+        {
+          "file": "round-2-user-guide.png",
+          "sha256": "463fae428256c24d50c9b937864dd622d51c0f6d48e293c6d2f6f6c9343c5b4b",
+          "width": 1366,
+          "height": 768,
+          "route": "#/rack/Naboo"
+        }
+      ],
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "mutations": [
+        {
+          "action": "agent-create",
+          "method": "POST",
+          "path": "/api/agent/runs",
+          "body": {
+            "case_variant_id": "director-walkthrough-case-2-1",
+            "node_id": "",
+            "expected_binding_revision": ""
+          }
+        },
+        {
+          "action": "agent-start-plan",
+          "method": "POST",
+          "path": "/api/agent/runs/director-walkthrough-agent-2/start",
+          "body": {
+            "auto_run": true,
+            "mode": "plan"
+          }
+        },
+        {
+          "action": "agent-message",
+          "method": "POST",
+          "path": "/api/agent/runs/director-walkthrough-agent-2/messages",
+          "body": {
+            "text": "GO"
+          }
+        },
+        {
+          "action": "cycle-create",
+          "method": "POST",
+          "path": "/api/cycle/runs",
+          "body": {
+            "project": "Neutrino Demo",
+            "machine_ids": [
+              "fbf9e5e6-c3859a4590975b4c98314c57ec0a33c6",
+              "fbf9e5e6-16dcd2180fe55aa88ab2c09b0d3179df",
+              "fbf9e5e6-4aa97f460cb85f8da7a4bb9a88b4f87d",
+              "fbf9e5e6-5ef03184c29757d88ce8bcfdc423bb0e"
+            ],
+            "cycle_profile": "neutrino",
+            "cycle_mode": "reboot",
+            "channel": "inband",
+            "limits": {
+              "loops": 2,
+              "hours": 0
+            },
+            "idempotency_key": "98f84ee3-450c-40ad-b22f-ff5dc9aa98e7"
+          }
+        },
+        {
+          "action": "cycle-confirm",
+          "method": "POST",
+          "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261008_161809_b8119b/confirm",
+          "body": {
+            "version": "walkthrough-pre-2",
+            "machine_ids": [
+              "fbf9e5e6-c3859a4590975b4c98314c57ec0a33c6",
+              "fbf9e5e6-16dcd2180fe55aa88ab2c09b0d3179df",
+              "fbf9e5e6-4aa97f460cb85f8da7a4bb9a88b4f87d",
+              "fbf9e5e6-5ef03184c29757d88ce8bcfdc423bb0e"
+            ]
+          }
+        }
+      ],
+      "expectedFailures": [
+        {
+          "path": "/api/machine/host_a/inspection/evidence/director-walkthrough-evidence/view",
+          "status": 503,
+          "reason": "deliberate persistent-error / reopen scenario"
+        }
+      ],
+      "notRun": [
+        "Physical display/projector and OS text-only scaling were not exercised.",
+        "No real hardware, SSH, BMC, KVM framebuffer, Gateway or OpenHands provider was contacted.",
+        "The synthetic report proves the existing entry opens; it does not validate production report generation or saved-file completion."
+      ]
+    },
+    {
+      "round": 3,
+      "status": "PASS",
+      "steps": [
+        {
+          "name": "overview",
+          "status": "PASS",
+          "durationMs": 779,
+          "details": null
+        },
+        {
+          "name": "theme-toggle",
+          "status": "PASS",
+          "durationMs": 675,
+          "details": {
+            "before": "dark",
+            "after": "light"
+          }
+        },
+        {
+          "name": "refresh-and-provider-reinstall",
+          "status": "PASS",
+          "durationMs": 997,
+          "details": null
+        },
+        {
+          "name": "project-system-node-inventory",
+          "status": "PASS",
+          "durationMs": 1321,
+          "details": null
+        },
+        {
+          "name": "inspection-evidence-failure-reopen",
+          "status": "PASS",
+          "durationMs": 895,
+          "details": null
+        },
+        {
+          "name": "telemetry-ready",
+          "status": "PASS",
+          "durationMs": 93,
+          "details": null
+        },
+        {
+          "name": "test-case-single-agent-go-done",
+          "status": "PASS",
+          "durationMs": 2511,
+          "details": null
+        },
+        {
+          "name": "agent-close-reopen",
+          "status": "PASS",
+          "durationMs": 588,
+          "details": null
+        },
+        {
+          "name": "test-case-multi-batch-no-agent",
+          "status": "PASS",
+          "durationMs": 333,
+          "details": null
+        },
+        {
+          "name": "cycle-pre-confirm-console-report",
+          "status": "PASS",
+          "durationMs": 1125,
+          "details": null
+        },
+        {
+          "name": "terminal-broadcast-kvm-frames",
+          "status": "PASS",
+          "durationMs": 739,
+          "details": null
+        },
+        {
+          "name": "rack-topology-return-reopen",
+          "status": "PASS",
+          "durationMs": 2173,
+          "details": null
+        },
+        {
+          "name": "user-guide",
+          "status": "PASS",
+          "durationMs": 798,
+          "details": null
+        }
+      ],
+      "screenshots": [
+        {
+          "file": "round-3-evidence-error.png",
+          "sha256": "6a79fa97bfb064819676c5a5eedc99d7266d17ac3af22bf83b97e519f8b5e285",
+          "width": 1366,
+          "height": 768,
+          "route": "#/machine/host_a"
+        },
+        {
+          "file": "round-3-agent-done.png",
+          "sha256": "0baf906cdcefaa0c1bf95ab66f6cdf5c4a22424ce70cd224a6bed9238a7c9947",
+          "width": 1366,
+          "height": 768,
+          "route": "#/machine/host_a"
+        },
+        {
+          "file": "round-3-cycle-console.png",
+          "sha256": "edaf755835ccf3129ba4764d03e0b5d5b061cd223743270576a3445d252071ff",
+          "width": 1366,
+          "height": 768,
+          "route": "#/cycle/runs/neutrino_demo_power_cycle_outband_20261008_161822_2f655b"
+        },
+        {
+          "file": "round-3-user-guide.png",
+          "sha256": "ff058a3b2e629cd012102397f1b8e000d001addbbf946e59bc4c58070c55db3e",
+          "width": 1366,
+          "height": 768,
+          "route": "#/rack/Naboo"
+        }
+      ],
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "mutations": [
+        {
+          "action": "agent-create",
+          "method": "POST",
+          "path": "/api/agent/runs",
+          "body": {
+            "case_variant_id": "director-walkthrough-case-3-1",
+            "node_id": "",
+            "expected_binding_revision": ""
+          }
+        },
+        {
+          "action": "agent-start-plan",
+          "method": "POST",
+          "path": "/api/agent/runs/director-walkthrough-agent-3/start",
+          "body": {
+            "auto_run": true,
+            "mode": "plan"
+          }
+        },
+        {
+          "action": "agent-message",
+          "method": "POST",
+          "path": "/api/agent/runs/director-walkthrough-agent-3/messages",
+          "body": {
+            "text": "GO"
+          }
+        },
+        {
+          "action": "cycle-create",
+          "method": "POST",
+          "path": "/api/cycle/runs",
+          "body": {
+            "project": "Neutrino Demo",
+            "machine_ids": [
+              "1786140b-c3859a4590975b4c98314c57ec0a33c6",
+              "1786140b-16dcd2180fe55aa88ab2c09b0d3179df",
+              "1786140b-4aa97f460cb85f8da7a4bb9a88b4f87d",
+              "1786140b-5ef03184c29757d88ce8bcfdc423bb0e"
+            ],
+            "cycle_profile": "neutrino",
+            "cycle_mode": "reboot",
+            "channel": "inband",
+            "limits": {
+              "loops": 2,
+              "hours": 0
+            },
+            "idempotency_key": "8fc3a0b5-0166-4d91-89e3-2c96d257efcc"
+          }
+        },
+        {
+          "action": "cycle-confirm",
+          "method": "POST",
+          "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261008_161822_2f655b/confirm",
+          "body": {
+            "version": "walkthrough-pre-3",
+            "machine_ids": [
+              "1786140b-c3859a4590975b4c98314c57ec0a33c6",
+              "1786140b-16dcd2180fe55aa88ab2c09b0d3179df",
+              "1786140b-4aa97f460cb85f8da7a4bb9a88b4f87d",
+              "1786140b-5ef03184c29757d88ce8bcfdc423bb0e"
+            ]
+          }
+        }
+      ],
+      "expectedFailures": [
+        {
+          "path": "/api/machine/host_a/inspection/evidence/director-walkthrough-evidence/view",
+          "status": 503,
+          "reason": "deliberate persistent-error / reopen scenario"
+        }
+      ],
+      "notRun": [
+        "Physical display/projector and OS text-only scaling were not exercised.",
+        "No real hardware, SSH, BMC, KVM framebuffer, Gateway or OpenHands provider was contacted.",
+        "The synthetic report proves the existing entry opens; it does not validate production report generation or saved-file completion."
+      ]
+    }
+  ],
+  "limitations": [
+    "This is synthetic UI acceptance, not real hardware end-to-end acceptance.",
+    "Physical display/projector, OS text-only 200%, and real OS per-monitor scaling remain unverified."
+  ],
+  "generatedAt": "2026-10-08T08:18:37.197Z"
+}

@@ -1,6 +1,6 @@
 # Future functional work
 
-This file contains only work that needs a new backend/schema/provider capability or a new product workflow. It is not a parking lot for unfinished UI verification. Final clean-SHA capture, deterministic fixtures, truthful rendering of existing results, loaded-text expansion, copy feedback, remaining S12/S13 coverage, physical-display checks and walkthroughs stay in the current Director scope.
+This file contains only work that needs a new backend/schema/provider capability or a new product workflow. It is not a parking lot for unfinished UI verification. Deterministic fixtures, truthful rendering of existing results, loaded-text expansion, copy feedback, remaining S12/S13 coverage and physical-display checks stay in the current Director scope. Clean broad 100%/true-125% capture identity and the three-round synthetic walkthrough are now evidenced separately and are not future work.
 
 ## New contracts required
 
@@ -34,6 +34,6 @@ This file contains only work that needs a new backend/schema/provider capability
 
 ## Explicitly not future work
 
-The following remain current acceptance work and must not be deferred here: final clean-SHA broad screenshots, untested owner/role/error combinations, S13 completion, physical-display verification, the non-green full suite and Director walkthroughs.
+The following remain current acceptance work and must not be deferred here: untested owner/role/error combinations, S13 formal Report/SOP completion, physical-display verification and the non-green full suite. Final clean broad screenshots are complete at tested SHA `84adcef`; the integrated synthetic walkthrough passes three rounds at `3ef6962`. Neither is listed as future work.
 
 True-125% compact-modal reachability, the targeted solid-background contrast matrix and 200% browser zoom now have evidence and are **not** listed here as future or open functional work. Their documented scope limits—partial WCAG methodology and browser zoom not being an OS text-only/physical-display test—remain truthful limitations rather than requests for a new backend.
