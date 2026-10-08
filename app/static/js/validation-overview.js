@@ -6,7 +6,6 @@
   const REFRESH_MS=30000;
   let overview=null,selectedProject='',loading=null,teardown=()=>{};
   const quote=value=>esc(JSON.stringify(String(value)));
-  const readRecent=()=>{try{return JSON.parse(sessionStorage.getItem('pa_recent_devices')||'[]');}catch{return [];}};
   const fmt=value=>value?new Date(value*1000).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'尚無紀錄';
   const projectByName=name=>overview?.projects?.find(project=>project.name===name);
 
@@ -34,8 +33,7 @@
     </section>
     <section class="vo-key-status" aria-labelledby="vo-key-title"><header><span class="vo-kicker">KEY STATUS</span><h2 id="vo-key-title">驗證狀態</h2></header><div data-vo-status><p class="vo-loading">正在取得狀態…</p></div></section>
     <section class="vo-attention" aria-labelledby="vo-attention-title"><header><div><span class="vo-kicker">ATTENTION REQUIRED</span><h2 id="vo-attention-title">需要處理</h2></div><span data-vo-attention-count>—</span></header><div data-vo-attention><p class="vo-loading">正在取得巡檢問題…</p></div></section>
-    <section class="vo-projects" aria-labelledby="vo-projects-title"><header><div><span class="vo-kicker">PROJECTS</span><h2 id="vo-projects-title">專案驗證摘要</h2></div><span data-vo-project-count>—</span></header><div class="vo-project-grid" data-vo-projects><p class="vo-loading">正在取得專案…</p></div></section>
-    <section class="vo-recent" aria-labelledby="vo-recent-title"><header><span class="vo-kicker">RECENT ACTIVITY</span><h2 id="vo-recent-title">最近使用與執行</h2></header><div data-vo-recent><p class="vo-loading">正在取得最近活動…</p></div></section>
+    <section class="vo-projects" aria-labelledby="vo-projects-title"><header><div><span class="vo-kicker">INSPECTION HEALTH</span><h2 id="vo-projects-title">Project Inspection Health — Top 5</h2></div><span data-vo-project-count>—</span></header><div class="vo-project-health" data-vo-projects><p class="vo-loading">正在取得專案巡檢狀態…</p></div></section>
   </main>`;
 
   function selectedSummary(){return selectedProject?projectByName(selectedProject):overview?.totals;}
@@ -65,11 +63,8 @@
     const issues=overview.issues.filter(issue=>!selectedProject||issue.project===selectedProject).slice(0,6);
     root.querySelector('[data-vo-attention-count]').textContent=`${issues.length} 項`;
     root.querySelector('[data-vo-attention]').innerHTML=issues.length?issues.map(issue=>`<button type="button" class="vo-issue" data-severity="${issue.severity}" onclick="openMachine(${quote(issue.system)})"><span>${issue.severity}</span><div><b>${esc(issue.system)}${issue.node?' / '+esc(issue.node):''}</b><strong>${esc(issue.component||issue.rule||'巡檢問題')}</strong><small>${esc(issue.facts||'請查看巡檢證據與分析依據')}</small></div><i aria-hidden="true">查看 →</i></button>`).join(''):'<div class="vo-empty"><strong>目前沒有待處理的巡檢問題</strong><span>仍請連同資料涵蓋率與最近巡檢時間判讀。</span></div>';
-    root.querySelector('[data-vo-project-count]').textContent=`${overview.projects.length} Projects`;
-    root.querySelector('[data-vo-projects]').innerHTML=overview.projects.length?overview.projects.map(project=>`<button type="button" class="vo-project-card" onclick="cineOpenProject(${quote(project.name)})"><header><span>${project.level}</span><b>${esc(project.name)}</b><i>↗</i></header><p>${project.systems} Chassis · ${project.nodes} Nodes</p><div class="vo-project-results"><strong>${project.issues.fail} FAIL</strong><span>${project.issues.warning} WARN</span><em>${project.validation.pass} PASS</em></div><dl><div><dt>Cycle</dt><dd>${project.cycle.running} Running</dd></div><div><dt>Telemetry</dt><dd>${project.monitoring.reporting} / ${project.monitoring.total}</dd></div><div><dt>Inspection</dt><dd>${project.validation.checked} / ${project.validation.total}</dd></div></dl><small>最近驗證 ${fmt(project.last_validation)}</small></button>`).join(''):'<div class="vo-empty"><strong>尚無可顯示的專案</strong><span>新增專案與系統後，驗證摘要會顯示在這裡。</span></div>';
-    const recentDevices=readRecent().filter(name=>machines.some(machine=>machine.name===name)).slice(0,4);
-    const runs=overview.recent_runs.filter(run=>!selectedProject||run.project===selectedProject).slice(0,4);
-    root.querySelector('[data-vo-recent]').innerHTML=`<div><h3>最近使用</h3>${recentDevices.length?recentDevices.map(name=>`<button type="button" onclick="openMachine(${quote(name)})"><b>${esc(name)}</b><span>開啟 →</span></button>`).join(''):'<p>尚無最近使用的系統。</p>'}</div><div><h3>最近 Cycle</h3>${runs.length?runs.map(run=>`<a href="#/cycle/runs/${encodeURIComponent(run.id)}"><b>${esc(run.project)}</b><span>${esc(run.state)} · ${fmt(run.updated_at||run.created_at)}</span></a>`).join(''):'<p>尚無 Cycle 執行紀錄。</p>'}</div>`;
+    const healthProjects=overview.projects.slice(0,5);root.querySelector('[data-vo-project-count]').textContent=`Top ${healthProjects.length} / ${overview.projects.length} Projects`;
+    root.querySelector('[data-vo-projects]').innerHTML=healthProjects.length?`<div class="vo-health-table" role="table" aria-label="Project Inspection Health"><div class="vo-health-row vo-health-head" role="row"><span>Project Name</span><span>Affected Nodes</span><span>FAIL Count</span><span>FAIL Rate</span><span>Inspection Coverage</span><span>Last Inspection</span><span>Health Status</span></div>${healthProjects.map(project=>{const inspection=project.inspection||{},rate=inspection.fail_rate==null?'NO DATA':inspection.fail_rate.toFixed(1)+'%',coverage=(inspection.coverage??0).toFixed(1)+'%';return `<button type="button" class="vo-health-row" role="row" onclick="openProjectInspection(${quote(project.name)})"><b>${esc(project.name)}</b><span>${inspection.affected_nodes??0} / ${project.nodes}</span><strong>${inspection.fail_count??0}</strong><span>${rate}</span><span>${coverage}</span><span>${fmt(inspection.last_inspection)}</span><em data-health="${esc(inspection.health_status||'UNKNOWN')}">${esc(inspection.health_status||'UNKNOWN')}</em></button>`;}).join('')}</div>`:'<div class="vo-empty"><strong>尚無可顯示的專案</strong><span>新增專案與系統後，Inspection Health 會顯示在這裡。</span></div>';
   }
 
   async function loadOverview(force=false,silent=false){
@@ -183,6 +178,7 @@
     teardown=()=>{disposed=true;cancel();callouts?.destroy();clearInterval(refreshTimer);delete story.paHeroPlayback;window.removeEventListener('scroll',manualScroll);canvas.removeEventListener('pointerdown',input);canvas.removeEventListener('touchstart',input);canvas.removeEventListener('keydown',input);story.removeEventListener('wheel',wheel);tools?.removeEventListener('click',input);canvas.removeEventListener('pa-core-ready',ready);document.removeEventListener('visibilitychange',visibilityChange);reduced.removeEventListener('change',motionChange);};
   }
   window.cineOpenProject=name=>{const project=projectByName(name);productProject(name,project?.level==='L11'?'rack':'system');};
+  window.openProjectInspection=name=>{const machine=machines.find(item=>item.project===name&&item.mgx_type!=='blanking'&&!item.passive);if(!machine){window.cineOpenProject(name);return;}openMachine(machine.name);setTimeout(()=>window.productDetailTab?.('sensors',true),0);};
   window.cineEnterSelected=()=>selectedProject?window.cineOpenProject(selectedProject):productLevel('system');
   const render=_renderMachine;
   _renderMachine=function(...args){const result=render(...args);if(state.view==='dashboard')requestAnimationFrame(mountOverview);else teardown();return result;};

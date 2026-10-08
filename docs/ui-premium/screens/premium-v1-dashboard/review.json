@@ -1,0 +1,15 @@
+{
+  "result": "PASS",
+  "checks": [
+    "four-section information architecture without recent activity",
+    "Project Inspection Health Top 5 fields and risk order",
+    "single dashboard renderer",
+    "decision-ready issue and project states",
+    "30-second refresh preserves project and cinematic state",
+    "refresh timer stops when Dashboard unmounts",
+    "one-shot cinematic",
+    "manual input cancels autoplay",
+    "returning to Dashboard shows full rack",
+    "1366/1920/3440 light/dark without horizontal overflow"
+  ]
+}

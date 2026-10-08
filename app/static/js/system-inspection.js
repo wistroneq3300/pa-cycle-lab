@@ -5,7 +5,7 @@
   const identityLabels={SUCCESS:'讀取成功',AUTH_FAILED:'登入驗證失敗',MISSING_DATA:'身分資料不完整',IDENTITY_REQUIRES_CONFIRMATION:'Identity 需確認'};
   const stamp=v=>v?new Date(v*1000).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false}):'尚未取得';
   const valueOrMissing=v=>v != null && v !== '' && Number.isFinite(Number(v))?String(Number(v)):'未取得';
-  const labels={EXPECTED_OFFLINE:'Cycle 預期恢復中',FRESH:'資料有效',MISSING:'尚無節點資料',STALE:'資料過舊',UNAVAILABLE:'來源無法使用',NOT_COVERED:'尚未涵蓋',BACKLOG:'事件補讀中',TIMED_OUT:'採集逾時',INVALID:'觀測欄位不完整',FAILED:'採集失敗',PARTIAL:'部分資料／觀測缺口',NOT_READY:'尚未就緒',NOT_CONFIGURED:'尚未設定',NOT_SUPPORTED:'來源不支援',WAITING_READY:'開機恢復中 · 等待檢查',INTERRUPTED:'開機世代改變 · 本批不完整',SHARED:'共用控制器資料',IDENTITY_MISMATCH:'節點身分與設定不符',TRUNCATED:'資料超過採集上限'};
+  const labels={PASS:'PASS',WARN:'WARN',FAIL:'FAIL',UNKNOWN:'UNKNOWN',NO_DATA:'NO DATA',NOT_APPLICABLE:'NOT APPLICABLE',NOT_MONITORED:'NOT MONITORED',EXPECTED_OFFLINE:'Cycle 預期恢復中',FRESH:'資料有效',MISSING:'尚無節點資料',STALE:'STALE',UNAVAILABLE:'來源無法使用',NOT_COVERED:'尚未涵蓋',BACKLOG:'事件補讀中',TIMED_OUT:'採集逾時',INVALID:'觀測欄位不完整',FAILED:'採集失敗',PARTIAL:'部分資料／觀測缺口',NOT_READY:'尚未就緒',NOT_CONFIGURED:'尚未設定',NOT_SUPPORTED:'來源不支援',WAITING_READY:'開機恢復中 · 等待檢查',INTERRUPTED:'開機世代改變 · 本批不完整',SHARED:'共用控制器資料',IDENTITY_MISMATCH:'節點身分與設定不符',TRUNCATED:'資料超過採集上限'};
   Object.assign(labels,identityLabels);
   // A capped Redfish LogService is PARTIAL for a specific, actionable reason:
   // the source is healthy but only the newest N entries were kept. Call that out
@@ -28,28 +28,29 @@
   const card=()=>`<section class="pd-inspection p-surface" id="pd-inspection" aria-label="系統巡檢">
     <div class="pd-section-heading"><h2><button type="button" class="pd-inspection-collapse" data-collapse aria-expanded="true" aria-controls="pd-inspection-body" title="收闔系統巡檢"><span class="pd-inspection-caret" aria-hidden="true">▾</span>系統巡檢</button></h2><span data-status role="status">讀取中…</span></div>
     <div class="pd-inspection-body" id="pd-inspection-body">
-    <p class="pd-inspection-copy">依專案規格檢查節點硬體、事件與遙測資料，持續追蹤異常與恢復狀態。巡檢僅執行唯讀觀測，不會變更設備電源狀態。</p>
-    <div class="pd-inspection-counts"><span data-severity="FAIL">FAIL <strong data-fail>—</strong> 項</span><span data-severity="WARN">WARN <strong data-warning>—</strong> 項</span></div>
+    <p class="pd-inspection-copy">依 Project 規格檢查節點硬體、SEL / Event Log 與 Telemetry 資料，持續追蹤異常與恢復狀態。巡檢僅執行唯讀觀測，不會變更設備電源狀態。</p>
+    <div class="pd-inspection-counts"><span data-severity="FAIL">FAIL <strong data-fail>—</strong> 項</span><span data-severity="WARN">WARN <strong data-warning>—</strong> 項</span><span data-severity="COVERAGE">Coverage <strong data-coverage-value>—</strong></span></div>
     <p class="pd-inspection-meta" data-time>最近完成：尚未取得 · 台灣時間 UTC+8</p>
     <p class="pd-inspection-meta" data-version></p><p class="pd-inspection-meta" data-completeness></p>
     <p class="pd-inspection-meta" data-progress aria-live="polite"></p>
     <p class="pd-inspection-error" data-error role="alert"></p>
     <div class="pd-inspection-actions"><button class="btn" type="button" data-view>查看問題</button><button class="btn" type="button" data-run>立即巡檢</button><button class="pd-text-action" type="button" data-settings>巡檢設定</button></div>
-    <details class="pd-inspection-coverage"><summary>資料來源與涵蓋範圍</summary><div data-coverage></div></details>
+    <section class="pd-inspection-matrix" aria-labelledby="pd-inspection-matrix-title"><div class="pd-inspection-matrix-head"><div><h3 id="pd-inspection-matrix-title">Inspection Status Matrix</h3><p>依此 Project checker 與已保存 Evidence 呈現；Coverage 與 Hardware Health 分開計算。</p></div><label>節點 <select data-matrix-node><option value="">全部節點</option></select></label></div><div class="pd-matrix-scroll"><table><thead><tr><th>Check Name</th><th>Status</th><th>Expected / Observed</th><th>Last Checked</th><th>Evidence</th></tr></thead><tbody data-matrix></tbody></table></div><p data-matrix-empty hidden>尚無巡檢結果。零項異常不代表 Hardware Health PASS。</p></section>
+    <details class="pd-inspection-coverage"><summary>採集來源與原始狀態</summary><div data-coverage></div></details>
     <details class="pd-inspection-coverage"><summary>節點名稱與身分紀錄</summary><div data-identity></div><div data-identity-history></div></details>
     <section data-issues hidden aria-label="巡檢問題與恢復歷史"><div class="pd-inspection-filters"><label>節點 <select data-node><option value="">全部節點</option></select></label><label>狀態 <select data-filter><option value="current">目前問題與最近恢復</option><option value="ACTIVE">目前問題</option><option value="RECOVERED">最近恢復</option><option value="ARCHIVED">歷史問題</option><option value="all">全部紀錄</option></select></label><label>搜尋全部符合範圍 <input data-issue-search type="search" placeholder="規則、元件或問題摘要"></label></div><button type="button" class="btn small" data-reload>更新問題</button><span data-history-count></span><div data-list></div><div class="pd-inspection-paging"><button class="btn small" data-prev>上一頁</button><span data-page></span><button class="btn small" data-next>下一頁</button></div></section>
     <form data-config hidden><h3>此系統巡檢設定</h3><p>設定只影響巡檢規則，不會變更 Telemetry 收集頻率。</p><div class="pd-inspection-fields">
-      <label><input type="checkbox" name="enabled"> 啟用排程</label><label><input type="checkbox" name="ai_enabled"> 活躍警告與 FAIL 使用 AI 分析</label>
+      <label><input type="checkbox" name="enabled"> 啟用 Project 排程</label><label><input type="checkbox" name="ai_enabled"> 活躍警告與 FAIL 使用 AI 分析</label>
       <label>事件巡檢間隔（秒）<input type="number" name="interval_seconds" min="30" max="3600" required></label>
       <label>完整硬體巡檢間隔（秒）<input type="number" name="deep_seconds" min="60" max="86400" required></label>
       <label>Sensor 採集（秒）<input type="number" name="sensor_seconds" min="30" max="86400" required></label>
       <label>韌體資訊採集（秒）<input type="number" name="firmware_seconds" min="60" max="604800" required></label>
       <label>高使用率持續（秒）<input type="number" name="duration_seconds" min="0" max="3600" required></label>
       <label>恢復所需新樣本<input type="number" name="recovery_samples" min="1" max="20" required></label>
-      <label>遙測資料有效期限（秒）<input type="number" name="stale_seconds" min="30" max="3600" required></label>
+      <label>Telemetry 資料有效期限（秒）<input type="number" name="stale_seconds" min="30" max="3600" required></label>
       <label>恢復遲滯（百分點）<input type="number" name="hysteresis" min="1" max="30" required></label>
       ${['cpu','memory','gpu','vram'].map((key,i)=>`<label>${['CPU','記憶體','GPU','VRAM'][i]} 警告門檻（%）<input type="number" name="${key}" min="1" max="100" required></label>`).join('')}
-    </div><p>高使用率僅列警告；請依專案負載設定。AI 內容為輔助判讀，不改變規則判定。</p><button type="submit" class="btn primary">儲存巡檢設定</button></form>
+    </div><fieldset class="pd-node-overrides"><legend>Node 個別覆寫</legend><div data-node-overrides></div></fieldset><p>停用排程不會刪除歷史 WARN／FAIL 或 Evidence，Telemetry 亦繼續獨立運作。AI 內容為輔助判讀，不改變規則判定。</p><button type="submit" class="btn primary">儲存巡檢設定</button></form>
     </div>
   </section>`;
   function dispose(){if(!mounted)return;const ctx=mounted,r=ctx.root;
@@ -82,6 +83,7 @@
       for(const name of ['enabled','ai_enabled'])body[name]=form.elements[name].checked;
       for(const name of ['interval_seconds','deep_seconds','sensor_seconds','firmware_seconds','duration_seconds','recovery_samples','stale_seconds','hysteresis'])body[name]=Number(form.elements[name].value);
       for(const name of ['cpu','memory','gpu','vram'])body.thresholds[name]=Number(form.elements[name].value);
+      body.node_overrides={};for(const select of form.querySelectorAll('[data-node-override]'))if(select.value!=='inherit')body.node_overrides[select.dataset.nodeOverride]=select.value==='true';
       const button=form.querySelector('[type=submit]');button.disabled=true;
       try{await request(ctx,'/settings',{method:'PATCH',body:JSON.stringify(body)});form.hidden=true;await refresh(ctx);}catch(e){error(ctx,e);}finally{button.disabled=false;}
     };
@@ -126,7 +128,7 @@
       r.dataset.sourceState=data.error?'error':'ready';r.querySelector('[data-error]').textContent=data.error||'';
       r.querySelector('[data-status]').textContent=data.delayed?'採集時間較長 · 仍在處理':data.running?'採集中…':data.config.enabled?`已啟用 · Fast ${data.config.interval_seconds}s / Deep ${data.config.deep_seconds||600}s`:'排程未啟用';
       r.querySelector('[data-run]').disabled=!!data.running;
-      r.querySelector('[data-fail]').textContent=valueOrMissing(data.summary?.fail);r.querySelector('[data-warning]').textContent=valueOrMissing(data.summary?.warning);
+      r.querySelector('[data-fail]').textContent=valueOrMissing(data.summary?.fail);r.querySelector('[data-warning]').textContent=valueOrMissing(data.summary?.warning);r.querySelector('[data-coverage-value]').textContent=data.config.enabled?`${valueOrMissing(data.coverage_summary?.coverage)}%`:'NOT MONITORED';
       const summary=r.closest('.pd-workspace')?.querySelector('[data-health-summary]');
       if(summary)summary.textContent=`${valueOrMissing(data.summary?.fail)} FAIL · ${valueOrMissing(data.summary?.warning)} Warning`;
       r.querySelector('[data-history-count]').textContent=`最近恢復 ${valueOrMissing(data.lifecycle_counts?.recovered)} · 歷史問題 ${valueOrMissing(data.lifecycle_counts?.archived)}`;
@@ -136,6 +138,8 @@
       const required=(data.coverage||[]).filter(c=>!c.source.startsWith('Input '));
       const fresh=required.filter(c=>c.state==='FRESH'||c.state==='SHARED');
       r.querySelector('[data-completeness]').textContent=`${data.nodes.length} 個節點 · ${fresh.length} / ${required.length} 項來源資料有效。請連同涵蓋狀態判讀異常數量。`;
+      const matrixSelect=r.querySelector('[data-matrix-node]');if(matrixSelect.options.length===1)for(const node of data.nodes)matrixSelect.add(new Option(node.label,node.node_id));
+      matrixSelect.onchange=()=>renderMatrix(ctx);renderMatrix(ctx);
       const coverage=r.querySelector('[data-coverage]');
       const signature=JSON.stringify(data.coverage||[]);
       if(ctx.coverageSignature!==signature){ctx.coverageSignature=signature;coverage.replaceChildren();
@@ -143,9 +147,19 @@
       if(!coverage.childNodes.length)coverage.textContent='尚未巡檢。零項異常不代表所有節點均已完成檢查。';
       const select=r.querySelector('[data-node]');if(select.options.length===1)for(const node of data.nodes){const option=document.createElement('option');option.value=node.node_id;option.textContent=node.label;select.append(option);}
       const form=r.querySelector('[data-config]');if(form.hidden){for(const [name,value] of Object.entries(data.config)){if(name==='thresholds'){for(const [metric,threshold] of Object.entries(value))form.elements[metric].value=threshold;}else if(form.elements[name]){if(typeof value==='boolean')form.elements[name].checked=value;else form.elements[name].value=value;}}}
+      const overrides=form.querySelector('[data-node-overrides]'),overrideSignature=JSON.stringify([data.nodes,data.config.node_overrides]);if(overrides.dataset.signature!==overrideSignature){overrides.dataset.signature=overrideSignature;overrides.replaceChildren();for(const node of data.nodes){const label=document.createElement('label'),nodeSelect=document.createElement('select');label.append(document.createTextNode(node.label));nodeSelect.dataset.nodeOverride=node.node_id;nodeSelect.append(new Option('跟隨 Project','inherit'),new Option('啟用','true'),new Option('停用','false'));const value=data.config.node_overrides?.[node.node_id];nodeSelect.value=value===true?'true':value===false?'false':'inherit';label.append(nodeSelect);overrides.append(label);}}
       // Preserve expanded evidence, keyboard focus and text selection during periodic refresh.
       if(!r.querySelector('[data-issues]').hidden&&!r.querySelector('[data-list]').childNodes.length)await loadIssues(ctx);
     }catch(e){error(ctx,e);}finally{if(mounted===ctx)ctx.timer=setTimeout(()=>refresh(ctx),5000);}
+  }
+  function renderMatrix(ctx){
+    const body=ctx.root.querySelector('[data-matrix]'),empty=ctx.root.querySelector('[data-matrix-empty]'),selected=ctx.root.querySelector('[data-matrix-node]').value;
+    body.replaceChildren();const rows=(ctx.snapshot?.check_matrix||[]).filter(row=>!selected||row.node_id===selected);empty.hidden=!!rows.length;
+    for(const row of rows){const tr=document.createElement('tr');tr.dataset.status=row.status;const check=document.createElement('td'),details=document.createElement('details'),summary=document.createElement('summary'),detail=document.createElement('p');summary.textContent=`${row.node_label} · ${row.check_name}`;detail.textContent=row.detail||'未提供其他判定資訊。';details.append(summary,detail);check.append(details);
+      const status=document.createElement('td'),badge=document.createElement('span');badge.className='pd-check-status';badge.dataset.state=row.status;badge.textContent=labels[row.status]||row.status;if(row.status==='STALE'&&['PASS','WARN','FAIL'].includes(row.health_status))badge.title='過期前最後判定：'+row.health_status;status.append(badge);
+      const comparison=document.createElement('td');comparison.textContent=row.expected!=null||row.observed!=null?`Expected ${row.expected??'—'} / Observed ${row.observed??'—'}`:'—';
+      const checked=document.createElement('td');checked.textContent=stamp(row.last_checked);
+      const evidence=document.createElement('td');if(row.evidence_available&&row.evidence_ref?.snapshot_id){const button=document.createElement('button');button.type='button';button.className='pd-text-action';button.textContent='原始 Evidence';button.onclick=()=>window.InspectionEvidence.open(ctx.base,row.evidence_ref.snapshot_id,`${row.node_label} · ${row.check_name}`);evidence.append(button);}else evidence.textContent='無可用 Evidence';tr.append(check,status,comparison,checked,evidence);body.append(tr);}
   }
   function issueQuery(ctx){const r=ctx.root;return '/issues?'+new URLSearchParams({offset:ctx.offset,limit:50,status:r.querySelector('[data-filter]').value,node_id:r.querySelector('[data-node]').value,search:r.querySelector('[data-issue-search]').value});}
   async function loadIssues(ctx){try{const data=await request(ctx,issueQuery(ctx));if(mounted!==ctx)return;ctx.rows=data.issues;ctx.root.querySelector('[data-reload]').textContent='更新問題';renderIssues(ctx);if(ctx.rows.some(i=>['QUEUED','RUNNING'].includes(i.analysis?.state)))trackAI(ctx);}catch(e){error(ctx,e);}}
