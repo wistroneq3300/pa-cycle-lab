@@ -58,7 +58,7 @@ const out=path.resolve('artifacts/validation-console');fs.mkdirSync(out,{recursi
     await console.locator('[data-fleet-focus=search]').fill('');
     await console.locator('.lc-matrix>summary').click();
    }
-   if(count===128){assert((await console.locator('.lc-fleet-counts').innerText()).includes('Completed / healthy 114'));assert((await console.locator('.lc-fleet-counts').innerText()).includes('Waiting / recovery 10'));}
+   if(count===128){assert((await console.locator('.lc-fleet-counts').innerText()).includes('Health PASS 124'));assert((await console.locator('.lc-fleet-counts').innerText()).includes('Recovery 10'));}
    if(count===128||count===1)await themes('cycle-'+count);else await capture('cycle-'+count);
    const summary=await(await page.request.get(base+'/api/projects/'+encodeURIComponent(campaign.project)+'/cycle/jobs/'+campaign.id+'/console-summary')).json();assert.equal(summary.nodes.length,count);
    assert.equal(summary.nodes.filter(n=>n.completed.includes('RECOVERY')).length,count===1?1:count===4?3:count-10);
@@ -76,7 +76,7 @@ const out=path.resolve('artifacts/validation-console');fs.mkdirSync(out,{recursi
   const log=await page.request.get(base+await console.locator('[data-part=download]').getAttribute('href'));assert(log.ok());assert((await log.text()).includes('Synthetic throughput'));
   results.push('Cycle 1/4/32/128 canonical fleet, typed summary, attention filters, lazy matrix, 2000 rows, pause/resume/follow/history/download');
   const healthy=await post('/__validation/campaign',{count:128,healthy:true});await page.goto(base+'/#/cycle/runs/'+healthy.id);await page.locator('#cw-console-toggle').click();
-  await page.waitForFunction(()=>document.querySelector('.lc-fleet-counts')?.textContent.includes('Completed / healthy 128'));assert((await page.locator('.lc-attention summary').innerText()).includes('0'));await capture('cycle-128-healthy');
+  await page.waitForFunction(()=>document.querySelector('.lc-fleet-counts')?.textContent.includes('Health PASS 128'));assert((await page.locator('.lc-attention summary').innerText()).includes('0'));await capture('cycle-128-healthy');
   results.push('128 all-healthy nodes: completion/health distinct from active recovery, no attention findings');
   assert.equal(errors.length,0,errors.join('\n'));
   fs.writeFileSync(path.join(out,'results.json'),JSON.stringify({result:'PASS',results,performance,campaigns:campaigns.map(j=>j.id),errors},null,2));

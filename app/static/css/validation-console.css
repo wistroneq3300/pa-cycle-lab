@@ -51,7 +51,10 @@
 .lc-seg{display:inline-flex;border:1px solid var(--pav-line);border-radius:5px;overflow:hidden}
 #cycle-workspace .lc-seg .btn{border:0;border-radius:0}
 #cycle-workspace .live-console [aria-pressed="true"]{background:color-mix(in srgb,var(--pav-info) 12%,transparent);color:var(--pav-info);border-color:var(--pav-info)}
+#cycle-workspace .lc-flow [data-state="COMPLETE"]{color:var(--pav-info)!important;border-color:color-mix(in srgb,var(--pav-info) 60%,var(--pav-line))!important;background:color-mix(in srgb,var(--pav-info) 8%,transparent)!important}
+#cycle-workspace .lc-severity{margin-inline-start:auto}
 #cycle-workspace .lc-search{flex:1;min-width:150px}
+#cycle-workspace .live-console [data-part="error"]{margin:0;padding:10px 20px;border-bottom:1px solid color-mix(in srgb,var(--pav-fail) 45%,var(--pav-line));background:color-mix(in srgb,var(--pav-fail) 7%,var(--pav-bg));color:var(--pav-fail);font-size:12px;overflow-wrap:anywhere}
 #cycle-workspace .live-console-view{height:440px;overflow:auto;scrollbar-gutter:stable;padding:0 20px;contain:layout style;scrollbar-color:var(--pav-info) transparent;scrollbar-width:thin}
 #cycle-workspace .cycle-console-row,#cycle-workspace .lc-columns{display:grid;grid-template-columns:42px 70px 100px 54px 80px minmax(0,1fr);gap:12px;align-items:baseline}
 #cycle-workspace .lc-columns{padding:10px 20px;border-bottom:1px solid var(--pav-line);font-size:10px;letter-spacing:.06em;color:var(--pav-muted)}
@@ -64,9 +67,10 @@
 #cycle-workspace .cycle-console-row[data-level="WAIT"],#cycle-workspace .cycle-console-row[data-level="WARN"]{--lc:var(--pav-warn)}
 #cycle-workspace .cycle-console-row[data-level="FAIL"],#cycle-workspace .cycle-console-row[data-level="ERROR"]{--lc:var(--pav-fail);background:color-mix(in srgb,var(--pav-fail) 5%,transparent)}
 .live-console-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 20px;color:var(--pav-muted);font-size:12px;border-top:1px solid var(--pav-line)}
-.lc-count{margin-left:auto}.live-console-note{padding:0 20px;font-size:12px;color:var(--pav-muted)}
+.lc-feedback{font-weight:650}.lc-feedback[data-state=success]{color:var(--pav-pass)}.lc-feedback[data-state=error]{color:var(--pav-fail)}.lc-count{margin-left:auto}.live-console-note{padding:0 20px;font-size:12px;color:var(--pav-muted)}
+.lc-empty{margin:0;padding:40px 16px;text-align:center;color:var(--pav-muted);font:13px/1.6 system-ui,sans-serif}
 .lc-fleet{padding:16px 20px}.lc-fleet-counts,.lc-fleet-controls,.lc-flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.lc-fleet-counts{font-size:12px;margin-bottom:12px}.lc-fleet-counts strong{margin-right:auto;font-size:14px}
+.lc-fleet-counts{font-size:12px;margin-bottom:12px;font-variant-numeric:tabular-nums}.lc-fleet-counts strong{margin-right:auto;font-size:14px}.lc-fleet-counts span{white-space:nowrap}
 .lc-fleet-controls input{flex:1;min-width:160px}.lc-fleet-controls select{max-width:220px}
 .lc-fleet .btn{font-size:12px;padding:5px 9px;min-height:32px}
 .lc-flow{margin:14px 0 6px}.lc-flow>span{font:12px var(--pav-mono);margin-right:auto}
@@ -82,6 +86,7 @@
 @keyframes pav-ping{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--pav-warn) 75%,transparent)}70%{box-shadow:0 0 0 7px color-mix(in srgb,var(--pav-warn) 0%,transparent)}100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--pav-warn) 0%,transparent)}}
 @keyframes pav-open{from{opacity:.4;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:1450px){.tp-workspace .tp-console{width:calc(100vw - 48px);height:calc(100dvh - 48px)}.tp-console .tp-tools label{flex-basis:auto;order:0}.tp-console .tp-tools{gap:6px}.tp-console .tp-tools .btn{font-size:12px;padding:6px 8px}.tp-console .tp-outcome{padding:8px 20px}#cycle-workspace .cycle-console-row,#cycle-workspace .lc-columns{grid-template-columns:36px 66px 84px 50px 64px minmax(0,1fr);gap:8px}}
+@media(max-width:1450px){#cycle-workspace .lc-severity{margin-inline-start:0}#cycle-workspace .live-console-bar [data-part=copy],#cycle-workspace .live-console-bar [data-part=download]{margin-inline-start:0}}
 @media(prefers-reduced-motion:reduce){.tp-console[open],.tp-pipeline>[data-state="ACTIVE"]::before,.lc-dot{animation:none}}
 
 /* Existing PA .btn uses !important. Override only these console states. */

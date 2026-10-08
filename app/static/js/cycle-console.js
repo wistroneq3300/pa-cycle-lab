@@ -36,15 +36,16 @@
           <span class="lc-seg" role="group" aria-label="View"><button class="btn" data-part="density" aria-pressed="true">Summary</button><button class="btn" data-part="full" aria-pressed="false">Full</button></span>
           <button class="btn" data-part="pause" title="暫停檢視（不影響任務）">暫停檢視</button>
           <input class="lc-search" type="search" data-part="search" placeholder="搜尋日誌…" maxlength="200" aria-label="搜尋目前視窗">
-          <button class="lc-icon" data-part="errors" aria-pressed="false" title="只顯示錯誤" aria-label="只顯示錯誤">Errors</button>
+          <span class="lc-seg lc-severity" role="group" aria-label="嚴重度篩選"><button class="btn" data-part="severity-all" aria-pressed="true">全部</button><button class="btn" data-part="warnings" aria-pressed="false">WARN+</button><button class="btn" data-part="errors" aria-pressed="false">FAIL</button></span>
           <button class="lc-icon" data-part="history" title="搜尋歷史" aria-label="搜尋歷史">History</button>
           <button class="lc-icon" data-part="older" title="更早的歷史" aria-label="更早的歷史" hidden>Older</button>
           <button class="lc-icon" data-part="live" title="回到即時" aria-label="回到即時" hidden>Live</button>
-          <a class="lc-icon" data-part="download" title="下載完整日誌" aria-label="下載完整日誌">Download</a>
+          <button class="lc-icon" data-part="copy" type="button">複製目前顯示</button>
+          <a class="lc-icon" data-part="download" title="下載完整日誌" aria-label="下載完整日誌">下載完整日誌</a>
         </div>
         <div class="lc-columns" aria-hidden="true"><span>SEQ</span><span>TIME</span><span>NODE</span><span>STATE</span><span>STAGE</span><span>EVENT</span></div><p hidden data-part="error" role="alert"></p>
         <div class="live-console-view" data-part="log" role="log" aria-live="off" tabindex="0" aria-label="Cycle 驗證紀錄"></div>
-        <div class="live-console-foot"><span class="lc-mode" data-part="status" role="status"></span><button class="btn" data-part="latest" hidden>跳至最新</button><span class="lc-count" data-part="count"></span></div>
+        <div class="live-console-foot"><span class="lc-mode" data-part="status" role="status"></span><button class="btn" data-part="latest" hidden>跳至最新</button><span class="lc-feedback" data-part="feedback" role="status" aria-live="polite"></span><span class="lc-count" data-part="count"></span></div>
         <p class="live-console-note">時間以台灣時間（UTC+8）顯示。畫面最多顯示 2,000 行。Summary 顯示重點摘要；Full 顯示原始事件。暫停檢視或關閉 Console 不會停止任務。完整紀錄可下載，原始證據保存在「證據與報告」。</p>`;
       this.part=name=>root.querySelector(`[data-part="${name}"]`);
       this.fleet=new CycleFleet(this.part('fleet'),()=>{this.node=this.fleet.node;this.render(true);});
@@ -54,14 +55,17 @@
       this.part('pause').onclick=()=>{this.paused=!this.paused;if(this.paused)this.pausedRows=this.buffer.slice();this.part('pause').textContent=this.paused?'繼續檢視':'暫停檢視';this.part('pause').setAttribute('aria-pressed',this.paused);if(!this.paused)this.render();this.status();};
       const density=value=>{this.summary=value;this.part('density').setAttribute('aria-pressed',value);this.part('full').setAttribute('aria-pressed',!value);this.render(true);};
       this.part('density').onclick=()=>density(true);this.part('full').onclick=()=>density(false);
-      this.part('errors').onclick=()=>{this.part('errors').setAttribute('aria-pressed',this.part('errors').getAttribute('aria-pressed')!=='true');this.render(true);};
+      this.part('severity-all').onclick=()=>this.setSeverity('all');
+      this.part('warnings').onclick=()=>this.setSeverity('warn');
+      this.part('errors').onclick=()=>this.setSeverity('error');
+      this.part('copy').onclick=()=>this.copyVisible();
       this.part('search').oninput=()=>{clearTimeout(this.searchTimer);this.searchTimer=setTimeout(()=>this.render(true),150);};
       this.part('history').onclick=()=>this.loadHistory();
       this.part('older').onclick=()=>this.loadHistory(this.visible()[0]?.sequence || (this.history || this.buffer)[0]?.sequence);
-      this.part('live').onclick=()=>{this.cancel();this.history=null;this.auto=true;this.part('live').hidden=true;this.part('older').hidden=true;this.render(true);this.bottom();this.poll();};
+      this.part('live').onclick=()=>{this.cancel();this.history=null;this.auto=true;this.paused=false;this.part('pause').setAttribute('aria-pressed','false');this.part('pause').textContent='暫停檢視';this.part('live').hidden=true;this.part('older').hidden=true;this.render(true);this.bottom();this.poll();};
     }
     cancel(){this.revision++;clearTimeout(this.timer);this.controller?.abort();this.controller=null;}
-    close(){this.cancel();clearTimeout(this.searchTimer);this.root.hidden=true;this.button.setAttribute('aria-expanded','false');}
+    close(){this.cancel();clearTimeout(this.searchTimer);this.root.hidden=true;this.button.setAttribute('aria-expanded','false');this.button.textContent='開啟 Live Console';this.button.title='開啟執行紀錄（不會改變任務）';}
     reset(){this.close();this.job=null;this.buffer=[];this.history=null;this.cursor=0;this.part('log').replaceChildren();}
     setJob(job,url){
       if(this.job?.id!==job.id){
@@ -69,7 +73,7 @@
         this.part('pause').textContent='暫停檢視';this.part('pause').classList.remove('on');this.part('pause').setAttribute('aria-pressed','false');
         this.summary=true;this.part('density').textContent='Summary';this.part('density').setAttribute('aria-pressed','true');this.part('density').classList.remove('on');this.part('full').setAttribute('aria-pressed','false');
         this.part('live').hidden=true;this.part('older').hidden=true;this.part('search').value='';
-        this.part('errors').setAttribute('aria-pressed','false');
+        this.setSeverity('all',false);this.errorState=new Map();this.feedback('');
         this.fleet.reset();
         this.part('download').href=`${url}/events/download`;
         this.job=job;if(!this.root.hidden)this.poll();
@@ -83,14 +87,33 @@
       this.fleet.update(job);
       const dot=this.root.querySelector('.lc-dot');if(dot)dot.classList.toggle('lc-idle',!!this.settled);
     }
-    toggle(){if(!this.root.hidden){this.close();return;}this.root.hidden=false;this.button.setAttribute('aria-expanded','true');this.loadFleet();this.render(true);if(!this.history)this.poll();}
+    toggle(){if(!this.root.hidden){this.close();return;}this.root.hidden=false;this.button.setAttribute('aria-expanded','true');this.button.textContent='收合 Live Console';this.button.title='收合執行紀錄（不會停止任務）';this.loadFleet();this.render(true);if(!this.history)this.poll();}
     async loadFleet(){const id=this.job?.id;if(!id)return;try{const response=await fetch(this.url+'/console-summary',{cache:'no-store'});if(!response.ok)return;const data=await response.json();if(this.job?.id!==id||this.root.hidden)return;for(const row of data.nodes){const old=this.fleet.observed.get(row.machine_id);if(old&&old.loop>row.loop)continue;this.fleet.observe(row.markers);const item=this.fleet.observed.get(row.machine_id)||{loop:row.loop,done:new Set()};for(const phase of row.completed)item.done.add(phase);this.fleet.observed.set(row.machine_id,item);}this.fleet.update(this.job);}catch(_){/* Tail remains usable; missing markers are unconfirmed. */}}
-    error(message){this.part('error').textContent=message;this.part('error').hidden=!message;}
+    setError(kind,message){
+      this.errorState||=new Map();
+      if(message)this.errorState.set(kind,message);else this.errorState.delete(kind);
+      const text=[...this.errorState.values()].join(' · ');this.part('error').textContent=text;this.part('error').hidden=!text;
+    }
+    feedback(message,state=''){clearTimeout(this.feedbackTimer);const node=this.part('feedback');node.textContent=message;node.dataset.state=state;if(message)this.feedbackTimer=setTimeout(()=>{node.textContent='';node.dataset.state='';},5000);}
+    setSeverity(level,render=true){
+      this.severity=level;
+      for(const [part,value] of [['severity-all','all'],['warnings','warn'],['errors','error']])this.part(part).setAttribute('aria-pressed',String(level===value));
+      if(render)this.render(true);
+    }
+    async copyVisible(){
+      const rows=this.visible();
+      if(!rows.length){this.feedback('目前沒有可複製的紀錄','error');return;}
+      const text=rows.map(e=>[displayTime(e.timestamp),e.machine_id||'JOB',e.level||'INFO',e.phase||'—',e.message||'',e.detail||''].join('\t')).join('\n');
+      const button=this.part('copy');button.disabled=true;
+      try{await navigator.clipboard.writeText(text);this.setError('copy','');this.feedback(`已複製目前顯示的 ${rows.length} 筆紀錄`,'success');}
+      catch(_){this.setError('copy','無法寫入剪貼簿；紀錄仍保留在畫面上，可手動選取。');this.feedback('複製未完成','error');}
+      finally{button.disabled=false;}
+    }
     async request(params){
       const revision=this.revision;const controller=new AbortController();this.controller=controller;
       const timeout=setTimeout(()=>controller.abort(),15000);
       try{const response=await fetch(`${this.url}/events?${new URLSearchParams({limit:500,...params})}`,{signal:controller.signal,cache:'no-store'});
-        if(!response.ok)throw new Error('Event request failed');
+        if(!response.ok){const body=await response.json().catch(()=>({}));throw new Error(typeof body.detail==='string'?body.detail:`Event request failed (${response.status})`);}
         const data=await response.json();return revision===this.revision&&!this.root.hidden?data:null;
       }finally{clearTimeout(timeout);if(this.controller===controller)this.controller=null;}
     }
@@ -98,20 +121,21 @@
       if(this.root.hidden||this.history||this.controller||!this.job)return;
       clearTimeout(this.timer);const revision=this.revision;let delay=1500;
       try{const data=await this.request(this.cursor?{after:this.cursor}:{tail:true});if(!data)return;
-        if(data.cursor_reset){this.buffer=[];this.cursor=0;this.part('log').replaceChildren();this.error('歷史更新位置已過期，正在重新載入任務狀態與保留紀錄。');this.job=await (await fetch(this.url,{cache:'no-store'})).json();return;}
+        if(data.cursor_reset){this.buffer=[];this.cursor=0;this.part('log').replaceChildren();this.setError('stream','歷史更新位置已過期，正在重新載入任務狀態與保留紀錄。');this.job=await (await fetch(this.url,{cache:'no-store'})).json();return;}
         for(const e of data.events){if(e.sequence>this.cursor){this.buffer.push(e);this.cursor=e.sequence;if(!this.auto||this.paused)this.unread++;}}
         if(this.buffer.length>BUFFER)this.buffer.splice(0,this.buffer.length-BUFFER);
-        this.fleet.observe(data.events);this.fleet.update(this.job);this.error('');if(!this.paused)this.render();else this.status();if(data.has_more&&data.events.length&&data.events[0].sequence>0&&this.loaded)delay=250;this.loaded=true;
-      }catch(e){if(revision===this.revision)this.error('Console 連線中斷，將自動重連。任務狀態仍會自動更新。');}
+        this.fleet.observe(data.events);this.fleet.update(this.job);this.setError('stream','');if(!this.paused)this.render();else this.status();if(data.has_more&&data.events.length&&data.events[0].sequence>0&&this.loaded)delay=250;this.loaded=true;
+      }catch(e){if(revision===this.revision)this.setError('stream',`Console 連線中斷，將自動重連。任務狀態仍會自動更新。原因：${e.message||'未提供'}`);}
       finally{if(revision===this.revision&&!this.root.hidden&&!this.history)this.timer=setTimeout(()=>this.poll(),delay);}
     }
     async loadHistory(before){
       this.cancel();const revision=this.revision;
       try{const data=await this.request({...(before?{before}:{tail:true}),...(this.node?{machine_id:this.node}:{}),errors_only:this.errorsOnly(),search:this.part('search').value});
-        if(!data)return;this.history=data.events;this.part('live').hidden=false;this.part('older').hidden=false;this.error('');this.render(true);this.part('older').disabled=!data.has_more;
-      }catch(e){if(revision===this.revision){this.error('歷史載入失敗，請重試。');if(!this.history)this.timer=setTimeout(()=>this.poll(),1500);}}
+        if(!data)return;this.history=data.events;this.part('live').hidden=false;this.part('older').hidden=false;this.setError('history','');this.render(true);this.part('older').disabled=!data.has_more;
+      }catch(e){if(revision===this.revision){this.setError('history',`歷史載入失敗，請重試。原因：${e.message||'未提供'}`);if(!this.history)this.timer=setTimeout(()=>this.poll(),1500);}}
     }
-    errorsOnly(){return this.part('errors').getAttribute('aria-pressed')==='true';}
+    errorsOnly(){return this.severity==='error';}
+    warningsOnly(){return this.severity==='warn';}
     fold(events){
       // Summary view: mirror the console.log transcript. Derive (never mutate) the
       // shown rows so switching back to Full is lossless. Dropped noise is the
@@ -140,7 +164,7 @@
       }
       return out;
     }
-    visible(){const query=this.part('search').value.toLowerCase(),source=this.history||(this.paused?this.pausedRows:this.buffer),base=this.summary?this.fold(source):source;return base.filter(e=>this.fleet.accepts(e.machine_id)&&(!this.errorsOnly()||['FAIL','ERROR'].includes(e.level))&&(!query||`${e.message} ${e.detail || ''}`.toLowerCase().includes(query))).slice(-RENDER);}
+    visible(){const query=this.part('search').value.toLowerCase(),source=this.history||(this.paused?this.pausedRows:this.buffer),base=this.summary?this.fold(source):source;return base.filter(e=>this.fleet.accepts(e.machine_id)&&(!this.errorsOnly()||['FAIL','ERROR'].includes(e.level))&&(!this.warningsOnly()||['WARN','FAIL','ERROR'].includes(e.level))&&(!query||`${e.message} ${e.detail || ''}`.toLowerCase().includes(query))).slice(-RENDER);}
     status(){const mode=this.history?'歷史視窗':this.paused?'已暫停檢視 · 不影響任務':'LIVE · 每 1.5 秒更新';this.part('status').textContent=`${mode}${this.unread?' · '+this.unread+' 筆新輸出':''}${this.history?' · 每頁最多 500 筆':''}${this.trimmed?' · 閱讀位置已移出視窗，請用 History 查看':''}`;this.part('latest').hidden=!this.unread;this.part('latest').textContent=this.unread+' 筆新輸出 · 跳至最新';this.part('count').textContent=`顯示 ${this.visible().length} / ${(this.history || this.buffer).length} 筆`;}
     bottom(){this.unread=0;const log=this.part('log');log.scrollTop=log.scrollHeight;}
     render(force=false){
@@ -161,7 +185,9 @@
         if(e.evidence&&!/[:\\%?#]/.test(e.evidence)&&!e.evidence.split('/').some(p=>!p||p.startsWith('.'))){const link=document.createElement('a');link.textContent='查看證據';link.href=`${this.url}/files/${e.evidence.split('/').map(encodeURIComponent).join('/')}`;link.target='_blank';link.rel='noopener';content.append(link);}
         row.append(content);fragment.append(row);newest=row;
       }
-      log.append(fragment);log.dataset.bufferCount=this.buffer.length;if(!this.history)this.part('older').disabled=!this.buffer.length;
+      log.append(fragment);
+      if(!events.length){const empty=document.createElement('p');empty.className='lc-empty';empty.textContent=this.part('search').value||this.severity!=='all'||this.node?'目前篩選條件沒有符合的紀錄。':this.history?'這一頁歷史沒有紀錄。':'尚未收到執行紀錄。';log.append(empty);}
+      log.dataset.bufferCount=this.buffer.length;if(!this.history)this.part('older').disabled=!this.buffer.length;
       if(this.auto&&!this.history&&!this.paused)this.bottom();
       else if(anchor?.isConnected)log.scrollTop+=anchor.getBoundingClientRect().top-anchorTop;
       else if(anchor){log.scrollTop=0;this.trimmed=true;}
