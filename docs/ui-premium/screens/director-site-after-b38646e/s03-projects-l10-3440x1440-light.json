@@ -1,0 +1,513 @@
+{
+  "schema": "director-site-capture/v2",
+  "phase": "after-site-b38646e",
+  "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+  "region": "Systems / Projects",
+  "surfaceId": "S03",
+  "frozenMarker": null,
+  "routeState": {
+    "route": "#/projects",
+    "state": "L10 System Level",
+    "details": null
+  },
+  "app": {
+    "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+    "commit": "b38646eb25607e8faa5d460077bbedbb2799bbcd",
+    "dirty": true
+  },
+  "browser": {
+    "version": "154.0.4258.62",
+    "theme": "light",
+    "browserZoomRequested": 1,
+    "browserZoom": 1,
+    "browserZoomEvidence": {
+      "status": "default-100",
+      "requested": 1,
+      "actual": 1,
+      "source": "Fresh browser context/profile with no zoom mutation",
+      "getZoomReturned": 1
+    },
+    "devicePixelRatio": 1,
+    "visualViewport": {
+      "width": 3440,
+      "height": 1440,
+      "scale": 1,
+      "offsetLeft": 0,
+      "offsetTop": 0
+    },
+    "osScaling": {
+      "status": "measured-registry",
+      "platform": "win32",
+      "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+      "appliedDpi": 192,
+      "scaleFactor": 2,
+      "percent": 200,
+      "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+    }
+  },
+  "viewportRequested": {
+    "width": 3440,
+    "height": 1440
+  },
+  "viewportCss": {
+    "width": 3440,
+    "height": 1440
+  },
+  "png": {
+    "file": "s03-projects-l10-3440x1440-light.png",
+    "width": 3440,
+    "height": 1440,
+    "sha256": "4f99f7d0a76382ae20c81d634be6b14623a3d7978cb89d96768d23e2a5bb640f"
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "externalRequests": [],
+  "unknownRequests": [],
+  "failedRequests": [],
+  "notices": [],
+  "contrastAudit": {
+    "status": "partial",
+    "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+    "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+    "scope": "Own text nodes visibly intersecting the captured viewport",
+    "thresholds": {
+      "normalText": 4.5,
+      "largeText": 3,
+      "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+    },
+    "exclusions": [
+      "image/canvas/SVG/video",
+      "disabled or aria-disabled",
+      "opacity/filter/blend/backdrop effects",
+      "pseudo-element text"
+    ],
+    "limitations": [
+      "CSS background images/gradients are approximated using their computed backgroundColor layers."
+    ],
+    "counts": {
+      "scannedElements": 905,
+      "auditedTextElements": 212,
+      "violations": 34,
+      "skippedNoOwnText": 395,
+      "skippedNotVisibleInViewport": 288,
+      "skippedMediaOrVector": 0,
+      "skippedDisabled": 0,
+      "approximatedComplexBackground": 91,
+      "skippedOpacityOrEffect": 10,
+      "skippedUnparsedColor": 0
+    },
+    "violations": [
+      {
+        "selector": "main.main > div.content > div.p-project-strip:nth-of-type(2) > button.active:nth-of-type(1) > b",
+        "text": "5",
+        "ratio": 4.03,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(92, 118, 128)",
+        "background": "rgb(228, 238, 219)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "main.main > div.content > div.p-project-strip:nth-of-type(2) > button:nth-of-type(2) > b",
+        "text": "4",
+        "ratio": 4.3,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(92, 118, 128)",
+        "background": "rgb(238, 243, 242)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "main.main > div.content > div.p-project-strip:nth-of-type(2) > button:nth-of-type(3) > b",
+        "text": "3",
+        "ratio": 4.3,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(92, 118, 128)",
+        "background": "rgb(238, 243, 242)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "main.main > div.content > div.p-project-strip:nth-of-type(2) > button:nth-of-type(4) > b",
+        "text": "2",
+        "ratio": 4.3,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(92, 118, 128)",
+        "background": "rgb(238, 243, 242)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "main.main > div.content > div.p-project-strip:nth-of-type(2) > button:nth-of-type(5) > b",
+        "text": "2",
+        "ratio": 4.3,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(92, 118, 128)",
+        "background": "rgb(238, 243, 242)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "main.main > div.content > div.p-project-strip:nth-of-type(2) > button:nth-of-type(6) > b",
+        "text": "1",
+        "ratio": 4.3,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(92, 118, 128)",
+        "background": "rgb(238, 243, 242)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(1) > td.mono.os-ip-cell:nth-of-type(2) > div.p-ip:nth-of-type(1) > small",
+        "text": "OS",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(1) > td.mono.os-ip-cell:nth-of-type(2) > div.p-ip:nth-of-type(2) > small",
+        "text": "BMC",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(1) > td:nth-of-type(3) > div.p-ip:nth-of-type(1) > small",
+        "text": "OS",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(1) > td:nth-of-type(3) > div.p-ip:nth-of-type(2) > small",
+        "text": "BMC",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(2) > td.mono.os-ip-cell:nth-of-type(2) > div.p-ip:nth-of-type(1) > small",
+        "text": "OS",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(2) > td.mono.os-ip-cell:nth-of-type(2) > div.p-ip:nth-of-type(2) > small",
+        "text": "BMC",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(2) > td:nth-of-type(3) > div.p-ip:nth-of-type(1) > small",
+        "text": "OS",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(2) > td:nth-of-type(3) > div.p-ip:nth-of-type(2) > small",
+        "text": "BMC",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(3) > td.mono.os-ip-cell:nth-of-type(2) > div.p-ip:nth-of-type(1) > small",
+        "text": "OS",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(3) > td.mono.os-ip-cell:nth-of-type(2) > div.p-ip:nth-of-type(2) > small",
+        "text": "BMC",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(3) > td:nth-of-type(3) > div.p-ip:nth-of-type(1) > small",
+        "text": "OS",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(3) > td:nth-of-type(3) > div.p-ip:nth-of-type(2) > small",
+        "text": "BMC",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(4) > td.mono.os-ip-cell:nth-of-type(2) > div.p-ip:nth-of-type(1) > small",
+        "text": "OS",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(4) > td.mono.os-ip-cell:nth-of-type(2) > div.p-ip:nth-of-type(2) > small",
+        "text": "BMC",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(4) > td:nth-of-type(3) > div.p-ip:nth-of-type(1) > small",
+        "text": "OS",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(4) > td:nth-of-type(3) > div.p-ip:nth-of-type(2) > small",
+        "text": "BMC",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(1) > td.mono.os-ip-cell:nth-of-type(2) > div.p-ip:nth-of-type(1) > small",
+        "text": "OS",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(1) > td.mono.os-ip-cell:nth-of-type(2) > div.p-ip:nth-of-type(2) > small",
+        "text": "BMC",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(1) > td:nth-of-type(3) > div.p-ip:nth-of-type(1) > small",
+        "text": "OS",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(1) > td:nth-of-type(3) > div.p-ip:nth-of-type(2) > small",
+        "text": "BMC",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(2) > td.mono.os-ip-cell:nth-of-type(2) > div.p-ip:nth-of-type(1) > small",
+        "text": "OS",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(2) > td.mono.os-ip-cell:nth-of-type(2) > div.p-ip:nth-of-type(2) > small",
+        "text": "BMC",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(2) > td:nth-of-type(3) > div.p-ip:nth-of-type(1) > small",
+        "text": "OS",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(2) > td:nth-of-type(3) > div.p-ip:nth-of-type(2) > small",
+        "text": "BMC",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(3) > td.mono.os-ip-cell:nth-of-type(2) > div.p-ip:nth-of-type(1) > small",
+        "text": "OS",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(3) > td.mono.os-ip-cell:nth-of-type(2) > div.p-ip:nth-of-type(2) > small",
+        "text": "BMC",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(3) > td:nth-of-type(3) > div.p-ip:nth-of-type(1) > small",
+        "text": "OS",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "tbody > tr:nth-of-type(3) > td:nth-of-type(3) > div.p-ip:nth-of-type(2) > small",
+        "text": "BMC",
+        "ratio": 4.11,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(98, 126, 137)",
+        "background": "rgb(248, 250, 247)",
+        "backgroundApproximation": null
+      }
+    ],
+    "violationsTruncated": false
+  },
+  "gaps": [],
+  "capturedAt": "2026-10-08T04:00:00.000Z"
+}

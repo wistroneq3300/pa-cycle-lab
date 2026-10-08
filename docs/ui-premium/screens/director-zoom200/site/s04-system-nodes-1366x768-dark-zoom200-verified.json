@@ -1,0 +1,167 @@
+{
+  "schema": "director-site-capture/v2",
+  "phase": "after-zoom200-content-reachability",
+  "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+  "region": "System detail / Nodes",
+  "surfaceId": "S04",
+  "frozenMarker": null,
+  "routeState": {
+    "route": "#/machine/host_a",
+    "state": "host_a / OS slots; horizontal table end focused",
+    "details": {
+      "nodeReachability": {
+        "role": "region",
+        "tabIndex": 0,
+        "scrollLeft": 583,
+        "scrollWidth": 1204,
+        "clientWidth": 616,
+        "bodyHorizontalOverflowPx": 0,
+        "wrapperBox": {
+          "left": 31,
+          "top": 239.5078125,
+          "right": 652,
+          "bottom": 385.0078125,
+          "width": 621,
+          "height": 145.5
+        },
+        "actionCellBox": {
+          "left": 524,
+          "top": 273.5078125,
+          "right": 652,
+          "bottom": 367.5078125,
+          "width": 128,
+          "height": 94
+        },
+        "actionButtonBox": {
+          "left": 534,
+          "top": 322.5078125,
+          "right": 642,
+          "bottom": 358.5078125,
+          "width": 108,
+          "height": 36
+        },
+        "actionCellInsideWrapper": true,
+        "actionCellInsideViewport": true,
+        "actionButtonInsideWrapper": true,
+        "actionButtonInsideViewport": true
+      }
+    }
+  },
+  "app": {
+    "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+    "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+    "dirty": true
+  },
+  "browser": {
+    "version": "154.0.4258.62",
+    "theme": "dark",
+    "browserZoomRequested": 2,
+    "browserZoom": 2,
+    "browserZoomEvidence": {
+      "status": "applied",
+      "requested": 2,
+      "actual": 2,
+      "tabId": 467812287,
+      "settingsError": null,
+      "setZoomError": null,
+      "getZoomError": null,
+      "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+      "getZoomReturned": 2
+    },
+    "devicePixelRatio": 2,
+    "visualViewport": {
+      "width": 683,
+      "height": 384,
+      "scale": 1,
+      "offsetLeft": 0,
+      "offsetTop": 0
+    },
+    "osScaling": {
+      "status": "measured-registry",
+      "platform": "win32",
+      "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+      "appliedDpi": 192,
+      "scaleFactor": 2,
+      "percent": 200,
+      "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+    }
+  },
+  "viewportRequested": {
+    "width": 1366,
+    "height": 768
+  },
+  "viewportCss": {
+    "width": 683,
+    "height": 384
+  },
+  "png": {
+    "file": "s04-system-nodes-1366x768-dark-zoom200-verified.png",
+    "width": 1366,
+    "height": 768,
+    "sha256": "0a2b939f2f57c94b5b08f7ecda5a2cc6058f9f03ff623189a627b354aa489a87"
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "externalRequests": [],
+  "unknownRequests": [],
+  "failedRequests": [],
+  "notices": [],
+  "reachability": {
+    "documentWidth": 683,
+    "bodyHorizontalOverflowPx": 0,
+    "visibleFocusableCount": 40,
+    "visibleFocusableInViewportCount": 6,
+    "primary": {
+      "selector": "#pd-panel-osslots .pd-os-table-wrap tbody tr:last-child td:last-child button:last-child",
+      "exists": true,
+      "visible": true,
+      "focusable": true,
+      "focused": true,
+      "inViewport": true,
+      "rect": {
+        "top": 322.51,
+        "right": 642,
+        "bottom": 358.51,
+        "left": 534,
+        "width": 108,
+        "height": 36
+      }
+    }
+  },
+  "contrastAudit": {
+    "status": "partial",
+    "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+    "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+    "scope": "Own text nodes visibly intersecting the captured viewport",
+    "thresholds": {
+      "normalText": 4.5,
+      "largeText": 3,
+      "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+    },
+    "exclusions": [
+      "image/canvas/SVG/video",
+      "disabled or aria-disabled",
+      "opacity/filter/blend/backdrop effects",
+      "pseudo-element text"
+    ],
+    "limitations": [
+      "CSS background images/gradients are approximated using their computed backgroundColor layers."
+    ],
+    "counts": {
+      "scannedElements": 1256,
+      "auditedTextElements": 23,
+      "violations": 0,
+      "skippedNoOwnText": 737,
+      "skippedNotVisibleInViewport": 484,
+      "skippedMediaOrVector": 2,
+      "skippedDisabled": 1,
+      "approximatedComplexBackground": 24,
+      "skippedOpacityOrEffect": 9,
+      "skippedUnparsedColor": 0
+    },
+    "violations": [],
+    "violationsTruncated": false
+  },
+  "gaps": [],
+  "capturedAt": "2026-10-08T04:00:00.000Z"
+}

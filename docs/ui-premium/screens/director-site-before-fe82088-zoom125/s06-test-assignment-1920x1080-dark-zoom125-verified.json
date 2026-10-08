@@ -1,0 +1,181 @@
+{
+  "schema": "director-site-capture/v2",
+  "phase": "before-site-fe82088-zoom125",
+  "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+  "region": "Test Case / Assignment",
+  "surfaceId": "S06",
+  "frozenMarker": null,
+  "routeState": {
+    "route": "#/machine/host_a",
+    "state": "first fixture case inspected and selected",
+    "details": null
+  },
+  "app": {
+    "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-baseline-fe82088",
+    "commit": "fe8208867144b28f4e057606f5e2699b228a8056",
+    "dirty": false
+  },
+  "browser": {
+    "version": "154.0.4258.62",
+    "theme": "dark",
+    "browserZoomRequested": 1.25,
+    "browserZoom": 1.25,
+    "browserZoomEvidence": {
+      "status": "applied",
+      "requested": 1.25,
+      "actual": 1.25,
+      "tabId": 245780745,
+      "settingsError": null,
+      "setZoomError": null,
+      "getZoomError": null,
+      "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+      "getZoomReturned": 1.25
+    },
+    "devicePixelRatio": 1.25,
+    "visualViewport": {
+      "width": 1536,
+      "height": 864,
+      "scale": 1,
+      "offsetLeft": 0,
+      "offsetTop": 0
+    },
+    "osScaling": {
+      "status": "measured-registry",
+      "platform": "win32",
+      "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+      "appliedDpi": 192,
+      "scaleFactor": 2,
+      "percent": 200,
+      "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+    }
+  },
+  "viewportRequested": {
+    "width": 1920,
+    "height": 1080
+  },
+  "viewportCss": {
+    "width": 1536,
+    "height": 864
+  },
+  "png": {
+    "file": "s06-test-assignment-1920x1080-dark-zoom125-verified.png",
+    "width": 1920,
+    "height": 1080,
+    "sha256": "6e98559211d97ebbbcf525d5a606efa2bab129236439999cfa8008f91d23d960"
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "externalRequests": [],
+  "unknownRequests": [],
+  "failedRequests": [],
+  "notices": [],
+  "contrastAudit": {
+    "status": "partial",
+    "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+    "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+    "scope": "Own text nodes visibly intersecting the captured viewport",
+    "thresholds": {
+      "normalText": 4.5,
+      "largeText": 3,
+      "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+    },
+    "exclusions": [
+      "image/canvas/SVG/video",
+      "disabled or aria-disabled",
+      "opacity/filter/blend/backdrop effects",
+      "pseudo-element text"
+    ],
+    "limitations": [
+      "CSS background images/gradients are approximated using their computed backgroundColor layers."
+    ],
+    "counts": {
+      "scannedElements": 2629,
+      "auditedTextElements": 143,
+      "violations": 6,
+      "skippedNoOwnText": 1365,
+      "skippedNotVisibleInViewport": 1082,
+      "skippedMediaOrVector": 2,
+      "skippedDisabled": 4,
+      "approximatedComplexBackground": 118,
+      "skippedOpacityOrEffect": 13,
+      "skippedUnparsedColor": 20
+    },
+    "violations": [
+      {
+        "selector": "div.pd-main > section.pd-tab-panel.is-active:nth-of-type(6) > div.pd-task-intro.p-surface:nth-of-type(2) > div:nth-of-type(1) > button.pd-primary-btn",
+        "text": "開啟 Test Library",
+        "ratio": 1.09,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(21, 37, 9)",
+        "background": "rgb(17, 26, 33)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "section.pd-tab-panel.is-active:nth-of-type(6) > div.pd-task-intro.p-surface:nth-of-type(2) > div:nth-of-type(1) > button.pd-primary-btn > span",
+        "text": "↗",
+        "ratio": 1.09,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(21, 37, 9)",
+        "background": "rgb(17, 26, 33)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "section.pd-tab-panel.is-active:nth-of-type(6) > div.pd-library-grid:nth-of-type(4) > button.pd-library-card.p-surface:nth-of-type(1) > div > b",
+        "text": "↗",
+        "ratio": 4.24,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(93, 129, 152)",
+        "background": "rgb(17, 26, 33)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "section.pd-tab-panel.is-active:nth-of-type(6) > div.pd-library-grid:nth-of-type(4) > button.pd-library-card.p-surface:nth-of-type(2) > div > b",
+        "text": "↗",
+        "ratio": 4.24,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(93, 129, 152)",
+        "background": "rgb(17, 26, 33)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "section.pd-tab-panel.is-active:nth-of-type(6) > div.pd-library-grid:nth-of-type(4) > button.pd-library-card.p-surface:nth-of-type(3) > div > b",
+        "text": "↗",
+        "ratio": 4.24,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(93, 129, 152)",
+        "background": "rgb(17, 26, 33)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "body > div.modal-backdrop:nth-of-type(8) > div.modal.rm-modal > div.modal-foot.assign-action-footer:nth-of-type(3) > button.btn.btn-primary:nth-of-type(3)",
+        "text": "交給 PA Agent",
+        "ratio": 1.06,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 500,
+        "foreground": "rgb(23, 39, 13)",
+        "background": "rgb(18, 31, 40)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      }
+    ],
+    "violationsTruncated": false
+  },
+  "gaps": [],
+  "capturedAt": "2026-10-08T04:00:00.000Z"
+}

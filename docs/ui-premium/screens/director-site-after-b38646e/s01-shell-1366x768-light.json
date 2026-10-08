@@ -1,0 +1,117 @@
+{
+  "schema": "director-site-capture/v2",
+  "phase": "after-site-b38646e",
+  "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+  "region": "Application shell / sidebar / topbar",
+  "surfaceId": "S01",
+  "frozenMarker": null,
+  "routeState": {
+    "route": "#/dashboard",
+    "state": "dashboard; rack-network preview",
+    "details": null
+  },
+  "app": {
+    "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+    "commit": "b38646eb25607e8faa5d460077bbedbb2799bbcd",
+    "dirty": true
+  },
+  "browser": {
+    "version": "154.0.4258.62",
+    "theme": "light",
+    "browserZoomRequested": 1,
+    "browserZoom": 1,
+    "browserZoomEvidence": {
+      "status": "default-100",
+      "requested": 1,
+      "actual": 1,
+      "source": "Fresh browser context/profile with no zoom mutation",
+      "getZoomReturned": 1
+    },
+    "devicePixelRatio": 1,
+    "visualViewport": {
+      "width": 1366,
+      "height": 768,
+      "scale": 1,
+      "offsetLeft": 0,
+      "offsetTop": 0
+    },
+    "osScaling": {
+      "status": "measured-registry",
+      "platform": "win32",
+      "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+      "appliedDpi": 192,
+      "scaleFactor": 2,
+      "percent": 200,
+      "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+    }
+  },
+  "viewportRequested": {
+    "width": 1366,
+    "height": 768
+  },
+  "viewportCss": {
+    "width": 1366,
+    "height": 768
+  },
+  "png": {
+    "file": "s01-shell-1366x768-light.png",
+    "width": 1366,
+    "height": 768,
+    "sha256": "fc01c83df5a9c16c43da30713ceba61e92d5f636f7c45031a49b68b087b4e76f"
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "externalRequests": [],
+  "unknownRequests": [],
+  "failedRequests": [],
+  "notices": [],
+  "contrastAudit": {
+    "status": "partial",
+    "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+    "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+    "scope": "Own text nodes visibly intersecting the captured viewport",
+    "thresholds": {
+      "normalText": 4.5,
+      "largeText": 3,
+      "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+    },
+    "exclusions": [
+      "image/canvas/SVG/video",
+      "disabled or aria-disabled",
+      "opacity/filter/blend/backdrop effects",
+      "pseudo-element text"
+    ],
+    "limitations": [
+      "CSS background images/gradients are approximated using their computed backgroundColor layers."
+    ],
+    "counts": {
+      "scannedElements": 511,
+      "auditedTextElements": 42,
+      "violations": 1,
+      "skippedNoOwnText": 250,
+      "skippedNotVisibleInViewport": 209,
+      "skippedMediaOrVector": 0,
+      "skippedDisabled": 1,
+      "approximatedComplexBackground": 50,
+      "skippedOpacityOrEffect": 9,
+      "skippedUnparsedColor": 0
+    },
+    "violations": [
+      {
+        "selector": "section.vo-hero:nth-of-type(1) > div.vo-hero-copy:nth-of-type(1) > div.vo-hero-summary:nth-of-type(2) > p.vo-hero-issues:nth-of-type(1) > span",
+        "text": "3 WARN",
+        "ratio": 3.25,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(177, 121, 36)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      }
+    ],
+    "violationsTruncated": false
+  },
+  "gaps": [],
+  "capturedAt": "2026-10-08T04:00:00.000Z"
+}

@@ -1,0 +1,565 @@
+{
+  "schema": "director-modal-surface-v1",
+  "generatedAt": "2026-10-08T07:25:18.107Z",
+  "base": "http://127.0.0.1:9196",
+  "fixture": "strict loopback / explicit GET allowlist / every mutation rejected",
+  "app": {
+    "branch": "codex/platform-premium-ui-v1",
+    "commit": "b38646eb25607e8faa5d460077bbedbb2799bbcd",
+    "dirty": true
+  },
+  "browser": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "dpr": 1
+  },
+  "overall": "PARTIAL",
+  "overallReason": "All assertions inside the claimed deterministic scope passed, including PA Agent, Topology and User Guide IME-safe Escape. Terminal/Broadcast/KVM, Cycle and Telemetry remain delegated to their dedicated fake-provider harnesses, so this inventory-level report stays PARTIAL.",
+  "visualComparisons": [
+    {
+      "surface": "Project manager long-name layout",
+      "before": {
+        "filename": "05-project-management-long.png",
+        "sha256": "1ba00d3de7c4262333b7066894ee51fc790c79e641b58b04f35c8875ed60fe3b",
+        "finding": "At 500px the long project name wrapped almost word-by-word and compressed the action column."
+      },
+      "after": {
+        "filename": "05-project-management-long-after.png",
+        "surface": "Project manager modal",
+        "state": "long-content-after-scoped-width-fix",
+        "selector": "#project-modal .modal",
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "dpr": 1,
+        "focused": "new-project-name",
+        "theme": "dark",
+        "horizontalOverflow": false,
+        "bytes": 61959,
+        "sha256": "2f1fb8861e767eda90ee5e610a11abf224be446b2af0097fa08778d25cd435fc"
+      },
+      "change": "Only #project-modal is widened; project table columns and action wrapping are scoped to that modal."
+    }
+  ],
+  "inventory": [
+    {
+      "id": "S12-GENERIC",
+      "surface": "Generic showDialog / uxConfirm",
+      "type": "dialog",
+      "owner": "app/static/js/app.js + workspace-ux.js",
+      "entry": "showDialog / uxConfirm",
+      "audit": "tested"
+    },
+    {
+      "id": "S12-CONFIRM",
+      "surface": "Delete / retire / power / Cycle destructive confirmation",
+      "type": "dialog",
+      "owner": "app/static/js/workspace-ux.js",
+      "entry": "uxConfirm / confirmUser",
+      "audit": "tested-cancel"
+    },
+    {
+      "id": "S12-STATUS-ERROR",
+      "surface": "Operation completed but list refresh failed",
+      "type": "dialog",
+      "owner": "app/static/js/cinematic.js",
+      "entry": "showDialog status update failure",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-ADD-SYSTEM",
+      "surface": "新增系統（L10 / L11）",
+      "type": "modal",
+      "owner": "app/static/index.html + app.js",
+      "entry": "openAdd",
+      "audit": "tested"
+    },
+    {
+      "id": "S12-PROJECT",
+      "surface": "新增／編輯／刪除專案與 Cycle entry",
+      "type": "modal",
+      "owner": "app/static/index.html + app.js",
+      "entry": "openProjectModal",
+      "audit": "tested"
+    },
+    {
+      "id": "S12-CONNECTION-IP",
+      "surface": "修改管理 IP",
+      "type": "dialog",
+      "owner": "app/static/js/equipment-connections.js",
+      "entry": "equipmentIpDialog",
+      "audit": "tested"
+    },
+    {
+      "id": "S12-CONNECTION-SSH",
+      "surface": "OS / BMC SSH Terminal credentials",
+      "type": "dialog",
+      "owner": "app/static/js/equipment-connections.js",
+      "entry": "equipmentSshDialog",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-POWER-CUSTOM",
+      "surface": "單機自訂電源指令",
+      "type": "dialog",
+      "owner": "app/static/js/equipment-connections.js",
+      "entry": "equipmentPowerDialog",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-POWER-RACK",
+      "surface": "整櫃電源目標選擇",
+      "type": "dialog",
+      "owner": "app/static/js/app.js",
+      "entry": "rackBulkDialog",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-POWER-BATCH",
+      "surface": "批次電源進度／結果",
+      "type": "dialog",
+      "owner": "app/static/js/operations-ux.js",
+      "entry": "showPowerBatch",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-COMPONENT",
+      "surface": "Rack component control",
+      "type": "dialog",
+      "owner": "app/static/js/app.js",
+      "entry": "machControlDialog",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-RACK-SPEC",
+      "surface": "升級 L11／設備高度",
+      "type": "dialog",
+      "owner": "app/static/js/workspace-ux.js",
+      "entry": "uxRackSpecification",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-RACK-MOVE",
+      "surface": "機櫃位置",
+      "type": "dialog",
+      "owner": "app/static/js/app.js",
+      "entry": "rackMoveDialog",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-RACK-ADD",
+      "surface": "加入機櫃／選擇設備與 U 位",
+      "type": "dialog",
+      "owner": "app/static/js/app.js",
+      "entry": "rackAddDialog / rackAddDialogAt",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-CDU",
+      "surface": "新增／編輯 CDU 安裝方式",
+      "type": "dialog",
+      "owner": "app/static/js/app.js",
+      "entry": "rackCduDialog",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-RACK-COMPONENT",
+      "surface": "新增機櫃元件／加入機櫃專案",
+      "type": "dialog",
+      "owner": "app/static/js/app.js",
+      "entry": "addRackComponentDialog",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-TOPOLOGY-LEGACY",
+      "surface": "Legacy topology add entry",
+      "type": "dialog",
+      "owner": "app/static/js/app.js",
+      "entry": "linkAddDialog",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-ASSIGN-CATEGORY",
+      "surface": "Test Case category",
+      "type": "dialog",
+      "owner": "app/static/js/app.js + engineering-ux.js",
+      "entry": "openAssignTask",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-ASSIGN-CASES",
+      "surface": "Test Case search / selection",
+      "type": "dialog",
+      "owner": "app/static/js/app.js + engineering-ux.js",
+      "entry": "assignTaskOpenSheet",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-ASSIGN-RESULT",
+      "surface": "Batch instruction result",
+      "type": "non-modal-dialog",
+      "owner": "app/static/js/app.js + engineering-ux.js",
+      "entry": "AssignResultWin.render",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-MACHINE-TERMINAL",
+      "surface": "Machine Terminal credential setup",
+      "type": "dialog",
+      "owner": "app/static/js/app.js",
+      "entry": "openTermDialog",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-MACHINE-SETTINGS",
+      "surface": "System settings / edit connection",
+      "type": "dialog",
+      "owner": "app/static/js/app.js",
+      "entry": "changeOsIp",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-BROADCAST-SELECT",
+      "surface": "Rack/System Broadcast target selection",
+      "type": "dialog",
+      "owner": "app/static/js/app.js",
+      "entry": "rackBroadcastDialog / systemBroadcastDialog",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-KVM-PREVIEW",
+      "surface": "Design-only KVM preview",
+      "type": "dialog",
+      "owner": "app/static/js/atelier.js",
+      "entry": "atelier KVM preview",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S12-ROW-MENU",
+      "surface": "System row More menu / project move",
+      "type": "popover-menu",
+      "owner": "app/static/js/product.js + workspace-ux.js",
+      "entry": "p-row-menu",
+      "audit": "source-reviewed"
+    },
+    {
+      "id": "S07-AGENT",
+      "surface": "PA Agent mission drawer",
+      "type": "drawer",
+      "owner": "app/static/js/pa-agent.js",
+      "entry": "PA_Agent.open",
+      "audit": "tested"
+    },
+    {
+      "id": "S08-CYCLE",
+      "surface": "Cycle workspace / PRE / confirmation / live console",
+      "type": "native-dialog",
+      "owner": "app/static/js/cycle.js + cycle-console.js",
+      "entry": "openCycleTest",
+      "audit": "covered-by-cycle-harness"
+    },
+    {
+      "id": "S09-EXPORTER",
+      "surface": "Telemetry Exporter Console",
+      "type": "native-dialog",
+      "owner": "app/static/js/telemetry-provision.js",
+      "entry": "TelemetryProvision",
+      "audit": "covered-by-telemetry-harness"
+    },
+    {
+      "id": "S13-EVIDENCE",
+      "surface": "Inspection raw Evidence viewer",
+      "type": "native-dialog",
+      "owner": "app/static/js/inspection-evidence.js",
+      "entry": "InspectionEvidence.open",
+      "audit": "tested"
+    },
+    {
+      "id": "S13-REPORT",
+      "surface": "Cycle report / evidence download entry",
+      "type": "link-viewer",
+      "owner": "app/static/js/cycle.js + cycle-console.js",
+      "entry": "cycle-report / evidence download",
+      "audit": "covered-by-cycle-harness"
+    },
+    {
+      "id": "S14-GUIDE",
+      "surface": "User Guide floating viewer",
+      "type": "non-modal-dialog",
+      "owner": "app/static/js/userguide.js",
+      "entry": "USER_GUIDE.open",
+      "audit": "tested"
+    },
+    {
+      "id": "S15-TOPOLOGY",
+      "surface": "Topology overlay and nested editors / confirmations",
+      "type": "dialog",
+      "owner": "app/static/js/topology.js",
+      "entry": "PATopology.open",
+      "audit": "tested"
+    },
+    {
+      "id": "S11-TERMINAL",
+      "surface": "OS / BMC Terminal",
+      "type": "modal",
+      "owner": "app/static/index.html + app.js",
+      "entry": "openTerm",
+      "audit": "fake-provider-only-elsewhere"
+    },
+    {
+      "id": "S11-BROADCAST",
+      "surface": "Broadcast terminal",
+      "type": "modal",
+      "owner": "app/static/index.html + app.js",
+      "entry": "openBroadcast",
+      "audit": "fake-provider-only-elsewhere"
+    },
+    {
+      "id": "S11-KVM",
+      "surface": "KVM grid / solo",
+      "type": "overlay",
+      "owner": "app/static/js/kvm_broadcast.js",
+      "entry": "openKvmBroadcast / openKvmSolo",
+      "audit": "fake-provider-only-elsewhere"
+    }
+  ],
+  "requests": [
+    "GET /api/machines",
+    "GET /api/projects",
+    "GET /api/ai/gpu-alerts",
+    "GET /api/director-evidence/evidence/long/view",
+    "GET /api/director-evidence/evidence/error/view",
+    "GET /api/director-evidence/evidence/long/view",
+    "GET /api/agent/active?case_variant_id=director-case-modal&node_id=director-node-00000000000000000000000000000001",
+    "GET /api/agent/runs/director-modal-run/attachments/unconsumed",
+    "GET /api/agent/runs/director-modal-run/messages?limit=500",
+    "GET /api/projects/Director%20%E5%B1%95%E7%A4%BA%E5%B0%88%E6%A1%88%EF%BC%8F%E8%B6%85%E9%95%B7%E4%B8%AD%E6%96%87%E5%90%8D%E7%A8%B1%EF%BC%8FGPU%20Validation%20Cluster%20Alpha/topology"
+  ],
+  "mutations": [],
+  "unknownReads": [],
+  "external": [],
+  "captures": [
+    {
+      "filename": "01-generic-long-normal.png",
+      "surface": "Generic form dialog",
+      "state": "normal-long-content",
+      "selector": "#rm-dialog .rm-modal",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "dpr": 1,
+      "focused": "director-long-host",
+      "theme": "dark",
+      "horizontalOverflow": false,
+      "bytes": 35310,
+      "sha256": "8174928933bf2da09f1b36e9e339c9b809079040bcaf84901acf68b0059c445e"
+    },
+    {
+      "filename": "02-generic-persistent-error.png",
+      "surface": "Generic form dialog",
+      "state": "submit-error-retains-input",
+      "selector": "#rm-dialog .rm-modal",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "dpr": 1,
+      "focused": "DIV",
+      "theme": "dark",
+      "horizontalOverflow": false,
+      "bytes": 25017,
+      "sha256": "d3ee38b13e7b677d6ef44261e3af0c66e8d14785c6e22b44e375f49d2d023914"
+    },
+    {
+      "filename": "03-generic-reopened.png",
+      "surface": "Generic form dialog",
+      "state": "reopened-clean",
+      "selector": "#rm-dialog .rm-modal",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "dpr": 1,
+      "focused": "director-reopen",
+      "theme": "dark",
+      "horizontalOverflow": false,
+      "bytes": 18421,
+      "sha256": "ace4a0a1f80ad3d664451273a80dcb9c38dcb8facf04d13937a92b5a1a1152d9"
+    },
+    {
+      "filename": "04-add-system-long-ip.png",
+      "surface": "Add system modal",
+      "state": "normal-long-ip",
+      "selector": "#add-modal .modal",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "dpr": 1,
+      "focused": "f-os-ip",
+      "theme": "dark",
+      "horizontalOverflow": false,
+      "bytes": 53757,
+      "sha256": "000ffed9c8c602994bca17dff5010917f19813d26baff0a2cc53cf276902c3d4"
+    },
+    {
+      "filename": "05-project-management-long-after.png",
+      "surface": "Project manager modal",
+      "state": "long-content-after-scoped-width-fix",
+      "selector": "#project-modal .modal",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "dpr": 1,
+      "focused": "new-project-name",
+      "theme": "dark",
+      "horizontalOverflow": false,
+      "bytes": 61959,
+      "sha256": "2f1fb8861e767eda90ee5e610a11abf224be446b2af0097fa08778d25cd435fc"
+    },
+    {
+      "filename": "06-connection-ip-form.png",
+      "surface": "Management IP dialog",
+      "state": "normal",
+      "selector": "#rm-dialog .rm-modal",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "dpr": 1,
+      "focused": "equipment-target",
+      "theme": "dark",
+      "horizontalOverflow": false,
+      "bytes": 42485,
+      "sha256": "0c4f6c65e2a85ecc97e453bec4c724b1ab15099118a21e8dab437dbebd649a46"
+    },
+    {
+      "filename": "07-evidence-loaded-long.png",
+      "surface": "Raw evidence viewer",
+      "state": "loaded-long-content",
+      "selector": "dialog.pa-evidence-modal",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "dpr": 1,
+      "focused": "BUTTON",
+      "theme": "dark",
+      "horizontalOverflow": false,
+      "bytes": 50482,
+      "sha256": "870b071d8ada67fecfb6224092884101fdb37722cdd452ec1551c51988f9f2fd"
+    },
+    {
+      "filename": "08-evidence-source-error.png",
+      "surface": "Raw evidence viewer",
+      "state": "403-source-error",
+      "selector": "dialog.pa-evidence-modal",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "dpr": 1,
+      "focused": "BUTTON",
+      "theme": "dark",
+      "horizontalOverflow": false,
+      "bytes": 25130,
+      "sha256": "a5c900ddb29281b2b7351c95dd12bb802fb8d938f18e099c98772c1f59a4f436"
+    },
+    {
+      "filename": "09-agent-drawer-long-done.png",
+      "surface": "PA Agent drawer",
+      "state": "DONE-awaiting-engineer-long-content",
+      "selector": "#pa-agent-drawer .pa-drawer-panel",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "dpr": 1,
+      "focused": "director-surface-opener",
+      "theme": "dark",
+      "horizontalOverflow": false,
+      "bytes": 100279,
+      "sha256": "4a8b77e32efbd4f264126cb3eab8fca68ddd56cf59e326079f4dfc4f09aa2869"
+    },
+    {
+      "filename": "10-topology-editor-long.png",
+      "surface": "Topology overlay/editor",
+      "state": "unsaved-editor-long-content",
+      "selector": ".nt-window",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "dpr": 1,
+      "focused": "nt-name",
+      "theme": "dark",
+      "horizontalOverflow": false,
+      "bytes": 73189,
+      "sha256": "396f8558225e27e2d121b1aee55b7e4feabc00cb81a1da8cfae2096ffec1efc1"
+    }
+  ],
+  "checks": [
+    {
+      "name": "generic dialog role/aria/focus/IME/Escape/restore",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "async failure retains value/reason; duplicate submit blocked; reopen clean",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "uxConfirm cancel sends zero requests",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "add system role/aria/focus/IME/Escape/restore/cancel zero request",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "project manager role/aria/focus/IME/Escape/restore/cancel zero request",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "project manager long-name layout",
+      "status": "PASS",
+      "detail": "Scoped 900px modal and fixed table columns replace the cramped 500px before state."
+    },
+    {
+      "name": "management IP owner dialog rendered; cancel zero request",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "evidence loaded/error/reopen truth + copy gating + focus/Escape/restore",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "PA Agent actual DONE drawer / IME-safe Escape / restore / no mutation",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "topology nested cancel retains draft; IME-safe Escape; clean close restores focus",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "User Guide non-modal semantics / IME-safe Escape / regular Escape / restore",
+      "status": "PASS",
+      "detail": ""
+    }
+  ],
+  "pageErrors": []
+}

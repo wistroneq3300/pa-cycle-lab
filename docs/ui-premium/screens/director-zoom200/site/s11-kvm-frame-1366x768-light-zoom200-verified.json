@@ -1,0 +1,135 @@
+{
+  "schema": "director-site-capture/v2",
+  "phase": "after-zoom200-content-reachability",
+  "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+  "region": "KVM broadcast frame",
+  "surfaceId": "S11",
+  "frozenMarker": null,
+  "routeState": {
+    "route": "#/machine/host_a",
+    "state": "explicit fake detector; every KVM offline; no RFB connection",
+    "details": null
+  },
+  "app": {
+    "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+    "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+    "dirty": true
+  },
+  "browser": {
+    "version": "154.0.4258.62",
+    "theme": "light",
+    "browserZoomRequested": 2,
+    "browserZoom": 2,
+    "browserZoomEvidence": {
+      "status": "applied",
+      "requested": 2,
+      "actual": 2,
+      "tabId": 838481332,
+      "settingsError": null,
+      "setZoomError": null,
+      "getZoomError": null,
+      "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+      "getZoomReturned": 2
+    },
+    "devicePixelRatio": 2,
+    "visualViewport": {
+      "width": 683,
+      "height": 384,
+      "scale": 1,
+      "offsetLeft": 0,
+      "offsetTop": 0
+    },
+    "osScaling": {
+      "status": "measured-registry",
+      "platform": "win32",
+      "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+      "appliedDpi": 192,
+      "scaleFactor": 2,
+      "percent": 200,
+      "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+    }
+  },
+  "viewportRequested": {
+    "width": 1366,
+    "height": 768
+  },
+  "viewportCss": {
+    "width": 683,
+    "height": 384
+  },
+  "png": {
+    "file": "s11-kvm-frame-1366x768-light-zoom200-verified.png",
+    "width": 1366,
+    "height": 768,
+    "sha256": "78ef13d67c12c23a5a8bac63dcf890ac68eb8a594e1c33955ae349da08dcd468"
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "externalRequests": [],
+  "unknownRequests": [],
+  "failedRequests": [],
+  "notices": [
+    {
+      "kind": "alert",
+      "message": "KVM 無法同步廣播\n\nDirector fake provider keeps every KVM connection offline.\n\n偵測結果：\n  SERVER-04U - RFB fixture / RFB\n  SERVER-03U - RFB fixture / RFB\n  SERVER-02U - RFB fixture / RFB\n  SERVER-01 - RFB fixture / RFB\n  SERVER-02 - RFB fixture / RFB\n  SERVER-03 - RFB fixture / RFB\n  SERVER-04 - RFB fixture / RFB\n  SERVER-05 - RFB fixture / RFB\n  SERVER-06 - RFB fixture / RFB\n  SERVER-07 - RFB fixture / RFB\n  SERVER-08 - RFB fixture / RFB\n  SERVER-09 - RFB fixture / RFB\n\n本頁仍會開啟，但只連線可同步的 RFB 系統。"
+    }
+  ],
+  "reachability": {
+    "documentWidth": 683,
+    "bodyHorizontalOverflowPx": 0,
+    "visibleFocusableCount": 43,
+    "visibleFocusableInViewportCount": 20,
+    "primary": {
+      "selector": "#kvm-overlay button",
+      "exists": true,
+      "visible": true,
+      "focusable": true,
+      "focused": true,
+      "inViewport": true,
+      "rect": {
+        "top": 64.5,
+        "right": 307.77,
+        "bottom": 98,
+        "left": 272.41,
+        "width": 35.36,
+        "height": 33.5
+      }
+    }
+  },
+  "contrastAudit": {
+    "status": "partial",
+    "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+    "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+    "scope": "Own text nodes visibly intersecting the captured viewport",
+    "thresholds": {
+      "normalText": 4.5,
+      "largeText": 3,
+      "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+    },
+    "exclusions": [
+      "image/canvas/SVG/video",
+      "disabled or aria-disabled",
+      "opacity/filter/blend/backdrop effects",
+      "pseudo-element text"
+    ],
+    "limitations": [
+      "CSS background images/gradients are approximated using their computed backgroundColor layers."
+    ],
+    "counts": {
+      "scannedElements": 2934,
+      "auditedTextElements": 39,
+      "violations": 0,
+      "skippedNoOwnText": 1535,
+      "skippedNotVisibleInViewport": 1348,
+      "skippedMediaOrVector": 2,
+      "skippedDisabled": 4,
+      "approximatedComplexBackground": 19,
+      "skippedOpacityOrEffect": 6,
+      "skippedUnparsedColor": 0
+    },
+    "violations": [],
+    "violationsTruncated": false
+  },
+  "gaps": [],
+  "capturedAt": "2026-10-08T04:00:00.000Z"
+}

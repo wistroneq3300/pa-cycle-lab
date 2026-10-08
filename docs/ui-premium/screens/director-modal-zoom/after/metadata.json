@@ -1,0 +1,1477 @@
+{
+  "schema": "director-modal-zoom-accessibility/v1",
+  "generatedAt": "2026-10-08T07:25:18.730Z",
+  "phase": "after",
+  "app": {
+    "branch": "codex/platform-premium-ui-v1",
+    "commit": "b38646eb25607e8faa5d460077bbedbb2799bbcd",
+    "dirty": true
+  },
+  "fixture": "strict loopback / explicit GET allowlist / all mutations rejected / no hardware transport",
+  "viewport": {
+    "width": 1366,
+    "height": 768
+  },
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "zooms": [
+    1,
+    1.25
+  ],
+  "zoomMethod": "100% fresh context; 125% MV3 chrome.tabs.setZoom + chrome.tabs.getZoom; deviceScaleFactor=1",
+  "sourceAssets": {
+    "app/static/index.html": "6c59b3adc6acff9a3f3fa83eba500c7c93858bcc1a0bb618a6f48ce0cda62914",
+    "app/static/css/style.css": "8c5839ea359a244bc12a2831ffdda258ec136ec7a79aa5fa6d3707c4d1423eb0",
+    "app/static/css/workspace-cinematic.css": "00f89be24d454b7c1a1abc620a75c504b56769b13e4bbd420a029d5c6c184ec8",
+    "app/static/css/engineering-ux.css": "7e281291b1e5247042c74a376f649c53318a8e7f338a90d1d48d5a1413742799",
+    "app/static/js/app.js": "f774553a0feb1b04e02e6e0b500fd508bb3df520e98aa43532102beee2330ff4",
+    "app/static/js/engineering-ux.js": "b39490bb4c806fa7b47cee05ad894e90767423e561d359334176124bac220b96"
+  },
+  "hardwareDispatches": 0,
+  "captures": [
+    {
+      "phase": "after",
+      "surface": "connection",
+      "theme": "light",
+      "zoomRequested": 1,
+      "zoomEvidence": {
+        "status": "default-100",
+        "requested": 1,
+        "actual": 1,
+        "source": "Fresh browser context with no zoom mutation"
+      },
+      "requestedViewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "screenshot": {
+        "file": "connection-1366x768-light-zoom100.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "0c3b51d74171d4a5d2364535e5ca12beb3deca84445cd493214086094133d55f",
+        "bytes": 181040
+      },
+      "measurement": {
+        "surface": "connection",
+        "window": {
+          "innerWidth": 1366,
+          "innerHeight": 768,
+          "outerWidth": 1366,
+          "outerHeight": 768,
+          "scrollX": 0,
+          "scrollY": 75
+        },
+        "visualViewport": {
+          "width": 1366,
+          "height": 768,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0,
+          "pageLeft": 0,
+          "pageTop": 75
+        },
+        "devicePixelRatio": 1,
+        "rects": {
+          "backdrop": {
+            "x": 0,
+            "y": 0,
+            "top": 0,
+            "right": 1366,
+            "bottom": 768,
+            "left": 0,
+            "width": 1366,
+            "height": 768
+          },
+          "modal": {
+            "x": 363,
+            "y": 37.703,
+            "top": 37.703,
+            "right": 1003,
+            "bottom": 730.297,
+            "left": 363,
+            "width": 640,
+            "height": 692.594
+          },
+          "body": {
+            "x": 364,
+            "y": 116.703,
+            "top": 116.703,
+            "right": 1002,
+            "bottom": 654.297,
+            "left": 364,
+            "width": 638,
+            "height": 537.594
+          },
+          "footer": {
+            "x": 364,
+            "y": 654.297,
+            "top": 654.297,
+            "right": 1002,
+            "bottom": 729.297,
+            "left": 364,
+            "width": 638,
+            "height": 75
+          },
+          "primary": {
+            "x": 907.188,
+            "y": 673.297,
+            "top": 673.297,
+            "right": 977,
+            "bottom": 711.297,
+            "left": 907.188,
+            "width": 69.813,
+            "height": 38
+          },
+          "lastBodyFocusable": {
+            "x": 389,
+            "y": 582.5,
+            "top": 582.5,
+            "right": 977,
+            "bottom": 619.5,
+            "left": 389,
+            "width": 588,
+            "height": 37
+          }
+        },
+        "computed": {
+          "backdrop": {
+            "position": "fixed",
+            "inset": "0px",
+            "top": "0px",
+            "right": "0px",
+            "bottom": "0px",
+            "left": "0px",
+            "height": "768px",
+            "padding": "20px",
+            "alignItems": "center",
+            "overflow": "visible",
+            "zIndex": "50"
+          },
+          "modal": {
+            "height": "692.594px",
+            "maxHeight": "720px",
+            "overflow": "hidden"
+          },
+          "body": {
+            "height": "537.594px",
+            "maxHeight": "537.6px",
+            "overflowY": "auto"
+          },
+          "footer": {
+            "height": "75px",
+            "flexShrink": "0"
+          }
+        },
+        "bodyScroll": {
+          "scrollTop": 13,
+          "scrollHeight": 551,
+          "clientHeight": 538,
+          "maxScrollTop": 13,
+          "bottomReachable": true,
+          "focusableCount": 7,
+          "lastFocusable": "new-bmc-pass-input",
+          "lastFocused": true,
+          "lastWithinBody": true,
+          "lastWithinViewport": true
+        },
+        "descendantScroll": {
+          "owner": "#rm-dialog-body",
+          "scrollTop": 13,
+          "scrollHeight": 551,
+          "clientHeight": 538,
+          "maxScrollTop": 13,
+          "bottomReachable": true
+        },
+        "assertions": {
+          "backdropCoversViewport": true,
+          "backdropOwnsTopPoint": true,
+          "modalFullyInViewport": true,
+          "footerFullyInViewport": true,
+          "primaryFullyInViewport": true,
+          "bodyBottomReachable": true,
+          "lastBodyFocusReachable": true
+        }
+      },
+      "assertionFailures": []
+    },
+    {
+      "phase": "after",
+      "surface": "assignment",
+      "theme": "light",
+      "zoomRequested": 1,
+      "zoomEvidence": {
+        "status": "default-100",
+        "requested": 1,
+        "actual": 1,
+        "source": "Fresh browser context with no zoom mutation"
+      },
+      "requestedViewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "screenshot": {
+        "file": "assignment-1366x768-light-zoom100.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "cfac03da919313a35ae304b046985a28037c4ad15e7b90de9b39e8792f30bf3d",
+        "bytes": 140978
+      },
+      "measurement": {
+        "surface": "assignment",
+        "window": {
+          "innerWidth": 1366,
+          "innerHeight": 768,
+          "outerWidth": 1366,
+          "outerHeight": 768,
+          "scrollX": 0,
+          "scrollY": 75
+        },
+        "visualViewport": {
+          "width": 1366,
+          "height": 768,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0,
+          "pageLeft": 0,
+          "pageTop": 75
+        },
+        "devicePixelRatio": 1,
+        "rects": {
+          "backdrop": {
+            "x": 0,
+            "y": 0,
+            "top": 0,
+            "right": 1366,
+            "bottom": 768,
+            "left": 0,
+            "width": 1366,
+            "height": 768
+          },
+          "modal": {
+            "x": 24,
+            "y": 24,
+            "top": 24,
+            "right": 1342,
+            "bottom": 744,
+            "left": 24,
+            "width": 1318,
+            "height": 720
+          },
+          "body": {
+            "x": 25,
+            "y": 103,
+            "top": 103,
+            "right": 1341,
+            "bottom": 668,
+            "left": 25,
+            "width": 1316,
+            "height": 565
+          },
+          "footer": {
+            "x": 25,
+            "y": 668,
+            "top": 668,
+            "right": 1341,
+            "bottom": 743,
+            "left": 25,
+            "width": 1316,
+            "height": 75
+          },
+          "primary": {
+            "x": 1162,
+            "y": 687,
+            "top": 687,
+            "right": 1316,
+            "bottom": 725,
+            "left": 1162,
+            "width": 154,
+            "height": 38
+          },
+          "lastBodyFocusable": {
+            "x": 106.578,
+            "y": 511.75,
+            "top": 511.75,
+            "right": 520.5,
+            "bottom": 626.25,
+            "left": 106.578,
+            "width": 413.922,
+            "height": 114.5
+          }
+        },
+        "computed": {
+          "backdrop": {
+            "position": "fixed",
+            "inset": "0px",
+            "top": "0px",
+            "right": "0px",
+            "bottom": "0px",
+            "left": "0px",
+            "height": "768px",
+            "padding": "20px",
+            "alignItems": "center",
+            "overflow": "visible",
+            "zIndex": "50"
+          },
+          "modal": {
+            "height": "720px",
+            "maxHeight": "720px",
+            "overflow": "hidden"
+          },
+          "body": {
+            "height": "565px",
+            "maxHeight": "none",
+            "overflowY": "hidden"
+          },
+          "footer": {
+            "height": "75px",
+            "flexShrink": "0"
+          }
+        },
+        "bodyScroll": {
+          "scrollTop": 0,
+          "scrollHeight": 565,
+          "clientHeight": 565,
+          "maxScrollTop": 0,
+          "bottomReachable": true,
+          "focusableCount": 31,
+          "lastFocusable": "button",
+          "lastFocused": true,
+          "lastWithinBody": true,
+          "lastWithinViewport": true
+        },
+        "descendantScroll": {
+          "owner": ".assign-rows",
+          "scrollTop": 1310,
+          "scrollHeight": 1568,
+          "clientHeight": 258,
+          "maxScrollTop": 1310,
+          "bottomReachable": true
+        },
+        "assertions": {
+          "backdropCoversViewport": true,
+          "backdropOwnsTopPoint": true,
+          "modalFullyInViewport": true,
+          "footerFullyInViewport": true,
+          "primaryFullyInViewport": true,
+          "bodyBottomReachable": true,
+          "lastBodyFocusReachable": true
+        }
+      },
+      "assertionFailures": []
+    },
+    {
+      "phase": "after",
+      "surface": "connection",
+      "theme": "light",
+      "zoomRequested": 1.25,
+      "zoomEvidence": {
+        "status": "applied",
+        "requested": 1.25,
+        "actual": 1.25,
+        "tabId": 1110020427,
+        "settingsError": null,
+        "setZoomError": null,
+        "getZoomError": null,
+        "source": "chrome.tabs.setZoom + chrome.tabs.getZoom"
+      },
+      "requestedViewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "screenshot": {
+        "file": "connection-1366x768-light-zoom125.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "45490b7f399ef39ac09e6b9469ee91aa1ff884fa7c70d5c627fab680b2aee1e9",
+        "bytes": 169542
+      },
+      "measurement": {
+        "surface": "connection",
+        "window": {
+          "innerWidth": 1093,
+          "innerHeight": 614,
+          "outerWidth": 1366,
+          "outerHeight": 768,
+          "scrollX": 0,
+          "scrollY": 75.19999694824219
+        },
+        "visualViewport": {
+          "width": 1092.800048828125,
+          "height": 614.4000244140625,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0,
+          "pageLeft": 0,
+          "pageTop": 75.19999694824219
+        },
+        "devicePixelRatio": 1.25,
+        "rects": {
+          "backdrop": {
+            "x": 0,
+            "y": 0,
+            "top": 0,
+            "right": 1092.8,
+            "bottom": 614.4,
+            "left": 0,
+            "width": 1092.8,
+            "height": 614.4
+          },
+          "modal": {
+            "x": 226.4,
+            "y": 24,
+            "top": 24,
+            "right": 866.4,
+            "bottom": 590.4,
+            "left": 226.4,
+            "width": 640,
+            "height": 566.4
+          },
+          "body": {
+            "x": 227.2,
+            "y": 102.6,
+            "top": 102.6,
+            "right": 865.6,
+            "bottom": 515.2,
+            "left": 227.2,
+            "width": 638.4,
+            "height": 412.6
+          },
+          "footer": {
+            "x": 227.2,
+            "y": 515.2,
+            "top": 515.2,
+            "right": 865.6,
+            "bottom": 589.6,
+            "left": 227.2,
+            "width": 638.4,
+            "height": 74.4
+          },
+          "primary": {
+            "x": 771.188,
+            "y": 534,
+            "top": 534,
+            "right": 840.6,
+            "bottom": 571.6,
+            "left": 771.188,
+            "width": 69.412,
+            "height": 37.6
+          },
+          "lastBodyFocusable": {
+            "x": 252.2,
+            "y": 442.8,
+            "top": 442.8,
+            "right": 840.6,
+            "bottom": 480,
+            "left": 252.2,
+            "width": 588.4,
+            "height": 37.2
+          }
+        },
+        "computed": {
+          "backdrop": {
+            "position": "fixed",
+            "inset": "0px",
+            "top": "0px",
+            "right": "0px",
+            "bottom": "0px",
+            "left": "0px",
+            "height": "614.4px",
+            "padding": "20px",
+            "alignItems": "center",
+            "overflow": "visible",
+            "zIndex": "50"
+          },
+          "modal": {
+            "height": "566.4px",
+            "maxHeight": "566.4px",
+            "overflow": "hidden"
+          },
+          "body": {
+            "height": "412.6px",
+            "maxHeight": "430.08px",
+            "overflowY": "auto"
+          },
+          "footer": {
+            "height": "74.4px",
+            "flexShrink": "0"
+          }
+        },
+        "bodyScroll": {
+          "scrollTop": 141.60000610351562,
+          "scrollHeight": 554,
+          "clientHeight": 413,
+          "maxScrollTop": 141,
+          "bottomReachable": true,
+          "focusableCount": 7,
+          "lastFocusable": "new-bmc-pass-input",
+          "lastFocused": true,
+          "lastWithinBody": true,
+          "lastWithinViewport": true
+        },
+        "descendantScroll": {
+          "owner": "#rm-dialog-body",
+          "scrollTop": 141.60000610351562,
+          "scrollHeight": 554,
+          "clientHeight": 413,
+          "maxScrollTop": 141,
+          "bottomReachable": true
+        },
+        "assertions": {
+          "backdropCoversViewport": true,
+          "backdropOwnsTopPoint": true,
+          "modalFullyInViewport": true,
+          "footerFullyInViewport": true,
+          "primaryFullyInViewport": true,
+          "bodyBottomReachable": true,
+          "lastBodyFocusReachable": true
+        }
+      },
+      "assertionFailures": []
+    },
+    {
+      "phase": "after",
+      "surface": "assignment",
+      "theme": "light",
+      "zoomRequested": 1.25,
+      "zoomEvidence": {
+        "status": "applied",
+        "requested": 1.25,
+        "actual": 1.25,
+        "tabId": 1110020427,
+        "settingsError": null,
+        "setZoomError": null,
+        "getZoomError": null,
+        "source": "chrome.tabs.setZoom + chrome.tabs.getZoom"
+      },
+      "requestedViewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "screenshot": {
+        "file": "assignment-1366x768-light-zoom125.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "fdc2be5ad103887bb3fbe284ff7e660a4d024683eab7ba1a1d61b4079e85f18c",
+        "bytes": 151713
+      },
+      "measurement": {
+        "surface": "assignment",
+        "window": {
+          "innerWidth": 1093,
+          "innerHeight": 614,
+          "outerWidth": 1366,
+          "outerHeight": 768,
+          "scrollX": 0,
+          "scrollY": 75.19999694824219
+        },
+        "visualViewport": {
+          "width": 1092.800048828125,
+          "height": 614.4000244140625,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0,
+          "pageLeft": 0,
+          "pageTop": 75.19999694824219
+        },
+        "devicePixelRatio": 1.25,
+        "rects": {
+          "backdrop": {
+            "x": 0,
+            "y": 0,
+            "top": 0,
+            "right": 1092.8,
+            "bottom": 614.4,
+            "left": 0,
+            "width": 1092.8,
+            "height": 614.4
+          },
+          "modal": {
+            "x": 20,
+            "y": 24,
+            "top": 24,
+            "right": 1072.8,
+            "bottom": 590.4,
+            "left": 20,
+            "width": 1052.8,
+            "height": 566.4
+          },
+          "body": {
+            "x": 20.8,
+            "y": 102.6,
+            "top": 102.6,
+            "right": 1072,
+            "bottom": 515.2,
+            "left": 20.8,
+            "width": 1051.2,
+            "height": 412.6
+          },
+          "footer": {
+            "x": 20.8,
+            "y": 515.2,
+            "top": 515.2,
+            "right": 1072,
+            "bottom": 589.6,
+            "left": 20.8,
+            "width": 1051.2,
+            "height": 74.4
+          },
+          "primary": {
+            "x": 893,
+            "y": 534,
+            "top": 534,
+            "right": 1047,
+            "bottom": 571.6,
+            "left": 893,
+            "width": 154,
+            "height": 37.6
+          },
+          "lastBodyFocusable": {
+            "x": 101.787,
+            "y": 359.55,
+            "top": 359.55,
+            "right": 452.138,
+            "bottom": 473.25,
+            "left": 101.787,
+            "width": 350.35,
+            "height": 113.7
+          }
+        },
+        "computed": {
+          "backdrop": {
+            "position": "fixed",
+            "inset": "0px",
+            "top": "0px",
+            "right": "0px",
+            "bottom": "0px",
+            "left": "0px",
+            "height": "614.4px",
+            "padding": "20px",
+            "alignItems": "center",
+            "overflow": "visible",
+            "zIndex": "50"
+          },
+          "modal": {
+            "height": "566.4px",
+            "maxHeight": "566.4px",
+            "overflow": "hidden"
+          },
+          "body": {
+            "height": "412.6px",
+            "maxHeight": "none",
+            "overflowY": "hidden"
+          },
+          "footer": {
+            "height": "74.4px",
+            "flexShrink": "0"
+          }
+        },
+        "bodyScroll": {
+          "scrollTop": 0,
+          "scrollHeight": 413,
+          "clientHeight": 413,
+          "maxScrollTop": 0,
+          "bottomReachable": true,
+          "focusableCount": 31,
+          "lastFocusable": "button",
+          "lastFocused": true,
+          "lastWithinBody": true,
+          "lastWithinViewport": true
+        },
+        "descendantScroll": {
+          "owner": ".assign-rows",
+          "scrollTop": 1512,
+          "scrollHeight": 1568,
+          "clientHeight": 56,
+          "maxScrollTop": 1512,
+          "bottomReachable": true
+        },
+        "assertions": {
+          "backdropCoversViewport": true,
+          "backdropOwnsTopPoint": true,
+          "modalFullyInViewport": true,
+          "footerFullyInViewport": true,
+          "primaryFullyInViewport": true,
+          "bodyBottomReachable": true,
+          "lastBodyFocusReachable": true
+        }
+      },
+      "assertionFailures": []
+    },
+    {
+      "phase": "after",
+      "surface": "connection",
+      "theme": "dark",
+      "zoomRequested": 1,
+      "zoomEvidence": {
+        "status": "default-100",
+        "requested": 1,
+        "actual": 1,
+        "source": "Fresh browser context with no zoom mutation"
+      },
+      "requestedViewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "screenshot": {
+        "file": "connection-1366x768-dark-zoom100.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "52dc698eb8ed7b03b3cf25d2371df89282e1d303f85c2fd56d63e633f13d1a65",
+        "bytes": 131197
+      },
+      "measurement": {
+        "surface": "connection",
+        "window": {
+          "innerWidth": 1366,
+          "innerHeight": 768,
+          "outerWidth": 1366,
+          "outerHeight": 768,
+          "scrollX": 0,
+          "scrollY": 75
+        },
+        "visualViewport": {
+          "width": 1366,
+          "height": 768,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0,
+          "pageLeft": 0,
+          "pageTop": 75
+        },
+        "devicePixelRatio": 1,
+        "rects": {
+          "backdrop": {
+            "x": 0,
+            "y": 0,
+            "top": 0,
+            "right": 1366,
+            "bottom": 768,
+            "left": 0,
+            "width": 1366,
+            "height": 768
+          },
+          "modal": {
+            "x": 363,
+            "y": 37.703,
+            "top": 37.703,
+            "right": 1003,
+            "bottom": 730.297,
+            "left": 363,
+            "width": 640,
+            "height": 692.594
+          },
+          "body": {
+            "x": 364,
+            "y": 116.703,
+            "top": 116.703,
+            "right": 1002,
+            "bottom": 654.297,
+            "left": 364,
+            "width": 638,
+            "height": 537.594
+          },
+          "footer": {
+            "x": 364,
+            "y": 654.297,
+            "top": 654.297,
+            "right": 1002,
+            "bottom": 729.297,
+            "left": 364,
+            "width": 638,
+            "height": 75
+          },
+          "primary": {
+            "x": 907.188,
+            "y": 673.297,
+            "top": 673.297,
+            "right": 977,
+            "bottom": 711.297,
+            "left": 907.188,
+            "width": 69.813,
+            "height": 38
+          },
+          "lastBodyFocusable": {
+            "x": 389,
+            "y": 582.5,
+            "top": 582.5,
+            "right": 977,
+            "bottom": 619.5,
+            "left": 389,
+            "width": 588,
+            "height": 37
+          }
+        },
+        "computed": {
+          "backdrop": {
+            "position": "fixed",
+            "inset": "0px",
+            "top": "0px",
+            "right": "0px",
+            "bottom": "0px",
+            "left": "0px",
+            "height": "768px",
+            "padding": "20px",
+            "alignItems": "center",
+            "overflow": "visible",
+            "zIndex": "50"
+          },
+          "modal": {
+            "height": "692.594px",
+            "maxHeight": "720px",
+            "overflow": "hidden"
+          },
+          "body": {
+            "height": "537.594px",
+            "maxHeight": "537.6px",
+            "overflowY": "auto"
+          },
+          "footer": {
+            "height": "75px",
+            "flexShrink": "0"
+          }
+        },
+        "bodyScroll": {
+          "scrollTop": 13,
+          "scrollHeight": 551,
+          "clientHeight": 538,
+          "maxScrollTop": 13,
+          "bottomReachable": true,
+          "focusableCount": 7,
+          "lastFocusable": "new-bmc-pass-input",
+          "lastFocused": true,
+          "lastWithinBody": true,
+          "lastWithinViewport": true
+        },
+        "descendantScroll": {
+          "owner": "#rm-dialog-body",
+          "scrollTop": 13,
+          "scrollHeight": 551,
+          "clientHeight": 538,
+          "maxScrollTop": 13,
+          "bottomReachable": true
+        },
+        "assertions": {
+          "backdropCoversViewport": true,
+          "backdropOwnsTopPoint": true,
+          "modalFullyInViewport": true,
+          "footerFullyInViewport": true,
+          "primaryFullyInViewport": true,
+          "bodyBottomReachable": true,
+          "lastBodyFocusReachable": true
+        }
+      },
+      "assertionFailures": []
+    },
+    {
+      "phase": "after",
+      "surface": "assignment",
+      "theme": "dark",
+      "zoomRequested": 1,
+      "zoomEvidence": {
+        "status": "default-100",
+        "requested": 1,
+        "actual": 1,
+        "source": "Fresh browser context with no zoom mutation"
+      },
+      "requestedViewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "screenshot": {
+        "file": "assignment-1366x768-dark-zoom100.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "3f919e1a6cc55d76695458f1b652078a1b0ba7dd9c7d60be36fc8d299becb462",
+        "bytes": 129412
+      },
+      "measurement": {
+        "surface": "assignment",
+        "window": {
+          "innerWidth": 1366,
+          "innerHeight": 768,
+          "outerWidth": 1366,
+          "outerHeight": 768,
+          "scrollX": 0,
+          "scrollY": 75
+        },
+        "visualViewport": {
+          "width": 1366,
+          "height": 768,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0,
+          "pageLeft": 0,
+          "pageTop": 75
+        },
+        "devicePixelRatio": 1,
+        "rects": {
+          "backdrop": {
+            "x": 0,
+            "y": 0,
+            "top": 0,
+            "right": 1366,
+            "bottom": 768,
+            "left": 0,
+            "width": 1366,
+            "height": 768
+          },
+          "modal": {
+            "x": 24,
+            "y": 24,
+            "top": 24,
+            "right": 1342,
+            "bottom": 744,
+            "left": 24,
+            "width": 1318,
+            "height": 720
+          },
+          "body": {
+            "x": 25,
+            "y": 103,
+            "top": 103,
+            "right": 1341,
+            "bottom": 668,
+            "left": 25,
+            "width": 1316,
+            "height": 565
+          },
+          "footer": {
+            "x": 25,
+            "y": 668,
+            "top": 668,
+            "right": 1341,
+            "bottom": 743,
+            "left": 25,
+            "width": 1316,
+            "height": 75
+          },
+          "primary": {
+            "x": 1162,
+            "y": 687,
+            "top": 687,
+            "right": 1316,
+            "bottom": 725,
+            "left": 1162,
+            "width": 154,
+            "height": 38
+          },
+          "lastBodyFocusable": {
+            "x": 106.578,
+            "y": 511.75,
+            "top": 511.75,
+            "right": 520.5,
+            "bottom": 626.25,
+            "left": 106.578,
+            "width": 413.922,
+            "height": 114.5
+          }
+        },
+        "computed": {
+          "backdrop": {
+            "position": "fixed",
+            "inset": "0px",
+            "top": "0px",
+            "right": "0px",
+            "bottom": "0px",
+            "left": "0px",
+            "height": "768px",
+            "padding": "20px",
+            "alignItems": "center",
+            "overflow": "visible",
+            "zIndex": "50"
+          },
+          "modal": {
+            "height": "720px",
+            "maxHeight": "720px",
+            "overflow": "hidden"
+          },
+          "body": {
+            "height": "565px",
+            "maxHeight": "none",
+            "overflowY": "hidden"
+          },
+          "footer": {
+            "height": "75px",
+            "flexShrink": "0"
+          }
+        },
+        "bodyScroll": {
+          "scrollTop": 0,
+          "scrollHeight": 565,
+          "clientHeight": 565,
+          "maxScrollTop": 0,
+          "bottomReachable": true,
+          "focusableCount": 31,
+          "lastFocusable": "button",
+          "lastFocused": true,
+          "lastWithinBody": true,
+          "lastWithinViewport": true
+        },
+        "descendantScroll": {
+          "owner": ".assign-rows",
+          "scrollTop": 1310,
+          "scrollHeight": 1568,
+          "clientHeight": 258,
+          "maxScrollTop": 1310,
+          "bottomReachable": true
+        },
+        "assertions": {
+          "backdropCoversViewport": true,
+          "backdropOwnsTopPoint": true,
+          "modalFullyInViewport": true,
+          "footerFullyInViewport": true,
+          "primaryFullyInViewport": true,
+          "bodyBottomReachable": true,
+          "lastBodyFocusReachable": true
+        }
+      },
+      "assertionFailures": []
+    },
+    {
+      "phase": "after",
+      "surface": "connection",
+      "theme": "dark",
+      "zoomRequested": 1.25,
+      "zoomEvidence": {
+        "status": "applied",
+        "requested": 1.25,
+        "actual": 1.25,
+        "tabId": 411246197,
+        "settingsError": null,
+        "setZoomError": null,
+        "getZoomError": null,
+        "source": "chrome.tabs.setZoom + chrome.tabs.getZoom"
+      },
+      "requestedViewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "screenshot": {
+        "file": "connection-1366x768-dark-zoom125.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "bff53d691846c6d12135350f94064c6a8d9ebd382f8ec6b247ddb46e64b8d41f",
+        "bytes": 118070
+      },
+      "measurement": {
+        "surface": "connection",
+        "window": {
+          "innerWidth": 1093,
+          "innerHeight": 614,
+          "outerWidth": 1366,
+          "outerHeight": 768,
+          "scrollX": 0,
+          "scrollY": 75.19999694824219
+        },
+        "visualViewport": {
+          "width": 1092.800048828125,
+          "height": 614.4000244140625,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0,
+          "pageLeft": 0,
+          "pageTop": 75.19999694824219
+        },
+        "devicePixelRatio": 1.25,
+        "rects": {
+          "backdrop": {
+            "x": 0,
+            "y": 0,
+            "top": 0,
+            "right": 1092.8,
+            "bottom": 614.4,
+            "left": 0,
+            "width": 1092.8,
+            "height": 614.4
+          },
+          "modal": {
+            "x": 226.4,
+            "y": 24,
+            "top": 24,
+            "right": 866.4,
+            "bottom": 590.4,
+            "left": 226.4,
+            "width": 640,
+            "height": 566.4
+          },
+          "body": {
+            "x": 227.2,
+            "y": 102.6,
+            "top": 102.6,
+            "right": 865.6,
+            "bottom": 515.2,
+            "left": 227.2,
+            "width": 638.4,
+            "height": 412.6
+          },
+          "footer": {
+            "x": 227.2,
+            "y": 515.2,
+            "top": 515.2,
+            "right": 865.6,
+            "bottom": 589.6,
+            "left": 227.2,
+            "width": 638.4,
+            "height": 74.4
+          },
+          "primary": {
+            "x": 771.188,
+            "y": 534,
+            "top": 534,
+            "right": 840.6,
+            "bottom": 571.6,
+            "left": 771.188,
+            "width": 69.412,
+            "height": 37.6
+          },
+          "lastBodyFocusable": {
+            "x": 252.2,
+            "y": 442.8,
+            "top": 442.8,
+            "right": 840.6,
+            "bottom": 480,
+            "left": 252.2,
+            "width": 588.4,
+            "height": 37.2
+          }
+        },
+        "computed": {
+          "backdrop": {
+            "position": "fixed",
+            "inset": "0px",
+            "top": "0px",
+            "right": "0px",
+            "bottom": "0px",
+            "left": "0px",
+            "height": "614.4px",
+            "padding": "20px",
+            "alignItems": "center",
+            "overflow": "visible",
+            "zIndex": "50"
+          },
+          "modal": {
+            "height": "566.4px",
+            "maxHeight": "566.4px",
+            "overflow": "hidden"
+          },
+          "body": {
+            "height": "412.6px",
+            "maxHeight": "430.08px",
+            "overflowY": "auto"
+          },
+          "footer": {
+            "height": "74.4px",
+            "flexShrink": "0"
+          }
+        },
+        "bodyScroll": {
+          "scrollTop": 141.60000610351562,
+          "scrollHeight": 554,
+          "clientHeight": 413,
+          "maxScrollTop": 141,
+          "bottomReachable": true,
+          "focusableCount": 7,
+          "lastFocusable": "new-bmc-pass-input",
+          "lastFocused": true,
+          "lastWithinBody": true,
+          "lastWithinViewport": true
+        },
+        "descendantScroll": {
+          "owner": "#rm-dialog-body",
+          "scrollTop": 141.60000610351562,
+          "scrollHeight": 554,
+          "clientHeight": 413,
+          "maxScrollTop": 141,
+          "bottomReachable": true
+        },
+        "assertions": {
+          "backdropCoversViewport": true,
+          "backdropOwnsTopPoint": true,
+          "modalFullyInViewport": true,
+          "footerFullyInViewport": true,
+          "primaryFullyInViewport": true,
+          "bodyBottomReachable": true,
+          "lastBodyFocusReachable": true
+        }
+      },
+      "assertionFailures": []
+    },
+    {
+      "phase": "after",
+      "surface": "assignment",
+      "theme": "dark",
+      "zoomRequested": 1.25,
+      "zoomEvidence": {
+        "status": "applied",
+        "requested": 1.25,
+        "actual": 1.25,
+        "tabId": 411246197,
+        "settingsError": null,
+        "setZoomError": null,
+        "getZoomError": null,
+        "source": "chrome.tabs.setZoom + chrome.tabs.getZoom"
+      },
+      "requestedViewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "screenshot": {
+        "file": "assignment-1366x768-dark-zoom125.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "bad9233417e6dee6c2d3c7f2fd777b95e90159be1b56604836393b287fbdc18b",
+        "bytes": 131097
+      },
+      "measurement": {
+        "surface": "assignment",
+        "window": {
+          "innerWidth": 1093,
+          "innerHeight": 614,
+          "outerWidth": 1366,
+          "outerHeight": 768,
+          "scrollX": 0,
+          "scrollY": 75.19999694824219
+        },
+        "visualViewport": {
+          "width": 1092.800048828125,
+          "height": 614.4000244140625,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0,
+          "pageLeft": 0,
+          "pageTop": 75.19999694824219
+        },
+        "devicePixelRatio": 1.25,
+        "rects": {
+          "backdrop": {
+            "x": 0,
+            "y": 0,
+            "top": 0,
+            "right": 1092.8,
+            "bottom": 614.4,
+            "left": 0,
+            "width": 1092.8,
+            "height": 614.4
+          },
+          "modal": {
+            "x": 20,
+            "y": 24,
+            "top": 24,
+            "right": 1072.8,
+            "bottom": 590.4,
+            "left": 20,
+            "width": 1052.8,
+            "height": 566.4
+          },
+          "body": {
+            "x": 20.8,
+            "y": 102.6,
+            "top": 102.6,
+            "right": 1072,
+            "bottom": 515.2,
+            "left": 20.8,
+            "width": 1051.2,
+            "height": 412.6
+          },
+          "footer": {
+            "x": 20.8,
+            "y": 515.2,
+            "top": 515.2,
+            "right": 1072,
+            "bottom": 589.6,
+            "left": 20.8,
+            "width": 1051.2,
+            "height": 74.4
+          },
+          "primary": {
+            "x": 893,
+            "y": 534,
+            "top": 534,
+            "right": 1047,
+            "bottom": 571.6,
+            "left": 893,
+            "width": 154,
+            "height": 37.6
+          },
+          "lastBodyFocusable": {
+            "x": 101.787,
+            "y": 359.55,
+            "top": 359.55,
+            "right": 452.138,
+            "bottom": 473.25,
+            "left": 101.787,
+            "width": 350.35,
+            "height": 113.7
+          }
+        },
+        "computed": {
+          "backdrop": {
+            "position": "fixed",
+            "inset": "0px",
+            "top": "0px",
+            "right": "0px",
+            "bottom": "0px",
+            "left": "0px",
+            "height": "614.4px",
+            "padding": "20px",
+            "alignItems": "center",
+            "overflow": "visible",
+            "zIndex": "50"
+          },
+          "modal": {
+            "height": "566.4px",
+            "maxHeight": "566.4px",
+            "overflow": "hidden"
+          },
+          "body": {
+            "height": "412.6px",
+            "maxHeight": "none",
+            "overflowY": "hidden"
+          },
+          "footer": {
+            "height": "74.4px",
+            "flexShrink": "0"
+          }
+        },
+        "bodyScroll": {
+          "scrollTop": 0,
+          "scrollHeight": 413,
+          "clientHeight": 413,
+          "maxScrollTop": 0,
+          "bottomReachable": true,
+          "focusableCount": 31,
+          "lastFocusable": "button",
+          "lastFocused": true,
+          "lastWithinBody": true,
+          "lastWithinViewport": true
+        },
+        "descendantScroll": {
+          "owner": ".assign-rows",
+          "scrollTop": 1512,
+          "scrollHeight": 1568,
+          "clientHeight": 56,
+          "maxScrollTop": 1512,
+          "bottomReachable": true
+        },
+        "assertions": {
+          "backdropCoversViewport": true,
+          "backdropOwnsTopPoint": true,
+          "modalFullyInViewport": true,
+          "footerFullyInViewport": true,
+          "primaryFullyInViewport": true,
+          "bodyBottomReachable": true,
+          "lastBodyFocusReachable": true
+        }
+      },
+      "assertionFailures": []
+    }
+  ],
+  "runs": [
+    {
+      "theme": "light",
+      "zoom": 1,
+      "zoomEvidence": {
+        "status": "default-100",
+        "requested": 1,
+        "actual": 1,
+        "source": "Fresh browser context with no zoom mutation"
+      },
+      "requests": [
+        "GET /api/machines",
+        "GET /api/projects",
+        "GET /api/ai/gpu-alerts",
+        "GET /api/testlibrary/meta",
+        "GET /api/testlibrary?sheet=Director"
+      ],
+      "mutations": [],
+      "unknownReads": [],
+      "external": [],
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "theme": "light",
+      "zoom": 1.25,
+      "zoomEvidence": {
+        "status": "applied",
+        "requested": 1.25,
+        "actual": 1.25,
+        "tabId": 1110020427,
+        "settingsError": null,
+        "setZoomError": null,
+        "getZoomError": null,
+        "source": "chrome.tabs.setZoom + chrome.tabs.getZoom"
+      },
+      "requests": [
+        "GET /api/machines",
+        "GET /api/projects",
+        "GET /api/ai/gpu-alerts",
+        "GET /api/testlibrary/meta",
+        "GET /api/testlibrary?sheet=Director"
+      ],
+      "mutations": [],
+      "unknownReads": [],
+      "external": [],
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "theme": "dark",
+      "zoom": 1,
+      "zoomEvidence": {
+        "status": "default-100",
+        "requested": 1,
+        "actual": 1,
+        "source": "Fresh browser context with no zoom mutation"
+      },
+      "requests": [
+        "GET /api/machines",
+        "GET /api/projects",
+        "GET /api/ai/gpu-alerts",
+        "GET /api/testlibrary/meta",
+        "GET /api/testlibrary?sheet=Director"
+      ],
+      "mutations": [],
+      "unknownReads": [],
+      "external": [],
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "theme": "dark",
+      "zoom": 1.25,
+      "zoomEvidence": {
+        "status": "applied",
+        "requested": 1.25,
+        "actual": 1.25,
+        "tabId": 411246197,
+        "settingsError": null,
+        "setZoomError": null,
+        "getZoomError": null,
+        "source": "chrome.tabs.setZoom + chrome.tabs.getZoom"
+      },
+      "requests": [
+        "GET /api/machines",
+        "GET /api/projects",
+        "GET /api/ai/gpu-alerts",
+        "GET /api/testlibrary/meta",
+        "GET /api/testlibrary?sheet=Director"
+      ],
+      "mutations": [],
+      "unknownReads": [],
+      "external": [],
+      "pageErrors": [],
+      "consoleErrors": []
+    }
+  ],
+  "summary": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0,
+    "failed100": [],
+    "failed125": [],
+    "status": "PASS"
+  }
+}

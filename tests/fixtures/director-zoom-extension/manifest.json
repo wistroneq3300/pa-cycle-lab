@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Director Capture Browser Zoom Evidence",
+  "version": "1.0.0",
+  "description": "Test-only evidence bridge for real per-tab browser zoom.",
+  "permissions": ["tabs"],
+  "host_permissions": ["http://127.0.0.1/*"],
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://127.0.0.1/*"],
+      "js": ["content-script.js"],
+      "run_at": "document_start"
+    }
+  ]
+}

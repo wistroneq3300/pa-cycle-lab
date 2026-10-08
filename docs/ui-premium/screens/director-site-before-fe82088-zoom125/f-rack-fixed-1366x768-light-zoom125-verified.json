@@ -1,0 +1,147 @@
+{
+  "schema": "director-site-capture/v2",
+  "phase": "before-site-fe82088-zoom125",
+  "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+  "region": "Rack + CDU frozen surface",
+  "surfaceId": "S03",
+  "frozenMarker": "F-RACK",
+  "routeState": {
+    "route": "#/rack/Naboo",
+    "state": "Naboo / naboo-01 / front / zoom 1.120 / wiring visible",
+    "details": {
+      "rackYaw": "0.0000",
+      "rackPitch": "0.0000",
+      "rackDragging": "false",
+      "rackSelected": "naboo-01",
+      "rackCount": "39",
+      "rackOccupied": "38",
+      "rackInvalid": "0",
+      "rackView": "front",
+      "rackZoom": "1.120",
+      "rackFocus": "",
+      "rackModel": "gb300-inspired",
+      "rackVertices": "963306",
+      "rackNetworkRoutes": "69",
+      "rackNetworkVisible": "true",
+      "rackCameraDistance": "34.656",
+      "coolingMode": "external",
+      "flowAnimated": "false",
+      "decorativeAnimated": "false",
+      "pingAnimated": "false",
+      "rackState": "ready"
+    }
+  },
+  "app": {
+    "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-baseline-fe82088",
+    "commit": "fe8208867144b28f4e057606f5e2699b228a8056",
+    "dirty": false
+  },
+  "browser": {
+    "version": "154.0.4258.62",
+    "theme": "light",
+    "browserZoomRequested": 1.25,
+    "browserZoom": 1.25,
+    "browserZoomEvidence": {
+      "status": "applied",
+      "requested": 1.25,
+      "actual": 1.25,
+      "tabId": 147031493,
+      "settingsError": null,
+      "setZoomError": null,
+      "getZoomError": null,
+      "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+      "getZoomReturned": 1.25
+    },
+    "devicePixelRatio": 1.25,
+    "visualViewport": {
+      "width": 1092.800048828125,
+      "height": 614.4000244140625,
+      "scale": 1,
+      "offsetLeft": 0,
+      "offsetTop": 0
+    },
+    "osScaling": {
+      "status": "measured-registry",
+      "platform": "win32",
+      "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+      "appliedDpi": 192,
+      "scaleFactor": 2,
+      "percent": 200,
+      "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+    }
+  },
+  "viewportRequested": {
+    "width": 1366,
+    "height": 768
+  },
+  "viewportCss": {
+    "width": 1093,
+    "height": 614
+  },
+  "png": {
+    "file": "f-rack-fixed-1366x768-light-zoom125-verified.png",
+    "width": 1366,
+    "height": 768,
+    "sha256": "9798bb8eef08d39b19b2a57c028866929f2469adb822af92a26096d878d2c780"
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "externalRequests": [],
+  "unknownRequests": [],
+  "failedRequests": [],
+  "notices": [
+    {
+      "kind": "alert",
+      "message": "KVM 無法同步廣播\n\nDirector fake provider keeps every KVM connection offline.\n\n偵測結果：\n  SERVER-04U - RFB fixture / RFB\n  SERVER-03U - RFB fixture / RFB\n  SERVER-02U - RFB fixture / RFB\n  SERVER-01 - RFB fixture / RFB\n  SERVER-02 - RFB fixture / RFB\n  SERVER-03 - RFB fixture / RFB\n  SERVER-04 - RFB fixture / RFB\n  SERVER-05 - RFB fixture / RFB\n  SERVER-06 - RFB fixture / RFB\n  SERVER-07 - RFB fixture / RFB\n  SERVER-08 - RFB fixture / RFB\n  SERVER-09 - RFB fixture / RFB\n\n本頁仍會開啟，但只連線可同步的 RFB 系統。"
+    }
+  ],
+  "contrastAudit": {
+    "status": "partial",
+    "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+    "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+    "scope": "Own text nodes visibly intersecting the captured viewport",
+    "thresholds": {
+      "normalText": 4.5,
+      "largeText": 3,
+      "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+    },
+    "exclusions": [
+      "image/canvas/SVG/video",
+      "disabled or aria-disabled",
+      "opacity/filter/blend/backdrop effects",
+      "pseudo-element text"
+    ],
+    "limitations": [
+      "CSS background images/gradients are approximated using their computed backgroundColor layers."
+    ],
+    "counts": {
+      "scannedElements": 1059,
+      "auditedTextElements": 65,
+      "violations": 1,
+      "skippedNoOwnText": 678,
+      "skippedNotVisibleInViewport": 306,
+      "skippedMediaOrVector": 2,
+      "skippedDisabled": 0,
+      "approximatedComplexBackground": 60,
+      "skippedOpacityOrEffect": 8,
+      "skippedUnparsedColor": 0
+    },
+    "violations": [
+      {
+        "selector": "div.layout:nth-of-type(1) > main.main > div.content > div.rack-hero:nth-of-type(1) > label.rack-sel",
+        "text": "機櫃專案",
+        "ratio": 2.33,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(144, 168, 181)",
+        "background": "rgb(247, 248, 246)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      }
+    ],
+    "violationsTruncated": false
+  },
+  "gaps": [],
+  "capturedAt": "2026-10-08T04:00:00.000Z"
+}

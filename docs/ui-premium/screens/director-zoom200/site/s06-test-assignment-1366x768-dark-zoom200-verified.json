@@ -1,0 +1,190 @@
+{
+  "schema": "director-site-capture/v2",
+  "phase": "after-zoom200-content-reachability",
+  "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+  "region": "Test Case / Assignment",
+  "surfaceId": "S06",
+  "frozenMarker": null,
+  "routeState": {
+    "route": "#/machine/host_a",
+    "state": "first fixture case inspected and selected",
+    "details": {
+      "viewport": {
+        "width": 683,
+        "height": 384
+      },
+      "pageScroll": {
+        "x": 0,
+        "y": 0
+      },
+      "backdrop": {
+        "left": 0,
+        "top": 0,
+        "right": 683,
+        "bottom": 384,
+        "width": 683,
+        "height": 384
+      },
+      "dialog": {
+        "left": 12,
+        "top": 16,
+        "right": 671,
+        "bottom": 368,
+        "width": 659,
+        "height": 352
+      },
+      "body": {
+        "left": 13,
+        "top": 95,
+        "right": 670,
+        "bottom": 292,
+        "width": 657,
+        "height": 197
+      },
+      "footer": {
+        "left": 13,
+        "top": 292,
+        "right": 670,
+        "bottom": 367,
+        "width": 657,
+        "height": 75
+      },
+      "footerFullyInViewport": true,
+      "bodyScroll": {
+        "scrollTop": 185.5,
+        "scrollHeight": 383,
+        "clientHeight": 197
+      }
+    }
+  },
+  "app": {
+    "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+    "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+    "dirty": true
+  },
+  "browser": {
+    "version": "154.0.4258.62",
+    "theme": "dark",
+    "browserZoomRequested": 2,
+    "browserZoom": 2,
+    "browserZoomEvidence": {
+      "status": "applied",
+      "requested": 2,
+      "actual": 2,
+      "tabId": 467812287,
+      "settingsError": null,
+      "setZoomError": null,
+      "getZoomError": null,
+      "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+      "getZoomReturned": 2
+    },
+    "devicePixelRatio": 2,
+    "visualViewport": {
+      "width": 683,
+      "height": 384,
+      "scale": 1,
+      "offsetLeft": 0,
+      "offsetTop": 0
+    },
+    "osScaling": {
+      "status": "measured-registry",
+      "platform": "win32",
+      "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+      "appliedDpi": 192,
+      "scaleFactor": 2,
+      "percent": 200,
+      "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+    }
+  },
+  "viewportRequested": {
+    "width": 1366,
+    "height": 768
+  },
+  "viewportCss": {
+    "width": 683,
+    "height": 384
+  },
+  "png": {
+    "file": "s06-test-assignment-1366x768-dark-zoom200-verified.png",
+    "width": 1366,
+    "height": 768,
+    "sha256": "7f49821e6aeb9ca41e7815feb4d42ac9b062bd7cb23e0eed68e5dd11a2b45928"
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "externalRequests": [],
+  "unknownRequests": [],
+  "failedRequests": [],
+  "notices": [],
+  "reachability": {
+    "documentWidth": 683,
+    "bodyHorizontalOverflowPx": 0,
+    "visibleFocusableCount": 240,
+    "visibleFocusableInViewportCount": 20,
+    "primary": {
+      "selector": "#rm-dialog-foot button.primary",
+      "exists": true,
+      "visible": true,
+      "focusable": true,
+      "focused": true,
+      "inViewport": true,
+      "rect": {
+        "top": 311,
+        "right": 645,
+        "bottom": 349,
+        "left": 491,
+        "width": 154,
+        "height": 38
+      }
+    }
+  },
+  "contrastAudit": {
+    "status": "partial",
+    "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+    "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+    "scope": "Own text nodes visibly intersecting the captured viewport",
+    "thresholds": {
+      "normalText": 4.5,
+      "largeText": 3,
+      "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+    },
+    "exclusions": [
+      "image/canvas/SVG/video",
+      "disabled or aria-disabled",
+      "opacity/filter/blend/backdrop effects",
+      "pseudo-element text"
+    ],
+    "limitations": [
+      "CSS background images/gradients are approximated using their computed backgroundColor layers."
+    ],
+    "counts": {
+      "scannedElements": 2636,
+      "auditedTextElements": 48,
+      "violations": 1,
+      "skippedNoOwnText": 1368,
+      "skippedNotVisibleInViewport": 1203,
+      "skippedMediaOrVector": 2,
+      "skippedDisabled": 4,
+      "approximatedComplexBackground": 31,
+      "skippedOpacityOrEffect": 6,
+      "skippedUnparsedColor": 5
+    },
+    "violations": [
+      {
+        "selector": "body > div.modal-backdrop:nth-of-type(8) > div.modal.rm-modal > div.modal-foot.assign-action-footer:nth-of-type(3) > button.btn.btn-primary:nth-of-type(3)",
+        "text": "交給 PA Agent",
+        "ratio": 1.06,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 500,
+        "foreground": "rgb(23, 39, 13)",
+        "background": "rgb(18, 31, 40)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      }
+    ],
+    "violationsTruncated": false
+  },
+  "gaps": [],
+  "capturedAt": "2026-10-08T04:00:00.000Z"
+}

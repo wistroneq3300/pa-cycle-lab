@@ -1,0 +1,1285 @@
+{
+  "result": "PASS",
+  "failure": null,
+  "phase": "after",
+  "mode": "loopback synthetic fixtures; strict API allowlist; no hardware transport",
+  "appRoot": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+  "appSha": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+  "appDirty": true,
+  "branch": "codex/platform-premium-ui-v1",
+  "browser": "Microsoft Edge / Playwright persistent context",
+  "browserZoom": {
+    "requested": 2,
+    "evidence": {
+      "status": "applied",
+      "requested": 2,
+      "actual": 2,
+      "tabId": 1912428980,
+      "settingsError": null,
+      "setZoomError": null,
+      "getZoomError": null,
+      "source": "chrome.tabs.setZoom + chrome.tabs.getZoom"
+    },
+    "method": "MV3 chrome.tabs.setZoom + chrome.tabs.getZoom",
+    "deviceScaleFactor": 1
+  },
+  "os": {
+    "platform": "win32",
+    "release": "10.0.26200",
+    "scaling": {
+      "source": "HKCU\\Control Panel\\Desktop\\WindowMetrics\\AppliedDPI",
+      "appliedDpi": 192,
+      "registryPercent": 200,
+      "limitation": "Registry evidence only; it does not prove the physical display used for a future presentation.",
+      "raw": "HKEY_CURRENT_USER\\Control Panel\\Desktop\\WindowMetrics\r\n    AppliedDPI    REG_DWORD    0xc0"
+    }
+  },
+  "requestedViewports": [
+    {
+      "width": 1366,
+      "height": 768
+    },
+    {
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "fixtures": [
+    1,
+    4,
+    32,
+    128
+  ],
+  "fixtureChecks": [
+    {
+      "count": 1,
+      "label": "1 NODE",
+      "summaryRowCount": 0,
+      "verifiedRowCount": 6,
+      "eventView": "full (Summary legitimately had no noteworthy rows)",
+      "strictLabel": true
+    },
+    {
+      "count": 4,
+      "label": "4 NODES",
+      "summaryRowCount": 0,
+      "verifiedRowCount": 21,
+      "eventView": "full (Summary legitimately had no noteworthy rows)",
+      "strictLabel": true
+    },
+    {
+      "count": 32,
+      "label": "32 NODES",
+      "summaryRowCount": 0,
+      "verifiedRowCount": 145,
+      "eventView": "full (Summary legitimately had no noteworthy rows)",
+      "strictLabel": true
+    },
+    {
+      "count": 128,
+      "label": "128 NODES",
+      "summaryRowCount": 0,
+      "verifiedRowCount": 500,
+      "eventView": "full (Summary legitimately had no noteworthy rows)",
+      "strictLabel": true
+    }
+  ],
+  "captures": [
+    {
+      "file": "create-1366-light.png",
+      "sha256": "e41730ed96da0eea832949e3d2c874ab9d97310bf77b27b0ad9b5daeb2d63dea",
+      "screenshotPixels": {
+        "width": 1366,
+        "height": 768
+      },
+      "requestedViewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "theme": "light",
+      "browserZoomRequested": 2,
+      "browserZoomActual": 2,
+      "measurement": {
+        "window": {
+          "innerWidth": 683,
+          "innerHeight": 384,
+          "outerWidth": 1366,
+          "outerHeight": 768,
+          "devicePixelRatio": 2
+        },
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "documentWidth": 683,
+        "bodyHorizontalOverflow": false,
+        "controls": [
+          {
+            "selector": "#cw-create",
+            "exists": true,
+            "rect": {
+              "top": 265.97,
+              "right": 673,
+              "bottom": 314.77,
+              "left": 495.21,
+              "width": 177.79,
+              "height": 48.8
+            },
+            "inViewport": true
+          },
+          {
+            "selector": "#cw-visible",
+            "exists": true,
+            "rect": {
+              "top": -161.8,
+              "right": 354,
+              "bottom": -120.6,
+              "left": 250,
+              "width": 104,
+              "height": 41.2
+            },
+            "inViewport": false
+          },
+          {
+            "selector": "#cw-limit-value",
+            "exists": true,
+            "rect": {
+              "top": -947.74,
+              "right": 673,
+              "bottom": -905.34,
+              "left": 353.5,
+              "width": 319.5,
+              "height": 42.4
+            },
+            "inViewport": false
+          }
+        ]
+      }
+    },
+    {
+      "file": "create-1366-dark.png",
+      "sha256": "a1cfaef51b0670ae671c67e027414148dd81acdf8241ebb500ab60a02b4e6abd",
+      "screenshotPixels": {
+        "width": 1366,
+        "height": 768
+      },
+      "requestedViewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "theme": "dark",
+      "browserZoomRequested": 2,
+      "browserZoomActual": 2,
+      "measurement": {
+        "window": {
+          "innerWidth": 683,
+          "innerHeight": 384,
+          "outerWidth": 1366,
+          "outerHeight": 768,
+          "devicePixelRatio": 2
+        },
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "documentWidth": 683,
+        "bodyHorizontalOverflow": false,
+        "controls": [
+          {
+            "selector": "#cw-create",
+            "exists": true,
+            "rect": {
+              "top": 265.97,
+              "right": 673,
+              "bottom": 314.77,
+              "left": 495.21,
+              "width": 177.79,
+              "height": 48.8
+            },
+            "inViewport": true
+          },
+          {
+            "selector": "#cw-visible",
+            "exists": true,
+            "rect": {
+              "top": -161.8,
+              "right": 354,
+              "bottom": -120.6,
+              "left": 250,
+              "width": 104,
+              "height": 41.2
+            },
+            "inViewport": false
+          },
+          {
+            "selector": "#cw-limit-value",
+            "exists": true,
+            "rect": {
+              "top": -947.74,
+              "right": 673,
+              "bottom": -905.34,
+              "left": 353.5,
+              "width": 319.5,
+              "height": 42.4
+            },
+            "inViewport": false
+          }
+        ]
+      }
+    },
+    {
+      "file": "create-1920-light.png",
+      "sha256": "640cd6fcdc7f8df0286960693cdd28acc08e7c1b0c3bee2517620392ac8c13e6",
+      "screenshotPixels": {
+        "width": 1920,
+        "height": 1080
+      },
+      "requestedViewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "browserZoomRequested": 2,
+      "browserZoomActual": 2,
+      "measurement": {
+        "window": {
+          "innerWidth": 960,
+          "innerHeight": 540,
+          "outerWidth": 1920,
+          "outerHeight": 1080,
+          "devicePixelRatio": 2
+        },
+        "visualViewport": {
+          "width": 960,
+          "height": 540,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "documentWidth": 960,
+        "bodyHorizontalOverflow": false,
+        "controls": [
+          {
+            "selector": "#cw-create",
+            "exists": true,
+            "rect": {
+              "top": 426.97,
+              "right": 933,
+              "bottom": 475.77,
+              "left": 755.21,
+              "width": 177.79,
+              "height": 48.8
+            },
+            "inViewport": true
+          },
+          {
+            "selector": "#cw-visible",
+            "exists": true,
+            "rect": {
+              "top": -0.8,
+              "right": 569,
+              "bottom": 40.4,
+              "left": 465,
+              "width": 104,
+              "height": 41.2
+            },
+            "inViewport": false
+          },
+          {
+            "selector": "#cw-limit-value",
+            "exists": true,
+            "rect": {
+              "top": -786.74,
+              "right": 933,
+              "bottom": -744.34,
+              "left": 591,
+              "width": 342,
+              "height": 42.4
+            },
+            "inViewport": false
+          }
+        ]
+      }
+    },
+    {
+      "file": "create-1920-dark.png",
+      "sha256": "cf452bc2dc8fa9faacfa21e4f3fd3daef552049533708bbf4501a4bd754fbf6a",
+      "screenshotPixels": {
+        "width": 1920,
+        "height": 1080
+      },
+      "requestedViewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "browserZoomRequested": 2,
+      "browserZoomActual": 2,
+      "measurement": {
+        "window": {
+          "innerWidth": 960,
+          "innerHeight": 540,
+          "outerWidth": 1920,
+          "outerHeight": 1080,
+          "devicePixelRatio": 2
+        },
+        "visualViewport": {
+          "width": 960,
+          "height": 540,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "documentWidth": 960,
+        "bodyHorizontalOverflow": false,
+        "controls": [
+          {
+            "selector": "#cw-create",
+            "exists": true,
+            "rect": {
+              "top": 426.97,
+              "right": 933,
+              "bottom": 475.77,
+              "left": 755.21,
+              "width": 177.79,
+              "height": 48.8
+            },
+            "inViewport": true
+          },
+          {
+            "selector": "#cw-visible",
+            "exists": true,
+            "rect": {
+              "top": -0.8,
+              "right": 569,
+              "bottom": 40.4,
+              "left": 465,
+              "width": 104,
+              "height": 41.2
+            },
+            "inViewport": false
+          },
+          {
+            "selector": "#cw-limit-value",
+            "exists": true,
+            "rect": {
+              "top": -786.74,
+              "right": 933,
+              "bottom": -744.34,
+              "left": 591,
+              "width": 342,
+              "height": 42.4
+            },
+            "inViewport": false
+          }
+        ]
+      }
+    },
+    {
+      "file": "pre-confirm-1366-light.png",
+      "sha256": "4227692e50b3e3721846b32562e4bea61967278e41b4534ec3f638886bdf7b44",
+      "screenshotPixels": {
+        "width": 1366,
+        "height": 768
+      },
+      "requestedViewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "theme": "light",
+      "browserZoomRequested": 2,
+      "browserZoomActual": 2,
+      "measurement": {
+        "window": {
+          "innerWidth": 683,
+          "innerHeight": 384,
+          "outerWidth": 1366,
+          "outerHeight": 768,
+          "devicePixelRatio": 2
+        },
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "documentWidth": 683,
+        "bodyHorizontalOverflow": false,
+        "controls": [
+          {
+            "selector": "#cw-confirm",
+            "exists": true,
+            "rect": {
+              "top": 220.52,
+              "right": 639,
+              "bottom": 263.32,
+              "left": 369.43,
+              "width": 269.57,
+              "height": 42.8
+            },
+            "inViewport": true
+          },
+          {
+            "selector": "#cw-pre-shell",
+            "exists": true,
+            "rect": {
+              "top": -88.16,
+              "right": 673,
+              "bottom": 295.32,
+              "left": 10,
+              "width": 663,
+              "height": 383.48
+            },
+            "inViewport": false
+          }
+        ]
+      }
+    },
+    {
+      "file": "pre-confirm-1366-dark.png",
+      "sha256": "a75cc3686467263e5681983803dad5de11f4e015107b241237d4ddf0f43b503d",
+      "screenshotPixels": {
+        "width": 1366,
+        "height": 768
+      },
+      "requestedViewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "theme": "dark",
+      "browserZoomRequested": 2,
+      "browserZoomActual": 2,
+      "measurement": {
+        "window": {
+          "innerWidth": 683,
+          "innerHeight": 384,
+          "outerWidth": 1366,
+          "outerHeight": 768,
+          "devicePixelRatio": 2
+        },
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "documentWidth": 683,
+        "bodyHorizontalOverflow": false,
+        "controls": [
+          {
+            "selector": "#cw-confirm",
+            "exists": true,
+            "rect": {
+              "top": 220.52,
+              "right": 639,
+              "bottom": 263.32,
+              "left": 369.43,
+              "width": 269.57,
+              "height": 42.8
+            },
+            "inViewport": true
+          },
+          {
+            "selector": "#cw-pre-shell",
+            "exists": true,
+            "rect": {
+              "top": -88.16,
+              "right": 673,
+              "bottom": 295.32,
+              "left": 10,
+              "width": 663,
+              "height": 383.48
+            },
+            "inViewport": false
+          }
+        ]
+      }
+    },
+    {
+      "file": "pre-confirm-1920-light.png",
+      "sha256": "37dd9ff93b33ecdc8745f595a38968fd09a0d9d666c72033818b21898e1846de",
+      "screenshotPixels": {
+        "width": 1920,
+        "height": 1080
+      },
+      "requestedViewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "browserZoomRequested": 2,
+      "browserZoomActual": 2,
+      "measurement": {
+        "window": {
+          "innerWidth": 960,
+          "innerHeight": 540,
+          "outerWidth": 1920,
+          "outerHeight": 1080,
+          "devicePixelRatio": 2
+        },
+        "visualViewport": {
+          "width": 960,
+          "height": 540,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "documentWidth": 960,
+        "bodyHorizontalOverflow": false,
+        "controls": [
+          {
+            "selector": "#cw-confirm",
+            "exists": true,
+            "rect": {
+              "top": 182.52,
+              "right": 899,
+              "bottom": 225.32,
+              "left": 629.43,
+              "width": 269.57,
+              "height": 42.8
+            },
+            "inViewport": true
+          },
+          {
+            "selector": "#cw-pre-shell",
+            "exists": true,
+            "rect": {
+              "top": -126.16,
+              "right": 933,
+              "bottom": 257.32,
+              "left": 225,
+              "width": 708,
+              "height": 383.48
+            },
+            "inViewport": false
+          }
+        ]
+      }
+    },
+    {
+      "file": "pre-confirm-1920-dark.png",
+      "sha256": "8d5ca76e98a7999600f81430512056c7321df4a4d4a283cb31acb52c7d86b7a4",
+      "screenshotPixels": {
+        "width": 1920,
+        "height": 1080
+      },
+      "requestedViewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "browserZoomRequested": 2,
+      "browserZoomActual": 2,
+      "measurement": {
+        "window": {
+          "innerWidth": 960,
+          "innerHeight": 540,
+          "outerWidth": 1920,
+          "outerHeight": 1080,
+          "devicePixelRatio": 2
+        },
+        "visualViewport": {
+          "width": 960,
+          "height": 540,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "documentWidth": 960,
+        "bodyHorizontalOverflow": false,
+        "controls": [
+          {
+            "selector": "#cw-confirm",
+            "exists": true,
+            "rect": {
+              "top": 182.52,
+              "right": 899,
+              "bottom": 225.32,
+              "left": 629.43,
+              "width": 269.57,
+              "height": 42.8
+            },
+            "inViewport": true
+          },
+          {
+            "selector": "#cw-pre-shell",
+            "exists": true,
+            "rect": {
+              "top": -126.16,
+              "right": 933,
+              "bottom": 257.32,
+              "left": 225,
+              "width": 708,
+              "height": 383.48
+            },
+            "inViewport": false
+          }
+        ]
+      }
+    },
+    {
+      "file": "run-console-1366-light.png",
+      "sha256": "e18de73057ac4a4d49c6ba388dfa7614a8cd02dc9b5e8f0e90abc44e5cabd6cf",
+      "screenshotPixels": {
+        "width": 1366,
+        "height": 768
+      },
+      "requestedViewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "theme": "light",
+      "browserZoomRequested": 2,
+      "browserZoomActual": 2,
+      "measurement": {
+        "window": {
+          "innerWidth": 683,
+          "innerHeight": 384,
+          "outerWidth": 1366,
+          "outerHeight": 768,
+          "devicePixelRatio": 2
+        },
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "documentWidth": 683,
+        "bodyHorizontalOverflow": false,
+        "controls": [
+          {
+            "selector": ".live-console [data-part=download]",
+            "exists": true,
+            "rect": {
+              "top": 225.21,
+              "right": 227,
+              "bottom": 259.21,
+              "left": 133,
+              "width": 94,
+              "height": 34
+            },
+            "inViewport": true
+          },
+          {
+            "selector": "#cw-console-toggle",
+            "exists": true,
+            "rect": {
+              "top": -552.52,
+              "right": 319.39,
+              "bottom": -509.72,
+              "left": 184,
+              "width": 135.39,
+              "height": 42.8
+            },
+            "inViewport": false
+          },
+          {
+            "selector": ".live-console [data-part=copy]",
+            "exists": true,
+            "rect": {
+              "top": 225.21,
+              "right": 125,
+              "bottom": 259.21,
+              "left": 31,
+              "width": 94,
+              "height": 34
+            },
+            "inViewport": true
+          }
+        ]
+      }
+    },
+    {
+      "file": "run-console-1366-dark.png",
+      "sha256": "992e1bf0d557b60174c58c40710dd3572516173363b7fa84d0ef25ad1b8ebee3",
+      "screenshotPixels": {
+        "width": 1366,
+        "height": 768
+      },
+      "requestedViewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "theme": "dark",
+      "browserZoomRequested": 2,
+      "browserZoomActual": 2,
+      "measurement": {
+        "window": {
+          "innerWidth": 683,
+          "innerHeight": 384,
+          "outerWidth": 1366,
+          "outerHeight": 768,
+          "devicePixelRatio": 2
+        },
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "documentWidth": 683,
+        "bodyHorizontalOverflow": false,
+        "controls": [
+          {
+            "selector": ".live-console [data-part=download]",
+            "exists": true,
+            "rect": {
+              "top": 225.21,
+              "right": 227,
+              "bottom": 259.21,
+              "left": 133,
+              "width": 94,
+              "height": 34
+            },
+            "inViewport": true
+          },
+          {
+            "selector": "#cw-console-toggle",
+            "exists": true,
+            "rect": {
+              "top": -552.52,
+              "right": 319.39,
+              "bottom": -509.72,
+              "left": 184,
+              "width": 135.39,
+              "height": 42.8
+            },
+            "inViewport": false
+          },
+          {
+            "selector": ".live-console [data-part=copy]",
+            "exists": true,
+            "rect": {
+              "top": 225.21,
+              "right": 125,
+              "bottom": 259.21,
+              "left": 31,
+              "width": 94,
+              "height": 34
+            },
+            "inViewport": true
+          }
+        ]
+      }
+    },
+    {
+      "file": "run-console-1920-light.png",
+      "sha256": "46959b9c6ce3c2ec6ed77e0cfa3c4d8a77c006f444d6e40230b1d724572cc030",
+      "screenshotPixels": {
+        "width": 1920,
+        "height": 1080
+      },
+      "requestedViewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "browserZoomRequested": 2,
+      "browserZoomActual": 2,
+      "measurement": {
+        "window": {
+          "innerWidth": 960,
+          "innerHeight": 540,
+          "outerWidth": 1920,
+          "outerHeight": 1080,
+          "devicePixelRatio": 2
+        },
+        "visualViewport": {
+          "width": 960,
+          "height": 540,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "documentWidth": 960,
+        "bodyHorizontalOverflow": false,
+        "controls": [
+          {
+            "selector": ".live-console [data-part=download]",
+            "exists": true,
+            "rect": {
+              "top": 156.02,
+              "right": 442,
+              "bottom": 190.02,
+              "left": 348,
+              "width": 94,
+              "height": 34
+            },
+            "inViewport": true
+          },
+          {
+            "selector": "#cw-console-toggle",
+            "exists": true,
+            "rect": {
+              "top": -590.52,
+              "right": 534.39,
+              "bottom": -547.72,
+              "left": 399,
+              "width": 135.39,
+              "height": 42.8
+            },
+            "inViewport": false
+          },
+          {
+            "selector": ".live-console [data-part=copy]",
+            "exists": true,
+            "rect": {
+              "top": 156.02,
+              "right": 340,
+              "bottom": 190.02,
+              "left": 246,
+              "width": 94,
+              "height": 34
+            },
+            "inViewport": true
+          }
+        ]
+      }
+    },
+    {
+      "file": "run-console-1920-dark.png",
+      "sha256": "3428ce12b8d3f269e11ff6ebe72afc534ff5855d346d85a779e0857aa0ddab66",
+      "screenshotPixels": {
+        "width": 1920,
+        "height": 1080
+      },
+      "requestedViewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "browserZoomRequested": 2,
+      "browserZoomActual": 2,
+      "measurement": {
+        "window": {
+          "innerWidth": 960,
+          "innerHeight": 540,
+          "outerWidth": 1920,
+          "outerHeight": 1080,
+          "devicePixelRatio": 2
+        },
+        "visualViewport": {
+          "width": 960,
+          "height": 540,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "documentWidth": 960,
+        "bodyHorizontalOverflow": false,
+        "controls": [
+          {
+            "selector": ".live-console [data-part=download]",
+            "exists": true,
+            "rect": {
+              "top": 156.02,
+              "right": 442,
+              "bottom": 190.02,
+              "left": 348,
+              "width": 94,
+              "height": 34
+            },
+            "inViewport": true
+          },
+          {
+            "selector": "#cw-console-toggle",
+            "exists": true,
+            "rect": {
+              "top": -590.52,
+              "right": 534.39,
+              "bottom": -547.72,
+              "left": 399,
+              "width": 135.39,
+              "height": 42.8
+            },
+            "inViewport": false
+          },
+          {
+            "selector": ".live-console [data-part=copy]",
+            "exists": true,
+            "rect": {
+              "top": 156.02,
+              "right": 340,
+              "bottom": 190.02,
+              "left": 246,
+              "width": 94,
+              "height": 34
+            },
+            "inViewport": true
+          }
+        ]
+      }
+    },
+    {
+      "file": "evidence-1366-light.png",
+      "sha256": "2c5d2622ca5dce04f4bf01bfe62a25d2ebbc75eb1f71b6fb903209f970423b3a",
+      "screenshotPixels": {
+        "width": 1366,
+        "height": 768
+      },
+      "requestedViewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "theme": "light",
+      "browserZoomRequested": 2,
+      "browserZoomActual": 2,
+      "measurement": {
+        "window": {
+          "innerWidth": 683,
+          "innerHeight": 384,
+          "outerWidth": 1366,
+          "outerHeight": 768,
+          "devicePixelRatio": 2
+        },
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "documentWidth": 683,
+        "bodyHorizontalOverflow": false,
+        "controls": [
+          {
+            "selector": "#cw-evidence",
+            "exists": true,
+            "rect": {
+              "top": 220.4,
+              "right": 146,
+              "bottom": 263.2,
+              "left": 10,
+              "width": 136,
+              "height": 42.8
+            },
+            "inViewport": true
+          },
+          {
+            "selector": "#cw-files a",
+            "exists": true,
+            "rect": {
+              "top": 473.98,
+              "right": 329.5,
+              "bottom": 537.38,
+              "left": 10,
+              "width": 319.5,
+              "height": 63.39
+            },
+            "inViewport": false
+          }
+        ]
+      }
+    },
+    {
+      "file": "evidence-1366-dark.png",
+      "sha256": "d8a1e893824807bb25b8b756eb35f99ebdeb5d9352875fe551b8d935b6360162",
+      "screenshotPixels": {
+        "width": 1366,
+        "height": 768
+      },
+      "requestedViewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "theme": "dark",
+      "browserZoomRequested": 2,
+      "browserZoomActual": 2,
+      "measurement": {
+        "window": {
+          "innerWidth": 683,
+          "innerHeight": 384,
+          "outerWidth": 1366,
+          "outerHeight": 768,
+          "devicePixelRatio": 2
+        },
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "documentWidth": 683,
+        "bodyHorizontalOverflow": false,
+        "controls": [
+          {
+            "selector": "#cw-evidence",
+            "exists": true,
+            "rect": {
+              "top": 220.4,
+              "right": 146,
+              "bottom": 263.2,
+              "left": 10,
+              "width": 136,
+              "height": 42.8
+            },
+            "inViewport": true
+          },
+          {
+            "selector": "#cw-files a",
+            "exists": true,
+            "rect": {
+              "top": 473.98,
+              "right": 329.5,
+              "bottom": 537.38,
+              "left": 10,
+              "width": 319.5,
+              "height": 63.39
+            },
+            "inViewport": false
+          }
+        ]
+      }
+    },
+    {
+      "file": "evidence-1920-light.png",
+      "sha256": "b3c36566fc582602f0b7dfe6be7a87fe4c3dd6f9107a5363d61eaa262ae6388c",
+      "screenshotPixels": {
+        "width": 1920,
+        "height": 1080
+      },
+      "requestedViewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "browserZoomRequested": 2,
+      "browserZoomActual": 2,
+      "measurement": {
+        "window": {
+          "innerWidth": 960,
+          "innerHeight": 540,
+          "outerWidth": 1920,
+          "outerHeight": 1080,
+          "devicePixelRatio": 2
+        },
+        "visualViewport": {
+          "width": 960,
+          "height": 540,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "documentWidth": 960,
+        "bodyHorizontalOverflow": false,
+        "controls": [
+          {
+            "selector": "#cw-evidence",
+            "exists": true,
+            "rect": {
+              "top": 143.48,
+              "right": 361,
+              "bottom": 186.27,
+              "left": 225,
+              "width": 136,
+              "height": 42.8
+            },
+            "inViewport": true
+          },
+          {
+            "selector": "#cw-files a",
+            "exists": true,
+            "rect": {
+              "top": 397.06,
+              "right": 567,
+              "bottom": 460.45,
+              "left": 225,
+              "width": 342,
+              "height": 63.39
+            },
+            "inViewport": true
+          }
+        ]
+      }
+    },
+    {
+      "file": "evidence-1920-dark.png",
+      "sha256": "9d2563ad7849da2ad0d77a50ece14c0455eb392257e37502061144aa98541d50",
+      "screenshotPixels": {
+        "width": 1920,
+        "height": 1080
+      },
+      "requestedViewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "browserZoomRequested": 2,
+      "browserZoomActual": 2,
+      "measurement": {
+        "window": {
+          "innerWidth": 960,
+          "innerHeight": 540,
+          "outerWidth": 1920,
+          "outerHeight": 1080,
+          "devicePixelRatio": 2
+        },
+        "visualViewport": {
+          "width": 960,
+          "height": 540,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "documentWidth": 960,
+        "bodyHorizontalOverflow": false,
+        "controls": [
+          {
+            "selector": "#cw-evidence",
+            "exists": true,
+            "rect": {
+              "top": 143.48,
+              "right": 361,
+              "bottom": 186.27,
+              "left": 225,
+              "width": 136,
+              "height": 42.8
+            },
+            "inViewport": true
+          },
+          {
+            "selector": "#cw-files a",
+            "exists": true,
+            "rect": {
+              "top": 397.06,
+              "right": 567,
+              "bottom": 460.45,
+              "left": 225,
+              "width": 342,
+              "height": 63.39
+            },
+            "inViewport": true
+          }
+        ]
+      }
+    }
+  ],
+  "mutations": [
+    {
+      "action": "create",
+      "method": "POST",
+      "path": "/api/cycle/runs",
+      "body": {
+        "project": "Neutrino Demo",
+        "machine_ids": [
+          "bae4e58d-c3859a4590975b4c98314c57ec0a33c6",
+          "bae4e58d-16dcd2180fe55aa88ab2c09b0d3179df",
+          "bae4e58d-4aa97f460cb85f8da7a4bb9a88b4f87d",
+          "bae4e58d-5ef03184c29757d88ce8bcfdc423bb0e"
+        ],
+        "cycle_profile": "neutrino",
+        "cycle_mode": "reboot",
+        "channel": "inband",
+        "limits": {
+          "loops": 2,
+          "hours": 0
+        },
+        "idempotency_key": "7efba4c2-0e09-4a83-9a86-29115570a4a4"
+      }
+    },
+    {
+      "action": "confirm",
+      "method": "POST",
+      "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261008_152859_e726bb/confirm",
+      "body": {
+        "version": "director-evidence-pre-v1",
+        "machine_ids": [
+          "bae4e58d-c3859a4590975b4c98314c57ec0a33c6",
+          "bae4e58d-16dcd2180fe55aa88ab2c09b0d3179df",
+          "bae4e58d-4aa97f460cb85f8da7a4bb9a88b4f87d",
+          "bae4e58d-5ef03184c29757d88ce8bcfdc423bb0e"
+        ]
+      }
+    }
+  ],
+  "allowedPassThrough": [
+    {
+      "method": "GET",
+      "path": "/api/machines"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects"
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/gpu-alerts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261008_152859_e726bb/console-summary"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261008_152859_e726bb/events"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261008_152859_e726bb/events"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261008_152859_e726bb/events"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261008_152859_543b1f/console-summary"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261008_152859_543b1f/events"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261008_152859_e726bb/console-summary"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261008_152859_e726bb/events"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261008_152900_cb12ec/console-summary"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261008_152900_cb12ec/events"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261008_152901_a24ac4/console-summary"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/Neutrino%20Demo/cycle/jobs/neutrino_demo_power_cycle_outband_20261008_152901_a24ac4/events"
+    }
+  ],
+  "unknownRequests": [],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "assets": {
+    "app/static/js/cycle-workspace.js": "ef971fcd99b612a91a2ea19df122808291ec1f86e94f1240a27fc6946cc687d8",
+    "app/static/js/cycle-console.js": "eea0d32c3b283a7ced2c99771ed570940898220611789fae67a70c7162000186",
+    "app/static/js/cycle-fleet.js": "746991dc7f8e8d81324d3cbf2bb32553ac96874488d8bd85ee891324ff988887",
+    "app/static/css/cycle-workspace.css": "a3096a9e0b450be246d76409056c252c461317ca87c522d193271c5c6febd11a",
+    "app/static/css/validation-console.css": "6f7849623cae557ed9c517f2bb2f04f42183a6210f7e71b30339810287ac7e2a"
+  },
+  "baselineCurrentAcceptanceComparison": null,
+  "generatedAt": "2026-10-08T07:29:18.739Z"
+}

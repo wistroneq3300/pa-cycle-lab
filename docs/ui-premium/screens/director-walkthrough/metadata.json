@@ -1,0 +1,303 @@
+{
+  "schema": "director-walkthrough/v1",
+  "result": "FAIL",
+  "mode": "strict loopback synthetic fixtures; no hardware transport",
+  "app": {
+    "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+    "sha": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+    "dirty": true
+  },
+  "browser": {
+    "name": "Microsoft Edge via Playwright",
+    "version": "154.0.4258.62",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "deviceScaleFactor": 1
+  },
+  "staticServer": {
+    "host": "127.0.0.1",
+    "ephemeralPort": true,
+    "unknownRequests": []
+  },
+  "cycleSeed": {
+    "origin": "http://127.0.0.1:19520",
+    "endpoint": "/__validation/campaign",
+    "mode": "synthetic"
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "status": "FAIL",
+      "steps": [
+        {
+          "name": "overview",
+          "status": "PASS",
+          "durationMs": 2357,
+          "details": null
+        },
+        {
+          "name": "theme-toggle",
+          "status": "PASS",
+          "durationMs": 360,
+          "details": {
+            "before": "dark",
+            "after": "light"
+          }
+        },
+        {
+          "name": "refresh-and-provider-reinstall",
+          "status": "PASS",
+          "durationMs": 2442,
+          "details": null
+        },
+        {
+          "name": "project-system-node-inventory",
+          "status": "PASS",
+          "durationMs": 1394,
+          "details": null
+        },
+        {
+          "name": "inspection-evidence-failure-reopen",
+          "status": "PASS",
+          "durationMs": 1806,
+          "details": null
+        },
+        {
+          "name": "telemetry-ready",
+          "status": "PASS",
+          "durationMs": 273,
+          "details": null
+        },
+        {
+          "name": "test-case-single-agent-go-done",
+          "status": "PASS",
+          "durationMs": 2941,
+          "details": null
+        },
+        {
+          "name": "agent-close-reopen",
+          "status": "PASS",
+          "durationMs": 609,
+          "details": null
+        },
+        {
+          "name": "test-case-multi-batch-no-agent",
+          "status": "FAIL",
+          "durationMs": 15347,
+          "error": "page.waitForFunction: Timeout 15000ms exceeded.\n    at C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:400:38\n    at async step (C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:280:27)\n    at async runRound (C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:393:5)\n    at async C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:507:63"
+        }
+      ],
+      "screenshots": [
+        {
+          "file": "round-1-evidence-error.png",
+          "sha256": "6a79fa97bfb064819676c5a5eedc99d7266d17ac3af22bf83b97e519f8b5e285",
+          "width": 1366,
+          "height": 768,
+          "route": "#/machine/host_a"
+        },
+        {
+          "file": "round-1-agent-done.png",
+          "sha256": "07b27f8b4a809434244d460abc10c6061a226d2fd289b0e0bb59bfe28c8a0d6a",
+          "width": 1366,
+          "height": 768,
+          "route": "#/machine/host_a"
+        }
+      ],
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "mutations": [],
+      "expectedFailures": [],
+      "notRun": [
+        "Remaining steps after the first failed step were not run in this round."
+      ],
+      "failure": "page.waitForFunction: Timeout 15000ms exceeded.\n    at C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:400:38\n    at async step (C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:280:27)\n    at async runRound (C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:393:5)\n    at async C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:507:63"
+    },
+    {
+      "round": 2,
+      "status": "FAIL",
+      "steps": [
+        {
+          "name": "overview",
+          "status": "PASS",
+          "durationMs": 810,
+          "details": null
+        },
+        {
+          "name": "theme-toggle",
+          "status": "PASS",
+          "durationMs": 762,
+          "details": {
+            "before": "dark",
+            "after": "light"
+          }
+        },
+        {
+          "name": "refresh-and-provider-reinstall",
+          "status": "PASS",
+          "durationMs": 1418,
+          "details": null
+        },
+        {
+          "name": "project-system-node-inventory",
+          "status": "PASS",
+          "durationMs": 1452,
+          "details": null
+        },
+        {
+          "name": "inspection-evidence-failure-reopen",
+          "status": "PASS",
+          "durationMs": 869,
+          "details": null
+        },
+        {
+          "name": "telemetry-ready",
+          "status": "PASS",
+          "durationMs": 113,
+          "details": null
+        },
+        {
+          "name": "test-case-single-agent-go-done",
+          "status": "PASS",
+          "durationMs": 2657,
+          "details": null
+        },
+        {
+          "name": "agent-close-reopen",
+          "status": "PASS",
+          "durationMs": 599,
+          "details": null
+        },
+        {
+          "name": "test-case-multi-batch-no-agent",
+          "status": "FAIL",
+          "durationMs": 15238,
+          "error": "page.waitForFunction: Timeout 15000ms exceeded.\n    at C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:400:38\n    at async step (C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:280:27)\n    at async runRound (C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:393:5)\n    at async C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:507:63"
+        }
+      ],
+      "screenshots": [
+        {
+          "file": "round-2-evidence-error.png",
+          "sha256": "6a79fa97bfb064819676c5a5eedc99d7266d17ac3af22bf83b97e519f8b5e285",
+          "width": 1366,
+          "height": 768,
+          "route": "#/machine/host_a"
+        },
+        {
+          "file": "round-2-agent-done.png",
+          "sha256": "fb7df77bb3c4f054e3b774c286222fcc79204639ec1782fbd964a8bf7db13d4e",
+          "width": 1366,
+          "height": 768,
+          "route": "#/machine/host_a"
+        }
+      ],
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "mutations": [],
+      "expectedFailures": [],
+      "notRun": [
+        "Remaining steps after the first failed step were not run in this round."
+      ],
+      "failure": "page.waitForFunction: Timeout 15000ms exceeded.\n    at C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:400:38\n    at async step (C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:280:27)\n    at async runRound (C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:393:5)\n    at async C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:507:63"
+    },
+    {
+      "round": 3,
+      "status": "FAIL",
+      "steps": [
+        {
+          "name": "overview",
+          "status": "PASS",
+          "durationMs": 819,
+          "details": null
+        },
+        {
+          "name": "theme-toggle",
+          "status": "PASS",
+          "durationMs": 737,
+          "details": {
+            "before": "dark",
+            "after": "light"
+          }
+        },
+        {
+          "name": "refresh-and-provider-reinstall",
+          "status": "PASS",
+          "durationMs": 1431,
+          "details": null
+        },
+        {
+          "name": "project-system-node-inventory",
+          "status": "PASS",
+          "durationMs": 1610,
+          "details": null
+        },
+        {
+          "name": "inspection-evidence-failure-reopen",
+          "status": "PASS",
+          "durationMs": 1059,
+          "details": null
+        },
+        {
+          "name": "telemetry-ready",
+          "status": "PASS",
+          "durationMs": 108,
+          "details": null
+        },
+        {
+          "name": "test-case-single-agent-go-done",
+          "status": "PASS",
+          "durationMs": 2578,
+          "details": null
+        },
+        {
+          "name": "agent-close-reopen",
+          "status": "PASS",
+          "durationMs": 611,
+          "details": null
+        },
+        {
+          "name": "test-case-multi-batch-no-agent",
+          "status": "FAIL",
+          "durationMs": 15239,
+          "error": "page.waitForFunction: Timeout 15000ms exceeded.\n    at C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:400:38\n    at async step (C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:280:27)\n    at async runRound (C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:393:5)\n    at async C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:507:63"
+        }
+      ],
+      "screenshots": [
+        {
+          "file": "round-3-evidence-error.png",
+          "sha256": "6a79fa97bfb064819676c5a5eedc99d7266d17ac3af22bf83b97e519f8b5e285",
+          "width": 1366,
+          "height": 768,
+          "route": "#/machine/host_a"
+        },
+        {
+          "file": "round-3-agent-done.png",
+          "sha256": "68166369fca03aebcbd129e6f094eff6e369fe8219caf39131fbef0e345ecf22",
+          "width": 1366,
+          "height": 768,
+          "route": "#/machine/host_a"
+        }
+      ],
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "mutations": [],
+      "expectedFailures": [],
+      "notRun": [
+        "Remaining steps after the first failed step were not run in this round."
+      ],
+      "failure": "page.waitForFunction: Timeout 15000ms exceeded.\n    at C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:400:38\n    at async step (C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:280:27)\n    at async runRound (C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:393:5)\n    at async C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\director-walkthrough-browser.cjs:507:63"
+    }
+  ],
+  "limitations": [
+    "This is synthetic UI acceptance, not real hardware end-to-end acceptance.",
+    "Physical display/projector, OS text-only 200%, and real OS per-monitor scaling remain unverified."
+  ],
+  "generatedAt": "2026-10-08T07:44:18.437Z"
+}

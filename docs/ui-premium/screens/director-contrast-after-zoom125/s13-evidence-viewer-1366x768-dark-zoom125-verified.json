@@ -1,0 +1,110 @@
+{
+  "schema": "director-site-capture/v2",
+  "phase": "contrast-after-zoom125",
+  "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+  "region": "Read-only evidence viewer",
+  "surfaceId": "S13",
+  "frozenMarker": null,
+  "routeState": {
+    "route": "#/machine/host_a",
+    "state": "saved inspection evidence loaded",
+    "details": null
+  },
+  "app": {
+    "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+    "commit": "b38646eb25607e8faa5d460077bbedbb2799bbcd",
+    "dirty": true
+  },
+  "browser": {
+    "version": "154.0.4258.62",
+    "theme": "dark",
+    "browserZoomRequested": 1.25,
+    "browserZoom": 1.25,
+    "browserZoomEvidence": {
+      "status": "applied",
+      "requested": 1.25,
+      "actual": 1.25,
+      "tabId": 1357306345,
+      "settingsError": null,
+      "setZoomError": null,
+      "getZoomError": null,
+      "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+      "getZoomReturned": 1.25
+    },
+    "devicePixelRatio": 1.25,
+    "visualViewport": {
+      "width": 1092.800048828125,
+      "height": 614.4000244140625,
+      "scale": 1,
+      "offsetLeft": 0,
+      "offsetTop": 0
+    },
+    "osScaling": {
+      "status": "measured-registry",
+      "platform": "win32",
+      "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+      "appliedDpi": 192,
+      "scaleFactor": 2,
+      "percent": 200,
+      "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+    }
+  },
+  "viewportRequested": {
+    "width": 1366,
+    "height": 768
+  },
+  "viewportCss": {
+    "width": 1093,
+    "height": 614
+  },
+  "png": {
+    "file": "s13-evidence-viewer-1366x768-dark-zoom125-verified.png",
+    "width": 1366,
+    "height": 768,
+    "sha256": "861b94a9c865d9dc1cc630c15cde342d20e189b87f1780202a84a3d299791232"
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "externalRequests": [],
+  "unknownRequests": [],
+  "failedRequests": [],
+  "notices": [],
+  "contrastAudit": {
+    "status": "partial",
+    "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+    "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+    "scope": "Own text nodes visibly intersecting the captured viewport",
+    "thresholds": {
+      "normalText": 4.5,
+      "largeText": 3,
+      "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+    },
+    "exclusions": [
+      "image/canvas/SVG/video",
+      "disabled or aria-disabled",
+      "opacity/filter/blend/backdrop effects",
+      "pseudo-element text"
+    ],
+    "limitations": [
+      "CSS background images/gradients are approximated using their computed backgroundColor layers."
+    ],
+    "counts": {
+      "scannedElements": 1307,
+      "auditedTextElements": 82,
+      "violations": 0,
+      "skippedNoOwnText": 754,
+      "skippedNotVisibleInViewport": 459,
+      "skippedMediaOrVector": 2,
+      "skippedDisabled": 3,
+      "approximatedComplexBackground": 76,
+      "skippedOpacityOrEffect": 7,
+      "skippedUnparsedColor": 0
+    },
+    "violations": [],
+    "violationsTruncated": false
+  },
+  "gaps": [
+    "Raw evidence viewer and SOP reference entry are captured. A Cycle report viewer is unavailable because S08 is not fixture-backed."
+  ],
+  "capturedAt": "2026-10-08T04:00:00.000Z"
+}

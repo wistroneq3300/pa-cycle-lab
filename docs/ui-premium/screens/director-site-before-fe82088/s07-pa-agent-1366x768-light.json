@@ -1,0 +1,345 @@
+{
+  "schema": "director-site-capture/v2",
+  "phase": "before-site-fe82088",
+  "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+  "region": "PA Agent",
+  "surfaceId": "S07",
+  "frozenMarker": null,
+  "routeState": {
+    "route": "#/machine/host_a",
+    "state": "existing WAITING_FOR_USER run; fake provider",
+    "details": null
+  },
+  "app": {
+    "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-baseline-fe82088",
+    "commit": "fe8208867144b28f4e057606f5e2699b228a8056",
+    "dirty": false
+  },
+  "browser": {
+    "version": "154.0.4258.62",
+    "theme": "light",
+    "browserZoomRequested": 1,
+    "browserZoom": 1,
+    "browserZoomEvidence": {
+      "status": "default-100",
+      "requested": 1,
+      "actual": 1,
+      "source": "Fresh browser context/profile with no zoom mutation",
+      "getZoomReturned": 1
+    },
+    "devicePixelRatio": 1,
+    "visualViewport": {
+      "width": 1366,
+      "height": 768,
+      "scale": 1,
+      "offsetLeft": 0,
+      "offsetTop": 0
+    },
+    "osScaling": {
+      "status": "measured-registry",
+      "platform": "win32",
+      "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+      "appliedDpi": 192,
+      "scaleFactor": 2,
+      "percent": 200,
+      "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+    }
+  },
+  "viewportRequested": {
+    "width": 1366,
+    "height": 768
+  },
+  "viewportCss": {
+    "width": 1366,
+    "height": 768
+  },
+  "png": {
+    "file": "s07-pa-agent-1366x768-light.png",
+    "width": 1366,
+    "height": 768,
+    "sha256": "12c23502e6ce64d4bb47b8afbffcb1aa5cf22696d8e51754c85e5e0f696c5c64"
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "externalRequests": [],
+  "unknownRequests": [],
+  "failedRequests": [],
+  "notices": [],
+  "contrastAudit": {
+    "status": "partial",
+    "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+    "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+    "scope": "Own text nodes visibly intersecting the captured viewport",
+    "thresholds": {
+      "normalText": 4.5,
+      "largeText": 3,
+      "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+    },
+    "exclusions": [
+      "image/canvas/SVG/video",
+      "disabled or aria-disabled",
+      "opacity/filter/blend/backdrop effects",
+      "pseudo-element text"
+    ],
+    "limitations": [
+      "CSS background images/gradients are approximated using their computed backgroundColor layers."
+    ],
+    "counts": {
+      "scannedElements": 2722,
+      "auditedTextElements": 139,
+      "violations": 20,
+      "skippedNoOwnText": 1402,
+      "skippedNotVisibleInViewport": 1162,
+      "skippedMediaOrVector": 2,
+      "skippedDisabled": 4,
+      "approximatedComplexBackground": 95,
+      "skippedOpacityOrEffect": 13,
+      "skippedUnparsedColor": 0
+    },
+    "violations": [
+      {
+        "selector": "div.pd-main > section.pd-tab-panel.is-active:nth-of-type(6) > div.pd-library-heading:nth-of-type(3) > h3 > span",
+        "text": "可用測項",
+        "ratio": 4.36,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(85, 116, 129)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "section.pd-tab-panel.is-active:nth-of-type(6) > div.pd-library-grid:nth-of-type(4) > button.pd-library-card.p-surface:nth-of-type(1) > div > b",
+        "text": "↗",
+        "ratio": 4.42,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(72, 120, 144)",
+        "background": "rgb(243, 246, 242)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "section.pd-tab-panel.is-active:nth-of-type(6) > div.pd-library-grid:nth-of-type(4) > button.pd-library-card.p-surface:nth-of-type(2) > div > b",
+        "text": "↗",
+        "ratio": 4.42,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(72, 120, 144)",
+        "background": "rgb(243, 246, 242)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "section.pd-tab-panel.is-active:nth-of-type(6) > div.pd-library-grid:nth-of-type(4) > button.pd-library-card.p-surface:nth-of-type(3) > div > b",
+        "text": "↗",
+        "ratio": 4.42,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(72, 120, 144)",
+        "background": "rgb(243, 246, 242)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > div.pd-operation-group:nth-of-type(2) > button.pd-operation.pd-operation-primary:nth-of-type(1) > span:nth-of-type(1)",
+        "text": "↗",
+        "ratio": 1.09,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(245, 250, 251)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > div.pd-operation-group:nth-of-type(2) > button.pd-operation.pd-operation-primary:nth-of-type(1) > span:nth-of-type(2)",
+        "text": "Terminal",
+        "ratio": 1.09,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(245, 250, 251)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > div.pd-operation-group:nth-of-type(2) > button.pd-operation.pd-operation-primary:nth-of-type(1) > b",
+        "text": "↗",
+        "ratio": 1.06,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(213, 237, 244)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > div.pd-operation-group:nth-of-type(2) > button.pd-operation:nth-of-type(2) > b",
+        "text": "↗",
+        "ratio": 3.75,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(92, 127, 143)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > details.pd-ops-disclosure.pd-settings:nth-of-type(1) > summary > b",
+        "text": "⌄",
+        "ratio": 3.32,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(104, 135, 154)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "aside.pd-operations.p-surface > details.pd-ops-disclosure.pd-settings:nth-of-type(1) > div > button.pd-operation.pd-rack-specification > b",
+        "text": "↗",
+        "ratio": 3.75,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(92, 127, 143)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > details.pd-ops-disclosure.pd-power-group:nth-of-type(2) > summary > b",
+        "text": "⌄",
+        "ratio": 3.32,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 12,
+        "fontWeight": 400,
+        "foreground": "rgb(104, 135, 154)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > div.pd-ops-context:nth-of-type(3) > div.pd-key-value:nth-of-type(1) > span",
+        "text": "專案層級",
+        "ratio": 4.26,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 9,
+        "fontWeight": 400,
+        "foreground": "rgb(90, 117, 130)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > div.pd-ops-context:nth-of-type(3) > div.pd-key-value:nth-of-type(2) > span",
+        "text": "設備類型",
+        "ratio": 4.26,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 9,
+        "fontWeight": 400,
+        "foreground": "rgb(90, 117, 130)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > div.pd-ops-context:nth-of-type(3) > div.pd-key-value:nth-of-type(3) > span",
+        "text": "運作時間",
+        "ratio": 4.26,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 9,
+        "fontWeight": 400,
+        "foreground": "rgb(90, 117, 130)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pd-workspace-grid:nth-of-type(2) > aside.pd-operations.p-surface > div.pd-refresh-action:nth-of-type(4) > button.pd-operation > b",
+        "text": "↗",
+        "ratio": 3.75,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(92, 127, 143)",
+        "background": "rgb(237, 240, 239)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "div.pa-drawer.open:nth-of-type(9) > aside.pa-drawer-panel > header.pa-drawer-head > div.pa-drawer-title > span.pa-drawer-ico",
+        "text": "PA",
+        "ratio": 1.02,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 700,
+        "foreground": "rgb(238, 246, 255)",
+        "background": "rgb(247, 248, 246)",
+        "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+      },
+      {
+        "selector": "#pa-drawer-status-text",
+        "text": "等待工程師確認",
+        "ratio": 1.9,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11,
+        "fontWeight": 400,
+        "foreground": "rgb(245, 166, 35)",
+        "background": "rgb(247, 248, 246)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "div.pa-drawer.open:nth-of-type(9) > aside.pa-drawer-panel > div.pa-summary:nth-of-type(1) > span.pa-sum-item:nth-of-type(4) > span.pa-sum-status.pa-status-wait",
+        "text": "等待工程師確認",
+        "ratio": 2.03,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 11.5,
+        "fontWeight": 600,
+        "foreground": "rgb(245, 166, 35)",
+        "background": "rgb(255, 255, 255)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "#pa-attach",
+        "text": "📎",
+        "ratio": 2.78,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 15,
+        "fontWeight": 400,
+        "foreground": "rgb(73, 97, 110)",
+        "background": "rgb(20, 22, 26)",
+        "backgroundApproximation": null
+      },
+      {
+        "selector": "#pa-msg-send",
+        "text": "送出",
+        "ratio": 2.63,
+        "threshold": 4.5,
+        "largeText": false,
+        "fontSizePx": 13,
+        "fontWeight": 600,
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(74, 163, 255)",
+        "backgroundApproximation": null
+      }
+    ],
+    "violationsTruncated": false
+  },
+  "gaps": [],
+  "capturedAt": "2026-10-08T04:00:00.000Z"
+}

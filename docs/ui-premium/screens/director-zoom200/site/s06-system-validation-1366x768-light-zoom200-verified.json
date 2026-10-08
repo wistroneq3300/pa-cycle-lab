@@ -1,0 +1,115 @@
+{
+  "schema": "director-site-capture/v2",
+  "phase": "after-zoom200-content-reachability",
+  "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+  "region": "System Validation",
+  "surfaceId": "S06",
+  "frozenMarker": null,
+  "routeState": {
+    "route": "#/machine/host_a",
+    "state": "host_a / Test Library entry",
+    "details": null
+  },
+  "app": {
+    "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+    "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+    "dirty": true
+  },
+  "browser": {
+    "version": "154.0.4258.62",
+    "theme": "light",
+    "browserZoomRequested": 2,
+    "browserZoom": 2,
+    "browserZoomEvidence": {
+      "status": "applied",
+      "requested": 2,
+      "actual": 2,
+      "tabId": 838481332,
+      "settingsError": null,
+      "setZoomError": null,
+      "getZoomError": null,
+      "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+      "getZoomReturned": 2
+    },
+    "devicePixelRatio": 2,
+    "visualViewport": {
+      "width": 683,
+      "height": 384,
+      "scale": 1,
+      "offsetLeft": 0,
+      "offsetTop": 0
+    },
+    "osScaling": {
+      "status": "measured-registry",
+      "platform": "win32",
+      "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+      "appliedDpi": 192,
+      "scaleFactor": 2,
+      "percent": 200,
+      "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+    }
+  },
+  "viewportRequested": {
+    "width": 1366,
+    "height": 768
+  },
+  "viewportCss": {
+    "width": 683,
+    "height": 384
+  },
+  "png": {
+    "file": "s06-system-validation-1366x768-light-zoom200-verified.png",
+    "width": 1366,
+    "height": 768,
+    "sha256": "fcdb02ba944cae6c5ab91284db706b06fe389cf83f848b028c28a347837c7fc6"
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "externalRequests": [],
+  "unknownRequests": [],
+  "failedRequests": [],
+  "notices": [],
+  "reachability": {
+    "documentWidth": 683,
+    "bodyHorizontalOverflowPx": 0,
+    "visibleFocusableCount": 32,
+    "visibleFocusableInViewportCount": 4,
+    "primary": null
+  },
+  "contrastAudit": {
+    "status": "partial",
+    "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+    "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+    "scope": "Own text nodes visibly intersecting the captured viewport",
+    "thresholds": {
+      "normalText": 4.5,
+      "largeText": 3,
+      "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+    },
+    "exclusions": [
+      "image/canvas/SVG/video",
+      "disabled or aria-disabled",
+      "opacity/filter/blend/backdrop effects",
+      "pseudo-element text"
+    ],
+    "limitations": [
+      "CSS background images/gradients are approximated using their computed backgroundColor layers."
+    ],
+    "counts": {
+      "scannedElements": 1522,
+      "auditedTextElements": 15,
+      "violations": 0,
+      "skippedNoOwnText": 826,
+      "skippedNotVisibleInViewport": 667,
+      "skippedMediaOrVector": 2,
+      "skippedDisabled": 3,
+      "approximatedComplexBackground": 24,
+      "skippedOpacityOrEffect": 9,
+      "skippedUnparsedColor": 0
+    },
+    "violations": [],
+    "violationsTruncated": false
+  },
+  "gaps": [],
+  "capturedAt": "2026-10-08T04:00:00.000Z"
+}

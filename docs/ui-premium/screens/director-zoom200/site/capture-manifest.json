@@ -1,0 +1,4167 @@
+{
+  "schema": "director-site-capture-manifest/v2",
+  "phase": "after-zoom200-content-reachability",
+  "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+  "app": {
+    "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+    "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+    "dirty": true
+  },
+  "browserVersions": [
+    "154.0.4258.62"
+  ],
+  "widths": [
+    1366
+  ],
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "browserZoomRequested": 2,
+  "zoomMethod": "MV3 chrome.tabs.setZoom/getZoom",
+  "osScaling": {
+    "status": "measured-registry",
+    "platform": "win32",
+    "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+    "appliedDpi": 192,
+    "scaleFactor": 2,
+    "percent": 200,
+    "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+  },
+  "fixture": "rack-network + explicit Director fake provider",
+  "hardwareDispatches": 0,
+  "contrastAudit": {
+    "status": "partial",
+    "standard": "WCAG 2.x contrast thresholds only; not a full WCAG audit",
+    "method": "Computed foreground over solid ancestor backgrounds with alpha composition"
+  },
+  "requestedCaptures": [
+    "s01",
+    "s04",
+    "s06",
+    "s07",
+    "s08",
+    "s09",
+    "s10",
+    "s11",
+    "s14",
+    "s15"
+  ],
+  "coverage": {
+    "S01": {
+      "status": "captured",
+      "surface": "Shell / sidebar / topbar"
+    },
+    "S02": {
+      "status": "captured",
+      "surface": "Overview and fixed Hero"
+    },
+    "S03": {
+      "status": "captured",
+      "surface": "Systems / Projects and fixed Rack"
+    },
+    "S04": {
+      "status": "captured",
+      "surface": "System detail / Nodes"
+    },
+    "S05": {
+      "status": "captured",
+      "surface": "Inventory / Sensors / Firmware"
+    },
+    "S06": {
+      "status": "captured",
+      "surface": "Validation / Test Case assignment"
+    },
+    "S07": {
+      "status": "captured",
+      "surface": "PA Agent"
+    },
+    "S08": {
+      "status": "partial",
+      "surface": "Cycle",
+      "reason": "Only the real Cycle entry is captured here. PRE / Console / Report require the separate strict synthetic Cycle harness; this static provider does not manufacture Cycle execution truth."
+    },
+    "S09": {
+      "status": "captured",
+      "surface": "Telemetry / Exporter"
+    },
+    "S10": {
+      "status": "captured",
+      "surface": "Inspection / AI / Evidence entry"
+    },
+    "S11": {
+      "status": "captured",
+      "surface": "Terminal / Broadcast / KVM frames"
+    },
+    "S12": {
+      "status": "partial",
+      "surface": "Modals / forms",
+      "reason": "One representative production connection form is captured; this is not an exhaustive modal inventory."
+    },
+    "S13": {
+      "status": "partial",
+      "surface": "Evidence / Report / SOP",
+      "reason": "Raw evidence viewer and SOP reference entry are captured. A Cycle report viewer is unavailable because S08 is not fixture-backed."
+    },
+    "S14": {
+      "status": "captured",
+      "surface": "User Guide"
+    },
+    "S15": {
+      "status": "captured",
+      "surface": "Topology"
+    }
+  },
+  "images": [
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "Application shell / sidebar / topbar",
+      "surfaceId": "S01",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/dashboard",
+        "state": "dashboard; rack-network preview",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "light",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 838481332,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s01-shell-1366x768-light-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "68ab84f43f9cc9e23c5e7c6ee3d68adc48b82858747b23e2ae4d75d1b93f35ee"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 18,
+        "visibleFocusableInViewportCount": 7,
+        "primary": {
+          "selector": ".nav-btn[data-view=\"projects\"]",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 8,
+            "right": 339,
+            "bottom": 52,
+            "left": 177,
+            "width": 162,
+            "height": 44
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 511,
+          "auditedTextElements": 8,
+          "violations": 0,
+          "skippedNoOwnText": 250,
+          "skippedNotVisibleInViewport": 249,
+          "skippedMediaOrVector": 0,
+          "skippedDisabled": 1,
+          "approximatedComplexBackground": 11,
+          "skippedOpacityOrEffect": 3,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "System detail",
+      "surfaceId": "S04",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "host_a / overview",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "light",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 838481332,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s04-system-overview-1366x768-light-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "37c6a9cc3c8d1f8cb1a68e6b5ead4dd024bd00e35decd57a9896dea0c80bc499"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 30,
+        "visibleFocusableInViewportCount": 9,
+        "primary": null
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 1193,
+          "auditedTextElements": 15,
+          "violations": 0,
+          "skippedNoOwnText": 714,
+          "skippedNotVisibleInViewport": 455,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 1,
+          "approximatedComplexBackground": 19,
+          "skippedOpacityOrEffect": 6,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "System detail / Nodes",
+      "surfaceId": "S04",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "host_a / OS slots; horizontal table end focused",
+        "details": {
+          "nodeReachability": {
+            "role": "region",
+            "tabIndex": 0,
+            "scrollLeft": 583,
+            "scrollWidth": 1204,
+            "clientWidth": 616,
+            "bodyHorizontalOverflowPx": 0,
+            "wrapperBox": {
+              "left": 31,
+              "top": 239.5078125,
+              "right": 652,
+              "bottom": 385.0078125,
+              "width": 621,
+              "height": 145.5
+            },
+            "actionCellBox": {
+              "left": 524,
+              "top": 273.5078125,
+              "right": 652,
+              "bottom": 367.5078125,
+              "width": 128,
+              "height": 94
+            },
+            "actionButtonBox": {
+              "left": 534,
+              "top": 322.5078125,
+              "right": 642,
+              "bottom": 358.5078125,
+              "width": 108,
+              "height": 36
+            },
+            "actionCellInsideWrapper": true,
+            "actionCellInsideViewport": true,
+            "actionButtonInsideWrapper": true,
+            "actionButtonInsideViewport": true
+          }
+        }
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "light",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 838481332,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s04-system-nodes-1366x768-light-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "fcdb02ba944cae6c5ab91284db706b06fe389cf83f848b028c28a347837c7fc6"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 40,
+        "visibleFocusableInViewportCount": 6,
+        "primary": {
+          "selector": "#pd-panel-osslots .pd-os-table-wrap tbody tr:last-child td:last-child button:last-child",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 322.51,
+            "right": 642,
+            "bottom": 358.51,
+            "left": 534,
+            "width": 108,
+            "height": 36
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 1256,
+          "auditedTextElements": 23,
+          "violations": 0,
+          "skippedNoOwnText": 737,
+          "skippedNotVisibleInViewport": 484,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 1,
+          "approximatedComplexBackground": 24,
+          "skippedOpacityOrEffect": 9,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "Inspection / AI / evidence entry",
+      "surfaceId": "S10",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "active synthetic issue expanded; AI complete",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "light",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 838481332,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s10-inspection-ai-1366x768-light-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "fcdb02ba944cae6c5ab91284db706b06fe389cf83f848b028c28a347837c7fc6"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 42,
+        "visibleFocusableInViewportCount": 3,
+        "primary": {
+          "selector": "[data-evidence-open]",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 223.96,
+            "right": 144,
+            "bottom": 259.76,
+            "left": 48,
+            "width": 96,
+            "height": 35.8
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 1290,
+          "auditedTextElements": 8,
+          "violations": 0,
+          "skippedNoOwnText": 747,
+          "skippedNotVisibleInViewport": 523,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 3,
+          "approximatedComplexBackground": 10,
+          "skippedOpacityOrEffect": 3,
+          "skippedUnparsedColor": 4
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "Telemetry / Exporter",
+      "surfaceId": "S09",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "host_a / director-node-1 / READY",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "light",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 838481332,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s09-telemetry-exporter-1366x768-light-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "fcdb02ba944cae6c5ab91284db706b06fe389cf83f848b028c28a347837c7fc6"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 31,
+        "visibleFocusableInViewportCount": 3,
+        "primary": {
+          "selector": "#pd-panel-telemetry select[data-node]",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 255.71,
+            "right": 271,
+            "bottom": 291.71,
+            "left": 31,
+            "width": 240,
+            "height": 36
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 1475,
+          "auditedTextElements": 15,
+          "violations": 0,
+          "skippedNoOwnText": 814,
+          "skippedNotVisibleInViewport": 632,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 3,
+          "approximatedComplexBackground": 24,
+          "skippedOpacityOrEffect": 9,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "System Validation",
+      "surfaceId": "S06",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "host_a / Test Library entry",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "light",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 838481332,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s06-system-validation-1366x768-light-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "fcdb02ba944cae6c5ab91284db706b06fe389cf83f848b028c28a347837c7fc6"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 32,
+        "visibleFocusableInViewportCount": 4,
+        "primary": null
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 1522,
+          "auditedTextElements": 15,
+          "violations": 0,
+          "skippedNoOwnText": 826,
+          "skippedNotVisibleInViewport": 667,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 3,
+          "approximatedComplexBackground": 24,
+          "skippedOpacityOrEffect": 9,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "Cycle entry from System Validation",
+      "surfaceId": "S08",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "host_a / Cycle entry visible; execution is covered by the strict Cycle harness",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "light",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 838481332,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s08-cycle-entry-1366x768-light-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "fcdb02ba944cae6c5ab91284db706b06fe389cf83f848b028c28a347837c7fc6"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 32,
+        "visibleFocusableInViewportCount": 4,
+        "primary": {
+          "selector": "#pd-panel-tasks .pd-task-intro button",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 256.71,
+            "right": 124.86,
+            "bottom": 296.21,
+            "left": 33,
+            "width": 91.86,
+            "height": 39.5
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 1522,
+          "auditedTextElements": 15,
+          "violations": 0,
+          "skippedNoOwnText": 826,
+          "skippedNotVisibleInViewport": 667,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 3,
+          "approximatedComplexBackground": 24,
+          "skippedOpacityOrEffect": 9,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [
+        "Only the real Cycle entry is captured here. PRE / Console / Report require the separate strict synthetic Cycle harness; this static provider does not manufacture Cycle execution truth."
+      ],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "Test Case / Assignment",
+      "surfaceId": "S06",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "first fixture case inspected and selected",
+        "details": {
+          "viewport": {
+            "width": 683,
+            "height": 384
+          },
+          "pageScroll": {
+            "x": 0,
+            "y": 0
+          },
+          "backdrop": {
+            "left": 0,
+            "top": 0,
+            "right": 683,
+            "bottom": 384,
+            "width": 683,
+            "height": 384
+          },
+          "dialog": {
+            "left": 12,
+            "top": 16,
+            "right": 671,
+            "bottom": 368,
+            "width": 659,
+            "height": 352
+          },
+          "body": {
+            "left": 13,
+            "top": 95,
+            "right": 670,
+            "bottom": 292,
+            "width": 657,
+            "height": 197
+          },
+          "footer": {
+            "left": 13,
+            "top": 292,
+            "right": 670,
+            "bottom": 367,
+            "width": 657,
+            "height": 75
+          },
+          "footerFullyInViewport": true,
+          "bodyScroll": {
+            "scrollTop": 185.5,
+            "scrollHeight": 383,
+            "clientHeight": 197
+          }
+        }
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "light",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 838481332,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s06-test-assignment-1366x768-light-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "c3c371ff85a54eb2702d0b1f700684ec5a51588c2e7b88af296d3c10a769b4ab"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 240,
+        "visibleFocusableInViewportCount": 20,
+        "primary": {
+          "selector": "#rm-dialog-foot button.primary",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 311,
+            "right": 645,
+            "bottom": 349,
+            "left": 491,
+            "width": 154,
+            "height": 38
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 2636,
+          "auditedTextElements": 48,
+          "violations": 3,
+          "skippedNoOwnText": 1368,
+          "skippedNotVisibleInViewport": 1203,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 4,
+          "approximatedComplexBackground": 31,
+          "skippedOpacityOrEffect": 6,
+          "skippedUnparsedColor": 5
+        },
+        "violations": [
+          {
+            "selector": "div.modal.rm-modal > div.modal-body:nth-of-type(2) > div > div.assign-toolbar:nth-of-type(1) > span.hint",
+            "text": "已選 /共 2291",
+            "ratio": 4.43,
+            "threshold": 4.5,
+            "largeText": false,
+            "fontSizePx": 11,
+            "fontWeight": 400,
+            "foreground": "rgb(89, 118, 132)",
+            "background": "rgb(243, 246, 241)",
+            "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+          },
+          {
+            "selector": "#assign-selcount",
+            "text": "1",
+            "ratio": 4.43,
+            "threshold": 4.5,
+            "largeText": false,
+            "fontSizePx": 11,
+            "fontWeight": 700,
+            "foreground": "rgb(89, 118, 132)",
+            "background": "rgb(243, 246, 241)",
+            "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+          },
+          {
+            "selector": "div.modal.rm-modal > div.modal-body:nth-of-type(2) > div > div.assign-pagination:nth-of-type(2) > span.hint",
+            "text": "第 1 / 23 頁 · 2291 項",
+            "ratio": 4.43,
+            "threshold": 4.5,
+            "largeText": false,
+            "fontSizePx": 11,
+            "fontWeight": 400,
+            "foreground": "rgb(89, 118, 132)",
+            "background": "rgb(243, 246, 241)",
+            "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+          }
+        ],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "PA Agent",
+      "surfaceId": "S07",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "existing WAITING_FOR_USER run; fake provider",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "light",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 838481332,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s07-pa-agent-1366x768-light-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "0776f9b0543cddffcb92880c635e6f7e41b16ec1b7d522d8dbbadc3c1cb43614"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 38,
+        "visibleFocusableInViewportCount": 14,
+        "primary": {
+          "selector": "#pa-msg-input",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 295.57,
+            "right": 542.34,
+            "bottom": 339.57,
+            "left": 74.66,
+            "width": 467.68,
+            "height": 44
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 2729,
+          "auditedTextElements": 60,
+          "violations": 0,
+          "skippedNoOwnText": 1405,
+          "skippedNotVisibleInViewport": 1252,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 4,
+          "approximatedComplexBackground": 19,
+          "skippedOpacityOrEffect": 6,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "Terminal frame",
+      "surfaceId": "S11",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "OS + BMC; preview WebSocket provider",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "light",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 838481332,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s11-terminal-frame-1366x768-light-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "d139dfc37a6e2f8a057bcb04f5a9e088cd704faab07a4975aeedcb249826b9ad"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 39,
+        "visibleFocusableInViewportCount": 16,
+        "primary": {
+          "selector": "#term-modal button",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 56.56,
+            "right": 256.55,
+            "bottom": 88.56,
+            "left": 224.55,
+            "width": 32,
+            "height": 32
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 2696,
+          "auditedTextElements": 34,
+          "violations": 4,
+          "skippedNoOwnText": 1410,
+          "skippedNotVisibleInViewport": 1238,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 4,
+          "approximatedComplexBackground": 26,
+          "skippedOpacityOrEffect": 8,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [
+          {
+            "selector": "div.modal-backdrop:nth-of-type(4) > div.modal.term-modal > div.term-drag-handle.term-head:nth-of-type(1) > div.modal-title > span.grip",
+            "text": "▦",
+            "ratio": 2.45,
+            "threshold": 4.5,
+            "largeText": false,
+            "fontSizePx": 13,
+            "fontWeight": 500,
+            "foreground": "rgb(136, 162, 177)",
+            "background": "rgb(243, 246, 241)",
+            "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+          },
+          {
+            "selector": "#term-max-btn",
+            "text": "⛶",
+            "ratio": 4.19,
+            "threshold": 4.5,
+            "largeText": false,
+            "fontSizePx": 15,
+            "fontWeight": 400,
+            "foreground": "rgb(84, 123, 142)",
+            "background": "rgb(243, 246, 241)",
+            "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+          },
+          {
+            "selector": "body > div.modal-backdrop:nth-of-type(4) > div.modal.term-modal > div.term-drag-handle.term-head:nth-of-type(1) > button.icon-btn:nth-of-type(2)",
+            "text": "✕",
+            "ratio": 4.19,
+            "threshold": 4.5,
+            "largeText": false,
+            "fontSizePx": 15,
+            "fontWeight": 400,
+            "foreground": "rgb(84, 123, 142)",
+            "background": "rgb(243, 246, 241)",
+            "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+          },
+          {
+            "selector": "#term-mode-both",
+            "text": "◫ 並排",
+            "ratio": 1.88,
+            "threshold": 4.5,
+            "largeText": false,
+            "fontSizePx": 12,
+            "fontWeight": 500,
+            "foreground": "rgb(52, 92, 111)",
+            "background": "rgb(23, 49, 63)",
+            "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+          }
+        ],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "Broadcast terminal frame",
+      "surfaceId": "S11",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "two systems; preview WebSocket provider",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "light",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 838481332,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s11-broadcast-frame-1366x768-light-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "592a5fa34af7eb5467b91d0f32fada11c7764789be994eb9e5eea84b31216782"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 39,
+        "visibleFocusableInViewportCount": 16,
+        "primary": {
+          "selector": "#bc-modal button",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 52.72,
+            "right": 219.69,
+            "bottom": 84.72,
+            "left": 187.69,
+            "width": 32,
+            "height": 32
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 2785,
+          "auditedTextElements": 35,
+          "violations": 5,
+          "skippedNoOwnText": 1476,
+          "skippedNotVisibleInViewport": 1260,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 4,
+          "approximatedComplexBackground": 27,
+          "skippedOpacityOrEffect": 8,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [
+          {
+            "selector": "#bc-max-btn",
+            "text": "⛶",
+            "ratio": 4.19,
+            "threshold": 4.5,
+            "largeText": false,
+            "fontSizePx": 15,
+            "fontWeight": 400,
+            "foreground": "rgb(84, 123, 142)",
+            "background": "rgb(243, 246, 241)",
+            "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+          },
+          {
+            "selector": "body > div.modal-backdrop:nth-of-type(5) > div.modal.bc-modal > div.term-drag-handle.bc-head:nth-of-type(1) > button.icon-btn:nth-of-type(2)",
+            "text": "✕",
+            "ratio": 4.19,
+            "threshold": 4.5,
+            "largeText": false,
+            "fontSizePx": 15,
+            "fontWeight": 400,
+            "foreground": "rgb(84, 123, 142)",
+            "background": "rgb(243, 246, 241)",
+            "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+          },
+          {
+            "selector": "#bc-grid-btn",
+            "text": "全部顯示",
+            "ratio": 1.88,
+            "threshold": 4.5,
+            "largeText": false,
+            "fontSizePx": 12,
+            "fontWeight": 500,
+            "foreground": "rgb(52, 92, 111)",
+            "background": "rgb(23, 49, 63)",
+            "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+          },
+          {
+            "selector": "#bc-bcast-on",
+            "text": "廣播全部",
+            "ratio": 1.88,
+            "threshold": 4.5,
+            "largeText": false,
+            "fontSizePx": 12,
+            "fontWeight": 500,
+            "foreground": "rgb(52, 92, 111)",
+            "background": "rgb(23, 49, 63)",
+            "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+          },
+          {
+            "selector": "#bc-bcast-off",
+            "text": "◈ 目前主機",
+            "ratio": 1.88,
+            "threshold": 4.5,
+            "largeText": false,
+            "fontSizePx": 12,
+            "fontWeight": 500,
+            "foreground": "rgb(52, 92, 111)",
+            "background": "rgb(23, 49, 63)",
+            "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+          }
+        ],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "KVM broadcast frame",
+      "surfaceId": "S11",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "explicit fake detector; every KVM offline; no RFB connection",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "light",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 838481332,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s11-kvm-frame-1366x768-light-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "78ef13d67c12c23a5a8bac63dcf890ac68eb8a594e1c33955ae349da08dcd468"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [
+        {
+          "kind": "alert",
+          "message": "KVM 無法同步廣播\n\nDirector fake provider keeps every KVM connection offline.\n\n偵測結果：\n  SERVER-04U - RFB fixture / RFB\n  SERVER-03U - RFB fixture / RFB\n  SERVER-02U - RFB fixture / RFB\n  SERVER-01 - RFB fixture / RFB\n  SERVER-02 - RFB fixture / RFB\n  SERVER-03 - RFB fixture / RFB\n  SERVER-04 - RFB fixture / RFB\n  SERVER-05 - RFB fixture / RFB\n  SERVER-06 - RFB fixture / RFB\n  SERVER-07 - RFB fixture / RFB\n  SERVER-08 - RFB fixture / RFB\n  SERVER-09 - RFB fixture / RFB\n\n本頁仍會開啟，但只連線可同步的 RFB 系統。"
+        }
+      ],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 43,
+        "visibleFocusableInViewportCount": 20,
+        "primary": {
+          "selector": "#kvm-overlay button",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 64.5,
+            "right": 307.77,
+            "bottom": 98,
+            "left": 272.41,
+            "width": 35.36,
+            "height": 33.5
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 2934,
+          "auditedTextElements": 39,
+          "violations": 0,
+          "skippedNoOwnText": 1535,
+          "skippedNotVisibleInViewport": 1348,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 4,
+          "approximatedComplexBackground": 19,
+          "skippedOpacityOrEffect": 6,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "Network Topology",
+      "surfaceId": "S15",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/rack/Naboo",
+        "state": "Naboo stored topology / rack-network preview",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "light",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 838481332,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s15-topology-1366x768-light-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "d6087d4dfd64aa91613fbb389f216e58b35d530b9ec52930b9cba97b87f1f456"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [
+        {
+          "kind": "alert",
+          "message": "KVM 無法同步廣播\n\nDirector fake provider keeps every KVM connection offline.\n\n偵測結果：\n  SERVER-04U - RFB fixture / RFB\n  SERVER-03U - RFB fixture / RFB\n  SERVER-02U - RFB fixture / RFB\n  SERVER-01 - RFB fixture / RFB\n  SERVER-02 - RFB fixture / RFB\n  SERVER-03 - RFB fixture / RFB\n  SERVER-04 - RFB fixture / RFB\n  SERVER-05 - RFB fixture / RFB\n  SERVER-06 - RFB fixture / RFB\n  SERVER-07 - RFB fixture / RFB\n  SERVER-08 - RFB fixture / RFB\n  SERVER-09 - RFB fixture / RFB\n\n本頁仍會開啟，但只連線可同步的 RFB 系統。"
+        }
+      ],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 341,
+        "visibleFocusableInViewportCount": 21,
+        "primary": {
+          "selector": ".nt-window [data-action=\"close\"]",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 74.05,
+            "right": 638,
+            "bottom": 113.55,
+            "left": 580,
+            "width": 58,
+            "height": 39.5
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 3471,
+          "auditedTextElements": 29,
+          "violations": 1,
+          "skippedNoOwnText": 1662,
+          "skippedNotVisibleInViewport": 1629,
+          "skippedMediaOrVector": 147,
+          "skippedDisabled": 1,
+          "approximatedComplexBackground": 25,
+          "skippedOpacityOrEffect": 3,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [
+          {
+            "selector": "div.layout:nth-of-type(1) > main.main > div.content > div.rack-hero:nth-of-type(1) > label.rack-sel",
+            "text": "機櫃專案",
+            "ratio": 2.33,
+            "threshold": 4.5,
+            "largeText": false,
+            "fontSizePx": 12,
+            "fontWeight": 400,
+            "foreground": "rgb(144, 168, 181)",
+            "background": "rgb(247, 248, 246)",
+            "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+          }
+        ],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "User Guide",
+      "surfaceId": "S14",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/rack/Naboo",
+        "state": "production template loaded from APP_ROOT",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "light",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 838481332,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s14-user-guide-1366x768-light-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "67789a3c11191809286fca9720f53445d9f483f826bae934483eacc1fd926aff"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [
+        {
+          "kind": "alert",
+          "message": "KVM 無法同步廣播\n\nDirector fake provider keeps every KVM connection offline.\n\n偵測結果：\n  SERVER-04U - RFB fixture / RFB\n  SERVER-03U - RFB fixture / RFB\n  SERVER-02U - RFB fixture / RFB\n  SERVER-01 - RFB fixture / RFB\n  SERVER-02 - RFB fixture / RFB\n  SERVER-03 - RFB fixture / RFB\n  SERVER-04 - RFB fixture / RFB\n  SERVER-05 - RFB fixture / RFB\n  SERVER-06 - RFB fixture / RFB\n  SERVER-07 - RFB fixture / RFB\n  SERVER-08 - RFB fixture / RFB\n  SERVER-09 - RFB fixture / RFB\n\n本頁仍會開啟，但只連線可同步的 RFB 系統。"
+        }
+      ],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 67,
+        "visibleFocusableInViewportCount": 12,
+        "primary": {
+          "selector": ".ug-close",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 61.76,
+            "right": 650.5,
+            "bottom": 84.76,
+            "left": 624.5,
+            "width": 26,
+            "height": 23
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 2598,
+          "auditedTextElements": 24,
+          "violations": 1,
+          "skippedNoOwnText": 1316,
+          "skippedNotVisibleInViewport": 1252,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 1,
+          "approximatedComplexBackground": 18,
+          "skippedOpacityOrEffect": 3,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [
+          {
+            "selector": "div.layout:nth-of-type(1) > main.main > div.content > div.rack-hero:nth-of-type(1) > label.rack-sel",
+            "text": "機櫃專案",
+            "ratio": 2.33,
+            "threshold": 4.5,
+            "largeText": false,
+            "fontSizePx": 12,
+            "fontWeight": 400,
+            "foreground": "rgb(144, 168, 181)",
+            "background": "rgb(247, 248, 246)",
+            "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+          }
+        ],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "Application shell / sidebar / topbar",
+      "surfaceId": "S01",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/dashboard",
+        "state": "dashboard; rack-network preview",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "dark",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 467812287,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s01-shell-1366x768-dark-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "11e646ef122a7a85dca4771c7653eab2281e43f72f676e8144eaed0e4b55eac9"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 18,
+        "visibleFocusableInViewportCount": 7,
+        "primary": {
+          "selector": ".nav-btn[data-view=\"projects\"]",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 8,
+            "right": 339,
+            "bottom": 52,
+            "left": 177,
+            "width": 162,
+            "height": 44
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 511,
+          "auditedTextElements": 8,
+          "violations": 0,
+          "skippedNoOwnText": 250,
+          "skippedNotVisibleInViewport": 249,
+          "skippedMediaOrVector": 0,
+          "skippedDisabled": 1,
+          "approximatedComplexBackground": 11,
+          "skippedOpacityOrEffect": 3,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "System detail",
+      "surfaceId": "S04",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "host_a / overview",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "dark",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 467812287,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s04-system-overview-1366x768-dark-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "612b2e020d4018df4c3ba49753266b183cc8a0766cfc22f705df627d196baf81"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 30,
+        "visibleFocusableInViewportCount": 9,
+        "primary": null
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 1193,
+          "auditedTextElements": 15,
+          "violations": 0,
+          "skippedNoOwnText": 714,
+          "skippedNotVisibleInViewport": 455,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 1,
+          "approximatedComplexBackground": 19,
+          "skippedOpacityOrEffect": 6,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "System detail / Nodes",
+      "surfaceId": "S04",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "host_a / OS slots; horizontal table end focused",
+        "details": {
+          "nodeReachability": {
+            "role": "region",
+            "tabIndex": 0,
+            "scrollLeft": 583,
+            "scrollWidth": 1204,
+            "clientWidth": 616,
+            "bodyHorizontalOverflowPx": 0,
+            "wrapperBox": {
+              "left": 31,
+              "top": 239.5078125,
+              "right": 652,
+              "bottom": 385.0078125,
+              "width": 621,
+              "height": 145.5
+            },
+            "actionCellBox": {
+              "left": 524,
+              "top": 273.5078125,
+              "right": 652,
+              "bottom": 367.5078125,
+              "width": 128,
+              "height": 94
+            },
+            "actionButtonBox": {
+              "left": 534,
+              "top": 322.5078125,
+              "right": 642,
+              "bottom": 358.5078125,
+              "width": 108,
+              "height": 36
+            },
+            "actionCellInsideWrapper": true,
+            "actionCellInsideViewport": true,
+            "actionButtonInsideWrapper": true,
+            "actionButtonInsideViewport": true
+          }
+        }
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "dark",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 467812287,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s04-system-nodes-1366x768-dark-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "0a2b939f2f57c94b5b08f7ecda5a2cc6058f9f03ff623189a627b354aa489a87"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 40,
+        "visibleFocusableInViewportCount": 6,
+        "primary": {
+          "selector": "#pd-panel-osslots .pd-os-table-wrap tbody tr:last-child td:last-child button:last-child",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 322.51,
+            "right": 642,
+            "bottom": 358.51,
+            "left": 534,
+            "width": 108,
+            "height": 36
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 1256,
+          "auditedTextElements": 23,
+          "violations": 0,
+          "skippedNoOwnText": 737,
+          "skippedNotVisibleInViewport": 484,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 1,
+          "approximatedComplexBackground": 24,
+          "skippedOpacityOrEffect": 9,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "Inspection / AI / evidence entry",
+      "surfaceId": "S10",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "active synthetic issue expanded; AI complete",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "dark",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 467812287,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s10-inspection-ai-1366x768-dark-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "0a2b939f2f57c94b5b08f7ecda5a2cc6058f9f03ff623189a627b354aa489a87"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 42,
+        "visibleFocusableInViewportCount": 3,
+        "primary": {
+          "selector": "[data-evidence-open]",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 223.96,
+            "right": 144,
+            "bottom": 259.76,
+            "left": 48,
+            "width": 96,
+            "height": 35.8
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 1290,
+          "auditedTextElements": 8,
+          "violations": 0,
+          "skippedNoOwnText": 747,
+          "skippedNotVisibleInViewport": 523,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 3,
+          "approximatedComplexBackground": 10,
+          "skippedOpacityOrEffect": 3,
+          "skippedUnparsedColor": 4
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "Telemetry / Exporter",
+      "surfaceId": "S09",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "host_a / director-node-1 / READY",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "dark",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 467812287,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s09-telemetry-exporter-1366x768-dark-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "0a2b939f2f57c94b5b08f7ecda5a2cc6058f9f03ff623189a627b354aa489a87"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 31,
+        "visibleFocusableInViewportCount": 3,
+        "primary": {
+          "selector": "#pd-panel-telemetry select[data-node]",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 255.71,
+            "right": 271,
+            "bottom": 291.71,
+            "left": 31,
+            "width": 240,
+            "height": 36
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 1475,
+          "auditedTextElements": 15,
+          "violations": 0,
+          "skippedNoOwnText": 814,
+          "skippedNotVisibleInViewport": 632,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 3,
+          "approximatedComplexBackground": 24,
+          "skippedOpacityOrEffect": 9,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "System Validation",
+      "surfaceId": "S06",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "host_a / Test Library entry",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "dark",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 467812287,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s06-system-validation-1366x768-dark-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "0a2b939f2f57c94b5b08f7ecda5a2cc6058f9f03ff623189a627b354aa489a87"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 32,
+        "visibleFocusableInViewportCount": 4,
+        "primary": null
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 1522,
+          "auditedTextElements": 15,
+          "violations": 0,
+          "skippedNoOwnText": 826,
+          "skippedNotVisibleInViewport": 667,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 3,
+          "approximatedComplexBackground": 24,
+          "skippedOpacityOrEffect": 9,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "Cycle entry from System Validation",
+      "surfaceId": "S08",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "host_a / Cycle entry visible; execution is covered by the strict Cycle harness",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "dark",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 467812287,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s08-cycle-entry-1366x768-dark-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "0a2b939f2f57c94b5b08f7ecda5a2cc6058f9f03ff623189a627b354aa489a87"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 32,
+        "visibleFocusableInViewportCount": 4,
+        "primary": {
+          "selector": "#pd-panel-tasks .pd-task-intro button",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 256.71,
+            "right": 124.86,
+            "bottom": 296.21,
+            "left": 33,
+            "width": 91.86,
+            "height": 39.5
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 1522,
+          "auditedTextElements": 15,
+          "violations": 0,
+          "skippedNoOwnText": 826,
+          "skippedNotVisibleInViewport": 667,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 3,
+          "approximatedComplexBackground": 24,
+          "skippedOpacityOrEffect": 9,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [
+        "Only the real Cycle entry is captured here. PRE / Console / Report require the separate strict synthetic Cycle harness; this static provider does not manufacture Cycle execution truth."
+      ],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "Test Case / Assignment",
+      "surfaceId": "S06",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "first fixture case inspected and selected",
+        "details": {
+          "viewport": {
+            "width": 683,
+            "height": 384
+          },
+          "pageScroll": {
+            "x": 0,
+            "y": 0
+          },
+          "backdrop": {
+            "left": 0,
+            "top": 0,
+            "right": 683,
+            "bottom": 384,
+            "width": 683,
+            "height": 384
+          },
+          "dialog": {
+            "left": 12,
+            "top": 16,
+            "right": 671,
+            "bottom": 368,
+            "width": 659,
+            "height": 352
+          },
+          "body": {
+            "left": 13,
+            "top": 95,
+            "right": 670,
+            "bottom": 292,
+            "width": 657,
+            "height": 197
+          },
+          "footer": {
+            "left": 13,
+            "top": 292,
+            "right": 670,
+            "bottom": 367,
+            "width": 657,
+            "height": 75
+          },
+          "footerFullyInViewport": true,
+          "bodyScroll": {
+            "scrollTop": 185.5,
+            "scrollHeight": 383,
+            "clientHeight": 197
+          }
+        }
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "dark",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 467812287,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s06-test-assignment-1366x768-dark-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "7f49821e6aeb9ca41e7815feb4d42ac9b062bd7cb23e0eed68e5dd11a2b45928"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 240,
+        "visibleFocusableInViewportCount": 20,
+        "primary": {
+          "selector": "#rm-dialog-foot button.primary",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 311,
+            "right": 645,
+            "bottom": 349,
+            "left": 491,
+            "width": 154,
+            "height": 38
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 2636,
+          "auditedTextElements": 48,
+          "violations": 1,
+          "skippedNoOwnText": 1368,
+          "skippedNotVisibleInViewport": 1203,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 4,
+          "approximatedComplexBackground": 31,
+          "skippedOpacityOrEffect": 6,
+          "skippedUnparsedColor": 5
+        },
+        "violations": [
+          {
+            "selector": "body > div.modal-backdrop:nth-of-type(8) > div.modal.rm-modal > div.modal-foot.assign-action-footer:nth-of-type(3) > button.btn.btn-primary:nth-of-type(3)",
+            "text": "交給 PA Agent",
+            "ratio": 1.06,
+            "threshold": 4.5,
+            "largeText": false,
+            "fontSizePx": 12,
+            "fontWeight": 500,
+            "foreground": "rgb(23, 39, 13)",
+            "background": "rgb(18, 31, 40)",
+            "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+          }
+        ],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "PA Agent",
+      "surfaceId": "S07",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "existing WAITING_FOR_USER run; fake provider",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "dark",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 467812287,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s07-pa-agent-1366x768-dark-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "696b11fda93553376a71d7344e67c2cab52a250136cbed11d3946d057f4ab515"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 38,
+        "visibleFocusableInViewportCount": 14,
+        "primary": {
+          "selector": "#pa-msg-input",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 295.57,
+            "right": 542.34,
+            "bottom": 339.57,
+            "left": 74.66,
+            "width": 467.68,
+            "height": 44
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 2729,
+          "auditedTextElements": 60,
+          "violations": 0,
+          "skippedNoOwnText": 1405,
+          "skippedNotVisibleInViewport": 1252,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 4,
+          "approximatedComplexBackground": 19,
+          "skippedOpacityOrEffect": 6,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "Terminal frame",
+      "surfaceId": "S11",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "OS + BMC; preview WebSocket provider",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "dark",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 467812287,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s11-terminal-frame-1366x768-dark-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "45dc0c865620a15315e5a322ef234bc2cc409768d455243d55a160a4caffc7c7"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 39,
+        "visibleFocusableInViewportCount": 16,
+        "primary": {
+          "selector": "#term-modal button",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 56.56,
+            "right": 256.55,
+            "bottom": 88.56,
+            "left": 224.55,
+            "width": 32,
+            "height": 32
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 2696,
+          "auditedTextElements": 34,
+          "violations": 0,
+          "skippedNoOwnText": 1410,
+          "skippedNotVisibleInViewport": 1238,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 4,
+          "approximatedComplexBackground": 26,
+          "skippedOpacityOrEffect": 8,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "Broadcast terminal frame",
+      "surfaceId": "S11",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "two systems; preview WebSocket provider",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "dark",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 467812287,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s11-broadcast-frame-1366x768-dark-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "7b4ebdc5275de08f002d8e71031e1391b374465f9401ad40c5d67e6fa8dd6711"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 39,
+        "visibleFocusableInViewportCount": 16,
+        "primary": {
+          "selector": "#bc-modal button",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 52.72,
+            "right": 219.69,
+            "bottom": 84.72,
+            "left": 187.69,
+            "width": 32,
+            "height": 32
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 2785,
+          "auditedTextElements": 35,
+          "violations": 0,
+          "skippedNoOwnText": 1476,
+          "skippedNotVisibleInViewport": 1260,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 4,
+          "approximatedComplexBackground": 27,
+          "skippedOpacityOrEffect": 8,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "KVM broadcast frame",
+      "surfaceId": "S11",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/machine/host_a",
+        "state": "explicit fake detector; every KVM offline; no RFB connection",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "dark",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 467812287,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s11-kvm-frame-1366x768-dark-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "38fb8d5c83c85c185045e33ab2e0acbdb9a002d74847d6fa1ac609270541f744"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [
+        {
+          "kind": "alert",
+          "message": "KVM 無法同步廣播\n\nDirector fake provider keeps every KVM connection offline.\n\n偵測結果：\n  SERVER-04U - RFB fixture / RFB\n  SERVER-03U - RFB fixture / RFB\n  SERVER-02U - RFB fixture / RFB\n  SERVER-01 - RFB fixture / RFB\n  SERVER-02 - RFB fixture / RFB\n  SERVER-03 - RFB fixture / RFB\n  SERVER-04 - RFB fixture / RFB\n  SERVER-05 - RFB fixture / RFB\n  SERVER-06 - RFB fixture / RFB\n  SERVER-07 - RFB fixture / RFB\n  SERVER-08 - RFB fixture / RFB\n  SERVER-09 - RFB fixture / RFB\n\n本頁仍會開啟，但只連線可同步的 RFB 系統。"
+        }
+      ],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 43,
+        "visibleFocusableInViewportCount": 20,
+        "primary": {
+          "selector": "#kvm-overlay button",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 64.5,
+            "right": 307.77,
+            "bottom": 98,
+            "left": 272.41,
+            "width": 35.36,
+            "height": 33.5
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 2934,
+          "auditedTextElements": 39,
+          "violations": 0,
+          "skippedNoOwnText": 1535,
+          "skippedNotVisibleInViewport": 1348,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 4,
+          "approximatedComplexBackground": 19,
+          "skippedOpacityOrEffect": 6,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "Network Topology",
+      "surfaceId": "S15",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/rack/Naboo",
+        "state": "Naboo stored topology / rack-network preview",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "dark",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 467812287,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s15-topology-1366x768-dark-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "126e5f22e6b3e8540809922d82c0a3d377a33a3e02fbb5170ad271d1bb593787"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [
+        {
+          "kind": "alert",
+          "message": "KVM 無法同步廣播\n\nDirector fake provider keeps every KVM connection offline.\n\n偵測結果：\n  SERVER-04U - RFB fixture / RFB\n  SERVER-03U - RFB fixture / RFB\n  SERVER-02U - RFB fixture / RFB\n  SERVER-01 - RFB fixture / RFB\n  SERVER-02 - RFB fixture / RFB\n  SERVER-03 - RFB fixture / RFB\n  SERVER-04 - RFB fixture / RFB\n  SERVER-05 - RFB fixture / RFB\n  SERVER-06 - RFB fixture / RFB\n  SERVER-07 - RFB fixture / RFB\n  SERVER-08 - RFB fixture / RFB\n  SERVER-09 - RFB fixture / RFB\n\n本頁仍會開啟，但只連線可同步的 RFB 系統。"
+        }
+      ],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 341,
+        "visibleFocusableInViewportCount": 21,
+        "primary": {
+          "selector": ".nt-window [data-action=\"close\"]",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 74.05,
+            "right": 638,
+            "bottom": 113.55,
+            "left": 580,
+            "width": 58,
+            "height": 39.5
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 3471,
+          "auditedTextElements": 29,
+          "violations": 1,
+          "skippedNoOwnText": 1662,
+          "skippedNotVisibleInViewport": 1629,
+          "skippedMediaOrVector": 147,
+          "skippedDisabled": 1,
+          "approximatedComplexBackground": 25,
+          "skippedOpacityOrEffect": 3,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [
+          {
+            "selector": "body > div.nt-overlay:nth-of-type(14) > section.nt-window > div.nt-toolbar:nth-of-type(1) > button.btn.primary:nth-of-type(5)",
+            "text": "儲存拓撲",
+            "ratio": 1.18,
+            "threshold": 4.5,
+            "largeText": false,
+            "fontSizePx": 13,
+            "fontWeight": 500,
+            "foreground": "rgb(23, 36, 20)",
+            "background": "rgb(9, 16, 23)",
+            "backgroundApproximation": "CSS background image/gradient omitted; computed backgroundColor layers used"
+          }
+        ],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    },
+    {
+      "schema": "director-site-capture/v2",
+      "phase": "after-zoom200-content-reachability",
+      "fixtureIdentity": "director-static-preview-v1/rack-network/fake-provider-v1",
+      "region": "User Guide",
+      "surfaceId": "S14",
+      "frozenMarker": null,
+      "routeState": {
+        "route": "#/rack/Naboo",
+        "state": "production template loaded from APP_ROOT",
+        "details": null
+      },
+      "app": {
+        "root": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1",
+        "commit": "419f9ca071bdabefc2e3e23dc0582bf8154f32ee",
+        "dirty": true
+      },
+      "browser": {
+        "version": "154.0.4258.62",
+        "theme": "dark",
+        "browserZoomRequested": 2,
+        "browserZoom": 2,
+        "browserZoomEvidence": {
+          "status": "applied",
+          "requested": 2,
+          "actual": 2,
+          "tabId": 467812287,
+          "settingsError": null,
+          "setZoomError": null,
+          "getZoomError": null,
+          "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+          "getZoomReturned": 2
+        },
+        "devicePixelRatio": 2,
+        "visualViewport": {
+          "width": 683,
+          "height": 384,
+          "scale": 1,
+          "offsetLeft": 0,
+          "offsetTop": 0
+        },
+        "osScaling": {
+          "status": "measured-registry",
+          "platform": "win32",
+          "source": "HKCU/Control Panel/Desktop/WindowMetrics/AppliedDPI",
+          "appliedDpi": 192,
+          "scaleFactor": 2,
+          "percent": 200,
+          "limitation": "Registry AppliedDPI is OS-level evidence and may differ from per-monitor scaling."
+        }
+      },
+      "viewportRequested": {
+        "width": 1366,
+        "height": 768
+      },
+      "viewportCss": {
+        "width": 683,
+        "height": 384
+      },
+      "png": {
+        "file": "s14-user-guide-1366x768-dark-zoom200-verified.png",
+        "width": 1366,
+        "height": 768,
+        "sha256": "11672e456a42ecdeaf40478d4752a4f57a4c863a8494b20a0bec493af8595f98"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "unknownRequests": [],
+      "failedRequests": [],
+      "notices": [
+        {
+          "kind": "alert",
+          "message": "KVM 無法同步廣播\n\nDirector fake provider keeps every KVM connection offline.\n\n偵測結果：\n  SERVER-04U - RFB fixture / RFB\n  SERVER-03U - RFB fixture / RFB\n  SERVER-02U - RFB fixture / RFB\n  SERVER-01 - RFB fixture / RFB\n  SERVER-02 - RFB fixture / RFB\n  SERVER-03 - RFB fixture / RFB\n  SERVER-04 - RFB fixture / RFB\n  SERVER-05 - RFB fixture / RFB\n  SERVER-06 - RFB fixture / RFB\n  SERVER-07 - RFB fixture / RFB\n  SERVER-08 - RFB fixture / RFB\n  SERVER-09 - RFB fixture / RFB\n\n本頁仍會開啟，但只連線可同步的 RFB 系統。"
+        }
+      ],
+      "reachability": {
+        "documentWidth": 683,
+        "bodyHorizontalOverflowPx": 0,
+        "visibleFocusableCount": 67,
+        "visibleFocusableInViewportCount": 12,
+        "primary": {
+          "selector": ".ug-close",
+          "exists": true,
+          "visible": true,
+          "focusable": true,
+          "focused": true,
+          "inViewport": true,
+          "rect": {
+            "top": 61.76,
+            "right": 650.5,
+            "bottom": 84.76,
+            "left": 624.5,
+            "width": 26,
+            "height": 23
+          }
+        }
+      },
+      "contrastAudit": {
+        "status": "partial",
+        "standard": "WCAG 2.x contrast thresholds only; this is not a full WCAG audit",
+        "method": "Computed foreground over solid ancestor backgrounds with RGBA alpha composition",
+        "scope": "Own text nodes visibly intersecting the captured viewport",
+        "thresholds": {
+          "normalText": 4.5,
+          "largeText": 3,
+          "largeTextDefinition": ">=24 CSS px, or >=18.66 CSS px and weight >=700"
+        },
+        "exclusions": [
+          "image/canvas/SVG/video",
+          "disabled or aria-disabled",
+          "opacity/filter/blend/backdrop effects",
+          "pseudo-element text"
+        ],
+        "limitations": [
+          "CSS background images/gradients are approximated using their computed backgroundColor layers."
+        ],
+        "counts": {
+          "scannedElements": 2598,
+          "auditedTextElements": 24,
+          "violations": 0,
+          "skippedNoOwnText": 1316,
+          "skippedNotVisibleInViewport": 1252,
+          "skippedMediaOrVector": 2,
+          "skippedDisabled": 1,
+          "approximatedComplexBackground": 18,
+          "skippedOpacityOrEffect": 3,
+          "skippedUnparsedColor": 0
+        },
+        "violations": [],
+        "violationsTruncated": false
+      },
+      "gaps": [],
+      "capturedAt": "2026-10-08T04:00:00.000Z"
+    }
+  ],
+  "zoomRuns": [
+    {
+      "width": 1366,
+      "height": 768,
+      "theme": "light",
+      "evidence": {
+        "status": "applied",
+        "requested": 2,
+        "actual": 2,
+        "tabId": 838481332,
+        "settingsError": null,
+        "setZoomError": null,
+        "getZoomError": null,
+        "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+        "getZoomReturned": 2
+      },
+      "launch": {
+        "mode": "persistent-context-mv3",
+        "requestedChannel": "msedge",
+        "executablePath": null,
+        "headless": true,
+        "extension": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\fixtures\\director-zoom-extension",
+        "profile": "C:\\Users\\kobei\\AppData\\Local\\Temp\\director-zoom-profile-cjvSa0",
+        "attempts": [
+          {
+            "channel": "msedge",
+            "status": "launched"
+          }
+        ],
+        "api": "chrome.tabs.setZoom + chrome.tabs.getZoom"
+      }
+    },
+    {
+      "width": 1366,
+      "height": 768,
+      "theme": "dark",
+      "evidence": {
+        "status": "applied",
+        "requested": 2,
+        "actual": 2,
+        "tabId": 467812287,
+        "settingsError": null,
+        "setZoomError": null,
+        "getZoomError": null,
+        "source": "chrome.tabs.setZoom + chrome.tabs.getZoom",
+        "getZoomReturned": 2
+      },
+      "launch": {
+        "mode": "persistent-context-mv3",
+        "requestedChannel": "msedge",
+        "executablePath": null,
+        "headless": true,
+        "extension": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-platform-premium-ui-v1\\tests\\fixtures\\director-zoom-extension",
+        "profile": "C:\\Users\\kobei\\AppData\\Local\\Temp\\director-zoom-profile-vGPra0",
+        "attempts": [
+          {
+            "channel": "msedge",
+            "status": "launched"
+          }
+        ],
+        "api": "chrome.tabs.setZoom + chrome.tabs.getZoom"
+      }
+    }
+  ],
+  "zoomFailures": [],
+  "scenarioFailures": [],
+  "viewportFailures": [],
+  "trailingIssues": [],
+  "generatedAt": "2026-10-08T04:00:00.000Z"
+}
