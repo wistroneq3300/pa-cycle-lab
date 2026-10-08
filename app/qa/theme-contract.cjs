@@ -172,18 +172,24 @@ check('03 Sampled text and small 3D controls meet 4.5:1 on their opaque material
   });
 });
 
-check('04 Light palette precedes token-based shared workspace layers', () => {
+check('04 Light palette precedes shared and scoped presentation layers', () => {
   const styles = [...html.matchAll(/<link\b[^>]*href="([^"]+\.css(?:\?[^"]*)?)"[^>]*>/g)].map(match => match[1].split('?')[0]);
   assert.equal(styles.filter(item => item === '/static/css/wistron-light.css').length, 1);
-  assert.equal(styles.at(-1), '/static/css/workspace-ux.css');
   for(const layer of ['workspace-reliability','equipment-workspace','engineering-ux','operations-ux','workspace-ux']) {
     assert.ok(styles.indexOf('/static/css/'+layer+'.css') > styles.indexOf('/static/css/wistron-light.css'));
   }
+  // Route-owned layers intentionally follow the shared workspace adapter.
+  // The frozen Hero V3 callout layer remains last so its scoped computed
+  // values are not changed by later generic declarations.
+  for(const layer of ['topology','cycle','cycle-workspace','telemetry-provision','telemetry-native','inspection-refinement','validation-console','validation-overview','hero-callouts']) {
+    assert.ok(styles.indexOf('/static/css/'+layer+'.css') > styles.indexOf('/static/css/workspace-ux.css'));
+  }
+  assert.equal(styles.at(-1), '/static/css/hero-callouts.css');
   assert.ok(styles.indexOf('/static/css/workspace-cinematic.css') < styles.indexOf('/static/css/wistron-light.css'));
   assert.match(app, /root\.dataset\.theme\s*=\s*t/);
   assert.match(app, /localStorage\.setItem\("pa_theme",\s*t\)/);
   assert.match(app, /theme-toggle[\s\S]*?addEventListener\("click",\s*\(\)\s*=>\s*applyTheme\(root\.dataset\.theme\s*===\s*"dark"\s*\?\s*"light"\s*:\s*"dark"\)/);
-  return { stylesheet:styles.at(-1), persistence:'original pa_theme contract' };
+  return { sharedAdapter:'/static/css/workspace-ux.css', finalFrozenLayer:styles.at(-1), persistence:'original pa_theme contract' };
 });
 
 check('05 Actual theme adapter updates labels, accessible state, charts and scene event', () => {
@@ -213,7 +219,9 @@ check('05 Actual theme adapter updates labels, accessible state, charts and scen
     assert.equal(button.attributes['aria-pressed'], String(theme === 'light'));
     assert.equal(button.attributes['aria-label'], button.title);
     assert.ok(button.innerHTML.includes(theme === 'light' ? 'Light' : 'Dark'));
-    assert.ok(button.title.includes(theme === 'light' ? 'Pearl Light' : 'Graphite Dark'));
+    assert.equal(button.title, theme === 'light'
+      ? '目前為淺色模式，切換至深色模式'
+      : '目前為深色模式，切換至淺色模式');
     const color = theme === 'light' ? '#46616e' : '#a3b3c1';
     assert.equal(context.Chart.defaults.color, color);
     assert.equal(chart.config.options.color, color);
