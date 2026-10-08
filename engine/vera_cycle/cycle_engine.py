@@ -21,13 +21,17 @@ from cycle_core import (
     missing_sensors,
     nic_slot_issues,
     now,
+    network_issues,
+    parse_network,
     filter_pci_verbose,
     merge_pci_devices,
     parse_pci,
     parse_pci_verbose,
     parse_hardware_checks,
     parse_sensors,
+    parse_usb,
     pci_issues,
+    usb_issues,
     redfish_collection,
     redfish_delta,
     redfish_entries,
@@ -48,7 +52,7 @@ PACKAGES = {"lspci": "pciutils", "dmidecode": "dmidecode", "nvme": "nvme-cli",
 IDENTITY = "printf 'HOSTNAME='; hostname; printf 'BOOT_ID='; cat /proc/sys/kernel/random/boot_id"
 CAPTURES = {
     "pci": ("lspci -Dnn", False), "pci_tree": ("lspci -Dtv", False),
-    "pci_verbose": ("lspci -Dvvv", True), "pci_config": ("lspci -Dxxx", True),
+    "pci_verbose": ("lspci -Dvvv", True),
     "disks": ("lsblk", False), "nvme": ("nvme list", True),
     "usb": ("lsusb", False), "memory": ("free -m", False),
     "network": ("ip address show", False), "dmesg": ("dmesg", True),
@@ -178,6 +182,8 @@ class NodeSession:
             stem = ('dmesg' if code.startswith('DMESG_') or 'dmesg' in component else
                     'sensor' if code.startswith('SENSOR_') else
                     'pci' if code in {'PCI_DRIFT', 'PCI_EMPTY'} else
+                    'usb' if code == 'USB_DRIFT' else
+                    'network' if code == 'NET_DRIFT' else
                     'eventlog' if code.startswith('REDFISH_') and component == 'eventlog' else
                     'redfish_sel' if code.startswith('REDFISH_') and component == 'redfish_sel' else
                     component if component in record['commands'] else
@@ -371,6 +377,22 @@ class NodeSession:
             elif stem == "pci_verbose" and result.code == 0:
                 record["pci_verbose"] = parse_pci_verbose(result.output)
                 record["pci_devices"] = merge_pci_devices(record.get("pci", {}), record["pci_verbose"])
+            elif stem == "usb" and result.code == 0:
+                record["usb"] = parse_usb(result.output)
+                if post:
+                    findings = usb_issues(self.baseline["usb"], record["usb"])
+                    record["issues"] += findings
+                    self.event(record, 'FAIL' if findings else 'PASS', 'USB_COMPARISON',
+                               'USB differs from PRE baseline' if findings else 'USB baseline matched',
+                               evidence=record['commands']['usb']['evidence'], phase='POST')
+            elif stem == "network" and result.code == 0:
+                record["network_ifaces"] = parse_network(result.output)
+                if post:
+                    findings = network_issues(self.baseline["network"], record["network_ifaces"])
+                    record["issues"] += findings
+                    self.event(record, 'FAIL' if findings else 'PASS', 'NETWORK_COMPARISON',
+                               'Network differs from PRE baseline' if findings else 'Network baseline matched',
+                               evidence=record['commands']['network']['evidence'], phase='POST')
         try:
             self.ensure_verified_script(record)
         except IdentityUnsafe:
@@ -1065,7 +1087,9 @@ class NodeSession:
             if not record["pci"]:
                 self.node["blocked"].append("PRE PCI baseline is unavailable")
             self.baseline = dict(pci=record["pci"].copy(), sensors=[r.copy() for r in record["sensors"]],
-                                 nic=dict(record.get("nic_slots", {})))
+                                 nic=dict(record.get("nic_slots", {})),
+                                 usb=dict(record.get("usb", {})),
+                                 network=dict(record.get("network_ifaces", {})))
             self.pre_issue_keys = issue_baseline(record["issues"])
             self.expected_boot = record['identities']['os']['boot_id']
         except Exception as exc:
