@@ -492,7 +492,7 @@ async function runRound(browser, base, round, cycleSeed) {
     await step("user-guide", async () => {
       await page.locator("#guide-btn").click();
       await page.locator(".ug-body").waitFor();
-      assert((await page.locator(".ug-body").innerText()).length > 200);
+      await page.waitForFunction(() => document.querySelector(".ug-body")?.textContent.trim().length > 200);
       await shot("user-guide");
       await page.locator(".ug-close").click();
     });
