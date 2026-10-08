@@ -127,7 +127,11 @@
     const overview=root.querySelector('#pd-panel-overview'),connection=overview?.querySelector('.pd-connect-panel'),showcase=overview?.querySelector('.pd-showcase');
     if(connection&&showcase&&equipmentIsServer(m)){showcase.before(connection);showcase.classList.add('ux-compact-showcase');}
     const main=root.querySelector('.pd-system-title');
-    if(main)main.insertAdjacentHTML('beforeend','<p class="ux-identity">'+esc(m.project||'\u672a\u6307\u6d3e')+' \u00b7 '+(m.level==='rack'?(m.rack_size||0)+'U \u00b7 '+(m.rack_u?'U'+m.rack_u:'\u5f85\u4e0a\u6ac3'):'L10')+'</p>');
+    if(main){
+      const reportedSize=m.rack_size!==''&&m.rack_size!=null&&Number.isFinite(Number(m.rack_size))?m.rack_size+'U':'\u8a2d\u5099\u9ad8\u5ea6\u672a\u8a2d\u5b9a';
+      const placement=rackIsExternal(m)?'\u5916\u7f6e':m.rack_u?'U'+m.rack_u:'\u5f85\u4e0a\u6ac3';
+      main.insertAdjacentHTML('beforeend','<p class="ux-identity">'+esc(m.project||'\u672a\u6307\u6d3e')+' \u00b7 '+(m.level==='rack'?reportedSize+' \u00b7 '+placement:'L10')+'</p>');
+    }
     return root.innerHTML;
   };
 
