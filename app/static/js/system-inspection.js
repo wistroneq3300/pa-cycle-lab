@@ -152,11 +152,44 @@
       if(!r.querySelector('[data-issues]').hidden&&!r.querySelector('[data-list]').childNodes.length)await loadIssues(ctx);
     }catch(e){error(ctx,e);}finally{if(mounted===ctx)ctx.timer=setTimeout(()=>refresh(ctx),5000);}
   }
+  function isPcieRow(row){return /^pcie/i.test(String(row.check_name||''));}
+  function aggregateRows(rows){
+    // All PCIe checks (PCIE_LINK per link, PCIE_DOWNGRADE, PCIe) answer one question:
+    // "is PCIe healthy on this node?" Collapse them to a single row so a per-link
+    // explosion of identical rows does not bury the one degraded link. Any member
+    // FAIL makes the group FAIL; otherwise the strongest remaining signal wins.
+    const pcie=rows.filter(isPcieRow);if(!pcie.length)return rows;
+    const rest=rows.filter(row=>!isPcieRow(row));
+    const rank={FAIL:5,WARN:4,STALE:3,NO_DATA:2,UNKNOWN:2,PASS:1,NOT_APPLICABLE:1,NOT_MONITORED:0};
+    const pick=values=>values.slice().sort((a,b)=>(rank[b]??0)-(rank[a]??0))[0];
+    const status=pick(pcie.map(row=>row.status));
+    const health=pcie.some(row=>row.health_status==='FAIL')?'FAIL':pick(pcie.map(row=>row.health_status));
+    const degraded=pcie.filter(row=>row.health_status==='FAIL'||row.status==='FAIL');
+    const last=pcie.reduce((max,row)=>Math.max(max,row.last_checked||0),0)||null;
+    const ref=pcie.find(row=>row.evidence_available&&row.evidence_ref?.snapshot_id)?.evidence_ref;
+    const label=pcie.find(row=>row.evidence_available&&row.evidence_ref?.snapshot_id)?.node_label||pcie[0].node_label;
+    const detail=degraded.length
+      ? '降速／異常 '+degraded.length+' 項：'+degraded.slice(0,8).map(row=>(row.check_id||'').split('/').pop()||row.check_name).join('、')+(degraded.length>8?' …':'')
+      : pcie.length+' 個 PCIe 項目，全部正常。';
+    const merged=Object.assign({},pcie[0],{
+      check_id:pcie[0].node_id+':PCIE',
+      check_name:'PCIe（合併 '+pcie.length+' 項）',
+      status:status,
+      health_status:health,
+      expected:null,
+      observed:null,
+      detail:detail,
+      last_checked:last,
+      evidence_ref:ref||null,
+      evidence_available:!!(ref&&ref.snapshot_id),
+      members:pcie});
+    return rest.concat([merged]);
+  }
   function renderMatrix(ctx){
     const body=ctx.root.querySelector('[data-matrix]'),empty=ctx.root.querySelector('[data-matrix-empty]'),selected=ctx.root.querySelector('[data-matrix-node]').value;
-    body.replaceChildren();const rows=(ctx.snapshot?.check_matrix||[]).filter(row=>!selected||row.node_id===selected);empty.hidden=!!rows.length;
-    for(const row of rows){const tr=document.createElement('tr');tr.dataset.status=row.status;const check=document.createElement('td'),details=document.createElement('details'),summary=document.createElement('summary'),detail=document.createElement('p');summary.textContent=`${row.node_label} · ${row.check_name}`;detail.textContent=row.detail||'未提供其他判定資訊。';details.append(summary,detail);check.append(details);
-      const status=document.createElement('td'),badge=document.createElement('span');badge.className='pd-check-status';badge.dataset.state=row.status;badge.textContent=labels[row.status]||row.status;if(row.status==='STALE'&&['PASS','WARN','FAIL'].includes(row.health_status))badge.title='過期前最後判定：'+row.health_status;status.append(badge);
+    body.replaceChildren();const allRows=(ctx.snapshot?.check_matrix||[]).filter(row=>!selected||row.node_id===selected);const rows=aggregateRows(allRows);empty.hidden=!!rows.length;
+    for(const row of rows){const tr=document.createElement('tr');tr.dataset.status=row.status;const check=document.createElement('td'),details=document.createElement('details'),summary=document.createElement('summary'),detail=document.createElement('p');summary.textContent=`${row.node_label} · ${row.check_name}`;detail.textContent=row.detail||'未提供其他判定資訊。';if(row.members){const list=document.createElement('ul');list.className='pd-matrix-members';const members=[...row.members].sort((a,b)=>(a.health_status==='FAIL'?0:1)-(b.health_status==='FAIL'?0:1));for(const member of members){const li=document.createElement('li');const bdf=(member.check_id||'').split('/').pop();li.textContent=`${bdf||member.check_name} · ${labels[member.status]||member.status}`+(member.detail?' · '+member.detail:'');list.append(li);}details.append(list);}details.append(summary,detail);check.append(details);
+      const status=document.createElement('td'),badge=document.createElement('span');badge.className='pd-check-status';const shown=(row.health_status==='FAIL')?'FAIL':row.status;badge.dataset.state=shown;badge.textContent=labels[shown]||shown;if(shown!==row.status)badge.title='排程已停用；此為最後一次判定：'+row.health_status;status.append(badge);
       const comparison=document.createElement('td');comparison.textContent=row.expected!=null||row.observed!=null?`Expected ${row.expected??'—'} / Observed ${row.observed??'—'}`:'—';
       const checked=document.createElement('td');checked.textContent=stamp(row.last_checked);
       const evidence=document.createElement('td');if(row.evidence_available&&row.evidence_ref?.snapshot_id){const button=document.createElement('button');button.type='button';button.className='pd-text-action';button.textContent='原始 Evidence';button.onclick=()=>window.InspectionEvidence.open(ctx.base,row.evidence_ref.snapshot_id,`${row.node_label} · ${row.check_name}`);evidence.append(button);}else evidence.textContent='無可用 Evidence';tr.append(check,status,comparison,checked,evidence);body.append(tr);}

@@ -16,7 +16,7 @@ PATTERNS = [
     ('PCIE', 'aer', r'\b(?:AER:|PCIe Bus Error:).*(?:corrected|correctable|uncorrected|uncorrectable|fatal)'),
     ('PCIE', 'dpc', r'\bDPC:.*(?:containment event|unmasked uncorrectable|recovery failed)'),
     ('NVME', 'io', r'\bnvme\S*.*(?:I/O(?:\s+tag)?\s*\d*.*(?:error|timeout|timed out)|controller is down|(?:reset|resetting).*\b(?:failed|failure)\b|\b(?:Abort|Device not ready|controller)\b.*\b(?:timeout|timed out)\b)|I/O error, dev nvme\S*'),
-    ('NIC', 'mlx5_health', r'\bmlx5\S*.*(?:fatal|health.*(?:error|failed)|firmware.*(?:error|failed))'),
+    ('NIC', 'mlx5_health', r'\bmlx5\S*.*(?:fatal|health.*(?:error|failed)|firmware.*(?:error|failed)|(?:cmd|out_err|ACCESS_REG|command).*(?:failed|error|abort))'),
     ('GPU', 'xid', r'\bNVRM:.*\bXid\b'),
 ]
 PATTERNS = [(family, subtype, re.compile(pattern, re.I)) for family, subtype, pattern in PATTERNS]

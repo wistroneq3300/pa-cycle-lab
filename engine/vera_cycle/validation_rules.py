@@ -520,6 +520,49 @@ def network_issues(baseline, current):
     return found
 
 
+def parse_network_state(text):
+    """Parse ``ip address show`` into ``{ifname: {up, running, flags, addrs}}``.
+
+    Unlike :func:`parse_network` this keeps operational state so the inspection
+    view can judge whether each interface is up and carries an address."""
+    rows = {}
+    current = None
+    for line in text.splitlines():
+        match = re.match(r"^\d+:\s+([^:@]+)(?:@[^:]+)?:\s+<([^>]*)>\s*(.*)$", line)
+        if match:
+            flags = match[2].split(',')
+            current = rows[match[1].strip()] = dict(name=match[1].strip(), flags=match[2],
+                                                    up='UP' in flags, running='LOWER_UP' in flags, addrs=[])
+            continue
+        if current is not None and line[:1].isspace():
+            addr = re.match(r"\s+inet6?\s+(\S+)", line)
+            if addr:
+                current['addrs'].append(addr.group(1))
+    return rows
+
+
+def network_link_issues(current):
+    """Report physical interfaces that are up but whose link is not running.
+
+    Loopback and virtual/container interfaces are excluded: a down ``veth`` or
+    ``docker0`` is normal and would drown the signal. An interface carrying no
+    address is reported separately so a link that is up but never addressed
+    stays visible."""
+    unstable = []
+    for name, row in sorted(current.items()):
+        if name == 'lo' or name.startswith(('veth','docker','br-','virbr','vnet','bond','tap','tun')):
+            continue
+        if row['up'] and not row['running']:
+            unstable.append(issue('NET_LINK_DOWN', 'network',
+                                  f'Network interface {name} is enabled but its link is not running',
+                                  snippet=f"{name}: flags <{row['flags']}>; addresses: {', '.join(row['addrs']) or 'none'}"))
+        elif row['up'] and row['running'] and not row['addrs']:
+            unstable.append(issue('NET_NO_ADDRESS', 'network',
+                                  f'Network interface {name} is up but carries no IP address',
+                                  snippet=f"{name}: flags <{row['flags']}>; addresses: none"))
+    return unstable
+
+
 def _check_snippet(line):
     """Turn a ``CHECK|<component>|key=value|...`` line into a one-line pointer
     to what the hardware script measured. A missing device has no offending

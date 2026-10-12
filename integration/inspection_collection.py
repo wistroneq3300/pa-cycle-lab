@@ -16,11 +16,28 @@ from validation_checker import run_checker
 from validation_identity import collect_identity
 from validation_rules import (parse_sensors, sensor_issues, missing_sensors, compare_sensors,
                               parse_pci, parse_pci_verbose, merge_pci_devices, pci_issues,
-                              config_issues, parse_hardware_checks)
+                              config_issues, parse_hardware_checks,
+                              parse_network_state, network_link_issues)
 from validation_events import identity, kernel_events, sel_records, log_events
 
 
 def sha(text): return hashlib.sha256(text.encode()).hexdigest()
+
+
+def prioritise_hardware_output(text):
+    """Lift the checker's verdict lines to the top of the evidence file.
+
+    ``<project>_config.sh`` prints per-component ``CHECK|`` rows and ``ISSUE|``
+    rows at the very end, after the multi-megabyte ``lspci`` dumps. The evidence
+    viewer only previews the first 1 MB, so those verdicts — the reason anyone
+    opens the file — fell outside the preview. Move them to the front (and drop
+    the originals from the body so the reader sees each verdict once)."""
+    lines=str(text).split('\n')
+    verdicts=[line for line in lines if line.startswith(('CHECK|','ISSUE|'))]
+    if not verdicts: return text
+    body=[line for line in lines if not line.startswith(('CHECK|','ISSUE|'))]
+    header=['[Checker verdicts]']+verdicts+['','[Raw checker output]','']
+    return '\n'.join(header+body)
 
 
 class IndependentSource:
@@ -298,6 +315,14 @@ class IndependentSource:
                     snap=save('PCIe',pci,devices,findings,config['deep_seconds'])
                     observations.extend(fact(f,snap) for f in findings)
                     if parsed: state['previous_pci']=parsed
+                    net=collector.read('network')
+                    if net['collection_status']=='SUCCESS':
+                        net_state=parse_network_state(net['raw'])
+                        net_findings=network_link_issues(net_state)
+                        snap=save('Network',net,net_state,net_findings,config['deep_seconds'])
+                        observations.extend(fact(f,snap) for f in net_findings)
+                    else:
+                        save('Network',net)
                     if frozen:
                         result=self.checker(frozen['checker'],inputs)
                         findings=config_issues(result.output,result.code)
@@ -305,7 +330,7 @@ class IndependentSource:
                         acquisition={'COLLECTION_FAILED','CONFIG_FAILED','CONFIG_INCOMPLETE','MST_MODULE','BF4_IDENTITY_UNAVAILABLE','PCIE_LINK_UNAVAILABLE'}
                         status='PARTIAL' if any(f['code'] in acquisition for f in findings) else 'SUCCESS'
                         if result.state=='NOT_READY': status='NOT_READY'
-                        snap=save('Hardware',dict(raw=result.output,code=result.code,collection_status=status),details,findings,config['deep_seconds'])
+                        snap=save('Hardware',dict(raw=prioritise_hardware_output(result.output),code=result.code,collection_status=status),details,findings,config['deep_seconds'])
                         observations.extend(fact(f,snap) for f in findings if f['code'] not in acquisition)
                         # Existing active configuration rules recover only from
                         # that component's successful structured CHECK in a new sample.

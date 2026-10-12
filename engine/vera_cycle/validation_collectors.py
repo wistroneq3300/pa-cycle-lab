@@ -54,6 +54,7 @@ OPERATIONS = {
     'NVMe': Operation('os', 'nvme list', True),
     'MST': Operation('os', 'mst status -v', True),
     'BIOS-firmware': Operation('os', 'dmidecode -t bios', True),
+    'network': Operation('os', 'ip address show'),
     'GPU': Operation('os', 'nvidia-smi -L'),
     'gpu': Operation('os', 'nvidia-smi --query-gpu=uuid,name,driver_version,utilization.gpu,memory.used,memory.total --format=csv,noheader,nounits'),
 }
@@ -112,8 +113,10 @@ class Collector:
 
     def kernel(self,cursor=None,limit=512):
         # Forward iteration from the saved cursor, never tail to the newest page.
+        # Scope to the current boot (-b): a kernel log that spans every boot accumulates
+        # forever, so the same hardware error is re-served on each subsequent boot.
         if cursor and (not isinstance(cursor,str) or len(cursor)>1024 or '\n' in cursor): raise ValueError('Invalid journal cursor')
-        command='journalctl -k --no-pager -o json --output-fields=MESSAGE,__CURSOR,__REALTIME_TIMESTAMP,__MONOTONIC_TIMESTAMP,_BOOT_ID'
+        command='journalctl -k -b --no-pager -o json --output-fields=MESSAGE,__CURSOR,__REALTIME_TIMESTAMP,__MONOTONIC_TIMESTAMP,_BOOT_ID'
         command+=' --after-cursor='+shlex.quote(cursor) if cursor else ''
         command+=' | head -n '+str(max(1,min(512,int(limit))))
         # pipefail ensures missing journalctl/cursor failures are not hidden by head.

@@ -2,6 +2,40 @@
 (() => {
   let current;
   function close(){if(!current)return;const {dialog,abort,restore,issueId}=current;current=null;abort.abort();dialog.close();dialog.remove();if(restore?.isConnected)restore.focus();else if(issueId){const card=document.querySelector('[data-issue-id="'+CSS.escape(issueId)+'"]');card?.querySelector('[data-evidence-open]')?.focus();}}
+function formatJournal(text){
+    // journalctl -o json emits one record per line. Raw records carry envelope
+    // fields (__CURSOR/_BOOT_ID/__SEQNUM...) that are meaningless to a reader,
+    // and a single recurring hardware error can repeat hundreds of times. Keep
+    // only MESSAGE, collapse identical messages with a count and time span, and
+    // drop the journal envelope so the result is scannable. Anything that is not
+    // clean NDJSON journal output is left for the generic formatter.
+    const lines=String(text||'').split('\n').filter(line=>line.trim());
+    if(lines.length<1)return null;
+    const groups=new Map();
+    for(const line of lines){
+      let row;try{row=JSON.parse(line);}catch{return null;}
+      if(!row||typeof row!=='object'||Array.isArray(row)||typeof row.MESSAGE!=='string'||!(row.__CURSOR||row._BOOT_ID))return null;
+      const message=row.MESSAGE.replace(/\s+$/,'');
+      // Volatile fields (pid, sequence) differ per occurrence of the same fault:
+      // normalise them so one recurring error collapses to a single line.
+      const key=message.replace(/\(pid \d+\)/g,'(pid N)');
+      const ts=row.__REALTIME_TIMESTAMP?Number(row.__REALTIME_TIMESTAMP)/1000000:null;
+      const entry=groups.get(key)||{message:message,count:0,first:null,last:null};
+      entry.count+=1;
+      if(ts){if(entry.first===null||ts<entry.first)entry.first=ts;if(entry.last===null||ts>entry.last)entry.last=ts;}
+      groups.set(key,entry);
+    }
+    const fmt=ts=>ts===null?'':new Date(ts*1000).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false});
+    const out=[];
+    for(const entry of groups.values()){
+      let suffix='';
+      const span=entry.first!==null?fmt(entry.first)+(entry.last!==null&&entry.last!==entry.first?' ~ '+fmt(entry.last):''):'';
+      if(entry.count>1)suffix='\n    ↳ ×'+entry.count+' 次'+(span?' · '+span:'');
+      else if(span)suffix='\n    ↳ '+span;
+      out.push(entry.message+suffix);
+    }
+    return out.join('\n\n');
+  }
 function formatEvidence(text){
     // Raw evidence can be one giant single-line JSON blob (e.g. the Redfish
     // transcript: [{path,code,body},...]). Pretty-print valid JSON so it is
@@ -9,6 +43,8 @@ function formatEvidence(text){
     // line. Non-JSON (or JSON truncated mid-record) is returned unchanged; CSS
     // handles wrapping so nothing ever runs off horizontally.
     const trimmed=String(text||'').trim();
+    const journal=formatJournal(trimmed);
+    if(journal!==null)return journal;
     if(!trimmed||(trimmed[0]!=='['&&trimmed[0]!=='{'))return text;
     try{return JSON.stringify(JSON.parse(trimmed),null,2);}catch{/* fall through */}
     if(trimmed[0]==='['){
@@ -35,7 +71,7 @@ function formatEvidence(text){
     dialog.querySelector('[data-copy]').onclick=async()=>{if(ctx.loadState!=='loaded')return;try{await navigator.clipboard.writeText(ctx.text);dialog.querySelector('[data-status]').textContent='已複製本次載入的預覽內容。';dialog.querySelector('[data-status]').dataset.state='success';}catch(e){dialog.querySelector('[data-status]').textContent='剪貼簿寫入失敗；預覽仍保留，請手動選取或下載。';dialog.querySelector('[data-status]').dataset.state='error';}};
     const search=()=>{const input=dialog.querySelector('input'),query=input.value.toLocaleLowerCase(),pre=dialog.querySelector('pre'),match=dialog.querySelector('[data-match]');if(!query){ctx.position=-1;match.textContent='';getSelection()?.removeAllRanges();return;}let index=ctx.text.toLocaleLowerCase().indexOf(query,ctx.position+1);if(index<0)index=ctx.text.toLocaleLowerCase().indexOf(query);ctx.position=index;match.textContent=index<0?'找不到符合內容':'已定位符合內容';if(index>=0&&pre.firstChild){const range=document.createRange();range.setStart(pre.firstChild,index);range.setEnd(pre.firstChild,index+query.length);const selection=getSelection();selection.removeAllRanges();selection.addRange(range);const rect=range.getBoundingClientRect();pre.scrollTop+=rect.top-pre.getBoundingClientRect().top-pre.clientHeight/3;}};
     dialog.querySelector('input').oninput=()=>{ctx.position=-1;search();};dialog.querySelector('[data-next]').onclick=search;
-    try{const response=await fetch(base+'/evidence/'+encodeURIComponent(id)+'/view',{signal:ctx.abort.signal});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.detail||data.error||('證據暫時無法取得（HTTP '+response.status+'）。'));if(current!==ctx)return;ctx.text=formatEvidence(data.text??'');ctx.loadState=ctx.text?'loaded':'empty';dialog.querySelector('pre').textContent=ctx.text;const status=dialog.querySelector('[data-status]');status.dataset.state=ctx.loadState;status.textContent=ctx.loadState==='empty'?'文件為空 · 載入完成 · 唯讀':data.truncated?'預覽已載入：目前顯示前 256 KB；完整內容可下載。':'完整內容已載入 · 唯讀';dialog.querySelector('[data-source]').textContent=[data.source||'來源未提供',data.collected_at?new Date(data.collected_at*1000).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false})+' UTC+8':'採集時間未提供',data.truncated?'預覽已截斷':'已載入全文','唯讀'].join(' · ');const hasText=ctx.loadState==='loaded';dialog.querySelector('[data-copy]').disabled=!hasText;dialog.querySelector('input').disabled=!hasText;dialog.querySelector('[data-next]').disabled=!hasText;}catch(e){if(e.name!=='AbortError'&&current===ctx){ctx.loadState='error';const status=dialog.querySelector('[data-status]');status.dataset.state='error';status.textContent=e.message;dialog.querySelector('[data-source]').textContent='預覽未載入 · 原因已保留';}}
+    try{const response=await fetch(base+'/evidence/'+encodeURIComponent(id)+'/view',{signal:ctx.abort.signal});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.detail||data.error||('證據暫時無法取得（HTTP '+response.status+'）。'));if(current!==ctx)return;ctx.text=formatEvidence(data.text??'');ctx.loadState=ctx.text?'loaded':'empty';dialog.querySelector('pre').textContent=ctx.text;const status=dialog.querySelector('[data-status]');status.dataset.state=ctx.loadState;status.textContent=ctx.loadState==='empty'?'文件為空 · 載入完成 · 唯讀':data.truncated?'預覽已載入：目前顯示前 1 MB；完整內容可下載。':'完整內容已載入 · 唯讀';dialog.querySelector('[data-source]').textContent=[data.source||'來源未提供',data.collected_at?new Date(data.collected_at*1000).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false})+' UTC+8':'採集時間未提供',data.truncated?'預覽已截斷':'已載入全文','唯讀'].join(' · ');const hasText=ctx.loadState==='loaded';dialog.querySelector('[data-copy]').disabled=!hasText;dialog.querySelector('input').disabled=!hasText;dialog.querySelector('[data-next]').disabled=!hasText;}catch(e){if(e.name!=='AbortError'&&current===ctx){ctx.loadState='error';const status=dialog.querySelector('[data-status]');status.dataset.state='error';status.textContent=e.message;dialog.querySelector('[data-source]').textContent='預覽未載入 · 原因已保留';}}
   }
   window.InspectionEvidence={open,close};
 })();

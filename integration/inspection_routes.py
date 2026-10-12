@@ -112,7 +112,7 @@ def install(app,pa,store_getter):
         svc,system=target(name,request)
         from validation_collectors import plan as observation_plan
         return {'operations':observation_plan(),'nodes':system['nodes'],
-                'kernel':'journalctl -k forward cursor, bounded batch; read-only dmesg fallback',
+                'kernel':'journalctl -k -b forward cursor, bounded batch (current boot); read-only dmesg fallback',
                 'redfish':'Session authentication and discovered LogService GET pages; no ClearLog',
                 'checker':'Controller-side Bash using the same frozen checker and collected files; no DUT installation'}
     @router.get('/issues/{issue_id}/history')
@@ -135,9 +135,11 @@ def install(app,pa,store_getter):
         root=svc.source.evidence.resolve();path=(root/record['raw_evidence']).resolve()
         if not path.is_relative_to(root) or not path.is_file(): raise HTTPException(404,'證據檔案無法取得')
         from .events import redact,environment_secrets
-        with path.open('rb') as src: content=src.read(262145)
-        return {'text':redact(content[:262144].decode('utf-8','replace'),(*environment_secrets(),*secrets()),262144,preserve_lines=True),
-                'truncated':len(content)>262144,'source':record.get('collector_name',record.get('source','')),
+        # 1 MB preview: project checkers put a multi-megabyte lspci dump before the
+        # per-component verdicts, so a 256 KB window cut the verdicts off entirely.
+        with path.open('rb') as src: content=src.read(1048577)
+        return {'text':redact(content[:1048576].decode('utf-8','replace'),(*environment_secrets(),*secrets()),1048576,preserve_lines=True),
+                'truncated':len(content)>1048576,'source':record.get('collector_name',record.get('source','')),
                 'collected_at':record.get('collected_at'),'snapshot_id':snapshot_id}
     @router.patch('/settings')
     def settings(name:str,body:dict,request:Request):

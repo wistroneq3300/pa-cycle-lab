@@ -129,5 +129,25 @@ class NVMeTests(unittest.TestCase):
         self.assertEqual(dmesg_issues('[ 1.0] nvme0n1: detected capacity change from 0 to 1000\n'), [])
 
 
+class Mlx5CommandFailureTests(unittest.TestCase):
+    """mlx5 register/command failures are hardware NIC errors, not routine traffic."""
+
+    def test_access_reg_failure_is_a_nic_failure(self):
+        items = dmesg_issues('[1100931.7] mlx5_core 0000:70:00.0: mlx5_cmd_out_err:839:(pid 378804): '
+                             'ACCESS_REG(0x805) op_mod(0x1) failed, status bad operation(0x2), err(-22)\n')
+        self.assertTrue(items)
+        self.assertEqual(items[0]['code'], 'DMESG_NIC')
+        self.assertEqual(items[0]['severity'], 'FAIL')
+        self.assertIn('0000:70:00.0', items[0]['device'])  
+
+    def test_health_failure_still_detected(self):
+        items = dmesg_issues('[ 5.0] mlx5_core 0000:70:00.0: health recovery failed\n')
+        self.assertTrue(items)
+        self.assertEqual(items[0]['code'], 'DMESG_NIC')
+
+    def test_routine_mlx5_bringup_is_ignored(self):
+        self.assertEqual(dmesg_issues('[ 1.0] mlx5_core 0000:70:00.0: firmware version 28.42.1280\n'), [])
+
+
 if __name__ == '__main__':
     unittest.main()
