@@ -235,7 +235,7 @@
 <ol><li>進入 Cycle 任務後，Test Results 會自動載入第一批報告與 Evidence。先看 Official HTML Report，再依 Node、Loop／Phase、Evidence Type、WARN／FAIL 與檔名篩選；大量檔案可按「載入更多」。</li>
 <li>Cycle Review 報告、Cycle 摘要、最終執行結果、已知／新增／惡化問題與各輪 JSON 都是保存的執行資料；仍須連同健康與覆蓋判讀，不能只因有報告就標記 PASS。</li>
 <li>正式報告右上角有「驗證規範／Validation Specification」入口，開啟隨報告附帶的 <strong>Vera Cycle 驗證規範</strong>（<code>CYCLE_VALIDATION_SPECIFICATION.html</code>）。它與報告放在同一個資料夾、以相對連結互連，因此把報告連同 Evidence 一起下載或分享時，規範仍可開啟。規範會隨每次報告產生更新，內容以本系統目前的驗證行為為準。</li>
-<li>Download Full ZIP 只在安全終態提供，下載整個 Run 的允許交付資料與 Manifest；RUNNING／STOP_REQUESTED 不可建立。ERROR／RECONCILIATION_REQUIRED 必須先確認 Runner 已停止及資料一致性。</li>
+<li>Download Full ZIP 只在安全終態提供，下載整個 Run 的允許交付資料與 Manifest；RUNNING／STOP_REQUESTED 不可建立。ERROR／RECONCILIATION_REQUIRED 必須先確認 Runner 已停止及資料一致性。異常終態（ERROR／RECONCILIATION_REQUIRED）封存前會核對 Job ID 與 Run ID 與 final snapshot 一致，且存在可驗證的 Run Evidence；任一不符即拒絕打包，避免把不同任務的資料封成同一份 ZIP。</li>
 <li>Live Console 可依節點、Errors 與文字篩選，並切換 Summary／Full、暫停檢視或查找 History；畫面只保存有限筆瀏覽內容，需要完整紀錄時使用 Console 的下載功能。</li>
 <li>Telemetry 啟用 Console 使用「下載完整紀錄」；Inspection 原始證據預覽若截斷，使用「下載完整證據」。下載前核對系統、Node、來源與時間。</li>
 <li>網路拓樸的 JSON 匯出用於保留目前草稿／配置；目前沒有對應匯入介面。它不是 Cycle 測試報告，也不是實體接線驗證證明。</li></ol>
@@ -263,6 +263,8 @@
 <h3>Cycle 按了停止，為什麼還有動作在收尾？</h3><p>停止只阻止新動作派送；已派送的操作仍要完成收尾或 Recovery。回到任務查看 heartbeat、節點階段與待核對狀態，不要重複送出電源命令。</p>
 <h3>頁面無法載入或操作失敗？</h3><p>先保留錯誤訊息與操作時間，再重新整理頁面。若持續發生，請提供目前專案、設備與操作步驟給管理者。</p>
 <h3>畫面與使用手冊不一致？</h3><p>請重新整理頁面，並向管理者確認目前使用的系統版本。</p>
+<h3>報告裡那些 SENSOR_*／NIC_*／DMESG_* 的 Issue Code 代表什麼？</h3><p>每個 Issue 都有分類的機器可讀 Code，是跨輪比對與統計的依據（不是檔名）。分類：<code>SENSOR_*</code> 感測器讀值（CRITICAL／NONCRITICAL／MISSING／EMPTY／MALFORMED／DUPLICATE／UNREADABLE／UNRECOGNIZED／RECOVERED）；<code>NET_*</code> 網路（DRIFT／LINK_DOWN／NO_ADDRESS）；<code>NIC_*</code> 網卡（MISSING／DEGRADED／SLOT／MST_ROW／NON_CARD）；<code>PCI_DRIFT</code>、<code>PCIE_*</code> 主機板／PCIe；<code>USB_DRIFT</code> USB 裝置；<code>CONFIG_*</code> 設定（FAILED／INCOMPLETE）；<code>BF4_IDENTITIES</code>、<code>CPU_ONLINE</code>、<code>MEMORY_VISIBLE</code> 平台一致性；<code>DMESG_*</code> 日誌硬體錯誤（KERNEL／ARM／MCE／PCIE／NVME／NIC／GPU）。看 Code 前綴即可知道是哪一類問題，細節點開該 Issue 的 Evidence 看。</p>
+<h3>溫度巡檢（CPU／GPU）什麼時候跑、為什麼要開？</h3><p>Cycle 的 Inspection 階段除感測器、網路與日誌外，會額外採集 CPU／GPU 溫度與頻率作為硬體健康證據，納入正式驗證。它與 <code>SENSOR_*</code>／<code>DMESG_*</code> 並列；若溫度越限或讀不到，會對應成 Issue 出現在報告的 Issue 分頁。需要比對溫度趨勢時，連同 Telemetry（host／GPU 分離）一起看。</p>
 </section>
 <section class="ug-sec" id="ug-key"><h2>28. 快捷鍵與閱讀提示</h2>
 <table class="ug-table"><tr><th>操作</th><th>用途</th></tr><tr><td>?</td><td>一般頁面焦點開啟使用手冊；在輸入欄、可編輯內容、Terminal、廣播終端或 KVM 操作中不會攔截按鍵。</td></tr><tr><td>手冊搜尋</td><td>依整段內容篩選，例如 OS Slot、PA Agent、PRE、Exporter、Evidence、KVM。清空恢復全部。</td></tr><tr><td>手冊目錄連結</td><td>跳到指定章節，不切換目前系統頁面。</td></tr><tr><td>手冊標題列與右下角</td><td>拖動位置與調整大小；最小化後可點標題列，或再次啟用同一個最小化控制來還原。</td></tr><tr><td>3D 方向鍵／Shift＋方向鍵</td><td>畫布聚焦時旋轉；Home 重設，＋／－縮放。</td></tr></table>
