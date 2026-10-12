@@ -33,6 +33,20 @@ $env:CYCLE_MODE='synthetic'
 - [本次與歷史验收分界](docs/ACCEPTANCE.md)
 - [固定來源版本](SOURCE_BASELINES.json)
 - [目前 UI 設計系統](DESIGN.md)
+- [Vera Cycle 驗證規範](CYCLE_VALIDATION_SPECIFICATION.html)：說明「跑一次 cycle 到底驗什麼」，逐項對應 engine 實際的檢查與 Issue Code，中英雙語。
+
+## 驗證規範（Validation Specification）
+
+每份 Cycle 報告都會附帶一份 `CYCLE_VALIDATION_SPECIFICATION.html`，報告右上角的「Validation Specification／驗證規範」即連到它。它與報告放在同一資料夾、以相對連結互連，因此報告連同 Evidence 一起下載或分享時仍可開啟。
+
+規範內容由 `engine/vera_cycle/cycle_specification_6969.py` 產生（self-contained，不 import engine），30 個驗證項目逐項標註來源於 `validation_collectors.py`、`validation_rules.py`、`validation_identity.py`、`validation_events.py`、`cycle_dmesg.py`、`cycle_engine.py` 與專案 `*_config.sh`。內容以本系統實際行為為準，包含 6969 專屬檢查（`NET_*`、`SEL_EVENT`、`REDFISH_EVENT`、`USB_DRIFT`、host power、asset identity、GPU），並如實註明未定義 `UNEXPECTED_BOOT_TRANSITION`（改以 boot ID 轉換判定）。重新產生：
+
+```bash
+cd engine/vera_cycle
+python3 -m cycle_specification_6969 --out ../../CYCLE_VALIDATION_SPECIFICATION.html
+```
+
+規範是說明文件，不操作設備、不改變任務結果。
 
 Live 需要真正的 server-side authentication/authorization、credential/identity provider 和已核實的 action scope。沒有 provider 時不能用環境變數 operator 冒充 caller；live fail closed。共享電源 selector 尚未完成實機能力契約，僅 synthetic coordinator 已驗證。不得將 AUX script 等同已驗證的 AC input isolation。
 

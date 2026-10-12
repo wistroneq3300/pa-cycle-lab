@@ -223,6 +223,7 @@
 <ol><li>從 Cycle 工作區或機框／節點入口建立任務，選專案、Reboot／DC Power Cycle／AUX Cycle、Inband／Outband、輪次或時數，再勾選 Chassis 下的 Node。</li>
 <li>先讀環境標示：「測試模式」不操作實體設備；只有經部署與能力確認且畫面標示 LIVE 的任務才可視為硬體連線流程。</li>
 <li>建立任務後系統先執行並保存 PRE。LIVE PRE 可能安裝依賴或上傳驗證腳本；PRE 完成不代表硬體已通過。</li>
+<li>想知道「這次 cycle 到底會驗哪些項目」，可從任一 Cycle 報告右上角的「驗證規範／Validation Specification」開啟 <strong>Vera Cycle 驗證規範</strong>。規範逐項對應本系統實際的檢查與 Issue Code（例如 <code>SENSOR_CRITICAL</code>、<code>NIC_MISSING</code>、<code>PCI_DRIFT</code>、<code>NET_DRIFT</code>、<code>DMESG_*</code>、<code>REDFISH_CRITICAL</code>），並標明每個項目屬於 PRE、Cycle 或 POST。它是說明文件，不操作設備、也不改變任務結果。</li>
 <li>審閱 PRE 版本、每個目標的 findings、排除原因、可執行清單及完整影響範圍，再按「確認這份 PRE 與完整影響範圍，開始執行」。確認綁定同一份 PRE，資料變更時應重新審閱。</li>
 <li>執行中分開看任務狀態、累積健康、有效輪數、Boot／POST 與覆蓋；<code>COMPLETE</code> 是執行終點，不自動等於硬體 PASS。</li>
 <li>「停止：不再派送新動作」只阻止後續派送。已派送的動作仍會收尾或進入 Recovery；不要把按下停止當作所有設備已立即停止。</li>
@@ -233,6 +234,7 @@
 <section class="ug-sec" id="ug-reports"><h2>24. Test Results、Evidence 與下載</h2>
 <ol><li>進入 Cycle 任務後，Test Results 會自動載入第一批報告與 Evidence。先看 Official HTML Report，再依 Node、Loop／Phase、Evidence Type、WARN／FAIL 與檔名篩選；大量檔案可按「載入更多」。</li>
 <li>Cycle Review 報告、Cycle 摘要、最終執行結果、已知／新增／惡化問題與各輪 JSON 都是保存的執行資料；仍須連同健康與覆蓋判讀，不能只因有報告就標記 PASS。</li>
+<li>正式報告右上角有「驗證規範／Validation Specification」入口，開啟隨報告附帶的 <strong>Vera Cycle 驗證規範</strong>（<code>CYCLE_VALIDATION_SPECIFICATION.html</code>）。它與報告放在同一個資料夾、以相對連結互連，因此把報告連同 Evidence 一起下載或分享時，規範仍可開啟。規範會隨每次報告產生更新，內容以本系統目前的驗證行為為準。</li>
 <li>Download Full ZIP 只在安全終態提供，下載整個 Run 的允許交付資料與 Manifest；RUNNING／STOP_REQUESTED 不可建立。ERROR／RECONCILIATION_REQUIRED 必須先確認 Runner 已停止及資料一致性。</li>
 <li>Live Console 可依節點、Errors 與文字篩選，並切換 Summary／Full、暫停檢視或查找 History；畫面只保存有限筆瀏覽內容，需要完整紀錄時使用 Console 的下載功能。</li>
 <li>Telemetry 啟用 Console 使用「下載完整紀錄」；Inspection 原始證據預覽若截斷，使用「下載完整證據」。下載前核對系統、Node、來源與時間。</li>
