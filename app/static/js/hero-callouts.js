@@ -33,8 +33,8 @@
     }
     function update(event){
       if(disposed)return;
-      const detail=event.detail||{},p=detail.progress??1;
-      if(p<.18||p>=.327||canvas.dataset.coreState!=='ready'){
+      const detail=event.detail||{},p=detail.rackProgress??detail.progress??1;
+      if(detail.calloutVisibility===0||p<.18||p>=.327||canvas.dataset.coreState!=='ready'){
         svg.style.display='none';state={visible:false,labels:[]};return;
       }
       const {width:w,height:h}=canvas.getBoundingClientRect();if(!w||!h)return;

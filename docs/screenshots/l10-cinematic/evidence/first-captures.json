@@ -1,0 +1,605 @@
+{
+  "note": "Selected original capture state; complete raw getState output is retained in the local artifacts capture folder.",
+  "viewport": {
+    "height": 1440,
+    "width": 3440,
+    "deviceScaleFactor": 1
+  },
+  "errors": [],
+  "captures": [
+    {
+      "file": "3440x1440-01-exploded.png",
+      "progress": 0.035,
+      "view": "authored",
+      "state": {
+        "supported": true,
+        "ready": true,
+        "contextLost": false,
+        "progress": 0.035,
+        "settling": false,
+        "theme": "dark",
+        "model": "generic-liquid-cooled-compute",
+        "l10": {
+          "board": 0,
+          "packages": 0,
+          "io": 0,
+          "cooling": 0,
+          "flow": 0,
+          "lid": 0,
+          "boardLift": 0.66,
+          "packageLift": 1.25,
+          "ioLift": 0.82,
+          "coolingLift": 2.05,
+          "phase": "l10-exploded",
+          "packageSeparation": "visual-only / board-integrated packages",
+          "flowMeaning": "conceptual thermal-flow overlay",
+          "profile": "liquid-compute-1u-v1"
+        },
+        "rackProgress": 0,
+        "camera": {
+          "yaw": -0.518516480922699,
+          "elevation": 0.6700000166893005,
+          "distance": 16.48963165283203,
+          "target": [
+            -3.646400213241577,
+            5.449999809265137,
+            5.49399995803833
+          ],
+          "eye": [
+            -10.051894187927246,
+            15.68982982635498,
+            16.72001838684082
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 20.826127875066877,
+          "pixelCount": 2599995,
+          "adaptive": true
+        },
+        "geometryBuffers": 24,
+        "vertices": 1532178,
+        "drawCalls": 6,
+        "computeTrays": 18,
+        "primaryName": "editorial-compute-01",
+        "primaryPose": {
+          "x": -5.3,
+          "y": 4.65,
+          "z": 7,
+          "scale": 1
+        },
+        "targetU": 40
+      }
+    },
+    {
+      "file": "3440x1440-02-cpu-gpu-assembly.png",
+      "progress": 0.177,
+      "view": "authored",
+      "state": {
+        "supported": true,
+        "ready": true,
+        "contextLost": false,
+        "progress": 0.177,
+        "settling": false,
+        "theme": "dark",
+        "model": "generic-liquid-cooled-compute",
+        "l10": {
+          "board": 1,
+          "packages": 0.8369199999999998,
+          "io": 0,
+          "cooling": 0,
+          "flow": 0,
+          "lid": 0,
+          "boardLift": 0,
+          "packageLift": 0.20385000000000028,
+          "ioLift": 0.82,
+          "coolingLift": 2.05,
+          "phase": "cpu-gpu-assembly",
+          "packageSeparation": "visual-only / board-integrated packages",
+          "flowMeaning": "conceptual thermal-flow overlay",
+          "profile": "liquid-compute-1u-v1"
+        },
+        "rackProgress": 0,
+        "camera": {
+          "yaw": -0.40234968066215515,
+          "elevation": 0.6700000166893005,
+          "distance": 16.965280532836914,
+          "target": [
+            -3.646400213241577,
+            5.062089443206787,
+            5.49399995803833
+          ],
+          "eye": [
+            -8.853554725646973,
+            15.597290992736816,
+            17.729841232299805
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 18.01083283509088,
+          "pixelCount": 2599995,
+          "adaptive": true
+        },
+        "geometryBuffers": 24,
+        "vertices": 1532178,
+        "drawCalls": 6,
+        "computeTrays": 18,
+        "primaryName": "editorial-compute-01",
+        "primaryPose": {
+          "x": -5.3,
+          "y": 4.65,
+          "z": 7,
+          "scale": 1
+        },
+        "targetU": 40
+      }
+    },
+    {
+      "file": "3440x1440-03-cooling-install.png",
+      "progress": 0.265,
+      "view": "authored",
+      "state": {
+        "supported": true,
+        "ready": true,
+        "contextLost": false,
+        "progress": 0.265,
+        "settling": false,
+        "theme": "dark",
+        "model": "generic-liquid-cooled-compute",
+        "l10": {
+          "board": 1,
+          "packages": 1,
+          "io": 1,
+          "cooling": 0.36147013671875106,
+          "flow": 0,
+          "lid": 0,
+          "boardLift": 0,
+          "packageLift": 0,
+          "ioLift": 0,
+          "coolingLift": 1.3089862197265603,
+          "phase": "cooling-install",
+          "packageSeparation": "visual-only / board-integrated packages",
+          "flowMeaning": "conceptual thermal-flow overlay",
+          "profile": "liquid-compute-1u-v1"
+        },
+        "rackProgress": 0,
+        "camera": {
+          "yaw": -0.2949948012828827,
+          "elevation": 0.7187672257423401,
+          "distance": 15.045208930969238,
+          "target": [
+            -3.646400213241577,
+            4.75678014755249,
+            5.49399995803833
+          ],
+          "eye": [
+            -6.938477039337158,
+            14.663409233093262,
+            16.328170776367188
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 17.60896006875795,
+          "pixelCount": 2599995,
+          "adaptive": true
+        },
+        "geometryBuffers": 24,
+        "vertices": 1532178,
+        "drawCalls": 6,
+        "computeTrays": 18,
+        "primaryName": "editorial-compute-01",
+        "primaryPose": {
+          "x": -5.3,
+          "y": 4.65,
+          "z": 7,
+          "scale": 1
+        },
+        "targetU": 40
+      }
+    },
+    {
+      "file": "3440x1440-04-cooling-flow.png",
+      "progress": 0.314,
+      "view": "authored",
+      "state": {
+        "supported": true,
+        "ready": true,
+        "contextLost": false,
+        "progress": 0.314,
+        "settling": false,
+        "theme": "dark",
+        "model": "generic-liquid-cooled-compute",
+        "l10": {
+          "board": 1,
+          "packages": 1,
+          "io": 1,
+          "cooling": 1,
+          "flow": 1,
+          "lid": 0,
+          "boardLift": 0,
+          "packageLift": 0,
+          "ioLift": 0,
+          "coolingLift": 0,
+          "phase": "cooling-reveal",
+          "packageSeparation": "visual-only / board-integrated packages",
+          "flowMeaning": "conceptual thermal-flow overlay",
+          "profile": "liquid-compute-1u-v1"
+        },
+        "rackProgress": 0,
+        "camera": {
+          "yaw": -0.26080185174942017,
+          "elevation": 0.8596499562263489,
+          "distance": 15.058295249938965,
+          "target": [
+            -3.646400213241577,
+            4.750016689300537,
+            5.49399995803833
+          ],
+          "eye": [
+            -6.180755138397217,
+            16.15839385986328,
+            14.990221977233887
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 19.304394583678032,
+          "pixelCount": 2599995,
+          "adaptive": true
+        },
+        "geometryBuffers": 24,
+        "vertices": 1532178,
+        "drawCalls": 8,
+        "computeTrays": 18,
+        "primaryName": "editorial-compute-01",
+        "primaryPose": {
+          "x": -5.3,
+          "y": 4.65,
+          "z": 7,
+          "scale": 1
+        },
+        "targetU": 40
+      }
+    },
+    {
+      "file": "3440x1440-05-l10-hero.png",
+      "progress": 0.354,
+      "view": "authored",
+      "state": {
+        "supported": true,
+        "ready": true,
+        "contextLost": false,
+        "progress": 0.354,
+        "settling": false,
+        "theme": "dark",
+        "model": "generic-liquid-cooled-compute",
+        "l10": {
+          "board": 1,
+          "packages": 1,
+          "io": 1,
+          "cooling": 1,
+          "flow": 0,
+          "lid": 0,
+          "boardLift": 0,
+          "packageLift": 0,
+          "ioLift": 0,
+          "coolingLift": 0,
+          "phase": "l10-hero",
+          "packageSeparation": "visual-only / board-integrated packages",
+          "flowMeaning": "conceptual thermal-flow overlay",
+          "profile": "liquid-compute-1u-v1"
+        },
+        "rackProgress": 0,
+        "camera": {
+          "yaw": -0.250787615776062,
+          "elevation": 0.8177275657653809,
+          "distance": 14.697975158691406,
+          "target": [
+            -3.646400213241577,
+            4.750000953674316,
+            5.49399995803833
+          ],
+          "eye": [
+            -6.140892028808594,
+            15.473549842834473,
+            15.231221199035645
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 20.29445300850063,
+          "pixelCount": 2599995,
+          "adaptive": true
+        },
+        "geometryBuffers": 24,
+        "vertices": 1532178,
+        "drawCalls": 6,
+        "computeTrays": 18,
+        "primaryName": "editorial-compute-01",
+        "primaryPose": {
+          "x": -5.3,
+          "y": 4.65,
+          "z": 7,
+          "scale": 1
+        },
+        "targetU": 40
+      }
+    },
+    {
+      "file": "3440x1440-06-rack-bridge.png",
+      "progress": 0.515,
+      "view": "authored",
+      "state": {
+        "supported": true,
+        "ready": true,
+        "contextLost": false,
+        "progress": 0.515,
+        "settling": false,
+        "theme": "dark",
+        "model": "generic-liquid-cooled-compute",
+        "l10": {
+          "board": 1,
+          "packages": 1,
+          "io": 1,
+          "cooling": 1,
+          "flow": 0,
+          "lid": 1,
+          "boardLift": 0,
+          "packageLift": 0,
+          "ioLift": 0,
+          "coolingLift": 0,
+          "phase": "camera-bridge",
+          "packageSeparation": "visual-only / board-integrated packages",
+          "flowMeaning": "conceptual thermal-flow overlay",
+          "profile": "liquid-compute-1u-v1"
+        },
+        "rackProgress": 0.29268013596534714,
+        "camera": {
+          "yaw": -0.30913105607032776,
+          "elevation": 0.21857695281505585,
+          "distance": 52.03400421142578,
+          "target": [
+            -0.5666235685348511,
+            0.7381148934364319,
+            0.8537269830703735
+          ],
+          "eye": [
+            -16.020328521728516,
+            12.021202087402344,
+            49.24187088012695
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 17.335841729145915,
+          "pixelCount": 2599995,
+          "adaptive": true
+        },
+        "geometryBuffers": 24,
+        "vertices": 1532178,
+        "drawCalls": 50,
+        "computeTrays": 18,
+        "primaryName": "editorial-compute-01",
+        "primaryPose": {
+          "x": -5.3,
+          "y": 4.65,
+          "z": 7,
+          "scale": 1
+        },
+        "targetU": 40
+      }
+    },
+    {
+      "file": "3440x1440-07-rack-insertion.png",
+      "progress": 0.694,
+      "view": "authored",
+      "state": {
+        "supported": true,
+        "ready": true,
+        "contextLost": false,
+        "progress": 0.694,
+        "settling": false,
+        "theme": "dark",
+        "model": "generic-liquid-cooled-compute",
+        "l10": {
+          "board": 1,
+          "packages": 1,
+          "io": 1,
+          "cooling": 1,
+          "flow": 0,
+          "lid": 1,
+          "boardLift": 0,
+          "packageLift": 0,
+          "ioLift": 0,
+          "coolingLift": 0,
+          "phase": "rack-integration",
+          "packageSeparation": "visual-only / board-integrated packages",
+          "flowMeaning": "conceptual thermal-flow overlay",
+          "profile": "liquid-compute-1u-v1"
+        },
+        "rackProgress": 0.5409999999999999,
+        "camera": {
+          "yaw": -0.7119758725166321,
+          "elevation": 0.26197928190231323,
+          "distance": 15.800347328186035,
+          "target": [
+            -5.430731107480824E-06,
+            4.649962425231934,
+            3.16660737991333
+          ],
+          "eye": [
+            -9.970637321472168,
+            8.742138862609863,
+            14.720462799072266
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 16.998858221372085,
+          "pixelCount": 2599995,
+          "adaptive": true
+        },
+        "geometryBuffers": 24,
+        "vertices": 1532178,
+        "drawCalls": 53,
+        "computeTrays": 18,
+        "primaryName": "editorial-compute-01",
+        "primaryPose": {
+          "x": 0,
+          "y": 4.65,
+          "z": 3.7484157410013053,
+          "scale": 1
+        },
+        "targetU": 40
+      }
+    },
+    {
+      "file": "3440x1440-08-l11-overview.png",
+      "progress": 1,
+      "view": "authored",
+      "state": {
+        "supported": true,
+        "ready": true,
+        "contextLost": false,
+        "progress": 1,
+        "settling": false,
+        "theme": "dark",
+        "model": "generic-liquid-cooled-compute",
+        "l10": {
+          "board": 1,
+          "packages": 1,
+          "io": 1,
+          "cooling": 1,
+          "flow": 0,
+          "lid": 1,
+          "boardLift": 0,
+          "packageLift": 0,
+          "ioLift": 0,
+          "coolingLift": 0,
+          "phase": "rack-integration",
+          "packageSeparation": "visual-only / board-integrated packages",
+          "flowMeaning": "conceptual thermal-flow overlay",
+          "profile": "liquid-compute-1u-v1"
+        },
+        "rackProgress": 1,
+        "camera": {
+          "yaw": -0.480002760887146,
+          "elevation": 0.0850021243095398,
+          "distance": 43.43772506713867,
+          "target": [
+            -2.3940811139100404E-11,
+            5.568484994000755E-05,
+            3.7921141483820975E-05
+          ],
+          "eye": [
+            -19.98632049560547,
+            3.6879098415374756,
+            38.389915466308594
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 17.417165197360085,
+          "pixelCount": 2599995,
+          "adaptive": true
+        },
+        "geometryBuffers": 24,
+        "vertices": 1532178,
+        "drawCalls": 54,
+        "computeTrays": 18,
+        "primaryName": "editorial-compute-01",
+        "primaryPose": {
+          "x": 0,
+          "y": 4.65,
+          "z": 0,
+          "scale": 1
+        },
+        "targetU": 40
+      }
+    },
+    {
+      "file": "3440x1440-09-l11-rear.png",
+      "progress": 1,
+      "view": "rear",
+      "state": {
+        "supported": true,
+        "ready": true,
+        "contextLost": false,
+        "progress": 1,
+        "settling": false,
+        "theme": "dark",
+        "model": "generic-liquid-cooled-compute",
+        "l10": {
+          "board": 1,
+          "packages": 1,
+          "io": 1,
+          "cooling": 1,
+          "flow": 0,
+          "lid": 1,
+          "boardLift": 0,
+          "packageLift": 0,
+          "ioLift": 0,
+          "coolingLift": 0,
+          "phase": "rack-integration",
+          "packageSeparation": "visual-only / board-integrated packages",
+          "flowMeaning": "conceptual thermal-flow overlay",
+          "profile": "liquid-compute-1u-v1"
+        },
+        "rackProgress": 1,
+        "camera": {
+          "yaw": -3.141263961791992,
+          "elevation": 0.06500246375799179,
+          "distance": 43.29275131225586,
+          "target": [
+            -2.643242544872297E-15,
+            6.14802164733419E-09,
+            4.186773594483384E-09
+          ],
+          "eye": [
+            -0.014199919067323208,
+            2.8121540546417236,
+            -43.201316833496094
+          ],
+          "fov": 0.5,
+          "view": "rear"
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 16.694288417041804,
+          "pixelCount": 2599995,
+          "adaptive": true
+        },
+        "geometryBuffers": 24,
+        "vertices": 1532178,
+        "drawCalls": 54,
+        "computeTrays": 18,
+        "primaryName": "editorial-compute-01",
+        "primaryPose": {
+          "x": 0,
+          "y": 4.65,
+          "z": 0,
+          "scale": 1
+        },
+        "targetU": 40
+      }
+    }
+  ]
+}

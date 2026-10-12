@@ -708,6 +708,26 @@
   // exterior references, not a vendor port map, CAD file, or cooling topology.
   // Operational inventory geometry above deliberately retains its own behavior.
   const E={skin:[.235,.265,.285],lid:[.31,.34,.36],fold:[.15,.18,.20],frame:[.082,.105,.12],edge:[.48,.525,.55],port:[.68,.71,.73],portInner:[.31,.34,.35],polymer:[.033,.047,.055],jacket:[.070,.091,.102],rear:[.255,.29,.31],seam:[.012,.021,.026]};
+  function editorialFluidCoupling(mesh,x,y,z,front=-1,scale=1,identification=0){
+    // Original turned-metal interpretation, not an asserted vendor fitting.
+    // A continuous revolved section retains real shoulder/seat normals rather
+    // than a stack of flat-ended cylinders. The collar is mechanically distinct
+    // from the neighboring keyed power and data connectors.
+    const profile=[[0,.052],[.006,.063],[.017,.063],[.024,.055],[.054,.055],[.060,.061],[.084,.061],[.091,.051],[.119,.051],[.129,.043]],sides=24;
+    const emit=(depth,radius,angle,nr,nz,color)=>mesh.data.push(x+Math.cos(angle)*radius*scale,y+Math.sin(angle)*radius*scale,z+front*depth*scale,Math.cos(angle)*nr,Math.sin(angle)*nr,front*nz,...color,.86,0);
+    for(let p=1;p<profile.length;p++){
+      const [za,ra]=profile[p-1],[zb,rb]=profile[p],length=Math.hypot(zb-za,rb-ra),nr=(zb-za)/length,nz=(ra-rb)/length;
+      const color=p===4?E.portInner:p===7?E.edge:E.port;
+      for(let i=0;i<sides;i++){
+        const a=i/sides*TAU,b=(i+1)/sides*TAU;
+        for(const [d,r,t] of [[za,ra,a],[za,ra,b],[zb,rb,b],[za,ra,a],[zb,rb,b],[zb,rb,a]])emit(d,r,t,nr,nz,color);
+      }
+    }
+    // Retaining grooves and a narrow dyed identification band are surface
+    // finishes; neither emits light or suggests colored liquid.
+    for(const depth of [.034,.044,.104])mesh.tube([x,y,z+front*depth*scale],[x,y,z+front*(depth+.002)*scale],(depth>.10?.0515:.0555)*scale,E.fold,24,.63);
+    if(identification)mesh.tube([x,y,z+front*.075*scale],[x,y,z+front*.079*scale],.0614*scale,identification<0?[.09,.18,.24]:[.29,.13,.09],24,.40);
+  }
   function editorialPerforation(m,x,y,z,w,h,color=C.gold,front=1,pitch=.028,backing=true){
     // Punched sheet, with real-depth grille bars over a recessed dark plenum.
     // At inspection distance the aperture edges catch a different highlight
@@ -963,8 +983,7 @@
       }
       for(const side of [-1,1]){
         V(side*1.69,0,rear-.062,.191,.224,.044,E.edge,.008,.81);
-        fluidPort(m,side*1.69,0,rear-.046,.050,-1);
-        T([side*1.69,0,rear-.150],[side*1.69,0,rear-.179],.064,E.port,18,.86);
+        editorialFluidCoupling(m,side*1.69,0,rear-.049,-1,1,side);
         for(const sy of [-1,1])screw(m,side*1.753,sy*.078,rear-.093,-1);
         B(side*1.841,0,rear-.091,.053,.122,.067,E.fold,.72);
       }
@@ -1045,9 +1064,20 @@
       // Paired outer metal manifolds: capped external building-loop interfaces
       // with no CDU inside or beside this conceptual compute rack.
       const x=side*1.78;
-      T([x,-6.72,-3.54],[x,6.69,-3.54],.085,E.rear,16,.82);
-      for(const y of [-6.45,-4.18,-1.78,.62,3.02,5.42,6.47]){V(x,y,-3.46,.245,.085,.29,E.fold,.015,.72);T([x,y,-3.60],[x,y,-3.642],.108,E.edge,16,.80);}
-      for(const y of [-6.72,6.70]){T([x,y,-3.54],[x,y+side*.025,-3.83],.103,E.edge,16,.84);T([x,y+side*.025,-3.82],[x,y+side*.025,-3.875],.074,E.polymer,16,.12);}
+      T([x,-6.72,-3.54],[x,6.69,-3.54],.085,E.rear,32,.82);
+      for(const y of [-6.45,-4.18,-1.78,.62,3.02,5.42,6.47]){
+        V(x,y,-3.46,.245,.085,.29,E.fold,.012,.72);
+        // A split saddle, dark isolation liner and captive fasteners attach
+        // the riser to the service rail. There are no floating metal pucks.
+        T([x,y-.028,-3.54],[x,y+.028,-3.54],.093,E.polymer,24,.13);
+        T([x,y-.017,-3.54],[x,y+.017,-3.54],.102,E.edge,24,.78);
+        for(const dx of [-.095,.095]){T([x+dx,y,-3.575],[x+dx,y,-3.620],.017,E.port,12,.81);B(x+dx,y,-3.621,.018,.004,.003,E.fold,.55);}
+      }
+      for(const y of [-6.72,6.70]){
+        T([x,y,-3.54],[x,y,-3.716],.073,E.rear,32,.83);
+        editorialFluidCoupling(infrastructure,x,y,-3.71,-1,1.12,side);
+        T([x,y,-3.852],[x,y,-3.875],.049,E.polymer,24,.13);
+      }
       // Shrouded cartridge carriers and ladder combs organize rear interconnect
       // without portraying generic Ethernet patch leads as NVIDIA's topology.
       V(side*.99,0,-3.455,.88,13.52,.12,E.frame,.018,-.7);
@@ -1123,10 +1153,13 @@
           route('interconnect',item,from,to,[from,[x,y+dy,rear-.66],[side*(.91+pair*.11),y+dy-.15,-4.00-pair*.055],to],.019,pair?E.jacket:[.10,.126,.137]);
         }
         const from=[side*1.69,y,rear-.245],to=[side*1.78,y-.040,-3.69];
-        T([side*1.78,y-.040,-3.54],to,.044,E.edge,12,.83);
+        T([side*1.78,y-.040,-3.54],[side*1.78,y-.040,-3.56],.047,E.edge,24,.83);
+        editorialFluidCoupling(infrastructure,side*1.78,y-.040,-3.56,-1,1,side);
         route('cooling',item,from,to,[from,[side*1.45,y,rear-.74],[side*1.46,y-.040,-4.04],to],.034,E.jacket,.14);
         // Small retained collars visually separate elastomer from turned metal.
-        connections.tube([side*1.69,y,rear-.210],from,.045,E.edge,12,.83);
+        connections.tube([side*1.69,y,rear-.176],[side*1.69,y,rear-.225],.039,E.jacket,20,.16);
+        connections.tube([side*1.69,y,rear-.210],from,.044,E.edge,24,.83);
+        for(const dz of [.217,.235])connections.tube([side*1.69,y,rear-dz],[side*1.69,y,rear-dz-.003],.0445,E.fold,24,.59);
       }
       if(type==='server'||type==='nvlink'||type==='powershelf'){
         const from=[.22,y,rear-.184],to=[.115,y,-3.635];connector(from[0],y,from[2]+.023,.125,.095);

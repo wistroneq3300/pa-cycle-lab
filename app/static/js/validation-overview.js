@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const replayKey='pa_dashboard_cinematic_v3_played';
+  const replayKey='pa_dashboard_cinematic_l10_v1_played';
   const REFRESH_MS=30000;
   let overview=null,selectedProject='',loading=null,teardown=()=>{};
   const quote=value=>esc(JSON.stringify(String(value)));
@@ -23,10 +23,11 @@
         <button class="btn primary" type="button" data-vo-enter>進入系統與專案</button>
       </div>
       <div class="cine-stage vo-scene" id="core-stage" data-phase="system">
-        <div class="cine-core" id="core-visual"><img class="cine-fallback" src="/static/img/server-hero.png" alt="伺服器設備視圖"><canvas id="system-core" tabindex="0" role="img" aria-label="AI infrastructure 整櫃組裝：空機櫃、設備辨識、多組同步進場、實體導軌特寫、工程展開與完整機櫃" aria-describedby="core-interaction-help"></canvas><svg class="vo-device-callouts" data-vo-callouts aria-hidden="true"></svg></div>
+        <div class="cine-core" id="core-visual"><img class="cine-fallback" src="/static/img/server-hero.png" alt="伺服器設備視圖"><canvas id="system-core" tabindex="0" role="img" aria-label="L10 分解與組裝、CPU 與 GPU 封裝、液冷示意、連續機櫃整合與 System Overview" aria-describedby="core-interaction-help"></canvas><svg class="vo-device-callouts" data-vo-callouts aria-hidden="true"></svg></div>
         <div class="vo-phase"><span data-vo-phase-number>01</span><div><b data-vo-phase-title>L10 SYSTEM</b><small data-vo-phase-detail>SERVER FOCUS</small></div></div>
+        <div class="vo-l10-note" data-vo-l10-note></div>
         <div class="vo-cinematic-progress" aria-hidden="true"><i data-vo-progress></i></div>
-        <button class="vo-replay" type="button" data-vo-replay aria-label="重播機櫃電影展示">↻ 重播</button>
+        <button class="vo-replay" type="button" data-vo-replay aria-label="重播 L10 與 Rack 展示">↻ 重播</button>
         <div class="cine-core-tools" id="core-tools"><span id="core-interaction-help">按住拖曳旋轉 · 方向鍵查看 · Home 重設</span><div><button type="button" data-core-view="rear" aria-label="3D 模型背面視角">背面</button><button type="button" data-core-view="reset" aria-label="重設 3D 模型視角">重設視角</button></div></div>
         <div id="core-system-copy" class="vo-a11y-state" aria-hidden="false">L10 System</div><div id="core-rack-copy" class="vo-a11y-state" inert aria-hidden="true">L11 Rack</div>
       </div>
@@ -79,31 +80,43 @@
   const ease=t=>t*t*(3-2*t);
   // The scene owns geometry and camera interpolation. This is the single owner
   // of cinematic time; cinematic.js only mounts/themes the compact scene.
-  const FILM_MS=24000;
-  const filmKeys=[[0,0],[1.8,.10],[3.6,.19],[4.25,.225],[5.45,.28],[6.45,.34],[9.8,.48],[12.6,.60],[15,.70],[16,.76],[18.5,.84],[19.5,.86],[22,.94],[24,1]];
+  const FILM_MS=35200;
+  const filmKeys=[[0,0],[1.7,.065],[3.3,.135],[5.4,.202],[6.6,.248],[8.4,.292],[8.65,.300],[9.7,.325],[9.9,.333],[12,.376],[13,.407],[17.5,.56],[21,.653333],[23.8,.733333],[26.2,.80],[27.2,.84],[29.7,.893333],[30.7,.906667],[33.2,.96],[35.2,1]];
   const shots=[
-    [0,'reveal','01','AI INFRASTRUCTURE','REVEAL / 48U ARCHITECTURE'],
-    [.10,'constellation','02','DEVICE CONSTELLATION','COMPUTE / FABRIC / POWER'],
-    [.19,'identify','03','SYSTEM ARCHITECTURE','IDENTIFY / INFRASTRUCTURE COMPONENTS'],
-    [.34,'convergence','04','FULL-RACK ASSEMBLY','COORDINATED EQUIPMENT CONVERGENCE'],
-    [.48,'insertion','05','PRECISION IN MOTION','U40 / TELESCOPING RAIL ENGAGEMENT'],
-    [.60,'pullback','06','RACK-SCALE INTEGRATION','SYNCHRONIZED ASSEMBLY'],
-    [.70,'complete','07','SYSTEM ASSEMBLED','COMPUTE / INTERCONNECT / POWER'],
-    [.76,'exploded','08','ENGINEERING STUDY','ARCHITECTURE LAYERS'],
-    [.86,'return','09','PRECISION ENGINEERING','RETURN / EXACT SEATING'],
-    [.94,'final','10','AI INFRASTRUCTURE','RACK-SCALE COMPUTING']
+    [0,'l10-exploded','01','L10 Exploded View','COMPUTE / COOLING / ENCLOSURE'],
+    [.065,'compute-board','02','L10 Assembly','COMPUTE BOARD'],
+    [.135,'cpu-gpu-assembly','03','CPU / GPU Assembly','BOARD-INTEGRATED PACKAGES'],
+    [.202,'network-storage','04','L10 Assembly','NETWORKING / STORAGE / MANAGEMENT'],
+    [.248,'cooling-install','05','Cooling Assembly','COLD PLATES / FITTINGS'],
+    [.292,'cooling-reveal','06','Cooling Flow Reveal','CONCEPTUAL THERMAL FLOW OVERLAY'],
+    [.333,'l10-hero','07','L10 Assembly View','LIQUID-COOLED COMPUTE TRAY'],
+    [.376,'chassis-close','08','L10 Assembly','ENCLOSURE CLOSURE'],
+    [.407,'camera-bridge','09','Rack Integration','CONTINUOUS CAMERA TRANSITION'],
+    [.56,'convergence','10','Rack Integration','COORDINATED EQUIPMENT ASSEMBLY'],
+    [.653333,'insertion','11','Rack Integration','U40 / RAIL ENGAGEMENT'],
+    [.733333,'pullback','12','System Overview','COMPUTE / INTERCONNECT / POWER'],
+    [.84,'exploded','13','System Overview','ARCHITECTURE LAYERS'],
+    [.906667,'return','14','System Overview','RETURN / EXACT SEATING'],
+    [.96,'final','15','System Overview','RACK-SCALE COMPUTING']
   ];
   function applyProgress(value){
     const stage=document.getElementById('core-stage'),canvas=document.getElementById('system-core');if(!stage||!canvas)return;
     const progress=clamp(value);canvas.paCoreScene?.setProgress(progress);
-    stage.dataset.phase=progress<.10?'system':progress<.70?'integration':'rack';
+    stage.dataset.phase=progress<.407?'system':progress<.80?'integration':'rack';
     let shot=shots[0];for(const candidate of shots){if(progress<candidate[0])break;shot=candidate;}
     if(stage.dataset.shot!==shot[1]){
       stage.dataset.shot=shot[1];
       stage.querySelector('[data-vo-phase-number]').textContent=shot[2];
       stage.querySelector('[data-vo-phase-title]').textContent=shot[3];
       stage.querySelector('[data-vo-phase-detail]').textContent=shot[4];
-      const system=stage.querySelector('#core-system-copy'),rack=stage.querySelector('#core-rack-copy'),showRack=progress>=.70;
+      const note=stage.querySelector('[data-vo-l10-note]');
+      note.replaceChildren();
+      if(progress<.202)note.textContent='Visual separation · CPU / GPU packages are integrated with the compute boards';
+      else if(progress>=.292&&progress<.333){
+        for(const [label,cls]of [['Supply / Inlet','supply'],['Return / Outlet','return']]){const item=document.createElement('span');item.className=cls;item.textContent=label;note.append(item);}
+        const detail=document.createElement('small');detail.textContent='Conceptual thermal flow · colors indicate direction, not coolant color';note.append(detail);
+      }
+      const system=stage.querySelector('#core-system-copy'),rack=stage.querySelector('#core-rack-copy'),showRack=progress>=.80;
       system.inert=showRack;system.setAttribute('aria-hidden',String(showRack));
       rack.inert=!showRack;rack.setAttribute('aria-hidden',String(!showRack));
     }
@@ -163,7 +176,7 @@
     }
     const motionChange=()=>{
       replay.disabled=reduced.matches;replay.setAttribute('aria-disabled',String(reduced.matches));
-      replay.title=reduced.matches?'已依減少動態效果偏好停用重播':'重播機櫃電影展示';
+      replay.title=reduced.matches?'已依減少動態效果偏好停用重播':'重播 L10 與 Rack 展示';
       if(reduced.matches)seek(1);
     };
     const visibilityChange=()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;lastTime=0;}else if(mode!=='stopped')schedule();};
