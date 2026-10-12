@@ -2,6 +2,7 @@
 from contextlib import asynccontextmanager
 import base64
 import copy
+from datetime import datetime, timedelta, timezone
 import hmac
 import ipaddress
 import json
@@ -426,11 +427,29 @@ def prepare_full_zip(project:str,job_id:str,body:dict):
     except ValueError as exc: raise HTTPException(409,str(exc))
     return status
 
+LOG_TIMEZONE=timezone(timedelta(hours=8),name='UTC+8')
+
+def zip_download_name(job):
+    """Download filename mirrors a vera-cycle campaign id: {project}_{mode}_{channel}_{YYYYMMDD}_{HHMMSS}.
+
+    Strict: a job without a complete, usable identity is refused rather than
+    given a placeholder name, so a delivered archive can always be traced back
+    to a real run.
+    """
+    config=job.get('config')
+    project=job.get('project');mode=config.get('cycle_mode') if isinstance(config,dict) else None
+    channel=config.get('channel') if isinstance(config,dict) else None;created=job.get('created_at')
+    missing=[label for label,value in (('project',project),('cycle_mode',mode),('channel',channel),('created_at',created)) if not value]
+    if missing: raise HTTPException(409,'Full ZIP 檔名所需的任務資料不完整（缺少 '+'、'.join(missing)+'）。')
+    stamp=datetime.fromtimestamp(created,LOG_TIMEZONE).strftime('%Y%m%d_%H%M%S')
+    safe=[re.sub(r'[^0-9A-Za-z._-]','_',str(value)) for value in (project,mode,channel)]
+    return '_'.join(safe)+'_'+stamp+'.zip'
+
 @router.get('/api/projects/{project}/cycle/jobs/{job_id}/full-zip/download')
 def download_full_zip(project:str,job_id:str):
-    scoped(project,job_id);status=full_zip_service.status(job_id);path=full_zip_service.path(job_id)
+    job=scoped(project,job_id);status=full_zip_service.status(job_id);path=full_zip_service.path(job_id)
     if status.get('state')!='READY' or not path.is_file(): raise HTTPException(409,'Full ZIP 尚未準備完成。')
-    return FileResponse(path,media_type='application/zip',filename=job_id+'.zip',headers={'X-Content-Type-Options':'nosniff'})
+    return FileResponse(path,media_type='application/zip',filename=zip_download_name(job),headers={'X-Content-Type-Options':'nosniff'})
 
 @router.get('/api/projects/{project}/cycle/jobs/{job_id}/artifact/{artifact_id}')
 def download_artifact(project:str,job_id:str,artifact_id:str):

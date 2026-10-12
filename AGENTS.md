@@ -9,6 +9,18 @@ Live hardware acceptance requires user-specified targets and scope.
 Use the project .venv, data/, runtime/, and artifacts/ directories only.
 Keep passwords and credentials out of Git, argv, public API and reports.
 
+## Full ZIP download filename (2026-10-12)
+
+- `Download Full ZIP` filename mirrors a vera-cycle campaign id:
+  `{project}_{cycle_mode}_{channel}_{YYYYMMDD}_{HHMMSS}.zip`, timezone UTC+8.
+  Project keeps its original casing (e.g. `Neutrino`). The trailing vera random
+  hex/version suffix is intentionally omitted.
+- Built by `zip_download_name(job)` in `integration/web.py`; job `created_at` is
+  the timestamp source. Example: `Neutrino_reboot_outband_20261003_014022.zip`.
+- Strict: if `project`, `config.cycle_mode`, `config.channel` or `created_at` is
+  missing the download is refused with HTTP 409 (no placeholder name is used),
+  so a delivered archive always traces back to a complete job identity.
+
 ## Restart policy for THIS repo (PA-manager-6969)
 
 - `:6969` is a systemd service: `pa-manager-6969-web.service`. Restart with
