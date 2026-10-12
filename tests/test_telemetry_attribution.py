@@ -101,7 +101,9 @@ class TelemetryAttribution(unittest.TestCase):
 class TelemetryCheckConfig(unittest.TestCase):
     def test_defaults_include_disk_and_checks(self):
         self.assertEqual(DEFAULTS['thresholds']['disk'], 90)
-        self.assertEqual(set(DEFAULTS['telemetry_checks']), {'cpu', 'memory', 'gpu', 'vram', 'disk'})
+        self.assertEqual(DEFAULTS['thresholds']['cpu_temp'], 85)
+        self.assertEqual(DEFAULTS['thresholds']['gpu_power'], 95)
+        self.assertEqual(set(DEFAULTS['telemetry_checks']), {'cpu', 'memory', 'gpu', 'vram', 'disk', 'cpu_temp', 'gpu_temp', 'gpu_power'})
 
     def test_validate_accepts_partial_telemetry_checks(self):
         from integration.inspection import validate_config

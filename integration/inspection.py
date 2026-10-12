@@ -22,8 +22,8 @@ DEFAULTS = dict(enabled=False, interval_seconds=120, duration_seconds=120,
                 recovery_samples=2, stale_seconds=300, ai_enabled=False,
                 deep_seconds=600, sensor_seconds=300, firmware_seconds=1800,
                 readiness_seconds=600, retention_days=30,
-                thresholds={'cpu':90, 'memory':95, 'gpu':95, 'vram':95, 'disk':90}, hysteresis=5,
-                telemetry_checks={'cpu':True, 'memory':True, 'gpu':True, 'vram':True, 'disk':True},
+                thresholds={'cpu':90, 'memory':95, 'gpu':95, 'vram':95, 'disk':90, 'cpu_temp':85, 'gpu_temp':85, 'gpu_power':95}, hysteresis=5,
+                telemetry_checks={'cpu':True, 'memory':True, 'gpu':True, 'vram':True, 'disk':True, 'cpu_temp':True, 'gpu_temp':True, 'gpu_power':True},
                 node_overrides={})
 
 
@@ -40,7 +40,9 @@ def validate_config(previous, changes):
             value=dict(value)
         elif name=='thresholds':
             if not isinstance(value,dict) or value.keys()-DEFAULTS['thresholds'].keys(): raise ValueError('門檻欄位無效')
-            if any(type(v) not in {int,float} or not math.isfinite(v) or not 1<=v<=100 for v in value.values()): raise ValueError('使用率門檻須介於 1–100%')
+            # Percentage metrics cap at 100; temperature is Celsius and power is a
+            # share of the card limit, so allow headroom up to 150 for those.
+            if any(type(v) not in {int,float} or not math.isfinite(v) or not 1<=v<=150 for v in value.values()): raise ValueError('門檻須介於 1–150')
             value={**result['thresholds'],**value}
         elif name=='telemetry_checks':
             if not isinstance(value,dict) or value.keys()-DEFAULTS['telemetry_checks'].keys(): raise ValueError('Telemetry 檢查項目無效')
@@ -341,7 +343,7 @@ class InspectionStore:
     def issues(self,system_id,limit=100,offset=0,status='all',node_id='',search=''):
         where='system_id=?'; args=[system_id]
         if status=='current': where+=" AND json_extract(data,'$.status') IN ('ACTIVE','RECOVERED')"
-        elif status in ('ACTIVE','RECOVERED','ARCHIVED'): where+=" AND json_extract(data,'$.status')=?";args.append(status)
+        elif status in ('ACTIVE','RECOVERED','ARCHIVED','KNOWN'): where+=" AND json_extract(data,'$.status')=?";args.append(status)
         if node_id:
             where+=" AND (json_extract(data,'$.node_id')=? OR EXISTS(SELECT 1 FROM json_each(json_extract(data,'$.affected_nodes')) WHERE value=?))";args.extend([node_id,node_id])
         if search:
@@ -357,7 +359,7 @@ class InspectionStore:
             item['summary']={'fail':0,'warning':0}
             for row in counts: item['summary']['fail' if row['severity']=='FAIL' else 'warning']=row['n']
             item['lifecycle_counts']={}
-            for state in ('RECOVERED','ARCHIVED'):
+            for state in ('RECOVERED','ARCHIVED','KNOWN'):
                 item['lifecycle_counts'][state.lower()]=db.execute("SELECT count(*) FROM inspection_items WHERE system_id=? AND json_extract(data,'$.status')=?",(system_id,state)).fetchone()[0]
             item['progress']=[dict(node_id=r['node_id'],**json.loads(r['data'])) for r in db.execute('SELECT node_id,data FROM inspection_progress WHERE system_id=?',(system_id,))]
         return item
@@ -376,6 +378,13 @@ class InspectionStore:
             row=db.execute('SELECT data FROM inspection_items WHERE id=? AND system_id=?',(issue_id,system_id)).fetchone()
             if not row: raise KeyError(issue_id)
             item=json.loads(row[0]); item.update(changes,handled_by=str(actor))
+            # Reflect the known-issue decision immediately instead of waiting for the
+            # next collection, so marking/unmarking moves the card between the active
+            # and known-issue filters right away. Only an ACTIVE or KNOWN item moves;
+            # a RECOVERED/ARCHIVED item keeps its lifecycle status.
+            if 'known_issue' in changes:
+                if changes['known_issue'] and item.get('status')=='ACTIVE': item['status']='KNOWN'
+                elif not changes['known_issue'] and item.get('status')=='KNOWN': item['status']='ACTIVE'
             db.execute('UPDATE inspection_items SET data=? WHERE id=?',(encode(item),issue_id))
             self.change(db,item,'HANDLED',time.time(),changes)
         return item
@@ -429,14 +438,20 @@ class InspectionEvaluator:
                     suppressed.append(dict(node_id=obs['node_id'],reason='EXPECTED_CYCLE_OFFLINE'))
                     continue
                 kind=obs.get('kind')
-                if kind=='utilization':
+                if kind in ('utilization','thermal','power'):
                     metric=obs.get('metric'); value=obs.get('value'); threshold=config['thresholds'].get(metric)
-                    if threshold is None or type(value) not in {int,float} or not math.isfinite(value) or not 0<=value<=100: continue
+                    # Utilization is a percentage; temperature is Celsius and power is a
+                    # percentage of the card's own limit, so validate against the metric
+                    # rather than a blanket 0-100 window.
+                    ceiling=150 if kind in ('thermal','power') else 100
+                    if threshold is None or type(value) not in {int,float} or not math.isfinite(value) or not 0<=value<=ceiling: continue
                     active=value>=threshold; healthy=value<=threshold-config['hysteresis']; severity='WARNING'
                     if active and state['high_since'] is None: state['high_since']=ts
                     if not active: state['high_since']=None
                     active=active and ts-state['high_since']>=config['duration_seconds']
-                    facts=f'{metric}: {value:g}% · 警告門檻 {threshold:g}% · 高使用率可能與測試負載相關'
+                    unit='°C' if kind=='thermal' else '%'
+                    note={'thermal':' · 高溫可能與散熱或負載相關','power':' · 功耗接近上限可能與負載相關'}.get(kind,' · 高使用率可能與測試負載相關')
+                    facts=f'{metric}: {value:g}{unit} · 警告門檻 {threshold:g}{unit}'+note
                 elif kind=='explicit_failure' and event and obs.get('verified_rule'):
                     active=True; healthy=False; severity='FAIL'; facts=obs.get('message','已保存的規則判定異常')
                 elif kind in {'finding','state'} and obs.get('verified_rule'):
@@ -459,7 +474,13 @@ class InspectionEvaluator:
                         transition='REOPENED'; item['recurrences']+=1
                     elif item['severity']=='WARNING' and severity=='FAIL': transition='ESCALATED'
                     elif item['severity']=='FAIL': severity='FAIL'
-                    item.update(status='ACTIVE',severity=severity,last_seen_at=max(ts,item.get('last_seen_at',ts)),resolved_at=None,
+                    # A handled "known issue" keeps being observed but is parked in
+                    # KNOWN instead of ACTIVE: it stays visible in its own filter and
+                    # still refreshes facts/last_seen_at, but no longer counts toward
+                    # the active summary, escalates, or triggers AI. Clearing the flag
+                    # lets the next observation promote it straight back to ACTIVE.
+                    status='KNOWN' if item.get('known_issue') else 'ACTIVE'
+                    item.update(status=status,severity=severity,last_seen_at=max(ts,item.get('last_seen_at',ts)),resolved_at=None,
                                 facts=redact(facts,secrets,1000),source=obs.get('source'),observation_kind=kind,
                                 evidence=redact(obs.get('evidence',''),secrets,1000),
                                 evidence_ref=obs.get('evidence_ref'),fingerprint=obs.get('fingerprint'),observations=item['observations']+1)
@@ -467,16 +488,16 @@ class InspectionEvaluator:
                                 occurrence_precision=obs.get('occurrence_precision'),
                                 historical=obs.get('historical',False),affected_nodes=obs.get('affected_nodes',[]),
                                 rule_version=obs.get('identity_version'),native_severity=obs.get('native_severity'))
-                    if transition:
+                    if transition and status=='ACTIVE':
                         self.store.change(db,item,transition,ts,{k:item.get(k) for k in ('facts','severity','evidence','evidence_ref','fingerprint')})
-                    elif event:
+                    elif event and status=='ACTIVE':
                         self.store.change(db,item,'OCCURRED',ts,dict(event_id=event,source_time=obs.get('source_time'),
                             evidence=item.get('evidence'),evidence_ref=item.get('evidence_ref'),facts=item.get('facts')))
-                    elif severity=='FAIL' and previous_evidence!=(item['facts'],item['fingerprint']):
+                    elif severity=='FAIL' and status=='ACTIVE' and previous_evidence!=(item['facts'],item['fingerprint']):
                         self.store.change(db,item,'EVIDENCE_UPDATED',ts,{k:item.get(k) for k in ('facts','evidence','evidence_ref','fingerprint')})
-                    if config['ai_enabled'] and (transition or previous_evidence!=(item['facts'],item['fingerprint']) or not item.get('analysis')):
+                    if status=='ACTIVE' and config['ai_enabled'] and (transition or previous_evidence!=(item['facts'],item['fingerprint']) or not item.get('analysis')):
                         self.store.queue_advice(db,item)
-                elif item and item['status']=='ACTIVE' and healthy and state['healthy_count']>=config['recovery_samples']:
+                elif item and item['status'] in ('ACTIVE','KNOWN') and healthy and state['healthy_count']>=config['recovery_samples']:
                     item.update(status='RECOVERED',resolved_at=ts)
                     self.store.change(db,item,'RECOVERED',ts,{'facts':facts})
                 if item: db.execute('INSERT OR REPLACE INTO inspection_items VALUES(?,?,?)',(iid,system_id,encode(item)))

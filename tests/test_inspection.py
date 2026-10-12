@@ -72,7 +72,10 @@ class Rules(unittest.TestCase):
     def test_ack_known_and_mute_do_not_recover(self):
         self.evaluate(self.obs()); issue=self.store.issues('s')[0]
         self.store.handle('s',issue['id'],{'acknowledged':True,'known_issue':True,'mute_until':10000},'test')
-        self.assertEqual(self.store.issues('s')[0]['status'],'ACTIVE')
+        # Marking stays visible as KNOWN rather than silently resolving to RECOVERED,
+        # but it also leaves the active set so it no longer counts or alerts.
+        self.assertEqual(self.store.issues('s')[0]['status'],'KNOWN')
+        self.assertEqual(self.store.issues('s',status='ACTIVE'),[])
     def test_independent_nodes_and_exact_cycle_offline_window(self):
         context=[dict(node_id='n1',phase='WAITING_RECOVERY',started_at=900,deadline=1050)]
         event=self.obs(rule='connectivity.lost',kind='explicit_failure',verified_rule=True,event_id='1')

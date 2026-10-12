@@ -98,23 +98,30 @@ class EvidenceSource:
                         rows=db.execute(f'SELECT * FROM {table} WHERE machine=? AND ts>=? AND ts<=? ORDER BY ts DESC,id DESC LIMIT 2000',
                                         (key,now-config['stale_seconds'],now)).fetchall()
                         for row in reversed(rows):
+                            keys=row.keys()
                             if table=='os_metrics':
-                                values=[('cpu','cpu',row['cpu_used']),('memory','memory',row['mem_used_pct'])]
+                                values=[('cpu','cpu',row['cpu_used'],'utilization',0,100),
+                                        ('memory','memory',row['mem_used_pct'],'utilization',0,100),
+                                        ('cpu_temp','cpu',row['cpu_temp_c'] if 'cpu_temp_c' in keys else None,'thermal',0,150)]
                             elif table=='gpu_metrics':
-                                values=[('gpu','gpu:'+str(row['gpu']),row['util']),
-                                        ('vram','gpu:'+str(row['gpu']),100*row['mem_used']/row['mem_total'] if row['mem_total'] and row['mem_used'] is not None else None)]
-                            elif 'pct' in row.keys() and 'mount' in row.keys():
-                                values=[('disk','disk:'+str(row['mount']),row['pct'])]
+                                limit=row['power_limit'] if 'power_limit' in keys else None
+                                values=[('gpu','gpu:'+str(row['gpu']),row['util'],'utilization',0,100),
+                                        ('vram','gpu:'+str(row['gpu']),100*row['mem_used']/row['mem_total'] if row['mem_total'] and row['mem_used'] is not None else None,'utilization',0,100),
+                                        ('gpu_temp','gpu:'+str(row['gpu']),row['temp'] if 'temp' in keys else None,'thermal',0,150),
+                                        ('gpu_power','gpu:'+str(row['gpu']),100*row['power']/limit if 'power' in keys and limit else None,'power',0,150)]
+                            elif 'pct' in keys and 'mount' in keys:
+                                values=[('disk','disk:'+str(row['mount']),row['pct'],'utilization',0,100)]
                             else:
                                 continue
-                            for metric,component,value in values:
+                            for metric,component,value,kind,low,high in values:
                                 if enabled.get(metric) is False: continue
-                                if type(value) in {int,float} and math.isfinite(value) and 0<=value<=100:
+                                if type(value) in {int,float} and math.isfinite(value) and low<=value<=high:
+                                    suffix={'utilization':'utilization.high','thermal':'temperature.high','power':'power.high'}[kind]
                                     seen.append(row['ts']); metrics.add(metric)
-                                    observations.append(dict(node_id=nid,component=component,rule=metric+'.utilization.high',metric=metric,value=value,
-                                    kind='utilization',source='telemetry',sample_at=row['ts'],evidence=f'{table} row {row["id"]}'))
+                                    observations.append(dict(node_id=nid,component=component,rule=metric+'.'+suffix,metric=metric,value=value,
+                                    kind=kind,source='telemetry',sample_at=row['ts'],evidence=f'{table} row {row["id"]}'))
                 coverage.append(dict(node_id=nid,label=node['label'],source='Telemetry',state='FRESH' if seen else ('INVALID' if now-max(latest)<=config['stale_seconds'] else 'STALE') if latest else 'MISSING',collected_at=max(seen) if seen else max(latest) if latest else None,
-                    detail='已涵蓋使用率：'+', '.join(sorted(metrics))+'；溫度與功耗故障未涵蓋。' if seen else '主機名稱 '+key+' 有歷史但近期無新樣本；可能已停止收集或剛改名。'))
+                    detail='已涵蓋：'+', '.join(sorted(metrics)) if seen else '主機名稱 '+key+' 有歷史但近期無新樣本；可能已停止收集或剛改名。'))
             except (sqlite3.Error,OSError):
                 coverage.append(dict(node_id=nid,label=node['label'],source='Telemetry',state='UNAVAILABLE',collected_at=None,detail='尚未取得可安全讀取的節點歷史。'))
         if config.get('_skip_reports'): return observations,coverage,[]

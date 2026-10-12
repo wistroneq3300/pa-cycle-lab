@@ -5,9 +5,23 @@
   const identityLabels={SUCCESS:'讀取成功',AUTH_FAILED:'登入驗證失敗',MISSING_DATA:'身分資料不完整',IDENTITY_REQUIRES_CONFIRMATION:'Identity 需確認'};
   const stamp=v=>v?new Date(v*1000).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false}):'尚未取得';
   const valueOrMissing=v=>v != null && v !== '' && Number.isFinite(Number(v))?String(Number(v)):'未取得';
+  // Threshold/check fields share one ordered definition: [key, label, unit].
+  const METRIC_FIELDS=[['cpu','CPU 使用率','%'],['memory','記憶體使用率','%'],['gpu','GPU 使用率','%'],['vram','VRAM 使用率','%'],['disk','磁碟使用率','%'],['cpu_temp','CPU 溫度','°C'],['gpu_temp','GPU 溫度','°C'],['gpu_power','GPU 功耗（上限%）','%']];
+  const METRICS=METRIC_FIELDS.map(f=>f[0]);
   // "OS 1" alone does not tell an operator which machine they are looking at;
   // pair the stable slot label with the collected hostname when we have one.
   const nodeLabel=node=>{const name=node?.os_hostname_raw||node?.os_hostname;return node?.label?(name?`${node.label} · ${name}`:node.label):(name||node?.node_id||'');};
+  const METRIC_NAMES=Object.fromEntries(METRIC_FIELDS.map(([key,label])=>[key,label]));
+  const ruleLabelFor=rule=>{
+    if(rule.startsWith('DMESG_'))return '核心日誌硬體錯誤';
+    const [metric,kind]=String(rule).split('.');
+    if(METRIC_NAMES[metric]){
+      if(kind==='temperature')return METRIC_NAMES[metric]+'偏高';
+      if(kind==='power')return METRIC_NAMES[metric]+'接近上限';
+      return METRIC_NAMES[metric]+'持續偏高';
+    }
+    return rule;
+  };
   const labels={PASS:'PASS',WARN:'WARN',FAIL:'FAIL',UNKNOWN:'UNKNOWN',NO_DATA:'NO DATA',NOT_APPLICABLE:'NOT APPLICABLE',NOT_MONITORED:'NOT MONITORED',EXPECTED_OFFLINE:'Cycle 預期恢復中',FRESH:'資料有效',MISSING:'尚無節點資料',STALE:'STALE',UNAVAILABLE:'來源無法使用',NOT_COVERED:'尚未涵蓋',BACKLOG:'事件補讀中',TIMED_OUT:'採集逾時',INVALID:'觀測欄位不完整',FAILED:'採集失敗',PARTIAL:'部分資料／觀測缺口',NOT_READY:'尚未就緒',NOT_CONFIGURED:'尚未設定',NOT_SUPPORTED:'來源不支援',WAITING_READY:'開機恢復中 · 等待檢查',INTERRUPTED:'開機世代改變 · 本批不完整',SHARED:'共用控制器資料',IDENTITY_MISMATCH:'節點身分與設定不符',TRUNCATED:'資料超過採集上限'};
   Object.assign(labels,identityLabels);
   // A capped Redfish LogService is PARTIAL for a specific, actionable reason:
@@ -41,7 +55,7 @@
     <section class="pd-inspection-matrix" aria-labelledby="pd-inspection-matrix-title"><div class="pd-inspection-matrix-head"><div><h3 id="pd-inspection-matrix-title">Inspection Status Matrix</h3><p>依此 Project checker 與已保存 Evidence 呈現；Coverage 與 Hardware Health 分開計算。</p></div><label>節點 <select data-matrix-node><option value="">全部節點</option></select></label></div><div class="pd-matrix-scroll"><table><thead><tr><th>Check Name</th><th>Status</th><th>Expected / Observed</th><th>Last Checked</th><th>Evidence</th></tr></thead><tbody data-matrix></tbody></table></div><p data-matrix-empty hidden>尚無巡檢結果。零項異常不代表 Hardware Health PASS。</p></section>
     <details class="pd-inspection-coverage"><summary>採集來源與原始狀態</summary><div data-coverage></div></details>
     <details class="pd-inspection-coverage"><summary>節點名稱與身分紀錄</summary><div data-identity></div><div data-identity-history></div></details>
-    <section data-issues hidden aria-label="巡檢問題與恢復歷史"><div class="pd-inspection-filters"><label>節點 <select data-node><option value="">全部節點</option></select></label><label>狀態 <select data-filter><option value="current">目前問題與最近恢復</option><option value="ACTIVE">目前問題</option><option value="RECOVERED">最近恢復</option><option value="ARCHIVED">歷史問題</option><option value="all">全部紀錄</option></select></label><label>搜尋全部符合範圍 <input data-issue-search type="search" placeholder="規則、元件或問題摘要"></label></div><button type="button" class="btn small" data-reload>更新問題</button><span data-history-count></span><div data-list></div><div class="pd-inspection-paging"><button class="btn small" data-prev>上一頁</button><span data-page></span><button class="btn small" data-next>下一頁</button></div></section>
+    <section data-issues hidden aria-label="巡檢問題與恢復歷史"><div class="pd-inspection-filters"><label>節點 <select data-node><option value="">全部節點</option></select></label><label>狀態 <select data-filter><option value="current">目前問題與最近恢復</option><option value="ACTIVE">目前問題</option><option value="KNOWN">已知問題</option><option value="RECOVERED">最近恢復</option><option value="ARCHIVED">歷史問題</option><option value="all">全部紀錄</option></select></label><label>搜尋全部符合範圍 <input data-issue-search type="search" placeholder="規則、元件或問題摘要"></label></div><button type="button" class="btn small" data-reload>更新問題</button><span data-history-count></span><div data-list></div><div class="pd-inspection-paging"><button class="btn small" data-prev>上一頁</button><span data-page></span><button class="btn small" data-next>下一頁</button></div></section>
     <dialog class="pd-settings-modal" data-config aria-label="巡檢設定"><div class="pd-settings-body"><h3>此系統巡檢設定</h3><p class="pd-settings-hint">設定只影響巡檢規則，不會變更 Telemetry 收集頻率。</p><div class="pd-inspection-fields">
       <label><input type="checkbox" name="enabled"> 啟用 Project 排程</label><label><input type="checkbox" name="ai_enabled"> 活躍警告與 FAIL 使用 AI 分析</label>
       <label>事件巡檢間隔（秒）<input type="number" name="interval_seconds" min="30" max="3600" required></label>
@@ -52,8 +66,8 @@
       <label>恢復所需新樣本<input type="number" name="recovery_samples" min="1" max="20" required></label>
       <label>Telemetry 資料有效期限（秒）<input type="number" name="stale_seconds" min="30" max="3600" required></label>
       <label>恢復遲滯（百分點）<input type="number" name="hysteresis" min="1" max="30" required></label>
-      ${['cpu','memory','gpu','vram','disk'].map((key,i)=>`<label>${['CPU','記憶體','GPU','VRAM','磁碟'][i]} 警告門檻（%）<input type="number" name="${key}" min="1" max="100" required></label>`).join('')}
-    </div><fieldset class="pd-telemetry-checks"><legend>Telemetry 檢查項目</legend><p class="pd-settings-hint">取消勾選即停止該項使用率判定（例如壓力測試期間）。關閉的項目不會產生 WARN／FAIL。</p><div class="pd-telemetry-check-grid">${['cpu','memory','gpu','vram','disk'].map((key,i)=>`<label><input type="checkbox" name="check_${key}"> ${['CPU','記憶體','GPU','VRAM','磁碟'][i]} 使用率</label>`).join('')}</div></fieldset><fieldset class="pd-node-overrides"><legend>Node 個別覆寫</legend><div data-node-overrides></div></fieldset><p class="pd-settings-hint">停用排程不會刪除歷史 WARN／FAIL 或 Evidence，Telemetry 亦繼續獨立運作。AI 內容為輔助判讀，不改變規則判定。</p><p class="pd-settings-error" data-config-error role="alert"></p><div class="pd-settings-foot"><button type="button" class="btn" data-config-cancel>取消</button><button type="button" class="btn primary" data-config-save>儲存巡檢設定</button></div></div></dialog>
+      ${METRIC_FIELDS.map(([key,label,unit])=>`<label>${label} 警告門檻（${unit}）<input type="number" name="${key}" min="1" max="150" required></label>`).join('')}
+    </div><fieldset class="pd-telemetry-checks"><legend>Telemetry 檢查項目</legend><p class="pd-settings-hint">取消勾選即停止該項判定（例如壓力測試期間）。關閉的項目不會產生 WARN／FAIL。</p><div class="pd-telemetry-check-grid">${METRIC_FIELDS.map(([key,label])=>`<label><input type="checkbox" name="check_${key}"> ${label}</label>`).join('')}</div></fieldset><fieldset class="pd-node-overrides"><legend>Node 個別覆寫</legend><div data-node-overrides></div></fieldset><p class="pd-settings-hint">停用排程不會刪除歷史 WARN／FAIL 或 Evidence，Telemetry 亦繼續獨立運作。AI 內容為輔助判讀，不改變規則判定。</p><p class="pd-settings-error" data-config-error role="alert"></p><div class="pd-settings-foot"><button type="button" class="btn" data-config-cancel>取消</button><button type="button" class="btn primary" data-config-save>儲存巡檢設定</button></div></div></dialog>
     </div>
   </section>`;
   function dispose(){if(!mounted)return;const ctx=mounted,r=ctx.root;
@@ -87,8 +101,8 @@
       const body={thresholds:{}};
       for(const name of ['enabled','ai_enabled'])body[name]=field(name).checked;
       for(const name of ['interval_seconds','deep_seconds','sensor_seconds','firmware_seconds','duration_seconds','recovery_samples','stale_seconds','hysteresis'])body[name]=Number(field(name).value);
-      for(const name of ['cpu','memory','gpu','vram','disk'])body.thresholds[name]=Number(field(name).value);
-      body.telemetry_checks={};for(const metric of ['cpu','memory','gpu','vram','disk'])body.telemetry_checks[metric]=field('check_'+metric).checked;
+      for(const metric of METRICS)body.thresholds[metric]=Number(field(metric).value);
+      body.telemetry_checks={};for(const metric of METRICS)body.telemetry_checks[metric]=field('check_'+metric).checked;
       body.node_overrides={};for(const select of dialog.querySelectorAll('[data-node-override]'))if(select.value!=='inherit')body.node_overrides[select.dataset.nodeOverride]=select.value==='true';
       const button=dialog.querySelector('[data-config-save]'),message=dialog.querySelector('[data-config-error]');button.disabled=true;if(message)message.textContent='';
       try{await request(ctx,'/settings',{method:'PATCH',body:JSON.stringify(body)});dialog.close();await refresh(ctx);}catch(err){if(message)message.textContent=err.message;else error(ctx,err);}finally{button.disabled=false;}
@@ -251,8 +265,8 @@
       const detail=document.createElement('details');detail.className='pd-inspection-issue';detail.dataset.issueId=issue.id;detail.open=opened.has(issue.id);const summary=document.createElement('summary');summary.className='pd-issue-summary';
       const label=nodeLabel(ctx.snapshot.nodes.find(n=>n.node_id===issue.node_id))||((issue.affected_nodes||[]).length?'共用控制器 · '+issue.affected_nodes.map(id=>ctx.snapshot.nodes.find(n=>n.node_id===id)?.label||id).join('、'):issue.node_id);
       detail.dataset.severity=issue.status!=='ACTIVE'?issue.status:issue.severity;
-      const ruleLabel={'cpu.utilization.high':'CPU 持續高使用率','memory.utilization.high':'記憶體持續高使用率','gpu.utilization.high':'GPU 持續高使用率','vram.utilization.high':'VRAM 持續高使用率','disk.utilization.high':'磁碟使用率偏高'}[issue.rule]||(issue.rule.startsWith('DMESG_')?'核心日誌硬體錯誤':issue.rule);
-      const stateText=issue.status==='ARCHIVED'?'已封存':issue.status==='RECOVERED'?'已恢復':issue.severity==='FAIL'?'FAIL':'WARN';
+      const ruleLabel=ruleLabelFor(issue.rule);
+      const stateText=issue.status==='ARCHIVED'?'已封存':issue.status==='KNOWN'?'已知問題':issue.status==='RECOVERED'?'已恢復':issue.severity==='FAIL'?'FAIL':'WARN';
       const state=document.createElement('strong'),identity=document.createElement('span'),rule=document.createElement('span');state.className='pd-issue-state';state.textContent=stateText;identity.className='pd-issue-identity';identity.textContent=label+' · '+issue.component;rule.className='pd-issue-rule';rule.textContent=ruleLabel;rule.title=issue.rule;summary.append(state,identity,rule);detail.append(summary);
       const facts=document.createElement('section'),factsTitle=document.createElement('h4'),factsBody=document.createElement('p');facts.className='pd-issue-facts';factsTitle.textContent='觀測事實';factsBody.textContent=issue.facts||'未提供';facts.append(factsTitle,factsBody);detail.append(facts);
       const timing=document.createElement('p');timing.className='pd-issue-timing';timing.textContent=`首次 ${stamp(issue.first_seen_at)} · 最後觀測 ${stamp(issue.last_seen_at)} · 恢復 ${issue.resolved_at?stamp(issue.resolved_at):'尚未恢復'} · 發生 ${valueOrMissing(issue.occurrences)} 次 · 觀測 ${valueOrMissing(issue.observations)} 次 · 復發 ${valueOrMissing(issue.recurrences)} 次${issue.occurrence_precision==='uncertain'?' · 來源切換，事件次數未能精確確認':issue.occurrence_precision==='lower_bound'?' · ring buffer 次數為可確認下限':''}`;detail.append(timing);
