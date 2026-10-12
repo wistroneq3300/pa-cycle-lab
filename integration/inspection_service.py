@@ -49,10 +49,34 @@ class EvidenceSource:
         except (sqlite3.Error,OSError,KeyError): pass
         return result
 
+    def telemetry_key(self,db,node):
+        """Resolve the telemetry ``machine`` value for a canonical node.
+
+        The DB keys rows by whatever name the collector used. Real deployments
+        write the collected hostname, but some fixtures key rows directly by the
+        node id, so try the raw hostname, the normalised hostname, then the node
+        id, and finally a case-insensitive match. Returns ``None`` when nothing
+        matches, which the caller reports as MISSING rather than guessing an
+        owner, so a parent machine's history is never copied onto every node."""
+        candidates=[node.get('os_hostname_raw'),node.get('os_hostname'),node.get('node_id')]
+        candidates=[c for c in candidates if c]
+        if not candidates: return None
+        known={r[0] for r in db.execute('SELECT DISTINCT machine FROM os_metrics')}
+        for name in candidates:
+            if name in known: return name
+        lowered={k.lower():k for k in known if k}
+        for name in candidates:
+            match=lowered.get(name.lower())
+            if match: return match
+        return None
+
     def __call__(self,system,config,now):
         observations=[]; coverage=[]; config['_deadline']=time.monotonic()+10
-        # Never call machine_telemetry/os_series_any: their legacy name merging cannot
-        # establish which physical node produced a sample after an Active OS switch.
+        # Telemetry rows are keyed by the collected machine name, while the
+        # canonical Node ID is a hash of chassis+slot. Resolve the name offline
+        # (raw first, then the normalised form, then a case-insensitive match)
+        # instead of merging by hostname at query time, which would risk
+        # attributing a sample to the wrong physical node.
         for node in system['nodes']:
             nid=node['node_id']; seen=[]; latest=[]; metrics=set()
             if time.monotonic()>config['_deadline']:
@@ -60,22 +84,37 @@ class EvidenceSource:
                 continue
             try:
                 with readonly(self.telemetry_path) as db:
-                    for table in ('os_metrics','gpu_metrics'):
-                        last=db.execute(f'SELECT MAX(ts) FROM {table} WHERE machine=? AND ts<=?',(nid,now)).fetchone()[0]
+                    key=self.telemetry_key(db,node)
+                    if key is None:
+                        coverage.append(dict(node_id=nid,label=node['label'],source='Telemetry',state='MISSING',collected_at=None,
+                            detail='已有節點身分但 Telemetry 尚未以此主機名稱留下歷史；改名後舊資料不會自動沿用。'))
+                        continue
+                    enabled=config.get('telemetry_checks') or {}
+                    present={r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+                    for table in ('os_metrics','gpu_metrics','disk_metrics'):
+                        if table not in present: continue
+                        last=db.execute(f'SELECT MAX(ts) FROM {table} WHERE machine=? AND ts<=?',(key,now)).fetchone()[0]
                         if last is not None: latest.append(last)
                         rows=db.execute(f'SELECT * FROM {table} WHERE machine=? AND ts>=? AND ts<=? ORDER BY ts DESC,id DESC LIMIT 2000',
-                                        (nid,now-config['stale_seconds'],now)).fetchall()
+                                        (key,now-config['stale_seconds'],now)).fetchall()
                         for row in reversed(rows):
-                            values=[('cpu','cpu',row['cpu_used']),('memory','memory',row['mem_used_pct'])] if table=='os_metrics' else [
-                                ('gpu','gpu:'+str(row['gpu']),row['util']),
-                                ('vram','gpu:'+str(row['gpu']),100*row['mem_used']/row['mem_total'] if row['mem_total'] and row['mem_used'] is not None else None)]
+                            if table=='os_metrics':
+                                values=[('cpu','cpu',row['cpu_used']),('memory','memory',row['mem_used_pct'])]
+                            elif table=='gpu_metrics':
+                                values=[('gpu','gpu:'+str(row['gpu']),row['util']),
+                                        ('vram','gpu:'+str(row['gpu']),100*row['mem_used']/row['mem_total'] if row['mem_total'] and row['mem_used'] is not None else None)]
+                            elif 'pct' in row.keys() and 'mount' in row.keys():
+                                values=[('disk','disk:'+str(row['mount']),row['pct'])]
+                            else:
+                                continue
                             for metric,component,value in values:
+                                if enabled.get(metric) is False: continue
                                 if type(value) in {int,float} and math.isfinite(value) and 0<=value<=100:
                                     seen.append(row['ts']); metrics.add(metric)
                                     observations.append(dict(node_id=nid,component=component,rule=metric+'.utilization.high',metric=metric,value=value,
                                     kind='utilization',source='telemetry',sample_at=row['ts'],evidence=f'{table} row {row["id"]}'))
                 coverage.append(dict(node_id=nid,label=node['label'],source='Telemetry',state='FRESH' if seen else ('INVALID' if now-max(latest)<=config['stale_seconds'] else 'STALE') if latest else 'MISSING',collected_at=max(seen) if seen else max(latest) if latest else None,
-                    detail='僅採用 canonical Node ID 歷史；機台名稱下的資料無法可靠歸屬節點。' if not seen else '已涵蓋使用率：'+', '.join(sorted(metrics))+'；溫度與功耗故障未涵蓋。'))
+                    detail='已涵蓋使用率：'+', '.join(sorted(metrics))+'；溫度與功耗故障未涵蓋。' if seen else '主機名稱 '+key+' 有歷史但近期無新樣本；可能已停止收集或剛改名。'))
             except (sqlite3.Error,OSError):
                 coverage.append(dict(node_id=nid,label=node['label'],source='Telemetry',state='UNAVAILABLE',collected_at=None,detail='尚未取得可安全讀取的節點歷史。'))
         if config.get('_skip_reports'): return observations,coverage,[]

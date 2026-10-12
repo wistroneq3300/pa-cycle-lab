@@ -5,6 +5,9 @@
   const identityLabels={SUCCESS:'讀取成功',AUTH_FAILED:'登入驗證失敗',MISSING_DATA:'身分資料不完整',IDENTITY_REQUIRES_CONFIRMATION:'Identity 需確認'};
   const stamp=v=>v?new Date(v*1000).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false}):'尚未取得';
   const valueOrMissing=v=>v != null && v !== '' && Number.isFinite(Number(v))?String(Number(v)):'未取得';
+  // "OS 1" alone does not tell an operator which machine they are looking at;
+  // pair the stable slot label with the collected hostname when we have one.
+  const nodeLabel=node=>{const name=node?.os_hostname_raw||node?.os_hostname;return node?.label?(name?`${node.label} · ${name}`:node.label):(name||node?.node_id||'');};
   const labels={PASS:'PASS',WARN:'WARN',FAIL:'FAIL',UNKNOWN:'UNKNOWN',NO_DATA:'NO DATA',NOT_APPLICABLE:'NOT APPLICABLE',NOT_MONITORED:'NOT MONITORED',EXPECTED_OFFLINE:'Cycle 預期恢復中',FRESH:'資料有效',MISSING:'尚無節點資料',STALE:'STALE',UNAVAILABLE:'來源無法使用',NOT_COVERED:'尚未涵蓋',BACKLOG:'事件補讀中',TIMED_OUT:'採集逾時',INVALID:'觀測欄位不完整',FAILED:'採集失敗',PARTIAL:'部分資料／觀測缺口',NOT_READY:'尚未就緒',NOT_CONFIGURED:'尚未設定',NOT_SUPPORTED:'來源不支援',WAITING_READY:'開機恢復中 · 等待檢查',INTERRUPTED:'開機世代改變 · 本批不完整',SHARED:'共用控制器資料',IDENTITY_MISMATCH:'節點身分與設定不符',TRUNCATED:'資料超過採集上限'};
   Object.assign(labels,identityLabels);
   // A capped Redfish LogService is PARTIAL for a specific, actionable reason:
@@ -49,8 +52,8 @@
       <label>恢復所需新樣本<input type="number" name="recovery_samples" min="1" max="20" required></label>
       <label>Telemetry 資料有效期限（秒）<input type="number" name="stale_seconds" min="30" max="3600" required></label>
       <label>恢復遲滯（百分點）<input type="number" name="hysteresis" min="1" max="30" required></label>
-      ${['cpu','memory','gpu','vram'].map((key,i)=>`<label>${['CPU','記憶體','GPU','VRAM'][i]} 警告門檻（%）<input type="number" name="${key}" min="1" max="100" required></label>`).join('')}
-    </div><fieldset class="pd-node-overrides"><legend>Node 個別覆寫</legend><div data-node-overrides></div></fieldset><p class="pd-settings-hint">停用排程不會刪除歷史 WARN／FAIL 或 Evidence，Telemetry 亦繼續獨立運作。AI 內容為輔助判讀，不改變規則判定。</p><p class="pd-settings-error" data-config-error role="alert"></p><div class="pd-settings-foot"><button type="button" class="btn" data-config-cancel>取消</button><button type="button" class="btn primary" data-config-save>儲存巡檢設定</button></div></div></dialog>
+      ${['cpu','memory','gpu','vram','disk'].map((key,i)=>`<label>${['CPU','記憶體','GPU','VRAM','磁碟'][i]} 警告門檻（%）<input type="number" name="${key}" min="1" max="100" required></label>`).join('')}
+    </div><fieldset class="pd-telemetry-checks"><legend>Telemetry 檢查項目</legend><p class="pd-settings-hint">取消勾選即停止該項使用率判定（例如壓力測試期間）。關閉的項目不會產生 WARN／FAIL。</p><div class="pd-telemetry-check-grid">${['cpu','memory','gpu','vram','disk'].map((key,i)=>`<label><input type="checkbox" name="check_${key}"> ${['CPU','記憶體','GPU','VRAM','磁碟'][i]} 使用率</label>`).join('')}</div></fieldset><fieldset class="pd-node-overrides"><legend>Node 個別覆寫</legend><div data-node-overrides></div></fieldset><p class="pd-settings-hint">停用排程不會刪除歷史 WARN／FAIL 或 Evidence，Telemetry 亦繼續獨立運作。AI 內容為輔助判讀，不改變規則判定。</p><p class="pd-settings-error" data-config-error role="alert"></p><div class="pd-settings-foot"><button type="button" class="btn" data-config-cancel>取消</button><button type="button" class="btn primary" data-config-save>儲存巡檢設定</button></div></div></dialog>
     </div>
   </section>`;
   function dispose(){if(!mounted)return;const ctx=mounted,r=ctx.root;
@@ -65,7 +68,7 @@
     if(lastView?.name===name){clearTimeout(closeViewerTimer);ctx.offset=lastView.offset;ctx.rows=lastView.rows;ctx.snapshot=lastView.snapshot;ctx.restoreOpen=lastView.opened;
       find('[data-issues]').hidden=!lastView.show;find('[data-filter]').value=lastView.filter;find('[data-issue-search]').value=lastView.search;
       if(lastView.collapsed){find('[data-collapse]').setAttribute('aria-expanded','false');find('#pd-inspection-body').hidden=true;root.classList.add('pd-inspection-collapsed');}
-      if(ctx.snapshot){for(const node of ctx.snapshot.nodes){const o=document.createElement('option');o.value=node.node_id;o.textContent=node.label;find('[data-node]').append(o);}find('[data-node]').value=lastView.node;if(lastView.show)renderIssues(ctx);}
+      if(ctx.snapshot){for(const node of ctx.snapshot.nodes){const o=document.createElement('option');o.value=node.node_id;o.textContent=nodeLabel(node);find('[data-node]').append(o);}find('[data-node]').value=lastView.node;if(lastView.show)renderIssues(ctx);}
       if(ctx.rows.some(i=>['QUEUED','RUNNING'].includes(i.analysis?.state)))trackAI(ctx);
     }
     find('[data-collapse]').onclick=()=>{
@@ -84,7 +87,8 @@
       const body={thresholds:{}};
       for(const name of ['enabled','ai_enabled'])body[name]=field(name).checked;
       for(const name of ['interval_seconds','deep_seconds','sensor_seconds','firmware_seconds','duration_seconds','recovery_samples','stale_seconds','hysteresis'])body[name]=Number(field(name).value);
-      for(const name of ['cpu','memory','gpu','vram'])body.thresholds[name]=Number(field(name).value);
+      for(const name of ['cpu','memory','gpu','vram','disk'])body.thresholds[name]=Number(field(name).value);
+      body.telemetry_checks={};for(const metric of ['cpu','memory','gpu','vram','disk'])body.telemetry_checks[metric]=field('check_'+metric).checked;
       body.node_overrides={};for(const select of dialog.querySelectorAll('[data-node-override]'))if(select.value!=='inherit')body.node_overrides[select.dataset.nodeOverride]=select.value==='true';
       const button=dialog.querySelector('[data-config-save]'),message=dialog.querySelector('[data-config-error]');button.disabled=true;if(message)message.textContent='';
       try{await request(ctx,'/settings',{method:'PATCH',body:JSON.stringify(body)});dialog.close();await refresh(ctx);}catch(err){if(message)message.textContent=err.message;else error(ctx,err);}finally{button.disabled=false;}
@@ -141,7 +145,7 @@
       const required=(data.coverage||[]).filter(c=>!c.source.startsWith('Input '));
       const fresh=required.filter(c=>c.state==='FRESH'||c.state==='SHARED');
       r.querySelector('[data-completeness]').textContent=`${data.nodes.length} 個節點 · ${fresh.length} / ${required.length} 項來源資料有效。請連同涵蓋狀態判讀異常數量。`;
-      const matrixSelect=r.querySelector('[data-matrix-node]');if(matrixSelect.options.length===1)for(const node of data.nodes)matrixSelect.add(new Option(node.label,node.node_id));
+      const matrixSelect=r.querySelector('[data-matrix-node]');if(matrixSelect.options.length===1)for(const node of data.nodes)matrixSelect.add(new Option(nodeLabel(node),node.node_id));
       matrixSelect.onchange=()=>{ctx.matrixSignature=null;renderMatrix(ctx);};
       // Refresh runs every few seconds; only rebuild the matrix when its content
       // actually changed, so an open row is not torn down on every poll.
@@ -150,11 +154,11 @@
       const coverage=r.querySelector('[data-coverage]');
       const signature=JSON.stringify(data.coverage||[]);
       if(ctx.coverageSignature!==signature){ctx.coverageSignature=signature;coverage.replaceChildren();
-      for(const entry of required){const line=document.createElement('p');const node=data.nodes.find(n=>n.node_id===entry.node_id);line.textContent=[node?.label,sourceLabel(entry),coverageLabel(entry),entry.collected_at?'採集 '+stamp(entry.collected_at):'',entry.duration!=null?entry.duration.toFixed(1)+' 秒':'',entry.detail].filter(Boolean).join(' · ');if(entry.evidence_ref?.snapshot_id){const link=document.createElement('button');link.type='button';link.className='pd-text-action';link.textContent=' 原始證據';link.onclick=()=>window.InspectionEvidence.open(ctx.base,entry.evidence_ref.snapshot_id,node?.label||entry.source);line.append(link);}coverage.append(line);}}
+      for(const entry of required){const line=document.createElement('p');const node=data.nodes.find(n=>n.node_id===entry.node_id);line.textContent=[node?nodeLabel(node):undefined,sourceLabel(entry),coverageLabel(entry),entry.collected_at?'採集 '+stamp(entry.collected_at):'',entry.duration!=null?entry.duration.toFixed(1)+' 秒':'',entry.detail].filter(Boolean).join(' · ');if(entry.evidence_ref?.snapshot_id){const link=document.createElement('button');link.type='button';link.className='pd-text-action';link.textContent=' 原始證據';link.onclick=()=>window.InspectionEvidence.open(ctx.base,entry.evidence_ref.snapshot_id,node?.label||entry.source);line.append(link);}coverage.append(line);}}
       if(!coverage.childNodes.length)coverage.textContent='尚未巡檢。零項異常不代表所有節點均已完成檢查。';
-      const select=r.querySelector('[data-node]');if(select.options.length===1)for(const node of data.nodes){const option=document.createElement('option');option.value=node.node_id;option.textContent=node.label;select.append(option);}
+      const select=r.querySelector('[data-node]');if(select.options.length===1)for(const node of data.nodes){const option=document.createElement('option');option.value=node.node_id;option.textContent=nodeLabel(node);select.append(option);}
       const form=r.querySelector('[data-config]');
-      const overrides=form.querySelector('[data-node-overrides]'),overrideSignature=JSON.stringify([data.nodes,data.config.node_overrides]);if(overrides.dataset.signature!==overrideSignature){overrides.dataset.signature=overrideSignature;overrides.replaceChildren();for(const node of data.nodes){const label=document.createElement('label'),nodeSelect=document.createElement('select');label.append(document.createTextNode(node.label));nodeSelect.dataset.nodeOverride=node.node_id;nodeSelect.append(new Option('跟隨 Project','inherit'),new Option('啟用','true'),new Option('停用','false'));const value=data.config.node_overrides?.[node.node_id];nodeSelect.value=value===true?'true':value===false?'false':'inherit';label.append(nodeSelect);overrides.append(label);}}
+      const overrides=form.querySelector('[data-node-overrides]'),overrideSignature=JSON.stringify([data.nodes,data.config.node_overrides]);if(overrides.dataset.signature!==overrideSignature){overrides.dataset.signature=overrideSignature;overrides.replaceChildren();for(const node of data.nodes){const label=document.createElement('label'),nodeSelect=document.createElement('select');label.append(document.createTextNode(nodeLabel(node)));nodeSelect.dataset.nodeOverride=node.node_id;nodeSelect.append(new Option('跟隨 Project','inherit'),new Option('啟用','true'),new Option('停用','false'));const value=data.config.node_overrides?.[node.node_id];nodeSelect.value=value===true?'true':value===false?'false':'inherit';label.append(nodeSelect);overrides.append(label);}}
       // Preserve expanded evidence, keyboard focus and text selection during periodic refresh.
       if(!r.querySelector('[data-issues]').hidden&&!r.querySelector('[data-list]').childNodes.length)await loadIssues(ctx);
     }catch(e){error(ctx,e);}finally{if(mounted===ctx)ctx.timer=setTimeout(()=>refresh(ctx),5000);}
@@ -198,6 +202,7 @@
     const field=name=>dialog.querySelector('[name="'+name+'"]');
     for(const [name,value] of Object.entries(config)){
       if(name==='thresholds'){for(const [metric,threshold] of Object.entries(value)){const input=field(metric);if(input)input.value=threshold;}}
+      else if(name==='telemetry_checks'){for(const [metric,on] of Object.entries(value)){const input=field('check_'+metric);if(input)input.checked=on;}}
       else {const input=field(name);if(input){if(typeof value==='boolean')input.checked=value;else input.value=value;}}
     }
   }
@@ -208,7 +213,7 @@
     // and re-open them after the rebuild.
     const opened=new Set([...body.querySelectorAll('details[open]')].map(d=>d.dataset.rowKey));
     body.replaceChildren();const allRows=(ctx.snapshot?.check_matrix||[]).filter(row=>!selected||row.node_id===selected);const rows=aggregateRows(allRows);empty.hidden=!!rows.length;
-    for(const row of rows){const tr=document.createElement('tr');tr.dataset.status=row.status;const check=document.createElement('td'),details=document.createElement('details'),summary=document.createElement('summary'),detail=document.createElement('p');details.dataset.rowKey=row.node_id+'|'+row.check_name;details.open=opened.has(details.dataset.rowKey);summary.textContent=`${row.node_label} · ${row.check_name}`;detail.textContent=row.detail||'未提供其他判定資訊。';if(row.members){const list=document.createElement('ul');list.className='pd-matrix-members';const members=[...row.members].sort((a,b)=>(a.health_status==='FAIL'?0:1)-(b.health_status==='FAIL'?0:1));for(const member of members){const li=document.createElement('li');const bdf=(member.check_id||'').split('/').pop();li.textContent=`${bdf||member.check_name} · ${labels[member.status]||member.status}`+(member.detail?' · '+member.detail:'');list.append(li);}details.append(list);}details.append(summary,detail);check.append(details);
+    for(const row of rows){const node=ctx.snapshot?.nodes?.find(n=>n.node_id===row.node_id);const rowName=node?nodeLabel(node):row.node_label;const tr=document.createElement('tr');tr.dataset.status=row.status;const check=document.createElement('td'),details=document.createElement('details'),summary=document.createElement('summary'),detail=document.createElement('p');details.dataset.rowKey=row.node_id+'|'+row.check_name;details.open=opened.has(details.dataset.rowKey);summary.textContent=`${rowName} · ${row.check_name}`;detail.textContent=row.detail||'未提供其他判定資訊。';if(row.members){const list=document.createElement('ul');list.className='pd-matrix-members';const members=[...row.members].sort((a,b)=>(a.health_status==='FAIL'?0:1)-(b.health_status==='FAIL'?0:1));for(const member of members){const li=document.createElement('li');const bdf=(member.check_id||'').split('/').pop();li.textContent=`${bdf||member.check_name} · ${labels[member.status]||member.status}`+(member.detail?' · '+member.detail:'');list.append(li);}details.append(list);}details.append(summary,detail);check.append(details);
       const status=document.createElement('td'),badge=document.createElement('span');badge.className='pd-check-status';const shown=(row.health_status==='FAIL')?'FAIL':row.status;badge.dataset.state=shown;badge.textContent=labels[shown]||shown;if(shown!==row.status)badge.title='排程已停用；此為最後一次判定：'+row.health_status;status.append(badge);
       const comparison=document.createElement('td');comparison.textContent=row.expected!=null||row.observed!=null?`Expected ${row.expected??'—'} / Observed ${row.observed??'—'}`:'—';
       const checked=document.createElement('td');checked.textContent=stamp(row.last_checked);
@@ -244,9 +249,9 @@
     if(!rows.length){const p=document.createElement('p');p.textContent='此頁沒有符合條件的問題。請同時查看資料涵蓋狀態。';list.append(p);}
     for(const issue of rows){
       const detail=document.createElement('details');detail.className='pd-inspection-issue';detail.dataset.issueId=issue.id;detail.open=opened.has(issue.id);const summary=document.createElement('summary');summary.className='pd-issue-summary';
-      const label=ctx.snapshot.nodes.find(n=>n.node_id===issue.node_id)?.label||((issue.affected_nodes||[]).length?'共用控制器 · '+issue.affected_nodes.map(id=>ctx.snapshot.nodes.find(n=>n.node_id===id)?.label||id).join('、'):issue.node_id);
+      const label=nodeLabel(ctx.snapshot.nodes.find(n=>n.node_id===issue.node_id))||((issue.affected_nodes||[]).length?'共用控制器 · '+issue.affected_nodes.map(id=>ctx.snapshot.nodes.find(n=>n.node_id===id)?.label||id).join('、'):issue.node_id);
       detail.dataset.severity=issue.status!=='ACTIVE'?issue.status:issue.severity;
-      const ruleLabel={'cpu.utilization.high':'CPU 持續高使用率','memory.utilization.high':'記憶體持續高使用率','gpu.utilization.high':'GPU 持續高使用率','vram.utilization.high':'VRAM 持續高使用率'}[issue.rule]||(issue.rule.startsWith('DMESG_')?'核心日誌硬體錯誤':issue.rule);
+      const ruleLabel={'cpu.utilization.high':'CPU 持續高使用率','memory.utilization.high':'記憶體持續高使用率','gpu.utilization.high':'GPU 持續高使用率','vram.utilization.high':'VRAM 持續高使用率','disk.utilization.high':'磁碟使用率偏高'}[issue.rule]||(issue.rule.startsWith('DMESG_')?'核心日誌硬體錯誤':issue.rule);
       const stateText=issue.status==='ARCHIVED'?'已封存':issue.status==='RECOVERED'?'已恢復':issue.severity==='FAIL'?'FAIL':'WARN';
       const state=document.createElement('strong'),identity=document.createElement('span'),rule=document.createElement('span');state.className='pd-issue-state';state.textContent=stateText;identity.className='pd-issue-identity';identity.textContent=label+' · '+issue.component;rule.className='pd-issue-rule';rule.textContent=ruleLabel;rule.title=issue.rule;summary.append(state,identity,rule);detail.append(summary);
       const facts=document.createElement('section'),factsTitle=document.createElement('h4'),factsBody=document.createElement('p');facts.className='pd-issue-facts';factsTitle.textContent='觀測事實';factsBody.textContent=issue.facts||'未提供';facts.append(factsTitle,factsBody);detail.append(facts);

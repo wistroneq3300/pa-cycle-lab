@@ -22,7 +22,8 @@ DEFAULTS = dict(enabled=False, interval_seconds=120, duration_seconds=120,
                 recovery_samples=2, stale_seconds=300, ai_enabled=False,
                 deep_seconds=600, sensor_seconds=300, firmware_seconds=1800,
                 readiness_seconds=600, retention_days=30,
-                thresholds={'cpu':90, 'memory':95, 'gpu':95, 'vram':95}, hysteresis=5,
+                thresholds={'cpu':90, 'memory':95, 'gpu':95, 'vram':95, 'disk':90}, hysteresis=5,
+                telemetry_checks={'cpu':True, 'memory':True, 'gpu':True, 'vram':True, 'disk':True},
                 node_overrides={})
 
 
@@ -41,6 +42,10 @@ def validate_config(previous, changes):
             if not isinstance(value,dict) or value.keys()-DEFAULTS['thresholds'].keys(): raise ValueError('門檻欄位無效')
             if any(type(v) not in {int,float} or not math.isfinite(v) or not 1<=v<=100 for v in value.values()): raise ValueError('使用率門檻須介於 1–100%')
             value={**result['thresholds'],**value}
+        elif name=='telemetry_checks':
+            if not isinstance(value,dict) or value.keys()-DEFAULTS['telemetry_checks'].keys(): raise ValueError('Telemetry 檢查項目無效')
+            if any(type(v) is not bool for v in value.values()): raise ValueError('Telemetry 檢查項目須為開關')
+            value={**result['telemetry_checks'],**value}
         else:
             limits={'interval_seconds':(30,3600),'duration_seconds':(0,3600),'recovery_samples':(1,20),'stale_seconds':(30,3600),'hysteresis':(1,30),
                     'deep_seconds':(60,86400),'sensor_seconds':(30,86400),'firmware_seconds':(60,604800),'readiness_seconds':(30,3600),'retention_days':(1,365)}
@@ -103,7 +108,12 @@ class InspectionStore:
             with self.tx(False) as conn: return self.system(system_id,conn)
         row=db.execute('SELECT data FROM inspection_systems WHERE id=?',(system_id,)).fetchone()
         item=json.loads(row[0]) if row else dict(id=system_id,config=copy.deepcopy(DEFAULTS),last_completed_at=None,next_due=0,coverage=[])
+        # Shallow merge would let a stored thresholds/telemetry_checks dict hide
+        # newly added keys (e.g. disk) from older rows; merge the nested maps too.
         item['config']={**copy.deepcopy(DEFAULTS),**item['config']}
+        for name in ('thresholds','telemetry_checks'):
+            stored=item['config'].get(name)
+            if isinstance(stored,dict): item['config'][name]={**copy.deepcopy(DEFAULTS[name]),**stored}
         return item
 
     def node_state(self,system_id):
