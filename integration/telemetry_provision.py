@@ -252,7 +252,7 @@ class ProvisionService:
         return state,detail,facts
 
     def snapshot(self,node_id):
-        target=self.resolve(node_id);job=self.store.latest(node_id);row=self.store.node(node_id)
+        target=self.resolve(node_id);job=self.store.latest(node_id);host_job=self.store.latest_scope(node_id,'host');row=self.store.node(node_id)
         state='NOT_CONFIGURED';detail='此節點目前尚未啟用 Telemetry。';checked=None;stale=False
         if row:
             state=row['state'];detail=row['detail'];checked=row['checked_at']
@@ -275,7 +275,7 @@ class ProvisionService:
                 components=dict(host=state)
         return dict(node_id=node_id,chassis_id=target['chassis_id'],label=target.get('display_name'),hostname=target.get('os_hostname'),
                     slot=target['slot_key'],os_ip=target['os_ip'],binding_revision=target['revision'],state=state,detail=detail,stale=stale,
-                    checked_at=checked,job=job,components=components,configured=self.config.ready(),dashboard_url=self.config.dashboard(node_id),
+                    checked_at=checked,job=job,host_job=host_job,components=components,configured=self.config.ready(),dashboard_url=self.config.dashboard(node_id),
                     host_setup=self.host_setup(target),gpu_setup=self.gpu_setup(target))
 
     def host_setup(self,target):

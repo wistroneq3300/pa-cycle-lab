@@ -20,8 +20,8 @@
       root.innerHTML=`<header class="tp-heading"><div><h3>Node Telemetry <span data-state class="tp-state">載入中</span></h3><p data-detail aria-live="polite">正在取得節點設定…</p></div><label class="tp-node">監控節點<select aria-label="Telemetry 節點" data-node><option value="">選擇節點</option></select></label></header>
         <div class="tp-context"><span data-target></span><span data-time></span></div>
         <div class="tp-components">
-          <section class="tp-component" data-component="host"><div><span class="tp-kicker">HOST</span><h4>主機監控 · Node Exporter</h4><p>CPU / Memory / Disk / Network</p></div><strong data-component-state>尚未檢查</strong><div class="tp-component-actions"><button class="btn primary" data-enable-scope="host" disabled>安裝 / 啟用</button><details><summary>手動安裝說明</summary><div class="tp-manual" data-host-manual><p>請先選擇節點以取得此節點的安裝與連線資訊。</p></div></details></div></section>
-          <section class="tp-component" data-component="gpu"><div><span class="tp-kicker">GPU</span><h4>GPU 監控 · DCGM Exporter</h4><p>GPU / HBM / Temperature / Power / NVLink</p></div><strong data-component-state>尚未檢查</strong><div class="tp-component-actions"><button class="btn primary" data-enable-scope="gpu" disabled>安裝 / 啟用</button><details><summary>手動安裝說明</summary><div class="tp-manual" data-gpu-manual><p>請先選擇節點以取得相容的 DCGM Exporter 設定。</p></div></details></div></section>
+          <section class="tp-component" data-component="host"><div><span class="tp-kicker">HOST</span><h4>主機監控 · Node Exporter</h4><p>CPU / Memory / Disk / Network</p></div><strong data-component-state>尚未檢查</strong><div class="tp-component-actions"><button class="btn primary" data-enable-scope="host" disabled>安裝 / 啟用</button><button class="btn" data-console-scope="host" hidden>查看安裝紀錄</button><details><summary>手動安裝說明</summary><div class="tp-manual" data-host-manual><p>請先選擇節點以取得此節點的安裝與連線資訊。</p></div></details></div></section>
+          <section class="tp-component" data-component="gpu"><div><span class="tp-kicker">GPU</span><h4>GPU 監控 · DCGM Exporter</h4><p>GPU / HBM / Temperature / Power / NVLink</p></div><strong data-component-state>尚未檢查</strong><div class="tp-component-actions"><button class="btn primary" data-enable-scope="gpu" disabled>安裝 / 啟用</button><button class="btn" data-console-scope="gpu" hidden>查看安裝紀錄</button><details><summary>手動安裝說明</summary><div class="tp-manual" data-gpu-manual><p>請先選擇節點以取得相容的 DCGM Exporter 設定。</p></div></details></div></section>
         </div>
         <div class="tp-actions"><button class="btn" data-console hidden>查看安裝紀錄</button><a class="btn" data-grafana hidden target="_blank" rel="noopener" title="開啟此節點的 Grafana 進階分析">Grafana 進階分析 ↗</a></div>
         <p class="tp-note" data-notice>安裝與啟用只針對所選節點；Host 與 GPU 監控可獨立處理。</p>
@@ -36,6 +36,7 @@
       this.$('[data-node]').onchange=()=>this.select(this.$('[data-node]').value);
       root.querySelectorAll('[data-enable-scope]').forEach(button=>button.onclick=()=>this.enable(button.dataset.enableScope));
       this.$('[data-console]').onclick=()=>this.openConsole();
+      this.root.querySelectorAll('[data-console-scope]').forEach(button=>button.onclick=()=>this.openConsole(button.dataset.consoleScope));
       this.$('[data-close]').onclick=()=>this.closeConsole();
       this.$('[data-view]').onclick=()=>{this.closeConsole();this.$('.tp-dashboard').scrollIntoView({block:'start',behavior:'smooth'});};
       this.$('[data-retry]').onclick=()=>{this.requestKey=null;this.enable(this.job?.scope||'all');};
@@ -51,12 +52,17 @@
       });
       this.load();
     }
-    openConsole(){
+    openConsole(scope){
+      // Prefer the job matching the requested scope; fall back to the latest job.
+      const job=(scope==='host'?this.hostJob:null)||(scope==='gpu'?this.gpuJob:null)||this.job;
+      if(!job)return;
+      this.consoleJob=job;
       if(!this.$('.tp-console').open){this.restoreFocus=document.activeElement;this.$('.tp-console').showModal();this.$('[data-close]').focus();}
       this.consoleOpen=true;
-      // Replay from the first event every time the console is opened so the pipeline
-      // lights follow the messages instead of snapping to the final READY verdict.
-      if(this.job){this.cursor=0;this.rows=[];this.stageQueue=[];this.pipeline={};this.$('.tp-log').replaceChildren();}
+      // Always reopen from the top so the messages appear first and the pipeline
+      // lights follow. Resetting follow guarantees the log is drawn and scrolled to
+      // the bottom even if the previous session was scrolled up (follow=false).
+      if(this.job){this.cursor=0;this.rows=[];this.stageQueue=[];this.pipeline={};this.follow=true;this.unread=0;this.$('.tp-log').replaceChildren();}
       this.renderPipeline(this.job);this.pumpStage();this.pollEvents();
     }
     closeConsole(){
@@ -218,9 +224,13 @@
       gpuCard.querySelector('[data-component-state]').textContent=stateLabel(gpu.state);gpuCard.dataset.state=gpu.state;
       this.manualHelp(node);
       this.$('[data-notice]').textContent=node.configured?'安裝與啟用只針對所選節點。關閉紀錄或離開頁面不會停止作業。':'中央監控連線尚未設定；既有效能資料仍可使用。';
-      const newJob=node.job?.job_id!==this.job?.job_id;
+      const watchedJob=this.consoleJob||this.job;
+      const newJob=watchedJob&&node.job?.job_id!==watchedJob.job_id&&watchedJob.scope==='gpu'||watchedJob&&node.host_job?.job_id!==watchedJob.job_id&&watchedJob.scope==='host'||(!this.consoleJob&&node.job?.job_id!==this.job?.job_id);
       if(newJob){this.resetLog();this.requestKey=null;}
-      this.job=node.job;this.$('[data-console]').hidden=!this.job;
+      this.job=node.job;this.hostJob=node.host_job||null;this.gpuJob=(node.job&&node.job.scope==='gpu')?node.job:null;
+      this.$('[data-console]').hidden=!this.job;
+      this.$('[data-console-scope="host"]').hidden=!this.hostJob;
+      this.$('[data-console-scope="gpu"]').hidden=!this.gpuJob;
       if(this.job){
         this.$('[data-job]').textContent='JOB / '+this.job.job_id.slice(0,8);this.$('[data-download]').href='/api/telemetry/jobs/'+encodeURIComponent(this.job.job_id)+'/log';
         this.$('[data-console-title]').textContent=scopeTitle(this.job.scope||'all');
@@ -239,20 +249,20 @@
     }
     async enable(scope){
       if(!this.node||active(this.job))return;
-      this.$('[data-console-title]').textContent=scopeTitle(scope);this.openConsole();this.$('[data-session]').textContent='CONNECTING';
+      this.$('[data-console-title]').textContent=scopeTitle(scope);this.openConsole(scope);this.$('[data-session]').textContent='CONNECTING';
       const node=this.node,generation=++this.generation;clearTimeout(this.timer);this.setButtons(true);this.requestKey ||= key();
       try{
         const job=await this.request('/nodes/'+encodeURIComponent(node.node_id)+'/enable',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idempotency_key:this.requestKey,expected_binding_revision:node.binding_revision,scope})});
         if(this.closed||generation!==this.generation)return;
-        this.update({...node,state:'PROVISIONING',detail:'啟用作業已排入背景執行。',job});clearTimeout(this.timer);this.poll(generation);
+        this.consoleJob=job;this.update({...node,state:'PROVISIONING',detail:'啟用作業已排入背景執行。',job});clearTimeout(this.timer);this.poll(generation);
       }catch(error){if(generation===this.generation){this.error(error);this.setButtons();}}
     }
     async pollEvents(){
-      if(!this.consoleOpen||!this.job||this.eventsBusy||this.closed)return;
-      const id=this.job.job_id,generation=this.generation;this.eventsBusy=true;
+      if(!this.consoleOpen||!this.consoleJob||this.eventsBusy||this.closed)return;
+      const id=this.consoleJob.job_id,generation=this.generation;this.eventsBusy=true;
       try{
         const data=await this.request('/jobs/'+encodeURIComponent(id)+'/events?after_seq='+this.cursor+'&limit=500');
-        if(this.closed||generation!==this.generation||this.job?.job_id!==id)return;
+        if(this.closed||generation!==this.generation||this.consoleJob?.job_id!==id)return;
         for(const row of data.events){
           if(row.sequence<=this.cursor)continue;
           if(row.sequence!==this.cursor+1){this.cursor=0;this.rows=[];this.$('[data-connection]').textContent='紀錄序號中斷，正在重新取得。';return;}
@@ -260,7 +270,12 @@
         }
         this.rows=this.rows.slice(-2000);this.$('[data-connection]').textContent=data.has_more?'正在補讀較早紀錄…':active(data.job)?'已連線 · 唯讀':'紀錄已更新 · '+data.job.state;
         this.renderPipeline(data.job);this.pumpStage();this.renderLog();if(data.has_more)setTimeout(()=>this.pollEvents(),50);
-      }catch(error){if(!this.closed&&generation===this.generation)this.$('[data-connection]').textContent='讀取紀錄失敗：'+(error?.message||'未知錯誤');}
+      }catch(error){
+        if(!this.closed&&generation===this.generation&&error.name!=='AbortError'){
+          this.$('[data-connection]').textContent='讀取紀錄失敗：'+(error?.message||'未知錯誤');
+          if(this.rows.length)this.renderLog();
+        }
+      }
       finally{if(generation===this.generation)this.eventsBusy=false;}
     }
     resetLog(){this.pipeline={};this.unread=0;this.cursor=0;this.rows=[];this.follow=true;this.stageQueue=[];if(this.stageTimer){clearTimeout(this.stageTimer);this.stageTimer=null;}this.$('.tp-log').replaceChildren();this.$('[data-latest]').hidden=true;}

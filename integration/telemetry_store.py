@@ -92,6 +92,11 @@ class ProvisionStore:
             row = db.execute('SELECT * FROM telemetry_jobs WHERE node_id=? ORDER BY created_at DESC LIMIT 1',(node_id,)).fetchone()
             return dict(row) if row else None
 
+    def latest_scope(self, node_id, scope):
+        with self.tx(False) as db:
+            row = db.execute("SELECT * FROM telemetry_jobs WHERE node_id=? AND scope=? ORDER BY created_at DESC LIMIT 1",(node_id,scope)).fetchone()
+            return dict(row) if row else None
+
     def events(self, job_id, after=0, limit=500):
         with self.tx(False) as db:
             return [dict(r, schema_version=1) for r in db.execute('SELECT * FROM telemetry_events WHERE job_id=? AND sequence>? ORDER BY sequence LIMIT ?', (job_id, after, limit))]
