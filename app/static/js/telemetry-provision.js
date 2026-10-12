@@ -54,11 +54,9 @@
     openConsole(){
       if(!this.$('.tp-console').open){this.restoreFocus=document.activeElement;this.$('.tp-console').showModal();this.$('[data-close]').focus();}
       this.consoleOpen=true;
-      // If this console has no rows yet for the current job, replay its existing event
-      // trace so the pipeline animates through the stages instead of appearing empty
-      // or instantly fully lit. Guard on rows (not pipeline) so a stale pipeline from a
-      // previously viewed job can't suppress the reload.
-      if(this.job&&!this.rows.length){this.cursor=0;this.stageQueue=[];this.pipeline={};}
+      // Replay from the first event every time the console is opened so the pipeline
+      // lights follow the messages instead of snapping to the final READY verdict.
+      if(this.job){this.cursor=0;this.rows=[];this.stageQueue=[];this.pipeline={};this.$('.tp-log').replaceChildren();}
       this.renderPipeline(this.job);this.pumpStage();this.pollEvents();
     }
     closeConsole(){
@@ -119,8 +117,17 @@
       }
     }
     async request(path,options={}){
-      const response=await fetch('/api/telemetry'+path,{...options,signal:this.abort.signal});
-      const body=await response.json();if(!response.ok)throw new Error(typeof body.detail==='string'?body.detail:'無法取得 Telemetry 資料');return body;
+      // A hung XHR would otherwise leave eventsBusy pinned true and the console stuck
+      // on "正在連線" forever, so fail loudly after a bounded wait instead.
+      const timeout=new AbortController(),timer=setTimeout(()=>timeout.abort(),15000);
+      const signal=AbortSignal.any([this.abort.signal,timeout.signal]);
+      try{
+        const response=await fetch('/api/telemetry'+path,{...options,signal});
+        const body=await response.json();if(!response.ok)throw new Error(typeof body.detail==='string'?body.detail:'無法取得 Telemetry 資料');return body;
+      }catch(error){
+        if(timeout.signal.aborted&&!this.abort.signal.aborted)throw new Error('要求逾時（15 秒），請確認網路後重新開啟紀錄。');
+        throw error;
+      }finally{clearTimeout(timer);}
     }
     async load(){
       try{
@@ -253,7 +260,7 @@
         }
         this.rows=this.rows.slice(-2000);this.$('[data-connection]').textContent=data.has_more?'正在補讀較早紀錄…':active(data.job)?'已連線 · 唯讀':'紀錄已更新 · '+data.job.state;
         this.renderPipeline(data.job);this.pumpStage();this.renderLog();if(data.has_more)setTimeout(()=>this.pollEvents(),50);
-      }catch(error){if(!this.closed)this.$('[data-connection]').textContent='連線中斷，將從最後序號重新連線。';}
+      }catch(error){if(!this.closed&&generation===this.generation)this.$('[data-connection]').textContent='讀取紀錄失敗：'+(error?.message||'未知錯誤');}
       finally{if(generation===this.generation)this.eventsBusy=false;}
     }
     resetLog(){this.pipeline={};this.unread=0;this.cursor=0;this.rows=[];this.follow=true;this.stageQueue=[];if(this.stageTimer){clearTimeout(this.stageTimer);this.stageTimer=null;}this.$('.tp-log').replaceChildren();this.$('[data-latest]').hidden=true;}
