@@ -131,7 +131,7 @@
 .pd-inspection-fields label{display:flex;flex-direction:column;gap:5px}
 .pd-inspection-fields label:has([type=checkbox]){flex-direction:row;align-items:center}
 .pd-inspection input:not([type=checkbox]),.pd-inspection select{width:100%;min-width:0;background:var(--p-panel);color:var(--p-text);border:1px solid var(--p-border,var(--pd-line));border-radius:6px;padding:8px;font:inherit}
-.pd-inspection [data-config],.pd-inspection [data-issues]{margin-top:20px;padding-top:12px;border-top:1px solid var(--p-border,var(--pd-line))}
+.pd-inspection [data-issues]{margin-top:20px;padding-top:12px;border-top:1px solid var(--p-border,var(--pd-line))}
 .pd-inspection-filters,.pd-inspection-paging{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0}
 .pd-inspection-filters label{flex:1;min-width:120px}
 .pd-inspection-issue{border:1px solid var(--p-border,var(--pd-line));border-radius:8px;padding:0 14px;margin:10px 0;overflow-wrap:anywhere}
