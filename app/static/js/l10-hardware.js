@@ -9,7 +9,7 @@
   'use strict';
   const TAU = Math.PI * 2;
   const profile = Object.freeze({
-    id: 'liquid-compute-1u-v1', label: 'Liquid-cooled Compute Tray', revision: 1,
+    id: 'liquid-compute-1u-v1', label: 'Liquid-cooled Compute Tray', revision: 2,
     basis: 'Lenovo public compute tray top, front and rear diagrams',
     referenceMatrix: 'docs/L10_HARDWARE_REFERENCE_MATRIX.md',
     units: 'PA rack scene units; physical dimensions are not manufacturing CAD',
@@ -34,6 +34,7 @@
       'Normalized envelope uses the existing rack coordinates; common editorial X/Z scaling restores published width/depth/height ratios.',
       'CPU/GPU package footprints and placement under the published cold plate are visual approximations.',
       'PCB routing, passive layout, plate machining, fasteners and tube bend radii are original visual approximations.',
+      'Package laminate, solder terminations, cold-plate mounting ears and preload collars describe generic construction, not a verified OEM retention design.',
       'Red and blue describe conceptual thermal flow, not coolant color or verified internal channels.'
     ]),
     motion: Object.freeze({ packageMode: 'visual-section-of-board-integrated-packages', coolingLast: true })
@@ -149,13 +150,37 @@
     ch.bevel(0,.118,2.982,3.91,.025,.05,C.darkSteel,.83,.004);
     ch.bevel(0,-.109,2.982,3.91,.030,.05,C.steel,.84,.004);
     for(const x of [-1.78,-.86,.87,1.78])ch.box(x,.004,2.979,.032,.208,.048,C.steel,.88);
-    for(const x of [-1.83,-.15,.15,1.83])for(const z of [-2.72,-.61,.61,2.47])ch.cylinder([x,-.114,z],[x,-.084,z],.023,C.gold,.78,12);
+
+    // Board-mounted parts share a real seating plane. The terminations and pads
+    // are original representative geometry; no OEM netlist or BOM is asserted.
+    const pcbTop=-.0715;
+    function smd(b,x,z,w=.035,d=.022,h=.012,ceramic=true) {
+      // Retention hardware has a component keep-out, not a post passing through
+      // a decorative passive row. Include the larger solder-pad footprint.
+      if(b===board&&profile.packages.some(p=>[-1,1].some(sx=>[-1,1].some(sz=>
+        Math.abs(x-p.x-sx*(p.width/2+.077))<w/2+.026&&
+        Math.abs(z-p.z-sz*(p.depth/2+.077))<d/2+.026))))return;
+      const terminal=Math.min(d*.23,.011),base=pcbTop+.001;
+      for(const side of [-1,1]){
+        b.box(x,pcbTop+.0007,z+side*(d/2-terminal*.4),w+.008,.0014,terminal+.009,C.bright,.72);
+        b.box(x,base+h*.47,z+side*(d/2-terminal*.5),w,h*.94,terminal,C.nickel,.82);
+      }
+      b.box(x,base+h/2,z,w,h,d-terminal*1.4,ceramic?C.ceramic:C.chip,.065);
+    }
+    function mountingPoints(cx,cz,w,d) {
+      return [-1,1].flatMap(sx=>[-1,1].map(sz=>[cx+sx*(w/2-.058),cz+sz*(d/2-.062)]));
+    }
 
     function pcbDetail(b,cx,cz,w,d,seed) {
       b.bevel(cx,-.084,cz,w,.025,d,C.pcb,.06,.005);
       b.box(cx,-.097,cz,w-.006,.002,d-.006,C.pcbEdge,.14);
       const left=cx-w/2,right=cx+w/2,front=cz+d/2,rear=cz-d/2;
-      for(const x of [left+.058,right-.058])for(const z of [rear+.062,front-.062]){b.ring(x,-.070,z,.032,.014,.002,C.gold,.8,12);b.screw(x,-.064,z,.012);}
+      for(const [x,z] of mountingPoints(cx,cz,w,d)){
+        // Derived from the PCB holes: no displaced generic chassis pillars.
+        ch.cylinder([x,-.1125,z],[x,-.098,z],.026,C.gold,.78,16);
+        ch.ring(x,-.099,z,.033,.014,.002,C.nickel,.84,16);
+        b.ring(x,-.070,z,.032,.014,.002,C.gold,.8,16);b.screw(x,-.064,z,.012);
+      }
       // PCB fan-out remains subdued under the solder mask.
       for(let i=0;i<34;i++){
         const x=left+.11+(i%17)*(w-.22)/16,z=rear+.14+Math.floor(i/17)*(d-.28);
@@ -166,50 +191,64 @@
       for(let i=0;i<25;i++){
         const z=rear+.17+i*(d-.34)/24;
         for(const side of [-1,1]){
-          const x=cx+side*(w/2-.105),h=.021+((i+seed)%3)*.004;
-          b.box(x,-.068+h/2,z,.047,h,.052,C.chip,.08);
-          b.box(x,-.059,z-.029,.042,.009,.008,C.bright,.70);
-          b.box(x,-.059,z+.029,.042,.009,.008,C.bright,.70);
+          const x=cx+side*(w/2-.105),h=.010+((i+seed)%3)*.003;
+          smd(b,x,z,.030+(i%3)*.005,.035,h,i%4!==0);
           if(i%3===0)b.line(x-.03,z-.043,x+.03,z-.043,-.069,.003,C.silk,.05);
         }
       }
       for(let i=0;i<12;i++){
         const x=left+.19+i*(w-.38)/11;
-        b.box(x,-.052,front-.12,.075,.031,.074,i%3===0?C.ceramic:C.chip,.08);
-        b.box(x,-.052,rear+.13,.066,.031,.08,C.chip,.08);
-        b.box(x,-.056,front-.068,.028,.013,.022,C.ceramic,.07);
+        smd(b,x,front-.12,.047,.044,.021,i%3===0);
+        smd(b,x,rear+.13,.041,.040,.015,false);
+        smd(b,x,front-.068,.024,.021,.012,true);
       }
       // Connectors and retention clips along the board edge.
       for(const side of [-1,1]){
-        b.box(cx+side*(w/2-.053),-.044,cz,.051,.049,.68,C.black,.1);
-        for(let i=0;i<20;i++)b.box(cx+side*(w/2-.08),-.041,cz-.294+i*.031,.013,.012,.009,C.gold,.78);
+        const x=cx+side*(w/2-.053),headerZ=front-.32;
+        // Keyed low-profile housing: recessed contact bed, perimeter walls and
+        // exposed solder tails instead of a monolithic black connector block.
+        b.bevel(x,-.063,headerZ,.061,.017,.44,C.black,.09,.002);
+        for(const sx of [-1,1])b.box(x+sx*.025,-.046,headerZ,.012,.032,.44,C.black,.08);
+        for(const sz of [-1,1])b.box(x,-.046,headerZ+sz*.208,.044,.032,.022,C.black,.08);
+        b.box(x,-.046,headerZ-.058,.046,.032,.023,C.black,.08);
+        for(let i=0;i<12;i++){
+          const z=headerZ-.174+i*.031;
+          b.box(x,-.052,z,.031,.006,.007,C.gold,.78);
+          b.box(x-side*.038,pcbTop+.002,z,.018,.004,.010,C.bright,.78);
+        }
       }
     }
     profile.boards.forEach((p,i)=>pcbDetail(board,p.x,p.z,p.width,p.depth,i*11));
     // Low-profile components are intentionally part of the board, not exploded chips.
     for(const b of profile.boards){
-      for(let i=0;i<10;i++){
-        const x=b.x-.69+i*.152;
-        board.bevel(x,-.044,-1.65,.10,.047,.15,C.chip,.09,.004);
-        board.box(x,-.018,-1.65,.067,.003,.091,C.darkSteel,.28);
+      for(let i=0;i<8;i++){
+        const x=b.x-.60+i*.172;
+        // A repeated power phase has a molded inductor, two terminated power
+        // devices and decoupling, rather than ten undifferentiated cubes.
+        board.bevel(x,pcbTop+.025,-1.65,.101,.048,.095,[.115,.126,.127],.13,.005);
+        for(const side of [-1,1])board.box(x,pcbTop+.006,-1.65+side*.046,.088,.012,.015,C.nickel,.73);
+        board.line(x-.032,-1.663,x+.024,-1.663,pcbTop+.0493,.003,[.25,.27,.26],.12);
+        smd(board,x-.037,-1.741,.047,.045,.015,false);
+        smd(board,x+.037,-1.741,.047,.045,.015,false);
+        smd(board,x,-1.56,.041,.027,.016,true);
       }
       for(let i=0;i<20;i++){
         const z=-2.58+(i%10)*.195,x=b.x+(i<10?-.355:.355);
         if(z< -1.77 || z> -1.4)continue;
-        board.box(x,-.052,z,.03,.021,.066,C.ceramic,.1);
+        smd(board,x,z,.030,.050,.014,true);
       }
       // Dense local power delivery and decoupling around the package perimeter.
       // Rows vary by purpose instead of repeating identical decorative cubes.
       for(const side of [-1,1])for(let i=0;i<8;i++){
         const x=b.x+side*.43,z=-1.37+i*.087;
-        board.box(x,-.056,z,.069,.025,.043,C.chip,.09);
-        board.box(x-side*.047,-.060,z,.017,.013,.037,C.ceramic,.08);
-        board.box(x+side*.049,-.058,z,.014,.018,.044,C.bright,.64);
+        smd(board,x,z,.058,.034,.018,false);
+        smd(board,x-side*.047,z,.017,.028,.010,true);
+        board.ring(x+side*.049,pcbTop+.001,z,.008,.004,.001,C.gold,.72,10);
       }
       for(let i=0;i<17;i++){
         const x=b.x-.64+i*.079;
-        board.box(x,-.060,-.635,.047,.018,.021,C.ceramic,.08);
-        board.box(x,-.058,-.678,.042,.018,.031,C.chip,.09);
+        smd(board,x,-.635,.038,.021,.012,true);
+        smd(board,x,-.678,.034,.026,.012,false);
         if(i%2===0){
           board.line(x,-.70,x+.042,-.75,-.0703,.004,C.trace,.13);
           board.line(x+.042,-.75,x+.042,-.88,-.0703,.004,C.trace,.13);
@@ -223,20 +262,35 @@
       }
     }
     profile.packages.forEach((p,index)=>{
-      // Solder land, thin laminate and bonded package. No fake socket or pins.
-      pkg.bevel(p.x,-.061,p.z,p.width+.078,.014,p.depth+.078,C.black,.06,.003);
-      pkg.bevel(p.x,-.047,p.z,p.width+.070,.018,p.depth+.070,[.040,.064,.050],.06,.004);
+      // Bonded board-integrated package: underfill meets the board, followed by
+      // layered laminate, the bonded spreader flange and its contact cap. Do not
+      // invent exposed silicon/HBM topology from a cold-plate-covered diagram.
+      pkg.bevel(p.x,-.06375,p.z,p.width+.028,.0155,p.depth+.028,C.black,.06,.003);
+      pkg.bevel(p.x,-.047,p.z,p.width+.100,.018,p.depth+.100,[.040,.064,.050],.06,.004);
+      for(const side of [-1,1]){
+        pkg.box(p.x+side*(p.width/2+.046),-.047,p.z,.006,.007,p.depth+.082,C.pcbEdge,.12);
+        pkg.box(p.x,-.047,p.z+side*(p.depth/2+.046),p.width+.082,.007,.006,C.pcbEdge,.12);
+        // Thin adhesive meniscus under the metal flange, not a removable socket.
+        pkg.box(p.x+side*(p.width/2-.004),-.0378,p.z,.006,.0014,p.depth-.015,C.black,.05);
+        pkg.box(p.x,-.0378,p.z+side*(p.depth/2-.004),p.width-.015,.0014,.006,C.black,.05);
+      }
       pkg.bevel(p.x,-.020,p.z,p.width,.035,p.depth,C.nickel,.83,.009);
       pkg.bevel(p.x,.001,p.z,p.width-.055,.010,p.depth-.055,p.type==='CPU'?[.66,.655,.63]:[.235,.285,.315],.85,.003);
       pkg.line(p.x-p.width*.38,p.z-p.depth*.37,p.x+p.width*.38,p.z-p.depth*.37,.0063,.0038,[.40,.45,.47],.86);
-      const pad=p.type==='GPU'?.033:.025;
+      const pad=p.type==='GPU'?.024:.020;
       for(let i=0;i<7;i++)for(const side of [-1,1]){
-        const x=p.x-p.width*.40+i*p.width*.80/6,z=p.z+side*(p.depth/2+.022);
-        pkg.box(x,-.031,z,pad,.010,.015,C.ceramic,.08);
+        const x=p.x-p.width*.40+i*p.width*.80/6,z=p.z+side*(p.depth/2+.029);
+        pkg.box(x,-.032,z,pad,.010,.017,C.ceramic,.08);
+        for(const sz of [-1,1])pkg.box(x,-.033,z+sz*.007,pad+.003,.008,.005,C.nickel,.72);
       }
+      // Sparse substrate test pads and a pin-one witness mark make the package
+      // edge legible without attributing an unpublished pinout to the hardware.
+      for(const side of [-1,1])for(let i=0;i<5;i++){
+        pkg.box(p.x+side*(p.width/2+.029),-.0374,p.z-.16+i*.077,.016,.0012,.022,C.gold,.78);
+      }
+      pkg.tri([p.x-p.width/2-.040,-.0371,p.z-p.depth/2-.039],[p.x-p.width/2-.011,-.0371,p.z-p.depth/2-.039],[p.x-p.width/2-.040,-.0371,p.z-p.depth/2-.011],[0,1,0],C.silk,.07);
       // Fine laser marking is represented by subdued etched strokes, not labels.
       for(let i=0;i<4;i++)pkg.line(p.x-.11,p.z+.10+i*.025,p.x+.10-(i%2)*.045,p.z+.10+i*.025,.0062,.0028,[.32,.36,.37],.6);
-      for(const dx of [-1,1])for(const dz of [-1,1])board.ring(p.x+dx*(p.width/2+.065),-.064,p.z+dz*(p.depth/2+.048),.022,.012,.002,C.bright,.85,12);
       // Nickel-plated copper cold plate: opaque rim/base, ghostable central cover.
       const w=p.width+.125,d=p.depth+.126;
       // Thin compliant interface closes the package-to-plate contact. The
@@ -258,7 +312,23 @@
         cp.line(p.x+s*w*.31,p.z-d*.30,p.x+s*w*.31,p.z+d*.30,.0803,.003,[.33,.38,.40],.84);
       }
       cp.bevel(p.x,.081,p.z+d*.22,w*.28,.002,.063,[.40,.45,.47],.83,.0005);
-      for(const sx of [-1,1])for(const sz of [-1,1])cf.screw(p.x+sx*(w/2-.037),.080,p.z+sz*(d/2-.037),.015);
+      for(const sx of [-1,1])for(const sz of [-1,1]){
+        const x=p.x+sx*(p.width/2+.077),z=p.z+sz*(p.depth/2+.077);
+        // Outboard retention ears keep the fastener axis outside the package
+        // laminate. Stand-off collars meet the board washer; the plated base
+        // still contacts the existing thin TIM at the six verified surfaces.
+        board.ring(x,-.070,z,.026,.013,.002,C.bright,.85,16);
+        cf.cylinder([x,-.069,z],[x,.044,z],.015,C.darkSteel,.78,16);
+        cf.ring(x,-.065,z,.022,.011,.007,C.nickel,.86,16);
+        cf.bevel(p.x+sx*(p.width/2+.050),.061,p.z+sz*(p.depth/2+.050),.112,.034,.112,C.nickel,.89,.005);
+        cf.ring(x,.079,z,.024,.013,.003,C.darkSteel,.78,16);
+        cf.screw(x,.0855,z,.017);
+      }
+      // A continuous sealed cover joint remains visible with the face ghosted.
+      for(const side of [-1,1]){
+        cf.box(p.x+side*(w/2-.044),.079,p.z,.003,.0015,d-.09,C.darkSteel,.54);
+        cf.box(p.x,.079,p.z+side*(d/2-.044),w-.09,.0015,.003,C.darkSteel,.54);
+      }
       for(const s of [-1,1]){
         const x=p.x+s*(p.type==='CPU'?.28:.12),z=p.type==='CPU'?p.z:p.z+d/2-.03;
         cf.cylinder([x,.066,z],[x,.10,z],.031,C.nickel,.94,16);
@@ -335,8 +405,18 @@
     for(let i=0;i<8;i++)io.box(-.29+i*.083,.020,1.09,.035,.022,.27,C.steel,.74);
 
     // Front: eight individually framed E1.S carriers with captive latches.
+    // Their rear sockets now meet one shared vertical backplane. The public
+    // image establishes the relationship; exact connector internals are authored.
+    io.bevel(0,-.013,2.520,1.74,.176,.025,C.pcb,.06,.003);
+    for(const x of [-.842,.842]){
+      io.box(x,-.013,2.496,.032,.176,.024,C.nickel,.79);
+      io.box(x,-.102,2.530,.048,.021,.09,C.nickel,.80);
+    }
     for(let i=0;i<8;i++){
       const x=-.735+i*.21;
+      io.box(x,-.015,2.549,.156,.147,.033,C.black,.08);
+      for(let j=0;j<8;j++)io.box(x-.057+j*.0163,-.071,2.569,.007,.014,.010,C.gold,.81);
+      io.box(x,.073,2.505,.087,.028,.012,C.chip,.07);
       io.box(x,-.007,2.762,.197,.207,.421,C.black,.12);
       io.bevel(x,-.005,2.983,.178,.19,.045,C.darkSteel,.77,.008);
       io.bevel(x+.048,-.006,3.012,.046,.167,.016,C.steel,.88,.003);

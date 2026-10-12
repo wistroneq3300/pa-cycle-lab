@@ -1,0 +1,20 @@
+{
+  "description": "H264 evidence encoding of actual Chrome compositor JPEGs; no renderer recreation, interpolation, color grading, resizing or enhancement. Variable frame intervals taken from capture timestamps; source JPEG demuxer timebase may quantize intervals. Compositor delivery is not every GPU frame.",
+  "sourceFrames": 333,
+  "width": 3440,
+  "height": 1440,
+  "firstTimestamp": 1791833123.763673,
+  "lastTimestamp": 1791833130.172927,
+  "sourceJpegsRetainedAt": "artifacts/l10-phase3/motion/bridge-frames",
+  "sha256": "f482708203133c2be143bc52a6b9810cb22931b00b408f71c21e4f96d2d5ef57",
+  "bytes": 5217030,
+  "captureDeliveryTimestampInversions": 2,
+  "chronology": "All source images sorted by compositor timestamp for encoding; original filenames and delivery-order JSON retained. No generated in-between frames.",
+  "decodedFrames": 333,
+  "decodedDimensions": [
+    3440,
+    1440
+  ],
+  "decodedDurationSeconds": 6.42,
+  "chromeDurationSeconds": 6.382
+}

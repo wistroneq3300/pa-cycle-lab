@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "checks": [
+    "9 matching before/after pairs load at original3440×1440",
+    "comparison slider responds",
+    "timestamp-sorted H264 recording decodes and plays at3440×1440",
+    "all5 runtime file hashes match the completed3-play evidence"
+  ],
+  "video": {
+    "width": 3440,
+    "height": 1440,
+    "duration": 6.382
+  },
+  "errors": []
+}

@@ -65,21 +65,29 @@ same primary tray instead of replacing it with a second model at insertion.
 Desktop evidence belongs to the delivery review. Existing narrow-screen
 fallbacks do not establish full mobile acceptance.
 
-Latest release evidence is retained in `artifacts/l10-cinematic/release/` and
-published under `docs/screenshots/l10-cinematic/release/`. The release frames
+Prior release evidence is retained in `artifacts/l10-cinematic/release/` and
+published under `docs/screenshots/l10-cinematic/release/`. Those release frames
 use a 2127 × 1272 canvas at resolution multiplier 1. The L10 renderer uses a
 5-million-pixel budget, restores full resolution after inspection settles,
 and stops repeated redraws while paused and settled outside idle motion.
+Phase 3 lighting, profile revision 2 and Skip behavior require new review in
+[L10 Phase 3 acceptance](../docs/L10_PHASE3_ACCEPTANCE.md); functional checks pass,
+while photographic quality remains **NOT ACCEPTED** after the new review.
+Earlier captures and review counts remain historical evidence.
 
 ## Elevation & Depth
 
 Folded sheet metal, beveled edges, plate rims, screws, connector cages, fan
 frames, paired boards and distinct rear service interfaces provide real
-geometry. The custom WebGL renderer combines procedural brushed-metal detail,
-roughness/metalness response, GGX-style specular lighting, analytic softbox
-highlights and a light-space depth shadow map. These are authored material and
-lighting approximations, not sampled manufacturer finishes or a measured PBR
-asset library.
+geometry. The custom WebGL renderer combines authored finish detail,
+roughness/metalness response, GGX lighting, a prefiltered photographic studio
+environment, fixed fill/softbox lighting and a light-space depth shadow map.
+The environment comes from Sergej Majboroda's CC0 **Studio Small 09** on Poly
+Haven, processed offline into local GGX and irradiance strips. Its opaque RGB
+log encoding preserves a 0–32 radiance range without an alpha-based decoder
+artifact. [Asset provenance](../app/static/img/l10/README.md) records the source,
+license and derivation. The hardware's finish remains authored, with no sampled
+manufacturer materials, vendor CAD or claim of achieved photorealism.
 
 The cooling beat retains opaque rims, fittings and structural tubing while
 reducing the plate-body opacity to approximately 72% at peak. Narrow directional
@@ -109,6 +117,9 @@ service instruction.
 `validation-overview.js` owns the single 35.2-second film clock and the progress
 labels. `core-scene.js` owns deterministic layer poses and the camera. The
 following table records authored boundaries; it is not a second clock.
+Film elapsed time waits for the environment load to resolve. A failed image
+load uses fallback lighting and reports `quality.environmentFailed`; a fallback
+frame does not count as a successful environment or photographic review.
 
 | Film time | Progress | Shot |
 | --- | --- | --- |
@@ -130,10 +141,15 @@ following table records authored boundaries; it is not a second clock.
 
 ### Inspection and motion preferences
 
+The local **略過開場** (Skip opening) control and `paHeroPlayback.skip()` cancel
+playback, seek the completed System Overview and reset the orbit. Skip hides at
+the endpoint and moves its keyboard focus to Replay when necessary.
+
 Replay, relative scroll takeover, orbit, front/rear inspection and Home/reset
 retain their existing ownership. Input interrupts automatic playback. Hidden
 documents pause scheduling, and disposal removes the scene's listeners and
-GPU resources. The completed rack retains the restrained idle showcase after
+GPU resources, including the local environment texture. The same WebGL context
+restores that asset after context recovery. The completed rack retains the restrained idle showcase after
 its existing inactivity hold.
 
 Reduced motion renders the assembled rack, disables replay and automatic
@@ -143,7 +159,7 @@ fallback is a concept image, not a photographic depiction of this L10 profile.
 
 ### Hardware asset boundary
 
-`PAL10Hardware` supplies the profile and semantic meshes. The active renderer
+`PAL10Hardware` supplies profile revision 2 and semantic meshes. The active renderer
 consumes separate chassis, board, package, I/O, cooling-frame, cooling-body,
 supply, return and lid groups. Future hardware must preserve these roles and
 the rack docking relationship or provide an adapter. The current factory is a

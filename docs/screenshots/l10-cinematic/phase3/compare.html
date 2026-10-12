@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L10 Phase 3 — Visual Acceptance</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0d141a;color:#e4e9ec;font:16px/1.6 system-ui,sans-serif}main{max-width:1720px;margin:auto;padding:28px}h1{font-size:28px;line-height:1.2;margin:8px 0}h2{font-size:20px}p{max-width:1000px;color:#b7c3ca}a{color:#b4d9f2}label{display:flex;align-items:center;gap:12px}select,button{font:inherit;padding:7px 12px;background:#20303c;border:1px solid #627785;color:inherit;border-radius:4px}header{display:flex;gap:20px;align-items:center;flex-wrap:wrap}.status{color:#f5bd99;font-weight:700}input{accent-color:#a7c5d8;min-width:180px}.comparison{position:relative;margin-top:18px;aspect-ratio:3440/1440;overflow:hidden;border:1px solid #37444f}.comparison img{position:absolute;width:100%;height:100%;object-fit:contain}.before{clip-path:inset(0 50% 0 0)}.divider{position:absolute;inset:0 auto 0 50%;width:2px;background:#dfe9ee;pointer-events:none}.tag{position:absolute;top:12px;padding:4px 10px;background:#0d141ae6;color:#fff;pointer-events:none}.tag.old{left:12px}.tag.new{right:12px}.links{display:flex;gap:24px;flex-wrap:wrap;margin:12px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}.grid figure{margin:0}.grid img{display:block;width:100%;border:1px solid #37444f}.grid figcaption{font-size:14px;padding-top:5px}video{display:block;width:100%;background:#000}small{color:#b7c3ca}a:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #e0d598;outline-offset:4px}
+</style>
+<main>
+<span class="status">NOT ACCEPTED · 照片級品質尚未通過</span>
+<h1>L10 Cinematic — Phase 3 前後比較</h1>
+<p>九張原始瀏覽器截圖皆為 3440×1440。Photorealism 平均由 63.6 提升至 71.7；各景仍未達 90、整體未達 95。這是人工設計評估，並非使用者驗收或客觀測量。功能與轉場測試另列。</p>
+<div class="links"><a href="../../../L10_PHASE3_ACCEPTANCE.md">完整驗收報告與七項分數</a><a href="evidence/final-review.md">獨立逐景缺陷</a><a href="motion/MOTION_REVIEW.md">連續播放檢查</a></div>
+<header><label>場景 <select id="stage" aria-label="比較場景"></select></label><label>比較分界 <input id="split" type="range" min="0" max="100" value="50"></label><span id="score"></span></header>
+<div class="comparison"><img id="after" alt="第三階段最終截圖"><img id="before" class="before" alt="32cd4f9 基準截圖"><div id="divider" class="divider"></div><span class="tag old">32cd4f9 · Before</span><span class="tag new">Phase 3 · After</span></div>
+<div class="links"><a id="beforeLink">開啟原尺寸 Before</a><a id="afterLink">開啟原尺寸 After</a></div>
+<h2>九張最終截圖</h2><div id="gallery" class="grid"></div>
+<h2>L10 → Rack 實際轉場影格</h2>
+<p>333 張 Chrome compositor 截圖按原始時間戳排序後編碼；保留 3440×1440，沒有補幀或重建動畫。此記錄約 6.41 秒，compositor 可能略過 GPU 影格。完整數值 trace 與邊界原始 JPEG 另外保存。</p>
+<video controls preload="metadata" src="motion/bridge.mp4" aria-label="L10 至 Rack 實際瀏覽器轉場記錄"></video>
+<div class="links"><a href="motion/bridge.mp4">下載轉場 MP4</a><a href="motion/bridge-boundaries-consecutive.jpg">交接點連續影格</a><a href="motion/bridge-overview-contact.jpg">轉場 contact sheet</a><a href="motion/acceptance-motion.json">三次完整播放數據</a></div>
+<small>所有畫面取自本機合成資料預覽；沒有向硬體發出操作。比較頁僅展示驗收證據，不是產品的新動畫。</small>
+</main>
+<script>
+const stages=[['01-exploded','Exploded View',62,70],['02-cpu-gpu-assembly','CPU/GPU Assembly',65,72],['03-cooling-install','Cooling Module Install',65,73],['04-cooling-flow','Cooling Flow Reveal',66,73],['05-l10-hero','L10 Completed Hero',67,74],['06-rack-bridge','Rack Bridge',59,68],['07-rack-insertion','Rack Insertion',64,75],['08-l11-overview','L11 / Rack Overview',59,72],['09-l11-rear','L11 / Rack Rear',65,68]];
+const stage=document.getElementById('stage'),split=document.getElementById('split');
+for(const [file,title,before,after] of stages){const option=document.createElement('option');option.textContent=title;stage.append(option);const figure=document.createElement('figure'),link=document.createElement('a'),img=document.createElement('img'),caption=document.createElement('figcaption');link.href='final/3440x1440-'+file+'.png';img.src=link.href;img.alt=title+' 最終實際瀏覽器截圖';img.loading='lazy';link.append(img);caption.textContent=title+' · Photorealism '+after+'/100';figure.append(link,caption);document.getElementById('gallery').append(figure);}
+function update(){const [file,title,before,after]=stages[stage.selectedIndex];document.getElementById('before').src='../release/3440x1440-'+file+'.png';document.getElementById('after').src='final/3440x1440-'+file+'.png';document.getElementById('beforeLink').href=document.getElementById('before').src;document.getElementById('afterLink').href=document.getElementById('after').src;document.getElementById('score').textContent='Photorealism '+before+' → '+after+' / 100';}
+stage.onchange=update;split.oninput=()=>{document.getElementById('before').style.clipPath='inset(0 '+(100-split.value)+'% 0 0)';document.getElementById('divider').style.left=split.value+'%';};update();
+</script></html>

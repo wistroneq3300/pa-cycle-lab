@@ -26,13 +26,13 @@ this pass does not reopen a brand workshop.
 | --- | --- |
 | Hardware data and geometry | `app/static/js/l10-hardware.js` exports the frozen `PAL10Hardware` API with `profile`, `build(modelProfile = profile)` and `sample()`. The factory builds original procedural meshes; it does not load vendor CAD, textures or live device data. |
 | Scene integration | `app/static/js/core-scene.js` merges the L10 meshes with `PARackScene.buildEditorialParts()`, replaces only the editorial primary compute asset, and carries it through the existing rack choreography. |
-| Film clock and captions | `app/static/js/validation-overview.js` owns 35.2-second playback, relative scroll takeover, phase copy, the conceptual-flow note and replay/reduced-motion state. |
+| Film clock and captions | `app/static/js/validation-overview.js` owns 35.2-second playback, relative scroll takeover, phase copy, the conceptual-flow note, Skip, and replay/reduced-motion state. |
 | Local typography | `app/static/css/validation-overview.css` adjusts the phase label and adds the wrapped note; the existing Hero layout and operational controls retain their styles. |
 | Loading order | `app/static/index.html` loads `l10-hardware.js` before `core-scene.js`; the actual index remains the stylesheet/script cascade authority. |
 
 ### Geometry and profile
 
-The current profile ID is `liquid-compute-1u-v1`, revision 1. Its generic display
+The current profile ID is `liquid-compute-1u-v1`, revision 2. Its generic display
 label is **Liquid-cooled Compute Tray**. It records the public reference basis,
 reference-matrix path, coordinate convention, normalized envelope, published
 dimensions, editorial scale, counts, board/package placements, coolant anchors,
@@ -71,11 +71,35 @@ without geometry work is not claimed.
 The existing custom WebGL 1 renderer remains the only rendering context. The
 L10 mesh uses real bevels, fasteners, folded edges, cages, tubes and fan geometry.
 Vertex material values distinguish metal from dielectric surfaces. The shader
-derives roughness from that material channel and procedural grain, adds
-GGX-style distribution/geometry/Fresnel terms, and retains analytic softbox,
-rim, fill and contact shading from the incumbent scene. Its highlight shoulder
-controls the bright metal response. There is no HDR image environment,
-photogrammetry, measured material map or imported texture set.
+derives roughness and subtle finish variation from authored material values,
+combines GGX direct lighting with prefiltered photographic studio radiance and
+diffuse irradiance, and applies an approximate environment BRDF response and
+filmic display transform. Fixed neutral fill and a rear service softbox help
+separate dark structures. These remain authored material approximations; no
+photogrammetry, measured OEM finish maps or vendor CAD are introduced.
+
+Phase 3 adds the local `studio-small-09-radiance.png` environment derived from
+Sergej Majboroda's CC0 **Studio Small 09** on Poly Haven. The offline
+`app/qa/l10-prefilter-environment.py` produces six GGX roughness strips and one
+cosine-weighted irradiance strip, each 512 × 256, using 256 samples per texel.
+The combined 512 × 1792 PNG is 902,906 bytes (approximately 882 KiB). Opaque RGB
+stores `log2(1 + radiance × 16) / log2(513)` over the range 0–32; the shader
+decodes it to radiance. This avoids the alpha-premultiplication artifact of an
+RGBM image. The JSON sidecar records exposure, roughness levels, source hash
+and derivation. See [asset provenance](../app/static/img/l10/README.md).
+
+The renderer fetches the shipped PNG from the same application and uploads it
+into the existing WebGL context; it does not fetch an external HDRI at runtime.
+The source HDR remains in ignored `artifacts/l10-phase3/`. Texture upload disables
+browser color-space conversion and alpha premultiplication. Setup/restoration
+reloads the resource, generation checks reject stale callbacks, and disposal
+detaches image callbacks and releases the texture.
+
+The film clock waits while the environment is loading. Scene readiness resolves
+after the image loads or reports failure. On failure, the older analytic lighting
+path remains available and `getState().quality.environmentFailed` reports the
+degraded state; `environmentReady` stays false. A drawable fallback is not a
+passed environment or visual-quality check.
 
 A light-space depth pass uses an RGBA packed-depth texture and a depth
 renderbuffer, up to 2048 × 2048 subject to device limits. The visible shader
@@ -115,7 +139,12 @@ movement retains the existing 150ms exponential damping. The renderer and
 overview expose `getState()`, `assemblySnapshot()` and `paHeroPlayback.seek()`
 for deterministic inspection; these do not communicate with hardware.
 
-The surface contract records the full timeline. Replay, scroll, orbit,
+The new **略過開場** (Skip opening) button and `paHeroPlayback.skip()` cancel the
+film, seek the completed System Overview, and reset the orbit. The button hides
+at completed progress; if it held keyboard focus, focus moves to Replay before
+it disappears. This is a local playback addition, with no other UI redesign.
+
+The surface contract records the full timeline. Replay, Skip, scroll, orbit,
 front/rear, reset, reduced motion, visibility pause, context restoration and
 disposal remain owned by the existing controller paths. Review evidence, not
 the presence of those paths alone, determines acceptance.
@@ -129,7 +158,7 @@ saved final ultrawide exploded capture to relate the implemented scene to the
 preserved shell.
 
 First-pass and earlier final PNGs remain under `artifacts/l10-cinematic/first/`
-and `artifacts/l10-cinematic/final/`. The latest release captures are in
+and `artifacts/l10-cinematic/final/`. The preceding release captures are in
 `artifacts/l10-cinematic/release/`, with metadata in its `captures.json`; their
 published documentation copies are in `docs/screenshots/l10-cinematic/release/`.
 All release captures use a 2127 × 1272 rendering canvas and report resolution
@@ -138,6 +167,13 @@ assets. `artifacts/l10-cinematic/evidence/` contains the associated saved
 validation outputs. This document does not assert test totals, certify every
 image, or claim photo-level realism. The delivery and visual review own final
 acceptance and any limitations found after these records were written.
+
+Phase 3 changes the lighting asset, material response, geometry revision and
+Skip behavior after that earlier evidence. Prior review counts and captures
+remain historical; they are not silently reused as Phase 3 acceptance. The new
+review is recorded in [L10 Phase 3 acceptance](L10_PHASE3_ACCEPTANCE.md):
+functional checks pass, but photographic acceptance remains **NOT ACCEPTED**.
+This integration document does not substitute for the screenshot review.
 
 ## Preexisting documentation drift, preserved without repair
 

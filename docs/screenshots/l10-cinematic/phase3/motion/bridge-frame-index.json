@@ -1,0 +1,5996 @@
+[
+  {
+    "file": "bridge-0001.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833123.763673,
+    "receivedWallMs": 1791833123805,
+    "progress": 0.3876352665625779,
+    "matchedDrawMs": 12528.200000047684,
+    "matchingErrorMs": 0.326904296875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0002.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833123.77139,
+    "receivedWallMs": 1791833123811,
+    "progress": 0.3883940147957759,
+    "matchedDrawMs": 12541.800000071526,
+    "matchingErrorMs": 5.610107421875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0003.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833123.785565,
+    "receivedWallMs": 1791833123834,
+    "progress": 0.3883940147957759,
+    "matchedDrawMs": 12541.800000071526,
+    "matchingErrorMs": -8.56494140625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0004.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833123.815042,
+    "receivedWallMs": 1791833123858,
+    "progress": 0.38992606540957797,
+    "matchedDrawMs": 12573.600000023842,
+    "matchingErrorMs": -6.0419921875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0005.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833123.825013,
+    "receivedWallMs": 1791833123867,
+    "progress": 0.39069587101845393,
+    "matchedDrawMs": 12590.400000095367,
+    "matchingErrorMs": 0.987060546875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0006.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833123.838908,
+    "receivedWallMs": 1791833123880,
+    "progress": 0.39147675000774995,
+    "matchedDrawMs": 12609.700000047684,
+    "matchingErrorMs": 6.092041015625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0007.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833123.871102,
+    "receivedWallMs": 1791833123918,
+    "progress": 0.393023012171776,
+    "matchedDrawMs": 12640.400000095367,
+    "matchingErrorMs": 4.89794921875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0008.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833123.89019,
+    "receivedWallMs": 1791833123932,
+    "progress": 0.39379423018275,
+    "matchedDrawMs": 12656.900000095367,
+    "matchingErrorMs": 1.81005859375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0009.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833123.908921,
+    "receivedWallMs": 1791833123952,
+    "progress": 0.3945557441035779,
+    "matchedDrawMs": 12673.600000023842,
+    "matchingErrorMs": 0.0791015625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0010.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833123.922239,
+    "receivedWallMs": 1791833123968,
+    "progress": 0.39531500485977594,
+    "matchedDrawMs": 12692.900000095367,
+    "matchingErrorMs": 5.760986328125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0011.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833123.938982,
+    "receivedWallMs": 1791833123981,
+    "progress": 0.39606120931739197,
+    "matchedDrawMs": 12709,
+    "matchingErrorMs": 6.01806640625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0012.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833123.954514,
+    "receivedWallMs": 1791833123997,
+    "progress": 0.39680162395057794,
+    "matchedDrawMs": 12725.300000071526,
+    "matchingErrorMs": 6.486083984375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0013.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833123.971803,
+    "receivedWallMs": 1791833124016,
+    "progress": 0.39752999354777596,
+    "matchedDrawMs": 12743.100000023842,
+    "matchingErrorMs": 7.197021484375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0014.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833123.987767,
+    "receivedWallMs": 1791833124033,
+    "progress": 0.39824458553275,
+    "matchedDrawMs": 12758.400000095367,
+    "matchingErrorMs": 6.23291015625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0015.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.004033,
+    "receivedWallMs": 1791833124052,
+    "progress": 0.39893953079757793,
+    "matchedDrawMs": 12775.5,
+    "matchingErrorMs": 6.966796875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0016.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.02401,
+    "receivedWallMs": 1791833124067,
+    "progress": 0.39962147823577593,
+    "matchedDrawMs": 12790.200000047684,
+    "matchingErrorMs": 1.989990234375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0017.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.04307,
+    "receivedWallMs": 1791833124085,
+    "progress": 0.40028446070775,
+    "matchedDrawMs": 12808,
+    "matchingErrorMs": 0.929931640625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0018.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.056688,
+    "receivedWallMs": 1791833124099,
+    "progress": 0.40092296464457794,
+    "matchedDrawMs": 12823.800000071526,
+    "matchingErrorMs": 2.31201171875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0019.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.071832,
+    "receivedWallMs": 1791833124117,
+    "progress": 0.40154295892377595,
+    "matchedDrawMs": 12843,
+    "matchingErrorMs": 6.16796875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0020.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.087631,
+    "receivedWallMs": 1791833124132,
+    "progress": 0.40213530827339194,
+    "matchedDrawMs": 12858.600000023842,
+    "matchingErrorMs": 6.368896484375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0021.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.10729,
+    "receivedWallMs": 1791833124151,
+    "progress": 0.4027054254915779,
+    "matchedDrawMs": 12873.800000071526,
+    "matchingErrorMs": 1.7099609375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0022.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.124229,
+    "receivedWallMs": 1791833124166,
+    "progress": 0.40324793561177597,
+    "matchedDrawMs": 12890.300000071526,
+    "matchingErrorMs": 1.77099609375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0023.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.138456,
+    "receivedWallMs": 1791833124180,
+    "progress": 0.403758123925392,
+    "matchedDrawMs": 12908.900000095367,
+    "matchingErrorMs": 5.5439453125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0024.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.154221,
+    "receivedWallMs": 1791833124199,
+    "progress": 0.40424041333857796,
+    "matchedDrawMs": 12924.800000071526,
+    "matchingErrorMs": 5.779052734375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0025.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.171226,
+    "receivedWallMs": 1791833124216,
+    "progress": 0.40468731773945393,
+    "matchedDrawMs": 12942.300000071526,
+    "matchingErrorMs": 6.77392578125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0026.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.191021,
+    "receivedWallMs": 1791833124234,
+    "progress": 0.40510487623275,
+    "matchedDrawMs": 12957,
+    "matchingErrorMs": 1.97900390625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0027.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.20421,
+    "receivedWallMs": 1791833124250,
+    "progress": 0.405481428185578,
+    "matchedDrawMs": 12975.100000023842,
+    "matchingErrorMs": 6.7900390625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0028.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.221377,
+    "receivedWallMs": 1791833124269,
+    "progress": 0.40582430070908193,
+    "matchedDrawMs": 12992.5,
+    "matchingErrorMs": 6.623046875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0029.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.240723,
+    "receivedWallMs": 1791833124284,
+    "progress": 0.40612361140775,
+    "matchedDrawMs": 13007.100000023842,
+    "matchingErrorMs": 2.277099609375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0030.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.260566,
+    "receivedWallMs": 1791833124304,
+    "progress": 0.40638339886926395,
+    "matchedDrawMs": 13025.100000023842,
+    "matchingErrorMs": 0.43408203125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0031.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.273039,
+    "receivedWallMs": 1791833124319,
+    "progress": 0.406598841675776,
+    "matchedDrawMs": 13043.600000023842,
+    "matchingErrorMs": 5.9609375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0032.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.288065,
+    "receivedWallMs": 1791833124330,
+    "progress": 0.40677081158274997,
+    "matchedDrawMs": 13059,
+    "matchingErrorMs": 6.93505859375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0033.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.311184,
+    "receivedWallMs": 1791833124354,
+    "progress": 0.40689553887957797,
+    "matchedDrawMs": 13076,
+    "matchingErrorMs": 0.816162109375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0034.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.330216,
+    "receivedWallMs": 1791833124373,
+    "progress": 0.406972802363776,
+    "matchedDrawMs": 13090.400000095367,
+    "matchingErrorMs": -4.2158203125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0035.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.339444,
+    "receivedWallMs": 1791833124381,
+    "progress": 0.40699997675774996,
+    "matchedDrawMs": 13106.900000095367,
+    "matchingErrorMs": 2.55615234375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0036.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.356098,
+    "receivedWallMs": 1791833124402,
+    "progress": 0.40699997675774996,
+    "matchedDrawMs": 13123.600000023842,
+    "matchingErrorMs": 2.902099609375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0037.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.393147,
+    "receivedWallMs": 1791833124436,
+    "progress": 0.407055131714,
+    "matchedDrawMs": 13157.900000095367,
+    "matchingErrorMs": -0.14697265625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0038.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.406284,
+    "receivedWallMs": 1791833124448,
+    "progress": 0.40709806561308104,
+    "matchedDrawMs": 13173.600000023842,
+    "matchingErrorMs": 2.7158203125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0039.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.423117,
+    "receivedWallMs": 1791833124466,
+    "progress": 0.407153492811776,
+    "matchedDrawMs": 13190.300000071526,
+    "matchingErrorMs": 2.883056640625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0040.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.440046,
+    "receivedWallMs": 1791833124485,
+    "progress": 0.4072206568844784,
+    "matchedDrawMs": 13207.100000023842,
+    "matchingErrorMs": 2.953857421875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0041.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.457711,
+    "receivedWallMs": 1791833124501,
+    "progress": 0.40730027366532795,
+    "matchedDrawMs": 13223.5,
+    "matchingErrorMs": 1.2890625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0042.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.476118,
+    "receivedWallMs": 1791833124522,
+    "progress": 0.4073918810800229,
+    "matchedDrawMs": 13240.700000047684,
+    "matchingErrorMs": -0.1181640625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0043.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.488861,
+    "receivedWallMs": 1791833124530,
+    "progress": 0.40749473028339195,
+    "matchedDrawMs": 13259.400000095367,
+    "matchingErrorMs": 6.138916015625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0044.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.507617,
+    "receivedWallMs": 1791833124550,
+    "progress": 0.4076099670509082,
+    "matchedDrawMs": 13273.800000071526,
+    "matchingErrorMs": 1.383056640625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0045.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.54008,
+    "receivedWallMs": 1791833124585,
+    "progress": 0.40787547578066663,
+    "matchedDrawMs": 13307,
+    "matchingErrorMs": 1.919921875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0046.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.556851,
+    "receivedWallMs": 1791833124601,
+    "progress": 0.4080246272513033,
+    "matchedDrawMs": 13323.800000071526,
+    "matchingErrorMs": 2.149169921875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0047.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.574163,
+    "receivedWallMs": 1791833124622,
+    "progress": 0.40818607154244263,
+    "matchedDrawMs": 13340.300000071526,
+    "matchingErrorMs": 1.837158203125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0048.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.590286,
+    "receivedWallMs": 1791833124638,
+    "progress": 0.4083577825627006,
+    "matchedDrawMs": 13357.200000047684,
+    "matchingErrorMs": 2.7138671875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0049.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.608121,
+    "receivedWallMs": 1791833124652,
+    "progress": 0.4085417357479946,
+    "matchedDrawMs": 13376.200000047684,
+    "matchingErrorMs": 3.879150390625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0050.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.641453,
+    "receivedWallMs": 1791833124689,
+    "progress": 0.40894172440605864,
+    "matchedDrawMs": 13410,
+    "matchingErrorMs": 4.546875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0051.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.656149,
+    "receivedWallMs": 1791833124700,
+    "progress": 0.40915877402246376,
+    "matchedDrawMs": 13427,
+    "matchingErrorMs": 6.85107421875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0052.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.671934,
+    "receivedWallMs": 1791833124739,
+    "progress": 0.4093866904493068,
+    "matchedDrawMs": 13440.5,
+    "matchingErrorMs": 4.066162109375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0053.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.707809,
+    "receivedWallMs": 1791833124754,
+    "progress": 0.40987169911466664,
+    "matchedDrawMs": 13473.900000095367,
+    "matchingErrorMs": 1.19091796875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0054.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.722537,
+    "receivedWallMs": 1791833124765,
+    "progress": 0.4101315267225064,
+    "matchedDrawMs": 13490.300000071526,
+    "matchingErrorMs": 3.462890625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0055.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.740889,
+    "receivedWallMs": 1791833124789,
+    "progress": 0.4104018469075895,
+    "matchedDrawMs": 13507.100000023842,
+    "matchingErrorMs": 2.11083984375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0056.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.7774,
+    "receivedWallMs": 1791833124820,
+    "progress": 0.41097358965246733,
+    "matchedDrawMs": 13542,
+    "matchingErrorMs": 0.60009765625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0057.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.795228,
+    "receivedWallMs": 1791833124851,
+    "progress": 0.4112729905287253,
+    "matchedDrawMs": 13560,
+    "matchingErrorMs": -0.22802734375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0058.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.808547,
+    "receivedWallMs": 1791833124854,
+    "progress": 0.41161083533641973,
+    "matchedDrawMs": 13573.600000023842,
+    "matchingErrorMs": 0.452880859375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0059.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.822835,
+    "receivedWallMs": 1791833124868,
+    "progress": 0.4119055980688624,
+    "matchedDrawMs": 13590.800000071526,
+    "matchingErrorMs": 3.1650390625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0060.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.858478,
+    "receivedWallMs": 1791833124904,
+    "progress": 0.4125758545277477,
+    "matchedDrawMs": 13623.700000047684,
+    "matchingErrorMs": 0.52197265625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0061.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.873482,
+    "receivedWallMs": 1791833124919,
+    "progress": 0.4129287505581406,
+    "matchedDrawMs": 13640.300000071526,
+    "matchingErrorMs": 2.51806640625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0062.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.888768,
+    "receivedWallMs": 1791833124937,
+    "progress": 0.41328484991914505,
+    "matchedDrawMs": 13656.900000095367,
+    "matchingErrorMs": 3.23193359375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0063.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.907847,
+    "receivedWallMs": 1791833124963,
+    "progress": 0.41365476391332795,
+    "matchedDrawMs": 13674.300000071526,
+    "matchingErrorMs": 2.153076171875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0064.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.926325,
+    "receivedWallMs": 1791833124973,
+    "progress": 0.4140387403201975,
+    "matchedDrawMs": 13693.200000047684,
+    "matchingErrorMs": 2.6748046875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0065.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.940852,
+    "receivedWallMs": 1791833124990,
+    "progress": 0.4144228841559753,
+    "matchedDrawMs": 13712.100000023842,
+    "matchingErrorMs": 7.148193359375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0066.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.975391,
+    "receivedWallMs": 1791833125020,
+    "progress": 0.4152256363550846,
+    "matchedDrawMs": 13740.5,
+    "matchingErrorMs": 0.609130859375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0067.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833124.991849,
+    "receivedWallMs": 1791833125037,
+    "progress": 0.41564186798066666,
+    "matchedDrawMs": 13757,
+    "matchingErrorMs": 0.151123046875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0068.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.005152,
+    "receivedWallMs": 1791833125053,
+    "progress": 0.4160645201659699,
+    "matchedDrawMs": 13775.900000095367,
+    "matchingErrorMs": 5.847900390625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0069.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.025808,
+    "receivedWallMs": 1791833125074,
+    "progress": 0.4164985917344426,
+    "matchedDrawMs": 13792.200000047684,
+    "matchingErrorMs": 3.19189453125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0070.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.039894,
+    "receivedWallMs": 1791833125083,
+    "progress": 0.41694414788130124,
+    "matchedDrawMs": 13811.800000071526,
+    "matchingErrorMs": 7.10595703125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0071.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.058507,
+    "receivedWallMs": 1791833125105,
+    "progress": 0.4173903299959946,
+    "matchedDrawMs": 13823.800000071526,
+    "matchingErrorMs": 0.492919921875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0072.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.088498,
+    "receivedWallMs": 1791833125138,
+    "progress": 0.41831633877405866,
+    "matchedDrawMs": 13856.900000095367,
+    "matchingErrorMs": 3.501953125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0073.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.109017,
+    "receivedWallMs": 1791833125163,
+    "progress": 0.4187934029371304,
+    "matchedDrawMs": 13874.700000047684,
+    "matchingErrorMs": 0.983154296875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0074.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.125304,
+    "receivedWallMs": 1791833125172,
+    "progress": 0.4192758740773706,
+    "matchedDrawMs": 13891.400000095367,
+    "matchingErrorMs": 1.696044921875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0075.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.142266,
+    "receivedWallMs": 1791833125185,
+    "progress": 0.4197724520473333,
+    "matchedDrawMs": 13906.900000095367,
+    "matchingErrorMs": -0.26611328125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0076.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.173317,
+    "receivedWallMs": 1791833125217,
+    "progress": 0.4207810264651093,
+    "matchedDrawMs": 13940.400000095367,
+    "matchingErrorMs": 2.68310546875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0077.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.193235,
+    "receivedWallMs": 1791833125237,
+    "progress": 0.42129567194225614,
+    "matchedDrawMs": 13958.100000023842,
+    "matchingErrorMs": 0.76513671875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0078.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.206779,
+    "receivedWallMs": 1791833125253,
+    "progress": 0.4218212640786613,
+    "matchedDrawMs": 13973.600000023842,
+    "matchingErrorMs": 2.220947265625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0079.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.223981,
+    "receivedWallMs": 1791833125270,
+    "progress": 0.422354632511134,
+    "matchedDrawMs": 13990.300000071526,
+    "matchingErrorMs": 2.01904296875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0080.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.238915,
+    "receivedWallMs": 1791833125287,
+    "progress": 0.4228956834004197,
+    "matchedDrawMs": 14010.600000023842,
+    "matchingErrorMs": 7.0849609375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0081.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.26106,
+    "receivedWallMs": 1791833125306,
+    "progress": 0.42344101524201927,
+    "matchedDrawMs": 14026,
+    "matchingErrorMs": 0.93994140625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0082.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.277393,
+    "receivedWallMs": 1791833125323,
+    "progress": 0.423997104927529,
+    "matchedDrawMs": 14042.100000023842,
+    "matchingErrorMs": 0.60693359375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0083.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.291999,
+    "receivedWallMs": 1791833125337,
+    "progress": 0.42455720007341663,
+    "matchedDrawMs": 14058.800000071526,
+    "matchingErrorMs": 2.0009765625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0084.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.307782,
+    "receivedWallMs": 1791833125354,
+    "progress": 0.4251279554424144,
+    "matchedDrawMs": 14074.100000023842,
+    "matchingErrorMs": 2.218017578125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0085.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.325699,
+    "receivedWallMs": 1791833125373,
+    "progress": 0.42570592519577594,
+    "matchedDrawMs": 14090.5,
+    "matchingErrorMs": 0.301025390625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0086.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.339895,
+    "receivedWallMs": 1791833125386,
+    "progress": 0.42628749095381174,
+    "matchedDrawMs": 14107.300000071526,
+    "matchingErrorMs": 3.10498046875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0087.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.357966,
+    "receivedWallMs": 1791833125406,
+    "progress": 0.42687956616132794,
+    "matchedDrawMs": 14123.700000047684,
+    "matchingErrorMs": 1.033935546875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0088.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.37772,
+    "receivedWallMs": 1791833125421,
+    "progress": 0.427474967470457,
+    "matchedDrawMs": 14142.800000071526,
+    "matchingErrorMs": 0.27978515625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0089.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.397227,
+    "receivedWallMs": 1791833125448,
+    "progress": 0.428080775019392,
+    "matchedDrawMs": 14157.200000047684,
+    "matchingErrorMs": -4.22705078125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0090.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.426551,
+    "receivedWallMs": 1791833125469,
+    "progress": 0.42930880777870395,
+    "matchedDrawMs": 14191.200000047684,
+    "matchingErrorMs": 0.448974609375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0091.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.4401,
+    "receivedWallMs": 1791833125484,
+    "progress": 0.42993453375163887,
+    "matchedDrawMs": 14206.900000095367,
+    "matchingErrorMs": 1.900146484375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0092.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.457729,
+    "receivedWallMs": 1791833125501,
+    "progress": 0.430562920448,
+    "matchedDrawMs": 14223.700000047684,
+    "matchingErrorMs": 1.27099609375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0093.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.472053,
+    "receivedWallMs": 1791833125516,
+    "progress": 0.43120528792644264,
+    "matchedDrawMs": 14243.800000071526,
+    "matchingErrorMs": 6.947021484375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0094.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.488354,
+    "receivedWallMs": 1791833125534,
+    "progress": 0.43184624863203397,
+    "matchedDrawMs": 14259.700000047684,
+    "matchingErrorMs": 6.64599609375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0095.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.505544,
+    "receivedWallMs": 1791833125551,
+    "progress": 0.4324972362439946,
+    "matchedDrawMs": 14273.600000023842,
+    "matchingErrorMs": 3.4560546875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0096.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.525811,
+    "receivedWallMs": 1791833125569,
+    "progress": 0.4331543144169117,
+    "matchedDrawMs": 14290.5,
+    "matchingErrorMs": 0.18896484375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0097.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.539098,
+    "receivedWallMs": 1791833125583,
+    "progress": 0.4338134011420586,
+    "matchedDrawMs": 14310,
+    "matchingErrorMs": 6.90185546875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0098.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.555034,
+    "receivedWallMs": 1791833125599,
+    "progress": 0.4344783208233086,
+    "matchedDrawMs": 14325.5,
+    "matchingErrorMs": 5.966064453125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0099.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.572086,
+    "receivedWallMs": 1791833125617,
+    "progress": 0.43515709616664017,
+    "matchedDrawMs": 14343.200000047684,
+    "matchingErrorMs": 6.913818359375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0100.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.590493,
+    "receivedWallMs": 1791833125635,
+    "progress": 0.435829381480658,
+    "matchedDrawMs": 14356.900000095367,
+    "matchingErrorMs": 1.507080078125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0101.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.607207,
+    "receivedWallMs": 1791833125652,
+    "progress": 0.43651540471466665,
+    "matchedDrawMs": 14373.600000023842,
+    "matchingErrorMs": 1.79296875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0102.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.62564,
+    "receivedWallMs": 1791833125669,
+    "progress": 0.4372069571598397,
+    "matchedDrawMs": 14390.200000047684,
+    "matchingErrorMs": 0.360107421875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0103.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.639648,
+    "receivedWallMs": 1791833125685,
+    "progress": 0.43790394497692287,
+    "matchedDrawMs": 14407,
+    "matchingErrorMs": 2.35205078125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0104.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.656466,
+    "receivedWallMs": 1791833125700,
+    "progress": 0.4386020530504692,
+    "matchedDrawMs": 14424,
+    "matchingErrorMs": 3.533935546875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0105.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.673313,
+    "receivedWallMs": 1791833125720,
+    "progress": 0.43930959894956817,
+    "matchedDrawMs": 14440.900000095367,
+    "matchingErrorMs": 2.68701171875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0106.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.689326,
+    "receivedWallMs": 1791833125737,
+    "progress": 0.4400222992647253,
+    "matchedDrawMs": 14460.100000023842,
+    "matchingErrorMs": 6.674072265625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0107.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.705253,
+    "receivedWallMs": 1791833125746,
+    "progress": 0.440740060156686,
+    "matchedDrawMs": 14476.5,
+    "matchingErrorMs": 6.7470703125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0108.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.723312,
+    "receivedWallMs": 1791833125765,
+    "progress": 0.44145844548003726,
+    "matchedDrawMs": 14490.200000047684,
+    "matchingErrorMs": 2.68798828125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0109.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.756839,
+    "receivedWallMs": 1791833125801,
+    "progress": 0.44291396898133334,
+    "matchedDrawMs": 14523.600000023842,
+    "matchingErrorMs": 2.160888671875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0110.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.773797,
+    "receivedWallMs": 1791833125818,
+    "progress": 0.44365097823272864,
+    "matchedDrawMs": 14540.200000047684,
+    "matchingErrorMs": 2.202880859375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0111.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.78725,
+    "receivedWallMs": 1791833125835,
+    "progress": 0.4443881257773493,
+    "matchedDrawMs": 14558,
+    "matchingErrorMs": 6.75,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0112.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.805564,
+    "receivedWallMs": 1791833125855,
+    "progress": 0.44513868040932797,
+    "matchedDrawMs": 14577.200000047684,
+    "matchingErrorMs": 7.43603515625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0113.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.825095,
+    "receivedWallMs": 1791833125876,
+    "progress": 0.44588467868912374,
+    "matchedDrawMs": 14597,
+    "matchingErrorMs": 7.905029296875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0114.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.844786,
+    "receivedWallMs": 1791833125891,
+    "progress": 0.4467120075521975,
+    "matchedDrawMs": 14611.100000023842,
+    "matchingErrorMs": 2.214111328125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0115.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.861659,
+    "receivedWallMs": 1791833125933,
+    "progress": 0.44744405919583463,
+    "matchedDrawMs": 14629.200000047684,
+    "matchingErrorMs": 3.341064453125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0116.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.89117,
+    "receivedWallMs": 1791833125941,
+    "progress": 0.44892877238066664,
+    "matchedDrawMs": 14657.300000071526,
+    "matchingErrorMs": 1.830078125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0117.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.907856,
+    "receivedWallMs": 1791833125955,
+    "progress": 0.449690613248,
+    "matchedDrawMs": 14673.600000023842,
+    "matchingErrorMs": 1.14404296875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0118.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.942304,
+    "receivedWallMs": 1791833125990,
+    "progress": 0.4512441536667006,
+    "matchedDrawMs": 14706.900000095367,
+    "matchingErrorMs": -0.303955078125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0119.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.958404,
+    "receivedWallMs": 1791833126013,
+    "progress": 0.45203114975012815,
+    "matchedDrawMs": 14727.5,
+    "matchingErrorMs": 4.595947265625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0120.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833125.974932,
+    "receivedWallMs": 1791833126049,
+    "progress": 0.45284061696771005,
+    "matchedDrawMs": 14742.600000023842,
+    "matchingErrorMs": 3.068115234375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0121.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.00462,
+    "receivedWallMs": 1791833126055,
+    "progress": 0.45438484028997533,
+    "matchedDrawMs": 14776.200000047684,
+    "matchingErrorMs": 7.3798828125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0122.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.024549,
+    "receivedWallMs": 1791833126070,
+    "progress": 0.45518556302530677,
+    "matchedDrawMs": 14790.600000023842,
+    "matchingErrorMs": 1.450927734375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0123.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.059184,
+    "receivedWallMs": 1791833126106,
+    "progress": 0.45677733751466665,
+    "matchedDrawMs": 14825.700000047684,
+    "matchingErrorMs": 1.81591796875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0124.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.076085,
+    "receivedWallMs": 1791833126120,
+    "progress": 0.45759704010291363,
+    "matchedDrawMs": 14841.300000071526,
+    "matchingErrorMs": 0.914794921875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0125.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.092031,
+    "receivedWallMs": 1791833126149,
+    "progress": 0.4583906660115895,
+    "matchedDrawMs": 14857.5,
+    "matchingErrorMs": 0.968994140625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0126.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.123684,
+    "receivedWallMs": 1791833126168,
+    "progress": 0.46001036616823476,
+    "matchedDrawMs": 14890.300000071526,
+    "matchingErrorMs": 2.316162109375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0127.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.139231,
+    "receivedWallMs": 1791833126184,
+    "progress": 0.46082173022248507,
+    "matchedDrawMs": 14906.900000095367,
+    "matchingErrorMs": 2.76904296875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0128.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.15521,
+    "receivedWallMs": 1791833126201,
+    "progress": 0.46164541707135265,
+    "matchedDrawMs": 14925,
+    "matchingErrorMs": 5.7900390625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0129.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.171703,
+    "receivedWallMs": 1791833126218,
+    "progress": 0.4624617220320373,
+    "matchedDrawMs": 14943.400000095367,
+    "matchingErrorMs": 7.296875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0130.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.188863,
+    "receivedWallMs": 1791833126236,
+    "progress": 0.46328528214275,
+    "matchedDrawMs": 14960.800000071526,
+    "matchingErrorMs": 7.136962890625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0131.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.205493,
+    "receivedWallMs": 1791833126254,
+    "progress": 0.4641110932717477,
+    "matchedDrawMs": 14977,
+    "matchingErrorMs": 6.507080078125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0132.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.222561,
+    "receivedWallMs": 1791833126269,
+    "progress": 0.46493409745139525,
+    "matchedDrawMs": 14993.900000095367,
+    "matchingErrorMs": 6.439208984375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0133.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.240935,
+    "receivedWallMs": 1791833126287,
+    "progress": 0.4657641170231451,
+    "matchedDrawMs": 15009.800000071526,
+    "matchingErrorMs": 4.06494140625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0134.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.260244,
+    "receivedWallMs": 1791833126305,
+    "progress": 0.4665961066573279,
+    "matchedDrawMs": 15025.400000095367,
+    "matchingErrorMs": 0.756103515625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0135.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.276758,
+    "receivedWallMs": 1791833126325,
+    "progress": 0.46744996758118396,
+    "matchedDrawMs": 15041.600000023842,
+    "matchingErrorMs": 0.241943359375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0136.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.294386,
+    "receivedWallMs": 1791833126343,
+    "progress": 0.46826061175539196,
+    "matchedDrawMs": 15059.600000023842,
+    "matchingErrorMs": 0.614013671875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0137.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.308577,
+    "receivedWallMs": 1791833126355,
+    "progress": 0.4691029575419307,
+    "matchedDrawMs": 15079,
+    "matchingErrorMs": 6.4228515625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0138.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.327856,
+    "receivedWallMs": 1791833126372,
+    "progress": 0.469951945399161,
+    "matchedDrawMs": 15094.100000023842,
+    "matchingErrorMs": 2.14404296875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0139.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.357103,
+    "receivedWallMs": 1791833126404,
+    "progress": 0.4716241607752693,
+    "matchedDrawMs": 15123.700000047684,
+    "matchingErrorMs": 1.89697265625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0140.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.372968,
+    "receivedWallMs": 1791833126420,
+    "progress": 0.4724521558576176,
+    "matchedDrawMs": 15140.400000095367,
+    "matchingErrorMs": 3.031982421875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0141.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.389972,
+    "receivedWallMs": 1791833126438,
+    "progress": 0.47329144726001593,
+    "matchedDrawMs": 15157.600000023842,
+    "matchingErrorMs": 3.028076171875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0142.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.407029,
+    "receivedWallMs": 1791833126455,
+    "progress": 0.47414198473999464,
+    "matchedDrawMs": 15174.200000047684,
+    "matchingErrorMs": 2.97119140625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0143.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.425233,
+    "receivedWallMs": 1791833126472,
+    "progress": 0.4749834243140127,
+    "matchedDrawMs": 15193.200000047684,
+    "matchingErrorMs": 3.76708984375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0144.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.439995,
+    "receivedWallMs": 1791833126488,
+    "progress": 0.47583086987805856,
+    "matchedDrawMs": 15208.600000023842,
+    "matchingErrorMs": 4.0048828125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0145.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.460611,
+    "receivedWallMs": 1791833126514,
+    "progress": 0.476674079756642,
+    "matchedDrawMs": 15225.800000071526,
+    "matchingErrorMs": 0.388916015625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0146.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.47422,
+    "receivedWallMs": 1791833126533,
+    "progress": 0.47752311973337075,
+    "matchedDrawMs": 15243.100000023842,
+    "matchingErrorMs": 4.780029296875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0147.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.490408,
+    "receivedWallMs": 1791833126537,
+    "progress": 0.4783728188325277,
+    "matchedDrawMs": 15258,
+    "matchingErrorMs": 3.592041015625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0148.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.521673,
+    "receivedWallMs": 1791833126571,
+    "progress": 0.4800687235971732,
+    "matchedDrawMs": 15290.600000023842,
+    "matchingErrorMs": 4.3271484375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0149.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.5408,
+    "receivedWallMs": 1791833126589,
+    "progress": 0.4809198350462561,
+    "matchedDrawMs": 15310.600000023842,
+    "matchingErrorMs": 5.199951171875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0150.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.559847,
+    "receivedWallMs": 1791833126611,
+    "progress": 0.48176613198380247,
+    "matchedDrawMs": 15325.300000071526,
+    "matchingErrorMs": 1.15283203125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0151.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.579477,
+    "receivedWallMs": 1791833126629,
+    "progress": 0.4826177173869016,
+    "matchedDrawMs": 15341.400000095367,
+    "matchingErrorMs": -2.47705078125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0152.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.599977,
+    "receivedWallMs": 1791833126654,
+    "progress": 0.48350000000000004,
+    "matchedDrawMs": 15357.300000071526,
+    "matchingErrorMs": -6.97705078125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0153.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.628984,
+    "receivedWallMs": 1791833126676,
+    "progress": 0.4852236703316496,
+    "matchedDrawMs": 15391.700000047684,
+    "matchingErrorMs": -1.98388671875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0154.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.643556,
+    "receivedWallMs": 1791833126689,
+    "progress": 0.48602409271400004,
+    "matchedDrawMs": 15414.5,
+    "matchingErrorMs": 6.44384765625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0155.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.657835,
+    "receivedWallMs": 1791833126709,
+    "progress": 0.48686503458133334,
+    "matchedDrawMs": 15424.300000071526,
+    "matchingErrorMs": 2.1650390625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0156.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.689503,
+    "receivedWallMs": 1791833126735,
+    "progress": 0.4885661020578117,
+    "matchedDrawMs": 15459.900000095367,
+    "matchingErrorMs": 5.4970703125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0157.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.707532,
+    "receivedWallMs": 1791833126753,
+    "progress": 0.48941075847269133,
+    "matchedDrawMs": 15474.5,
+    "matchingErrorMs": 2.468017578125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0158.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.7235,
+    "receivedWallMs": 1791833126769,
+    "progress": 0.49025985312645715,
+    "matchedDrawMs": 15490.5,
+    "matchingErrorMs": 2.5,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0159.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.740553,
+    "receivedWallMs": 1791833126788,
+    "progress": 0.4911031245940406,
+    "matchedDrawMs": 15511.100000023842,
+    "matchingErrorMs": 6.447021484375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0160.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.757847,
+    "receivedWallMs": 1791833126805,
+    "progress": 0.49195063940108646,
+    "matchedDrawMs": 15523.800000071526,
+    "matchingErrorMs": 1.15283203125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0161.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.774019,
+    "receivedWallMs": 1791833126825,
+    "progress": 0.49279722143470406,
+    "matchedDrawMs": 15540.5,
+    "matchingErrorMs": 1.98095703125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0162.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.794308,
+    "receivedWallMs": 1791833126849,
+    "progress": 0.49364277685563884,
+    "matchedDrawMs": 15559.200000047684,
+    "matchingErrorMs": 0.692138671875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0163.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.814204,
+    "receivedWallMs": 1791833126867,
+    "progress": 0.49448215884799995,
+    "matchedDrawMs": 15577.400000095367,
+    "matchingErrorMs": -1.203857421875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0164.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.840392,
+    "receivedWallMs": 1791833126891,
+    "progress": 0.496162270372016,
+    "matchedDrawMs": 15607.300000071526,
+    "matchingErrorMs": 2.60791015625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0165.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.857689,
+    "receivedWallMs": 1791833126903,
+    "progress": 0.4970078269879946,
+    "matchedDrawMs": 15623.800000071526,
+    "matchingErrorMs": 1.31103515625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0166.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.88029,
+    "receivedWallMs": 1791833126926,
+    "progress": 0.4978418315326793,
+    "matchedDrawMs": 15640.800000071526,
+    "matchingErrorMs": -4.2900390625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0167.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.907374,
+    "receivedWallMs": 1791833126953,
+    "progress": 0.4995100392233087,
+    "matchedDrawMs": 15674,
+    "matchingErrorMs": 2.6259765625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0168.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.925555,
+    "receivedWallMs": 1791833126972,
+    "progress": 0.5003440362853707,
+    "matchedDrawMs": 15690.5,
+    "matchingErrorMs": 0.445068359375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0169.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.939262,
+    "receivedWallMs": 1791833126985,
+    "progress": 0.501171186816658,
+    "matchedDrawMs": 15707.100000023842,
+    "matchingErrorMs": 3.738037109375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0170.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.95784,
+    "receivedWallMs": 1791833127004,
+    "progress": 0.5019963980260655,
+    "matchedDrawMs": 15728,
+    "matchingErrorMs": 6.16015625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0171.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.973815,
+    "receivedWallMs": 1791833127022,
+    "progress": 0.50282948281584,
+    "matchedDrawMs": 15741.600000023842,
+    "matchingErrorMs": 3.18505859375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0172.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833126.989487,
+    "receivedWallMs": 1791833127033,
+    "progress": 0.5036505127426827,
+    "matchedDrawMs": 15757.200000047684,
+    "matchingErrorMs": 3.51318359375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0173.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.006605,
+    "receivedWallMs": 1791833127050,
+    "progress": 0.5044742514504692,
+    "matchedDrawMs": 15773.900000095367,
+    "matchingErrorMs": 2.39501953125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0174.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.041036,
+    "receivedWallMs": 1791833127089,
+    "progress": 0.5061097257798185,
+    "matchedDrawMs": 15807.200000047684,
+    "matchingErrorMs": 1.964111328125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0175.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.057609,
+    "receivedWallMs": 1791833127105,
+    "progress": 0.5069261857121975,
+    "matchedDrawMs": 15823.800000071526,
+    "matchingErrorMs": 1.390869140625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0176.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.073002,
+    "receivedWallMs": 1791833127128,
+    "progress": 0.5077351618126238,
+    "matchedDrawMs": 15840.800000071526,
+    "matchingErrorMs": 2.997802734375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0177.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.093792,
+    "receivedWallMs": 1791833127144,
+    "progress": 0.5085463074095469,
+    "matchedDrawMs": 15859.700000047684,
+    "matchingErrorMs": 1.2080078125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0178.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.115867,
+    "receivedWallMs": 1791833127172,
+    "progress": 0.509359479101081,
+    "matchedDrawMs": 15877.800000071526,
+    "matchingErrorMs": -2.866943359375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0179.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.143861,
+    "receivedWallMs": 1791833127195,
+    "progress": 0.5109577391133493,
+    "matchedDrawMs": 15908.800000071526,
+    "matchingErrorMs": 0.138916015625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0180.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.160813,
+    "receivedWallMs": 1791833127209,
+    "progress": 0.5117905560412107,
+    "matchedDrawMs": 15929.800000071526,
+    "matchingErrorMs": 4.18701171875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0181.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.177904,
+    "receivedWallMs": 1791833127237,
+    "progress": 0.5125771046051841,
+    "matchedDrawMs": 15947.300000071526,
+    "matchingErrorMs": 5.09619140625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0182.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.215298,
+    "receivedWallMs": 1791833127262,
+    "progress": 0.514154665982,
+    "matchedDrawMs": 15974,
+    "matchingErrorMs": -5.2978515625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0183.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.227282,
+    "receivedWallMs": 1791833127273,
+    "progress": 0.5149124971975126,
+    "matchedDrawMs": 15991.400000095367,
+    "matchingErrorMs": -0.281982421875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0184.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.240945,
+    "receivedWallMs": 1791833127287,
+    "progress": 0.515718453466496,
+    "matchedDrawMs": 16011.600000023842,
+    "matchingErrorMs": 6.054931640625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0185.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.272821,
+    "receivedWallMs": 1791833127322,
+    "progress": 0.517249202294951,
+    "matchedDrawMs": 16040.600000023842,
+    "matchingErrorMs": 3.178955078125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0186.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.291687,
+    "receivedWallMs": 1791833127338,
+    "progress": 0.5180205567707006,
+    "matchedDrawMs": 16057.800000071526,
+    "matchingErrorMs": 1.31298828125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0187.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.307736,
+    "receivedWallMs": 1791833127362,
+    "progress": 0.5187833977615802,
+    "matchedDrawMs": 16073.800000071526,
+    "matchingErrorMs": 1.26416015625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0188.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.324638,
+    "receivedWallMs": 1791833127368,
+    "progress": 0.5195422635034879,
+    "matchedDrawMs": 16090.600000023842,
+    "matchingErrorMs": 1.362060546875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0189.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.344902,
+    "receivedWallMs": 1791833127388,
+    "progress": 0.5202970618328304,
+    "matchedDrawMs": 16112.200000047684,
+    "matchingErrorMs": 3.097900390625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0190.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.373209,
+    "receivedWallMs": 1791833127418,
+    "progress": 0.5218030539157349,
+    "matchedDrawMs": 16140.5,
+    "matchingErrorMs": 2.791015625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0191.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.390927,
+    "receivedWallMs": 1791833127435,
+    "progress": 0.5225450441277439,
+    "matchedDrawMs": 16157.700000047684,
+    "matchingErrorMs": 2.072998046875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0192.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.405863,
+    "receivedWallMs": 1791833127450,
+    "progress": 0.5232914559146666,
+    "matchedDrawMs": 16173.900000095367,
+    "matchingErrorMs": 3.136962890625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0193.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.425557,
+    "receivedWallMs": 1791833127472,
+    "progress": 0.52402442447613,
+    "matchedDrawMs": 16190.400000095367,
+    "matchingErrorMs": 0.443115234375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0194.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.440657,
+    "receivedWallMs": 1791833127484,
+    "progress": 0.5247571438546826,
+    "matchedDrawMs": 16207.100000023842,
+    "matchingErrorMs": 2.343017578125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0195.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.456999,
+    "receivedWallMs": 1791833127501,
+    "progress": 0.5254807463411272,
+    "matchedDrawMs": 16223.800000071526,
+    "matchingErrorMs": 2.0009765625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0196.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.488247,
+    "receivedWallMs": 1791833127535,
+    "progress": 0.5269220075584852,
+    "matchedDrawMs": 16257.200000047684,
+    "matchingErrorMs": 4.753173828125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0197.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.507205,
+    "receivedWallMs": 1791833127554,
+    "progress": 0.5276308503578185,
+    "matchedDrawMs": 16273.800000071526,
+    "matchingErrorMs": 1.794921875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0198.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.52594,
+    "receivedWallMs": 1791833127571,
+    "progress": 0.5283430556880374,
+    "matchedDrawMs": 16290.900000095367,
+    "matchingErrorMs": 1.06005859375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0199.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.540613,
+    "receivedWallMs": 1791833127587,
+    "progress": 0.5290415731882137,
+    "matchedDrawMs": 16307.200000047684,
+    "matchingErrorMs": 2.386962890625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0200.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.557983,
+    "receivedWallMs": 1791833127605,
+    "progress": 0.5297389801813335,
+    "matchedDrawMs": 16324.5,
+    "matchingErrorMs": 2.01708984375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0201.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.574603,
+    "receivedWallMs": 1791833127625,
+    "progress": 0.5304433396584691,
+    "matchedDrawMs": 16340.600000023842,
+    "matchingErrorMs": 1.39697265625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0202.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.592817,
+    "receivedWallMs": 1791833127637,
+    "progress": 0.5311092281222133,
+    "matchedDrawMs": 16360.800000071526,
+    "matchingErrorMs": 3.182861328125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0203.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.607955,
+    "receivedWallMs": 1791833127654,
+    "progress": 0.5317941974060246,
+    "matchedDrawMs": 16374,
+    "matchingErrorMs": 2.044921875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0204.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.639516,
+    "receivedWallMs": 1791833127686,
+    "progress": 0.533134736151374,
+    "matchedDrawMs": 16408.100000023842,
+    "matchingErrorMs": 4.48388671875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0205.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.658136,
+    "receivedWallMs": 1791833127702,
+    "progress": 0.5337942830004854,
+    "matchedDrawMs": 16424.100000023842,
+    "matchingErrorMs": 1.864013671875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0206.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.675964,
+    "receivedWallMs": 1791833127723,
+    "progress": 0.5344518313521793,
+    "matchedDrawMs": 16441,
+    "matchingErrorMs": 0.035888671875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0207.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.689194,
+    "receivedWallMs": 1791833127738,
+    "progress": 0.5351032964477691,
+    "matchedDrawMs": 16460.100000023842,
+    "matchingErrorMs": 6.80615234375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0208.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.707547,
+    "receivedWallMs": 1791833127753,
+    "progress": 0.535748584448,
+    "matchedDrawMs": 16473.900000095367,
+    "matchingErrorMs": 1.453125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0209.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.728028,
+    "receivedWallMs": 1791833127773,
+    "progress": 0.5363837939125744,
+    "matchedDrawMs": 16493,
+    "matchingErrorMs": 0.971923828125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0210.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.743967,
+    "receivedWallMs": 1791833127788,
+    "progress": 0.5370240227831358,
+    "matchedDrawMs": 16508.900000095367,
+    "matchingErrorMs": 0.032958984375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0211.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.756981,
+    "receivedWallMs": 1791833127805,
+    "progress": 0.537642717228247,
+    "matchedDrawMs": 16523.800000071526,
+    "matchingErrorMs": 2.01904296875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0212.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.776958,
+    "receivedWallMs": 1791833127820,
+    "progress": 0.5382587069914879,
+    "matchedDrawMs": 16541.900000095367,
+    "matchingErrorMs": 0.0419921875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0213.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.796235,
+    "receivedWallMs": 1791833127840,
+    "progress": 0.5388790836448643,
+    "matchedDrawMs": 16557.200000047684,
+    "matchingErrorMs": -3.235107421875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0214.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.806691,
+    "receivedWallMs": 1791833127854,
+    "progress": 0.539478118156642,
+    "matchedDrawMs": 16574.200000047684,
+    "matchingErrorMs": 3.30908203125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0215.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.823236,
+    "receivedWallMs": 1791833127870,
+    "progress": 0.5400740520704015,
+    "matchedDrawMs": 16590.600000023842,
+    "matchingErrorMs": 2.763916015625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0216.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.843937,
+    "receivedWallMs": 1791833127887,
+    "progress": 0.5406666703739913,
+    "matchedDrawMs": 16608.700000047684,
+    "matchingErrorMs": 0.06298828125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0217.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.857733,
+    "receivedWallMs": 1791833127902,
+    "progress": 0.5412522687146667,
+    "matchedDrawMs": 16623.700000047684,
+    "matchingErrorMs": 1.26708984375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0218.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.875022,
+    "receivedWallMs": 1791833127922,
+    "progress": 0.5418273106307967,
+    "matchedDrawMs": 16640.400000095367,
+    "matchingErrorMs": 0.97802734375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0219.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.889359,
+    "receivedWallMs": 1791833127934,
+    "progress": 0.5423986309666826,
+    "matchedDrawMs": 16657,
+    "matchingErrorMs": 3.64111328125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0220.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.907304,
+    "receivedWallMs": 1791833127952,
+    "progress": 0.5429626503838025,
+    "matchedDrawMs": 16673.600000023842,
+    "matchingErrorMs": 1.696044921875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0221.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.924752,
+    "receivedWallMs": 1791833127971,
+    "progress": 0.5435159641541547,
+    "matchedDrawMs": 16690.400000095367,
+    "matchingErrorMs": 1.248046875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0222.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.939491,
+    "receivedWallMs": 1791833127985,
+    "progress": 0.5440618792977193,
+    "matchedDrawMs": 16707.600000023842,
+    "matchingErrorMs": 3.509033203125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0223.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.958774,
+    "receivedWallMs": 1791833128002,
+    "progress": 0.5446035242858186,
+    "matchedDrawMs": 16723.800000071526,
+    "matchingErrorMs": 0.225830078125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0224.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.972222,
+    "receivedWallMs": 1791833128021,
+    "progress": 0.5451406682400374,
+    "matchedDrawMs": 16743.700000047684,
+    "matchingErrorMs": 6.77783203125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0225.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833127.99339,
+    "receivedWallMs": 1791833128038,
+    "progress": 0.5456636949668803,
+    "matchedDrawMs": 16758.400000095367,
+    "matchingErrorMs": 0.60986328125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0226.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.009014,
+    "receivedWallMs": 1791833128054,
+    "progress": 0.5461820329813334,
+    "matchedDrawMs": 16773.900000095367,
+    "matchingErrorMs": -0.013916015625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0227.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.025106,
+    "receivedWallMs": 1791833128067,
+    "progress": 0.5466893820156855,
+    "matchedDrawMs": 16790.400000095367,
+    "matchingErrorMs": 0.89404296875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0228.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.041175,
+    "receivedWallMs": 1791833128084,
+    "progress": 0.5471917613373494,
+    "matchedDrawMs": 16807.5,
+    "matchingErrorMs": 1.8251953125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0229.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.073232,
+    "receivedWallMs": 1791833128117,
+    "progress": 0.5481691093168213,
+    "matchedDrawMs": 16840.400000095367,
+    "matchingErrorMs": 2.76806640625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0230.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.093104,
+    "receivedWallMs": 1791833128136,
+    "progress": 0.5486439903306083,
+    "matchedDrawMs": 16857.900000095367,
+    "matchingErrorMs": -0.10400390625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0231.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.107759,
+    "receivedWallMs": 1791833128156,
+    "progress": 0.5491161178010864,
+    "matchedDrawMs": 16873.800000071526,
+    "matchingErrorMs": 1.240966796875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0232.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.122597,
+    "receivedWallMs": 1791833128173,
+    "progress": 0.549574157506846,
+    "matchedDrawMs": 16890.5,
+    "matchingErrorMs": 3.403076171875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0233.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.141758,
+    "receivedWallMs": 1791833128194,
+    "progress": 0.5500236881810774,
+    "matchedDrawMs": 16911.300000071526,
+    "matchingErrorMs": 5.241943359375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0234.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.158333,
+    "receivedWallMs": 1791833128207,
+    "progress": 0.5504725065686367,
+    "matchedDrawMs": 16929.300000071526,
+    "matchingErrorMs": 6.6669921875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0235.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.17702,
+    "receivedWallMs": 1791833128231,
+    "progress": 0.5509020080672411,
+    "matchedDrawMs": 16944.200000047684,
+    "matchingErrorMs": 2.97998046875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0236.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.208269,
+    "receivedWallMs": 1791833128252,
+    "progress": 0.5517447566949136,
+    "matchedDrawMs": 16973.800000071526,
+    "matchingErrorMs": 0.731201171875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0237.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.221844,
+    "receivedWallMs": 1791833128268,
+    "progress": 0.5521501424794881,
+    "matchedDrawMs": 16991.700000047684,
+    "matchingErrorMs": 5.156005859375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0238.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.239814,
+    "receivedWallMs": 1791833128285,
+    "progress": 0.5525488238562629,
+    "matchedDrawMs": 17007,
+    "matchingErrorMs": 3.18603515625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0239.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.257187,
+    "receivedWallMs": 1791833128301,
+    "progress": 0.552935933571152,
+    "matchedDrawMs": 17024.100000023842,
+    "matchingErrorMs": 2.81298828125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0240.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.272834,
+    "receivedWallMs": 1791833128319,
+    "progress": 0.5533160422250682,
+    "matchedDrawMs": 17040.800000071526,
+    "matchingErrorMs": 3.166015625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0241.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.29106,
+    "receivedWallMs": 1791833128340,
+    "progress": 0.5536866961526581,
+    "matchedDrawMs": 17057.300000071526,
+    "matchingErrorMs": 1.93994140625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0242.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.310411,
+    "receivedWallMs": 1791833128357,
+    "progress": 0.5540456678100656,
+    "matchedDrawMs": 17075.300000071526,
+    "matchingErrorMs": 0.589111328125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0243.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.324403,
+    "receivedWallMs": 1791833128379,
+    "progress": 0.5543971887854633,
+    "matchedDrawMs": 17091.400000095367,
+    "matchingErrorMs": 2.596923828125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0244.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.343107,
+    "receivedWallMs": 1791833128390,
+    "progress": 0.554736956619991,
+    "matchedDrawMs": 17108,
+    "matchingErrorMs": 0.89306640625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0245.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.359866,
+    "receivedWallMs": 1791833128406,
+    "progress": 0.5550709298504691,
+    "matchedDrawMs": 17129.700000047684,
+    "matchingErrorMs": 5.134033203125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0246.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.392037,
+    "receivedWallMs": 1791833128440,
+    "progress": 0.5557178358186633,
+    "matchedDrawMs": 17159,
+    "matchingErrorMs": 2.963134765625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0247.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.411478,
+    "receivedWallMs": 1791833128456,
+    "progress": 0.5560033262138186,
+    "matchedDrawMs": 17179,
+    "matchingErrorMs": 2.52197265625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0248.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.430783,
+    "receivedWallMs": 1791833128483,
+    "progress": 0.556307156129456,
+    "matchedDrawMs": 17193.100000023842,
+    "matchingErrorMs": -1.782958984375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0249.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.457701,
+    "receivedWallMs": 1791833128509,
+    "progress": 0.5568462133416211,
+    "matchedDrawMs": 17225.100000023842,
+    "matchingErrorMs": 3.299072265625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0250.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.474582,
+    "receivedWallMs": 1791833128519,
+    "progress": 0.5571069241703522,
+    "matchedDrawMs": 17240.5,
+    "matchingErrorMs": 1.41796875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0251.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.49777,
+    "receivedWallMs": 1791833128550,
+    "progress": 0.5573570564493494,
+    "matchedDrawMs": 17258.200000047684,
+    "matchingErrorMs": -3.77001953125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0252.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.524512,
+    "receivedWallMs": 1791833128569,
+    "progress": 0.5578238728048214,
+    "matchedDrawMs": 17291.600000023842,
+    "matchingErrorMs": 2.488037109375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0253.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.540461,
+    "receivedWallMs": 1791833128586,
+    "progress": 0.5580417717087074,
+    "matchedDrawMs": 17307.100000023842,
+    "matchingErrorMs": 2.538818359375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0254.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.554594,
+    "receivedWallMs": 1791833128608,
+    "progress": 0.5582487172677532,
+    "matchedDrawMs": 17326.100000023842,
+    "matchingErrorMs": 7.406005859375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0255.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.57524,
+    "receivedWallMs": 1791833128616,
+    "progress": 0.5584434756615128,
+    "matchedDrawMs": 17340.400000095367,
+    "matchingErrorMs": 0.760009765625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0256.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.591594,
+    "receivedWallMs": 1791833128632,
+    "progress": 0.5586272266130774,
+    "matchedDrawMs": 17359.200000047684,
+    "matchingErrorMs": 3.406005859375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0257.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.622666,
+    "receivedWallMs": 1791833128670,
+    "progress": 0.5589632142219078,
+    "matchedDrawMs": 17390.300000071526,
+    "matchingErrorMs": 3.334228515625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0258.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.638078,
+    "receivedWallMs": 1791833128688,
+    "progress": 0.5591132533524354,
+    "matchedDrawMs": 17409.5,
+    "matchingErrorMs": 6.922119140625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0259.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.656438,
+    "receivedWallMs": 1791833128704,
+    "progress": 0.5592527159269052,
+    "matchedDrawMs": 17424.600000023842,
+    "matchingErrorMs": 3.561767578125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0260.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.677126,
+    "receivedWallMs": 1791833128724,
+    "progress": 0.5593805699674881,
+    "matchedDrawMs": 17445.600000023842,
+    "matchingErrorMs": 3.8740234375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0261.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.693788,
+    "receivedWallMs": 1791833128743,
+    "progress": 0.5595013333333334,
+    "matchedDrawMs": 17458.900000095367,
+    "matchingErrorMs": 0.2119140625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0262.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.70812,
+    "receivedWallMs": 1791833128751,
+    "progress": 0.559600487499152,
+    "matchedDrawMs": 17479.900000095367,
+    "matchingErrorMs": 6.8798828125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0263.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.728532,
+    "receivedWallMs": 1791833128770,
+    "progress": 0.5597012626226774,
+    "matchedDrawMs": 17490.600000023842,
+    "matchingErrorMs": -2.531982421875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0264.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.7598,
+    "receivedWallMs": 1791833128803,
+    "progress": 0.5598416804047323,
+    "matchedDrawMs": 17524.700000047684,
+    "matchingErrorMs": 0.199951171875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0265.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.772865,
+    "receivedWallMs": 1791833128819,
+    "progress": 0.55989805894013,
+    "matchedDrawMs": 17540.400000095367,
+    "matchingErrorMs": 3.135009765625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0266.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.787774,
+    "receivedWallMs": 1791833128834,
+    "progress": 0.5599419457186576,
+    "matchedDrawMs": 17558.900000095367,
+    "matchingErrorMs": 7.225830078125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0267.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.809115,
+    "receivedWallMs": 1791833128857,
+    "progress": 0.5599737761251273,
+    "matchedDrawMs": 17575.100000023842,
+    "matchingErrorMs": 1.885009765625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0268.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.822773,
+    "receivedWallMs": 1791833128868,
+    "progress": 0.5599931551301547,
+    "matchedDrawMs": 17590.700000047684,
+    "matchingErrorMs": 3.22705078125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0269.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.842381,
+    "receivedWallMs": 1791833128885,
+    "progress": 0.5599931551301547,
+    "matchedDrawMs": 17607.100000023842,
+    "matchingErrorMs": 0.618896484375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0270.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.876657,
+    "receivedWallMs": 1791833128919,
+    "progress": 0.5600241407313024,
+    "matchedDrawMs": 17641.700000047684,
+    "matchingErrorMs": 0.343017578125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0271.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.891879,
+    "receivedWallMs": 1791833128935,
+    "progress": 0.5600552545997923,
+    "matchedDrawMs": 17657.200000047684,
+    "matchingErrorMs": 1.120849609375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0272.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.906333,
+    "receivedWallMs": 1791833128951,
+    "progress": 0.5600980178760944,
+    "matchedDrawMs": 17673.900000095367,
+    "matchingErrorMs": 3.6669921875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0273.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.924072,
+    "receivedWallMs": 1791833128968,
+    "progress": 0.5601531261878128,
+    "matchedDrawMs": 17690.300000071526,
+    "matchingErrorMs": 1.927978515625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0274.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.94169,
+    "receivedWallMs": 1791833128987,
+    "progress": 0.5602211188874265,
+    "matchedDrawMs": 17707,
+    "matchingErrorMs": 1.31005859375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0275.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.955149,
+    "receivedWallMs": 1791833129002,
+    "progress": 0.5603002564071446,
+    "matchedDrawMs": 17726.100000023842,
+    "matchingErrorMs": 6.85107421875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0276.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.976389,
+    "receivedWallMs": 1791833129020,
+    "progress": 0.560391156630218,
+    "matchedDrawMs": 17741.300000071526,
+    "matchingErrorMs": 0.611083984375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0277.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833128.990097,
+    "receivedWallMs": 1791833129037,
+    "progress": 0.5604943528358607,
+    "matchedDrawMs": 17757.200000047684,
+    "matchingErrorMs": 2.90283203125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0278.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.008184,
+    "receivedWallMs": 1791833129054,
+    "progress": 0.5606092112917577,
+    "matchedDrawMs": 17773.800000071526,
+    "matchingErrorMs": 0.816162109375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0279.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.022355,
+    "receivedWallMs": 1791833129064,
+    "progress": 0.560734819348425,
+    "matchedDrawMs": 17790.5,
+    "matchingErrorMs": 3.64501953125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0280.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.040585,
+    "receivedWallMs": 1791833129083,
+    "progress": 0.5608725692984161,
+    "matchedDrawMs": 17808.100000023842,
+    "matchingErrorMs": 3.4150390625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0281.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.07354,
+    "receivedWallMs": 1791833129119,
+    "progress": 0.5611818414956895,
+    "matchedDrawMs": 17840.5,
+    "matchingErrorMs": 2.4599609375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0282.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.090917,
+    "receivedWallMs": 1791833129135,
+    "progress": 0.5613531204151617,
+    "matchedDrawMs": 17857.100000023842,
+    "matchingErrorMs": 2.0830078125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0283.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.107185,
+    "receivedWallMs": 1791833129158,
+    "progress": 0.561533085945356,
+    "matchedDrawMs": 17874.800000071526,
+    "matchingErrorMs": 2.815185546875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0284.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.12257,
+    "receivedWallMs": 1791833129167,
+    "progress": 0.5617271678136668,
+    "matchedDrawMs": 17890.400000095367,
+    "matchingErrorMs": 3.429931640625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0285.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.140415,
+    "receivedWallMs": 1791833129187,
+    "progress": 0.561930817079571,
+    "matchedDrawMs": 17907.300000071526,
+    "matchingErrorMs": 2.5849609375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0286.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.1758,
+    "receivedWallMs": 1791833129223,
+    "progress": 0.562368323993475,
+    "matchedDrawMs": 17940.900000095367,
+    "matchingErrorMs": 0.199951171875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0287.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.191776,
+    "receivedWallMs": 1791833129233,
+    "progress": 0.5626032529974614,
+    "matchedDrawMs": 17957,
+    "matchingErrorMs": 1.223876953125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0288.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.208159,
+    "receivedWallMs": 1791833129252,
+    "progress": 0.5628468884766235,
+    "matchedDrawMs": 17973.700000047684,
+    "matchingErrorMs": 0.841064453125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0289.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.239437,
+    "receivedWallMs": 1791833129284,
+    "progress": 0.5633671628743722,
+    "matchedDrawMs": 18007.200000047684,
+    "matchingErrorMs": 3.56298828125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0290.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.259514,
+    "receivedWallMs": 1791833129304,
+    "progress": 0.5636404457121402,
+    "matchedDrawMs": 18024.5,
+    "matchingErrorMs": 0.48583984375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0291.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.273485,
+    "receivedWallMs": 1791833129322,
+    "progress": 0.5639250647607416,
+    "matchedDrawMs": 18040.800000071526,
+    "matchingErrorMs": 2.51513671875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0292.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.289351,
+    "receivedWallMs": 1791833129344,
+    "progress": 0.5642192814158427,
+    "matchedDrawMs": 18057.200000047684,
+    "matchingErrorMs": 3.64892578125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0293.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.30823,
+    "receivedWallMs": 1791833129355,
+    "progress": 0.5645211275344558,
+    "matchedDrawMs": 18079,
+    "matchingErrorMs": 6.77001953125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0294.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.327492,
+    "receivedWallMs": 1791833129383,
+    "progress": 0.5648645925608128,
+    "matchedDrawMs": 18093,
+    "matchingErrorMs": 0.508056640625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0295.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.363376,
+    "receivedWallMs": 1791833129411,
+    "progress": 0.5654876795749519,
+    "matchedDrawMs": 18131.800000071526,
+    "matchingErrorMs": 3.6240234375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0296.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.375048,
+    "receivedWallMs": 1791833129419,
+    "progress": 0.565823877363629,
+    "matchedDrawMs": 18142.400000095367,
+    "matchingErrorMs": 2.9521484375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0297.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.390793,
+    "receivedWallMs": 1791833129434,
+    "progress": 0.5661729664902633,
+    "matchedDrawMs": 18159.300000071526,
+    "matchingErrorMs": 4.20703125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0298.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.423705,
+    "receivedWallMs": 1791833129467,
+    "progress": 0.566897267513857,
+    "matchedDrawMs": 18190.800000071526,
+    "matchingErrorMs": 2.294921875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0299.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.438602,
+    "receivedWallMs": 1791833129483,
+    "progress": 0.5672722360830065,
+    "matchedDrawMs": 18210,
+    "matchingErrorMs": 7.39794921875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0300.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.454574,
+    "receivedWallMs": 1791833129501,
+    "progress": 0.5676532675775892,
+    "matchedDrawMs": 18225.400000095367,
+    "matchingErrorMs": 6.42578125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0301.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.473429,
+    "receivedWallMs": 1791833129521,
+    "progress": 0.5680424626373608,
+    "matchedDrawMs": 18244.200000047684,
+    "matchingErrorMs": 6.571044921875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0302.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.491615,
+    "receivedWallMs": 1791833129538,
+    "progress": 0.5684421189107445,
+    "matchedDrawMs": 18259.900000095367,
+    "matchingErrorMs": 3.385009765625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0303.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.508736,
+    "receivedWallMs": 1791833129553,
+    "progress": 0.5688497948024936,
+    "matchedDrawMs": 18274.600000023842,
+    "matchingErrorMs": 1.26416015625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0304.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.525583,
+    "receivedWallMs": 1791833129577,
+    "progress": 0.5692653686487037,
+    "matchedDrawMs": 18291.900000095367,
+    "matchingErrorMs": 1.4169921875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0305.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.555637,
+    "receivedWallMs": 1791833129601,
+    "progress": 0.5701171201418939,
+    "matchedDrawMs": 18327,
+    "matchingErrorMs": 6.363037109375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0306.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.542053,
+    "receivedWallMs": 1791833129633,
+    "progress": 0.5696887187854695,
+    "matchedDrawMs": 18310.800000071526,
+    "matchingErrorMs": 3.947021484375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0307.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.589726,
+    "receivedWallMs": 1791833129638,
+    "progress": 0.5709961345760224,
+    "matchedDrawMs": 18357.200000047684,
+    "matchingErrorMs": 3.27392578125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0308.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.607877,
+    "receivedWallMs": 1791833129659,
+    "progress": 0.571451978301329,
+    "matchedDrawMs": 18377,
+    "matchingErrorMs": 5.123046875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0309.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.644192,
+    "receivedWallMs": 1791833129698,
+    "progress": 0.5723768497266556,
+    "matchedDrawMs": 18413.900000095367,
+    "matchingErrorMs": 4.80810546875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0310.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.665626,
+    "receivedWallMs": 1791833129717,
+    "progress": 0.5728883090419515,
+    "matchedDrawMs": 18429.300000071526,
+    "matchingErrorMs": -0.6259765625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0311.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.7269,
+    "receivedWallMs": 1791833129772,
+    "progress": 0.5748119386364613,
+    "matchedDrawMs": 18492.300000071526,
+    "matchingErrorMs": 1.099853515625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0312.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.678103,
+    "receivedWallMs": 1791833129804,
+    "progress": 0.5733524743715799,
+    "matchedDrawMs": 18446.200000047684,
+    "matchingErrorMs": 3.89697265625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0313.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.707992,
+    "receivedWallMs": 1791833129823,
+    "progress": 0.574338052983475,
+    "matchedDrawMs": 18479.100000023842,
+    "matchingErrorMs": 7.0078125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0314.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.788524,
+    "receivedWallMs": 1791833129839,
+    "progress": 0.5768704160977388,
+    "matchedDrawMs": 18557.200000047684,
+    "matchingErrorMs": 4.47607421875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0315.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.823894,
+    "receivedWallMs": 1791833129876,
+    "progress": 0.5779446247975855,
+    "matchedDrawMs": 18590.700000047684,
+    "matchingErrorMs": 2.10595703125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0316.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.843647,
+    "receivedWallMs": 1791833129888,
+    "progress": 0.5784804830172197,
+    "matchedDrawMs": 18610.400000095367,
+    "matchingErrorMs": 2.35302734375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0317.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.864036,
+    "receivedWallMs": 1791833129911,
+    "progress": 0.5790480535958279,
+    "matchedDrawMs": 18627.5,
+    "matchingErrorMs": -1.0361328125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0318.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.890928,
+    "receivedWallMs": 1791833129936,
+    "progress": 0.5801364125654773,
+    "matchedDrawMs": 18657.200000047684,
+    "matchingErrorMs": 2.072021484375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0319.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.911149,
+    "receivedWallMs": 1791833129956,
+    "progress": 0.5806930713462521,
+    "matchedDrawMs": 18674.400000095367,
+    "matchingErrorMs": -1.14892578125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0320.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.923723,
+    "receivedWallMs": 1791833129970,
+    "progress": 0.581268268175362,
+    "matchedDrawMs": 18690.900000095367,
+    "matchingErrorMs": 2.277099609375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0321.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.940112,
+    "receivedWallMs": 1791833129988,
+    "progress": 0.5818346550735567,
+    "matchedDrawMs": 18711.900000095367,
+    "matchingErrorMs": 6.887939453125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0322.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.958777,
+    "receivedWallMs": 1791833130006,
+    "progress": 0.5824126196436605,
+    "matchedDrawMs": 18724.400000095367,
+    "matchingErrorMs": 1.22314453125,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0323.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.973751,
+    "receivedWallMs": 1791833130021,
+    "progress": 0.5829952037995255,
+    "matchedDrawMs": 18743.100000023842,
+    "matchingErrorMs": 7.2490234375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0324.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833129.990035,
+    "receivedWallMs": 1791833130042,
+    "progress": 0.5835787572701763,
+    "matchedDrawMs": 18759.700000047684,
+    "matchingErrorMs": 6.96484375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0325.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833130.011598,
+    "receivedWallMs": 1791833130059,
+    "progress": 0.5841666354652476,
+    "matchedDrawMs": 18776.700000047684,
+    "matchingErrorMs": 0.40185546875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0326.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833130.032787,
+    "receivedWallMs": 1791833130079,
+    "progress": 0.5847945182431352,
+    "matchedDrawMs": 18792,
+    "matchingErrorMs": -4.787109375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0327.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833130.044202,
+    "receivedWallMs": 1791833130089,
+    "progress": 0.5854125616216276,
+    "matchedDrawMs": 18809.300000071526,
+    "matchingErrorMs": 0.7978515625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0328.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833130.061604,
+    "receivedWallMs": 1791833130108,
+    "progress": 0.585969532520454,
+    "matchedDrawMs": 18826.700000047684,
+    "matchingErrorMs": 0.39599609375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0329.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833130.090353,
+    "receivedWallMs": 1791833130138,
+    "progress": 0.587181403703672,
+    "matchedDrawMs": 18857.400000095367,
+    "matchingErrorMs": 2.64697265625,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0330.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833130.109393,
+    "receivedWallMs": 1791833130156,
+    "progress": 0.5877928063861555,
+    "matchedDrawMs": 18874.5,
+    "matchingErrorMs": 0.607177734375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0331.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833130.122703,
+    "receivedWallMs": 1791833130168,
+    "progress": 0.5884151235250492,
+    "matchedDrawMs": 18890.700000047684,
+    "matchingErrorMs": 3.296875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0332.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833130.141212,
+    "receivedWallMs": 1791833130191,
+    "progress": 0.5890371519661245,
+    "matchedDrawMs": 18907.5,
+    "matchingErrorMs": 1.7880859375,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  },
+  {
+    "file": "bridge-0333.jpg",
+    "offsetTop": 0,
+    "pageScaleFactor": 1,
+    "deviceWidth": 3440,
+    "deviceHeight": 1440,
+    "scrollOffsetX": 0,
+    "scrollOffsetY": 0,
+    "timestamp": 1791833130.172927,
+    "receivedWallMs": 1791833130217,
+    "progress": 0.5902833927289934,
+    "matchedDrawMs": 18940.300000071526,
+    "matchingErrorMs": 3.072998046875,
+    "actualImageSize": [
+      3440,
+      1440
+    ]
+  }
+]
