@@ -139,7 +139,11 @@
       const fresh=required.filter(c=>c.state==='FRESH'||c.state==='SHARED');
       r.querySelector('[data-completeness]').textContent=`${data.nodes.length} 個節點 · ${fresh.length} / ${required.length} 項來源資料有效。請連同涵蓋狀態判讀異常數量。`;
       const matrixSelect=r.querySelector('[data-matrix-node]');if(matrixSelect.options.length===1)for(const node of data.nodes)matrixSelect.add(new Option(node.label,node.node_id));
-      matrixSelect.onchange=()=>renderMatrix(ctx);renderMatrix(ctx);
+      matrixSelect.onchange=()=>{ctx.matrixSignature=null;renderMatrix(ctx);};
+      // Refresh runs every few seconds; only rebuild the matrix when its content
+      // actually changed, so an open row is not torn down on every poll.
+      const matrixSignature=JSON.stringify([data.check_matrix,matrixSelect.value]);
+      if(ctx.matrixSignature!==matrixSignature){ctx.matrixSignature=matrixSignature;renderMatrix(ctx);}
       const coverage=r.querySelector('[data-coverage]');
       const signature=JSON.stringify(data.coverage||[]);
       if(ctx.coverageSignature!==signature){ctx.coverageSignature=signature;coverage.replaceChildren();
@@ -187,8 +191,12 @@
   }
   function renderMatrix(ctx){
     const body=ctx.root.querySelector('[data-matrix]'),empty=ctx.root.querySelector('[data-matrix-empty]'),selected=ctx.root.querySelector('[data-matrix-node]').value;
+    // Refresh runs every few seconds; rebuilding rows would snap any <details>
+    // the operator opened closed again. Remember the open rows by a stable key
+    // and re-open them after the rebuild.
+    const opened=new Set([...body.querySelectorAll('details[open]')].map(d=>d.dataset.rowKey));
     body.replaceChildren();const allRows=(ctx.snapshot?.check_matrix||[]).filter(row=>!selected||row.node_id===selected);const rows=aggregateRows(allRows);empty.hidden=!!rows.length;
-    for(const row of rows){const tr=document.createElement('tr');tr.dataset.status=row.status;const check=document.createElement('td'),details=document.createElement('details'),summary=document.createElement('summary'),detail=document.createElement('p');summary.textContent=`${row.node_label} · ${row.check_name}`;detail.textContent=row.detail||'未提供其他判定資訊。';if(row.members){const list=document.createElement('ul');list.className='pd-matrix-members';const members=[...row.members].sort((a,b)=>(a.health_status==='FAIL'?0:1)-(b.health_status==='FAIL'?0:1));for(const member of members){const li=document.createElement('li');const bdf=(member.check_id||'').split('/').pop();li.textContent=`${bdf||member.check_name} · ${labels[member.status]||member.status}`+(member.detail?' · '+member.detail:'');list.append(li);}details.append(list);}details.append(summary,detail);check.append(details);
+    for(const row of rows){const tr=document.createElement('tr');tr.dataset.status=row.status;const check=document.createElement('td'),details=document.createElement('details'),summary=document.createElement('summary'),detail=document.createElement('p');details.dataset.rowKey=row.node_id+'|'+row.check_name;details.open=opened.has(details.dataset.rowKey);summary.textContent=`${row.node_label} · ${row.check_name}`;detail.textContent=row.detail||'未提供其他判定資訊。';if(row.members){const list=document.createElement('ul');list.className='pd-matrix-members';const members=[...row.members].sort((a,b)=>(a.health_status==='FAIL'?0:1)-(b.health_status==='FAIL'?0:1));for(const member of members){const li=document.createElement('li');const bdf=(member.check_id||'').split('/').pop();li.textContent=`${bdf||member.check_name} · ${labels[member.status]||member.status}`+(member.detail?' · '+member.detail:'');list.append(li);}details.append(list);}details.append(summary,detail);check.append(details);
       const status=document.createElement('td'),badge=document.createElement('span');badge.className='pd-check-status';const shown=(row.health_status==='FAIL')?'FAIL':row.status;badge.dataset.state=shown;badge.textContent=labels[shown]||shown;if(shown!==row.status)badge.title='排程已停用；此為最後一次判定：'+row.health_status;status.append(badge);
       const comparison=document.createElement('td');comparison.textContent=row.expected!=null||row.observed!=null?`Expected ${row.expected??'—'} / Observed ${row.observed??'—'}`:'—';
       const checked=document.createElement('td');checked.textContent=stamp(row.last_checked);
