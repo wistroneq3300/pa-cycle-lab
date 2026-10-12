@@ -39,7 +39,7 @@
     <details class="pd-inspection-coverage"><summary>採集來源與原始狀態</summary><div data-coverage></div></details>
     <details class="pd-inspection-coverage"><summary>節點名稱與身分紀錄</summary><div data-identity></div><div data-identity-history></div></details>
     <section data-issues hidden aria-label="巡檢問題與恢復歷史"><div class="pd-inspection-filters"><label>節點 <select data-node><option value="">全部節點</option></select></label><label>狀態 <select data-filter><option value="current">目前問題與最近恢復</option><option value="ACTIVE">目前問題</option><option value="RECOVERED">最近恢復</option><option value="ARCHIVED">歷史問題</option><option value="all">全部紀錄</option></select></label><label>搜尋全部符合範圍 <input data-issue-search type="search" placeholder="規則、元件或問題摘要"></label></div><button type="button" class="btn small" data-reload>更新問題</button><span data-history-count></span><div data-list></div><div class="pd-inspection-paging"><button class="btn small" data-prev>上一頁</button><span data-page></span><button class="btn small" data-next>下一頁</button></div></section>
-    <form data-config hidden><h3>此系統巡檢設定</h3><p>設定只影響巡檢規則，不會變更 Telemetry 收集頻率。</p><div class="pd-inspection-fields">
+    <dialog class="pd-settings-modal" data-config aria-label="巡檢設定"><div class="pd-settings-body"><h3>此系統巡檢設定</h3><p class="pd-settings-hint">設定只影響巡檢規則，不會變更 Telemetry 收集頻率。</p><div class="pd-inspection-fields">
       <label><input type="checkbox" name="enabled"> 啟用 Project 排程</label><label><input type="checkbox" name="ai_enabled"> 活躍警告與 FAIL 使用 AI 分析</label>
       <label>事件巡檢間隔（秒）<input type="number" name="interval_seconds" min="30" max="3600" required></label>
       <label>完整硬體巡檢間隔（秒）<input type="number" name="deep_seconds" min="60" max="86400" required></label>
@@ -50,7 +50,7 @@
       <label>Telemetry 資料有效期限（秒）<input type="number" name="stale_seconds" min="30" max="3600" required></label>
       <label>恢復遲滯（百分點）<input type="number" name="hysteresis" min="1" max="30" required></label>
       ${['cpu','memory','gpu','vram'].map((key,i)=>`<label>${['CPU','記憶體','GPU','VRAM'][i]} 警告門檻（%）<input type="number" name="${key}" min="1" max="100" required></label>`).join('')}
-    </div><fieldset class="pd-node-overrides"><legend>Node 個別覆寫</legend><div data-node-overrides></div></fieldset><p>停用排程不會刪除歷史 WARN／FAIL 或 Evidence，Telemetry 亦繼續獨立運作。AI 內容為輔助判讀，不改變規則判定。</p><button type="submit" class="btn primary">儲存巡檢設定</button></form>
+    </div><fieldset class="pd-node-overrides"><legend>Node 個別覆寫</legend><div data-node-overrides></div></fieldset><p class="pd-settings-hint">停用排程不會刪除歷史 WARN／FAIL 或 Evidence，Telemetry 亦繼續獨立運作。AI 內容為輔助判讀，不改變規則判定。</p><p class="pd-settings-error" data-config-error role="alert"></p><div class="pd-settings-foot"><button type="button" class="btn" data-config-cancel>取消</button><button type="button" class="btn primary" data-config-save>儲存巡檢設定</button></div></div></dialog>
     </div>
   </section>`;
   function dispose(){if(!mounted)return;const ctx=mounted,r=ctx.root;
@@ -76,17 +76,20 @@
       root.classList.toggle('pd-inspection-collapsed',open);
     };
     find('[data-view]').onclick=async()=>{find('[data-issues]').hidden=!find('[data-issues]').hidden;if(!find('[data-issues]').hidden)await loadIssues(ctx);};
-    find('[data-settings]').onclick=()=>{const form=find('[data-config]');form.hidden=!form.hidden;};
+    find('[data-settings]').onclick=()=>{const dialog=find('[data-config]');populateSettings(ctx,dialog);dialog.showModal();};
     find('[data-run]').onclick=async()=>{try{await request(ctx,'/run',{method:'POST'});find('[data-status]').textContent='巡檢中…';await refresh(ctx);}catch(e){error(ctx,e);}};
-    find('[data-config]').onsubmit=async e=>{
-      e.preventDefault();const form=e.currentTarget,body={thresholds:{}};
-      for(const name of ['enabled','ai_enabled'])body[name]=form.elements[name].checked;
-      for(const name of ['interval_seconds','deep_seconds','sensor_seconds','firmware_seconds','duration_seconds','recovery_samples','stale_seconds','hysteresis'])body[name]=Number(form.elements[name].value);
-      for(const name of ['cpu','memory','gpu','vram'])body.thresholds[name]=Number(form.elements[name].value);
-      body.node_overrides={};for(const select of form.querySelectorAll('[data-node-override]'))if(select.value!=='inherit')body.node_overrides[select.dataset.nodeOverride]=select.value==='true';
-      const button=form.querySelector('[type=submit]');button.disabled=true;
-      try{await request(ctx,'/settings',{method:'PATCH',body:JSON.stringify(body)});form.hidden=true;await refresh(ctx);}catch(e){error(ctx,e);}finally{button.disabled=false;}
+    const configCancel=find('[data-config-cancel]');if(configCancel)configCancel.onclick=()=>find('[data-config]').close();
+    const saveSettings=async dialog=>{
+      const field=name=>dialog.querySelector('[name="'+name+'"]');
+      const body={thresholds:{}};
+      for(const name of ['enabled','ai_enabled'])body[name]=field(name).checked;
+      for(const name of ['interval_seconds','deep_seconds','sensor_seconds','firmware_seconds','duration_seconds','recovery_samples','stale_seconds','hysteresis'])body[name]=Number(field(name).value);
+      for(const name of ['cpu','memory','gpu','vram'])body.thresholds[name]=Number(field(name).value);
+      body.node_overrides={};for(const select of dialog.querySelectorAll('[data-node-override]'))if(select.value!=='inherit')body.node_overrides[select.dataset.nodeOverride]=select.value==='true';
+      const button=dialog.querySelector('[data-config-save]'),message=dialog.querySelector('[data-config-error]');button.disabled=true;if(message)message.textContent='';
+      try{await request(ctx,'/settings',{method:'PATCH',body:JSON.stringify(body)});dialog.close();await refresh(ctx);}catch(err){if(message)message.textContent=err.message;else error(ctx,err);}finally{button.disabled=false;}
     };
+    find('[data-config-save]').onclick=()=>saveSettings(find('[data-config]'));
     find('[data-reload]').onclick=()=>loadIssues(ctx);
     const filter=()=>{ctx.offset=0;void loadIssues(ctx);};
     find('[data-node]').onchange=filter;find('[data-filter]').onchange=filter;
@@ -150,7 +153,7 @@
       for(const entry of required){const line=document.createElement('p');const node=data.nodes.find(n=>n.node_id===entry.node_id);line.textContent=[node?.label,sourceLabel(entry),coverageLabel(entry),entry.collected_at?'採集 '+stamp(entry.collected_at):'',entry.duration!=null?entry.duration.toFixed(1)+' 秒':'',entry.detail].filter(Boolean).join(' · ');if(entry.evidence_ref?.snapshot_id){const link=document.createElement('button');link.type='button';link.className='pd-text-action';link.textContent=' 原始證據';link.onclick=()=>window.InspectionEvidence.open(ctx.base,entry.evidence_ref.snapshot_id,node?.label||entry.source);line.append(link);}coverage.append(line);}}
       if(!coverage.childNodes.length)coverage.textContent='尚未巡檢。零項異常不代表所有節點均已完成檢查。';
       const select=r.querySelector('[data-node]');if(select.options.length===1)for(const node of data.nodes){const option=document.createElement('option');option.value=node.node_id;option.textContent=node.label;select.append(option);}
-      const form=r.querySelector('[data-config]');if(form.hidden){for(const [name,value] of Object.entries(data.config)){if(name==='thresholds'){for(const [metric,threshold] of Object.entries(value))form.elements[metric].value=threshold;}else if(form.elements[name]){if(typeof value==='boolean')form.elements[name].checked=value;else form.elements[name].value=value;}}}
+      const form=r.querySelector('[data-config]');
       const overrides=form.querySelector('[data-node-overrides]'),overrideSignature=JSON.stringify([data.nodes,data.config.node_overrides]);if(overrides.dataset.signature!==overrideSignature){overrides.dataset.signature=overrideSignature;overrides.replaceChildren();for(const node of data.nodes){const label=document.createElement('label'),nodeSelect=document.createElement('select');label.append(document.createTextNode(node.label));nodeSelect.dataset.nodeOverride=node.node_id;nodeSelect.append(new Option('跟隨 Project','inherit'),new Option('啟用','true'),new Option('停用','false'));const value=data.config.node_overrides?.[node.node_id];nodeSelect.value=value===true?'true':value===false?'false':'inherit';label.append(nodeSelect);overrides.append(label);}}
       // Preserve expanded evidence, keyboard focus and text selection during periodic refresh.
       if(!r.querySelector('[data-issues]').hidden&&!r.querySelector('[data-list]').childNodes.length)await loadIssues(ctx);
@@ -188,6 +191,15 @@
       evidence_available:!!(ref&&ref.snapshot_id),
       members:pcie});
     return rest.concat([merged]);
+  }
+  function populateSettings(ctx,dialog){
+    const config=ctx.snapshot?.config;if(!config)return;
+    const message=dialog.querySelector('[data-config-error]');if(message)message.textContent='';
+    const field=name=>dialog.querySelector('[name="'+name+'"]');
+    for(const [name,value] of Object.entries(config)){
+      if(name==='thresholds'){for(const [metric,threshold] of Object.entries(value)){const input=field(metric);if(input)input.value=threshold;}}
+      else {const input=field(name);if(input){if(typeof value==='boolean')input.checked=value;else input.value=value;}}
+    }
   }
   function renderMatrix(ctx){
     const body=ctx.root.querySelector('[data-matrix]'),empty=ctx.root.querySelector('[data-matrix-empty]'),selected=ctx.root.querySelector('[data-matrix-node]').value;
