@@ -1,0 +1,927 @@
+{
+  "baseline": "445bd9c6287cbe7f69d6cbc1ffc9dd1c43c1905b",
+  "scope": "Local final Cooling V2 candidate regression; remote CI is reported separately by the parent task.",
+  "bareAsset": {
+    "file": "app\\static\\models\\l10-prototype\\bare-compute-boards.glb",
+    "bytes": 25533668,
+    "sha256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29"
+  },
+  "companion": {
+    "sha256": "de55d9e6516c2fa1efdf4e3894b98adfd49f00fae8659214178f782a428de913",
+    "bytes": 3547240,
+    "primitives": 106,
+    "layers": [
+      "cooling-mounts",
+      "cooling-frame",
+      "cooling",
+      "cooling-channels",
+      "cooling-plumbing",
+      "cooling-fluid"
+    ]
+  },
+  "passed": true,
+  "webgl": {
+    "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "vendor": "Google Inc. (NVIDIA)"
+  },
+  "compiledShaderSHA256": [
+    "61689f1ad93b1ba987e7eaca859bf153d41f730e954ee52b6f98dd17bf18b240",
+    "cc8c02bec0667ae1116bbbb961ca7aa7d8d73f036478bb425d501ed2212fc67a"
+  ],
+  "method": "Native Chromium/WebGL; three real-clock Cooling V2 films. No animation, geometry, camera, lighting or resource timing mocks. Targeted GLB failure fixtures are isolated after normal-operation tests.",
+  "preview": "http://127.0.0.1:8775 (synthetic app/serve.py)",
+  "authoredDurationMs": 39700,
+  "films": [
+    {
+      "film": 1,
+      "frames": 2386,
+      "wallDurationMs": 39799.5,
+      "authoredDurationMs": 39700,
+      "clockBoundaries": [
+        {
+          "id": "plate-start",
+          "progress": 0.24800693068229354,
+          "authoredMs": 7500,
+          "wallMs": 7617.299999952316,
+          "clockMs": 7516.399999999794
+        },
+        {
+          "id": "flow-start",
+          "progress": 0.2919999833425926,
+          "authoredMs": 10500,
+          "wallMs": 10601,
+          "clockMs": 10499.500000000171
+        },
+        {
+          "id": "restore-start",
+          "progress": 0.332999946054,
+          "authoredMs": 14300,
+          "wallMs": 14400.5,
+          "clockMs": 14299.400000000061
+        },
+        {
+          "id": "solid-restored",
+          "progress": 0.34499998594335934,
+          "authoredMs": 15100,
+          "wallMs": 15200.5,
+          "clockMs": 15099.499999999898
+        },
+        {
+          "id": "lid-start",
+          "progress": 0.37599996964422155,
+          "authoredMs": 16500,
+          "wallMs": 16600.299999952316,
+          "clockMs": 16499.20000000029
+        },
+        {
+          "id": "bridge-start",
+          "progress": 0.40699995445126597,
+          "authoredMs": 17500,
+          "wallMs": 17600.799999952316,
+          "clockMs": 17499.29999999995
+        },
+        {
+          "id": "rack-start",
+          "progress": 0.5600056171885677,
+          "authoredMs": 22000,
+          "wallMs": 22117.400000095367,
+          "clockMs": 22015.700000001518
+        },
+        {
+          "id": "late-rack",
+          "progress": 0.9066926680555045,
+          "authoredMs": 35200,
+          "wallMs": 35333.5,
+          "clockMs": 35231.80000000043
+        }
+      ],
+      "observedDrawFPS": 59.925375946934004,
+      "canvasBuffers": [
+        "2127x1272"
+      ],
+      "resolutions": [
+        1
+      ],
+      "drawIntervalsMs": {
+        "min": 13.599999904632568,
+        "median": 16.699999809265137,
+        "p95": 17,
+        "max": 33.799999952316284,
+        "mean": 16.6874213836478
+      },
+      "drawCalls": {
+        "min": 127,
+        "median": 255,
+        "p95": 259,
+        "max": 259,
+        "mean": 221.53855825649623
+      },
+      "pixelCount": {
+        "min": 2705544,
+        "median": 2705544,
+        "p95": 2705544,
+        "max": 2705544,
+        "mean": 2705544
+      },
+      "insertionStarts": 1,
+      "insertionCompletions": 1,
+      "limitations": "Draw cadence and allocation estimates are measured on this host, not a GPU timer or portable performance certification. Actual canvas buffers and adaptive pixel counts are recorded per frame."
+    },
+    {
+      "film": 2,
+      "frames": 2386,
+      "wallDurationMs": 39814.799999952316,
+      "authoredDurationMs": 39700,
+      "clockBoundaries": [
+        {
+          "id": "plate-start",
+          "progress": 0.24800693068229354,
+          "authoredMs": 7500,
+          "wallMs": 7615.899999856949,
+          "clockMs": 7516.399999999794
+        },
+        {
+          "id": "flow-start",
+          "progress": 0.29199998933807403,
+          "authoredMs": 10500,
+          "wallMs": 10599.099999904633,
+          "clockMs": 10499.599999999646
+        },
+        {
+          "id": "restore-start",
+          "progress": 0.332999946054,
+          "authoredMs": 14300,
+          "wallMs": 14398.899999856949,
+          "clockMs": 14299.400000000061
+        },
+        {
+          "id": "solid-restored",
+          "progress": 0.3449999724535781,
+          "authoredMs": 15100,
+          "wallMs": 15199.199999809265,
+          "clockMs": 15099.299999999857
+        },
+        {
+          "id": "lid-start",
+          "progress": 0.3759999829232478,
+          "authoredMs": 16500,
+          "wallMs": 16598.799999952316,
+          "clockMs": 16499.400000000696
+        },
+        {
+          "id": "bridge-start",
+          "progress": 0.40699995445126597,
+          "authoredMs": 17500,
+          "wallMs": 17598.89999985695,
+          "clockMs": 17499.29999999995
+        },
+        {
+          "id": "rack-start",
+          "progress": 0.5600056171885677,
+          "authoredMs": 22000,
+          "wallMs": 22116.099999904633,
+          "clockMs": 22015.700000001518
+        },
+        {
+          "id": "late-rack",
+          "progress": 0.9066925075610214,
+          "authoredMs": 35200,
+          "wallMs": 35332,
+          "clockMs": 35231.70000000069
+        }
+      ],
+      "observedDrawFPS": 59.90234787071281,
+      "canvasBuffers": [
+        "2127x1272"
+      ],
+      "resolutions": [
+        1
+      ],
+      "drawIntervalsMs": {
+        "min": 13.299999952316284,
+        "median": 16.699999809265137,
+        "p95": 17,
+        "max": 33.700000047683716,
+        "mean": 16.693836477967427
+      },
+      "drawCalls": {
+        "min": 127,
+        "median": 255,
+        "p95": 259,
+        "max": 259,
+        "mean": 221.53855825649623
+      },
+      "pixelCount": {
+        "min": 2705544,
+        "median": 2705544,
+        "p95": 2705544,
+        "max": 2705544,
+        "mean": 2705544
+      },
+      "insertionStarts": 1,
+      "insertionCompletions": 1,
+      "limitations": "Draw cadence and allocation estimates are measured on this host, not a GPU timer or portable performance certification. Actual canvas buffers and adaptive pixel counts are recorded per frame."
+    },
+    {
+      "film": 3,
+      "frames": 2386,
+      "wallDurationMs": 39800.59999990463,
+      "authoredDurationMs": 39700,
+      "clockBoundaries": [
+        {
+          "id": "plate-start",
+          "progress": 0.24800693068229354,
+          "authoredMs": 7500,
+          "wallMs": 7617.399999856949,
+          "clockMs": 7516.399999999794
+        },
+        {
+          "id": "flow-start",
+          "progress": 0.29199998933807403,
+          "authoredMs": 10500,
+          "wallMs": 10600.899999856949,
+          "clockMs": 10499.599999999646
+        },
+        {
+          "id": "restore-start",
+          "progress": 0.332999946054,
+          "authoredMs": 14300,
+          "wallMs": 14400.5,
+          "clockMs": 14299.400000000061
+        },
+        {
+          "id": "solid-restored",
+          "progress": 0.344999979760125,
+          "authoredMs": 15100,
+          "wallMs": 15200.799999952316,
+          "clockMs": 15099.400000000242
+        },
+        {
+          "id": "lid-start",
+          "progress": 0.37599997675775,
+          "authoredMs": 16500,
+          "wallMs": 16600.799999952316,
+          "clockMs": 16499.29999999922
+        },
+        {
+          "id": "bridge-start",
+          "progress": 0.40699995445126597,
+          "authoredMs": 17500,
+          "wallMs": 17600.799999952316,
+          "clockMs": 17499.29999999995
+        },
+        {
+          "id": "rack-start",
+          "progress": 0.5600056171885677,
+          "authoredMs": 22000,
+          "wallMs": 22117.299999952316,
+          "clockMs": 22015.700000001518
+        },
+        {
+          "id": "late-rack",
+          "progress": 0.9066925075610214,
+          "authoredMs": 35200,
+          "wallMs": 35333.59999990463,
+          "clockMs": 35231.70000000069
+        }
+      ],
+      "observedDrawFPS": 59.92371974306204,
+      "canvasBuffers": [
+        "2127x1272"
+      ],
+      "resolutions": [
+        1
+      ],
+      "drawIntervalsMs": {
+        "min": 13.200000047683716,
+        "median": 16.699999809265137,
+        "p95": 17,
+        "max": 33.40000009536743,
+        "mean": 16.687882599540725
+      },
+      "drawCalls": {
+        "min": 127,
+        "median": 255,
+        "p95": 259,
+        "max": 259,
+        "mean": 221.53855825649623
+      },
+      "pixelCount": {
+        "min": 2705544,
+        "median": 2705544,
+        "p95": 2705544,
+        "max": 2705544,
+        "mean": 2705544
+      },
+      "insertionStarts": 1,
+      "insertionCompletions": 1,
+      "limitations": "Draw cadence and allocation estimates are measured on this host, not a GPU timer or portable performance certification. Actual canvas buffers and adaptive pixel counts are recorded per frame."
+    }
+  ],
+  "renderingMeasurement": {
+    "viewport": {
+      "width": 3440,
+      "height": 1440,
+      "deviceScaleFactor": 1
+    },
+    "bridgeCanvasBuffers": [
+      {
+        "width": 2127,
+        "height": 1272
+      },
+      {
+        "width": 2127,
+        "height": 1272
+      },
+      {
+        "width": 2127,
+        "height": 1272
+      },
+      {
+        "width": 2127,
+        "height": 1272
+      }
+    ],
+    "traceQualityStates": [
+      [
+        [
+          2127,
+          1272,
+          1,
+          2705544,
+          true
+        ]
+      ],
+      [
+        [
+          2127,
+          1272,
+          1,
+          2705544,
+          true
+        ]
+      ],
+      [
+        [
+          2127,
+          1272,
+          1,
+          2705544,
+          true
+        ]
+      ]
+    ],
+    "interpretation": "Viewport 3440x1440. Actual canvas width/height, adaptive resolution and pixels are recorded for every film frame. Observed draw FPS is the normal dashboard canvas cadence, not a full-viewport or portable rendering benchmark."
+  },
+  "browserSuites": [
+    {
+      "file": "regression.json",
+      "passed": true,
+      "checks": [
+        "Bare asset loaded in normal dashboard with two-board ownership and no fallback",
+        "Film 1: real clock, GPU chassis pose, continuous bridge and exactly one U40 insertion",
+        "Film 2: real clock, GPU chassis pose, continuous bridge and exactly one U40 insertion",
+        "Film 3: real clock, GPU chassis pose, continuous bridge and exactly one U40 insertion",
+        "Four native 3440\u00d71440 bridge frames captured using authored cameras",
+        "Skip, Replay, interruption, orbit, Home, rear/reset and reduced motion retain behavior",
+        "404: fail-closed complete baseline retained",
+        "one-board-metadata: fail-closed complete baseline retained",
+        "network-ownership: fail-closed complete baseline retained"
+      ],
+      "errors": [],
+      "external": []
+    },
+    {
+      "file": "l10-regression.json",
+      "passed": true,
+      "checks": [
+        "Public hardware profile: two boards, 2 CPU / 4 GPU, package ownership and honest conceptual overlay",
+        "All authored stages compile and render in the same canvas, scene and GL context",
+        "Rendered assembly seats board, CPU/GPU, I/O, then cold plates; restrained reveal restores opaque metal",
+        "Same L10 remains U40 primary; no duplicate legacy tray or second insertion at handoff",
+        "Pure snapshots and rendered layer transforms are exactly reversible",
+        "Camera transition boundaries preserve pose, scale and camera continuity",
+        "1366 and 1920, dark and light: final framing, L10 visibility, labels and no horizontal overflow",
+        "Real forward/reverse scroll, keyboard and pointer orbit, replay cancellation",
+        "WebGL context loss restores actual geometry and final pose",
+        "Reduced motion lands fully assembled, disables replay and disposes scene/playback on route change"
+      ],
+      "errors": [],
+      "external": []
+    },
+    {
+      "file": "rack-isolation.json",
+      "passed": true,
+      "checks": [
+        "Original 36 components, 48U placement and external CDU remain intact; Overview callouts are isolated",
+        "Perspective/front/rear and both themes preserve exact geometry and compile/render without WebGL errors",
+        "Liquid-flow pause/resume, saved cabling hide/show, zoom and reset retain behavior",
+        "Device focus, expanded Escape, route disposal/re-entry and reduced-motion cooling are unchanged"
+      ],
+      "errors": [],
+      "external": []
+    }
+  ],
+  "focusedRuntime": {
+    "pass": true,
+    "checks": [
+      "Actual UV-distance advection; 22 routes / six thermal gradients / blue supply / red return, constant speed, fixed camera/light, zero emission; paused state is stable",
+      "Fluid disappears and solid metal returns before lid closure",
+      "Context loss/restoration reloads both bare and cooling assets",
+      "Reduced Motion seats the assembly with zero fluid animation",
+      "Missing or incomplete cooling companion fails closed; delayed environment failure restores the full procedural scene",
+      "Delayed companion loading holds the real dashboard cinematic clock",
+      "39.7-second central clock: seekTime, progress bar, pause/resume, Replay and Skip share the same state",
+      "Failed companion retains the exact 35.2-second legacy timeline"
+    ],
+    "errors": [],
+    "external": [],
+    "loadingGate": {
+      "heldProgress": 0,
+      "after450ms": 0
+    },
+    "expectedFixtureErrors": [
+      {
+        "fixture": "404",
+        "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      },
+      {
+        "fixture": "late-environment",
+        "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      },
+      {
+        "fixture": "404",
+        "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      }
+    ]
+  },
+  "expectedFailureFixtureErrors": [
+    {
+      "scenario": "404",
+      "type": "http",
+      "status": 404,
+      "url": "http://127.0.0.1:8775/static/models/l10-prototype/bare-compute-boards.glb"
+    },
+    {
+      "scenario": "404",
+      "type": "console",
+      "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "fallbackModes": [
+    {
+      "mode": "404",
+      "passed": true,
+      "assetFailure": {
+        "enabled": true,
+        "loading": false,
+        "failed": true,
+        "error": "L10 GLB: asset request failed (404)",
+        "metadata": null
+      }
+    },
+    {
+      "mode": "one-board-metadata",
+      "passed": true,
+      "assetFailure": {
+        "enabled": true,
+        "loading": false,
+        "failed": true,
+        "error": "Bare-board prototype must own two boards, packages and the retained service layer",
+        "metadata": null
+      }
+    },
+    {
+      "mode": "network-ownership",
+      "passed": true,
+      "assetFailure": {
+        "enabled": true,
+        "loading": false,
+        "failed": true,
+        "error": "Networking replacement requires all three declared cards and its network layer",
+        "metadata": null
+      }
+    }
+  ],
+  "staticSuites": {
+    "GLBParserGroupsPerAsset": 19,
+    "StorageLayoutGroups": 12,
+    "NetworkCollisionGroups": 11,
+    "NetworkCollisions": 0,
+    "Hardware": "PASS",
+    "CoolingInvariantGroups": 12,
+    "SealedHeaderRays": 126,
+    "UnsealedRays": 0,
+    "BareCollisionPairs": 0,
+    "FluidWallCollisionPairs": 0,
+    "PlumbingMotionCollisionPairs": 0,
+    "RuntimeManifestFiles": 225,
+    "EngineHash": "918aad2bfb79c78c3018910a72b7671c8aac159b0d39eee5314d97e0a7456e63"
+  },
+  "timelineAudit": {
+    "legacyDurationMs": 35200,
+    "coolingDurationMs": 39700,
+    "legacyKeys": [
+      [
+        0,
+        0
+      ],
+      [
+        1.7,
+        0.065
+      ],
+      [
+        3.3,
+        0.135
+      ],
+      [
+        5.4,
+        0.202
+      ],
+      [
+        6.6,
+        0.248
+      ],
+      [
+        8.4,
+        0.292
+      ],
+      [
+        8.65,
+        0.3
+      ],
+      [
+        9.7,
+        0.325
+      ],
+      [
+        9.9,
+        0.333
+      ],
+      [
+        12,
+        0.376
+      ],
+      [
+        13,
+        0.407
+      ],
+      [
+        17.5,
+        0.56
+      ],
+      [
+        21,
+        0.653333
+      ],
+      [
+        23.8,
+        0.733333
+      ],
+      [
+        26.2,
+        0.8
+      ],
+      [
+        27.2,
+        0.84
+      ],
+      [
+        29.7,
+        0.893333
+      ],
+      [
+        30.7,
+        0.906667
+      ],
+      [
+        33.2,
+        0.96
+      ],
+      [
+        35.2,
+        1
+      ]
+    ],
+    "coolingKeys": [
+      [
+        0,
+        0
+      ],
+      [
+        1.7,
+        0.065
+      ],
+      [
+        3.3,
+        0.135
+      ],
+      [
+        5.4,
+        0.202
+      ],
+      [
+        7.5,
+        0.248
+      ],
+      [
+        9.3,
+        0.276
+      ],
+      [
+        9.6,
+        0.278
+      ],
+      [
+        9.9,
+        0.284
+      ],
+      [
+        10.5,
+        0.292
+      ],
+      [
+        11,
+        0.3
+      ],
+      [
+        13.9,
+        0.325
+      ],
+      [
+        14.3,
+        0.333
+      ],
+      [
+        15.1,
+        0.345
+      ],
+      [
+        16.5,
+        0.376
+      ],
+      [
+        17.5,
+        0.407
+      ],
+      [
+        22,
+        0.56
+      ],
+      [
+        25.5,
+        0.653333
+      ],
+      [
+        28.3,
+        0.733333
+      ],
+      [
+        30.7,
+        0.8
+      ],
+      [
+        31.7,
+        0.84
+      ],
+      [
+        34.2,
+        0.893333
+      ],
+      [
+        35.2,
+        0.906667
+      ],
+      [
+        37.7,
+        0.96
+      ],
+      [
+        39.7,
+        1
+      ]
+    ],
+    "lidAndRackOffsetMs": 4500,
+    "independentClockSamplesPerMode": 1601,
+    "lidAndRackSamples": 1001
+  },
+  "localizedFasteners": {
+    "count": 48,
+    "outsideTriangles": {
+      "oldTriangles": 60704,
+      "newTriangles": 60704,
+      "missingCount": 0,
+      "addedCount": 0,
+      "missingSamples": [],
+      "addedSamples": []
+    }
+  },
+  "fluidJunctionAudit": {
+    "period": 0.38,
+    "globalPhaseSpeed": 0.85,
+    "rows": [
+      {
+        "seat": "CPU-L",
+        "length": 3.950504359545781,
+        "correction": 0.1837990510172567,
+        "joins": [
+          {
+            "id": "supply/inlet",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "inlet/channel",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "channel/outlet",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "outlet/return",
+            "phaseMismatch": 0
+          }
+        ],
+        "minPhaseDerivative": 1,
+        "maxPhaseDerivative": 1.0872352462602979,
+        "manifoldEndpointSpeed": 0.85
+      },
+      {
+        "seat": "GPU-L-OUTER",
+        "length": 6.349808939771599,
+        "correction": 0.06449459000072721,
+        "joins": [
+          {
+            "id": "supply/inlet",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "inlet/channel",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "channel/outlet",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "outlet/return",
+            "phaseMismatch": 0
+          }
+        ],
+        "minPhaseDerivative": 1,
+        "maxPhaseDerivative": 1.0190442511575337,
+        "manifoldEndpointSpeed": 0.85
+      },
+      {
+        "seat": "GPU-L-INNER",
+        "length": 6.349808882495712,
+        "correction": 0.06449452806732481,
+        "joins": [
+          {
+            "id": "supply/inlet",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "inlet/channel",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "channel/outlet",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "outlet/return",
+            "phaseMismatch": -1.7763568394002505e-15
+          }
+        ],
+        "minPhaseDerivative": 1,
+        "maxPhaseDerivative": 1.0190442330413423,
+        "manifoldEndpointSpeed": 0.85
+      },
+      {
+        "seat": "CPU-R",
+        "length": 3.9505043255319805,
+        "correction": 0.18379908503105646,
+        "joins": [
+          {
+            "id": "supply/inlet",
+            "phaseMismatch": -8.881784197001252e-16
+          },
+          {
+            "id": "inlet/channel",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "channel/outlet",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "outlet/return",
+            "phaseMismatch": 0
+          }
+        ],
+        "minPhaseDerivative": 1,
+        "maxPhaseDerivative": 1.0872352631551223,
+        "manifoldEndpointSpeed": 0.85
+      },
+      {
+        "seat": "GPU-R-INNER",
+        "length": 6.349808923060953,
+        "correction": 0.06449448750208298,
+        "joins": [
+          {
+            "id": "supply/inlet",
+            "phaseMismatch": -8.881784197001252e-16
+          },
+          {
+            "id": "inlet/channel",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "channel/outlet",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "outlet/return",
+            "phaseMismatch": -1.7763568394002505e-15
+          }
+        ],
+        "minPhaseDerivative": 1,
+        "maxPhaseDerivative": 1.0190442209413937,
+        "manifoldEndpointSpeed": 0.85
+      },
+      {
+        "seat": "GPU-R-OUTER",
+        "length": 6.349809094602403,
+        "correction": 0.06449443516992481,
+        "joins": [
+          {
+            "id": "supply/inlet",
+            "phaseMismatch": -8.881784197001252e-16
+          },
+          {
+            "id": "inlet/channel",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "channel/outlet",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "outlet/return",
+            "phaseMismatch": 1.7763568394002505e-15
+          }
+        ],
+        "minPhaseDerivative": 1,
+        "maxPhaseDerivative": 1.0190442049740365,
+        "manifoldEndpointSpeed": 0.85
+      }
+    ],
+    "method": "Actual unchanged route lengths and UV offsets; modulo phase checked at all six supply/inlet/channel/outlet/return joins and both trunks, with positive interior derivative and exact endpoint speed match."
+  },
+  "traceArchives": [
+    {
+      "file": "bare-film-1.json.gz",
+      "rawBytes": 6074041,
+      "compressedBytes": 709450,
+      "rawSHA256": "00faf27c07e919bc0670570689e53313e16275a3de37df0f3355c43754bfb3ef",
+      "compressedSHA256": "447f87780959a03e3ef8eea96c570a66731a44c5efbb0febf3025dca4a09d08b"
+    },
+    {
+      "file": "bare-film-2.json.gz",
+      "rawBytes": 6073984,
+      "compressedBytes": 709426,
+      "rawSHA256": "27d6cf45f1e50360996fb9959357da7d499913158bf890da466ef8e055624c1d",
+      "compressedSHA256": "51f4d1c2bbe4cfa237f45fe5a18b16e956bfbcc2e2f8104dc41d6ee616ab1e85"
+    },
+    {
+      "file": "bare-film-3.json.gz",
+      "rawBytes": 6074244,
+      "compressedBytes": 709626,
+      "rawSHA256": "008cc16aa218f7dfa650c8b43f5f993d36fd1dcd0d1371a91b809623ff1d8fd7",
+      "compressedSHA256": "fc2af629e5f62801d446814bd89d2d9dcaec473487663d287809caa7412c571c"
+    }
+  ],
+  "copiedEvidence": [
+    "regression.json",
+    "l10-regression.json",
+    "rack-isolation.json",
+    "final-focused-runtime.log",
+    "final-bareboard.log",
+    "final-cinematic.log",
+    "final-rack.log",
+    "run-browser.cjs",
+    "run-cpu.cjs",
+    "3440x1440-bridge-0.40.png",
+    "3440x1440-bridge-0.42.png",
+    "3440x1440-bridge-0.48.png",
+    "3440x1440-bridge-0.56.png"
+  ],
+  "limitations": [
+    "Local native Chromium/ANGLE driver execution is not a cross-device performance certification.",
+    "Real-clock films use the normal dashboard canvas inside the 3440x1440 viewport; no clock or frame injection.",
+    "Intentional failure fixtures retain their expected console/HTTP errors separately; normal-operation errors must be empty.",
+    "Geometry covers declared contacts, sampled installation, flow passage and manifold closure; not manufacturing CAD, complete watertight certification or CFD."
+  ]
+}

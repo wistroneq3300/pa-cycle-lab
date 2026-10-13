@@ -77,11 +77,10 @@
   }
 
   const clamp=value=>Math.max(0,Math.min(1,Number(value)||0));
-  const ease=t=>t*t*(3-2*t);
   // The scene owns geometry and camera interpolation. This is the single owner
   // of cinematic time; cinematic.js only mounts/themes the compact scene.
-  const FILM_MS=35200;
-  const filmKeys=[[0,0],[1.7,.065],[3.3,.135],[5.4,.202],[6.6,.248],[8.4,.292],[8.65,.300],[9.7,.325],[9.9,.333],[12,.376],[13,.407],[17.5,.56],[21,.653333],[23.8,.733333],[26.2,.80],[27.2,.84],[29.7,.893333],[30.7,.906667],[33.2,.96],[35.2,1]];
+  const timeline=window.PAL10Timeline;
+  const timelineMode=canvas=>canvas.dataset.coreCooling==='ready'?'coolingV2':'legacy';
   const shots=[
     [0,'l10-exploded','01','L10 Exploded View','COMPUTE / COOLING / ENCLOSURE'],
     [.065,'compute-board','02','L10 Assembly','COMPUTE BOARD'],
@@ -104,13 +103,12 @@
     const progress=clamp(value);canvas.paCoreScene?.setProgress(progress);
     stage.dataset.phase=progress<.407?'system':progress<.80?'integration':'rack';
     let shot=shots[0];for(const candidate of shots){if(progress<candidate[0])break;shot=candidate;}
-    const coolingV1=canvas.dataset.coreCooling==='ready';
+    const coolingV1=canvas.dataset.coreCooling==='ready',clock=timeline.sample(progress,timelineMode(canvas));
     if(coolingV1){
-      if(progress<.135)shot=[0,'bare-board','01','L10 Bare-board View','2 CPU / 4 GPU / TWO COMPUTE BOARDS'];
-      else if(progress<.248)shot=[.135,'silicon-detail','03','CPU / GPU Detail','SILICON / PACKAGE / HBM'];
-      else if(progress<.276)shot=[.248,'cooling-install','05','Cold Plate Installation','SIX CONTACT SURFACES / TIM / RETENTION'];
-      else if(progress<.292)shot=[.276,'manifold-connect','05','Manifold Connection','SUPPLY / RETURN / SEALED FITTINGS'];
-      else if(progress<.333)shot=[.292,'cooling-reveal','06','Cooling Flow Reveal','CONNECTED CHANNELS / FLOW DIRECTION'];
+      const coolingShots={bare:['bare-board','01','L10 Bare-board View','2 CPU / 4 GPU / TWO COMPUTE BOARDS'],silicon:['silicon-detail','03','CPU / GPU Detail','SILICON / PACKAGE / HBM'],
+        'plate-install':['cooling-install','05','Cold Plate Installation','SIX CONTACT SURFACES / TIM / RETENTION'],plumbing:['manifold-connect','05','Manifold Connection','SUPPLY / RETURN / SEALED FITTINGS'],
+        flow:['cooling-reveal','06','Cooling Flow Reveal','BLUE INLET / RED OUTLET / CONTINUOUS FLOW'],restore:['cooling-restore','07','Metal Finish Returns','SEALED COLD PLATES / PLUMBING'],solid:['l10-hero','07','Cooling Assembly','COPPER / NICKEL / ELASTOMER']};
+      if(coolingShots[clock.stage])shot=[progress,...coolingShots[clock.stage]];
     }
     if(stage.dataset.shot!==shot[1]){
       stage.dataset.shot=shot[1];
@@ -120,31 +118,24 @@
       const note=stage.querySelector('[data-vo-l10-note]');
       note.replaceChildren();
       if(progress<.202)note.textContent=coolingV1?'Board-integrated packages · cooling installs on six seated contact surfaces':'Visual separation · CPU / GPU packages are integrated with the compute boards';
-      else if(progress>=.292&&progress<.333){
+      else if(coolingV1?['flow','restore'].includes(clock.stage):progress>=.292&&progress<.333){
         for(const [label,cls]of [['Supply / Inlet','supply'],['Return / Outlet','return']]){const item=document.createElement('span');item.className=cls;item.textContent=label;note.append(item);}
-        const detail=document.createElement('small');detail.textContent=coolingV1?'Illustrative cutaway · moving coolant / conceptual channels, not measured flow':'Conceptual thermal flow · colors indicate direction, not coolant color';note.append(detail);
+        const detail=document.createElement('small');detail.textContent=coolingV1?'Blue / red show heat exchange, not two coolant colors · illustrative flow, not CFD':'Conceptual thermal flow · colors indicate direction, not coolant color';note.append(detail);
       }
       const system=stage.querySelector('#core-system-copy'),rack=stage.querySelector('#core-rack-copy'),showRack=progress>=.80;
       system.inert=showRack;system.setAttribute('aria-hidden',String(showRack));
       rack.inert=!showRack;rack.setAttribute('aria-hidden',String(!showRack));
     }
-    stage.querySelector('[data-vo-progress]').style.transform=`scaleX(${progress.toFixed(4)})`;
+    stage.querySelector('[data-vo-progress]').style.transform=`scaleX(${clock.timeProgress.toFixed(4)})`;
     stage.querySelector('[data-vo-skip]').hidden=progress>=.999;
-  }
-  function timedProgress(milliseconds){
-    const seconds=milliseconds/1000;
-    for(let i=1;i<filmKeys.length;i++){
-      const [end,p1]=filmKeys[i], [start,p0]=filmKeys[i-1];
-      if(seconds<=end)return p0+(p1-p0)*ease(clamp((seconds-start)/(end-start)));
-    }
-    return 1;
   }
   function mountOverview(){
     teardown();teardown=()=>{};const root=document.querySelector('.vo-overview'),story=document.getElementById('core-story'),canvas=document.getElementById('system-core');if(!root||!story||!canvas)return;
     const callouts=window.PAHeroCallouts?.mount(story.querySelector('[data-vo-callouts]'),canvas);
     const select=root.querySelector('[data-vo-select]'),replay=root.querySelector('[data-vo-replay]'),skip=root.querySelector('[data-vo-skip]');select.onchange=()=>{selectedProject=select.value;renderData();};root.querySelector('[data-vo-enter]').onclick=()=>window.cineEnterSelected();replay.onclick=()=>play(true);skip.onclick=()=>{if(document.activeElement===skip)replay.focus({preventScroll:true});seek(1);canvas.paCoreScene?.resetOrbit();};
     const refreshExisting=!!overview;void loadOverview(refreshExisting,refreshExisting);
-    let frame=0,timer=0,refreshTimer=0,disposed=false,mode='stopped',elapsed=0,lastTime=0,lastScroll=scrollY,progress=1,target=1;
+    let frame=0,timer=0,refreshTimer=0,disposed=false,mode='stopped',elapsed=0,lastTime=0,lastScroll=scrollY,progress=1,target=1,activeTimeline=timelineMode(canvas);
+    const syncTimeline=()=>{const next=timelineMode(canvas);if(next!==activeTimeline){activeTimeline=next;elapsed=timeline.timeAt(progress,next);}return timeline.definitions[activeTimeline];};
     const write=value=>{progress=clamp(value);applyProgress(progress);};
     const cancel=()=>{mode='stopped';clearTimeout(timer);cancelAnimationFrame(frame);frame=0;lastTime=0;};
     const schedule=()=>{if(!disposed&&!frame&&!document.hidden)frame=requestAnimationFrame(tick);};
@@ -152,9 +143,10 @@
       frame=0;if(disposed||document.hidden||mode==='stopped')return;
       if(canvas.dataset.coreEnvironment==='loading'||canvas.dataset.coreAsset==='loading'||canvas.dataset.coreCooling==='loading'){lastTime=0;schedule();return;}
       const dt=lastTime?Math.min(80,now-lastTime):0;lastTime=now;
+      const film=syncTimeline();
       if(mode==='film'){
-        elapsed=Math.min(FILM_MS,elapsed+dt);write(timedProgress(elapsed));
-        if(elapsed===FILM_MS){mode='stopped';lastTime=0;return;}
+        elapsed=Math.min(film.durationMs,elapsed+dt);write(timeline.progressAt(elapsed,activeTimeline));
+        if(elapsed===film.durationMs){mode='stopped';lastTime=0;return;}
       }else{
         const next=progress+(target-progress)*(1-Math.exp(-dt/90));
         write(Math.abs(target-next)<.00015?target:next);
@@ -162,7 +154,7 @@
       }
       schedule();
     }
-    function seek(value){cancel();target=reduced.matches?1:clamp(value);write(target);lastScroll=scrollY;}
+    function seek(value){cancel();syncTimeline();target=reduced.matches?1:clamp(value);write(target);elapsed=timeline.timeAt(target,activeTimeline);lastScroll=scrollY;}
     const manualScroll=()=>{
       const nextScroll=scrollY,delta=nextScroll-lastScroll;lastScroll=nextScroll;
       if(disposed||Math.abs(delta)<.5)return;
@@ -190,12 +182,14 @@
       if(reduced.matches)seek(1);
     };
     const visibilityChange=()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;lastTime=0;}else if(mode!=='stopped')schedule();};
-    const ready=()=>applyProgress(progress);
+    const ready=()=>{syncTimeline();applyProgress(progress);};
     let played=false;try{played=sessionStorage.getItem(replayKey)==='1';}catch{}
     motionChange();if(reduced.matches||played)seek(1);else play();
     // Deterministic public playback control also lets QA exercise the real
     // phase labels, scan overlay and progress ownership when seeking a shot.
-    story.paHeroPlayback={seek,skip:()=>skip.click(),replay:()=>play(true),getState:()=>({progress,target,mode,duration:FILM_MS,reducedMotion:reduced.matches})};
+    story.paHeroPlayback={seek,seekTime:ms=>seek(timeline.progressAt(ms,timelineMode(canvas))),pause:cancel,
+      resume:()=>{if(reduced.matches||progress>=1)return;syncTimeline();elapsed=timeline.timeAt(progress,activeTimeline);mode='film';lastTime=0;schedule();},
+      skip:()=>skip.click(),replay:()=>play(true),getState:()=>({progress,target,mode,duration:timeline.definitions[timelineMode(canvas)].durationMs,elapsedMs:timeline.timeAt(progress,timelineMode(canvas)),timelineMode:timelineMode(canvas),reducedMotion:reduced.matches})};
     refreshTimer=setInterval(()=>{if(!document.hidden&&root.isConnected)void loadOverview(true,true);},REFRESH_MS);
     window.addEventListener('scroll',manualScroll,{passive:true});canvas.addEventListener('pointerdown',input,{passive:true});canvas.addEventListener('touchstart',input,{passive:true});canvas.addEventListener('keydown',input);story.addEventListener('wheel',wheel,{passive:true});tools?.addEventListener('click',input);canvas.addEventListener('pa-core-ready',ready);document.addEventListener('visibilitychange',visibilityChange);reduced.addEventListener('change',motionChange);
     teardown=()=>{disposed=true;cancel();callouts?.destroy();clearInterval(refreshTimer);delete story.paHeroPlayback;window.removeEventListener('scroll',manualScroll);canvas.removeEventListener('pointerdown',input);canvas.removeEventListener('touchstart',input);canvas.removeEventListener('keydown',input);story.removeEventListener('wheel',wheel);tools?.removeEventListener('click',input);canvas.removeEventListener('pa-core-ready',ready);document.removeEventListener('visibilitychange',visibilityChange);reduced.removeEventListener('change',motionChange);};

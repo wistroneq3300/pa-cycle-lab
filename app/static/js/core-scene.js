@@ -42,7 +42,7 @@
       packageSeparation:'visual-only / board-integrated packages',flowMeaning:'conceptual thermal-flow overlay',profile:window.PAL10Hardware?.profile?.id||null};
   }
   // The companion cooling assembly starts with the accepted, seated bare board.
-  // Its authored prefix rejoins the unchanged enclosure/Rack timeline at .333.
+  // Its authored prefix rejoins the unchanged lid/Rack choreography.
   // No independent clock: seeking, Replay and Reduced Motion share one state.
   function coolingAssemblyState(p){
     const state=l10State(p),cooling=interval(.248,.278,p),plumbing=interval(.276,.291,p);
@@ -55,10 +55,32 @@
       phase:p<.135?'bare-board':p<.248?'silicon-detail':p<.276?'cooling-install':p<.292?'manifold-connect':state.phase,
       packageSeparation:'board-integrated / seated throughout cooling installation',
       flowMeaning:'Advected coolant visualization in original conceptual channels; not CFD or measured flow',
-      coolingAssembly:'l10-cooling-assembly-v1'};
+      coolingAssembly:'l10-cooling-assembly-v2',...window.PAL10Timeline?.coolingPose(p)};
   }
   function coolingAssemblyCamera(p){
+    if(window.PAL10Timeline)return window.PAL10Timeline.cameraWeights(p);
     return {bare:1-interval(.235,.248,p),detail:interval(.095,.155,p)*(1-interval(.225,.248,p))};
+  }
+  function coolingFlowBindings(routes){
+    if(!Array.isArray(routes)||routes.length!==22||new Set(routes.map(r=>r.id)).size!==22||routes.some(r=>
+      !['supply','return','plate-channel'].includes(r.semantic)||!Number.isFinite(r.length)||r.length<=0||!Number.isFinite(r.uvOffset)||r.uvOffset<0||
+      !Array.isArray(r.points)||r.points.length<2||r.points.some(p=>!Array.isArray(p)||p.length!==3||!p.every(Number.isFinite))))throw new Error('Cooling requires 22 finite directed routes');
+    const byId=Object.fromEntries(routes.map(r=>[r.id,r])),period=.38,bindings={};
+    for(const r of routes){
+      let start=0,length=1,correction=0;
+      const seat=r.id.match(/^(.*)\/(inlet|channels|outlet)$/)?.[1];
+      if(seat){
+        const a=byId[seat+'/inlet'],b=byId[seat+'/channels'],c=byId[seat+'/outlet'],header=byId['return-header'];
+        if(!a||!b||!c||!header)throw new Error('Incomplete cooling branch');
+        start=a.uvOffset;length=a.length+b.length+c.length;
+        const desired=header.uvOffset+c.points.at(-1)[0]-header.points[0][0];
+        const delta=desired-(start+length);correction=delta-Math.round(delta/period)*period;
+      }
+      // Quintic phase correction distributes at most half one packet along a
+      // branch. Its endpoint derivative is zero: direction, phase and speed
+      // agree with both headers. It is visual transport, not CFD.
+      bindings[r.id]={route:[r.semantic==='supply'?-1:r.semantic==='return'?1:0,r.uvOffset,r.length,start],phase:[length,correction],period};
+    }return bindings;
   }
   const groupTravel={server:1.52,nvlink:2.68,powershelf:.78,switch:1.94,blanking:.14};
   const groupLateral={server:0,nvlink:.60,powershelf:.30,switch:-.38,blanking:0};
@@ -143,6 +165,7 @@
     uniform vec3 uEye;uniform vec3 uKeyPosition;uniform float uLightTheme;uniform float uTime;uniform float uScan;uniform float uScanY;
     uniform float uRack;uniform float uQuality;uniform float uReveal;uniform float uDetail;uniform float uSectionX;uniform float uL10Finish;
     uniform float uCoolingFlow;uniform float uCoolingTravel;
+    uniform vec4 uCoolingRoute;uniform vec2 uCoolingPhase;
     uniform sampler2D uShadowMap;uniform float uShadowPass;uniform float uHasShadow;uniform float uShadowTexel;
     uniform sampler2D uEnvironment;uniform float uHasEnvironment;
     varying vec2 vUV;varying vec4 vTangent;
@@ -228,16 +251,27 @@
       if(uCoolingFlow>.5){
         // The UV coordinate is authored arc length through the connected
         // fluid volume. Density witnesses advect; nothing emits or blooms.
-        float travel=vUV.x-uCoolingTravel;
-        float witness=pow(.5+.5*cos(travel*20.943951),16.0);
+        float branchT=clamp((vUV.x-uCoolingRoute.w)/uCoolingPhase.x,0.0,1.0);
+        float warp=branchT*branchT*branchT*(branchT*(branchT*6.0-15.0)+10.0);
+        float travel=vUV.x+uCoolingPhase.y*warp-uCoolingTravel;
+        float packet=fract(travel/.38);
+        // A long trailing wake and short leading edge make direction legible.
+        float witness=smoothstep(.32,.78,packet)*(1.0-smoothstep(.84,.94,packet));
         float fine=sin(travel*83.0+vUV.y*6.283185)*.003;
         N=normalize(N+vec3(fine,0.0,-fine));R=reflect(-V,N);
         float nv=max(dot(N,V),0.0),f=.0204+.9796*pow(1.0-nv,5.0);
-        vec3 body=srgbLinear(assetBase.rgb)*vColor.rgb;
+        float heat=uCoolingRoute.x<-.5?0.0:uCoolingRoute.x>.5?1.0:smoothstep(.08,.92,(vUV.x-uCoolingRoute.y)/uCoolingRoute.z);
+        vec3 body=srgbLinear(mix(vec3(.065,.36,.72),vec3(.72,.13,.075),heat));
         vec3 irradiance=uHasEnvironment>.5?environmentStrip(N,6.0):vec3(.45);
         vec3 reflected=uHasEnvironment>.5?environmentSpecular(R,.10):vec3(.30);
-        vec3 water=body*irradiance*(.64+witness*.24)+reflected*(f+.04+witness*.09);
-        gl_FragColor=vec4(displayTransform(water),vColor.a*(.70+.14*witness+.14*f));return;
+        // Longer optical paths through the centre retain the thermal tint;
+        // the existing cylindrical surface supplies the edge reflection.
+        // Sparse pale density fronts have a sharp leading edge and a long
+        // coloured wake, so motion remains readable at normal viewing size.
+        float column=.30+.70*sqrt(nv);
+        vec3 scatter=mix(body,vec3(.64),witness*.18)*irradiance*(.42+witness*1.18)*column;
+        vec3 water=scatter+reflected*(f*.60+.008);
+        gl_FragColor=vec4(displayTransform(water),vColor.a*(.86+.12*witness));return;
       }
       float metal=clamp(vMaterial.x,0.0,1.0),polymer=1.0-metal;
       float grain=fract(sin(dot(floor(vLocal*310.0),vec3(127.1,311.7,74.7)))*43758.5453);
@@ -464,7 +498,7 @@
     const assetEnabled=hasL10()&&(bareAsset||/(?:^|[?&])l10AssetPrototype=1(?:&|$)/.test(window.location?.search||''));
     const inspectionEnabled=/(?:^|[?&])l10AssetLab=1(?:&|$)/.test(window.location?.search||'');
     let assetRuntime=null,assetLoading=false,assetFailed=false,assetError='',assetGeneration=0,inspection=null;
-    let coolingRuntime=null,coolingLoading=false,coolingFailed=false,coolingError='';
+    let coolingRuntime=null,coolingLoading=false,coolingFailed=false,coolingError='',flowBindings={};
     let progress=0,pointerX=0,pointerY=0,yaw=0,pitch=0,manual=false,drag=null,light=0,view='authored';
     let visible=true,intersecting=true,lastTime=0,lightTime=0,drawCalls=0,vertices=0,slowFrames=0,resolution=1,frameMs=16.7;
     let idleTimer=0,idleStart=0,idleWeight=0,idleExit=0,idleYaw=0,idlePitch=0,idleTravel=0;
@@ -490,7 +524,7 @@
       Object.entries(built.meshes).forEach(([name,mesh])=>{const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,mesh.data,gl.STATIC_DRAW);parts[name]={buffer,count:mesh.data.length/12};vertices+=mesh.data.length/12;});
       ['aPosition','aNormal','aColor','aMaterial','aUV','aTangent'].forEach(name=>attributes[name]=gl.getAttribLocation(program,name));
       ['uViewProjection','uLightViewProjection','uModel','uPart','uOpacity','uEye','uKeyPosition','uLightTheme','uTime','uScan','uScanY','uRack','uQuality','uReveal','uDetail','uSectionX','uShadowMap','uShadowPass','uHasShadow','uShadowTexel','uEnvironment','uHasEnvironment'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
-      ['uAsset','uAssetNormalScale','uAssetRoughness','uAssetAO','uAssetAlphaCutoff','uAssetAlphaMask','uAssetBase','uAssetMR','uAssetNormal','uAssetOcclusion','uAssetFilmStrength','uAssetFilmThickness','uL10Finish','uCoolingFlow','uCoolingTravel'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
+      ['uAsset','uAssetNormalScale','uAssetRoughness','uAssetAO','uAssetAlphaCutoff','uAssetAlphaMask','uAssetBase','uAssetMR','uAssetNormal','uAssetOcclusion','uAssetFilmStrength','uAssetFilmThickness','uL10Finish','uCoolingFlow','uCoolingTravel','uCoolingRoute','uCoolingPhase'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
       if(assetEnabled&&window.PAL10GLTF&&window.PAL10AssetRuntime){
         assetLoading=true;assetFailed=false;assetError='';canvas.dataset.coreAsset='loading';const generation=++assetGeneration;
         window.PAL10GLTF.load('/static/models/l10-prototype/'+(bareAsset?'bare-compute-boards.glb':'compute-board.glb')).then(asset=>{
@@ -557,11 +591,11 @@
     }
     function releaseCooling(){
       if(coolingRuntime){vertices-=coolingRuntime.metadata.vertices;coolingRuntime.destroy(contextLost);coolingRuntime=null;}
-      coolingLoading=false;canvas.dataset.coreCooling='fallback';
+      coolingLoading=false;flowBindings={};canvas.dataset.coreCooling='fallback';
     }
     function loadCoolingCompanion(generation){
       coolingLoading=true;coolingFailed=false;coolingError='';canvas.dataset.coreCooling='loading';
-      window.PAL10GLTF.load('/static/models/l10-cooling-v1/cooling-assembly.glb').then(asset=>{
+      window.PAL10GLTF.load('/static/models/l10-cooling-v1/cooling-assembly.glb?v=20261013-v2').then(asset=>{
         if(disposed||contextLost||generation!==assetGeneration){asset.disposeImages();return;}
         try{
           const meta=asset.metadata.extras;
@@ -575,7 +609,9 @@
             if(p.bounds.max[1]>.125001||p.bounds.min[1]<-.113||p.bounds.min[0]<-1.98||p.bounds.max[0]>1.98||p.bounds.min[2]<-3.14||p.bounds.max[2]>-.18)
               throw new Error('Cooling companion exceeds its tray envelope');
           }
-          const staged=window.PAL10AssetRuntime.upload(gl,asset,attributes,uniforms);
+          const bindings=coolingFlowBindings(meta.flowRoutes);
+          for(const p of asset.primitives)if(p.layer==='cooling-fluid'&&!bindings[p.name.replace(/^Cooling V1 \/ cooling-fluid \/ /,'').replace(/#\d+$/,'')])throw new Error('Cooling fluid primitive lacks its directed route');
+          const staged=window.PAL10AssetRuntime.upload(gl,asset,attributes,uniforms);flowBindings=bindings;
           coolingRuntime=staged;vertices+=staged.metadata.vertices;coolingLoading=false;
           canvas.dataset.coreCooling='ready';canvas.dataset.coreVertices=String(vertices);shadowProgress=-1;cameraReady=false;requestDraw();
         }catch(error){asset.disposeImages();coolingLoading=false;coolingFailed=true;coolingError=error.message;canvas.dataset.coreCooling='fallback';requestDraw();}
@@ -662,14 +698,22 @@
       if(hasL10()){
         target[0]*=modelMatrix[0];target[2]*=modelMatrix[10];
         const l10=sample.l10,pose=placementPose(PLACEMENTS[PRIMARY_INDEX],PRIMARY_INDEX,progress,0),bridge=interval(.407,.56,progress);
-        const closeYaw=mix(-.52,-.25,interval(0,.38,progress)),closeElevation=mix(.67,.86,interval(.245,.30,progress))-.16*interval(.333,.39,progress);
+        let closeYaw=mix(-.52,-.25,interval(0,.38,progress)),closeElevation=mix(.67,.86,interval(.245,.30,progress))-.16*interval(.333,.39,progress);
         const closeTarget=[pose.x*modelMatrix[0],pose.y+mix(.80,.10,interval(.05,.29,progress)),pose.z*modelMatrix[10]-.12];
         const coolingCamera=coolingRuntime?coolingAssemblyCamera(progress):{bare:0,detail:0};
         closeTarget[0]-=.965*modelMatrix[0]*coolingCamera.detail;
         closeTarget[1]=mix(closeTarget[1],pose.y+.04,coolingCamera.bare);
         closeTarget[2]=mix(closeTarget[2],(pose.z-1.70)*modelMatrix[10],coolingCamera.detail);
         const lo=[closeTarget[0]-1.47,pose.y-.14,(pose.z-3.1)*modelMatrix[10]],hi=[closeTarget[0]+1.47,pose.y+.22+l10.coolingLift,(pose.z+3.1)*modelMatrix[10]];
-        const closeFit=mix(fittedDistance(lo,hi,closeTarget,closeYaw+yaw,closeElevation+pitch,aspect,.79,.89),Math.max(4.5,3.7/aspect),coolingCamera.detail);
+        let closeFit=mix(fittedDistance(lo,hi,closeTarget,closeYaw+yaw,closeElevation+pitch,aspect,.79,.89),Math.max(4.5,3.7/aspect),coolingCamera.detail);
+        const focus=coolingCamera.cooling||0;
+        if(focus>0){
+          const reveal=coolingCamera.reveal||0,focusTarget=[pose.x*modelMatrix[0],pose.y+.055,(pose.z-1.60)*modelMatrix[10]];
+          closeYaw=mix(closeYaw,-.22,focus);closeElevation=mix(closeElevation,mix(.89,1.02,reveal),focus);
+          const focusLo=[(pose.x-1.96)*modelMatrix[0],pose.y-.13,(pose.z-3.10)*modelMatrix[10]],focusHi=[(pose.x+1.96)*modelMatrix[0],pose.y+.15+l10.coolingLift,(pose.z-.22)*modelMatrix[10]];
+          const focusDistance=fittedDistance(focusLo,focusHi,focusTarget,closeYaw+yaw,closeElevation+pitch,aspect,.83,.83);
+          closeFit=mix(closeFit,focusDistance,focus);for(let axis=0;axis<3;axis++)closeTarget[axis]=mix(closeTarget[axis],focusTarget[axis],focus);
+        }
         azimuth=mix(closeYaw+yaw,azimuth,bridge);elevation=mix(closeElevation+pitch,elevation,bridge);
         distance=mix(closeFit,distance,bridge);
         for(let axis=0;axis<3;axis++)target[axis]=mix(closeTarget[axis],target[axis],bridge);
@@ -789,7 +833,10 @@
             if(shadowPass&&fluid)return;
             m[13]=base[13]+lift;m[14]=base[14]+(semantic==='cooling-plumbing'?l10.plumbingZ:0);
             gl.uniform1f(uniforms.uL10Finish,0);gl.uniform1f(uniforms.uCoolingFlow,fluid?1:0);
-            drawCalls+=coolingRuntime.draw(semantic,m,opacity,depth,shadowPass);
+            drawCalls+=coolingRuntime.draw(semantic,m,opacity,depth,shadowPass,fluid?p=>{
+              const binding=flowBindings[p.name.replace(/^Cooling V1 \/ cooling-fluid \/ /,'').replace(/#\d+$/,'')];
+              gl.uniform4fv(uniforms.uCoolingRoute,binding.route);gl.uniform2fv(uniforms.uCoolingPhase,binding.phase);
+            }:null);
             gl.uniform1f(uniforms.uCoolingFlow,0);
           };
           coolingLayer('cooling-mounts',0,l10.coolingVisibility);
@@ -798,8 +845,8 @@
           // Fluid is an actual volume inside the passages. Composite ghosted
           // metal covers afterward; the whole envelope stays in place.
           coolingLayer('cooling-fluid',0,l10.flow*.92,false,true);
-          coolingLayer('cooling',l10.coolingLift,l10.coolingVisibility*(1-l10.flow*.85),l10.flow<.001);
-          coolingLayer('cooling-plumbing',l10.plumbingLift,l10.plumbingVisibility*(1-l10.flow*.82),l10.flow<.001);
+          coolingLayer('cooling',l10.coolingLift,l10.coolingVisibility*(1-l10.flow*.94),l10.flow<.001);
+          coolingLayer('cooling-plumbing',l10.plumbingLift,l10.plumbingVisibility*(1-l10.flow*.89),l10.flow<.001);
         }else{
           layer('l10-cooling-frame',l10.coolingLift);
           layer('l10-cooling',l10.coolingLift,1-l10.flow*.28,l10.flow<.01);
@@ -898,5 +945,5 @@
       destroy(){if(disposed)return;disposed=true;clearTimeout(idleTimer);if(frame)cancelAnimationFrame(frame);frame=0;drag=null;ro?.disconnect();io?.disconnect();window.removeEventListener('resize',requestDraw);Object.entries(events).forEach(([name,handler])=>canvas.removeEventListener(name,handler));activityEvents.forEach(name=>window.removeEventListener(name,activity));if(typeof document!=='undefined')document.removeEventListener('visibilitychange',onVisibility);reduced.removeEventListener?.('change',onReduced);canvas.style.touchAction=originalTouchAction;release();canvas.dataset.coreState='disposed';delete canvas.paCoreScene;}
     };canvas.paCoreScene=api;return api;
   }
-  window.PACoreScene=Object.freeze({mount,assemblySnapshot,coolingAssemblyState,coolingAssemblyCamera});
+  window.PACoreScene=Object.freeze({mount,assemblySnapshot,coolingAssemblyState,coolingAssemblyCamera,coolingFlowBindings});
 })();

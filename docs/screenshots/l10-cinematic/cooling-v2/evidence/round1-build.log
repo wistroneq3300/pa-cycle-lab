@@ -1,0 +1,143 @@
+Info: Saved as "cooling-assembly.blend"
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+Warning: No mesh data to join
+INFO Draco mesh compression is available, use library at C:\Users\kobei\OneDrive\文件\ChatGPT\New project\pa-cycle-cinematic-l10\artifacts\l10-phase4\tools\blender-4.5.9-windows-x64\4.5\scripts\addons_core\io_scene_gltf2\extern_draco.dll
+23:20:18 | INFO: Starting glTF 2.0 export
+23:20:18 | INFO: Extracting primitive: Cube.175
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: Cube.179
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: Cube.183
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: Cube.187
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: Cube.191
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: Cube.195
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: Cube.199
+23:20:18 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+23:20:18 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+23:20:18 | INFO: Primitives created: 7
+23:20:18 | INFO: Extracting primitive: Cube.218
+23:20:18 | INFO: Primitives created: 7
+23:20:18 | INFO: Extracting primitive: Cube.237
+23:20:18 | INFO: Primitives created: 7
+23:20:18 | INFO: Extracting primitive: Cube.256
+23:20:18 | INFO: Primitives created: 7
+23:20:18 | INFO: Extracting primitive: Cube.275
+23:20:18 | INFO: Primitives created: 7
+23:20:18 | INFO: Extracting primitive: Cube.294
+23:20:18 | INFO: Primitives created: 7
+23:20:18 | INFO: Extracting primitive: Cube.313
+23:20:18 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+23:20:18 | INFO: Primitives created: 3
+23:20:18 | INFO: Extracting primitive: Cube.314
+23:20:18 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+23:20:18 | INFO: Primitives created: 3
+23:20:18 | INFO: Extracting primitive: Cube.315
+23:20:18 | INFO: Primitives created: 3
+23:20:18 | INFO: Extracting primitive: Cube.316
+23:20:18 | INFO: Primitives created: 3
+23:20:18 | INFO: Extracting primitive: Cube.317
+23:20:18 | INFO: Primitives created: 3
+23:20:18 | INFO: Extracting primitive: Cube.318
+23:20:18 | INFO: Primitives created: 3
+23:20:18 | INFO: Extracting primitive: Cube.319
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: Cube.324
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: Cube.329
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: Cube.334
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: Cube.339
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: Cube.344
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: Rear supply line.001
+23:20:18 | INFO: Primitives created: 3
+23:20:18 | INFO: Extracting primitive: Rear return line.001
+23:20:18 | INFO: Primitives created: 3
+23:20:18 | INFO: Extracting primitive: CPU-L supply hose.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: GPU-L-OUTER supply hose.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: GPU-L-INNER supply hose.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: CPU-R supply hose.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: GPU-R-INNER supply hose.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: GPU-R-OUTER supply hose.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: supply-trunk.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: supply-header.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: return-header.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: return-trunk.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: CPU-L/inlet.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: CPU-L/channels.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: CPU-L/outlet.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: GPU-L-OUTER/inlet.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: GPU-L-OUTER/channels.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: GPU-L-OUTER/outlet.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: GPU-L-INNER/inlet.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: GPU-L-INNER/channels.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: GPU-L-INNER/outlet.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: CPU-R/inlet.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: CPU-R/channels.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: CPU-R/outlet.001
+23:20:18 | INFO: Primitives created: 1
+23:20:18 | INFO: Extracting primitive: GPU-R-INNER/inlet.001
+23:20:19 | INFO: Primitives created: 1
+23:20:19 | INFO: Extracting primitive: GPU-R-INNER/channels.001
+23:20:19 | INFO: Primitives created: 1
+23:20:19 | INFO: Extracting primitive: GPU-R-INNER/outlet.001
+23:20:19 | INFO: Primitives created: 1
+23:20:19 | INFO: Extracting primitive: GPU-R-OUTER/inlet.001
+23:20:19 | INFO: Primitives created: 1
+23:20:19 | INFO: Extracting primitive: GPU-R-OUTER/channels.001
+23:20:19 | INFO: Primitives created: 1
+23:20:19 | INFO: Extracting primitive: GPU-R-OUTER/outlet.001
+23:20:19 | INFO: Primitives created: 1
+23:20:19 | INFO: Finished glTF 2.0 export in 0.41487622261047363 s
+
+COOLING_V1_RESULT {"sha256": "428fa53ece6c2741c7245a50971e79219da2d28da3e90873304f7c875d11d6fe", "bytes": 3562156, "triangles": 69344, "nodes": 54, "materials": 12, "embeddedImages": 4}
+Blender 4.5.9 LTS (hash 8bf95cbd38d1 built 2026-04-21 01:33:45)
+
+Blender quit

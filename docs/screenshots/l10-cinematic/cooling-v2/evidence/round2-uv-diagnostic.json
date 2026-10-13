@@ -1,0 +1,1082 @@
+{
+  "before": "428fa53ece6c2741c7245a50971e79219da2d28da3e90873304f7c875d11d6fe",
+  "after": "de55d9e6516c2fa1efdf4e3894b98adfd49f00fae8659214178f782a428de913",
+  "otherAttributeChanges": 0,
+  "changedUVPrimitives": 51,
+  "changedUVElements": 15395,
+  "maxAbsDiff": 2.384185791015625e-7,
+  "nodeExact": true,
+  "rows": [
+    {
+      "mesh": "Cube.199",
+      "primitive": 1,
+      "material": "Machined copper",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 3544,
+          "changedElements": 980,
+          "maxAbsDiff": 2.384185791015625e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.199",
+      "primitive": 2,
+      "material": "Gasket",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 888,
+          "changedElements": 125,
+          "maxAbsDiff": 1.1920928955078125e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.199",
+      "primitive": 3,
+      "material": "Brushed nickel",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 6684,
+          "changedElements": 1001,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.199",
+      "primitive": 4,
+      "material": "Dark nickel fastener",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 2660,
+          "changedElements": 319,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.199",
+      "primitive": 5,
+      "material": "Recess oxide",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 400,
+          "changedElements": 3,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            -8.940696716308594e-8,
+            1
+          ],
+          "afterRange": [
+            -8.940696716308594e-8,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.218",
+      "primitive": 1,
+      "material": "Machined copper",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 3486,
+          "changedElements": 719,
+          "maxAbsDiff": 2.384185791015625e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.218",
+      "primitive": 2,
+      "material": "Gasket",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 892,
+          "changedElements": 141,
+          "maxAbsDiff": 1.1920928955078125e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.218",
+      "primitive": 3,
+      "material": "Brushed nickel",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 6784,
+          "changedElements": 920,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.218",
+      "primitive": 4,
+      "material": "Dark nickel fastener",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 2768,
+          "changedElements": 341,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.218",
+      "primitive": 5,
+      "material": "Recess oxide",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 424,
+          "changedElements": 7,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            -8.940696716308594e-8,
+            1
+          ],
+          "afterRange": [
+            -8.940696716308594e-8,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.237",
+      "primitive": 1,
+      "material": "Machined copper",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 3466,
+          "changedElements": 713,
+          "maxAbsDiff": 2.384185791015625e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.237",
+      "primitive": 2,
+      "material": "Gasket",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 896,
+          "changedElements": 146,
+          "maxAbsDiff": 1.1920928955078125e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.237",
+      "primitive": 3,
+      "material": "Brushed nickel",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 6604,
+          "changedElements": 1030,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.237",
+      "primitive": 4,
+      "material": "Dark nickel fastener",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 2700,
+          "changedElements": 181,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.237",
+      "primitive": 5,
+      "material": "Recess oxide",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 400,
+          "changedElements": 4,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            -8.940696716308594e-8,
+            1
+          ],
+          "afterRange": [
+            -8.940696716308594e-8,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.256",
+      "primitive": 1,
+      "material": "Machined copper",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 3556,
+          "changedElements": 984,
+          "maxAbsDiff": 2.384185791015625e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.256",
+      "primitive": 2,
+      "material": "Gasket",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 888,
+          "changedElements": 130,
+          "maxAbsDiff": 1.1920928955078125e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.256",
+      "primitive": 3,
+      "material": "Brushed nickel",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 6680,
+          "changedElements": 931,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.256",
+      "primitive": 4,
+      "material": "Dark nickel fastener",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 2660,
+          "changedElements": 58,
+          "maxAbsDiff": 1.1920928955078125e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.275",
+      "primitive": 1,
+      "material": "Machined copper",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 3464,
+          "changedElements": 749,
+          "maxAbsDiff": 2.384185791015625e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.275",
+      "primitive": 2,
+      "material": "Gasket",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 896,
+          "changedElements": 130,
+          "maxAbsDiff": 1.1920928955078125e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.275",
+      "primitive": 3,
+      "material": "Brushed nickel",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 6600,
+          "changedElements": 919,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.275",
+      "primitive": 4,
+      "material": "Dark nickel fastener",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 2700,
+          "changedElements": 298,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.275",
+      "primitive": 5,
+      "material": "Recess oxide",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 400,
+          "changedElements": 3,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            -8.940696716308594e-8,
+            1
+          ],
+          "afterRange": [
+            -8.940696716308594e-8,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.294",
+      "primitive": 1,
+      "material": "Machined copper",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 3488,
+          "changedElements": 760,
+          "maxAbsDiff": 2.384185791015625e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.294",
+      "primitive": 2,
+      "material": "Gasket",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 900,
+          "changedElements": 141,
+          "maxAbsDiff": 1.1920928955078125e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.294",
+      "primitive": 3,
+      "material": "Brushed nickel",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 6772,
+          "changedElements": 814,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.294",
+      "primitive": 4,
+      "material": "Dark nickel fastener",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 2764,
+          "changedElements": 337,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.294",
+      "primitive": 5,
+      "material": "Recess oxide",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 408,
+          "changedElements": 7,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            -8.940696716308594e-8,
+            1
+          ],
+          "afterRange": [
+            -8.940696716308594e-8,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.313",
+      "primitive": 0,
+      "material": "CPU satin nickel cover",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 920,
+          "changedElements": 245,
+          "maxAbsDiff": 2.384185791015625e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.313",
+      "primitive": 1,
+      "material": "Dark nickel fastener",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 2564,
+          "changedElements": 407,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.313",
+      "primitive": 2,
+      "material": "Recess oxide",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 400,
+          "changedElements": 16,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            -8.940696716308594e-8,
+            1
+          ],
+          "afterRange": [
+            -8.940696716308594e-8,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.314",
+      "primitive": 0,
+      "material": "GPU machined nickel cover",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 916,
+          "changedElements": 32,
+          "maxAbsDiff": 1.1920928955078125e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.314",
+      "primitive": 1,
+      "material": "Dark nickel fastener",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 2800,
+          "changedElements": 237,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.314",
+      "primitive": 2,
+      "material": "Recess oxide",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 408,
+          "changedElements": 9,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            -8.940696716308594e-8,
+            1
+          ],
+          "afterRange": [
+            -8.940696716308594e-8,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.315",
+      "primitive": 0,
+      "material": "GPU machined nickel cover",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 938,
+          "changedElements": 19,
+          "maxAbsDiff": 1.1920928955078125e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.315",
+      "primitive": 1,
+      "material": "Dark nickel fastener",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 2604,
+          "changedElements": 118,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.315",
+      "primitive": 2,
+      "material": "Recess oxide",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 400,
+          "changedElements": 3,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            -8.940696716308594e-8,
+            1
+          ],
+          "afterRange": [
+            -8.940696716308594e-8,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.316",
+      "primitive": 0,
+      "material": "CPU satin nickel cover",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 928,
+          "changedElements": 224,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.316",
+      "primitive": 1,
+      "material": "Dark nickel fastener",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 2568,
+          "changedElements": 132,
+          "maxAbsDiff": 5.960464477539063e-8,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.316",
+      "primitive": 2,
+      "material": "Recess oxide",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 400,
+          "changedElements": 1,
+          "maxAbsDiff": 5.960464477539063e-8,
+          "beforeRange": [
+            -8.940696716308594e-8,
+            1
+          ],
+          "afterRange": [
+            -8.940696716308594e-8,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.317",
+      "primitive": 0,
+      "material": "GPU machined nickel cover",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 928,
+          "changedElements": 224,
+          "maxAbsDiff": 2.384185791015625e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.317",
+      "primitive": 1,
+      "material": "Dark nickel fastener",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 2604,
+          "changedElements": 209,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.317",
+      "primitive": 2,
+      "material": "Recess oxide",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 400,
+          "changedElements": 6,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            -8.940696716308594e-8,
+            1
+          ],
+          "afterRange": [
+            -8.940696716308594e-8,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.318",
+      "primitive": 0,
+      "material": "GPU machined nickel cover",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 912,
+          "changedElements": 198,
+          "maxAbsDiff": 2.384185791015625e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.318",
+      "primitive": 1,
+      "material": "Dark nickel fastener",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 2800,
+          "changedElements": 299,
+          "maxAbsDiff": 1.7881393432617188e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.318",
+      "primitive": 2,
+      "material": "Recess oxide",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 408,
+          "changedElements": 5,
+          "maxAbsDiff": 5.960464477539063e-8,
+          "beforeRange": [
+            -8.940696716308594e-8,
+            1
+          ],
+          "afterRange": [
+            -8.940696716308594e-8,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.319",
+      "primitive": 0,
+      "material": "Machined copper",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 1052,
+          "changedElements": 63,
+          "maxAbsDiff": 1.1920928955078125e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.329",
+      "primitive": 0,
+      "material": "Machined copper",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 992,
+          "changedElements": 16,
+          "maxAbsDiff": 5.960464477539063e-8,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.334",
+      "primitive": 0,
+      "material": "Machined copper",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 1072,
+          "changedElements": 31,
+          "maxAbsDiff": 1.1920928955078125e-7,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "mesh": "Cube.344",
+      "primitive": 0,
+      "material": "Machined copper",
+      "changes": [
+        {
+          "attribute": "TEXCOORD_0",
+          "elements": 1064,
+          "changedElements": 10,
+          "maxAbsDiff": 5.960464477539063e-8,
+          "beforeRange": [
+            0,
+            1
+          ],
+          "afterRange": [
+            0,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

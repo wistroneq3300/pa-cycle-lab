@@ -1,0 +1,234 @@
+{
+  "baselineCommit": "445bd9c6287cbe7f69d6cbc1ffc9dd1c43c1905b",
+  "baselineCoolingSHA256": "9816625ec2789766476b5afea543895123b388da0eec8c5978ec623cc69a5920",
+  "iteration": 2,
+  "assetId": "l10-cooling-assembly-v1",
+  "finishRevision": 2,
+  "sourceBareGLBSHA256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29",
+  "files": [
+    {
+      "path": "assets/l10-cooling-v1/build.py",
+      "bytes": 25003,
+      "sha256": "fb7ffe9bd248f5a6a2de8ee8b31929f11e164ad4ab91ab054b3570cb0ab43731"
+    },
+    {
+      "path": "assets/l10-cooling-v1/cooling-assembly.blend",
+      "bytes": 5934461,
+      "sha256": "0c6b381b35a36d8ad355c20fa1735dd08e673370d6bccc52218e99bb75185003"
+    },
+    {
+      "path": "app/static/models/l10-cooling-v1/cooling-assembly.glb",
+      "bytes": 3547240,
+      "sha256": "de55d9e6516c2fa1efdf4e3894b98adfd49f00fae8659214178f782a428de913"
+    },
+    {
+      "path": "app/static/models/l10-cooling-v1/assembly.json",
+      "bytes": 185884,
+      "sha256": "db99b5d8823bcd8ce7ac7521fcdc47d91a26acbb394cdc9d1b24b3913f2ca2d9"
+    },
+    {
+      "path": "assets/l10-cooling-v1/textures/cooling-cpu-cover-mr.png",
+      "bytes": 37449,
+      "sha256": "8a9e31f4bd575bc82504f2e956143387f9581447a0bd3b3b1b926f465358677d"
+    },
+    {
+      "path": "assets/l10-cooling-v1/textures/cooling-gpu-cover-mr.png",
+      "bytes": 43343,
+      "sha256": "f41a5f4277c3a0657f9ff1cf08291ee24dc0733b4be2dd93433e2ffa88486da9"
+    },
+    {
+      "path": "assets/l10-cooling-v1/textures/cooling-machined-metal-mr.png",
+      "bytes": 43928,
+      "sha256": "d0894df6d34a0d996ca2d3215b94cc0e5d6f6b2903df461985eb39a8803fcc18"
+    },
+    {
+      "path": "assets/l10-cooling-v1/textures/cooling-satin-nickel-mr.png",
+      "bytes": 39910,
+      "sha256": "af0ae0574dfc85a2e92011f10eaeb5587c930e6f76f78048d4806f6ff9301f8f"
+    },
+    {
+      "path": "assets/l10-cooling-v1/README.md",
+      "bytes": 5546,
+      "sha256": "c5571127de172d7af07db9798ca7e9d5d5250d0b486df4957567b5fd7e2489f0"
+    }
+  ],
+  "geometry": {
+    "triangles": 69344,
+    "nodes": 54,
+    "materials": 12,
+    "embeddedImages": 4
+  },
+  "runtimeTextureDecodedBytes": 1048576,
+  "finishChanges": [
+    "Separate CPU cross-lapped and GPU longitudinal-milled nickel cover finishes",
+    "Satin nickel manifold, distinct machined nickel fittings and copper",
+    "Real recessed drives inside 48 original fastener head envelopes; 24 raised fake drive slugs removed",
+    "Separate elastomer and gasket roughness; all fluid geometry, UVs and material unchanged"
+  ],
+  "localizedGeometryRecesses": 48,
+  "removedRaisedDriveSlugs": 24,
+  "limitations": "Original conceptual liquid circuit and frame-supported clamping; no OEM CAD, hydraulic/thermal/pressure or serviceability validation.",
+  "round1CoolingSHA256": "428fa53ece6c2741c7245a50971e79219da2d28da3e90873304f7c875d11d6fe",
+  "finalCoolingSHA256": "de55d9e6516c2fa1efdf4e3894b98adfd49f00fae8659214178f782a428de913",
+  "round2Changes": [
+    "Shared satin nickel effective roughness changed from about 0.43 to 0.60, without changing metal color or metallic weight.",
+    "CPU face effective roughness changed from about 0.39 to 0.46; low-amplitude smoothed nonperiodic microvariation replaces periodic crossed-sine stipple.",
+    "GPU and copper maps remain byte-identical to round 1; no geometry, optical setup or fluid contract edits in round 2."
+  ],
+  "round2GPUAndCopperMapsByteIdentical": true,
+  "glbMaterials": [
+    {
+      "name": "Anodized retention",
+      "baseColorFactor": [
+        0.024000000208616257,
+        0.027000000700354576,
+        0.028999999165534973,
+        1
+      ],
+      "metallicFactor": 0.75,
+      "roughnessFactor": 0.4699999988079071,
+      "hasMRTexture": false
+    },
+    {
+      "name": "TIM",
+      "baseColorFactor": [
+        0.1899999976158142,
+        0.20000000298023224,
+        0.1899999976158142,
+        1
+      ],
+      "metallicFactor": 0,
+      "roughnessFactor": 0.7799999713897705,
+      "hasMRTexture": false
+    },
+    {
+      "name": "Machined copper",
+      "baseColorFactor": [
+        0.5600000023841858,
+        0.26499998569488525,
+        0.12999999523162842,
+        1
+      ],
+      "metallicFactor": 1,
+      "roughnessFactor": 1,
+      "hasMRTexture": true
+    },
+    {
+      "name": "Gasket",
+      "baseColorFactor": [
+        0.010999999940395355,
+        0.014000000432133675,
+        0.014999999664723873,
+        1
+      ],
+      "metallicFactor": 0,
+      "roughnessFactor": 0.8199999928474426,
+      "hasMRTexture": false
+    },
+    {
+      "name": "Brushed nickel",
+      "baseColorFactor": [
+        0.46000000834465027,
+        0.49000000953674316,
+        0.49000000953674316,
+        1
+      ],
+      "metallicFactor": 1,
+      "roughnessFactor": 1,
+      "hasMRTexture": true
+    },
+    {
+      "name": "Dark nickel fastener",
+      "baseColorFactor": [
+        0.11500000208616257,
+        0.12999999523162842,
+        0.14000000059604645,
+        1
+      ],
+      "metallicFactor": 0.9100000262260437,
+      "roughnessFactor": 0.36000001430511475,
+      "hasMRTexture": false
+    },
+    {
+      "name": "Recess oxide",
+      "baseColorFactor": [
+        0.012000000104308128,
+        0.01600000075995922,
+        0.017999999225139618,
+        1
+      ],
+      "metallicFactor": 0.3799999952316284,
+      "roughnessFactor": 0.5899999737739563,
+      "hasMRTexture": false
+    },
+    {
+      "name": "Machined nickel fittings",
+      "baseColorFactor": [
+        0.4399999976158142,
+        0.4699999988079071,
+        0.47999998927116394,
+        1
+      ],
+      "metallicFactor": 1,
+      "roughnessFactor": 0.3149999976158142,
+      "hasMRTexture": false
+    },
+    {
+      "name": "CPU satin nickel cover",
+      "baseColorFactor": [
+        0.4300000071525574,
+        0.46000000834465027,
+        0.4699999988079071,
+        1
+      ],
+      "metallicFactor": 1,
+      "roughnessFactor": 1,
+      "hasMRTexture": true
+    },
+    {
+      "name": "GPU machined nickel cover",
+      "baseColorFactor": [
+        0.4300000071525574,
+        0.46000000834465027,
+        0.4699999988079071,
+        1
+      ],
+      "metallicFactor": 1,
+      "roughnessFactor": 1,
+      "hasMRTexture": true
+    },
+    {
+      "name": "Elastomer hose",
+      "baseColorFactor": [
+        0.01899999938905239,
+        0.02199999988079071,
+        0.02500000037252903,
+        1
+      ],
+      "metallicFactor": 0,
+      "roughnessFactor": 0.6499999761581421,
+      "hasMRTexture": false
+    },
+    {
+      "name": "Coolant water tracer",
+      "baseColorFactor": [
+        0.03500000014901161,
+        0.28999999165534973,
+        0.3400000035762787,
+        1
+      ],
+      "metallicFactor": 0.12999999523162842,
+      "roughnessFactor": 0.23000000417232513,
+      "hasMRTexture": false
+    }
+  ],
+  "runtimeTextureDecodedBytesWithMipmapsApprox": 1398100,
+  "pngTotalBytes": 164630,
+  "sourcePortabilityEvidence": "source-portability-final.json",
+  "protectedHashes": {
+    "app/static/models/l10-prototype/bare-compute-boards.glb": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29",
+    "assets/l10-prototype/compute-board-prototype.blend1": "01b5856ab7261a1ca0a8b9904ec8e82bccd611cfd3cbb687235e99b55b563e85",
+    "assets/l10-prototype/textures/surface-normal.png": "6309b50efb72caed7d2c651cef994b57946026879d54fcc611fab351b22994d5"
+  },
+  "finalAssetFrozen": true
+}

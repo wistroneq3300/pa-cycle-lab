@@ -1,0 +1,122 @@
+{
+  "method": "Read-only extraction of actual Chromium frame-sidecar state and observed main-pass draw calls.",
+  "note": "Reported runtime texture bytes include renderer allocations and mip estimates. File bytes are not GPU allocation size.",
+  "frames": {
+    "01-bare": {
+      "canvas": [
+        3440,
+        1440
+      ],
+      "drawCalls": 126,
+      "observedMainPassDraws": 126,
+      "observedMainPassVertices": 616350,
+      "bare": {
+        "bytes": 25533668,
+        "primitiveCount": 124,
+        "vertexCount": 499242,
+        "imageCount": 39,
+        "imagePixels": 15777792,
+        "bufferBytes": 23963616,
+        "textureBytes": 84148258,
+        "textureObjects": 41
+      },
+      "cooling": {
+        "bytes": 3547240,
+        "primitiveCount": 106,
+        "vertexCount": 208032,
+        "imageCount": 4,
+        "imagePixels": 262144,
+        "bufferBytes": 9985536,
+        "textureBytes": 1398112,
+        "textureObjects": 6
+      }
+    },
+    "04-dynamic-flow-A": {
+      "canvas": [
+        3440,
+        1440
+      ],
+      "drawCalls": 233,
+      "observedMainPassDraws": 233,
+      "observedMainPassVertices": 833058,
+      "bare": {
+        "bytes": 25533668,
+        "primitiveCount": 124,
+        "vertexCount": 499242,
+        "imageCount": 39,
+        "imagePixels": 15777792,
+        "bufferBytes": 23963616,
+        "textureBytes": 84148258,
+        "textureObjects": 41
+      },
+      "cooling": {
+        "bytes": 3547240,
+        "primitiveCount": 106,
+        "vertexCount": 208032,
+        "imageCount": 4,
+        "imagePixels": 262144,
+        "bufferBytes": 9985536,
+        "textureBytes": 1398112,
+        "textureObjects": 6
+      }
+    },
+    "05-solid": {
+      "canvas": [
+        3440,
+        1440
+      ],
+      "drawCalls": 211,
+      "observedMainPassDraws": 211,
+      "observedMainPassVertices": 767946,
+      "bare": {
+        "bytes": 25533668,
+        "primitiveCount": 124,
+        "vertexCount": 499242,
+        "imageCount": 39,
+        "imagePixels": 15777792,
+        "bufferBytes": 23963616,
+        "textureBytes": 84148258,
+        "textureObjects": 41
+      },
+      "cooling": {
+        "bytes": 3547240,
+        "primitiveCount": 106,
+        "vertexCount": 208032,
+        "imageCount": 4,
+        "imagePixels": 262144,
+        "bufferBytes": 9985536,
+        "textureBytes": 1398112,
+        "textureObjects": 6
+      }
+    },
+    "07-rack": {
+      "canvas": [
+        3440,
+        1440
+      ],
+      "drawCalls": 259,
+      "observedMainPassDraws": 259,
+      "observedMainPassVertices": 4111278,
+      "bare": {
+        "bytes": 25533668,
+        "primitiveCount": 124,
+        "vertexCount": 499242,
+        "imageCount": 39,
+        "imagePixels": 15777792,
+        "bufferBytes": 23963616,
+        "textureBytes": 84148258,
+        "textureObjects": 41
+      },
+      "cooling": {
+        "bytes": 3547240,
+        "primitiveCount": 106,
+        "vertexCount": 208032,
+        "imageCount": 4,
+        "imagePixels": 262144,
+        "bufferBytes": 9985536,
+        "textureBytes": 1398112,
+        "textureObjects": 6
+      }
+    }
+  }
+}

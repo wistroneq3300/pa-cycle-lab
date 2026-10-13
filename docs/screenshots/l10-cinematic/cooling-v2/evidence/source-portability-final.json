@@ -1,0 +1,105 @@
+{
+  "result": "PASS",
+  "sourceObjects": 304,
+  "editableLayerObjectCounts": {
+    "cooling-mounts": 24,
+    "cooling-frame": 174,
+    "cooling": 30,
+    "cooling-channels": 30,
+    "cooling-plumbing": 24,
+    "cooling-fluid": 22
+  },
+  "sourceSHA256": "0c6b381b35a36d8ad355c20fa1735dd08e673370d6bccc52218e99bb75185003",
+  "glbSHA256": "de55d9e6516c2fa1efdf4e3894b98adfd49f00fae8659214178f782a428de913",
+  "images": [
+    {
+      "name": "cooling-cpu-cover-mr",
+      "packed": true,
+      "width": 256,
+      "height": 256,
+      "externalSHA256": "8a9e31f4bd575bc82504f2e956143387f9581447a0bd3b3b1b926f465358677d",
+      "decodedPixelsSHA256": "eb80360db8653b4a52826d2b8e3ba326b7a583f877070391255c50cdb5c6052e",
+      "packedExternalPixelIdentical": true,
+      "decodedRoughness": {
+        "min": 0.3294117748737335,
+        "max": 0.4705882668495178,
+        "mean": 0.4467862546443939
+      }
+    },
+    {
+      "name": "cooling-gpu-cover-mr",
+      "packed": true,
+      "width": 256,
+      "height": 256,
+      "externalSHA256": "f41a5f4277c3a0657f9ff1cf08291ee24dc0733b4be2dd93433e2ffa88486da9",
+      "decodedPixelsSHA256": "77995f9f9a48f6c3f4d3f7c1e326dfdaed24ef8fdd83d47c9209e06dbf1ac235",
+      "packedExternalPixelIdentical": true,
+      "decodedRoughness": {
+        "min": 0.29019609093666077,
+        "max": 0.3803921937942505,
+        "mean": 0.3484446704387665
+      }
+    },
+    {
+      "name": "cooling-machined-metal-mr",
+      "packed": true,
+      "width": 256,
+      "height": 256,
+      "externalSHA256": "d0894df6d34a0d996ca2d3215b94cc0e5d6f6b2903df461985eb39a8803fcc18",
+      "decodedPixelsSHA256": "5fd5d04b0cc5a20ea52900b83852e580b26ebd10ed0dc0be428ffc2f4e324a80",
+      "packedExternalPixelIdentical": true,
+      "decodedRoughness": {
+        "min": 0.3176470696926117,
+        "max": 0.3607843220233917,
+        "mean": 0.3399895131587982
+      }
+    },
+    {
+      "name": "cooling-satin-nickel-mr",
+      "packed": true,
+      "width": 256,
+      "height": 256,
+      "externalSHA256": "af0ae0574dfc85a2e92011f10eaeb5587c930e6f76f78048d4806f6ff9301f8f",
+      "decodedPixelsSHA256": "31ec59c9f14d68d135d9a7f5b8308c5b8029cd7ec57079a0600d834c029a6ef0",
+      "packedExternalPixelIdentical": true,
+      "decodedRoughness": {
+        "min": 0.5882353186607361,
+        "max": 0.6117647290229797,
+        "mean": 0.6000120043754578
+      }
+    }
+  ],
+  "embeddedImages": [
+    {
+      "name": "cooling-machined-metal-mr",
+      "sha256": "d0894df6d34a0d996ca2d3215b94cc0e5d6f6b2903df461985eb39a8803fcc18",
+      "bytes": 43928,
+      "equalsExternal": true
+    },
+    {
+      "name": "cooling-satin-nickel-mr",
+      "sha256": "af0ae0574dfc85a2e92011f10eaeb5587c930e6f76f78048d4806f6ff9301f8f",
+      "bytes": 39910,
+      "equalsExternal": true
+    },
+    {
+      "name": "cooling-cpu-cover-mr",
+      "sha256": "8a9e31f4bd575bc82504f2e956143387f9581447a0bd3b3b1b926f465358677d",
+      "bytes": 37449,
+      "equalsExternal": true
+    },
+    {
+      "name": "cooling-gpu-cover-mr",
+      "sha256": "f41a5f4277c3a0657f9ff1cf08291ee24dc0733b4be2dd93433e2ffa88486da9",
+      "bytes": 43343,
+      "equalsExternal": true
+    }
+  ],
+  "zeroEmission": true,
+  "protectedHashes": {
+    "app/static/models/l10-prototype/bare-compute-boards.glb": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29",
+    "assets/l10-prototype/compute-board-prototype.blend1": "01b5856ab7261a1ca0a8b9904ec8e82bccd611cfd3cbb687235e99b55b563e85",
+    "assets/l10-prototype/textures/surface-normal.png": "6309b50efb72caed7d2c651cef994b57946026879d54fcc611fab351b22994d5"
+  },
+  "readOnlyAudit": true
+}

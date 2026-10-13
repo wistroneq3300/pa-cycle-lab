@@ -1,0 +1,66 @@
+{
+  "baselineCommit": "445bd9c6287cbe7f69d6cbc1ffc9dd1c43c1905b",
+  "baselineCoolingSHA256": "9816625ec2789766476b5afea543895123b388da0eec8c5978ec623cc69a5920",
+  "iteration": 1,
+  "assetId": "l10-cooling-assembly-v1",
+  "finishRevision": 2,
+  "sourceBareGLBSHA256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29",
+  "files": [
+    {
+      "path": "assets/l10-cooling-v1/build.py",
+      "bytes": 24474,
+      "sha256": "c2ecbedcf5321323f5ef0840d998da668127a895fd79b17a466ad99db669fd45"
+    },
+    {
+      "path": "assets/l10-cooling-v1/cooling-assembly.blend",
+      "bytes": 5949378,
+      "sha256": "e98cac288b40cff2d6f8eda4ddfda6a719ad1e6e794adfccbb84faa99ba0daa1"
+    },
+    {
+      "path": "app/static/models/l10-cooling-v1/cooling-assembly.glb",
+      "bytes": 3562156,
+      "sha256": "428fa53ece6c2741c7245a50971e79219da2d28da3e90873304f7c875d11d6fe"
+    },
+    {
+      "path": "app/static/models/l10-cooling-v1/assembly.json",
+      "bytes": 185884,
+      "sha256": "69343ae754c2e508a05d89fe91b39bc72c82ab0a7699968ac348977df0e08033"
+    },
+    {
+      "path": "assets/l10-cooling-v1/textures/cooling-cpu-cover-mr.png",
+      "bytes": 45793,
+      "sha256": "7b9a2e3e112795cc53ac67ebe42dbb59aa07b2adf659dd7aa821abe5682bf98d"
+    },
+    {
+      "path": "assets/l10-cooling-v1/textures/cooling-gpu-cover-mr.png",
+      "bytes": 43343,
+      "sha256": "f41a5f4277c3a0657f9ff1cf08291ee24dc0733b4be2dd93433e2ffa88486da9"
+    },
+    {
+      "path": "assets/l10-cooling-v1/textures/cooling-machined-metal-mr.png",
+      "bytes": 43928,
+      "sha256": "d0894df6d34a0d996ca2d3215b94cc0e5d6f6b2903df461985eb39a8803fcc18"
+    },
+    {
+      "path": "assets/l10-cooling-v1/textures/cooling-satin-nickel-mr.png",
+      "bytes": 46483,
+      "sha256": "403b8d94515afa4322cf839716110ff94d561edba1ae2d42d4e9001509539160"
+    }
+  ],
+  "geometry": {
+    "triangles": 69344,
+    "nodes": 54,
+    "materials": 12,
+    "embeddedImages": 4
+  },
+  "runtimeTextureDecodedBytes": 1048576,
+  "finishChanges": [
+    "Separate CPU cross-lapped and GPU longitudinal-milled nickel cover finishes",
+    "Satin nickel manifold, distinct machined nickel fittings and copper",
+    "Real recessed drives inside 48 original fastener head envelopes; 24 raised fake drive slugs removed",
+    "Separate elastomer and gasket roughness; all fluid geometry, UVs and material unchanged"
+  ],
+  "localizedGeometryRecesses": 48,
+  "removedRaisedDriveSlugs": 24,
+  "limitations": "Original conceptual liquid circuit and frame-supported clamping; no OEM CAD, hydraulic/thermal/pressure or serviceability validation."
+}

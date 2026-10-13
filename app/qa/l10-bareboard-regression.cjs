@@ -1,5 +1,6 @@
 /* Native Chromium regression for the opt-in bare-board asset. Synthetic only.
- * Observes actual WebGL draws and the unmodified 35.2 s playback clock.
+ * Observes actual WebGL draws and the authored 39.7 s Cooling V2 clock.
+ * Procedural/default and failed-companion playback retain the 35.2 s clock.
  * PA_PREVIEW_URL=http://127.0.0.1:8774 node app/qa/l10-bareboard-regression.cjs
  */
 'use strict';
@@ -11,7 +12,7 @@ const out=path.resolve(__dirname,'../../artifacts/l10-bareboard/evidence');fs.mk
 const assetFile=path.resolve(__dirname,'../static/models/l10-prototype/bare-compute-boards.glb');
 const assetPath='/static/models/l10-prototype/bare-compute-boards.glb';
 const url=bare=>base+'/?'+(bare?'l10Bareboard=1':'')+'#/dashboard';
-const report={passed:false,viewport:{width:3440,height:1440,deviceScaleFactor:1},authoredDurationMs:35200,checks:[],runs:[],bridge:[],errors:[],external:[],failureScenarioErrors:[],fallbacks:[],method:'Native Chromium/WebGL; three real-clock films. No animation, geometry, camera, lighting or resource timing mocks. Targeted GLB failure fixtures are isolated after normal-operation tests.'};
+const report={passed:false,viewport:{width:3440,height:1440,deviceScaleFactor:1},authoredDurationMs:39700,legacyDurationMs:35200,checks:[],runs:[],bridge:[],errors:[],external:[],failureScenarioErrors:[],fallbacks:[],method:'Native Chromium/WebGL; three real-clock Cooling V2 films. No animation, geometry, camera, lighting or resource timing mocks. Targeted GLB failure fixtures are isolated after normal-operation tests.'};
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const dist=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));
 const near=(a,b,tolerance,label)=>assert.ok(Math.abs(a-b)<=tolerance,label+': '+a+' versus '+b);
@@ -49,7 +50,8 @@ function observeRealGL(){
   const chassis=g.draws.filter(draw=>draw.hash===q.chassisHash&&!draw.asset);
   q.last={drawCalls:g.draws.length,submittedVerticesOrIndices:g.draws.reduce((n,d)=>n+d.count,0),shadowDrawCalls:g.shadowDraws,eyeUniform:g.uniforms.uEye,viewProjection:g.uniforms.uViewProjection,lighting:Object.fromEntries(['uKeyPosition','uLightTheme','uHasEnvironment','uReveal','uQuality'].filter(k=>k in g.uniforms).map(k=>[k,g.uniforms[k]])),glError:gl.getError()};
   if(q.recording){
-   q.trace.push({ms:performance.now()-q.started,progress:s.progress,playback:document.querySelector('#core-story')?.paHeroPlayback?.getState().mode,camera:s.camera,pose:s.assembly.primaryPose,expectedPose:assembly.primaryPose,insertion:s.assembly.insertion,expectedInsertion:assembly.insertion,targetU:s.assembly.targetU,l10:s.l10,inspection:s.inspection,quality:s.quality,geometryVertices:s.vertices,assetFailed:s.asset.failed,chassisDraws:chassis,sameContext:canvas===q.canvas&&scene===q.scene&&gl===q.gl,...q.last});
+   const clock=document.querySelector('#core-story')?.paHeroPlayback?.getState();
+   q.trace.push({ms:performance.now()-q.started,progress:s.progress,playback:clock?.mode,clock,canvas:{width:canvas.width,height:canvas.height},coolingReady:s.cooling.ready,camera:s.camera,pose:s.assembly.primaryPose,expectedPose:assembly.primaryPose,insertion:s.assembly.insertion,expectedInsertion:assembly.insertion,targetU:s.assembly.targetU,l10:s.l10,inspection:s.inspection,quality:s.quality,geometryVertices:s.vertices,assetFailed:s.asset.failed,chassisDraws:chassis,sameContext:canvas===q.canvas&&scene===q.scene&&gl===q.gl,...q.last});
    if(q.trace.length>150&&s.progress>=.99999)q.recording=false;
   }
   g.draws=[];g.shadowDraws=0;
@@ -62,6 +64,8 @@ function analyzeFilm(observed){
  let insertion=0,started=0,finished=0;const intervals=[],bridge=[];
  for(let i=0;i<rows.length;i++){
   const row=rows[i];assert.equal(row.sameContext,true);assert.equal(row.glError,0);assert.equal(row.assetFailed,false);assert.equal(row.targetU,40);assert.equal(row.pose.scale,1);assert.equal(row.inspection,null);
+  assert.equal(row.coolingReady,true);assert.equal(row.clock.duration,39700);assert.equal(row.clock.timelineMode,'coolingV2');
+  assert.equal(row.canvas.width*row.canvas.height,row.quality.pixelCount,'Actual per-frame canvas buffer matches reported pixel count');
   assert.deepEqual(row.pose,row.expectedPose,'Rendered state follows retained assemblySnapshot');assert.equal(row.insertion,row.expectedInsertion);
   assert.ok(row.chassisDraws.length>=1,'Original chassis GPU draw remains present');
   for(const draw of row.chassisDraws){near(draw.part[12],row.pose.x,2e-6,'Actual chassis x');near(draw.part[13],row.pose.y,2e-6,'Actual chassis y');near(draw.part[14],row.pose.z,2e-6,'Actual chassis z');near(draw.part[0],1,1e-7,'No tray scale jump');near(draw.part[5],1,1e-7,'No tray scale jump');near(draw.part[10],1,1e-7,'No tray scale jump');}
@@ -78,8 +82,15 @@ function analyzeFilm(observed){
   }
  }
  assert.equal(started,1,'U40 insertion starts exactly once');assert.equal(finished,1,'U40 insertion completes exactly once');assert.ok(bridge.length>20,'Bridge continuously sampled');
- const elapsed=rows.at(-1).ms-rows[0].ms;assert.ok(rows.at(-1).ms>34000&&rows.at(-1).ms<65000,'Real 35.2 s clock, allowing host draw scheduling overhead');
- return {frames:rows.length,wallDurationMs:rows.at(-1).ms,observedDrawFPS:(rows.length-1)/elapsed*1000,drawIntervalsMs:stats(intervals),drawCalls:stats(rows.map(r=>r.drawCalls)),submittedVerticesOrIndices:stats(rows.map(r=>r.submittedVerticesOrIndices)),pixelCount:stats(rows.map(r=>r.quality.pixelCount)),insertionStarts:started,insertionCompletions:finished,bridge:{frames:bridge.length,eyeStep:stats(bridge.map(r=>r.eyeStep)),trayStep:stats(bridge.map(r=>r.trayStep)),samples:bridge},limitations:'Draw cadence and allocation estimates are measured on this host, not a GPU timer or portable performance certification. Adaptive pixel counts are recorded.'};
+ const elapsed=rows.at(-1).ms-rows[0].ms;assert.ok(rows.at(-1).ms>38500&&rows.at(-1).ms<65000,'Real 39.7 s clock, retaining the original -1.2 s lower slack and 65 s host-scheduling ceiling');
+ const clockBoundaries=[];
+ for(const [id,p,authoredMs]of [['plate-start',.248,7500],['flow-start',.292,10500],['restore-start',.333,14300],['solid-restored',.345,15100],['lid-start',.376,16500],['bridge-start',.407,17500],['rack-start',.56,22000],['late-rack',.906667,35200]]){
+  const row=rows.find(r=>r.progress>=p-1e-7);assert.ok(row,id+' is actually rendered');
+  assert.ok(Math.abs(row.ms-authoredMs)<Math.max(1250,rows.at(-1).ms-39700+300),id+' occurs at authored real-clock time, allowing measured host overhead');
+  assert.ok(Math.abs(row.clock.elapsedMs-authoredMs)<150,id+' selected-clock boundary is within an observed frame');
+  clockBoundaries.push({id,progress:row.progress,authoredMs,wallMs:row.ms,clockMs:row.clock.elapsedMs});
+ }
+ return {frames:rows.length,wallDurationMs:rows.at(-1).ms,authoredDurationMs:39700,clockBoundaries,observedDrawFPS:(rows.length-1)/elapsed*1000,canvasBuffers:[...new Set(rows.map(r=>r.canvas.width+'x'+r.canvas.height))],resolutions:[...new Set(rows.map(r=>r.quality.resolution))],drawIntervalsMs:stats(intervals),drawCalls:stats(rows.map(r=>r.drawCalls)),submittedVerticesOrIndices:stats(rows.map(r=>r.submittedVerticesOrIndices)),pixelCount:stats(rows.map(r=>r.quality.pixelCount)),insertionStarts:started,insertionCompletions:finished,bridge:{frames:bridge.length,eyeStep:stats(bridge.map(r=>r.eyeStep)),trayStep:stats(bridge.map(r=>r.trayStep)),samples:bridge},limitations:'Draw cadence and allocation estimates are measured on this host, not a GPU timer or portable performance certification. Actual canvas buffers and adaptive pixel counts are recorded per frame.'};
 }
 
 function malformedOwnership(mode){
@@ -111,7 +122,9 @@ function malformedOwnership(mode){
   report.asset={file:path.relative(path.resolve(__dirname,'../..'),assetFile),bytes:fs.statSync(assetFile).size,sha256:sha(fs.readFileSync(assetFile))};
   page=await createPage();await page.goto(url(true),{waitUntil:'domcontentloaded',timeout:120000});await ready();assert.equal(await page.evaluate(()=>!!window.PA_PREVIEW),true,'Synthetic fixture required');
   await page.waitForFunction(()=>{const a=document.querySelector('#system-core').paCoreScene.getState().asset;return a.enabled&&!a.loading;},null,{timeout:120000});
+  await page.waitForFunction(()=>document.querySelector('#system-core').paCoreScene.getState().cooling.ready,null,{timeout:120000});
   const loaded=await read();assert.equal(loaded.scene.asset.failed,false,loaded.scene.asset.error);assert.deepEqual(loaded.scene.asset.metadata.extras.replacesComputeBoards,[0,1]);assert.equal(loaded.scene.asset.metadata.extras.bareBoardOnly,true);report.loadedAsset=loaded.scene.asset;
+  assert.equal(loaded.playback.duration,39700);assert.equal(loaded.playback.timelineMode,'coolingV2');report.loadedCooling=loaded.scene.cooling;
   report.webgl=await page.evaluate(()=>{const gl=document.querySelector('#system-core').getContext('webgl'),ext=gl.getExtension('WEBGL_debug_renderer_info');return {version:gl.getParameter(gl.VERSION),renderer:gl.getParameter(ext?ext.UNMASKED_RENDERER_WEBGL:gl.RENDERER),vendor:gl.getParameter(ext?ext.UNMASKED_VENDOR_WEBGL:gl.VENDOR)};});
   report.compiledShaderSHA256=(await page.evaluate(()=>__bareQA.shaders())).map(source=>sha(Buffer.from(source))).sort();
   await page.evaluate(()=>applyTheme('dark'));check('Bare asset loaded in normal dashboard with two-board ownership and no fallback');
@@ -130,11 +143,11 @@ function malformedOwnership(mode){
   await seek(1);await page.locator('#system-core').press('ArrowRight');await settle();assert.notEqual((await read()).scene.yaw,0);await page.locator('#system-core').press('Home');await settle();assert.equal((await read()).scene.yaw,0);
   await page.locator('[data-core-view="rear"]').click();await settle();assert.equal((await read()).scene.camera.view,'rear');await page.locator('[data-core-view="reset"]').click();await settle();assert.equal((await read()).scene.camera.view,'authored');
   await page.emulateMedia({reducedMotion:'reduce'});await settle();s=await read();assert.ok(s.scene.progress>=.99999);assert.equal(s.scene.idle.disabled,true);report.reducedMotion=s;await page.emulateMedia({reducedMotion:'no-preference'});check('Skip, Replay, interruption, orbit, Home, rear/reset and reduced motion retain behavior');
-  await page.close();page=await createPage();await page.goto(url(false),{waitUntil:'domcontentloaded',timeout:120000});await ready();await seek(.354);const baseline=await read();assert.equal(baseline.scene.asset.enabled,false);assert.equal(baseline.observed.glError,0);report.proceduralBaseline={vertices:baseline.scene.vertices,geometryBuffers:baseline.scene.geometryBuffers,asset:baseline.scene.asset};await page.close();
+  await page.close();page=await createPage();await page.goto(url(false),{waitUntil:'domcontentloaded',timeout:120000});await ready();await seek(.354);const baseline=await read();assert.equal(baseline.scene.asset.enabled,false);assert.equal(baseline.observed.glError,0);assert.equal(baseline.playback.duration,35200);assert.equal(baseline.playback.timelineMode,'legacy');report.proceduralBaseline={vertices:baseline.scene.vertices,geometryBuffers:baseline.scene.geometryBuffers,asset:baseline.scene.asset,playback:baseline.playback};await page.close();
   for(const mode of ['404','one-board-metadata','network-ownership']){
    page=await createPage(mode);await page.route('**/bare-compute-boards.glb',route=>mode==='404'?route.fulfill({status:404,contentType:'text/plain',body:'Intentional bare-board regression fixture'}):route.fulfill({status:200,contentType:'model/gltf-binary',body:malformedOwnership(mode)}));
    await page.goto(url(true),{waitUntil:'domcontentloaded',timeout:120000});await ready();await page.waitForFunction(()=>document.querySelector('#system-core').paCoreScene.getState().asset.failed&&!document.querySelector('#system-core').paCoreScene.getState().asset.loading,null,{timeout:120000});await seek(.354);const fallback=await read();
-   assert.equal(fallback.scene.ready,true);assert.equal(fallback.scene.asset.metadata,null);assert.equal(fallback.scene.vertices,baseline.scene.vertices,'Complete fallback vertex inventory');assert.equal(fallback.scene.geometryBuffers,baseline.scene.geometryBuffers);assert.deepEqual(fallback.scene.assembly,baseline.scene.assembly);assert.ok(fallback.observed.drawCalls>0);assert.equal(fallback.observed.glError,0);
+   assert.equal(fallback.scene.ready,true);assert.equal(fallback.scene.asset.metadata,null);assert.equal(fallback.scene.vertices,baseline.scene.vertices,'Complete fallback vertex inventory');assert.equal(fallback.scene.geometryBuffers,baseline.scene.geometryBuffers);assert.deepEqual(fallback.scene.assembly,baseline.scene.assembly);assert.ok(fallback.observed.drawCalls>0);assert.equal(fallback.observed.glError,0);assert.equal(fallback.playback.duration,35200);assert.equal(fallback.playback.timelineMode,'legacy');
    assert.match(fallback.scene.asset.error,mode==='404'?/404/:mode==='network-ownership'?/all three declared cards/:/two boards/);report.fallbacks.push({mode,passed:true,...fallback});check(mode+': fail-closed complete baseline retained');await page.close();
   }
   assert.deepEqual(report.errors,[],'Normal operation has no shader, resource, or JavaScript errors');assert.deepEqual(report.external,[],'All runtime resources self-hosted');

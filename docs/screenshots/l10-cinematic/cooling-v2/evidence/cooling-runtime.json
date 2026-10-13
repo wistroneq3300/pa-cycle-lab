@@ -1,0 +1,366 @@
+{
+  "pass": true,
+  "companionSHA256": "de55d9e6516c2fa1efdf4e3894b98adfd49f00fae8659214178f782a428de913",
+  "checks": [
+    "Actual UV-distance advection; 22 routes / six thermal gradients / blue supply / red return, constant speed, fixed camera/light, zero emission; paused state is stable",
+    "Fluid disappears and solid metal returns before lid closure",
+    "Context loss/restoration reloads both bare and cooling assets",
+    "Reduced Motion seats the assembly with zero fluid animation",
+    "Missing or incomplete cooling companion fails closed; delayed environment failure restores the full procedural scene",
+    "Delayed companion loading holds the real dashboard cinematic clock",
+    "39.7-second central clock: seekTime, progress bar, pause/resume, Replay and Skip share the same state",
+    "Failed companion retains the exact 35.2-second legacy timeline"
+  ],
+  "errors": [],
+  "expectedFixtureErrors": [
+    {
+      "fixture": "404",
+      "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "fixture": "late-environment",
+      "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "fixture": "404",
+      "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "external": [],
+  "flow": {
+    "a": {
+      "progress": 0.3071026528352946,
+      "travel": 1.2919999999996372,
+      "pngSHA256": "454ac4c181e2c432a58e4bc7cb438d59c4af00ae14908d9b6f5d55f6313b4ab3"
+    },
+    "b": {
+      "progress": 0.31669356677190535,
+      "travel": 1.9380000000009039
+    },
+    "fluidDraws": 22,
+    "emission": 0,
+    "routes": [
+      {
+        "route": [
+          -1,
+          0,
+          2.705696584668591,
+          0
+        ],
+        "phase": [
+          1,
+          0
+        ]
+      },
+      {
+        "route": [
+          -1,
+          2.705696584668591,
+          3.559999893702816,
+          0
+        ],
+        "phase": [
+          1,
+          0
+        ]
+      },
+      {
+        "route": [
+          1,
+          0,
+          3.559999893702816,
+          0
+        ],
+        "phase": [
+          1,
+          0
+        ]
+      },
+      {
+        "route": [
+          1,
+          3.56,
+          2.8143804870380746,
+          0
+        ],
+        "phase": [
+          1,
+          0
+        ]
+      },
+      {
+        "route": [
+          -1,
+          3.3306966132788203,
+          0.38404485438778113,
+          3.3306966132788203
+        ],
+        "phase": [
+          3.950504359545781,
+          0.1837990510172567
+        ]
+      },
+      {
+        "route": [
+          0,
+          3.7147414676666015,
+          3.086955009378257,
+          3.3306966132788203
+        ],
+        "phase": [
+          3.950504359545781,
+          0.1837990510172567
+        ]
+      },
+      {
+        "route": [
+          1,
+          6.8016964770448585,
+          0.4795044957797431,
+          3.3306966132788203
+        ],
+        "phase": [
+          3.950504359545781,
+          0.1837990510172567
+        ]
+      },
+      {
+        "route": [
+          -1,
+          2.9056965417532465,
+          1.4393494427440745,
+          2.9056965417532465
+        ],
+        "phase": [
+          6.349808939771599,
+          0.06449459000072721
+        ]
+      },
+      {
+        "route": [
+          0,
+          4.345045984497321,
+          3.3749549773575596,
+          2.9056965417532465
+        ],
+        "phase": [
+          6.349808939771599,
+          0.06449459000072721
+        ]
+      },
+      {
+        "route": [
+          1,
+          7.720000961854881,
+          1.5355045196699646,
+          2.9056965417532465
+        ],
+        "phase": [
+          6.349808939771599,
+          0.06449459000072721
+        ]
+      },
+      {
+        "route": [
+          -1,
+          3.7456965751318476,
+          1.4393494427237226,
+          3.7456965751318476
+        ],
+        "phase": [
+          6.349808882495712,
+          0.06449452806732481
+        ]
+      },
+      {
+        "route": [
+          0,
+          5.18504601785557,
+          3.3749549201052917,
+          3.7456965751318476
+        ],
+        "phase": [
+          6.349808882495712,
+          0.06449452806732481
+        ]
+      },
+      {
+        "route": [
+          1,
+          8.560000937960861,
+          1.5355045196666974,
+          3.7456965751318476
+        ],
+        "phase": [
+          6.349808882495712,
+          0.06449452806732481
+        ]
+      },
+      {
+        "route": [
+          -1,
+          5.260696560826734,
+          0.38404485438365626,
+          5.260696560826734
+        ],
+        "phase": [
+          3.9505043255319805,
+          0.18379908503105646
+        ]
+      },
+      {
+        "route": [
+          0,
+          5.64474141521039,
+          3.086954975365949,
+          5.260696560826734
+        ],
+        "phase": [
+          3.9505043255319805,
+          0.18379908503105646
+        ]
+      },
+      {
+        "route": [
+          1,
+          8.731696390576339,
+          0.4795044957823754,
+          5.260696560826734
+        ],
+        "phase": [
+          3.9505043255319805,
+          0.18379908503105646
+        ]
+      },
+      {
+        "route": [
+          -1,
+          4.845696598973706,
+          1.4393494427217508,
+          4.845696598973706
+        ],
+        "phase": [
+          6.349808923060953,
+          0.06449448750208298
+        ]
+      },
+      {
+        "route": [
+          0,
+          6.285046041695457,
+          3.3749549606709883,
+          4.845696598973706
+        ],
+        "phase": [
+          6.349808923060953,
+          0.06449448750208298
+        ]
+      },
+      {
+        "route": [
+          1,
+          9.660001002366446,
+          1.5355045196682136,
+          4.845696598973706
+        ],
+        "phase": [
+          6.349808923060953,
+          0.06449448750208298
+        ]
+      },
+      {
+        "route": [
+          -1,
+          5.685696513143018,
+          1.439349442725996,
+          5.685696513143018
+        ],
+        "phase": [
+          6.349809094602403,
+          0.06449443516992481
+        ]
+      },
+      {
+        "route": [
+          0,
+          7.125045955869014,
+          3.3749551321925355,
+          5.685696513143018
+        ],
+        "phase": [
+          6.349809094602403,
+          0.06449443516992481
+        ]
+      },
+      {
+        "route": [
+          1,
+          10.50000108806155,
+          1.5355045196838717,
+          5.685696513143018
+        ],
+        "phase": [
+          6.349809094602403,
+          0.06449443516992481
+        ]
+      }
+    ]
+  },
+  "fallbacks": [
+    {
+      "fixture": "404",
+      "cooling": {
+        "enabled": true,
+        "ready": false,
+        "loading": false,
+        "failed": true,
+        "error": "L10 GLB: asset request failed (404)",
+        "metadata": null
+      },
+      "assetFailed": false,
+      "vertices": 2061768,
+      "liveBuffers": 149,
+      "liveTextures": 43
+    },
+    {
+      "fixture": "ownership",
+      "cooling": {
+        "enabled": true,
+        "ready": false,
+        "loading": false,
+        "failed": true,
+        "error": "Cooling companion ownership or six-seat contract is invalid",
+        "metadata": null
+      },
+      "assetFailed": false,
+      "vertices": 2061768,
+      "liveBuffers": 149,
+      "liveTextures": 43
+    },
+    {
+      "fixture": "late-environment",
+      "cooling": {
+        "enabled": true,
+        "ready": false,
+        "loading": false,
+        "failed": true,
+        "error": "Reference studio environment failed; prototype reverted to baseline",
+        "metadata": null
+      },
+      "assetFailed": true,
+      "vertices": 1691904,
+      "liveBuffers": 25,
+      "liveTextures": 2
+    }
+  ],
+  "loadingGate": {
+    "heldProgress": 0,
+    "after450ms": 0
+  },
+  "clock": {
+    "seekMs": 12000,
+    "resumedMs": 12400.000000000318,
+    "durationMs": 39700,
+    "progressBar": "scaleX(0.3023)"
+  }
+}

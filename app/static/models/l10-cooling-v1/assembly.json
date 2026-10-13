@@ -6425,13 +6425,1078 @@
     "frontLimitZ": -0.313
   },
   "builderHelperSource": "assets/l10-prototype/build.py: pure helper definitions only",
-  "sha256": "9816625ec2789766476b5afea543895123b388da0eec8c5978ec623cc69a5920",
-  "bytes": 3425524,
+  "finishRevision": 2,
+  "finishChanges": [
+    "Separate CPU cross-lapped and GPU longitudinal-milled nickel cover finishes",
+    "Satin nickel manifold, distinct machined nickel fittings and copper",
+    "Real recessed drives inside 48 original fastener head envelopes; 24 raised fake drive slugs removed",
+    "Separate elastomer and gasket roughness; all fluid geometry, UVs and material unchanged"
+  ],
+  "fastenerRecesses": [
+    {
+      "id": "CPU-L/foot/-1/-1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "CPU-L",
+      "center": [
+        -1.2564999737739564,
+        0.037,
+        -1.3574999940395356
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "CPU-L/foot/-1/-1 recessed drive",
+        "center": [
+          -1.2564999737739564,
+          0.0421,
+          -1.3574999940395356
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "CPU-L/foot/-1/1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "CPU-L",
+      "center": [
+        -1.2564999737739564,
+        0.037,
+        -0.8424999940395355
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "CPU-L/foot/-1/1 recessed drive",
+        "center": [
+          -1.2564999737739564,
+          0.0421,
+          -0.8424999940395355
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "CPU-L/foot/1/-1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "CPU-L",
+      "center": [
+        -0.6734999737739563,
+        0.037,
+        -1.3574999940395356
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "CPU-L/foot/1/-1 recessed drive",
+        "center": [
+          -0.6734999737739563,
+          0.0421,
+          -1.3574999940395356
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "CPU-L/foot/1/1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "CPU-L",
+      "center": [
+        -0.6734999737739563,
+        0.037,
+        -0.8424999940395355
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "CPU-L/foot/1/1 recessed drive",
+        "center": [
+          -0.6734999737739563,
+          0.0421,
+          -0.8424999940395355
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "CPU-L cover screw -1 -1",
+      "layer": "cooling",
+      "component": "CPU-L",
+      "center": [
+        -1.1979999737739564,
+        0.0744,
+        -1.3359999940395355
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "CPU-L cover screw -1 1",
+      "layer": "cooling",
+      "component": "CPU-L",
+      "center": [
+        -1.1979999737739564,
+        0.0744,
+        -0.8639999940395355
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "CPU-L cover screw 1 -1",
+      "layer": "cooling",
+      "component": "CPU-L",
+      "center": [
+        -0.7319999737739563,
+        0.0744,
+        -1.3359999940395355
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "CPU-L cover screw 1 1",
+      "layer": "cooling",
+      "component": "CPU-L",
+      "center": [
+        -0.7319999737739563,
+        0.0744,
+        -0.8639999940395355
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "GPU-L-OUTER/foot/-1/-1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "GPU-L-OUTER",
+      "center": [
+        -1.6829999856948852,
+        0.037,
+        -2.4575000071525572
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "GPU-L-OUTER/foot/-1/-1 recessed drive",
+        "center": [
+          -1.6829999856948852,
+          0.0421,
+          -2.4575000071525572
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "GPU-L-OUTER/foot/-1/1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "GPU-L-OUTER",
+      "center": [
+        -1.6829999856948852,
+        0.037,
+        -1.9025000071525573
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "GPU-L-OUTER/foot/-1/1 recessed drive",
+        "center": [
+          -1.6829999856948852,
+          0.0421,
+          -1.9025000071525573
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "GPU-L-OUTER/foot/1/-1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "GPU-L-OUTER",
+      "center": [
+        -1.0969999856948853,
+        0.037,
+        -2.4575000071525572
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "GPU-L-OUTER/foot/1/-1 recessed drive",
+        "center": [
+          -1.0969999856948853,
+          0.0421,
+          -2.4575000071525572
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "GPU-L-OUTER/foot/1/1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "GPU-L-OUTER",
+      "center": [
+        -1.0969999856948853,
+        0.037,
+        -1.9025000071525573
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "GPU-L-OUTER/foot/1/1 recessed drive",
+        "center": [
+          -1.0969999856948853,
+          0.0421,
+          -1.9025000071525573
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "GPU-L-OUTER cover screw -1 -1",
+      "layer": "cooling",
+      "component": "GPU-L-OUTER",
+      "center": [
+        -1.6279999856948852,
+        0.0744,
+        -2.440000007152557
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "GPU-L-OUTER cover screw -1 1",
+      "layer": "cooling",
+      "component": "GPU-L-OUTER",
+      "center": [
+        -1.6279999856948852,
+        0.0744,
+        -1.9200000071525574
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "GPU-L-OUTER cover screw 1 -1",
+      "layer": "cooling",
+      "component": "GPU-L-OUTER",
+      "center": [
+        -1.1519999856948853,
+        0.0744,
+        -2.440000007152557
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "GPU-L-OUTER cover screw 1 1",
+      "layer": "cooling",
+      "component": "GPU-L-OUTER",
+      "center": [
+        -1.1519999856948853,
+        0.0744,
+        -1.9200000071525574
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "GPU-L-INNER/foot/-1/-1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "GPU-L-INNER",
+      "center": [
+        -0.8430000119209289,
+        0.037,
+        -2.4575000071525572
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "GPU-L-INNER/foot/-1/-1 recessed drive",
+        "center": [
+          -0.8430000119209289,
+          0.0421,
+          -2.4575000071525572
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "GPU-L-INNER/foot/-1/1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "GPU-L-INNER",
+      "center": [
+        -0.8430000119209289,
+        0.037,
+        -1.9025000071525573
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "GPU-L-INNER/foot/-1/1 recessed drive",
+        "center": [
+          -0.8430000119209289,
+          0.0421,
+          -1.9025000071525573
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "GPU-L-INNER/foot/1/-1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "GPU-L-INNER",
+      "center": [
+        -0.257000011920929,
+        0.037,
+        -2.4575000071525572
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "GPU-L-INNER/foot/1/-1 recessed drive",
+        "center": [
+          -0.257000011920929,
+          0.0421,
+          -2.4575000071525572
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "GPU-L-INNER/foot/1/1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "GPU-L-INNER",
+      "center": [
+        -0.257000011920929,
+        0.037,
+        -1.9025000071525573
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "GPU-L-INNER/foot/1/1 recessed drive",
+        "center": [
+          -0.257000011920929,
+          0.0421,
+          -1.9025000071525573
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "GPU-L-INNER cover screw -1 -1",
+      "layer": "cooling",
+      "component": "GPU-L-INNER",
+      "center": [
+        -0.7880000119209289,
+        0.0744,
+        -2.440000007152557
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "GPU-L-INNER cover screw -1 1",
+      "layer": "cooling",
+      "component": "GPU-L-INNER",
+      "center": [
+        -0.7880000119209289,
+        0.0744,
+        -1.9200000071525574
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "GPU-L-INNER cover screw 1 -1",
+      "layer": "cooling",
+      "component": "GPU-L-INNER",
+      "center": [
+        -0.31200001192092897,
+        0.0744,
+        -2.440000007152557
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "GPU-L-INNER cover screw 1 1",
+      "layer": "cooling",
+      "component": "GPU-L-INNER",
+      "center": [
+        -0.31200001192092897,
+        0.0744,
+        -1.9200000071525574
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "CPU-R/foot/-1/-1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "CPU-R",
+      "center": [
+        0.6734999737739563,
+        0.037,
+        -1.3574999940395356
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "CPU-R/foot/-1/-1 recessed drive",
+        "center": [
+          0.6734999737739563,
+          0.0421,
+          -1.3574999940395356
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "CPU-R/foot/-1/1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "CPU-R",
+      "center": [
+        0.6734999737739563,
+        0.037,
+        -0.8424999940395355
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "CPU-R/foot/-1/1 recessed drive",
+        "center": [
+          0.6734999737739563,
+          0.0421,
+          -0.8424999940395355
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "CPU-R/foot/1/-1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "CPU-R",
+      "center": [
+        1.2564999737739564,
+        0.037,
+        -1.3574999940395356
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "CPU-R/foot/1/-1 recessed drive",
+        "center": [
+          1.2564999737739564,
+          0.0421,
+          -1.3574999940395356
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "CPU-R/foot/1/1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "CPU-R",
+      "center": [
+        1.2564999737739564,
+        0.037,
+        -0.8424999940395355
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "CPU-R/foot/1/1 recessed drive",
+        "center": [
+          1.2564999737739564,
+          0.0421,
+          -0.8424999940395355
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "CPU-R cover screw -1 -1",
+      "layer": "cooling",
+      "component": "CPU-R",
+      "center": [
+        0.7319999737739563,
+        0.0744,
+        -1.3359999940395355
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "CPU-R cover screw -1 1",
+      "layer": "cooling",
+      "component": "CPU-R",
+      "center": [
+        0.7319999737739563,
+        0.0744,
+        -0.8639999940395355
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "CPU-R cover screw 1 -1",
+      "layer": "cooling",
+      "component": "CPU-R",
+      "center": [
+        1.1979999737739564,
+        0.0744,
+        -1.3359999940395355
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "CPU-R cover screw 1 1",
+      "layer": "cooling",
+      "component": "CPU-R",
+      "center": [
+        1.1979999737739564,
+        0.0744,
+        -0.8639999940395355
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "GPU-R-INNER/foot/-1/-1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "GPU-R-INNER",
+      "center": [
+        0.257000011920929,
+        0.037,
+        -2.4575000071525572
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "GPU-R-INNER/foot/-1/-1 recessed drive",
+        "center": [
+          0.257000011920929,
+          0.0421,
+          -2.4575000071525572
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "GPU-R-INNER/foot/-1/1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "GPU-R-INNER",
+      "center": [
+        0.257000011920929,
+        0.037,
+        -1.9025000071525573
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "GPU-R-INNER/foot/-1/1 recessed drive",
+        "center": [
+          0.257000011920929,
+          0.0421,
+          -1.9025000071525573
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "GPU-R-INNER/foot/1/-1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "GPU-R-INNER",
+      "center": [
+        0.8430000119209289,
+        0.037,
+        -2.4575000071525572
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "GPU-R-INNER/foot/1/-1 recessed drive",
+        "center": [
+          0.8430000119209289,
+          0.0421,
+          -2.4575000071525572
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "GPU-R-INNER/foot/1/1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "GPU-R-INNER",
+      "center": [
+        0.8430000119209289,
+        0.037,
+        -1.9025000071525573
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "GPU-R-INNER/foot/1/1 recessed drive",
+        "center": [
+          0.8430000119209289,
+          0.0421,
+          -1.9025000071525573
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "GPU-R-INNER cover screw -1 -1",
+      "layer": "cooling",
+      "component": "GPU-R-INNER",
+      "center": [
+        0.31200001192092897,
+        0.0744,
+        -2.440000007152557
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "GPU-R-INNER cover screw -1 1",
+      "layer": "cooling",
+      "component": "GPU-R-INNER",
+      "center": [
+        0.31200001192092897,
+        0.0744,
+        -1.9200000071525574
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "GPU-R-INNER cover screw 1 -1",
+      "layer": "cooling",
+      "component": "GPU-R-INNER",
+      "center": [
+        0.7880000119209289,
+        0.0744,
+        -2.440000007152557
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "GPU-R-INNER cover screw 1 1",
+      "layer": "cooling",
+      "component": "GPU-R-INNER",
+      "center": [
+        0.7880000119209289,
+        0.0744,
+        -1.9200000071525574
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "GPU-R-OUTER/foot/-1/-1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "GPU-R-OUTER",
+      "center": [
+        1.0969999856948853,
+        0.037,
+        -2.4575000071525572
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "GPU-R-OUTER/foot/-1/-1 recessed drive",
+        "center": [
+          1.0969999856948853,
+          0.0421,
+          -2.4575000071525572
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "GPU-R-OUTER/foot/-1/1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "GPU-R-OUTER",
+      "center": [
+        1.0969999856948853,
+        0.037,
+        -1.9025000071525573
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "GPU-R-OUTER/foot/-1/1 recessed drive",
+        "center": [
+          1.0969999856948853,
+          0.0421,
+          -1.9025000071525573
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "GPU-R-OUTER/foot/1/-1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "GPU-R-OUTER",
+      "center": [
+        1.6829999856948852,
+        0.037,
+        -2.4575000071525572
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "GPU-R-OUTER/foot/1/-1 recessed drive",
+        "center": [
+          1.6829999856948852,
+          0.0421,
+          -2.4575000071525572
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "GPU-R-OUTER/foot/1/1 captive fastener",
+      "layer": "cooling-frame",
+      "component": "GPU-R-OUTER",
+      "center": [
+        1.6829999856948852,
+        0.037,
+        -1.9025000071525573
+      ],
+      "radius": 0.0085,
+      "minY": 0.032,
+      "maxY": 0.041999999999999996,
+      "recessRadius": 0.0034000000000000002,
+      "recessFloorY": 0.039999999999999994,
+      "recessDepth": 0.002,
+      "removedV1Slug": {
+        "name": "GPU-R-OUTER/foot/1/1 recessed drive",
+        "center": [
+          1.6829999856948852,
+          0.0421,
+          -1.9025000071525573
+        ],
+        "radius": 0.004,
+        "minY": 0.042,
+        "maxY": 0.0422
+      }
+    },
+    {
+      "id": "GPU-R-OUTER cover screw -1 -1",
+      "layer": "cooling",
+      "component": "GPU-R-OUTER",
+      "center": [
+        1.1519999856948853,
+        0.0744,
+        -2.440000007152557
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "GPU-R-OUTER cover screw -1 1",
+      "layer": "cooling",
+      "component": "GPU-R-OUTER",
+      "center": [
+        1.1519999856948853,
+        0.0744,
+        -1.9200000071525574
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "GPU-R-OUTER cover screw 1 -1",
+      "layer": "cooling",
+      "component": "GPU-R-OUTER",
+      "center": [
+        1.6279999856948852,
+        0.0744,
+        -2.440000007152557
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    },
+    {
+      "id": "GPU-R-OUTER cover screw 1 1",
+      "layer": "cooling",
+      "component": "GPU-R-OUTER",
+      "center": [
+        1.6279999856948852,
+        0.0744,
+        -1.9200000071525574
+      ],
+      "radius": 0.008,
+      "minY": 0.073,
+      "maxY": 0.07579999999999999,
+      "recessRadius": 0.0032,
+      "recessFloorY": 0.07469999999999999,
+      "recessDepth": 0.0011,
+      "removedV1Slug": null
+    }
+  ],
+  "sha256": "de55d9e6516c2fa1efdf4e3894b98adfd49f00fae8659214178f782a428de913",
+  "bytes": 3547240,
   "file": "cooling-assembly.glb",
   "source": "assets/l10-cooling-v1/cooling-assembly.blend",
   "builder": "assets/l10-cooling-v1/build.py",
-  "triangles": 69824,
+  "triangles": 69344,
   "nodes": 54,
-  "materials": 7,
-  "embeddedImages": 1
+  "materials": 12,
+  "embeddedImages": 4
 }

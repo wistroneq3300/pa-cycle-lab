@@ -1,0 +1,56 @@
+{
+  "method": "Decoded RGB comparison of actual unedited 3440x1440 Chromium screenshots.",
+  "note": "Equality can establish non-regression for these views; pixel difference alone is not a photorealism score.",
+  "metrics": {
+    "bareBoard": {
+      "before": "before/01-bare.png",
+      "after": "after/01-bare.png",
+      "totalPixels": 4953600,
+      "changedPixels": 70,
+      "changedPercent": 0.0014131136950904391,
+      "meanAbsoluteChannelDifference": 5.6255383290267014e-05,
+      "maxAbsoluteChannelDifference": 19,
+      "exactPixels": false
+    },
+    "rack": {
+      "before": "before/07-rack.png",
+      "after": "after/07-rack.png",
+      "totalPixels": 4953600,
+      "changedPixels": 109,
+      "changedPercent": 0.002200419896640827,
+      "meanAbsoluteChannelDifference": 0.00013761035745047374,
+      "maxAbsoluteChannelDifference": 23,
+      "exactPixels": false
+    },
+    "goldFront": {
+      "before": "before/guard-gold-front.png",
+      "after": "after/guard-gold-front.png",
+      "totalPixels": 4953600,
+      "changedPixels": 143,
+      "changedPercent": 0.0028867894056847543,
+      "meanAbsoluteChannelDifference": 4.670004306632214e-05,
+      "maxAbsoluteChannelDifference": 6,
+      "exactPixels": false
+    },
+    "network": {
+      "before": "before/guard-network.png",
+      "after": "after/guard-network.png",
+      "totalPixels": 4953600,
+      "changedPixels": 130,
+      "changedPercent": 0.0026243540051679587,
+      "meanAbsoluteChannelDifference": 5.0333763996554694e-05,
+      "maxAbsoluteChannelDifference": 7,
+      "exactPixels": false
+    },
+    "fluidTravel": {
+      "before": "after/04-dynamic-flow-A.png",
+      "after": "after/04-dynamic-flow-B.png",
+      "totalPixels": 4953600,
+      "changedPixels": 145464,
+      "changedPercent": 2.9365310077519378,
+      "meanAbsoluteChannelDifference": 0.5109289540267011,
+      "maxAbsoluteChannelDifference": 107,
+      "exactPixels": false
+    }
+  }
+}

@@ -1,0 +1,3796 @@
+{
+  "passed": true,
+  "before": {
+    "sha256": "428fa53ece6c2741c7245a50971e79219da2d28da3e90873304f7c875d11d6fe",
+    "bytes": 3562156
+  },
+  "after": {
+    "sha256": "de55d9e6516c2fa1efdf4e3894b98adfd49f00fae8659214178f782a428de913",
+    "bytes": 3547240
+  },
+  "nodes": 54,
+  "meshes": 54,
+  "primitiveCount": 106,
+  "checks": [
+    "Every POSITION/NORMAL/index accessor payload byte-identical",
+    "All 22 fluid UV payloads byte-identical",
+    "Primitive mode, ordering, node transforms, labels and scene graph identical",
+    "Solid UVs are not byte-exact: measured maximum2.384185791e-7 across51primitives/15395floats, range[0,1]; no meaningful remapping"
+  ],
+  "solidUV": {
+    "changedPrimitives": 51,
+    "changedElements": 15395,
+    "maxAbsDiff": 2.384185791015625e-7,
+    "maxTexelDisplacementAt256": 0.00006103515625
+  },
+  "accessorEvidence": [
+    {
+      "name": "Cube.175",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 144,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "4498bf16d848beda3a9c1b2d400a251574988707b132fd3bc9b40b1ceae6c39f"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 96,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "8ae7f6507d49a16bec4791cbb9ba30fbe17040ad951c94d6f0398ccb76f3b5e4"
+            },
+            "POSITION": {
+              "count": 96,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "2bf1a9254546f3450c7096a159e69f99c2eb70177c571c9af895b857763dce05"
+            },
+            "TEXCOORD_0": {
+              "count": 96,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "65bfb8d9bfa05c38b7bcade5d6a62a8251c8d483e975992c494ccee5d8c7fc8c"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.179",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 144,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "4498bf16d848beda3a9c1b2d400a251574988707b132fd3bc9b40b1ceae6c39f"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 96,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "8ae7f6507d49a16bec4791cbb9ba30fbe17040ad951c94d6f0398ccb76f3b5e4"
+            },
+            "POSITION": {
+              "count": 96,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "2b0b706714a62ccdbee25985e11a641f76bdd4e85bd7bc08d766c901eb81cc83"
+            },
+            "TEXCOORD_0": {
+              "count": 96,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "65bfb8d9bfa05c38b7bcade5d6a62a8251c8d483e975992c494ccee5d8c7fc8c"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.183",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 144,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "4498bf16d848beda3a9c1b2d400a251574988707b132fd3bc9b40b1ceae6c39f"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 96,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "8ae7f6507d49a16bec4791cbb9ba30fbe17040ad951c94d6f0398ccb76f3b5e4"
+            },
+            "POSITION": {
+              "count": 96,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "c043f34edceff8f2e546507f5e5be50aa4c1488bfbc53edb3c62a1fd74e5f60d"
+            },
+            "TEXCOORD_0": {
+              "count": 96,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "65bfb8d9bfa05c38b7bcade5d6a62a8251c8d483e975992c494ccee5d8c7fc8c"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.187",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 144,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "4498bf16d848beda3a9c1b2d400a251574988707b132fd3bc9b40b1ceae6c39f"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 96,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "8ae7f6507d49a16bec4791cbb9ba30fbe17040ad951c94d6f0398ccb76f3b5e4"
+            },
+            "POSITION": {
+              "count": 96,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "d4d00e69549f725d447669167db90d508368092fd361286830e2b075f37f44fb"
+            },
+            "TEXCOORD_0": {
+              "count": 96,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "65bfb8d9bfa05c38b7bcade5d6a62a8251c8d483e975992c494ccee5d8c7fc8c"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.191",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 144,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "4498bf16d848beda3a9c1b2d400a251574988707b132fd3bc9b40b1ceae6c39f"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 96,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "8ae7f6507d49a16bec4791cbb9ba30fbe17040ad951c94d6f0398ccb76f3b5e4"
+            },
+            "POSITION": {
+              "count": 96,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "3f183afdfe2f29baac0a936c1359e985de2aa831b96531f5e232ca1ca4497a74"
+            },
+            "TEXCOORD_0": {
+              "count": 96,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "65bfb8d9bfa05c38b7bcade5d6a62a8251c8d483e975992c494ccee5d8c7fc8c"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.195",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 144,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "4498bf16d848beda3a9c1b2d400a251574988707b132fd3bc9b40b1ceae6c39f"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 96,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "8ae7f6507d49a16bec4791cbb9ba30fbe17040ad951c94d6f0398ccb76f3b5e4"
+            },
+            "POSITION": {
+              "count": 96,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "1a9da0db82994b82b33d95fceabcdc3f79e3017907b563320c73923d538d9c27"
+            },
+            "TEXCOORD_0": {
+              "count": 96,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "65bfb8d9bfa05c38b7bcade5d6a62a8251c8d483e975992c494ccee5d8c7fc8c"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.199",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 36,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "4845ac8d92cc0f504589931569321c0bd48523dfe221b5223c28a17f0ab3af27"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 24,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "575ec3a39b89f6667936c19871c9744693f6496315695bd4b75c64651b2267c1"
+            },
+            "POSITION": {
+              "count": 24,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "e8f6ae9c29ba02de98960406b24c9cc6f2e56812695acf0d44ad14d937be5e85"
+            },
+            "TEXCOORD_0": {
+              "count": 24,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "6ddb045d23f1326d173e054c31c8a1872fa55effacd376eef641992d6e17fe59"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 2184,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "a43f63585ab84c317a33911e555bd2d2b2a006a0f9cec824a6cd4084bd72538e"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1772,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "8914d596cc095c91f9a2d385c2e52697a815dc6414906b5aeb9d5e2afef283c1"
+            },
+            "POSITION": {
+              "count": 1772,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "3dccee61b44f8c5b260d5a8b7576c76b0891a29da44a6a052cc8f78a9ece1b45"
+            },
+            "TEXCOORD_0": {
+              "count": 1772,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "fca2cc1ce5fb1ef735beec12430dfc0a9c130cb56121840212df9982c1685110"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 528,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "af3f9c176520a6bb33f60d2609e4fde596b52676eee19a19f97a898a1c1f63cf"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 444,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "47258c7870adbd750e3ecac3a8baaaa02a31736e55b4ccca6d03c4a37fa13548"
+            },
+            "POSITION": {
+              "count": 444,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "ae6a8529ee1267184f4e6746ff920e79f4107400f0ef61ba72336d8e4094a00f"
+            },
+            "TEXCOORD_0": {
+              "count": 444,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "1dcc1b8f2c4d79399799acae6118feee0e9ef91eb89a903335859319b97a26f1"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 4608,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "93818650fc934521da1006f4a44bbe900d5124cb6906e27209b3d4fd7af322f5"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 3342,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "025d39cf81a83a1a47fe30013e43963b4760a0b7f39911f0bc901d6122bd1f1d"
+            },
+            "POSITION": {
+              "count": 3342,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "f9485e2d8e48770eb5427201f9eae784f75a493edc2e0e903ae2880c3071cf74"
+            },
+            "TEXCOORD_0": {
+              "count": 3342,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "b4c7f2124d14d2a34a47911f5505132a4113c0aa26d0524a6ff15ba4b4ad46ce"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1752,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "cbf71041d5f4417133bacf1d6e424974a8491a2be878a293cef240296fab0a56"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1330,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "66b87121688293db98e9e5d5b36e6e70d3e2adfaf2c762ed722dfe04b8a17d3c"
+            },
+            "POSITION": {
+              "count": 1330,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "1dd298d89ed72e1ac75ee4f494075fec6f6ffc61792c52c621d0a180f1e78b6d"
+            },
+            "TEXCOORD_0": {
+              "count": 1330,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "23372117eb45e630e7e1793ee5cadce6e8853e93205e0167f64a9d399fe27882"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 408,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "292e683ccaa2c1f532621833f09c36a7026ccb9a1535db88bb7176d4db95b27b"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "78dd128323626638025ccd4a2d4957cc866909673ba9f31947475718f2a21467"
+            },
+            "POSITION": {
+              "count": 200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "4b3cc0ea7ee61dd8b8c146af1014d4fbdb94234cceb7fba442f4eaa0b91a8fa8"
+            },
+            "TEXCOORD_0": {
+              "count": 200,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "a6fa94459828782d81adba5f9dfe16f1e3aab32d92467ac3bafdfe549ef885cd"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 960,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "b4d92d4730a131f4b3740f622d3dce74dfc8ff22c6fe372e668bfd45fbaade51"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 160,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "0e85864eae0113146f5b2653f851033396c159a02d1cd6f568aeebcfdc2a207e"
+            },
+            "POSITION": {
+              "count": 160,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "32bed4eae011f192c232ac62d50344a78b83a7a1fec9a546aee3d8c7081182f2"
+            },
+            "TEXCOORD_0": {
+              "count": 160,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "1164e48be606bf9ef138f48858ee4ad7796951162b69d7397c1096af3c784000"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.218",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 36,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "4845ac8d92cc0f504589931569321c0bd48523dfe221b5223c28a17f0ab3af27"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 24,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "575ec3a39b89f6667936c19871c9744693f6496315695bd4b75c64651b2267c1"
+            },
+            "POSITION": {
+              "count": 24,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "4b66ac2df0a7cad84a6ef6db4ad31bf61f5fdad7f4f489daf2eea11a67b4ecde"
+            },
+            "TEXCOORD_0": {
+              "count": 24,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "6ddb045d23f1326d173e054c31c8a1872fa55effacd376eef641992d6e17fe59"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 2184,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "82d2eb04df52aecce0680bfb476be8a774570c0931a1d249cf5f3bbb23711b2b"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1743,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "eaf5330a888e14a7b71ad831ec9b4b801c0278770d5b6936e3a49903e1280599"
+            },
+            "POSITION": {
+              "count": 1743,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "688da40c30359ba21b63403e4393b4698b0b13d8c22c30e68600de685c40af81"
+            },
+            "TEXCOORD_0": {
+              "count": 1743,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "d8a62040330c69354dc08413978cb328d791ebc3e76e219ca0c7451ce3b18181"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 528,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "86fb1d349c4291d9c97d68828aff680ab96f5a82ea4fd158e8ba16e0a7f79063"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 446,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "c4da7635507708e11d7f7f083540a1bc0ff04061645a4443735dc82fe38017a7"
+            },
+            "POSITION": {
+              "count": 446,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "a00dce23bcb88dbab8c9ff6a4bbbca30d2aaf45f314ce0d06f80c858993c8c40"
+            },
+            "TEXCOORD_0": {
+              "count": 446,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "0505a2375c56e1811013daf3a50ae6f0e4d5ffd7bcaa802ab45f79b793f0040f"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 4608,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "dc6cbe25e0c5bb351b444bbbdb7195e611969782e4aa269ca7ef5476dcef2b07"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 3392,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "009c04a7db5d8b4e5c15f5170bf06496c13a8f256414fe0a09496d66c7826f0a"
+            },
+            "POSITION": {
+              "count": 3392,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "353edef9c47957acb87e4f2b3d025bf8a4bf265b41ed67ab070210f45f1fab15"
+            },
+            "TEXCOORD_0": {
+              "count": 3392,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "694d8b107282ff5d220a7b4c2fdf6b4b86e24d4e146502e97ef64b701e72dc45"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1752,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "0c06ddc48e814e97d80d75c256f23bcb2cbaebab976f11008ca759784ad89fd2"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1384,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "06435e1a86d9ea194898765665fce6301938a593b1b2ccb77d0b0f8ace985626"
+            },
+            "POSITION": {
+              "count": 1384,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "bc3b98395253cb70710e1f09367498695ab9a428186b679389f60a6ae927803f"
+            },
+            "TEXCOORD_0": {
+              "count": 1384,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "e0022b230275398c8fde305d43050b80cf26b83b5a199f364d8ee2bab2618fc9"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 408,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "4d760af3af27ffc1100643ddc7c3a53a8caa83ca16c01ceb53b48a703a383e32"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 212,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "53c82e9e5e9f8a8ffb28ecbaaf8b13c019898fed7b7fb5900636c0a4d327a1c5"
+            },
+            "POSITION": {
+              "count": 212,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "552333014ab4b52951af2cc6f65ef5784a9edf684103f89ad53f7c5122319afc"
+            },
+            "TEXCOORD_0": {
+              "count": 212,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "15d3b7f895c1d502df60927c4daec07b5360ae899f33432cf401c0e1cb78388a"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 960,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "a0027559445756b638234a5807170e4a3396e340962a4d1f963bb14663d44496"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 160,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "155e9f4094dda6ffdf6ccdf2f45cfcaf62ee1fbfef593a3bffe6ba04d8685c46"
+            },
+            "POSITION": {
+              "count": 160,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "8a3b71792a0fd0112f450ae0beb35d16ae78da39c92f543f45c81d0c32e980f1"
+            },
+            "TEXCOORD_0": {
+              "count": 160,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "3fed3d7025302e56b6b67e7410dcd0cb23a446918f7c8f457792125cb9525d76"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.237",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 36,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "4845ac8d92cc0f504589931569321c0bd48523dfe221b5223c28a17f0ab3af27"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 24,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "575ec3a39b89f6667936c19871c9744693f6496315695bd4b75c64651b2267c1"
+            },
+            "POSITION": {
+              "count": 24,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "1e502867ebf34214debc5f98667aa9ea70ce6f4ad6100f4b125327d026347ede"
+            },
+            "TEXCOORD_0": {
+              "count": 24,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "6ddb045d23f1326d173e054c31c8a1872fa55effacd376eef641992d6e17fe59"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 2184,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "eec0c83fb6933b96dcb00a4265c8edfac2f5d63710c93f1b625b4642519c7a66"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1733,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "9ae8c8a1d47217a99a379dfeb67ab847fac19b0ca21897f7729e300cfa02fa00"
+            },
+            "POSITION": {
+              "count": 1733,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "65e852801ecba1e476745f600eea6413f3ca479d0f9e8c7e82c5240d206c1473"
+            },
+            "TEXCOORD_0": {
+              "count": 1733,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "ad0a94591aba1c665bf03ff17c99533fae250c5a1de96eef80a13d887a6d4fcc"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 528,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "6fe6e8a98bb43b449664980e6b406ff04114b4ca9a11008ec5240675240fbc41"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 448,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "7cf75c05966a61985fa1e50bfdbf6355c8c31f56edeb2f5d8acd7270b41fbd20"
+            },
+            "POSITION": {
+              "count": 448,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "d284b689d9ab8f7ce9c92ae1aca0e0ec5a3e05353603c5affeb9e85252319fe1"
+            },
+            "TEXCOORD_0": {
+              "count": 448,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "c9d9f44b4c3ed1afc08110ec6381b2eddda6c943d18cf38a0c5a4a87691005c3"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 4608,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "29d52069e101bad346fe7082f6db4f1f674afa0e91be78e027ec2dd8029a0ead"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 3302,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "e5a7b0fd4c9f8c187b13d9b6af004a89506b77d878d9e06d6251efeedaa09159"
+            },
+            "POSITION": {
+              "count": 3302,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "2e7f77a385d317de06dddc22e802f1263d0aff428fa8a212a62ce17e98412e31"
+            },
+            "TEXCOORD_0": {
+              "count": 3302,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "7e91addd67a2bf2aaa59dd5d237fff52bb40f16880708a6a5bb8748caac09b9e"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1752,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "9ad7d60258f4223b3a9e8bbd497e10ed1ffd5f818ff255285b8512188a9eed19"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1350,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "0969bdaebb4ea02bcef369fca84451d4be879168bb8e5a6a475296ccb7cbbdd2"
+            },
+            "POSITION": {
+              "count": 1350,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "a3d7e3c97d27c8d7f7ec4e8c0c50c9c670d8c3aa9b088e0e0d3dfcbd44f54580"
+            },
+            "TEXCOORD_0": {
+              "count": 1350,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "53270bcba3f2091052d8562f631b7c860f89ae53ca7d2e3920be2a1633fa1bf4"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 408,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "b6d0d417aed628333a72b186c60383a8c4dcd72af483964e91782b67ee5a07b6"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "78dd128323626638025ccd4a2d4957cc866909673ba9f31947475718f2a21467"
+            },
+            "POSITION": {
+              "count": 200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "b6824fb81de59e3d60a10ed96c0aa84decf32ff37f5b1291247127aaa06b6770"
+            },
+            "TEXCOORD_0": {
+              "count": 200,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "879af7a4cbf12ac1128eb8379854d1a4fd319e2f9fc1d77cc72c85ff6aaf2d7b"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 960,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "214c0edb8470cb57ee02058154b350d49d3fa0e9a0304d8749376326a229dd7e"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 160,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "5ea8383fbe3a75f46736ee7ecaf8151b864309aee1b672a0c77e769ceee31ccb"
+            },
+            "POSITION": {
+              "count": 160,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "386e0441426c95b96caabc10ad7798278d147fcba12cfc91cbf1c4d47cc039f2"
+            },
+            "TEXCOORD_0": {
+              "count": 160,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "3fed3d7025302e56b6b67e7410dcd0cb23a446918f7c8f457792125cb9525d76"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.256",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 36,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "4845ac8d92cc0f504589931569321c0bd48523dfe221b5223c28a17f0ab3af27"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 24,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "575ec3a39b89f6667936c19871c9744693f6496315695bd4b75c64651b2267c1"
+            },
+            "POSITION": {
+              "count": 24,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "03e52f9cd3a9a70ae6fe7be50756823b37aecc62f7c93b13b618014474cecb38"
+            },
+            "TEXCOORD_0": {
+              "count": 24,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "6ddb045d23f1326d173e054c31c8a1872fa55effacd376eef641992d6e17fe59"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 2184,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "7e129b50cb7cba251945a3acb56016b2fbc9361b9ab387cc49fde77fedf3635b"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1778,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "2de45356ba303b972bfd6bfe8d9bebf657aa6e111aafe200fef3b4e433fa62c3"
+            },
+            "POSITION": {
+              "count": 1778,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "006d67142a57a880b270c4cd415276d72b47b95f299eaf811fe33f6205555d80"
+            },
+            "TEXCOORD_0": {
+              "count": 1778,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "11c7c2d102aed88c2e2c83a6271b7b2547cc624409e811d2a3f43605a6b8f0b3"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 528,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "84ac27b4a30b707dc170e8694d7ae6782699a59cc148d724da02cd0b4b1cacb1"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 444,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "d8d66a732c452f0a9faff72ad4bf9ed7215b0fed0a25b13abeb3e20a940731d2"
+            },
+            "POSITION": {
+              "count": 444,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "be2d87b58bdd527987cc2d4c90e37cc0b9e94b0a80ebba0af5bfe623dfdac752"
+            },
+            "TEXCOORD_0": {
+              "count": 444,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "67866d366ce66d01c419e5ddcb1f9ee5f19da3cad0cc546eadc3842aaa62edcf"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 4608,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "ba4f4f6a71459359d52a5cfcbf0b8e1513a15dfc227e64f7af0e38acf088d02b"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 3340,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "6d8cfdb2b29fe026bae0674dca07e2fec7b7c2bc987d0b25f31fd5f563902aca"
+            },
+            "POSITION": {
+              "count": 3340,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "6e68e7864e9c1c4b481b260a27e3cc139186cfb039ab2c31fa1f076a364f081e"
+            },
+            "TEXCOORD_0": {
+              "count": 3340,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "93615310d51e63dbc0ada4d81efcc99869d64944bc2231e602eb5b1701b9b794"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1752,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "a709e31ee6f30e37e671b3128ecf73833a7d8d732dda48d6bde0d4f6b53518c1"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1330,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "46cfa14cd9e70a02fdd71fdd2eeba253e3ad9fdf611aeb4903884fa95744e732"
+            },
+            "POSITION": {
+              "count": 1330,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "640d12a1c1c6874bdf634ba692b33ee274ced945b07adb55901ed10698f4bbc5"
+            },
+            "TEXCOORD_0": {
+              "count": 1330,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "e2e3484e198e035ce0dac4282042fa25c580f65eeeae40f6fc00899163382ace"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 408,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "b4285cd421a26eb5b8bbae63458dab3765710642f22c8be3ad56235308e87481"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "78dd128323626638025ccd4a2d4957cc866909673ba9f31947475718f2a21467"
+            },
+            "POSITION": {
+              "count": 200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "2dd10e5f2280b332d71742eba45b7ceab5e8f61cae8113406ad4c81d4a2d58a5"
+            },
+            "TEXCOORD_0": {
+              "count": 200,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "913b3e6fc793a40c5c5e0c2d5511c9913727203d7360e304c331270a7f992338"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 960,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "551080cebbe68694fca855678bca2772441245dbe1cecf76442be29f7fad15c7"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 160,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "4c5a839e6b1f1960119f2f65df6ef4e2c50fa0b56e5badffc5b0124d6696b9ca"
+            },
+            "POSITION": {
+              "count": 160,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "a89052b91b1be66bc55d2b3beefb02668973b2679540c7ca6227cfd1eeb8c94c"
+            },
+            "TEXCOORD_0": {
+              "count": 160,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "1164e48be606bf9ef138f48858ee4ad7796951162b69d7397c1096af3c784000"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.275",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 36,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "4845ac8d92cc0f504589931569321c0bd48523dfe221b5223c28a17f0ab3af27"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 24,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "575ec3a39b89f6667936c19871c9744693f6496315695bd4b75c64651b2267c1"
+            },
+            "POSITION": {
+              "count": 24,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "6e4b40ff09a64a73015166d64bbbb9f208f97687ac39af6850d6486f06fa6121"
+            },
+            "TEXCOORD_0": {
+              "count": 24,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "6ddb045d23f1326d173e054c31c8a1872fa55effacd376eef641992d6e17fe59"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 2184,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "0f706ccc10311b378db7a2b0aa7590a014b81adbb4285c6a0744be448778cc19"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1732,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "dc09a2f5f8564ee185267c8a574ca8c7464ffdd607155914234b249bb99ff310"
+            },
+            "POSITION": {
+              "count": 1732,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "08348428ebe6eee44c9eef57206c406e1ef23bb5f8eeaf17e67bf90200775d98"
+            },
+            "TEXCOORD_0": {
+              "count": 1732,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "45730d9af613207c85108984ef01c141fedb5ab8a3aacac857edf3da23c0406b"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 528,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "be8db0d59203458c1411d3b8c185f030c6c7d83efd32f8394da1fa94ff47defe"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 448,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "05c0161c4dc1d60e37e5d66cf81a1129014e71c445cead84c8a492a06fa0279b"
+            },
+            "POSITION": {
+              "count": 448,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "a16c095230009d3ea433dc7deac339849885a0a7b71d7884f91273532e8e343b"
+            },
+            "TEXCOORD_0": {
+              "count": 448,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "69f37cac46a63d4a15d526657d59fec05aa5773cef080c60ba72b85ceb035993"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 4608,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "33a19250872554a637b4ed38e12b0241629d3e0685a5df782e0de0cf7bab377b"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 3300,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "9e2b6c45ab09999e1d058c3227547d689de14cd79dedf3fb6c6d24e42c9d638c"
+            },
+            "POSITION": {
+              "count": 3300,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "1dff07ef5128adf379e4216eb2e9561025e7d5fa89ba7d7a24dd9febc3e9c088"
+            },
+            "TEXCOORD_0": {
+              "count": 3300,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "fcc8f457c24b814d469d6c13235f5bedcfd23eb4d7f6f3f8309a1b8989bb5f5c"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1752,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "d92d16129163481e6e6dc90a522249975b135c32eae738378156821b146132e6"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1350,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "b839ddaa32169f2116d655c349d83b589dffc88262782ed0e5f15122efa02822"
+            },
+            "POSITION": {
+              "count": 1350,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "ea63e061aff7bb83f140b8d70cac054ed41ed2a9d86086a5ebca0837ac10e815"
+            },
+            "TEXCOORD_0": {
+              "count": 1350,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "615e93635cb1d499c8fe5120a60043d58d8059f17b9c832f969c959d74f20e5d"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 408,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "9fea287295f94cd3135c24250955650465440fb51d67f94375fb55cd205bdff2"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "78dd128323626638025ccd4a2d4957cc866909673ba9f31947475718f2a21467"
+            },
+            "POSITION": {
+              "count": 200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "597dd3f1b8afa46e769553b9a41c78f997109d15356ef5e0abff320a7b2dd1f4"
+            },
+            "TEXCOORD_0": {
+              "count": 200,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "f99067069618285518709dc24087c691ea63ecae48ed1a59e6105ae21344429d"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 960,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "0929946b8394c0067377e7d7a5a0af8bbaf25a695a8b740db90061fbb9f241f0"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 160,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "e49e7158b0b637b5508f85aa7e007646ffd9743d77aad4f4e89afe2ac30a7c38"
+            },
+            "POSITION": {
+              "count": 160,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "ad09cec593ee4ab727accbb2d133debf72ddffd3a66048500889ab2d370cc541"
+            },
+            "TEXCOORD_0": {
+              "count": 160,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "3fed3d7025302e56b6b67e7410dcd0cb23a446918f7c8f457792125cb9525d76"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.294",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 36,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "4845ac8d92cc0f504589931569321c0bd48523dfe221b5223c28a17f0ab3af27"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 24,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "575ec3a39b89f6667936c19871c9744693f6496315695bd4b75c64651b2267c1"
+            },
+            "POSITION": {
+              "count": 24,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "0b6e7f8faf2ca76b4c1d2108a7e5649ca01f6d295b8fa3ab254cd1eb390fde4e"
+            },
+            "TEXCOORD_0": {
+              "count": 24,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "6ddb045d23f1326d173e054c31c8a1872fa55effacd376eef641992d6e17fe59"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 2184,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "e7ffca48999de92d78f7786772c4a000e461bbb0420d3f4f3de82c2dae2dc9fa"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1744,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "0fbaeb769cfb1554c3a4e5559f43b8c3e8c167c29ac99fd293a32e8c1d8042e2"
+            },
+            "POSITION": {
+              "count": 1744,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "c6829b3f494802980967cdbca0c69c79d04b452c8ee3242d9df1191feb3cb1e5"
+            },
+            "TEXCOORD_0": {
+              "count": 1744,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "49dca46e4a5123a546c6be9e44a96050fcc23d6102c29fd77c1e4b426a9cce6b"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 528,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "27c71c8d17ce78aab08d2c2f2190eef75df9a48c8a43d1709d487189aa11e260"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 450,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "4aa276cd61674a6ab83a172d44c393e7497a4f25f60c56ba12292b5b781f3845"
+            },
+            "POSITION": {
+              "count": 450,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "f42a75feadebea511486e4fba46c634b89fe057d565237cf1a770163cf74dcfc"
+            },
+            "TEXCOORD_0": {
+              "count": 450,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "b8fa8c6023d8b3db23fdf2e01413e88bc060a42d982ad2f563ac555e0d5b84a0"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 4608,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "3a63a9151e56705a6a7fbaec7a1b99eb48dd2ab651b279596889746b37e45652"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 3386,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "b12137b77b141536529962753429c8d3964d00104427af8b59f3fa2bc1502a36"
+            },
+            "POSITION": {
+              "count": 3386,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "9c06c1f08c98ee94ccbaddb59ec82386e154892f42c70cd682c18e8c99ddbd76"
+            },
+            "TEXCOORD_0": {
+              "count": 3386,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "45333d82f53919b4d26e1232b395430a538e1e395854152b6718cd2097ee9a21"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1752,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "819b4f19e67b7bed5fd2b7972925e4080a506b55cd911059bc4acee320dc13d2"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1382,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "9f3dbc0d7245f46f4a411e229bad87774c60c36a6706e9bf29acbd06849a90b2"
+            },
+            "POSITION": {
+              "count": 1382,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "43beb984893a1e12e8cc3ed9db73fd2fcf0b0931852807f6b11e5932e11db385"
+            },
+            "TEXCOORD_0": {
+              "count": 1382,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "75125b8c6dbcd70f7f7d200085d49fe0f0615279006dc9c95a08ca4ab58ab0fd"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 408,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "b7826601f9f2035bf165aa0f02ad92bbdb017ebff164b761eaebcb4bc95b199c"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 204,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "0a8959ff393ad522592fc5a0d40f05a9701fd687d92921f53bf5914a3a9219d9"
+            },
+            "POSITION": {
+              "count": 204,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "212c044ef6e198058c2cdc6eedc062f585e71c0ed06abfad9e849df87b3c535a"
+            },
+            "TEXCOORD_0": {
+              "count": 204,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "3d5a4792d20798feef5ddb735da064f3df6994b79146d41a91cb41c8e812fee7"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 960,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "a0027559445756b638234a5807170e4a3396e340962a4d1f963bb14663d44496"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 160,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "155e9f4094dda6ffdf6ccdf2f45cfcaf62ee1fbfef593a3bffe6ba04d8685c46"
+            },
+            "POSITION": {
+              "count": 160,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "884340a4339b2cfed897d8e1d697dfbf8fafae9bc4a918106b22a7b6d0886942"
+            },
+            "TEXCOORD_0": {
+              "count": 160,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "3fed3d7025302e56b6b67e7410dcd0cb23a446918f7c8f457792125cb9525d76"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.313",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 564,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "80d63ba408477722ea51ff56202f74b07721864b4a145c12cdb338d52cb6b4ef"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 460,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "0be50e7ac58c85a6706bc18e13acb1b598d2dd2cc216820b7a31c54c8d8a53d2"
+            },
+            "POSITION": {
+              "count": 460,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "59da14cf8bd7e79c9359b94d21f8a0a8724adeb0573216a97894c91be15b532f"
+            },
+            "TEXCOORD_0": {
+              "count": 460,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "6c90e6f84cee909452f2d4f2ca53352a44f1cc29cb5f2e4429d541c79e1da5bd"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1752,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "63bd6c051e9bdcab06788e114554ee7695ce4644733fc707e3489b13ec739c53"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1282,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "d8c9c2e10705e899975ddf2887dd06bf179b576be51db52ac8da092912ddf5ce"
+            },
+            "POSITION": {
+              "count": 1282,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "03b1696d36d97d7667c671f57c8b7486280bc0e78511ed5614ec88b477d3617d"
+            },
+            "TEXCOORD_0": {
+              "count": 1282,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "3a29d93c7b32f0a7be3b3526dedf5777d2bddf717ac3d480372cd6e8f3d4ab69"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 408,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "0f118eacc47737d8701c858ab462c86aad72e582f2ebdb84fe5a0dd973384008"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "78dd128323626638025ccd4a2d4957cc866909673ba9f31947475718f2a21467"
+            },
+            "POSITION": {
+              "count": 200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "289b855a575a1993eb5bfcce63478670a56ff8314b3bf15e21e933797e5f7733"
+            },
+            "TEXCOORD_0": {
+              "count": 200,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "eef2c78b95185e36e419559515fe3892d1cc9fc4fbd70f49bcaa65ed6097b64f"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.314",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 564,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "1b43298fc006ebde53a5c3b0a5c36925793135c43fa671d6a26635ee6848082e"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 458,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "e3a5e8e97c897d1a645d46e916cb81b545ded42908b234882d6249e2f98dce37"
+            },
+            "POSITION": {
+              "count": 458,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "8c44202756cb2d0cc567eff48bf418632884a2a4367eab50ac3d49b2a85c1e08"
+            },
+            "TEXCOORD_0": {
+              "count": 458,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "1651cb5771b376625cd4c8b1b84ce82671ddd7f8da0a172a733b9ab63538e3a7"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1752,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "9bf27c231edd31def28a1459c2980a1b9dc85a777360e991d255f10419c8d415"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1400,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "074b0273623ab75cf1fc7eae2f3ad24183e3612775d1193965b2ad109361120b"
+            },
+            "POSITION": {
+              "count": 1400,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "9dfe60779a30bead4325acfd01e610d56aaf8ad5a4bd53be42e86415ecfcd1fb"
+            },
+            "TEXCOORD_0": {
+              "count": 1400,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "927d429800a27c14192e8a5478e29bd4e972e7f6d775f47e74026cad61dddb76"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 408,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "b5d2fcbb90fca7f362180158aa00fc0c7f4f78aa1f4a358640878695288129b0"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 204,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "2ae73a9357bde724d793dfc4e7424d5d3aceb7ee8e2cd5f9451eb112b18b68dd"
+            },
+            "POSITION": {
+              "count": 204,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "c1a59f4357469bf1ef61e5fd13c794b880b60eb788bd99e2d29f1cfe9f0490a3"
+            },
+            "TEXCOORD_0": {
+              "count": 204,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "afad530f1381271f55ec249bc6a69e4538b5b21562831a5f4c1f43b49d784b45"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.315",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 564,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "dca77ca2f78cc33dde6289f06debf00ee056ca05177fc9d4b554e7a9a3f39541"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 469,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "bdf6de9ce0b38dd2125f0063b1c0975e2e55c226a692744f9c8e426aed388a7a"
+            },
+            "POSITION": {
+              "count": 469,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "586cc2fb326d903a5dc8ec90d0c4f0f33f931f27e91975e51173e76f9441e52b"
+            },
+            "TEXCOORD_0": {
+              "count": 469,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "49e714ec6cbccbf02fb2438f87be964230647c61607f168dec02f7ebddf49774"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1752,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "8d214aeeea689abd4a9daa847ba5bb622ba2da0343d876e8b2b007170e6df7d6"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1302,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "609aa0e7790e69c6833971ba906ee5b8d12bcd8f056050a369b7862c736aa07a"
+            },
+            "POSITION": {
+              "count": 1302,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "1dae6d52e8fc13827b62691c8cf5744dab9b3021824b8c291d91809896fc07dc"
+            },
+            "TEXCOORD_0": {
+              "count": 1302,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "1179101a8ad2ee1a49e09082797b590a1b341afc2d5031f4bf6d349687721eec"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 408,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "c27712a0b3b0b41ca088dd3ee534b5a27cff76e65b1f9e9c4fbb008e0401d46e"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "78dd128323626638025ccd4a2d4957cc866909673ba9f31947475718f2a21467"
+            },
+            "POSITION": {
+              "count": 200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "97759eadfd23c0d14f0276ca47c7b4d8aa5a7fba27d806e8c1e868638d19a5b3"
+            },
+            "TEXCOORD_0": {
+              "count": 200,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "5fe65d6ea445bbb905f3e9aed49f8e4199d8ce35a83d5bbdbb2a6b783e1b7a5b"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.316",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 564,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "4dfc4aa6ffaaa17232c065ccc8f02d2c9e05c2cad76d48317feb72dd5ba52149"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 464,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "f676469ff183aaab3d85560887dc977f219615de49c27572fc01a21a8c4c6b80"
+            },
+            "POSITION": {
+              "count": 464,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "508d5c1d1ddf23d6fc7c555075b796c236ed173580dcee352602ae79a04b513f"
+            },
+            "TEXCOORD_0": {
+              "count": 464,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "3c5d526011658e6dda7faf26003fbf3beb3f3247f33de58fd09fa0360b292dd6"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1752,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "8ad2a5c498a3b30f312ff29448b387d02f3e5b7d354b88c3e194bbfddd52c2a2"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1284,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "40e14a75f50d611b83ba507c118b6362374f806ebc82530c20853ea9896a74bf"
+            },
+            "POSITION": {
+              "count": 1284,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "16093cc42a51a9ab875502d1938a02197c60506c55b275dbcecded695a8ec2ac"
+            },
+            "TEXCOORD_0": {
+              "count": 1284,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "388860754b72bb69b3ebaf1aa9e21ce96c2166bef203218297aebcf860271ccc"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 408,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "5d48368ea9d49e011a78417679b20ab9c86db753afd8568a5f84a59764ff430e"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "78dd128323626638025ccd4a2d4957cc866909673ba9f31947475718f2a21467"
+            },
+            "POSITION": {
+              "count": 200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "38c2e09f727c7e249aa6ca00d8f11df5501ce8dd06345612ca9320b9213bffa5"
+            },
+            "TEXCOORD_0": {
+              "count": 200,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "51fa3396c69a24f5a6e676f543033e94e67801ce3e80bafd370df20ecd549c96"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.317",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 564,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "f3bce7844ff322e977f5b64f75fcc42066c834c22b4ffd4e687e39fe3e87becb"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 464,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "3ca34c64f2cf5872948035b8c34c94395756e6f1600c53f55a7b3d0f60b52756"
+            },
+            "POSITION": {
+              "count": 464,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "6a5375f54c876f1304018280d566337c9b75879b57f62030e75f539db1c5f7aa"
+            },
+            "TEXCOORD_0": {
+              "count": 464,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "5eefe97e10b45ffed2569738f08a6c77411fbdfc8d4b9f3c2c620bdf636ea77f"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1752,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "b1ae2ad27a1e48eb598844e08f9b91281489b28059959d53383892f92ab104a8"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1302,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "9e95954f0ec21375e3d585a9a657254913c829c2abac89088b22150faa69fab0"
+            },
+            "POSITION": {
+              "count": 1302,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "09a24c6c8cab4516a1e8ba009cc443a93fda533307183689ea5d4cbcb93fda04"
+            },
+            "TEXCOORD_0": {
+              "count": 1302,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "f30c84bd401a05b7decb64bfcb60df64b97b1f9542f6aa57ff69db5113ff15bb"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 408,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "b31c9aa48c5ac6fc3779a2ca164ecf0b32da3bcc0c4152c9ae1aa0065bda5a00"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "78dd128323626638025ccd4a2d4957cc866909673ba9f31947475718f2a21467"
+            },
+            "POSITION": {
+              "count": 200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "2889f0f44e5aca35392d0a8162c38b8b0866906b35658cf92b12e072af6709a0"
+            },
+            "TEXCOORD_0": {
+              "count": 200,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "f3d26ac31c7e5df52c3b752f1dca724da74df3fdbc017d34b9f0be1b162dc2e4"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.318",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 564,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "b50f9dbd2d051eb8d721f0761feec617c01f085f45e70f8124cac9bfb20d3a94"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 456,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "6c7b7065b4f2bf31c82f2e9a32d19437c5727d1b263b1eb5cd9008f83fd65ee4"
+            },
+            "POSITION": {
+              "count": 456,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "05d49f6a33946a9f2c5f89d76bc384d6c33ae12458b53b91ab5767f1ec424424"
+            },
+            "TEXCOORD_0": {
+              "count": 456,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "a6d61b1d42358e9843e659555124d5db85e33a69937919557b2000bc2cbe5bb6"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1752,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "7f1dad8046af8eb0b0bb2dd249a25e6ea8c145a620eef5033a42a141528418a6"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1400,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "96d90d493962b4ee609209658670bdfe6bf5a2a3a38293542473f2066a584b18"
+            },
+            "POSITION": {
+              "count": 1400,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "59f74a5375e3d52581820822981d41c4bfff65a143d7108a18324fe7af4878f8"
+            },
+            "TEXCOORD_0": {
+              "count": 1400,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "6ea57aabd54ed1fcbdb6190f125c9f175c2ca2b6c9be04ead5d98c1544545c39"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 408,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "beb9b7d5faadf5bd1f9d429b7e736c6ca8854626e7183ec4e7393404ac0c56cc"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 204,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "ad9639371b664a1ee8400e99708bc0e8e891f9a6cae757fcd2411d0b2863098f"
+            },
+            "POSITION": {
+              "count": 204,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "e8b0d982229719bbb270b5eb51a4af9ef0aad23fa330b95bdfc03b6d18e28040"
+            },
+            "TEXCOORD_0": {
+              "count": 204,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "fccd31e13fa55dee48215ded0b8f5e2f334a2a25acf2972929c430289273eefa"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.319",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 660,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "3703f7fee9e900d9ea7b00206d407ae3766c8b0e25688747959eea0a37d02a5a"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 526,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "d4d686c966715645d02aed2ac103c91df905c582c9755e4f34de82efb3013db8"
+            },
+            "POSITION": {
+              "count": 526,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "6653b9ad45754a33bdb61a1f462f9dbec13d715c63c601431240489b2a18680c"
+            },
+            "TEXCOORD_0": {
+              "count": 526,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "c30afb929e47e9eb6b3af8f0caa4e72f0545c06619a912d3b6d5f28bb3d792e7"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.324",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 660,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "cad54e9016dff80a8a398a044487045ae5d8f5146437959ed3a0ca8c35b1bc46"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 532,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "77909995ed45742ee6c5016e48ac3f83962848131029a74e4a7c408935ace48c"
+            },
+            "POSITION": {
+              "count": 532,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "cc8267e071faf680ed5c1efed1b5fb3c4bdace0b270bdbca519c66bd22744f26"
+            },
+            "TEXCOORD_0": {
+              "count": 532,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "51a4b46ec89d36f4e6783db92e2d856a657ef1be7f4371ee547c62b409e28ee3"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.329",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 660,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "7fc42c8f23caef83edcd399e3b6e21743d8f0aa9e2aae6adbfc447ba017fe85b"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 496,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "e615b8623d3f3bba48a744a46827e47b18232e0f3f36fb3184d1e1f3bf464f12"
+            },
+            "POSITION": {
+              "count": 496,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "1d48e12d959b112a79c72bf21c43d2358c5832f53127aa462383eb1c4f9b81cb"
+            },
+            "TEXCOORD_0": {
+              "count": 496,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "3070e386ad5ac0d2f0c1838177f48c0a795f1d6d487278fb5a7c8d39e041ba61"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.334",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 660,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "30ec110f5849245307714b2e4e03a9411055dc282a4ced831ed222d946925d69"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 536,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "8d03780797987231186de68bbb1df7ed0b6184ae92037736de0eaa045bdef6ca"
+            },
+            "POSITION": {
+              "count": 536,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "5b8ac72eca92e25eb44d69a468418286b3a754bbf8b3c2386174b03b8720a974"
+            },
+            "TEXCOORD_0": {
+              "count": 536,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "168b96412725567dd7189a760292be9994c774dfb9f356a9bcf4e55a9433be85"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.339",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 660,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "b4ce11bb63b8a2adbab54ffc4805029db3a5dfb08a309b19b3ac4506821107b5"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 496,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "99e29873781bc107c709eca8e2949c5f5c9bf7dac6081bb0757634534a518a97"
+            },
+            "POSITION": {
+              "count": 496,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "cdb9e87882dbe5b9b9c8ffbde8f7c8c062f50f5aba74e6273ff143321e6220db"
+            },
+            "TEXCOORD_0": {
+              "count": 496,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "cb721cc9eb4a25bfcdd0733b5bb42f3d0f019afec68c895dd72d239a376628cd"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cube.344",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 660,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "cad54e9016dff80a8a398a044487045ae5d8f5146437959ed3a0ca8c35b1bc46"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 532,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "f2fe1fa0d0e86692b9e2d14aed046160b41276666ab8c638baf710a0fd244e3e"
+            },
+            "POSITION": {
+              "count": 532,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "debe8967d4cfa0fa87dc2a2782e333ce90188d8b8d4e5467a79085dac04a2ca0"
+            },
+            "TEXCOORD_0": {
+              "count": 532,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "2e5e30c4daaa8ffe859ff3821a6c8605a8713be1ede4d8276a281fa5cb575559"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rear supply line.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 3744,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "ea6962be56740b49c3d107858895342f5c04da9f7fef8a48f8eeaad33850ee9e"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 624,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "0f577d6f1ecf093e34c5496c9c3753f8e752694eb035150a6a6eeaedf780f81b"
+            },
+            "POSITION": {
+              "count": 624,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "b6d1029290698be557f43c5f410c6826947d3ebc3fdb6f9db8c6a3697fe2d00c"
+            },
+            "TEXCOORD_0": {
+              "count": 624,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "22ebe264ace0f383198a2a6f79f652a75ba533f48b2bfccdcd6468fff419cf2a"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 4140,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "dd86e662af7d88101560fb24bacf9fa9248577a759de1121f603e76fdef0e7c8"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1274,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "7daedec1e4eabd889a38b7dc7ae4208656917a7eef540c745b5a1261fdafa0fa"
+            },
+            "POSITION": {
+              "count": 1274,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "16d0e19645ae46cd457cb636a270221e76a40781addc4bacb773fc0205f4a49f"
+            },
+            "TEXCOORD_0": {
+              "count": 1274,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "c38696173616365a585e56d3d2b626ce3bdd7c3d576ccd47139141fd23d73177"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 576,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "9bc00d65895daabd928e4025bb8385a38d0e841fe4ce47b2b839da513e750ed0"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 96,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "01eaf677359f6be1fc6856f0029e14fa0d06f7b3bd1f64f8d31e0b41e4a18b0b"
+            },
+            "POSITION": {
+              "count": 96,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "8c975f7603dee42f9008708f0c79b8c44d6274136a5df34af2b9dd8b065343c5"
+            },
+            "TEXCOORD_0": {
+              "count": 96,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "82478f4fdbfdf35764345bd9a94b4cb6f14a1c5f72be2a328c9ba9dbf2d5b798"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rear return line.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 3744,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "c125b9e365e644a714551aa32aae286a6ef5be8abd22f1f264fe973292bb6917"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 624,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "4920d6c47657a3e7b0ff11f1a474cb89047cd6424d84fd06698c1724497696d2"
+            },
+            "POSITION": {
+              "count": 624,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "405f14ed84b2e9072db1cb996d9eb0aeb1e444b4bcfc0956ddfc05f5f5fcda89"
+            },
+            "TEXCOORD_0": {
+              "count": 624,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "457790964ecb6448675ab97f8965adcad2ee4ec8337200a9bc3663ea0a56ecba"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 3996,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "40666b57fca314850a36eeb30fdf7ebfa85b294ff961372cf0cfce50de05c1cf"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1071,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "0c30d9ff36ea067ea19eaeb76cd78ed3d1e1b0e1a7611cd3ce8f9b8a1200b498"
+            },
+            "POSITION": {
+              "count": 1071,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "04e19586488558654c2af342dc6288b1fd6bf143f95784d2fb18abf56fba1dc5"
+            },
+            "TEXCOORD_0": {
+              "count": 1071,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "2fde64a0e124d4ff31648c3d6e24cb704aab29f7261c73164d7598903c596fc8"
+            }
+          }
+        },
+        {
+          "mode": 4,
+          "indices": {
+            "count": 576,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "9bc00d65895daabd928e4025bb8385a38d0e841fe4ce47b2b839da513e750ed0"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 96,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "01eaf677359f6be1fc6856f0029e14fa0d06f7b3bd1f64f8d31e0b41e4a18b0b"
+            },
+            "POSITION": {
+              "count": 96,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "f87af867349b139a3b42776d0f6d0e88bedebb7e5fdfa5f6cc359ba3bef4149b"
+            },
+            "TEXCOORD_0": {
+              "count": 96,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "82478f4fdbfdf35764345bd9a94b4cb6f14a1c5f72be2a328c9ba9dbf2d5b798"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CPU-L supply hose.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 7020,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "2fbf5fc3e8b11b0e0d67cbf5e149eb83c85006c437dc4966e73c872211ba122f"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1347,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "5814b9e3c66d450487a0b45e87860ae8d16be4eb8b8e0cb43c63735f53b3a353"
+            },
+            "POSITION": {
+              "count": 1347,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "0fc5a09cdd249d223b66ecd807b91e100a06fb0544683b7ec5c3a5a2a1b3ce42"
+            },
+            "TEXCOORD_0": {
+              "count": 1347,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "89cd588843683e7926062f2414d509318ec37c594c0cd0dc9f82c256c06df0cb"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GPU-L-OUTER supply hose.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 7020,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "5bb44d9bfe2b9cb7dae237ea574920874437de99f944fd496bbcf6fa763d32ad"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1358,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "33a90a7b5967bd81ef77f228a84fd7e176432532e2f90e143ca7fda824c3a192"
+            },
+            "POSITION": {
+              "count": 1358,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "13fadbf21dfd2f40d6a1fb5867a434ebcc26b135838a2676cae744cc722c515b"
+            },
+            "TEXCOORD_0": {
+              "count": 1358,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "1912f72a692bd6da21ec4bc16d22d7f13a303885c3fb4e6d878e6f7c7947c796"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GPU-L-INNER supply hose.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 7020,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "e31ac199e291c4762d7d5e3b56e77eb422f1e7943779cea2285c461f35c6e8cd"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1342,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "6b4affaadc94f26255538512d20cd42b268a89143a9053056f306c8c32daebd6"
+            },
+            "POSITION": {
+              "count": 1342,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "dfff245e8a5f9ec03c62200e1b24bb33fe0e574fd0e09ef13d5077d268a2c394"
+            },
+            "TEXCOORD_0": {
+              "count": 1342,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "2a2e594ee072adc719b4e8d137aab54c2bafe546b74599764f73625e2e57ea10"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CPU-R supply hose.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 7020,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "36fd8b3e4209646cae8fd2d52452bec95cca17d6e1cd5aafd4120ea7200899e6"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1348,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "645b92ec8f24ec50451f6b850446f1861dd5ead34fcb6099d018ba080be99bfb"
+            },
+            "POSITION": {
+              "count": 1348,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "602f6e2d7f8f624ee14cf10a30ee05914c4737a0bdd345d92d2c419b9169d6c2"
+            },
+            "TEXCOORD_0": {
+              "count": 1348,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "ae7e801b44343c3649c36fccd76e941fa6f7a2a57f83bd2d4049bb6ccc56863a"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GPU-R-INNER supply hose.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 7020,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "23c7bacd4f513533c5870f0a19d3e551e3184e024b1074eb528c345de051bb99"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1340,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "cf5fbe0f8ad48a22b629d628c17c33bf92340d414764a6f8834915b305a45591"
+            },
+            "POSITION": {
+              "count": 1340,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "b19438a87074fad686b2c1c384dfa2e9aa80bef14cea62144a7bc05f7b0d30bd"
+            },
+            "TEXCOORD_0": {
+              "count": 1340,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "0b1e9a484fd763caf13851fc724182b50c4295ff73e3eecb64ebe0a3a299ad80"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GPU-R-OUTER supply hose.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 7020,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "9b4b1707edddaf9bd4a332ef21539eefccb20f85f468f5f39d1020270cc10914"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1350,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "4139680ff6b9bcb34015be3ef683b0ab47c7b19df44873c66333e5baff7b7b14"
+            },
+            "POSITION": {
+              "count": 1350,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "2e2dc3f8197e0603aa95429aa35894bb8db7a3277b40ca01781ad46450b97cd3"
+            },
+            "TEXCOORD_0": {
+              "count": 1350,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "54459445a6c55fc13c5f3c11d72668f45dff9b904674a8c031d3c8fbb362e656"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "supply-trunk.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1860,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "e82f8bf0c52fdba498399546c6652ca740915b8857c97ec0c58a78dcf3eb34cf"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 343,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "a0c3e98ba4111bdbdbfd682e92d86945a31e93dd2c21a3098615f3bc8850071c"
+            },
+            "POSITION": {
+              "count": 343,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "2a9f60b0a701002620be212b9cda3002d5527b6590b10890d4a5579fceb1fb45"
+            },
+            "TEXCOORD_0": {
+              "count": 343,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "1ef3e4e17e70426ecb8c2e2fa75450c67a02c80bd3ca928350d52e5fab4b4430"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "supply-header.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 132,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "0e50e33adb2189e9deb12b05882030575af85f751a022e15d2799d8a3de2d80f"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 57,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "510dd1907771d2609684b010c9ff1349169a28c792da8033282cd3f821574f2f"
+            },
+            "POSITION": {
+              "count": 57,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "b946d45695cc59b9a7b5b05fadc6064338ec3c19da903f9a51982e3c6350b7d7"
+            },
+            "TEXCOORD_0": {
+              "count": 57,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "4dc671d1b5cef83134f05a0e940154ad6297e6038ddbd8e70ce3c43f770d076d"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "return-header.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 132,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "840865b8341eeabb2e48bdbba762697dd37229adb4de3eb8964002cf70ef5990"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 56,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "7df046d426535ab054a61a7ded1eab67fec99bd5052b70dc50317f7a85d9fba0"
+            },
+            "POSITION": {
+              "count": 56,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "5a59c6dcc15657c53326fe93bb0164578de39a15fc0a3ed18eb9c78589c337af"
+            },
+            "TEXCOORD_0": {
+              "count": 56,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "2d4b652d68fe0c54f88e589286ecc9f36ea912cdbb3180d6397a4b4de5a1a1b4"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "return-trunk.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1860,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "3383ee0b7a28f015c4a139cd1575297b9e7dc0be6bd29d45f3a53c361330d940"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 336,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "47b8d062f58a0fff5da4270cad32c390824c5b74280175ff330f584803af7137"
+            },
+            "POSITION": {
+              "count": 336,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "7835035273f01a73f7dd0d69c9a69a0df2246345fcdf199fc8bb2f3c731e01c4"
+            },
+            "TEXCOORD_0": {
+              "count": 336,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "807aea1c77c6807779e626d6f278ff2dee2dad8b46533e267f40523a87413c7f"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CPU-L/inlet.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1860,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "2efa774f88410826ec9b8454d64b04f3164a9e6705ef985f9a1b01917cd77688"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 339,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "df048e236461ba38d6768794c5bbcfbfd3e67056f43c61cc6402a721825494e0"
+            },
+            "POSITION": {
+              "count": 339,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "a967125669c5d2fa7cc33743738561bb0e69b5e3fe6c6f223c64e61e2124b2c8"
+            },
+            "TEXCOORD_0": {
+              "count": 339,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "c70b48482e43fec0a3bcc7643653375b04adb5ee4abffa9a7b1532bae7bce053"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CPU-L/channels.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 7044,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "fb7a3b7b1ca87be49c17c5eb49ae2d63ae165e72108c08f1048ab05ddc7b2889"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "c4dd57d541240adaa6d8513cf4d3a52271c053490588c775f9e0080190f8e508"
+            },
+            "POSITION": {
+              "count": 1200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "769f2d158a698cc4597892bf57ca486fe8af9b10593e462cf843fd33b79e1be6"
+            },
+            "TEXCOORD_0": {
+              "count": 1200,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "f52478fe751a41de3c571b3213af3b0f71e73dfe299dc0d61359940644cc46eb"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CPU-L/outlet.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1284,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "eb34cf4773ef562798a9511453a48074e4ebdc361931b11ec8936852d927ee17"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 243,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "890deba0ff806e64166b100d01a9f12162b7739165d1683d227a65193a9766b0"
+            },
+            "POSITION": {
+              "count": 243,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "bdf868cdb821764e70e8ba1fc44e57db1ce9670977f4f7a71f0e07c720419948"
+            },
+            "TEXCOORD_0": {
+              "count": 243,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "d9ca416c5e6c83f1f3c663a76ae90fb60831aa9fbab6b2beb71e6f36e20dd2b4"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GPU-L-OUTER/inlet.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1860,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "ad745a711804ebfad4425404f7afea1f14236cfb0b1916f73bc79f3b07e31d18"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 346,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "2b5f3a1d8f9b3ea7e008243e420f448e1ae2276ea8cdc520da0099a777f367da"
+            },
+            "POSITION": {
+              "count": 346,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "60c292346d5908d95c45d1db7961e11550d57a55982f5e242040379275f794c4"
+            },
+            "TEXCOORD_0": {
+              "count": 346,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "02c1c72e78a495db89f28c898375573ff327e323e7a22f995c9aa194fdb7b79d"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GPU-L-OUTER/channels.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 7044,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "14bbfb4a974289ec7d7526c4aced64eae2a99747ce97e49373a53b1482ecc198"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1203,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "49ab5545a4950f78db71b55d6aef04681825208860da5063224e2dc3d85b5cd2"
+            },
+            "POSITION": {
+              "count": 1203,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "8ce20a1903f23d16ea16d77db28a743cc0ff98a97cb7e6d51c052b406440f832"
+            },
+            "TEXCOORD_0": {
+              "count": 1203,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "8782f486ce19fc889166da8bfe9b6e491b84a19a19280dda497a9c2e3bcd164e"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GPU-L-OUTER/outlet.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1284,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "51bed7fc915a1bbbcba9729ec8927696cead754de8d2dd2f8a421f1b0063c9dc"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 250,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "f24705ff6aab6fc77fe1ab0a9c40fcf9c0a292d18fa5eeaf934752262306a98b"
+            },
+            "POSITION": {
+              "count": 250,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "cbcfe6eaf7a16d55d6d2587ac2f7b699265ccc00c4c5cfb2f814665d678ea547"
+            },
+            "TEXCOORD_0": {
+              "count": 250,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "9e05e04b26b2d918ded79487bc7266fa7d59257621540ae40a137b8eb63eec19"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GPU-L-INNER/inlet.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1860,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "3a03cc515ed86ca733d3668a3714e8d63df7437d7bfba974246014fd53bda849"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 347,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "25aefea42cf8c196ee776de77d4a2831868633d34120b891e7f3d95f1d349c66"
+            },
+            "POSITION": {
+              "count": 347,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "d2d1f3ce65a7fb78f4d4fea3c7ed1789d2e9db7b08423065919210e495044863"
+            },
+            "TEXCOORD_0": {
+              "count": 347,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "e1b948e33c84ad95598eff67f7dbe01d457ce5b82a92814c80a8a3c98f0a55eb"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GPU-L-INNER/channels.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 7044,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "f83e159a6039342abc4b13ad444ee96a022d253d1e4d35a445a324ba90f8969f"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1205,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "4d1fda5c3a82f61ddf17d34fd0f99936c0787d6ce7065f0050614ad1ef7f14c8"
+            },
+            "POSITION": {
+              "count": 1205,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "ee00d9ba391d8de4847a8693f6d358099874c611fe9e288e0ae5a52f12309c2f"
+            },
+            "TEXCOORD_0": {
+              "count": 1205,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "24eac43daa0a117296c44f5c229497c75aac6f28d87af678f9ccb9b4af1d82ac"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GPU-L-INNER/outlet.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1284,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "2a01323939d754915a8a54e0ed65ab27a7bed52348c82a322808baf202328d35"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 250,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "c7086e62297fc70bbaf0332e6ee07f288cf5a08bddc81e7c80c766623f559b35"
+            },
+            "POSITION": {
+              "count": 250,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "eaa5fe18393c3c485496994fb86dd9cb27d4eb9bd4454d4781b1c288e981485b"
+            },
+            "TEXCOORD_0": {
+              "count": 250,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "a136832b27b6b2b0797b47025132d75df8ad006c1a5a551833f5909c22c8a001"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CPU-R/inlet.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1860,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "db30082d4f6e19a8539802cc0d160f14e0abe9982237edadaf8d617752e42095"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 348,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "1aecfdb0d81b12d21208eaa5e27492ceff91415058bd2373007714f389afedef"
+            },
+            "POSITION": {
+              "count": 348,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "35c9fcfd60e181a9693085e66212f56092914d3d2c7be9431436ccd4dbcd1eb0"
+            },
+            "TEXCOORD_0": {
+              "count": 348,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "94d5e5e7cfc0988bcb04952a6067db71e6e8f1a7fe76ebe381583667bf50cf15"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CPU-R/channels.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 7044,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "0d9d0d6bb9b87f6f19db83792363dd8f52103db024eddccc6a21f6654422d6b5"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "6fd27d8a8582e61c9d589e359e28fca5af82ce744aee66734128e0d18967885f"
+            },
+            "POSITION": {
+              "count": 1200,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "1f30bcc1a2443515e6c7de9cedeab40b48e62eeb4a2cf8e212ce50eafa554f7e"
+            },
+            "TEXCOORD_0": {
+              "count": 1200,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "e2ef0c140cd649ab594ea73e7198bc0989ce30fda5d2fb68448bbbbd3314cdbb"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CPU-R/outlet.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1284,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "538b282c619b740da294a52a38879708f78fefa7794bcc6271d94c29d58d92d1"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 240,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "8537c6b59ea0105e69500f54301c098b79873f46e1b140aa22ef120c751ccf14"
+            },
+            "POSITION": {
+              "count": 240,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "12def57f374c1d7b6af27f975d1680691796a248f4168715c71768878a9b3bda"
+            },
+            "TEXCOORD_0": {
+              "count": 240,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "426f3a01a69584e29644d3b42613aea5b4bcf02cb6f12d5ad7a9e5bb4ec8466e"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GPU-R-INNER/inlet.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1860,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "6234fede188451535797599e4028a71df3d609c9b973818f20e12eb6e9fdb2a8"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 346,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "1d808f4ad4e75b8487a7e08cd37b083ffa87d0e568a3285ff85ab2c607a5c580"
+            },
+            "POSITION": {
+              "count": 346,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "b606184af25abd14c3af46c97360adabe9dc9a5b01bb9577b56a2d800db691e6"
+            },
+            "TEXCOORD_0": {
+              "count": 346,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "dde782f0a4fca8182e4af098b0e0fe205f11f3e8af20bc7e1e280f75f7d1a2c6"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GPU-R-INNER/channels.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 7044,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "9bdee3c0be297a7d93f11f40126c7b1cc18a8643c7c26315feca38dbed721670"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1203,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "4105a451d12ada0921d249c8972fed45d1bbd82335c9688be8d5319c7f9983cc"
+            },
+            "POSITION": {
+              "count": 1203,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "55234a7c2e4c77816ea686dfac4a332e5d233bc1d8e43fed5ff14268cb9e7e61"
+            },
+            "TEXCOORD_0": {
+              "count": 1203,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "11f4fd379a01c47c8c7c97763da0de8e9f13bec95b0db8f4d280e0399811da19"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GPU-R-INNER/outlet.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1284,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "f2be6584f2e0f8050bb91a6f38eec75c7186ad8b92fb442eb48d52d76e08cced"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 246,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "3d629333ab695d6f25e7b53e99c3278a19ab7df0cdbf2801fad2798bc93d909a"
+            },
+            "POSITION": {
+              "count": 246,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "33c3fe5f0cf352db91a7e90e38aca2772ecccd265e1c61cb9a0fabb67f2cdc50"
+            },
+            "TEXCOORD_0": {
+              "count": 246,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "0fa7613a3edc84316215689898e9c2254232c57fba90899a685371f562973379"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GPU-R-OUTER/inlet.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1860,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "3a49898f2bf54713e486349ce67ee8a08f31d8eeab39ddfb27f95bd62cf1be61"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 345,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "15b72d51efe57a48487e57e6c71d5343a54b9022f1558d16f0348285d758895b"
+            },
+            "POSITION": {
+              "count": 345,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "135cd0633a2f5904eb13e39869a11f2743f98fb80be8e156c32802842e5991e3"
+            },
+            "TEXCOORD_0": {
+              "count": 345,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "893f489507aa5f10ecf3bf71cfc0d3d364cce913d5f0a9997e86eb75b269c914"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GPU-R-OUTER/channels.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 7044,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "eae6d24bb86ccaa6848fa1df7f9a3ef51a305d8de847ddd20fb78adf0649e55f"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 1203,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "26f970f916b55d55c52c9c80653f54ac246992ff4d792b49e948b07cdea7f892"
+            },
+            "POSITION": {
+              "count": 1203,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "2215d7c69ec73d5520a422cae385d965e5cb97a8d285456a95cd7b61049506cf"
+            },
+            "TEXCOORD_0": {
+              "count": 1203,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "b9d2306757a2f8096403ce72b9be2097074939a9d8fa2875f6dcc7f75117e7a9"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GPU-R-OUTER/outlet.001",
+      "primitives": [
+        {
+          "mode": 4,
+          "indices": {
+            "count": 1284,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "normalized": false,
+            "sha256": "d4b18f842fb9bc26e536efa176df5c8e9eeefb2ba54c01b5cf5da9d765d6ab09"
+          },
+          "attributes": {
+            "NORMAL": {
+              "count": 250,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "6de4879c232bd6f08c8b1d3981d07546cbfd05dd4b551e7d7bb2f8b3ca8c00e2"
+            },
+            "POSITION": {
+              "count": 250,
+              "type": "VEC3",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "cf51f1241f928b1ca7783954ef1e6965d8a42bc13a75c7999b6f18f560634181"
+            },
+            "TEXCOORD_0": {
+              "count": 250,
+              "type": "VEC2",
+              "componentType": 5126,
+              "normalized": false,
+              "sha256": "68f819a7b1353179ff4115bd22b94684f4fed3588f01d18d93aa6699fcf0f76c"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

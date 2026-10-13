@@ -1,0 +1,1988 @@
+{
+  "baseline": "fa55ce8b439a9825e5e9eac34871fd5330344799",
+  "passed": true,
+  "checks": [
+    "Independent collision/path helpers retain piercing, coplanar, clearance and full-containment negative fixtures",
+    "Frozen bare GLB, default procedural fallback, profile, SSD/ports/gold/Rack, 1001 default poses/cameras and 35.2-second timing retained",
+    "Six actual GLB die/TIM/copper stacks, 24 frame-supported feet, exact covers and unchanged lid clearance",
+    "22 actual fluid meshes follow directed arc-length UVs; six parallel circuits join supply/header/plate/return without gaps",
+    "126 actual-triangle rays verify sealed opposite header walls and both unused header ends",
+    "Actual triangle SAT detects no unapproved bareboard intersections or fluid-wall crossings; named TIM/frame contacts only and divider-containment checks",
+    "1001 deterministic cooling states: seated bare board, ordered plate/plumbing descent, bounded flow interval, solid restore before lid, unchanged Rack from .40 and retained default controller",
+    "20 actual-triangle plumbing installation poses clear bare hardware and moving plate/frame assemblies",
+    "Companion camera influence is zero for every Rack/bridge sample from .40 to 1"
+  ],
+  "errors": [],
+  "limits": [
+    "Independent geometric validation of a conceptual assembly, not manufacturing CAD, a verified OEM retention design or CFD.",
+    "Visual opacity/flow animation, real-clock playback, late loading failures and WebGL context lifecycle require the separate browser suite.",
+    "Triangle SAT plus named contact rules is complemented by channel containment sampling; arbitrary watertight solid topology is not certified."
+  ],
+  "bareAsset": {
+    "sha256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29",
+    "bytes": 25533668
+  },
+  "companion": {
+    "sha256": "9816625ec2789766476b5afea543895123b388da0eec8c5978ec623cc69a5920",
+    "bytes": 3425524,
+    "primitives": 88,
+    "layers": [
+      "cooling-mounts",
+      "cooling-frame",
+      "cooling",
+      "cooling-channels",
+      "cooling-plumbing",
+      "cooling-fluid"
+    ]
+  },
+  "contacts": [
+    {
+      "id": "CPU-L",
+      "sourceComponent": "Board1/CPU",
+      "actualDieY": 0.005599997937679291,
+      "timBounds": {
+        "min": [
+          -1.0694999694824219,
+          0.005599997937679291,
+          -1.2454999685287476
+        ],
+        "max": [
+          -0.8604999780654907,
+          0.0063999975100159645,
+          -0.9545000791549683
+        ]
+      },
+      "feet": 4
+    },
+    {
+      "id": "GPU-L-OUTER",
+      "sourceComponent": "Board1/GPU_A",
+      "actualDieY": 0.005599997937679291,
+      "timBounds": {
+        "min": [
+          -1.5164999961853027,
+          0.005599997937679291,
+          -2.3984999656677246
+        ],
+        "max": [
+          -1.2634999752044678,
+          0.0063999975100159645,
+          -1.9615001678466797
+        ]
+      },
+      "feet": 4
+    },
+    {
+      "id": "GPU-L-INNER",
+      "sourceComponent": "Board1/GPU_B",
+      "actualDieY": 0.005599997937679291,
+      "timBounds": {
+        "min": [
+          -0.6765000224113464,
+          0.005599997937679291,
+          -2.3984999656677246
+        ],
+        "max": [
+          -0.4235000014305115,
+          0.0063999975100159645,
+          -1.9615001678466797
+        ]
+      },
+      "feet": 4
+    },
+    {
+      "id": "CPU-R",
+      "sourceComponent": "Board2/CPU",
+      "actualDieY": 0.005599997937679291,
+      "timBounds": {
+        "min": [
+          0.8604999780654907,
+          0.005599997937679291,
+          -1.2454999685287476
+        ],
+        "max": [
+          1.0694999694824219,
+          0.0063999975100159645,
+          -0.9545000791549683
+        ]
+      },
+      "feet": 4
+    },
+    {
+      "id": "GPU-R-INNER",
+      "sourceComponent": "Board2/GPU_A",
+      "actualDieY": 0.005599997937679291,
+      "timBounds": {
+        "min": [
+          0.4235000014305115,
+          0.005599997937679291,
+          -2.3984999656677246
+        ],
+        "max": [
+          0.6765000224113464,
+          0.0063999975100159645,
+          -1.9615001678466797
+        ]
+      },
+      "feet": 4
+    },
+    {
+      "id": "GPU-R-OUTER",
+      "sourceComponent": "Board2/GPU_B",
+      "actualDieY": 0.005599997937679291,
+      "timBounds": {
+        "min": [
+          1.2634999752044678,
+          0.005599997937679291,
+          -2.3984999656677246
+        ],
+        "max": [
+          1.5164999961853027,
+          0.0063999975100159645,
+          -1.9615001678466797
+        ]
+      },
+      "feet": 4
+    }
+  ],
+  "envelope": {
+    "minY": -0.005000002682209015,
+    "maxY": 0.11700001358985901,
+    "lidBottomY": 0.125,
+    "minimumVerticalLidClearance": 0.007999986410140991
+  },
+  "flowRoutes": [
+    {
+      "id": "supply-trunk",
+      "length": 2.705696584668591,
+      "vertices": 1860,
+      "minU": 0,
+      "maxU": 2.7056965827941895
+    },
+    {
+      "id": "supply-header",
+      "length": 3.559999893702816,
+      "vertices": 132,
+      "minU": 2.7056965827941895,
+      "maxU": 6.2656965255737305
+    },
+    {
+      "id": "return-header",
+      "length": 3.559999893702816,
+      "vertices": 132,
+      "minU": 0,
+      "maxU": 3.559999942779541
+    },
+    {
+      "id": "return-trunk",
+      "length": 2.8143804870380746,
+      "vertices": 1860,
+      "minU": 3.559999942779541,
+      "maxU": 6.374380588531494
+    },
+    {
+      "id": "CPU-L/inlet",
+      "length": 0.38404485438778113,
+      "vertices": 1860,
+      "minU": 3.3306965827941895,
+      "maxU": 3.7147414684295654
+    },
+    {
+      "id": "CPU-L/channels",
+      "length": 3.086955009378257,
+      "vertices": 7044,
+      "minU": 3.7147414684295654,
+      "maxU": 6.801696300506592
+    },
+    {
+      "id": "CPU-L/outlet",
+      "length": 0.4795044957797431,
+      "vertices": 1284,
+      "minU": 6.801696300506592,
+      "maxU": 7.281200885772705
+    },
+    {
+      "id": "GPU-L-OUTER/inlet",
+      "length": 1.4393494427440745,
+      "vertices": 1860,
+      "minU": 2.9056966304779053,
+      "maxU": 4.345046043395996
+    },
+    {
+      "id": "GPU-L-OUTER/channels",
+      "length": 3.3749549773575596,
+      "vertices": 7044,
+      "minU": 4.345046043395996,
+      "maxU": 7.720000743865967
+    },
+    {
+      "id": "GPU-L-OUTER/outlet",
+      "length": 1.5355045196699646,
+      "vertices": 1284,
+      "minU": 7.720000743865967,
+      "maxU": 9.255505561828613
+    },
+    {
+      "id": "GPU-L-INNER/inlet",
+      "length": 1.4393494427237226,
+      "vertices": 1860,
+      "minU": 3.745696544647217,
+      "maxU": 5.185046195983887
+    },
+    {
+      "id": "GPU-L-INNER/channels",
+      "length": 3.3749549201052917,
+      "vertices": 7044,
+      "minU": 5.185046195983887,
+      "maxU": 8.560001373291016
+    },
+    {
+      "id": "GPU-L-INNER/outlet",
+      "length": 1.5355045196666974,
+      "vertices": 1284,
+      "minU": 8.560001373291016,
+      "maxU": 10.095505714416504
+    },
+    {
+      "id": "CPU-R/inlet",
+      "length": 0.38404485438365626,
+      "vertices": 1860,
+      "minU": 5.2606964111328125,
+      "maxU": 5.644741535186768
+    },
+    {
+      "id": "CPU-R/channels",
+      "length": 3.086954975365949,
+      "vertices": 7044,
+      "minU": 5.644741535186768,
+      "maxU": 8.731696128845215
+    },
+    {
+      "id": "CPU-R/outlet",
+      "length": 0.4795044957823754,
+      "vertices": 1284,
+      "minU": 8.731696128845215,
+      "maxU": 9.211200714111328
+    },
+    {
+      "id": "GPU-R-INNER/inlet",
+      "length": 1.4393494427217508,
+      "vertices": 1860,
+      "minU": 4.845696449279785,
+      "maxU": 6.285046100616455
+    },
+    {
+      "id": "GPU-R-INNER/channels",
+      "length": 3.3749549606709883,
+      "vertices": 7044,
+      "minU": 6.285046100616455,
+      "maxU": 9.660000801086426
+    },
+    {
+      "id": "GPU-R-INNER/outlet",
+      "length": 1.5355045196682136,
+      "vertices": 1284,
+      "minU": 9.660000801086426,
+      "maxU": 11.195505142211914
+    },
+    {
+      "id": "GPU-R-OUTER/inlet",
+      "length": 1.439349442725996,
+      "vertices": 1860,
+      "minU": 5.685696601867676,
+      "maxU": 7.1250457763671875
+    },
+    {
+      "id": "GPU-R-OUTER/channels",
+      "length": 3.3749551321925355,
+      "vertices": 7044,
+      "minU": 7.1250457763671875,
+      "maxU": 10.500000953674316
+    },
+    {
+      "id": "GPU-R-OUTER/outlet",
+      "length": 1.5355045196838717,
+      "vertices": 1284,
+      "minU": 10.500000953674316,
+      "maxU": 12.035505294799805
+    }
+  ],
+  "manifoldSealAudit": {
+    "rays": 126,
+    "unsealedRays": 0,
+    "samples": [
+      {
+        "header": "supply",
+        "seat": "CPU-L",
+        "dx": -0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.4183167775806026,
+          -0.4133167793814016
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "CPU-L",
+        "dx": -0.002,
+        "dy": 0,
+        "crossings": [
+          -0.4180000126928266,
+          -0.4130000174611977
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "CPU-L",
+        "dx": -0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.4183167773756621,
+          -0.4133167792700576
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "CPU-L",
+        "dx": 0,
+        "dy": -0.002,
+        "crossings": [
+          -0.4183167775806026,
+          -0.41331677938140154
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "CPU-L",
+        "dx": 0,
+        "dy": 0,
+        "crossings": [
+          -0.4180000126928266,
+          -0.4130000174611977
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "CPU-L",
+        "dx": 0,
+        "dy": 0.002,
+        "crossings": [
+          -0.4183167773756621,
+          -0.4133167792700576
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "CPU-L",
+        "dx": 0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.4183167775806025,
+          -0.41331677938140154
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "CPU-L",
+        "dx": 0.002,
+        "dy": 0,
+        "crossings": [
+          -0.4180000126928266,
+          -0.4130000174611977
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "CPU-L",
+        "dx": 0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.4183167773756621,
+          -0.4133167792700576
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-L-OUTER",
+        "dx": -0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.41831677758060254,
+          -0.41331677938140154
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-L-OUTER",
+        "dx": -0.002,
+        "dy": 0,
+        "crossings": [
+          -0.4180000126928266,
+          -0.4130000174611977
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-L-OUTER",
+        "dx": -0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.4183167773756621,
+          -0.4133167792700576
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-L-OUTER",
+        "dx": 0,
+        "dy": -0.002,
+        "crossings": [
+          -0.41831677758060254,
+          -0.41331677938140154
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-L-OUTER",
+        "dx": 0,
+        "dy": 0,
+        "crossings": [
+          -0.4180000126928266,
+          -0.41300001746119774
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-L-OUTER",
+        "dx": 0,
+        "dy": 0.002,
+        "crossings": [
+          -0.4183167773756621,
+          -0.41331677927005767
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-L-OUTER",
+        "dx": 0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.41831677758060254,
+          -0.41331677938140154
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-L-OUTER",
+        "dx": 0.002,
+        "dy": 0,
+        "crossings": [
+          -0.41800001269282666,
+          -0.4130000174611977
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-L-OUTER",
+        "dx": 0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.4183167773756621,
+          -0.4133167792700576
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-L-INNER",
+        "dx": -0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.41831677758060254,
+          -0.41331677938140154
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-L-INNER",
+        "dx": -0.002,
+        "dy": 0,
+        "crossings": [
+          -0.4180000126928266,
+          -0.41300001746119774
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-L-INNER",
+        "dx": -0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.4183167773756621,
+          -0.4133167792700576
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-L-INNER",
+        "dx": 0,
+        "dy": -0.002,
+        "crossings": [
+          -0.41831677758060254,
+          -0.41331677938140154
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-L-INNER",
+        "dx": 0,
+        "dy": 0,
+        "crossings": [
+          -0.4180000126928266,
+          -0.41300001746119774
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-L-INNER",
+        "dx": 0,
+        "dy": 0.002,
+        "crossings": [
+          -0.4183167773756621,
+          -0.41331677927005767
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-L-INNER",
+        "dx": 0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.41831677758060254,
+          -0.41331677938140154
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-L-INNER",
+        "dx": 0.002,
+        "dy": 0,
+        "crossings": [
+          -0.4180000126928266,
+          -0.4130000174611977
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-L-INNER",
+        "dx": 0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.4183167773756621,
+          -0.4133167792700576
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "CPU-R",
+        "dx": -0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.41831677758060254,
+          -0.4133167793814016
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "CPU-R",
+        "dx": -0.002,
+        "dy": 0,
+        "crossings": [
+          -0.41800001269282666,
+          -0.41300001746119774
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "CPU-R",
+        "dx": -0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.41831677737566214,
+          -0.4133167792700576
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "CPU-R",
+        "dx": 0,
+        "dy": -0.002,
+        "crossings": [
+          -0.4183167775806026,
+          -0.4133167793814016
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "CPU-R",
+        "dx": 0,
+        "dy": 0,
+        "crossings": [
+          -0.4180000126928266,
+          -0.4130000174611977
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "CPU-R",
+        "dx": 0,
+        "dy": 0.002,
+        "crossings": [
+          -0.41831677737566214,
+          -0.41331677927005767
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "CPU-R",
+        "dx": 0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.41831677758060254,
+          -0.41331677938140166
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "CPU-R",
+        "dx": 0.002,
+        "dy": 0,
+        "crossings": [
+          -0.41800001269282666,
+          -0.41300001746119774
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "CPU-R",
+        "dx": 0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.41831677737566214,
+          -0.41331677927005767
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-R-INNER",
+        "dx": -0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.41831677758060254,
+          -0.41331677938140154
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-R-INNER",
+        "dx": -0.002,
+        "dy": 0,
+        "crossings": [
+          -0.41800001269282655,
+          -0.4130000174611977
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-R-INNER",
+        "dx": -0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.4183167773756621,
+          -0.4133167792700576
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-R-INNER",
+        "dx": 0,
+        "dy": -0.002,
+        "crossings": [
+          -0.41831677758060254,
+          -0.41331677938140154
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-R-INNER",
+        "dx": 0,
+        "dy": 0,
+        "crossings": [
+          -0.41800001269282666,
+          -0.4130000174611977
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-R-INNER",
+        "dx": 0,
+        "dy": 0.002,
+        "crossings": [
+          -0.41831677737566214,
+          -0.4133167792700576
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-R-INNER",
+        "dx": 0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.41831677758060254,
+          -0.41331677938140154
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-R-INNER",
+        "dx": 0.002,
+        "dy": 0,
+        "crossings": [
+          -0.4180000126928266,
+          -0.41300001746119774
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-R-INNER",
+        "dx": 0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.4183167773756621,
+          -0.4133167792700576
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-R-OUTER",
+        "dx": -0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.41831677758060254,
+          -0.41331677938140154
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-R-OUTER",
+        "dx": -0.002,
+        "dy": 0,
+        "crossings": [
+          -0.41800001269282666,
+          -0.4130000174611977
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-R-OUTER",
+        "dx": -0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.4183167773756621,
+          -0.4133167792700576
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-R-OUTER",
+        "dx": 0,
+        "dy": -0.002,
+        "crossings": [
+          -0.41831677758060254,
+          -0.41331677938140154
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-R-OUTER",
+        "dx": 0,
+        "dy": 0,
+        "crossings": [
+          -0.41800001269282666,
+          -0.41300001746119774
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-R-OUTER",
+        "dx": 0,
+        "dy": 0.002,
+        "crossings": [
+          -0.4183167773756621,
+          -0.4133167792700576
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-R-OUTER",
+        "dx": 0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.41831677758060254,
+          -0.41331677938140154
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-R-OUTER",
+        "dx": 0.002,
+        "dy": 0,
+        "crossings": [
+          -0.41800001269282666,
+          -0.41300001746119774
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "seat": "GPU-R-OUTER",
+        "dx": 0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.4183167773756621,
+          -0.4133167792700576
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "CPU-L",
+        "dx": -0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.31831678351549275,
+          -0.3133167854098866
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "CPU-L",
+        "dx": -0.002,
+        "dy": 0,
+        "crossings": [
+          -0.31800001883265727,
+          -0.3130000236010267
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "CPU-L",
+        "dx": -0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.3183167830434766,
+          -0.3133167849378748
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "CPU-L",
+        "dx": 0,
+        "dy": -0.002,
+        "crossings": [
+          -0.31831678351549275,
+          -0.3133167854098866
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "CPU-L",
+        "dx": 0,
+        "dy": 0,
+        "crossings": [
+          -0.31800001883265727,
+          -0.3130000236010267
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "CPU-L",
+        "dx": 0,
+        "dy": 0.002,
+        "crossings": [
+          -0.3183167830434766,
+          -0.31331678493787474
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "CPU-L",
+        "dx": 0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.31831678351549275,
+          -0.3133167854098866
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "CPU-L",
+        "dx": 0.002,
+        "dy": 0,
+        "crossings": [
+          -0.31800001883265727,
+          -0.3130000236010267
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "CPU-L",
+        "dx": 0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.31831678304347655,
+          -0.31331678493787474
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-L-OUTER",
+        "dx": -0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.3183167835154927,
+          -0.3133167854098866
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-L-OUTER",
+        "dx": -0.002,
+        "dy": 0,
+        "crossings": [
+          -0.31800001883265727,
+          -0.31300002360102663
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-L-OUTER",
+        "dx": -0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.31831678304347655,
+          -0.31331678493787474
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-L-OUTER",
+        "dx": 0,
+        "dy": -0.002,
+        "crossings": [
+          -0.3183167835154927,
+          -0.3133167854098866
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-L-OUTER",
+        "dx": 0,
+        "dy": 0,
+        "crossings": [
+          -0.31800001883265727,
+          -0.31300002360102663
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-L-OUTER",
+        "dx": 0,
+        "dy": 0.002,
+        "crossings": [
+          -0.31831678304347655,
+          -0.31331678493787474
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-L-OUTER",
+        "dx": 0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.31831678351549275,
+          -0.3133167854098866
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-L-OUTER",
+        "dx": 0.002,
+        "dy": 0,
+        "crossings": [
+          -0.31800001883265727,
+          -0.31300002360102663
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-L-OUTER",
+        "dx": 0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.31831678304347655,
+          -0.31331678493787474
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-L-INNER",
+        "dx": -0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.31831678351549275,
+          -0.3133167854098866
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-L-INNER",
+        "dx": -0.002,
+        "dy": 0,
+        "crossings": [
+          -0.31800001883265727,
+          -0.3130000236010267
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-L-INNER",
+        "dx": -0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.31831678304347655,
+          -0.31331678493787474
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-L-INNER",
+        "dx": 0,
+        "dy": -0.002,
+        "crossings": [
+          -0.31831678351549275,
+          -0.3133167854098866
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-L-INNER",
+        "dx": 0,
+        "dy": 0,
+        "crossings": [
+          -0.31800001883265727,
+          -0.3130000236010267
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-L-INNER",
+        "dx": 0,
+        "dy": 0.002,
+        "crossings": [
+          -0.31831678304347655,
+          -0.31331678493787474
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-L-INNER",
+        "dx": 0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.31831678351549275,
+          -0.3133167854098866
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-L-INNER",
+        "dx": 0.002,
+        "dy": 0,
+        "crossings": [
+          -0.31800001883265727,
+          -0.31300002360102674
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-L-INNER",
+        "dx": 0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.31831678304347655,
+          -0.31331678493787474
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "CPU-R",
+        "dx": -0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.3183167835154927,
+          -0.3133167854098866
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "CPU-R",
+        "dx": -0.002,
+        "dy": 0,
+        "crossings": [
+          -0.31800001883265727,
+          -0.3130000236010267
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "CPU-R",
+        "dx": -0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.3183167830434766,
+          -0.31331678493787474
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "CPU-R",
+        "dx": 0,
+        "dy": -0.002,
+        "crossings": [
+          -0.31831678351549275,
+          -0.3133167854098866
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "CPU-R",
+        "dx": 0,
+        "dy": 0,
+        "crossings": [
+          -0.31800001883265727,
+          -0.3130000236010267
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "CPU-R",
+        "dx": 0,
+        "dy": 0.002,
+        "crossings": [
+          -0.3183167830434766,
+          -0.31331678493787474
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "CPU-R",
+        "dx": 0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.31831678351549275,
+          -0.3133167854098866
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "CPU-R",
+        "dx": 0.002,
+        "dy": 0,
+        "crossings": [
+          -0.31800001883265727,
+          -0.3130000236010267
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "CPU-R",
+        "dx": 0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.3183167830434766,
+          -0.31331678493787474
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-R-INNER",
+        "dx": -0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.3183167835154927,
+          -0.3133167854098866
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-R-INNER",
+        "dx": -0.002,
+        "dy": 0,
+        "crossings": [
+          -0.31800001883265727,
+          -0.3130000236010267
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-R-INNER",
+        "dx": -0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.3183167830434766,
+          -0.31331678493787474
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-R-INNER",
+        "dx": 0,
+        "dy": -0.002,
+        "crossings": [
+          -0.3183167835154927,
+          -0.3133167854098866
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-R-INNER",
+        "dx": 0,
+        "dy": 0,
+        "crossings": [
+          -0.31800001883265727,
+          -0.3130000236010267
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-R-INNER",
+        "dx": 0,
+        "dy": 0.002,
+        "crossings": [
+          -0.3183167830434766,
+          -0.31331678493787474
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-R-INNER",
+        "dx": 0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.31831678351549275,
+          -0.31331678540988656
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-R-INNER",
+        "dx": 0.002,
+        "dy": 0,
+        "crossings": [
+          -0.31800001883265727,
+          -0.3130000236010267
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-R-INNER",
+        "dx": 0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.3183167830434766,
+          -0.31331678493787474
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-R-OUTER",
+        "dx": -0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.3183167835154927,
+          -0.3133167854098866
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-R-OUTER",
+        "dx": -0.002,
+        "dy": 0,
+        "crossings": [
+          -0.31800001883265727,
+          -0.3130000236010267
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-R-OUTER",
+        "dx": -0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.31831678304347655,
+          -0.31331678493787474
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-R-OUTER",
+        "dx": 0,
+        "dy": -0.002,
+        "crossings": [
+          -0.31831678351549275,
+          -0.31331678540988656
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-R-OUTER",
+        "dx": 0,
+        "dy": 0,
+        "crossings": [
+          -0.31800001883265727,
+          -0.3130000236010267
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-R-OUTER",
+        "dx": 0,
+        "dy": 0.002,
+        "crossings": [
+          -0.3183167830434766,
+          -0.31331678493787474
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-R-OUTER",
+        "dx": 0.002,
+        "dy": -0.002,
+        "crossings": [
+          -0.31831678351549275,
+          -0.3133167854098866
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-R-OUTER",
+        "dx": 0.002,
+        "dy": 0,
+        "crossings": [
+          -0.31800001883265727,
+          -0.3130000236010267
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "seat": "GPU-R-OUTER",
+        "dx": 0.002,
+        "dy": 0.002,
+        "crossings": [
+          -0.3183167830434766,
+          -0.31331678493787474
+        ],
+        "sealed": true
+      }
+    ],
+    "endCaps": [
+      {
+        "header": "supply",
+        "endX": 1.78,
+        "dz": -0.002,
+        "dy": -0.002,
+        "crossings": [
+          1.7860000133514404,
+          1.7920000553131104
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "endX": 1.78,
+        "dz": -0.002,
+        "dy": 0,
+        "crossings": [
+          1.7860000133514402,
+          1.7920000553131101
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "endX": 1.78,
+        "dz": -0.002,
+        "dy": 0.002,
+        "crossings": [
+          1.7860000133514404,
+          1.7920000553131101
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "endX": 1.78,
+        "dz": 0,
+        "dy": -0.002,
+        "crossings": [
+          1.7860000133514404,
+          1.7920000553131104
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "endX": 1.78,
+        "dz": 0,
+        "dy": 0,
+        "crossings": [
+          1.7860000133514402,
+          1.7920000553131104
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "endX": 1.78,
+        "dz": 0,
+        "dy": 0.002,
+        "crossings": [
+          1.7860000133514404,
+          1.7920000553131104
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "endX": 1.78,
+        "dz": 0.002,
+        "dy": -0.002,
+        "crossings": [
+          1.7860000133514404,
+          1.7920000553131104
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "endX": 1.78,
+        "dz": 0.002,
+        "dy": 0,
+        "crossings": [
+          1.7860000133514404,
+          1.7920000553131104
+        ],
+        "sealed": true
+      },
+      {
+        "header": "supply",
+        "endX": 1.78,
+        "dz": 0.002,
+        "dy": 0.002,
+        "crossings": [
+          1.7860000133514404,
+          1.7920000553131104
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "endX": -1.78,
+        "dz": -0.002,
+        "dy": -0.002,
+        "crossings": [
+          -1.7920000553131104,
+          -1.7860000133514402
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "endX": -1.78,
+        "dz": -0.002,
+        "dy": 0,
+        "crossings": [
+          -1.7920000553131104,
+          -1.7860000133514404
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "endX": -1.78,
+        "dz": -0.002,
+        "dy": 0.002,
+        "crossings": [
+          -1.7920000553131104,
+          -1.7860000133514404
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "endX": -1.78,
+        "dz": 0,
+        "dy": -0.002,
+        "crossings": [
+          -1.7920000553131104,
+          -1.7860000133514404
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "endX": -1.78,
+        "dz": 0,
+        "dy": 0,
+        "crossings": [
+          -1.7920000553131106,
+          -1.7860000133514404
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "endX": -1.78,
+        "dz": 0,
+        "dy": 0.002,
+        "crossings": [
+          -1.7920000553131104,
+          -1.7860000133514404
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "endX": -1.78,
+        "dz": 0.002,
+        "dy": -0.002,
+        "crossings": [
+          -1.7920000553131104,
+          -1.7860000133514407
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "endX": -1.78,
+        "dz": 0.002,
+        "dy": 0,
+        "crossings": [
+          -1.7920000553131104,
+          -1.7860000133514404
+        ],
+        "sealed": true
+      },
+      {
+        "header": "return",
+        "endX": -1.78,
+        "dz": 0.002,
+        "dy": 0.002,
+        "crossings": [
+          -1.7920000553131104,
+          -1.7860000133514404
+        ],
+        "sealed": true
+      }
+    ],
+    "method": "108 rays through actual opposite (+Z/front) walls at the 12 branch axes plus 18 rays through the two unused header ends; requires distinct inner/outer metal surfaces and positive wall thickness."
+  },
+  "bareCollisionAudit": {
+    "testedPairs": 600,
+    "collisionPairs": 0,
+    "groups": [],
+    "samples": [],
+    "approvedContactSamples": [
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      },
+      {
+        "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+        "bare": "Bare Board 1 / packages / Board1/CPU#3",
+        "plane": 0.0040000006556510925
+      }
+    ],
+    "contactTolerance": 0.000001
+  },
+  "fluidWallAudit": {
+    "collisionPairs": 0,
+    "groups": [],
+    "samples": [],
+    "scope": "Actual fluid stream surfaces vs every companion solid surface, including annular hose/port bores, headers, copper floors/walls/dividers and nickel covers."
+  },
+  "plumbingMotionAudit": {
+    "samples": [
+      {
+        "progress": 0.276,
+        "plumbingLift": 0.6,
+        "plumbingZ": 0.1,
+        "coolingLift": 0.002674567901234548,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.27678947368421053,
+        "plumbingLift": 0.5950536046469056,
+        "plumbingZ": 0.1,
+        "coolingLift": 0.0006178668984501146,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.2775789473684211,
+        "plumbingLift": 0.5664486694531888,
+        "plumbingZ": 0.1,
+        "coolingLift": 0.000027068062292134876,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.2783684210526316,
+        "plumbingLift": 0.5052617664227618,
+        "plumbingZ": 0.1,
+        "coolingLift": 0,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.2791578947368421,
+        "plumbingLift": 0.41496852508724463,
+        "plumbingZ": 0.1,
+        "coolingLift": 0,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.27994736842105267,
+        "plumbingLift": 0.30740046157301293,
+        "plumbingZ": 0.1,
+        "coolingLift": 0,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.2807368421052632,
+        "plumbingLift": 0.19870180766827902,
+        "plumbingZ": 0.1,
+        "coolingLift": 0,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.2815263157894737,
+        "plumbingLift": 0.1052863398900957,
+        "plumbingZ": 0.1,
+        "coolingLift": 0,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.28231578947368424,
+        "plumbingLift": 0.03979420855143223,
+        "plumbingZ": 0.1,
+        "coolingLift": 0,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.28310526315789475,
+        "plumbingLift": 0.00704876682823552,
+        "plumbingZ": 0.1,
+        "coolingLift": 0,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.28389473684210526,
+        "plumbingLift": 0.000013399826451099273,
+        "plumbingZ": 0.1,
+        "coolingLift": 0,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.28468421052631576,
+        "plumbingLift": 0,
+        "plumbingZ": 0.09919771835228519,
+        "coolingLift": 0,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.2854736842105263,
+        "plumbingLift": 0,
+        "plumbingZ": 0.09336763190809377,
+        "coolingLift": 0,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.28626315789473683,
+        "plumbingLift": 0,
+        "plumbingZ": 0.0804748756604536,
+        "coolingLift": 0,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.28705263157894734,
+        "plumbingLift": 0,
+        "plumbingZ": 0.0618532039881756,
+        "coolingLift": 0,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.2878421052631579,
+        "plumbingLift": 0,
+        "plumbingZ": 0.04089466423700511,
+        "coolingLift": 0,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.2886315789473684,
+        "plumbingLift": 0,
+        "plumbingZ": 0.021735792698179424,
+        "coolingLift": 0,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.2894210526315789,
+        "plumbingLift": 0,
+        "plumbingZ": 0.007943810586970291,
+        "coolingLift": 0,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.2902105263157895,
+        "plumbingLift": 0,
+        "plumbingZ": 0.0012028200212414687,
+        "coolingLift": 0,
+        "collisionPairs": 0
+      },
+      {
+        "progress": 0.291,
+        "plumbingLift": 0,
+        "plumbingZ": 0,
+        "coolingLift": 0,
+        "collisionPairs": 0
+      }
+    ],
+    "collisionPairs": 0,
+    "firstCollisions": [],
+    "tolerance": 0.000001,
+    "method": "20 actual triangle samples of full plumbing transform against immutable bare hardware and same-time plate/frame/mount transforms; no AABB-only clearance claim."
+  }
+}

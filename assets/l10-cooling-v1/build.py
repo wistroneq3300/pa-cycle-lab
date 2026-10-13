@@ -54,21 +54,69 @@ def material(name,color,metal,rough):
     p=m.node_tree.nodes.get('Principled BSDF');p.inputs['Base Color'].default_value=(*color,1)
     p.inputs['Metallic'].default_value=metal;p.inputs['Roughness'].default_value=rough;p.inputs['Specular IOR Level'].default_value=.5
     m['authorship']='Original engineering visualization finish; not measured BRDF';M[name]=m;return m
-material('Machined copper',(.56,.265,.13),1,.30)
-material('Brushed nickel',(.46,.49,.49),1,.29)
-material('Anodized retention',(.024,.027,.029),.75,.38)
+material('Machined copper',(.56,.265,.13),1,.34)
+material('Brushed nickel',(.46,.49,.49),1,.60)
+material('CPU satin nickel cover',(.43,.46,.47),1,.46)
+material('GPU machined nickel cover',(.43,.46,.47),1,.355)
+material('Machined nickel fittings',(.44,.47,.48),1,.315)
+material('Dark nickel fastener',(.115,.13,.14),.91,.36)
+material('Recess oxide',(.012,.016,.018),.38,.59)
+material('Anodized retention',(.024,.027,.029),.75,.47)
 material('TIM',(.19,.20,.19),0,.78)
 material('Coolant water tracer',(.035,.29,.34),.13,.23)
-material('Elastomer hose',(.019,.022,.025),0,.61)
-material('Gasket',(.011,.014,.015),0,.69)
-# Deterministic fine directional roughness, deliberately below geometric scale.
-# Packed image is the sole new texture. No unrelated source maps are rewritten.
+material('Elastomer hose',(.019,.022,.025),0,.65)
+material('Gasket',(.011,.014,.015),0,.82)
+# Fine authored fabrication finishes; no photo scan, random scratches, or broad
+# decorative striping. Covers retain their existing geometry and reflectance
+# hierarchy, with a finer finished perimeter around the manufactured edge.
 TEX=HERE/'textures';TEX.mkdir(exist_ok=True)
-y,x=np.mgrid[0:256,0:256];grain=.5+.12*np.sin(x*2.19)+.05*np.sin(x*.371)+.045*np.cos(y*1.173+x*.713)
-rgba=np.ones((256,256,4),dtype=np.float32);rgba[:,:,0]=1;rgba[:,:,1]=np.clip(.29+(grain-.5)*.065,.26,.33);rgba[:,:,2]=1
-img=bpy.data.images.new('cooling-machined-metal-mr',width=256,height=256,alpha=True);img.colorspace_settings.name='Non-Color';img.pixels.foreach_set(rgba.ravel());img.filepath_raw=str(TEX/'cooling-machined-metal-mr.png');img.file_format='PNG';img.save();img.pack()
-for name in ['Machined copper','Brushed nickel']:
-    m=M[name];p=m.node_tree.nodes.get('Principled BSDF');tex=m.node_tree.nodes.new('ShaderNodeTexImage');tex.image=img;sep=m.node_tree.nodes.new('ShaderNodeSeparateColor');m.node_tree.links.new(tex.outputs['Color'],sep.inputs['Color']);m.node_tree.links.new(sep.outputs['Green'],p.inputs['Roughness']);m.node_tree.links.new(sep.outputs['Blue'],p.inputs['Metallic'])
+y,x=np.mgrid[0:256,0:256];u=(x+.5)/256;v=(y+.5)/256
+micro=.50*np.sin(x*2.19+y*.071)+.28*np.sin(x*.713-y*1.173)+.22*np.cos(x*1.671+y*2.031)
+# The cross-lapped/satin finishes have no periodic machining feed. A fixed
+# PCG64 field, gently filtered in both axes, provides repeatable subpixel
+# roughness without the visible interference dots of crossed sine waves.
+rng=np.random.Generator(np.random.PCG64(20261013))
+def satin_micro():
+    field=rng.standard_normal((256,256))
+    for _ in range(2):
+        for axis in (0,1):
+            field=(np.roll(field,1,axis)+2*field+np.roll(field,-1,axis))/4
+    return np.clip((field-field.mean())/field.std(),-2,2)
+nickel_micro=satin_micro();cpu_micro=satin_micro()
+edge=np.clip((np.minimum.reduce([u,1-u,v,1-v])-.010)/.032,0,1)
+finishes=[
+    ('Machined copper','cooling-machined-metal-mr',.34+.012*micro+.010*np.sin(x*1.417+y*.017)),
+    ('Brushed nickel','cooling-satin-nickel-mr',.60+.006*nickel_micro),
+    ('CPU satin nickel cover','cooling-cpu-cover-mr',.33*(1-edge)+edge*(.46+.006*cpu_micro)),
+    ('GPU machined nickel cover','cooling-gpu-cover-mr',.29*(1-edge)+edge*(.355+.013*micro+.014*np.sin(x*1.693+y*.011)))
+]
+for name,image_name,rough in finishes:
+    rgba=np.ones((256,256,4),dtype=np.float32);rgba[:,:,1]=np.clip(rough,.27,.65)
+    img=bpy.data.images.new(image_name,width=256,height=256,alpha=True);img.colorspace_settings.name='Non-Color';img.pixels.foreach_set(rgba.ravel());img.filepath_raw=str(TEX/(image_name+'.png'));img.file_format='PNG';img.save();img.pack()
+    m=M[name];m['finishProcess']='Cross-lapped satin face' if name.startswith('CPU') else 'Fine longitudinal milling' if name.startswith('GPU') else 'Fine machined copper' if name=='Machined copper' else 'Satin finished nickel tube'
+    p=m.node_tree.nodes.get('Principled BSDF');tex=m.node_tree.nodes.new('ShaderNodeTexImage');tex.image=img;sep=m.node_tree.nodes.new('ShaderNodeSeparateColor');m.node_tree.links.new(tex.outputs['Color'],sep.inputs['Color']);m.node_tree.links.new(sep.outputs['Green'],p.inputs['Roughness']);m.node_tree.links.new(sep.outputs['Blue'],p.inputs['Metallic'])
+
+fastener_recesses=[]
+def recessed_fastener(name,layer,component,x,y,z,r,h,depth,removed_slug=None):
+    """Carve a real internal hex drive; retain the reviewed exterior head."""
+    head=cylinder(name,layer,component,x,y,z,r,h,'Dark nickel fastener',20)
+    bpy.ops.object.select_all(action='DESELECT');head.select_set(True);bpy.context.view_layer.objects.active=head
+    # Evaluate the pre-existing bevel/weighted normal stack before removing
+    # only the drive volume. No contact plane or outer fastener face moves.
+    for mod in list(head.modifiers):bpy.ops.object.modifier_apply(modifier=mod.name)
+    top=y+h/2;drive_r=r*.40;floor=top-depth
+    bpy.ops.mesh.primitive_cylinder_add(vertices=6,radius=drive_r,depth=depth+.002,location=coord(x,floor+(depth+.002)/2,z))
+    cutter=bpy.context.object;cutter.name=name+' temporary hex cutter'
+    cutter.select_set(False);head.select_set(True);bpy.context.view_layer.objects.active=head
+    mod=head.modifiers.new('Functional recessed hex drive','BOOLEAN');mod.operation='DIFFERENCE';mod.solver='EXACT';mod.object=cutter
+    bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cutter,do_unlink=True)
+    head.data.materials.append(M['Recess oxide']);head.data.update()
+    for face in head.data.polygons:
+        c=head.matrix_world@face.center
+        if math.hypot(c.x-x,-c.y-z)<drive_r*1.015 and c.z<top-.00002:face.material_index=1
+    head['functionalDetail']='Recessed hex drive, confined to original head bounds'
+    fastener_recesses.append({'id':name,'layer':layer,'component':component,'center':[x,y,z],'radius':r,'minY':y-h/2,'maxY':top,'recessRadius':drive_r,'recessFloorY':floor,'recessDepth':depth,'removedV1Slug':removed_slug})
+    return head
 
 def pipe(name,layer,component,points,r,mat,offset=0,sides=12,inner=0):
     """Annular physical shell, or closed stream core; raw arc U and section V."""
@@ -177,7 +225,7 @@ for seat in seats:
         # Divider terminates short of its U-turn at alternating ends.
         gap=.059;length=2*end-gap;shift=gap/2 if i%2==0 else -gap/2
         cube(sid+' microchannel divider '+str(i+1),'cooling-channels',sid,x+float((lane[i]+lane[i+1])/2),.046,z+shift,.032,.036,length,'Machined copper',.001)
-    cube(sid+' sealed nickel cover','cooling',sid,x,.0685,z,w,.009,d,'Brushed nickel',.0018)
+    cube(sid+' sealed nickel cover','cooling',sid,x,.0685,z,w,.009,d,'CPU satin nickel cover' if cpu else 'GPU machined nickel cover',.0018)
     # Compressible dark gasket follows the perimeter between rim and cover.
     for side in [-1,1]:
         cube(sid+' cover gasket side','cooling-frame',sid,x+side*(w-.011)/2,.064,z,.006,.001,d-.010,'Gasket',.0001)
@@ -191,16 +239,16 @@ for seat in seats:
         cube(mid,'cooling-mounts',sid,mx,.013,mz,.012,.018,.025,'Anodized retention',0)
         cube(mid+' clamp ear','cooling-frame',sid,x+sx*(w/2+.008),.026,mz,.044,.008,.052,'Machined copper',.001)
         cylinder(mid+' preload washer','cooling-frame',sid,mx,.031,mz,.012,.002,'Brushed nickel',24,inner=.005)
-        cylinder(mid+' captive fastener','cooling-frame',sid,mx,.037,mz,.0085,.010,'Anodized retention',20)
-        cylinder(mid+' recessed drive','cooling-frame',sid,mx,.0421,mz,.004,.0002,'Brushed nickel',6)
+        recessed_fastener(mid+' captive fastener','cooling-frame',sid,mx,.037,mz,.0085,.010,.002,
+            {'name':mid+' recessed drive','center':[mx,.0421,mz],'radius':.004,'minY':.042,'maxY':.0422})
         mounts.append({'id':mid,'seatId':sid,'min':[mx-.006,.004,mz-.0125],'max':[mx+.006,.022,mz+.0125],'contactMaterial':'CPU nickel frame' if cpu else 'Gold plated frame','contactType':'existing package frame top; generic conceptual clamp, no PCB bore'})
     for sx in [-1,1]:
       for sz in [-1,1]:
-        cylinder(sid+' cover screw','cooling',sid,x+sx*(w/2-.041),.0744,z+sz*(d/2-.039),.008,.0028,'Anodized retention',20)
+        recessed_fastener(sid+f' cover screw {sx} {sz}','cooling',sid,x+sx*(w/2-.041),.0744,z+sz*(d/2-.039),.008,.0028,.0011)
     inlet=channel[0];outlet=channel[-1]
     # Separate radial fittings seat at real openings and enclose fluid endpoints.
     for label,p in [('inlet',inlet),('outlet',outlet)]:
-        pipe(sid+' '+label+' port collar','cooling-frame',sid,[[p[0],p[1],z+d/2-.012],[p[0],p[1],p[2]+.008]],.020,'Brushed nickel',sides=20,inner=.0145)
+        pipe(sid+' '+label+' port collar','cooling-frame',sid,[[p[0],p[1],z+d/2-.012],[p[0],p[1],p[2]+.008]],.020,'Machined nickel fittings',sides=20,inner=.0145)
     # Hoses rise forward of each coldplate then clear every closed cover.
     inlet_pts=path([[inlet[0],SUPPLY_Y,SUPPLY_Z],[inlet[0],.100,-.56],[inlet[0],.100,inlet[2]+.16],[inlet[0],inlet[1],inlet[2]+.05],inlet],.048)
     outlet_pts=path([outlet,[outlet[0],outlet[1],outlet[2]+.05],[outlet[0],.100,outlet[2]+.16],[outlet[0],.100,RETURN_Z]],.048)
@@ -217,6 +265,9 @@ for seat in seats:
     seat.update({'plateWidth':w,'plateDepth':d,'timBottom':die_y,'timTop':tim_top,'copperContactBottom':tim_top,'copperContactTop':.022,'bodyBottom':.022,'coverBottom':.064,'coverTop':.073,'mountFootY':.004,'inlet':inlet,'outlet':outlet,'routeIds':[rin['id'],rchannel['id'],rout['id']]})
 
 metadata={'id':'l10-cooling-assembly-v1','revision':1,'sourceBareGLBSHA256':baseline_hash,'seats':seats,'mounts':mounts,'flowRoutes':routes,'layers':LAYERS,'coordinateUnits':'PA raw normalized tray coordinates; apply shared [.688,1,.802] once','approximation':scene['approximation'],'flowInterpretation':'Original six parallel serpentine circuits. Fluid meshes visualize stream cores within sealed passages; no CFD, pressure, thermal or real coolant claim. Shared return header is a mixing volume with local arc phase; branch transport distances remain physical.','envelope':{'lidUndersideY':.125,'maxExpectedY':.117,'frontLimitZ':-.313},'builderHelperSource':'assets/l10-prototype/build.py: pure helper definitions only'}
+metadata['finishRevision']=2
+metadata['finishChanges']=['Separate CPU cross-lapped and GPU longitudinal-milled nickel cover finishes','Satin nickel manifold, distinct machined nickel fittings and copper','Real recessed drives inside 48 original fastener head envelopes; 24 raised fake drive slugs removed','Separate elastomer and gasket roughness; all fluid geometry, UVs and material unchanged']
+metadata['fastenerRecesses']=fastener_recesses
 scene['assemblyContract']=json.dumps(metadata,separators=(',',':'))
 # Editable source is saved before export batching; every component remains named.
 bpy.ops.wm.save_as_mainfile(filepath=str(HERE/'cooling-assembly.blend'))

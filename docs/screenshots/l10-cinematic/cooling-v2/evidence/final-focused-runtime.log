@@ -1,0 +1,13 @@
+{
+  "pass": true,
+  "checks": [
+    "Actual UV-distance advection; 22 routes / six thermal gradients / blue supply / red return, constant speed, fixed camera/light, zero emission; paused state is stable",
+    "Fluid disappears and solid metal returns before lid closure",
+    "Context loss/restoration reloads both bare and cooling assets",
+    "Reduced Motion seats the assembly with zero fluid animation",
+    "Missing or incomplete cooling companion fails closed; delayed environment failure restores the full procedural scene",
+    "Delayed companion loading holds the real dashboard cinematic clock",
+    "39.7-second central clock: seekTime, progress bar, pause/resume, Replay and Skip share the same state",
+    "Failed companion retains the exact 35.2-second legacy timeline"
+  ]
+}

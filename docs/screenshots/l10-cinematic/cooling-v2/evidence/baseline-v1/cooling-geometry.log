@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "checks": [
+    "Independent collision/path helpers retain piercing, coplanar, clearance and full-containment negative fixtures",
+    "Frozen bare GLB, default procedural fallback, profile, SSD/ports/gold/Rack, 1001 default poses/cameras and 35.2-second timing retained",
+    "Six actual GLB die/TIM/copper stacks, 24 frame-supported feet, exact covers and unchanged lid clearance",
+    "22 actual fluid meshes follow directed arc-length UVs; six parallel circuits join supply/header/plate/return without gaps",
+    "126 actual-triangle rays verify sealed opposite header walls and both unused header ends",
+    "Actual triangle SAT detects no unapproved bareboard intersections or fluid-wall crossings; named TIM/frame contacts only and divider-containment checks",
+    "1001 deterministic cooling states: seated bare board, ordered plate/plumbing descent, bounded flow interval, solid restore before lid, unchanged Rack from .40 and retained default controller",
+    "20 actual-triangle plumbing installation poses clear bare hardware and moving plate/frame assemblies",
+    "Companion camera influence is zero for every Rack/bridge sample from .40 to 1"
+  ],
+  "companion": {
+    "sha256": "9816625ec2789766476b5afea543895123b388da0eec8c5978ec623cc69a5920",
+    "bytes": 3425524,
+    "primitives": 88,
+    "layers": [
+      "cooling-mounts",
+      "cooling-frame",
+      "cooling",
+      "cooling-channels",
+      "cooling-plumbing",
+      "cooling-fluid"
+    ]
+  },
+  "errors": [],
+  "output": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-cinematic-l10\\docs\\screenshots\\l10-cinematic\\cooling-v2\\evidence\\baseline-v1\\cooling-geometry.json"
+}
