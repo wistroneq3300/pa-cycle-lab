@@ -1,0 +1,40 @@
+{
+  "result": "PASS",
+  "sourceObjects": 328,
+  "editableLayerObjectCounts": {
+    "cooling-mounts": 24,
+    "cooling-frame": 198,
+    "cooling": 30,
+    "cooling-channels": 30,
+    "cooling-plumbing": 24,
+    "cooling-fluid": 22
+  },
+  "sourceSHA256": "deb765a4bc6cc2364e491aec88bc0deabf1affbfea68994845b68b9a8b7902b9",
+  "glbSHA256": "9816625ec2789766476b5afea543895123b388da0eec8c5978ec623cc69a5920",
+  "images": [
+    {
+      "name": "cooling-machined-metal-mr",
+      "packed": true,
+      "width": 256,
+      "height": 256,
+      "externalSHA256": "e566a83a016809b8ad3f9b1adaec11edd37bb4ea7de9560cdfeb0a3fc56081fd",
+      "decodedPixelsSHA256": "f05d4af982c7d81a851a19447259217d138e559a477f48cb980f1f083e148f06",
+      "packedExternalPixelIdentical": true
+    }
+  ],
+  "embeddedImages": [
+    {
+      "name": "cooling-machined-metal-mr",
+      "sha256": "e566a83a016809b8ad3f9b1adaec11edd37bb4ea7de9560cdfeb0a3fc56081fd",
+      "bytes": 34004,
+      "equalsExternal": true
+    }
+  ],
+  "zeroEmission": true,
+  "protectedHashes": {
+    "app/static/models/l10-prototype/bare-compute-boards.glb": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29",
+    "assets/l10-prototype/compute-board-prototype.blend1": "01b5856ab7261a1ca0a8b9904ec8e82bccd611cfd3cbb687235e99b55b563e85",
+    "assets/l10-prototype/textures/surface-normal.png": "6309b50efb72caed7d2c651cef994b57946026879d54fcc611fab351b22994d5"
+  },
+  "readOnlyAudit": true
+}

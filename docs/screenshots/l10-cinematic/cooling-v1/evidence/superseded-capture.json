@@ -1,0 +1,8 @@
+{
+  "supersededCoolingSHA256": "d4a025723e68ed34adb1a5c1245aea5fede34cd1850425e9c3a61d0485c45c2c",
+  "reason": "Independent low-angle visual review found opposite-wall manifold openings. Passing interference tests did not establish hydraulic closure. The asset was returned for a necessary sealed-manifold correction before acceptance.",
+  "retainedLocally": "artifacts/l10-cooling-v1/superseded-d4a025/",
+  "historicalBeforeChanged": false,
+  "replacementCoolingSHA256": "9816625ec2789766476b5afea543895123b388da0eec8c5978ec623cc69a5920",
+  "method": "After images and comparison were refreshed after the sealed companion passed physical checks. The earlier capture remains in ignored artifacts and is not presented as the accepted result."
+}

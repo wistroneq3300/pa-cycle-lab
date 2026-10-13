@@ -41,6 +41,25 @@
       phase:p<.065?'l10-exploded':p<.135?'compute-board':p<.202?'cpu-gpu-assembly':p<.248?'network-storage':p<.292?'cooling-install':p<.333?'cooling-reveal':p<.376?'l10-hero':p<.407?'chassis-close':p<.56?'camera-bridge':'rack-integration',
       packageSeparation:'visual-only / board-integrated packages',flowMeaning:'conceptual thermal-flow overlay',profile:window.PAL10Hardware?.profile?.id||null};
   }
+  // The companion cooling assembly starts with the accepted, seated bare board.
+  // Its authored prefix rejoins the unchanged enclosure/Rack timeline at .333.
+  // No independent clock: seeking, Replay and Reduced Motion share one state.
+  function coolingAssemblyState(p){
+    const state=l10State(p),cooling=interval(.248,.278,p),plumbing=interval(.276,.291,p);
+    return {...state,board:1,packages:1,io:1,boardLift:0,packageLift:0,ioLift:0,
+      cooling,coolingLift:1.0*(1-cooling),plumbing,plumbingLift:.60*(1-interval(.276,.284,p)),
+      plumbingZ:.10*(1-interval(.284,.291,p)),
+      coolingVisibility:interval(.240,.248,p),plumbingVisibility:interval(.267,.276,p),
+      // Distance, not brightness, advances along the authored channel UVs.
+      flowTravel:Math.max(0,(p-.292)/.041)*3.6,
+      phase:p<.135?'bare-board':p<.248?'silicon-detail':p<.276?'cooling-install':p<.292?'manifold-connect':state.phase,
+      packageSeparation:'board-integrated / seated throughout cooling installation',
+      flowMeaning:'Advected coolant visualization in original conceptual channels; not CFD or measured flow',
+      coolingAssembly:'l10-cooling-assembly-v1'};
+  }
+  function coolingAssemblyCamera(p){
+    return {bare:1-interval(.235,.248,p),detail:interval(.095,.155,p)*(1-interval(.225,.248,p))};
+  }
   const groupTravel={server:1.52,nvlink:2.68,powershelf:.78,switch:1.94,blanking:.14};
   const groupLateral={server:0,nvlink:.60,powershelf:.30,switch:-.38,blanking:0};
   const classInfo={server:['COMPUTE TRAY','AI COMPUTE NODE'],nvlink:['NVLINK SWITCH TRAY','HIGH-SPEED GPU FABRIC'],switch:['NETWORK SWITCH','RACK NETWORK FABRIC'],powershelf:['POWER SHELF','RACK POWER DELIVERY']};
@@ -102,8 +121,9 @@
     }
     return out;
   }
-  function assemblySnapshot(value){
+  function assemblySnapshot(value,options={}){
     const progress=clamp(Number(value)||0),sample=motion(progress),{alignment,insertion,pullback,rackOpacity,explode}=sample;
+    if(options.coolingV1&&hasL10()){sample.l10=coolingAssemblyState(progress);if(progress<.407)sample.phase=sample.l10.phase;}
     const placements=PLACEMENTS.map((item,index)=>({...item,...placementPose(item,index,progress,explode),constellation:choreography[index].constellation.slice(),seatStart:choreography[index].seatStart,seatEnd:choreography[index].seatEnd,primary:item.name===PRIMARY}));
     const primary=placements.find(item=>item.primary),primaryPose={x:primary.x,y:primary.y,z:primary.z,scale:1};
     return {...sample,model:'generic-liquid-cooled-compute',
@@ -122,6 +142,7 @@
     varying vec3 vPosition;varying vec3 vLocal;varying vec3 vNormal;varying vec4 vColor;varying vec2 vMaterial;
     uniform vec3 uEye;uniform vec3 uKeyPosition;uniform float uLightTheme;uniform float uTime;uniform float uScan;uniform float uScanY;
     uniform float uRack;uniform float uQuality;uniform float uReveal;uniform float uDetail;uniform float uSectionX;uniform float uL10Finish;
+    uniform float uCoolingFlow;uniform float uCoolingTravel;
     uniform sampler2D uShadowMap;uniform float uShadowPass;uniform float uHasShadow;uniform float uShadowTexel;
     uniform sampler2D uEnvironment;uniform float uHasEnvironment;
     varying vec2 vUV;varying vec4 vTangent;
@@ -204,6 +225,20 @@
       if(uShadowPass>.5){gl_FragColor=packedDepth(gl_FragCoord.z);return;}
       if(vMaterial.y<-.5){gl_FragColor=vColor;return;}
       vec3 N=normalize(vNormal),V=normalize(uEye-vPosition),R=reflect(-V,N);
+      if(uCoolingFlow>.5){
+        // The UV coordinate is authored arc length through the connected
+        // fluid volume. Density witnesses advect; nothing emits or blooms.
+        float travel=vUV.x-uCoolingTravel;
+        float witness=pow(.5+.5*cos(travel*20.943951),16.0);
+        float fine=sin(travel*83.0+vUV.y*6.283185)*.003;
+        N=normalize(N+vec3(fine,0.0,-fine));R=reflect(-V,N);
+        float nv=max(dot(N,V),0.0),f=.0204+.9796*pow(1.0-nv,5.0);
+        vec3 body=srgbLinear(assetBase.rgb)*vColor.rgb;
+        vec3 irradiance=uHasEnvironment>.5?environmentStrip(N,6.0):vec3(.45);
+        vec3 reflected=uHasEnvironment>.5?environmentSpecular(R,.10):vec3(.30);
+        vec3 water=body*irradiance*(.64+witness*.24)+reflected*(f+.04+witness*.09);
+        gl_FragColor=vec4(displayTransform(water),vColor.a*(.70+.14*witness+.14*f));return;
+      }
       float metal=clamp(vMaterial.x,0.0,1.0),polymer=1.0-metal;
       float grain=fract(sin(dot(floor(vLocal*310.0),vec3(127.1,311.7,74.7)))*43758.5453);
       float rough=.24+polymer*.44+(grain-.5)*.032;
@@ -429,6 +464,7 @@
     const assetEnabled=hasL10()&&(bareAsset||/(?:^|[?&])l10AssetPrototype=1(?:&|$)/.test(window.location?.search||''));
     const inspectionEnabled=/(?:^|[?&])l10AssetLab=1(?:&|$)/.test(window.location?.search||'');
     let assetRuntime=null,assetLoading=false,assetFailed=false,assetError='',assetGeneration=0,inspection=null;
+    let coolingRuntime=null,coolingLoading=false,coolingFailed=false,coolingError='';
     let progress=0,pointerX=0,pointerY=0,yaw=0,pitch=0,manual=false,drag=null,light=0,view='authored';
     let visible=true,intersecting=true,lastTime=0,lightTime=0,drawCalls=0,vertices=0,slowFrames=0,resolution=1,frameMs=16.7;
     let idleTimer=0,idleStart=0,idleWeight=0,idleExit=0,idleYaw=0,idlePitch=0,idleTravel=0;
@@ -454,7 +490,7 @@
       Object.entries(built.meshes).forEach(([name,mesh])=>{const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,mesh.data,gl.STATIC_DRAW);parts[name]={buffer,count:mesh.data.length/12};vertices+=mesh.data.length/12;});
       ['aPosition','aNormal','aColor','aMaterial','aUV','aTangent'].forEach(name=>attributes[name]=gl.getAttribLocation(program,name));
       ['uViewProjection','uLightViewProjection','uModel','uPart','uOpacity','uEye','uKeyPosition','uLightTheme','uTime','uScan','uScanY','uRack','uQuality','uReveal','uDetail','uSectionX','uShadowMap','uShadowPass','uHasShadow','uShadowTexel','uEnvironment','uHasEnvironment'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
-      ['uAsset','uAssetNormalScale','uAssetRoughness','uAssetAO','uAssetAlphaCutoff','uAssetAlphaMask','uAssetBase','uAssetMR','uAssetNormal','uAssetOcclusion','uAssetFilmStrength','uAssetFilmThickness','uL10Finish'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
+      ['uAsset','uAssetNormalScale','uAssetRoughness','uAssetAO','uAssetAlphaCutoff','uAssetAlphaMask','uAssetBase','uAssetMR','uAssetNormal','uAssetOcclusion','uAssetFilmStrength','uAssetFilmThickness','uL10Finish','uCoolingFlow','uCoolingTravel'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
       if(assetEnabled&&window.PAL10GLTF&&window.PAL10AssetRuntime){
         assetLoading=true;assetFailed=false;assetError='';canvas.dataset.coreAsset='loading';const generation=++assetGeneration;
         window.PAL10GLTF.load('/static/models/l10-prototype/'+(bareAsset?'bare-compute-boards.glb':'compute-board.glb')).then(asset=>{
@@ -477,6 +513,7 @@
             if(gl.getError()!==gl.NO_ERROR)throw new Error('Prototype replacement buffer upload failed');
             for(const [name,mesh] of Object.entries(stagedParts)){vertices+=mesh.count-(parts[name]?.count||0);if(parts[name])gl.deleteBuffer(parts[name].buffer);parts[name]=mesh;}
             assetRuntime=stagedRuntime;
+            if(bareAsset)loadCoolingCompanion(generation);
             vertices+=assetRuntime.metadata.vertices;assetLoading=false;canvas.dataset.coreAsset='ready';canvas.dataset.coreVertices=String(vertices);canvas.dataset.coreGeometryBuffers=String(Object.keys(parts).length+assetRuntime.metadata.primitives);shadowProgress=-1;requestDraw();
           }catch(error){stagedRuntime?.destroy();Object.values(stagedParts).forEach(p=>gl.deleteBuffer(p.buffer));asset.disposeImages();assetLoading=false;assetFailed=true;assetError=error.message;canvas.dataset.coreAsset='failed';requestDraw();}
         }).catch(error=>{if(disposed||generation!==assetGeneration)return;assetLoading=false;assetFailed=true;assetError=error.message;canvas.dataset.coreAsset='failed';requestDraw();});
@@ -518,13 +555,40 @@
       canvas.dataset.coreModel='generic-liquid-cooled-compute';canvas.dataset.coreComputeTrays=String(classCounts.server);canvas.dataset.coreSwitchTrays=String(classCounts.nvlink);
       canvas.dataset.coreGeometryBuffers=String(Object.keys(parts).length);canvas.dataset.coreVertices=String(vertices);
     }
-    function release(){assetGeneration++;assetRuntime?.destroy(contextLost);assetRuntime=null;assetLoading=false;environmentGeneration++;if(environmentImage){environmentImage.onload=null;environmentImage.onerror=null;}environmentImage=null;if(gl&&!contextLost){if(parts)Object.values(parts).forEach(part=>gl.deleteBuffer(part.buffer));if(program)gl.deleteProgram(program);shaders.forEach(shader=>gl.deleteShader(shader));if(shadowFramebuffer)gl.deleteFramebuffer(shadowFramebuffer);if(shadowTexture)gl.deleteTexture(shadowTexture);if(shadowDepthBuffer)gl.deleteRenderbuffer(shadowDepthBuffer);if(environmentTexture)gl.deleteTexture(environmentTexture);}environmentTexture=null;environmentReady=false;shadowFramebuffer=null;shadowTexture=null;shadowDepthBuffer=null;parts=null;program=null;shared=null;shaders.length=0;}
+    function releaseCooling(){
+      if(coolingRuntime){vertices-=coolingRuntime.metadata.vertices;coolingRuntime.destroy(contextLost);coolingRuntime=null;}
+      coolingLoading=false;canvas.dataset.coreCooling='fallback';
+    }
+    function loadCoolingCompanion(generation){
+      coolingLoading=true;coolingFailed=false;coolingError='';canvas.dataset.coreCooling='loading';
+      window.PAL10GLTF.load('/static/models/l10-cooling-v1/cooling-assembly.glb').then(asset=>{
+        if(disposed||contextLost||generation!==assetGeneration){asset.disposeImages();return;}
+        try{
+          const meta=asset.metadata.extras;
+          const expected=['cooling','cooling-channels','cooling-fluid','cooling-frame','cooling-mounts','cooling-plumbing'];
+          if(!assetRuntime||environmentFailed||meta.id!=='l10-cooling-assembly-v1'||
+            meta.sourceBareGLBSHA256!=='6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29'||
+            JSON.stringify([...asset.metadata.layers].sort())!==JSON.stringify(expected)||
+            !Array.isArray(meta.seats)||meta.seats.length!==6||new Set(meta.seats.map(s=>s.id)).size!==6||
+            !Array.isArray(meta.flowRoutes)||meta.flowRoutes.length<6)throw new Error('Cooling companion ownership or six-seat contract is invalid');
+          for(const p of asset.primitives){
+            if(p.bounds.max[1]>.125001||p.bounds.min[1]<-.113||p.bounds.min[0]<-1.98||p.bounds.max[0]>1.98||p.bounds.min[2]<-3.14||p.bounds.max[2]>-.18)
+              throw new Error('Cooling companion exceeds its tray envelope');
+          }
+          const staged=window.PAL10AssetRuntime.upload(gl,asset,attributes,uniforms);
+          coolingRuntime=staged;vertices+=staged.metadata.vertices;coolingLoading=false;
+          canvas.dataset.coreCooling='ready';canvas.dataset.coreVertices=String(vertices);shadowProgress=-1;cameraReady=false;requestDraw();
+        }catch(error){asset.disposeImages();coolingLoading=false;coolingFailed=true;coolingError=error.message;canvas.dataset.coreCooling='fallback';requestDraw();}
+      }).catch(error=>{if(disposed||generation!==assetGeneration)return;coolingLoading=false;coolingFailed=true;coolingError=error.message;canvas.dataset.coreCooling='fallback';requestDraw();});
+    }
+    function release(){assetGeneration++;releaseCooling();assetRuntime?.destroy(contextLost);assetRuntime=null;assetLoading=false;environmentGeneration++;if(environmentImage){environmentImage.onload=null;environmentImage.onerror=null;}environmentImage=null;if(gl&&!contextLost){if(parts)Object.values(parts).forEach(part=>gl.deleteBuffer(part.buffer));if(program)gl.deleteProgram(program);shaders.forEach(shader=>gl.deleteShader(shader));if(shadowFramebuffer)gl.deleteFramebuffer(shadowFramebuffer);if(shadowTexture)gl.deleteTexture(shadowTexture);if(shadowDepthBuffer)gl.deleteRenderbuffer(shadowDepthBuffer);if(environmentTexture)gl.deleteTexture(environmentTexture);}environmentTexture=null;environmentReady=false;shadowFramebuffer=null;shadowTexture=null;shadowDepthBuffer=null;parts=null;program=null;shared=null;shaders.length=0;}
     function restoreLegacyAsset(reason){
       assetGeneration++;assetLoading=false;assetFailed=true;assetError=reason;canvas.dataset.coreAsset='failed';
+      releaseCooling();coolingFailed=true;coolingError=reason;
       if(assetRuntime){
         vertices-=assetRuntime.metadata.vertices;assetRuntime.destroy();assetRuntime=null;
         const legacy=window.PAL10Hardware.build();
-        for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling','l10-flow-supply','l10-io']){const mesh=parts[name],data=legacy.meshes[name].data;vertices+=data.length/12-mesh.count;gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);mesh.count=data.length/12;}
+        for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling','l10-flow-supply','l10-flow-return','l10-io','l10-network-cover']){const mesh=parts[name],data=legacy.meshes[name].data;vertices+=data.length/12-mesh.count;gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);mesh.count=data.length/12;}
       }
       shadowProgress=-1;
       canvas.dataset.coreVertices=String(vertices);canvas.dataset.coreGeometryBuffers=String(parts?Object.keys(parts).length:0);
@@ -552,8 +616,12 @@
         // Additional opt-in evidence cameras; never used by the authored film.
         if(inspection==='fans'){camera[1]=.68;camera[2]=3.5;camera[3]=(pose.x-.85)*modelMatrix[0];camera[5]=(pose.z+.055)*modelMatrix[10];}
         if(inspection==='power'){camera[1]=1.12;camera[2]=5.3;camera[3]=pose.x*modelMatrix[0];camera[5]=(pose.z+.62)*modelMatrix[10];}
-        if(inspection.startsWith('bare-')){
+        if(inspection.startsWith('bare-')||inspection.startsWith('cooling-')){
           const presets={
+            'cooling-hero':[-.46,.86,11.5,0,.04,.35],
+            'cooling-close':[-.34,.79,4.80,-.965,.05,-1.68],
+            'cooling-rear':[3.02,.54,6.2,0,.04,-2.00],
+            'cooling-section':[-.24,.13,4.60,-.965,.04,-1.68],
             'bare-front':[0,0,3.0,0,0,3.15],
             'bare-storage':[0,1.46,3.3,-.075,.01,2.62],
             'bare-section':[1.38,.095,3.0,.46,.009,2.63],
@@ -596,8 +664,12 @@
         const l10=sample.l10,pose=placementPose(PLACEMENTS[PRIMARY_INDEX],PRIMARY_INDEX,progress,0),bridge=interval(.407,.56,progress);
         const closeYaw=mix(-.52,-.25,interval(0,.38,progress)),closeElevation=mix(.67,.86,interval(.245,.30,progress))-.16*interval(.333,.39,progress);
         const closeTarget=[pose.x*modelMatrix[0],pose.y+mix(.80,.10,interval(.05,.29,progress)),pose.z*modelMatrix[10]-.12];
+        const coolingCamera=coolingRuntime?coolingAssemblyCamera(progress):{bare:0,detail:0};
+        closeTarget[0]-=.965*modelMatrix[0]*coolingCamera.detail;
+        closeTarget[1]=mix(closeTarget[1],pose.y+.04,coolingCamera.bare);
+        closeTarget[2]=mix(closeTarget[2],(pose.z-1.70)*modelMatrix[10],coolingCamera.detail);
         const lo=[closeTarget[0]-1.47,pose.y-.14,(pose.z-3.1)*modelMatrix[10]],hi=[closeTarget[0]+1.47,pose.y+.22+l10.coolingLift,(pose.z+3.1)*modelMatrix[10]];
-        const closeFit=fittedDistance(lo,hi,closeTarget,closeYaw+yaw,closeElevation+pitch,aspect,.79,.89);
+        const closeFit=mix(fittedDistance(lo,hi,closeTarget,closeYaw+yaw,closeElevation+pitch,aspect,.79,.89),Math.max(4.5,3.7/aspect),coolingCamera.detail);
         azimuth=mix(closeYaw+yaw,azimuth,bridge);elevation=mix(closeElevation+pitch,elevation,bridge);
         distance=mix(closeFit,distance,bridge);
         for(let axis=0;axis<3;axis++)target[axis]=mix(closeTarget[axis],target[axis],bridge);
@@ -619,6 +691,7 @@
       if(shadowPass&&(opacity<.96||!writeDepth||name==='floor'||name.includes('flow')))return;
       const mesh=parts[name];if(!mesh||!mesh.count||opacity<=.003)return;
       gl.uniform1f(uniforms.uL10Finish,bareAsset&&assetRuntime&&name==='l10-chassis'?1:0);
+      gl.uniform1f(uniforms.uCoolingFlow,0);
       gl.uniform1f(uniforms.uAsset,0);gl.disableVertexAttribArray(attributes.aUV);gl.disableVertexAttribArray(attributes.aTangent);
       gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
       gl.enableVertexAttribArray(attributes.aPosition);gl.vertexAttribPointer(attributes.aPosition,3,gl.FLOAT,false,48,0);
@@ -663,7 +736,9 @@
       const dpr=Math.min(desiredDpr*resolution,maxBufferSize/Math.max(rect.width,rect.height));
       const width=Math.max(1,Math.round(rect.width*dpr)),height=Math.max(1,Math.round(rect.height*dpr));
       if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
-      motion(progress,sample);updateCamera(now,width/height,dt);
+      motion(progress,sample);
+      if(coolingRuntime){sample.l10=coolingAssemblyState(progress);if(progress<.407)sample.phase=sample.l10.phase;}
+      updateCamera(now,width/height,dt);
       const explode=sample.explode+idleTravel*idleWeight;
       PLACEMENTS.forEach((item,index)=>placementPose(item,index,progress,explode,poses[index]));
       gl.viewport(0,0,width,height);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(program);
@@ -671,6 +746,7 @@
       gl.uniformMatrix4fv(uniforms.uViewProjection,false,viewProjection);
       gl.uniform3fv(uniforms.uEye,eye);gl.uniformMatrix4fv(uniforms.uModel,false,modelMatrix);
       gl.uniform1f(uniforms.uLightTheme,light);gl.uniform1f(uniforms.uTime,reduced.matches?0:lightTime);
+      gl.uniform1f(uniforms.uCoolingFlow,0);gl.uniform1f(uniforms.uCoolingTravel,reduced.matches?0:sample.l10?.flowTravel||0);
       gl.uniform1f(uniforms.uScan,reduced.matches?0:sample.scan);gl.uniform1f(uniforms.uScanY,sample.scanY);
       gl.uniform1f(uniforms.uRack,sample.rackOpacity);gl.uniform1f(uniforms.uQuality,resolution);drawCalls=0;
       gl.uniform1f(uniforms.uReveal,sample.reveal);gl.uniform1f(uniforms.uDetail,key[2]);
@@ -707,11 +783,28 @@
         };
         layer('l10-chassis');layer('l10-board',l10.boardLift);layer('l10-packages',l10.packageLift);layer('l10-io',l10.ioLift);
         if(assetRuntime?.metadata.extras.replacesNetworking){layer('l10-network',l10.ioLift);layer('l10-network-cover',l10.ioLift);}
-        layer('l10-cooling-frame',l10.coolingLift);
-        layer('l10-cooling',l10.coolingLift,1-l10.flow*.28,l10.flow<.01);
-        // Conceptual directional overlays sit on the disclosed cold-plate
-        // envelope; they are not invented proprietary internal microchannels.
-        layer('l10-flow-supply',0,l10.flow*.88,false);layer('l10-flow-return',0,l10.flow*.88,false);
+        if(coolingRuntime){
+          const coolingLayer=(semantic,lift=0,opacity=1,depth=true,fluid=false)=>{
+            if(inspection?.startsWith('bare-')||inspection==='board'||inspection==='packages')return;
+            if(shadowPass&&fluid)return;
+            m[13]=base[13]+lift;m[14]=base[14]+(semantic==='cooling-plumbing'?l10.plumbingZ:0);
+            gl.uniform1f(uniforms.uL10Finish,0);gl.uniform1f(uniforms.uCoolingFlow,fluid?1:0);
+            drawCalls+=coolingRuntime.draw(semantic,m,opacity,depth,shadowPass);
+            gl.uniform1f(uniforms.uCoolingFlow,0);
+          };
+          coolingLayer('cooling-mounts',0,l10.coolingVisibility);
+          coolingLayer('cooling-frame',l10.coolingLift,l10.coolingVisibility);
+          coolingLayer('cooling-channels',l10.coolingLift,l10.coolingVisibility);
+          // Fluid is an actual volume inside the passages. Composite ghosted
+          // metal covers afterward; the whole envelope stays in place.
+          coolingLayer('cooling-fluid',0,l10.flow*.92,false,true);
+          coolingLayer('cooling',l10.coolingLift,l10.coolingVisibility*(1-l10.flow*.85),l10.flow<.001);
+          coolingLayer('cooling-plumbing',l10.plumbingLift,l10.plumbingVisibility*(1-l10.flow*.82),l10.flow<.001);
+        }else{
+          layer('l10-cooling-frame',l10.coolingLift);
+          layer('l10-cooling',l10.coolingLift,1-l10.flow*.28,l10.flow<.01);
+          layer('l10-flow-supply',0,l10.flow*.88,false);layer('l10-flow-return',0,l10.flow*.88,false);
+        }
         if(progress>=.37)layer('l10-lid',.50*(1-l10.lid),interval(.37,.376,progress));
         // A real geometric section through the same tray, with the lid seated
         // at its unchanged closed height. The cut plane removes the near wall.
@@ -746,7 +839,7 @@
       canvas.dataset.coreIdle=idleStart?'showcase':'waiting';canvas.dataset.coreScan=sample.scan.toFixed(3);
       projected=projectEquipment(multiply(viewProjection,modelMatrix),rect);
       canvas.dispatchEvent(new CustomEvent('pa-core-projection',{bubbles:true,detail:projected}));
-      if(!ready&&!assetLoading&&(!hasL10()||environmentReady||environmentFailed)){const error=gl.getError();if(error!==gl.NO_ERROR){fail('WebGL render error '+error);return;}ready=true;canvas.dataset.coreState='ready';delete canvas.dataset.coreError;canvas.dispatchEvent(new CustomEvent('pa-core-ready',{bubbles:true}));}
+      if(!ready&&!assetLoading&&!coolingLoading&&(!hasL10()||environmentReady||environmentFailed)){const error=gl.getError();if(error!==gl.NO_ERROR){fail('WebGL render error '+error);return;}ready=true;canvas.dataset.coreState='ready';delete canvas.dataset.coreError;canvas.dispatchEvent(new CustomEvent('pa-core-ready',{bubbles:true}));}
       // Settled inspection frames return to native display resolution. Playback
       // owns time and requests its next frame; a paused tray need not burn GPU.
       if(hasL10()&&!cameraSettling&&resolution<1){resolution=1;slowFrames=0;cameraSettling=true;}
@@ -794,15 +887,16 @@
       return {left,right,bottom,top,heightFraction:(top-bottom)/2,widthFraction:(right-left)/2,nearest,clipped:left< -1||right>1||bottom< -1||top>1||nearest<.15};
     }
     const api={supported:true,
-      setInspection(value){if(!inspectionEnabled)throw new Error('Inspection cameras require l10AssetLab=1');if(value!==null&&!['board','packages','cooling','fans','power','bare-front','bare-storage','bare-section','bare-hero','bare-packages','bare-network'].includes(value))throw new Error('Unknown asset inspection');inspection=value;cameraReady=false;shadowProgress=-1;requestDraw();},
+      setInspection(value){if(!inspectionEnabled)throw new Error('Inspection cameras require l10AssetLab=1');if(value!==null&&!['board','packages','cooling','fans','power','bare-front','bare-storage','bare-section','bare-hero','bare-packages','bare-network','cooling-hero','cooling-close','cooling-rear','cooling-section'].includes(value))throw new Error('Unknown asset inspection');inspection=value;cameraReady=false;shadowProgress=-1;requestDraw();},
       setProgress(value){const next=reduced.matches?1:clamp(Number(value)||0);if(Math.abs(next-progress)<.00001)return;activity();progress=next;if(manual&&!drag){manual=false;view='authored';yaw=0;pitch=0;syncOrbit();}armIdle();requestDraw();},
       setPointer(x,y){if(manual||drag||reduced.matches)return;pointerX=clamp(Number(x)||0,-1,1);pointerY=clamp(Number(y)||0,-1,1);requestDraw();},
       setOrbit,setView,resetOrbit,setTheme(value){const next=value===true||value==='light'?1:0;if(next===light)return;light=next;requestDraw();},
-      getState(){return {supported:true,ready,contextLost,progress,yaw,pitch,dragging:!!drag,settling:cameraSettling,theme:light?'light':'dark',model:'generic-liquid-cooled-compute',l10:hasL10()?l10State(progress):null,rackProgress:rackProgress(progress),computeTrays:classCounts.server,switchTrays:classCounts.nvlink,networkSwitches:classCounts.switch,powerShelves:classCounts.powershelf,occupiedU:48,componentCount:PLACEMENTS.length,geometryBuffers:parts?Object.keys(parts).length:0,vertices,drawCalls,
+      getState(){return {supported:true,ready,contextLost,progress,yaw,pitch,dragging:!!drag,settling:cameraSettling,theme:light?'light':'dark',model:'generic-liquid-cooled-compute',l10:hasL10()?(coolingRuntime?coolingAssemblyState(progress):l10State(progress)):null,rackProgress:rackProgress(progress),computeTrays:classCounts.server,switchTrays:classCounts.nvlink,networkSwitches:classCounts.switch,powerShelves:classCounts.powershelf,occupiedU:48,componentCount:PLACEMENTS.length,geometryBuffers:parts?Object.keys(parts).length:0,vertices,drawCalls,
         camera:{yaw:camera[0],elevation:camera[1],distance:camera[2],target:Array.from(target),eye:Array.from(eye),fov:.50,view},inspection,asset:{enabled:assetEnabled,loading:assetLoading,failed:assetFailed,error:assetError,metadata:assetRuntime?.metadata||null},bounds:projectionBounds(),callouts:projected?.callouts||[],projection:projected,geometry:shared?.quality||shared?.metadata||null,
-        quality:{resolution,frameMs,pixelCount:canvas.width*canvas.height,adaptive:true,contactShadows:!!shadowFramebuffer,shadowMapSize:shadowFramebuffer?shadowSize:0,environmentReady,environmentFailed,environment:'CC0 photographic studio / GGX log radiance'},idle:{active:!!idleStart,exiting:!!idleExit,weight:idleWeight,delay:6500,lastActivity,disabled:reduced.matches},assembly:assemblySnapshot(progress),disposed};},resize:requestDraw,
+        cooling:{enabled:bareAsset,ready:!!coolingRuntime,loading:coolingLoading,failed:coolingFailed,error:coolingError,metadata:coolingRuntime?.metadata||null},
+        quality:{resolution,frameMs,pixelCount:canvas.width*canvas.height,adaptive:true,contactShadows:!!shadowFramebuffer,shadowMapSize:shadowFramebuffer?shadowSize:0,environmentReady,environmentFailed,environment:'CC0 photographic studio / GGX log radiance'},idle:{active:!!idleStart,exiting:!!idleExit,weight:idleWeight,delay:6500,lastActivity,disabled:reduced.matches},assembly:assemblySnapshot(progress,{coolingV1:!!coolingRuntime}),disposed};},resize:requestDraw,
       destroy(){if(disposed)return;disposed=true;clearTimeout(idleTimer);if(frame)cancelAnimationFrame(frame);frame=0;drag=null;ro?.disconnect();io?.disconnect();window.removeEventListener('resize',requestDraw);Object.entries(events).forEach(([name,handler])=>canvas.removeEventListener(name,handler));activityEvents.forEach(name=>window.removeEventListener(name,activity));if(typeof document!=='undefined')document.removeEventListener('visibilitychange',onVisibility);reduced.removeEventListener?.('change',onReduced);canvas.style.touchAction=originalTouchAction;release();canvas.dataset.coreState='disposed';delete canvas.paCoreScene;}
     };canvas.paCoreScene=api;return api;
   }
-  window.PACoreScene=Object.freeze({mount,assemblySnapshot});
+  window.PACoreScene=Object.freeze({mount,assemblySnapshot,coolingAssemblyState,coolingAssemblyCamera});
 })();

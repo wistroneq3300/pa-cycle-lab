@@ -209,7 +209,16 @@ async function reject(mutator, pattern, options = {}) {
       });
       const bare=result.metadata.extras.bareBoardOnly===true;
       if(bare)assert.deepEqual(Array.from(result.metadata.extras.replacesComputeBoards),[0,1]);
-      const expectedLayers=bare?['board','packages']:['board','cooling','cooling-frame','packages'];
+      const companion=result.metadata.extras.id==='l10-cooling-assembly-v1';
+      if(companion){
+        assert.equal(bare,false,'Cooling companion cannot claim bareboard ownership');
+        const seats=result.metadata.extras.seats;
+        assert.ok(Array.isArray(seats));assert.equal(seats.length,6);assert.equal(new Set(seats.map(s=>s.id)).size,6);
+        assert.equal(seats.filter(s=>s.kind==='CPU').length,2);assert.equal(seats.filter(s=>s.kind==='GPU').length,4);
+        assert.equal(result.metadata.extras.sourceBareGLBSHA256,'6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29');
+        assert.notEqual(result.metadata.extras.replacesServiceGeometry,true);assert.notEqual(result.metadata.extras.replacesNetworking,true);
+      }
+      const expectedLayers=companion?['cooling-mounts','cooling-frame','cooling','cooling-channels','cooling-plumbing','cooling-fluid']:bare?['board','packages']:['board','cooling','cooling-frame','packages'];
       if(result.metadata.extras.replacesServiceGeometry===true)expectedLayers.push('io');
       if(result.metadata.extras.replacesNetworking===true){
         assert.ok(bare,'Networking ownership is restricted to the bare-board candidate');

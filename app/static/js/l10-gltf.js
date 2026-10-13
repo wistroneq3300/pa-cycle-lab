@@ -6,7 +6,8 @@
  */
 (() => {
   'use strict';
-  const LAYERS = new Set(['board', 'packages', 'cooling-frame', 'cooling', 'io', 'network']);
+  const LAYERS = new Set(['board', 'packages', 'cooling-frame', 'cooling', 'io', 'network',
+    'cooling-mounts', 'cooling-channels', 'cooling-plumbing', 'cooling-fluid']);
   const COMPONENTS = {
     5120: [1, 'getInt8', 127, true], 5121: [1, 'getUint8', 255, false],
     5122: [2, 'getInt16', 32767, true], 5123: [2, 'getUint16', 65535, false],

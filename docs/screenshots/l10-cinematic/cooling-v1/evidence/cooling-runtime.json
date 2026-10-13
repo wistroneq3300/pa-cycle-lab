@@ -1,0 +1,88 @@
+{
+  "pass": true,
+  "companionSHA256": "9816625ec2789766476b5afea543895123b388da0eec8c5978ec623cc69a5920",
+  "checks": [
+    "Actual UV-distance advection; changed WebGL pixels, fixed camera/light, zero emission; paused state is stable",
+    "Fluid disappears and solid metal returns before lid closure",
+    "Context loss/restoration reloads both bare and cooling assets",
+    "Reduced Motion seats the assembly with zero fluid animation",
+    "Missing or incomplete cooling companion fails closed; delayed environment failure restores the full procedural scene",
+    "Delayed companion loading holds the real dashboard cinematic clock"
+  ],
+  "errors": [],
+  "expectedFixtureErrors": [
+    {
+      "fixture": "404",
+      "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "fixture": "late-environment",
+      "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "external": [],
+  "flow": {
+    "a": {
+      "progress": 0.31,
+      "travel": 1.5804878048780502,
+      "pngSHA256": "97bb391c64ffd9548f2d0eab7f09647fe3d343dd07cfab67c58bfd9a3afea511"
+    },
+    "b": {
+      "progress": 0.32,
+      "travel": 2.458536585365856
+    },
+    "fluidDraws": 22,
+    "emission": 0
+  },
+  "fallbacks": [
+    {
+      "fixture": "404",
+      "cooling": {
+        "enabled": true,
+        "ready": false,
+        "loading": false,
+        "failed": true,
+        "error": "L10 GLB: asset request failed (404)",
+        "metadata": null
+      },
+      "assetFailed": false,
+      "vertices": 2061768,
+      "liveBuffers": 149,
+      "liveTextures": 43
+    },
+    {
+      "fixture": "ownership",
+      "cooling": {
+        "enabled": true,
+        "ready": false,
+        "loading": false,
+        "failed": true,
+        "error": "Cooling companion ownership or six-seat contract is invalid",
+        "metadata": null
+      },
+      "assetFailed": false,
+      "vertices": 2061768,
+      "liveBuffers": 149,
+      "liveTextures": 43
+    },
+    {
+      "fixture": "late-environment",
+      "cooling": {
+        "enabled": true,
+        "ready": false,
+        "loading": false,
+        "failed": true,
+        "error": "Reference studio environment failed; prototype reverted to baseline",
+        "metadata": null
+      },
+      "assetFailed": true,
+      "vertices": 1691904,
+      "liveBuffers": 25,
+      "liveTextures": 2
+    }
+  ],
+  "loadingGate": {
+    "heldProgress": 0,
+    "after450ms": 0
+  }
+}

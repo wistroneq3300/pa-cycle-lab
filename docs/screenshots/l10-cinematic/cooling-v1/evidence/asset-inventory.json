@@ -1,0 +1,42 @@
+{
+  "result": "PASS",
+  "assetId": "l10-cooling-assembly-v1",
+  "sourceBareGLBSHA256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29",
+  "newFiles": [
+    {
+      "path": "assets/l10-cooling-v1/build.py",
+      "bytes": 21209,
+      "sha256": "c7d5d86fa8db14b62156fcfe38ffae2c5076646361da205affd5eba1624caeb9"
+    },
+    {
+      "path": "assets/l10-cooling-v1/cooling-assembly.blend",
+      "bytes": 5503456,
+      "sha256": "deb765a4bc6cc2364e491aec88bc0deabf1affbfea68994845b68b9a8b7902b9"
+    },
+    {
+      "path": "assets/l10-cooling-v1/textures/cooling-machined-metal-mr.png",
+      "bytes": 34004,
+      "sha256": "e566a83a016809b8ad3f9b1adaec11edd37bb4ea7de9560cdfeb0a3fc56081fd"
+    },
+    {
+      "path": "app/static/models/l10-cooling-v1/cooling-assembly.glb",
+      "bytes": 3425524,
+      "sha256": "9816625ec2789766476b5afea543895123b388da0eec8c5978ec623cc69a5920"
+    },
+    {
+      "path": "app/static/models/l10-cooling-v1/assembly.json",
+      "bytes": 157646,
+      "sha256": "cf1d8e83b605ed591b7def2fa31e74a51b8ceb189d799aa8a6142a54e2a8868e"
+    }
+  ],
+  "geometry": {
+    "triangles": 69824,
+    "nodes": 54,
+    "materials": 7,
+    "embeddedImages": 1
+  },
+  "runtimeTextureDecodedBytes": 262144,
+  "rootUnits": "PA raw normalized tray coordinates; apply shared [.688,1,.802] once",
+  "limitations": "Original conceptual liquid circuit and frame-supported clamping; no OEM CAD, hydraulic/thermal/pressure or serviceability validation.",
+  "sourceMethod": "Actual frozen optical face anchors; original additive geometry; editable Blender collections; shared legacy pure helper AST definitions without executing legacy source"
+}

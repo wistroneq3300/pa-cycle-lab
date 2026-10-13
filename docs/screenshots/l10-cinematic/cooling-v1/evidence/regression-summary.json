@@ -1,0 +1,359 @@
+{
+  "baseline": "fa55ce8b439a9825e5e9eac34871fd5330344799",
+  "scope": "Local final sealed-candidate regression; remote CI is reported separately by the parent task.",
+  "bareAsset": {
+    "file": "app\\static\\models\\l10-prototype\\bare-compute-boards.glb",
+    "bytes": 25533668,
+    "sha256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29"
+  },
+  "companion": {
+    "sha256": "9816625ec2789766476b5afea543895123b388da0eec8c5978ec623cc69a5920",
+    "bytes": 3425524,
+    "primitives": 88,
+    "layers": [
+      "cooling-mounts",
+      "cooling-frame",
+      "cooling",
+      "cooling-channels",
+      "cooling-plumbing",
+      "cooling-fluid"
+    ]
+  },
+  "passed": true,
+  "webgl": {
+    "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "vendor": "Google Inc. (NVIDIA)"
+  },
+  "compiledShaderSHA256": [
+    "7511ba1269b3d6a4e2ec914c420082acfa48aeae85073a27b5c565509aab91d8",
+    "cc8c02bec0667ae1116bbbb961ca7aa7d8d73f036478bb425d501ed2212fc67a"
+  ],
+  "method": "Native Chromium/WebGL; three real-clock films. No animation, geometry, camera, lighting or resource timing mocks. Targeted GLB failure fixtures are isolated after normal-operation tests.",
+  "preview": "http://127.0.0.1:8775 (synthetic app/serve.py)",
+  "authoredDurationMs": 35200,
+  "films": [
+    {
+      "film": 1,
+      "frames": 2116,
+      "wallDurationMs": 35279.299999952316,
+      "observedDrawFPS": 59.9501690793995,
+      "drawIntervalsMs": {
+        "min": 11.699999809265137,
+        "median": 16.699999809265137,
+        "p95": 17,
+        "max": 33.40000009536743,
+        "mean": 16.680520094540103
+      },
+      "drawCalls": {
+        "min": 127,
+        "median": 237,
+        "p95": 241,
+        "max": 241,
+        "mean": 208.53544423440454
+      },
+      "pixelCount": {
+        "min": 2705544,
+        "median": 2705544,
+        "p95": 2705544,
+        "max": 2705544,
+        "mean": 2705544
+      },
+      "insertionStarts": 1,
+      "insertionCompletions": 1,
+      "limitations": "Draw cadence and allocation estimates are measured on this host, not a GPU timer or portable performance certification. Adaptive pixel counts are recorded."
+    },
+    {
+      "film": 2,
+      "frames": 2117,
+      "wallDurationMs": 35299.09999990463,
+      "observedDrawFPS": 59.94487111585612,
+      "drawIntervalsMs": {
+        "min": 12.700000047683716,
+        "median": 16.700000047683716,
+        "p95": 17,
+        "max": 33.799999952316284,
+        "mean": 16.681994328877426
+      },
+      "drawCalls": {
+        "min": 127,
+        "median": 237,
+        "p95": 241,
+        "max": 241,
+        "mean": 208.55077940481814
+      },
+      "pixelCount": {
+        "min": 2705544,
+        "median": 2705544,
+        "p95": 2705544,
+        "max": 2705544,
+        "mean": 2705544
+      },
+      "insertionStarts": 1,
+      "insertionCompletions": 1,
+      "limitations": "Draw cadence and allocation estimates are measured on this host, not a GPU timer or portable performance certification. Adaptive pixel counts are recorded."
+    },
+    {
+      "film": 3,
+      "frames": 2116,
+      "wallDurationMs": 35282.90000009537,
+      "observedDrawFPS": 59.944052217767904,
+      "drawIntervalsMs": {
+        "min": 13.700000047683716,
+        "median": 16.699999809265137,
+        "p95": 17,
+        "max": 33.69999980926514,
+        "mean": 16.682222222267313
+      },
+      "drawCalls": {
+        "min": 127,
+        "median": 237,
+        "p95": 241,
+        "max": 241,
+        "mean": 208.54111531190927
+      },
+      "pixelCount": {
+        "min": 2705544,
+        "median": 2705544,
+        "p95": 2705544,
+        "max": 2705544,
+        "mean": 2705544
+      },
+      "insertionStarts": 1,
+      "insertionCompletions": 1,
+      "limitations": "Draw cadence and allocation estimates are measured on this host, not a GPU timer or portable performance certification. Adaptive pixel counts are recorded."
+    }
+  ],
+  "renderingMeasurement": {
+    "viewport": {
+      "width": 3440,
+      "height": 1440,
+      "deviceScaleFactor": 1
+    },
+    "bridgeCanvasBuffers": [
+      {
+        "width": 2127,
+        "height": 1272
+      },
+      {
+        "width": 2127,
+        "height": 1272
+      },
+      {
+        "width": 2127,
+        "height": 1272
+      },
+      {
+        "width": 2127,
+        "height": 1272
+      }
+    ],
+    "traceQualityStates": [
+      [
+        [
+          1,
+          2705544,
+          true
+        ]
+      ],
+      [
+        [
+          1,
+          2705544,
+          true
+        ]
+      ],
+      [
+        [
+          1,
+          2705544,
+          true
+        ]
+      ]
+    ],
+    "interpretation": "Viewport 3440x1440; normal dashboard canvas buffer 2127x1272 at all four bridge checkpoints. Every film trace frame records 2705544 pixels and resolution=1 with adaptive=true. Observed draw FPS is this dashboard cadence, not a full 3440x1440 rendering benchmark."
+  },
+  "browserSuites": [
+    {
+      "file": "regression.json",
+      "passed": true,
+      "checks": [
+        "Bare asset loaded in normal dashboard with two-board ownership and no fallback",
+        "Film 1: real clock, GPU chassis pose, continuous bridge and exactly one U40 insertion",
+        "Film 2: real clock, GPU chassis pose, continuous bridge and exactly one U40 insertion",
+        "Film 3: real clock, GPU chassis pose, continuous bridge and exactly one U40 insertion",
+        "Four native 3440\u00d71440 bridge frames captured using authored cameras",
+        "Skip, Replay, interruption, orbit, Home, rear/reset and reduced motion retain behavior",
+        "404: fail-closed complete baseline retained",
+        "one-board-metadata: fail-closed complete baseline retained",
+        "network-ownership: fail-closed complete baseline retained"
+      ],
+      "errors": [],
+      "external": []
+    },
+    {
+      "file": "l10-regression.json",
+      "passed": true,
+      "checks": [
+        "Public hardware profile: two boards, 2 CPU / 4 GPU, package ownership and honest conceptual overlay",
+        "All authored stages compile and render in the same canvas, scene and GL context",
+        "Rendered assembly seats board, CPU/GPU, I/O, then cold plates; restrained reveal restores opaque metal",
+        "Same L10 remains U40 primary; no duplicate legacy tray or second insertion at handoff",
+        "Pure snapshots and rendered layer transforms are exactly reversible",
+        "Camera transition boundaries preserve pose, scale and camera continuity",
+        "1366 and 1920, dark and light: final framing, L10 visibility, labels and no horizontal overflow",
+        "Real forward/reverse scroll, keyboard and pointer orbit, replay cancellation",
+        "WebGL context loss restores actual geometry and final pose",
+        "Reduced motion lands fully assembled, disables replay and disposes scene/playback on route change"
+      ],
+      "errors": [],
+      "external": []
+    },
+    {
+      "file": "rack-isolation.json",
+      "passed": true,
+      "checks": [
+        "Original 36 components, 48U placement and external CDU remain intact; Overview callouts are isolated",
+        "Perspective/front/rear and both themes preserve exact geometry and compile/render without WebGL errors",
+        "Liquid-flow pause/resume, saved cabling hide/show, zoom and reset retain behavior",
+        "Device focus, expanded Escape, route disposal/re-entry and reduced-motion cooling are unchanged"
+      ],
+      "errors": [],
+      "external": []
+    }
+  ],
+  "focusedRuntime": {
+    "pass": true,
+    "checks": [
+      "Actual UV-distance advection; changed WebGL pixels, fixed camera/light, zero emission; paused state is stable",
+      "Fluid disappears and solid metal returns before lid closure",
+      "Context loss/restoration reloads both bare and cooling assets",
+      "Reduced Motion seats the assembly with zero fluid animation",
+      "Missing or incomplete cooling companion fails closed; delayed environment failure restores the full procedural scene",
+      "Delayed companion loading holds the real dashboard cinematic clock"
+    ],
+    "errors": [],
+    "external": [],
+    "loadingGate": {
+      "heldProgress": 0,
+      "after450ms": 0
+    },
+    "expectedFixtureErrors": [
+      {
+        "fixture": "404",
+        "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      },
+      {
+        "fixture": "late-environment",
+        "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      }
+    ]
+  },
+  "expectedFailureFixtureErrors": [
+    {
+      "scenario": "404",
+      "type": "http",
+      "status": 404,
+      "url": "http://127.0.0.1:8775/static/models/l10-prototype/bare-compute-boards.glb"
+    },
+    {
+      "scenario": "404",
+      "type": "console",
+      "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "fallbackModes": [
+    {
+      "mode": "404",
+      "passed": true,
+      "assetFailure": {
+        "enabled": true,
+        "loading": false,
+        "failed": true,
+        "error": "L10 GLB: asset request failed (404)",
+        "metadata": null
+      }
+    },
+    {
+      "mode": "one-board-metadata",
+      "passed": true,
+      "assetFailure": {
+        "enabled": true,
+        "loading": false,
+        "failed": true,
+        "error": "Bare-board prototype must own two boards, packages and the retained service layer",
+        "metadata": null
+      }
+    },
+    {
+      "mode": "network-ownership",
+      "passed": true,
+      "assetFailure": {
+        "enabled": true,
+        "loading": false,
+        "failed": true,
+        "error": "Networking replacement requires all three declared cards and its network layer",
+        "metadata": null
+      }
+    }
+  ],
+  "staticSuites": {
+    "GLBParserGroupsPerAsset": 19,
+    "StorageLayoutGroups": 12,
+    "NetworkCollisionGroups": 11,
+    "NetworkCollisions": 0,
+    "Hardware": "PASS",
+    "CoolingInvariantGroups": 9,
+    "SealedHeaderRays": 126,
+    "UnsealedRays": 0,
+    "BareCollisionPairs": 0,
+    "FluidWallCollisionPairs": 0,
+    "PlumbingMotionCollisionPairs": 0,
+    "RuntimeManifestFiles": 222,
+    "EngineHash": "918aad2bfb79c78c3018910a72b7671c8aac159b0d39eee5314d97e0a7456e63"
+  },
+  "traceArchives": [
+    {
+      "file": "bare-film-1.json.gz",
+      "rawBytes": 4553209,
+      "compressedBytes": 571319,
+      "rawSHA256": "cf0296cc8d983bf25639d0b40f5d695c42b2ad948bc6cff06824d44085a7d6ca",
+      "compressedSHA256": "c50537e66a549acf06adccbd829b1726c051bb7d4d0baf49dffb8745474e4791"
+    },
+    {
+      "file": "bare-film-2.json.gz",
+      "rawBytes": 4554996,
+      "compressedBytes": 571395,
+      "rawSHA256": "79ed3c2c082f0d65cadd773fce5096bbd2b5bcec65d914e8f1c53a879ba15b6d",
+      "compressedSHA256": "be37accddce0be86951e6c2ed3181d6dbe84c18178e35a89c6397847645190ca"
+    },
+    {
+      "file": "bare-film-3.json.gz",
+      "rawBytes": 4553300,
+      "compressedBytes": 571280,
+      "rawSHA256": "1e6e16fa3a15f9e39e7a87492ab01016605e7471f793bfd5ffa1285915495207",
+      "compressedSHA256": "972c4a238c279217cdf8d04b90a76426a00cee7beefe556a1805723c0b80f1ad"
+    }
+  ],
+  "copiedEvidence": [
+    "regression.json",
+    "l10-regression.json",
+    "rack-isolation.json",
+    "final-focused-runtime.log",
+    "final-bareboard.log",
+    "final-cinematic.log",
+    "final-rack.log",
+    "run-browser.cjs",
+    "run-cpu.cjs",
+    "3440x1440-bridge-0.40.png",
+    "3440x1440-bridge-0.42.png",
+    "3440x1440-bridge-0.48.png",
+    "3440x1440-bridge-0.56.png"
+  ],
+  "limitations": [
+    "Local native Chromium/ANGLE driver execution is not a cross-device performance certification.",
+    "Real-clock films use the normal dashboard canvas inside the 3440x1440 viewport; no clock or frame injection.",
+    "Intentional failure fixtures retain their expected console/HTTP errors separately; normal-operation errors must be empty.",
+    "Geometry covers declared contacts, sampled installation, flow passage and manifold closure; not manufacturing CAD, complete watertight certification or CFD."
+  ]
+}

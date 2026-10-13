@@ -1,0 +1,36 @@
+{
+  "method": "Decoded RGB comparison of actual unedited 3440x1440 Chromium screenshots.",
+  "note": "Equality can establish non-regression for these views; pixel difference alone is not a photorealism score.",
+  "metrics": {
+    "goldFront": {
+      "before": "before/guard-gold-front.png",
+      "after": "after/guard-gold-front.png",
+      "totalPixels": 4953600,
+      "changedPixels": 176,
+      "changedPercent": 0.0035529715762273907,
+      "meanAbsoluteChannelDifference": 6.661821705426356e-05,
+      "maxAbsoluteChannelDifference": 8,
+      "exactPixels": false
+    },
+    "network": {
+      "before": "before/guard-network.png",
+      "after": "after/guard-network.png",
+      "totalPixels": 4953600,
+      "changedPixels": 263,
+      "changedPercent": 0.0053092700258397935,
+      "meanAbsoluteChannelDifference": 0.00015059754521963824,
+      "maxAbsoluteChannelDifference": 8,
+      "exactPixels": false
+    },
+    "fluidTravel": {
+      "before": "after/05-flow.png",
+      "after": "after/06-fluid-timeB.png",
+      "totalPixels": 4953600,
+      "changedPixels": 120767,
+      "changedPercent": 2.43796430878553,
+      "meanAbsoluteChannelDifference": 0.05173382321274763,
+      "maxAbsoluteChannelDifference": 50,
+      "exactPixels": false
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "pass": true,
+  "checks": [
+    "Actual UV-distance advection; changed WebGL pixels, fixed camera/light, zero emission; paused state is stable",
+    "Fluid disappears and solid metal returns before lid closure",
+    "Context loss/restoration reloads both bare and cooling assets",
+    "Reduced Motion seats the assembly with zero fluid animation",
+    "Missing or incomplete cooling companion fails closed; delayed environment failure restores the full procedural scene",
+    "Delayed companion loading holds the real dashboard cinematic clock"
+  ]
+}

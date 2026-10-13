@@ -104,6 +104,14 @@
     const progress=clamp(value);canvas.paCoreScene?.setProgress(progress);
     stage.dataset.phase=progress<.407?'system':progress<.80?'integration':'rack';
     let shot=shots[0];for(const candidate of shots){if(progress<candidate[0])break;shot=candidate;}
+    const coolingV1=canvas.dataset.coreCooling==='ready';
+    if(coolingV1){
+      if(progress<.135)shot=[0,'bare-board','01','L10 Bare-board View','2 CPU / 4 GPU / TWO COMPUTE BOARDS'];
+      else if(progress<.248)shot=[.135,'silicon-detail','03','CPU / GPU Detail','SILICON / PACKAGE / HBM'];
+      else if(progress<.276)shot=[.248,'cooling-install','05','Cold Plate Installation','SIX CONTACT SURFACES / TIM / RETENTION'];
+      else if(progress<.292)shot=[.276,'manifold-connect','05','Manifold Connection','SUPPLY / RETURN / SEALED FITTINGS'];
+      else if(progress<.333)shot=[.292,'cooling-reveal','06','Cooling Flow Reveal','CONNECTED CHANNELS / FLOW DIRECTION'];
+    }
     if(stage.dataset.shot!==shot[1]){
       stage.dataset.shot=shot[1];
       stage.querySelector('[data-vo-phase-number]').textContent=shot[2];
@@ -111,10 +119,10 @@
       stage.querySelector('[data-vo-phase-detail]').textContent=shot[4];
       const note=stage.querySelector('[data-vo-l10-note]');
       note.replaceChildren();
-      if(progress<.202)note.textContent='Visual separation · CPU / GPU packages are integrated with the compute boards';
+      if(progress<.202)note.textContent=coolingV1?'Board-integrated packages · cooling installs on six seated contact surfaces':'Visual separation · CPU / GPU packages are integrated with the compute boards';
       else if(progress>=.292&&progress<.333){
         for(const [label,cls]of [['Supply / Inlet','supply'],['Return / Outlet','return']]){const item=document.createElement('span');item.className=cls;item.textContent=label;note.append(item);}
-        const detail=document.createElement('small');detail.textContent='Conceptual thermal flow · colors indicate direction, not coolant color';note.append(detail);
+        const detail=document.createElement('small');detail.textContent=coolingV1?'Illustrative cutaway · moving coolant / conceptual channels, not measured flow':'Conceptual thermal flow · colors indicate direction, not coolant color';note.append(detail);
       }
       const system=stage.querySelector('#core-system-copy'),rack=stage.querySelector('#core-rack-copy'),showRack=progress>=.80;
       system.inert=showRack;system.setAttribute('aria-hidden',String(showRack));
@@ -142,7 +150,7 @@
     const schedule=()=>{if(!disposed&&!frame&&!document.hidden)frame=requestAnimationFrame(tick);};
     function tick(now){
       frame=0;if(disposed||document.hidden||mode==='stopped')return;
-      if(canvas.dataset.coreEnvironment==='loading'||canvas.dataset.coreAsset==='loading'){lastTime=0;schedule();return;}
+      if(canvas.dataset.coreEnvironment==='loading'||canvas.dataset.coreAsset==='loading'||canvas.dataset.coreCooling==='loading'){lastTime=0;schedule();return;}
       const dt=lastTime?Math.min(80,now-lastTime):0;lastTime=now;
       if(mode==='film'){
         elapsed=Math.min(FILM_MS,elapsed+dt);write(timedProgress(elapsed));
