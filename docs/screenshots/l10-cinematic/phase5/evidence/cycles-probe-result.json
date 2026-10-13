@@ -1,0 +1,216 @@
+{
+  "status": "NOT ADOPTED \u2014 camera projection only; lighting/scene/handoff not matched",
+  "baseline": "031830a1c7faf5484b358e0964551e8656e1d852",
+  "assetSHA256": "c8467c0ac186b34ee95e549fc27f5da47ad3de4b8d09b72b68d6070e774985cc",
+  "hdrSHA256": "e7cfda5f4e98e623db12b8bfd0184e048488e4855d9c83e2751fb44a32e80c45",
+  "blender": "4.5.9 LTS",
+  "engine": "Cycles CPU",
+  "threads": 8,
+  "samples": 32,
+  "denoised": true,
+  "viewport": {
+    "width": 3440,
+    "height": 1440,
+    "notRendered": true
+  },
+  "renderedCanvas": {
+    "width": 2127,
+    "height": 1272,
+    "alpha": true,
+    "scope": "single GLB only"
+  },
+  "recordedCamera": {
+    "yaw": -0.3400000035762787,
+    "elevation": 0.7900000214576721,
+    "distance": 4.800000190734863,
+    "target": [
+      -4.3103203773498535,
+      4.699999809265137,
+      4.266639709472656
+    ],
+    "eye": [
+      -5.436992168426514,
+      8.109695434570312,
+      7.451696395874023
+    ],
+    "fov": 0.5,
+    "view": "authored"
+  },
+  "primaryPose": [
+    -5.300000190734863,
+    4.650000095367432,
+    7.0
+  ],
+  "modelScale": [
+    0.6880000233650208,
+    1.0,
+    0.8019999861717224
+  ],
+  "progress": 0.354,
+  "referenceStage": "03-cooling",
+  "loadSeconds": 0.43515739985741675,
+  "renderAndEXRWriteSeconds": 31.110272499965504,
+  "outputs": {
+    "pngBytes": 564760,
+    "exrBytes": 5431559
+  },
+  "maxProjectionErrorPixels": 0.00026975408310342874,
+  "landmarks": [
+    {
+      "name": "PCB rear left",
+      "raw": [
+        -1.83,
+        -0.0715,
+        -2.84
+      ],
+      "webglPixels": [
+        658.905604030239,
+        451.8699440824968
+      ],
+      "blenderPixels": [
+        658.9056133031845,
+        451.8699645996094
+      ],
+      "errorPixels": 2.2515315395468108e-05
+    },
+    {
+      "name": "PCB rear right",
+      "raw": [
+        -0.1,
+        -0.0715,
+        -2.84
+      ],
+      "webglPixels": [
+        1174.1963948211505,
+        336.53721209561115
+      ],
+      "blenderPixels": [
+        1174.196265757084,
+        336.53720712661743
+      ],
+      "errorPixels": 0.00012915968487323769
+    },
+    {
+      "name": "PCB front left",
+      "raw": [
+        -1.83,
+        -0.0715,
+        -0.52
+      ],
+      "webglPixels": [
+        912.2171858383841,
+        1148.428495320114
+      ],
+      "blenderPixels": [
+        912.2171868681908,
+        1148.4283205866814
+      ],
+      "errorPixels": 0.0001747364672875025
+    },
+    {
+      "name": "PCB front right",
+      "raw": [
+        -0.1,
+        -0.0715,
+        -0.52
+      ],
+      "webglPixels": [
+        1555.760950931835,
+        956.6564879932548
+      ],
+      "blenderPixels": [
+        1555.760725557804,
+        956.6563850641251
+      ],
+      "errorPixels": 0.0002477657351728071
+    },
+    {
+      "name": "CPU contact centre",
+      "raw": [
+        -0.965,
+        0.0068,
+        -1.1
+      ],
+      "webglPixels": [
+        1148.9445169795888,
+        824.3322557933119
+      ],
+      "blenderPixels": [
+        1148.9442819356918,
+        824.3323881626129
+      ],
+      "errorPixels": 0.00026975408310342874
+    },
+    {
+      "name": "GPU A contact centre",
+      "raw": [
+        -1.39,
+        0.0068,
+        -2.18
+      ],
+      "webglPixels": [
+        860.7016848356976,
+        552.3466199543307
+      ],
+      "blenderPixels": [
+        860.7015221714973,
+        552.3465871810913
+      ],
+      "errorPixels": 0.00016593289989875502
+    },
+    {
+      "name": "GPU B contact centre",
+      "raw": [
+        -0.55,
+        0.0068,
+        -2.18
+      ],
+      "webglPixels": [
+        1128.83369388209,
+        488.50713781628764
+      ],
+      "blenderPixels": [
+        1128.8335701227188,
+        488.5071415901184
+      ],
+      "errorPixels": 0.00012381689615763324
+    },
+    {
+      "name": "CPU collar top",
+      "raw": [
+        -1.245,
+        0.1,
+        -1.1
+      ],
+      "webglPixels": [
+        1048.5421195836323,
+        817.8162518972313
+      ],
+      "blenderPixels": [
+        1048.5420970916748,
+        817.8164763450623
+      ],
+      "errorPixels": 0.00022557197739319715
+    }
+  ],
+  "illumination": {
+    "hdrSourceExposure": 0.38,
+    "newLights": 0,
+    "orientation": "explicit core-scene sampler UV arithmetic",
+    "strictMatch": false,
+    "missing": [
+      "analytic key diffuse .82 and GGX specular .48",
+      "front diffuse fill .22",
+      "service reflection lobe .42 and diffuse .35",
+      "final shader radiance factor .91",
+      "complete chassis/hoses/rack shadow casters"
+    ],
+    "different": [
+      "Cycles multiple-bounce integration vs WebGL split-sum IBL",
+      "native HDR vs 512x256 prefiltered log-encoded strips",
+      "Cycles BSDF vs custom material BRDF"
+    ]
+  },
+  "displayTransform": "Existing GLSL rational ACES approximation then pow(1/2.2); no AgX",
+  "acceptance": "Not evidence of photorealism improvement or video-to-interactive continuity"
+}

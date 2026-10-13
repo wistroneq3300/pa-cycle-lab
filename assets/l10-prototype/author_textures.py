@@ -27,22 +27,23 @@ def write_set(name, base, rough, metal, height, normal_strength):
     orm[:,:,2]=np.uint8(np.clip(metal,0,1)*255)
     Image.fromarray(base).save(OUT/f"{name}-basecolor.png")
     Image.fromarray(orm).save(OUT/f"{name}-metallicroughness.png")
-    Image.fromarray(normal_from_height(height,normal_strength)).save(OUT/f"{name}-normal.png")
+    if normal_strength>0:
+        Image.fromarray(normal_from_height(height,normal_strength)).save(OUT/f"{name}-normal.png")
 
-# One true board UV; soldermask relief, designed routing corridors, pad openings
+# One unique board UV; soldermask relief, evidence-bounded pad openings
 # and assembly witnesses are related to geometry rather than a tiled circuit image.
-N=2048
+N=1024
 b=LAYOUT['board']; left=b['x']-b['width']/2; rear=b['z']-b['depth']/2
 def uv(x,z): return ((x-left)/b['width']*(N-1),(z-rear)/b['depth']*(N-1))
 yy,xx=np.mgrid[:N,:N]
 weave=(np.sin(xx*math.pi*.51)*np.sin(yy*math.pi*.47))*.6
-base=np.empty((N,N,3),dtype=np.float32);base[:]=[22,54,42];base+=weave[:,:,None]
+base=np.empty((N,N,3),dtype=np.float32);base[:]=[18,47,34];base+=weave[:,:,None]
 im=Image.fromarray(np.uint8(base)); d=ImageDraw.Draw(im)
 height=Image.new('L',(N,N),128); hd=ImageDraw.Draw(height)
 mask=Image.new('L',(N,N),0); md=ImageDraw.Draw(mask)
 silk=(144,159,128); trace=(29,64,47)
 fontpath=Path('C:/Windows/Fonts/consola.ttf')
-font=ImageFont.truetype(str(fontpath),16) if fontpath.exists() else ImageFont.load_default()
+font=ImageFont.truetype(str(fontpath),8) if fontpath.exists() else ImageFont.load_default()
 
 def line(points,width=.0022):
     pts=[uv(x,z) for x,z in points]; w=max(1,int(width*N/b['width']))
@@ -52,14 +53,8 @@ def pad(x,z,w,h):
     d.rectangle(p,fill=(161,165,154));hd.rectangle(p,fill=140);md.rectangle(p,fill=255)
 def mark(x,z,label): d.text(uv(x,z),label,font=font,fill=silk)
 
-# Deliberate routed edge corridors; this is appearance, never a claimed netlist.
-for side in [-1,1]:
-    for i in range(12):
-        x=b['x']+side*(.66+i*.008)
-        line([(x,-2.57),(x,-1.86),(x-side*.036,-1.824),(x-side*.036,-1.52)])
-for i in range(18):
-    x=-1.58+i*.068
-    line([(x,-.64),(x,-.73),(x+.035,-.765),(x+.035,-.80)])
+# No unverified netlist or decorative fake routing is drawn. Broad concealed
+# areas use only soldermask finish. Pads align with explicit component islands.
 for i,(x,z) in enumerate(LAYOUT['powerStages']):
     for j in [-1,1]:
         pad(x,z+j*.049,.095,.018)
@@ -86,36 +81,42 @@ for x,z in [(-1.70,-2.69),(-.225,-2.69),(-1.70,-.67),(-.225,-.67)]:
 for i in range(5):
     x=-1.10+i*.060;z=-2.715;cx,cy=uv(x,z)
     d.ellipse((cx-5,cy-5,cx+5,cy+5),fill=(149,120,60));md.ellipse((cx-5,cy-5,cx+5,cy+5),fill=255)
-mark(-1.61,-2.80,'CB-01  /  VISUAL PROTOTYPE')
-rough=np.full((N,N),.48);metal=np.asarray(mask,dtype=np.float32)/255*.85
+mark(-1.61,-2.80,'CB-01 / PROTOTYPE')
+rough=np.full((N,N),.50);metal=np.asarray(mask,dtype=np.float32)/255*.85
 rough[metal>.1]=.30
-write_set('pcb',np.asarray(im),rough,metal,np.asarray(height)/255,8)
+write_set('pcb',np.asarray(im),rough,metal,np.asarray(height)/255,3)
 
 # Nickel finish: fine directional grinding, lower-frequency polishing bands and
 # regular machining arcs. Physical amplitude is deliberately tiny, not scratches
 # used to imply weathering or OEM measurement.
-N=1024; yy,xx=np.mgrid[:N,:N];u=xx/N;v=yy/N
+N=512; yy,xx=np.mgrid[:N,:N];u=xx/N;v=yy/N
 grain=.55*np.sin(v*2639)+.25*np.sin(v*1667+u*.13)+.12*np.sin(v*4499)
 bands=np.sin(v*24+u*.11)*.35
 base=np.empty((N,N,3));base[:]=[178,185,184];base+=(grain*.60+bands)[:,:,None]
 rough=.31+grain*.016+bands*.008
 height=(grain*.003)+.001*np.sin(u*80)*np.sin(v*3)
 write_set('nickel',base,rough,np.ones((N,N)),height,1.7)
-base=np.empty((N,N,3));base[:]=[207,138,95];base+=(grain*.55+bands*.45)[:,:,None]
-write_set('copper',base,.34+grain*.013+bands*.010,np.ones((N,N)),height,1.5)
+base=np.empty((N,N,3));base[:]=[201,141,105];base+=(grain*.55+bands*.45)[:,:,None]
+write_set('copper',base,.37+grain*.014+bands*.012,np.ones((N,N)),height,1.5)
 
-# Package nickel lid has flatter lapping marks and subtle original non-product
-# laser witness strokes. No manufacturer brand or fictional part number.
-base=np.empty((N,N,3));base[:]=[178,178,166];base+=(grain*.45)[:,:,None]
-im=Image.fromarray(np.uint8(base));d=ImageDraw.Draw(im)
-font2=ImageFont.truetype(str(fontpath),32) if fontpath.exists() else ImageFont.load_default()
-d.text((132,690),'THERMAL CONTACT',font=font2,fill=(125,128,120))
-d.text((132,735),'VISUAL APPROXIMATION',font=font2,fill=(135,138,128))
-d.line([(132,790),(403,790)],fill=(128,132,124),width=3)
-write_set('package',np.asarray(im),.36+grain*.012,np.ones((N,N)),height*.45,1.5)
+# The package finish follows visible lapping/soft machining, with no borrowed
+# brand, product number or artificial printed disclaimer covering the metal.
+base=np.empty((N,N,3));base[:]=[176,178,169];base+=(grain*.70+bands*.28)[:,:,None]
+write_set('package',base,.39+grain*.016+bands*.01,np.ones((N,N)),height*.38,1.4)
+
+# Thin black/gold striped exterior seen on Lenovo coolers. Functional meaning is
+# unknown: this is NOT a fin mesh, leak-sensor claim or copied vendor texture.
+N=512; yy,xx=np.mgrid[:N,:N];u=xx/N;v=yy/N
+stripes=(np.cos(xx*math.tau/6.0)>.15).astype(float)
+base=np.empty((N,N,3));base[:]=[60,57,38]
+base += stripes[:,:,None]*np.array([46,39,18])[None,None,:]
+# Narrow edge border distinguishes a thin applied surface from deep channels.
+border=(xx<12)|(xx>N-13)|(yy<12)|(yy>N-13)
+base[border]=[51,49,35]
+write_set('surface',base,.52-stripes*.05,.40+stripes*.15,np.zeros((N,N)),0)
 
 # Matte black molded connector; periodic tiny tool grain, without fake dirt.
-N=512;yy,xx=np.mgrid[:N,:N];tool=.18*np.sin(xx*2.18)*np.sin(yy*1.83)+.05*np.sin(xx*.17+yy*.11)
+N=128;yy,xx=np.mgrid[:N,:N];tool=.18*np.sin(xx*2.18)*np.sin(yy*1.83)+.05*np.sin(xx*.17+yy*.11)
 base=np.empty((N,N,3));base[:]=[27,31,32];base+=tool[:,:,None]*2
 write_set('polymer',base,.55+tool*.04,np.zeros((N,N)),tool*.002,2)
 print(json.dumps({'textures':len(list(OUT.glob('*.png'))),'output':str(OUT),'randomUsed':False}))

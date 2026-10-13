@@ -221,6 +221,8 @@
     // Asset prototype can replace one semantic board without spatially clipping
     // triangles or removing the shared chassis, piping and flow overlays.
     const omitted=Number.isInteger(options.omitBoard)?options.omitBoard:-1;
+    const replaceLeftPlumbing=omitted===0&&options.replaceLeftPlumbing===true;
+    if(replaceLeftPlumbing&&(!Array.isArray(options.supplyOverlayPath)||options.supplyOverlayPath.length<2||options.supplyOverlayPath.length>512||options.supplyOverlayPath.some(p=>!Array.isArray(p)||p.length!==3||p.some(v=>!Number.isFinite(v)||Math.abs(v)>4))))throw new Error('Invalid prototype supply path');
     const discard=mesh();
     profile.boards.forEach((p,i)=>pcbDetail(i===omitted?discard:board,p.x,p.z,p.width,p.depth,i*11));
     // Low-profile components are intentionally part of the board, not exploded chips.
@@ -489,11 +491,15 @@
       [[.685,y,-1.10],[.43,y,-1.10],[.43,y,gpuPortZ]],
       [[.67,y,gpuPortZ],[1.27,y,gpuPortZ]]
     ];
-    cf.tube(supplyPath,.021,C.nickel,.92,16);cf.tube(returnPath,.021,C.nickel,.92,16);
-    connections.forEach(path=>cf.tube(path,.018,C.nickel,.92,16));
+    // A revision-2 single-board GLB owns these three left-side hoses. Revision
+    // 1 and the default scene retain every original tube. The rest of the tray
+    // stays procedural; replacing a board never silently removes shared pipes.
+    if(!replaceLeftPlumbing)cf.tube(supplyPath,.021,C.nickel,.92,16);
+    cf.tube(returnPath,.021,C.nickel,.92,16);
+    connections.forEach((path,i)=>{if(!replaceLeftPlumbing||i>=2)cf.tube(path,.018,C.nickel,.92,16);});
     // Only the known supply/return endpoints are colored outside the plates;
     // arrows over the covers describe heat exchange, not unpublished channels.
-    parts['flow-supply'].tube(supplyPath.map(p=>[p[0],p[1]+.023,p[2]]),.010,C.inlet,.18,10);
+    parts['flow-supply'].tube((replaceLeftPlumbing?options.supplyOverlayPath:supplyPath).map(p=>[p[0],p[1]+.023,p[2]]),.010,C.inlet,.18,10);
     parts['flow-return'].tube(returnPath.map(p=>[p[0],p[1]+.023,p[2]]),.010,C.outlet,.18,10);
     for(const side of [-1,1])for(const z of [-2.48,-1.89]){
       cf.box(side*1.84,.078,z,.071,.014,.087,C.darkSteel,.65);

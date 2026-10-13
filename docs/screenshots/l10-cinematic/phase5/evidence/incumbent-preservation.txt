@@ -1,0 +1,2 @@
+PASS default Phase3 hardware remains byte-identical for all 9 mesh layers.
+PASS shader sources, lighting/tone mapping and complete timeline controller unchanged.

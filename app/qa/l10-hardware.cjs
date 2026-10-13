@@ -51,4 +51,11 @@ for(const p of profile.packages)for(const sx of [-1,1])for(const sz of [-1,1]){
 const moved={...profile,packages:profile.packages.map((p,i)=>({...p,x:p.x+(i?0:.025)}))};
 assert.notDeepEqual(api.build(moved).meshes['l10-packages'].data,meshes['l10-packages'].data,'Asset layout can change through profile');
 assert.deepEqual(api.build().meshes['l10-packages'].data,meshes['l10-packages'].data,'Alternate profile does not mutate default');
+// Malformed opt-in plumbing must fail before any replacement reaches WebGL.
+for(const supplyOverlayPath of [undefined,[],[[0,0,0]],[[0,0,0],[Infinity,0,0]],[[0,0,0],[0,0,5]]]){
+ assert.throws(()=>api.build(profile,{omitBoard:0,replaceLeftPlumbing:true,supplyOverlayPath}),/Invalid prototype supply path/);
+}
+const routed=api.build(profile,{omitBoard:0,replaceLeftPlumbing:true,supplyOverlayPath:[[-1.84,.026,-2.79],[-1.51,.100,-1.817]]});
+for(const name of ['l10-chassis','l10-io','l10-lid','l10-flow-return'])assert.deepEqual(routed.meshes[name].data,meshes[name].data,'Single-board plumbing leaves shared '+name+' intact');
+assert.deepEqual(api.build().meshes['l10-flow-supply'].data,meshes['l10-flow-supply'].data,'Opt-in routing cannot mutate default supply');
 console.log(`PASS ${vertices} finite vertices, normalized surfaces, six package/TIM/copper contacts and bonded underfill, eight aligned board supports, 24 cold-plate retention contacts, profile isolation`);

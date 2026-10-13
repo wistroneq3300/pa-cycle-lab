@@ -60,6 +60,12 @@ bpy.ops.export_scene.gltf(filepath=str(OUT/'compute-board.glb'),export_format='G
  export_materials='EXPORT',export_extras=True,export_animations=False,export_cameras=False,export_lights=False,
  export_image_format='AUTO',export_draco_mesh_compression_enable=False)
 data=(OUT/'compute-board.glb').read_bytes();ln,typ=struct.unpack_from('<II',data,12);doc=json.loads(data[20:20+ln])
+# Root extras are consumed transactionally by the existing renderer. A Phase 4
+# GLB has no replacement flag and therefore retains all legacy local plumbing.
+doc['extras']={'prototypeRevision':2,'replacesLeftPlumbing':True,
+ 'supplyOverlayPath':L['hoseContract']['sampledPaths'][0],
+ 'leftPlumbingPaths':L['hoseContract']['sampledPaths'],
+ 'surfacePatternFunction':'Unconfirmed Lenovo exterior pattern; not fins or a claimed leak sensor'}
 # Normal-free materials have no use for a tangent attribute. Omit it rather than
 # shipping unused degenerate vectors generated on collapsed physical edge seams.
 # Normal-mapped primitives are never repaired or exempted by this export step.
@@ -78,10 +84,11 @@ manifest={
  'source':'assets/l10-prototype/compute-board-prototype.blend','build':'assets/l10-prototype/build.py',
  'export':'assets/l10-prototype/export_gltf.py','layers':['board','packages','cooling-frame','cooling'],
  'units':'Normalized PA raw scene units, NOT glTF SI meters; renderer common [.688,1,.802] editorial transform remains required.',
- 'contact':L['contact'],'references':['https://pubs.lenovo.com/gb300-nvl72/zh-TW/compute_tray_top_view','https://lenovopress.lenovo.com/lp2357-lenovo-nvidia-gb300-nvl72-rack-scale-ai'],
+ 'contact':L['contact'],'references':['https://pubs.lenovo.com/gb300-nvl72/compute_tray_top_view','https://lenovopress.lenovo.com/lp2357-lenovo-nvidia-gb300-nvl72-rack-scale-ai','https://www.lttlabs.com/articles/2026/06/06/asus-test-server-tour','https://servers.asus.com/products/detail/overview/XA-GB721-E2','https://pi3g.com/gigabyte-w775-v10-l01-dgx-station-gb300/'],
+ 'prototypeRevision':2,'hoseContract':L['hoseContract'],
  'approximation':L['approximation'],'assetApproval':'PROTOTYPE / NOT PHOTOREALISM ACCEPTED',
  'textureMethod':'Original deterministic UV-mapped fabrication appearance; not photo scans, vendor textures or random scatter',
- 'limitations':['No measured PBR material data','No uncovered official package/PCB view','Legacy local coolant port anchors retained; no OEM hydraulic reconstruction'],
+ 'limitations':['No measured PBR material data','No uncovered Lenovo package/PCB view; ASUS bare-board layout is not transplanted','Legacy local coolant port anchors retained; no OEM hydraulic reconstruction','Thin dark/gold Lenovo exterior pattern has unconfirmed function','ASUS/LTT and workstation references inform general construction/surface appearance only'],
  'extensionsUsed':doc.get('extensionsUsed',[]),'extensionsRequired':doc.get('extensionsRequired',[])
 }
 (OUT/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')

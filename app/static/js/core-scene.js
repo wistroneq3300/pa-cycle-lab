@@ -408,9 +408,10 @@
           let stagedRuntime=null;const stagedParts={};
           try{
             if(environmentFailed)throw new Error('Prototype requires the reference studio environment');
-            const replacement=window.PAL10Hardware.build(window.PAL10Hardware.profile,{omitBoard:0});
+            const plumbing=asset.metadata.extras;
+            const replacement=window.PAL10Hardware.build(window.PAL10Hardware.profile,{omitBoard:0,replaceLeftPlumbing:plumbing.replacesLeftPlumbing===true,supplyOverlayPath:plumbing.supplyOverlayPath});
             stagedRuntime=window.PAL10AssetRuntime.upload(gl,asset,attributes,uniforms);
-            for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling']){
+            for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling','l10-flow-supply']){
               const data=replacement.meshes[name].data,buffer=gl.createBuffer();stagedParts[name]={buffer,count:data.length/12};
               gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
             }
@@ -464,7 +465,7 @@
       if(assetRuntime){
         vertices-=assetRuntime.metadata.vertices;assetRuntime.destroy();assetRuntime=null;
         const legacy=window.PAL10Hardware.build();
-        for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling']){const mesh=parts[name],data=legacy.meshes[name].data;vertices+=data.length/12-mesh.count;gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);mesh.count=data.length/12;}
+        for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling','l10-flow-supply']){const mesh=parts[name],data=legacy.meshes[name].data;vertices+=data.length/12-mesh.count;gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);mesh.count=data.length/12;}
       }
       shadowProgress=-1;
       canvas.dataset.coreVertices=String(vertices);canvas.dataset.coreGeometryBuffers=String(parts?Object.keys(parts).length:0);

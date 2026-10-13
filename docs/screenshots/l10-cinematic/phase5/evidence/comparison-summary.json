@@ -1,0 +1,523 @@
+{
+  "passed": true,
+  "viewport": {
+    "width": 3440,
+    "height": 1440,
+    "deviceScaleFactor": 1
+  },
+  "comparison": "Phase 4 GLB versus Phase 5 GLB; both opt-in with identical renderer/camera/light/exposure/progress. Local route serves both saved GLB byte streams; load timings are fixture timings, not CDN benchmarks.",
+  "loading": {
+    "before": {
+      "assetReadySamplesMs": [
+        1714,
+        1481,
+        1563
+      ],
+      "min": 1481,
+      "median": 1563,
+      "p95": 1714,
+      "max": 1714,
+      "mean": 1586,
+      "glbBytes": 7768444,
+      "glbSHA256": "c8467c0ac186b34ee95e549fc27f5da47ad3de4b8d09b72b68d6070e774985cc",
+      "method": "Three fresh browser contexts; localhost GLB byte fixtures. Navigation through both environmentReady and asset upload completion. Includes shell/build/decode/upload; not a CDN or isolated download benchmark."
+    },
+    "after": {
+      "assetReadySamplesMs": [
+        1473,
+        1452,
+        1509
+      ],
+      "min": 1452,
+      "median": 1473,
+      "p95": 1509,
+      "max": 1509,
+      "mean": 1478,
+      "glbBytes": 8806972,
+      "glbSHA256": "fe898a419c0f613bd003ef964e921dcc7c43771c4ed841bdbcd92da695857bc7",
+      "method": "Three fresh browser contexts; localhost GLB byte fixtures. Navigation through both environmentReady and asset upload completion. Includes shell/build/decode/upload; not a CDN or isolated download benchmark."
+    }
+  },
+  "checks": [
+    "before: four native 3440x1440 captures, no lighting/exposure override",
+    "before: complete real-clock film, unchanged layer sequence, bridge and U40 identity",
+    "after: four native 3440x1440 captures, no lighting/exposure override",
+    "after: complete real-clock film, unchanged layer sequence, bridge and U40 identity",
+    "Opt-in: Skip, Replay, keyboard orbit and rear/reset remain operational",
+    "Opt-in: WebGL context loss restores GLB and retained final pose",
+    "Opt-in: reduced motion retains assembled Rack and disables idle motion",
+    "Four comparisons: exact camera, object pose, native pixels, lighting, environment and shader sources",
+    "Blocked GLB network request falls back to renderable legacy geometry",
+    "Blocked studio environment restores the baseline without falsely reporting a textured prototype"
+  ],
+  "errors": [],
+  "external": [],
+  "sources": {
+    "before": {
+      "environmentSHA256": "d8896d4633a204501e51deb29f655e3244993b816db18ef974b812d51d905f6e",
+      "environmentBytes": 902906,
+      "compiledShaderSHA256": [
+        "cc8c02bec0667ae1116bbbb961ca7aa7d8d73f036478bb425d501ed2212fc67a",
+        "fec3a85f6223c5a7c62936c3ba79ec7887daa25457805aab46260d4d4884f880"
+      ]
+    },
+    "after": {
+      "environmentSHA256": "d8896d4633a204501e51deb29f655e3244993b816db18ef974b812d51d905f6e",
+      "environmentBytes": 902906,
+      "compiledShaderSHA256": [
+        "cc8c02bec0667ae1116bbbb961ca7aa7d8d73f036478bb425d501ed2212fc67a",
+        "fec3a85f6223c5a7c62936c3ba79ec7887daa25457805aab46260d4d4884f880"
+      ]
+    }
+  },
+  "runs": [
+    {
+      "variant": "before",
+      "frames": 2116,
+      "rawObservedFrames": 2116,
+      "postFilmObservationsOmitted": 0,
+      "endpointRule": "First actual draw with progress >= 0.99999 (renderer progress epsilon); later idle draws remain in raw trace but are excluded from film metrics.",
+      "wallDurationMs": 35285,
+      "authoredFilmDurationMs": 35200,
+      "observedDrawFPS": 59.946260940708946,
+      "drawIntervalsMs": {
+        "min": 13.699999809265137,
+        "median": 16.699999809265137,
+        "p95": 16.800000190734863,
+        "max": 33.299999952316284,
+        "mean": 16.68160756496673
+      },
+      "drawCalls": {
+        "min": 47,
+        "median": 91,
+        "p95": 95,
+        "max": 95,
+        "mean": 74.0968809073724
+      },
+      "submittedVerticesOrIndices": {
+        "min": 404991,
+        "median": 2804223,
+        "p95": 3167139,
+        "max": 3167139,
+        "mean": 1861795.0179584122
+      },
+      "shadowDrawCalls": {
+        "min": 0,
+        "median": 90,
+        "p95": 94,
+        "max": 94,
+        "mean": 72.28591682419659
+      },
+      "shadowSubmittedVerticesOrIndices": {
+        "min": 0,
+        "median": 2803839,
+        "p95": 3166755,
+        "max": 3166755,
+        "mean": 1778154.904536862
+      },
+      "geometryVertices": {
+        "min": 1751325,
+        "median": 1751325,
+        "p95": 1751325,
+        "max": 1751325,
+        "mean": 1751325
+      },
+      "nativePixels": {
+        "min": 2191530,
+        "median": 2705544,
+        "p95": 2705544,
+        "max": 2705544,
+        "mean": 2516068.1398865785
+      },
+      "resolutionChanges": [
+        {
+          "progress": 0.0011379233744107562,
+          "from": 1,
+          "to": 0.9,
+          "pixelCount": 2191530
+        },
+        {
+          "progress": 0.4073918810800229,
+          "from": 0.9,
+          "to": 1,
+          "pixelCount": 2705544
+        }
+      ],
+      "limitations": "Observed native-browser draw cadence on this host, not GPU timer measurements or portable device certification. Raw draw counts include any repeated renderer draws before a projection event. Adaptive resolution changes are recorded and prevent an equal-pixel FPS speedup claim when variants differ.",
+      "bridge": {
+        "frames": 389,
+        "eyeStep": {
+          "min": 3.0946694831062226e-05,
+          "median": 0.020703304642559196,
+          "p95": 0.4520125136930091,
+          "max": 0.46499192471334455,
+          "mean": 0.12096521126449063
+        },
+        "trayStep": {
+          "min": 0,
+          "median": 0,
+          "p95": 0.14251170771357108,
+          "max": 0.220857187158979,
+          "mean": 0.013565112255134033
+        }
+      },
+      "asset": {
+        "asset": {
+          "generator": "Khronos glTF Blender I/O v4.5.51",
+          "version": "2.0"
+        },
+        "bytes": 7768444,
+        "primitiveCount": 41,
+        "vertexCount": 178992,
+        "sourceVertexCount": 145200,
+        "imageCount": 15,
+        "imagePixels": 22806528,
+        "layers": [
+          "board",
+          "packages",
+          "cooling-frame",
+          "cooling"
+        ],
+        "coordinateSystem": "glTF Y-up; node transforms baked; UV/image origin unchanged",
+        "strideFloats": 12,
+        "primitives": 41,
+        "vertices": 178992,
+        "bufferBytes": 8591616,
+        "textureBytes": 121634834,
+        "textureObjects": 17
+      }
+    },
+    {
+      "variant": "after",
+      "frames": 2116,
+      "rawObservedFrames": 2116,
+      "postFilmObservationsOmitted": 0,
+      "endpointRule": "First actual draw with progress >= 0.99999 (renderer progress epsilon); later idle draws remain in raw trace but are excluded from film metrics.",
+      "wallDurationMs": 35286.799999952316,
+      "authoredFilmDurationMs": 35200,
+      "observedDrawFPS": 59.946260940708946,
+      "drawIntervalsMs": {
+        "min": 14.099999904632568,
+        "median": 16.699999809265137,
+        "p95": 16.899999856948853,
+        "max": 33.5,
+        "mean": 16.68160756496673
+      },
+      "drawCalls": {
+        "min": 50,
+        "median": 94,
+        "p95": 98,
+        "max": 98,
+        "mean": 77.0968809073724
+      },
+      "submittedVerticesOrIndices": {
+        "min": 454563,
+        "median": 2853795,
+        "p95": 3216711,
+        "max": 3216711,
+        "mean": 1911879.116257089
+      },
+      "shadowDrawCalls": {
+        "min": 0,
+        "median": 93,
+        "p95": 97,
+        "max": 97,
+        "mean": 75.26606805293005
+      },
+      "shadowSubmittedVerticesOrIndices": {
+        "min": 0,
+        "median": 2853411,
+        "p95": 3216327,
+        "max": 3216327,
+        "mean": 1827410.3563327033
+      },
+      "geometryVertices": {
+        "min": 1813497,
+        "median": 1813497,
+        "p95": 1813497,
+        "max": 1813497,
+        "mean": 1813497
+      },
+      "nativePixels": {
+        "min": 2705544,
+        "median": 2705544,
+        "p95": 2705544,
+        "max": 2705544,
+        "mean": 2705544
+      },
+      "resolutionChanges": [],
+      "limitations": "Observed native-browser draw cadence on this host, not GPU timer measurements or portable device certification. Raw draw counts include any repeated renderer draws before a projection event. Adaptive resolution changes are recorded and prevent an equal-pixel FPS speedup claim when variants differ.",
+      "bridge": {
+        "frames": 389,
+        "eyeStep": {
+          "min": 3.0946694831062226e-05,
+          "median": 0.020822794431079393,
+          "p95": 0.4539154744269063,
+          "max": 0.46674881637865406,
+          "mean": 0.12096521134515736
+        },
+        "trayStep": {
+          "min": 0,
+          "median": 0,
+          "p95": 0.1425117077135693,
+          "max": 0.22080374775809167,
+          "mean": 0.013565112255134003
+        }
+      },
+      "asset": {
+        "asset": {
+          "generator": "Khronos glTF Blender I/O v4.5.51",
+          "version": "2.0"
+        },
+        "bytes": 8806972,
+        "primitiveCount": 44,
+        "vertexCount": 231540,
+        "sourceVertexCount": 171117,
+        "imageCount": 17,
+        "imagePixels": 6078464,
+        "layers": [
+          "board",
+          "packages",
+          "cooling-frame",
+          "cooling"
+        ],
+        "coordinateSystem": "glTF Y-up; node transforms baked; UV/image origin unchanged",
+        "strideFloats": 12,
+        "primitives": 44,
+        "vertices": 231540,
+        "bufferBytes": 11113920,
+        "textureBytes": 32418494,
+        "textureObjects": 19
+      }
+    }
+  ],
+  "pairs": [
+    {
+      "id": "01-packages",
+      "matched": {
+        "camera": true,
+        "pixels": true,
+        "lightingUniforms": true,
+        "assembly": true
+      },
+      "before": {
+        "file": "before/3440x1440-01-packages.png",
+        "sha256": "14cb3d7c00a0c7694b66235499c582256b15db51086a2107d6023d1ed4d8deac",
+        "progress": 0.21,
+        "inspection": "packages",
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        }
+      },
+      "after": {
+        "file": "after/3440x1440-01-packages.png",
+        "sha256": "9f59839dab85e3bafbacb6d848fc557ed86915d591d1368efec02f0b2b2d9cc4",
+        "progress": 0.21,
+        "inspection": "packages",
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        }
+      }
+    },
+    {
+      "id": "02-board",
+      "matched": {
+        "camera": true,
+        "pixels": true,
+        "lightingUniforms": true,
+        "assembly": true
+      },
+      "before": {
+        "file": "before/3440x1440-02-board.png",
+        "sha256": "e535fd59775874c5e395068fd820d4fc0f278ae18fc21c6cada75bbab27ac657",
+        "progress": 0.11,
+        "inspection": "board",
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        }
+      },
+      "after": {
+        "file": "after/3440x1440-02-board.png",
+        "sha256": "cef425324cc89452d722bb88598abbc2e8b1e0d5f2f07251449a42c6d3f4a13c",
+        "progress": 0.11,
+        "inspection": "board",
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        }
+      }
+    },
+    {
+      "id": "03-cooling",
+      "matched": {
+        "camera": true,
+        "pixels": true,
+        "lightingUniforms": true,
+        "assembly": true
+      },
+      "before": {
+        "file": "before/3440x1440-03-cooling.png",
+        "sha256": "7a6fd48de1bcecdf7013f481f92ad3c2b803ac2695b17bd1d7e414ff0e42949d",
+        "progress": 0.354,
+        "inspection": "cooling",
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        }
+      },
+      "after": {
+        "file": "after/3440x1440-03-cooling.png",
+        "sha256": "5589dd3674c7a2f0bfdb0ba545faf15260455796a1d07e3e72cc9d476b73c514",
+        "progress": 0.354,
+        "inspection": "cooling",
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        }
+      }
+    },
+    {
+      "id": "04-hero",
+      "matched": {
+        "camera": true,
+        "pixels": true,
+        "lightingUniforms": true,
+        "assembly": true
+      },
+      "before": {
+        "file": "before/3440x1440-04-hero.png",
+        "sha256": "2cdf6e31a3b4e85f6b0e9c569eed90aa73effd9735c24eb686af1327e94cf71d",
+        "progress": 0.354,
+        "inspection": null,
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        }
+      },
+      "after": {
+        "file": "after/3440x1440-04-hero.png",
+        "sha256": "17d436ebf18e1190bbc2a874d442e59cc68d978ca276b40c4af55ed7750b4069",
+        "progress": 0.354,
+        "inspection": null,
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        }
+      }
+    }
+  ],
+  "supplemental": [
+    {
+      "label": "cooling-reveal",
+      "progress": 0.312,
+      "file": "after/3440x1440-cooling-reveal.png",
+      "sha256": "855d9c39b125c705aeb72ae2ff663f4b5db165fdb67bb3875252e6cc76c54f26"
+    },
+    {
+      "label": "bridge",
+      "progress": 0.48,
+      "file": "after/3440x1440-bridge.png",
+      "sha256": "d4c6e4f7c2998501faaa24f4d1b4e3dbe1117e6f81783c8d1e5704498f2ff1d5"
+    },
+    {
+      "label": "rack-final",
+      "progress": 1,
+      "file": "after/3440x1440-rack-final.png",
+      "sha256": "f5d42db0dbd416fbe4561119921bfb64276c36069da4e5662fe4ad5b61babdd4"
+    }
+  ],
+  "fallbacks": {
+    "loaderFallback": {
+      "passed": true,
+      "asset": {
+        "enabled": true,
+        "loading": false,
+        "failed": true,
+        "error": "Failed to fetch",
+        "metadata": null
+      },
+      "vertices": 1645692,
+      "observed": {
+        "drawCalls": 6,
+        "submittedVerticesOrIndices": 299358,
+        "shadowDrawCalls": 0,
+        "shadowSubmittedVerticesOrIndices": 0,
+        "lighting": {
+          "uKeyPosition": [
+            -13.646400451660156,
+            23.149999618530273,
+            19.61400032043457
+          ],
+          "uLightTheme": 0,
+          "uHasEnvironment": 1,
+          "uReveal": 1
+        }
+      }
+    },
+    "environmentFallback": {
+      "passed": true,
+      "asset": {
+        "enabled": true,
+        "loading": false,
+        "failed": true,
+        "error": "Reference studio environment failed; prototype reverted to baseline",
+        "metadata": null
+      },
+      "quality": {
+        "resolution": 1,
+        "frameMs": 16.700000000000003,
+        "pixelCount": 2705544,
+        "adaptive": true,
+        "contactShadows": true,
+        "shadowMapSize": 2048,
+        "environmentReady": false,
+        "environmentFailed": true,
+        "environment": "CC0 photographic studio / GGX log radiance"
+      },
+      "vertices": 1645692
+    }
+  }
+}

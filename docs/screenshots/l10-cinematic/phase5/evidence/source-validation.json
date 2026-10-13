@@ -1,0 +1,10 @@
+{
+  "tool": "Blender 4.5.9 LTS / validate_blend.py",
+  "sourceObjects": 959,
+  "assembledMinY": -0.09650000184774399,
+  "assembledMaxY": 0.12200000137090683,
+  "contactPlanesVerified": 3,
+  "contactInterfacesVerified": 24,
+  "pcbMetalMaskLinked": true,
+  "errors": []
+}
