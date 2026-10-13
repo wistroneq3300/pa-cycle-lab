@@ -6,7 +6,7 @@
  */
 (() => {
   'use strict';
-  const LAYERS = new Set(['board', 'packages', 'cooling-frame', 'cooling', 'io']);
+  const LAYERS = new Set(['board', 'packages', 'cooling-frame', 'cooling', 'io', 'network']);
   const COMPONENTS = {
     5120: [1, 'getInt8', 127, true], 5121: [1, 'getUint8', 255, false],
     5122: [2, 'getInt16', 32767, true], 5123: [2, 'getUint16', 65535, false],
@@ -189,6 +189,12 @@
         check(m.doubleSided === undefined || typeof m.doubleSided === 'boolean', 'invalid doubleSided flag');
         const normalScale = m.normalTexture && m.normalTexture.scale !== undefined ? m.normalTexture.scale : 1;
         const occlusionStrength = m.occlusionTexture && m.occlusionTexture.strength !== undefined ? m.occlusionTexture.strength : 1;
+        // Bounded, authored silicon finish; not a guessed glTF extension.
+        // Unknown required extensions still fail closed above.
+        const thinFilmStrength = m.extras?.l10ThinFilmStrength ?? 0;
+        const thinFilmThickness = m.extras?.l10ThinFilmThickness ?? 400;
+        check(Number.isFinite(thinFilmStrength) && thinFilmStrength >= 0 && thinFilmStrength <= .25, 'invalid silicon thin-film strength');
+        check(Number.isFinite(thinFilmThickness) && thinFilmThickness >= 250 && thinFilmThickness <= 650, 'invalid silicon thin-film thickness');
         check(Number.isFinite(normalScale) && Number.isFinite(occlusionStrength) && occlusionStrength >= 0 && occlusionStrength <= 1, 'invalid normal scale/occlusion strength');
         // Sequential decode avoids unowned asynchronous images if one texture fails.
         const base = await texture(pbr.baseColorTexture), normal = await texture(m.normalTexture), mr = await texture(pbr.metallicRoughnessTexture), ao = await texture(m.occlusionTexture);
@@ -198,6 +204,7 @@
           normalTexture: normal.image, normalSampler: normal.sampler, normalScale,
           metallicRoughnessTexture: mr.image, metallicRoughnessSampler: mr.sampler,
           occlusionTexture: ao.image, occlusionSampler: ao.sampler, occlusionStrength,
+          thinFilmStrength, thinFilmThickness,
           alphaMode, alphaCutoff, doubleSided: !!m.doubleSided,
           colorSpaces: { baseColor: 'srgb', normal: 'linear', metallicRoughness: 'linear', occlusion: 'linear' }, texCoord: 0
         };

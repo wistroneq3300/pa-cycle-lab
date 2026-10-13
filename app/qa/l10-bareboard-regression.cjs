@@ -82,10 +82,11 @@ function analyzeFilm(observed){
  return {frames:rows.length,wallDurationMs:rows.at(-1).ms,observedDrawFPS:(rows.length-1)/elapsed*1000,drawIntervalsMs:stats(intervals),drawCalls:stats(rows.map(r=>r.drawCalls)),submittedVerticesOrIndices:stats(rows.map(r=>r.submittedVerticesOrIndices)),pixelCount:stats(rows.map(r=>r.quality.pixelCount)),insertionStarts:started,insertionCompletions:finished,bridge:{frames:bridge.length,eyeStep:stats(bridge.map(r=>r.eyeStep)),trayStep:stats(bridge.map(r=>r.trayStep)),samples:bridge},limitations:'Draw cadence and allocation estimates are measured on this host, not a GPU timer or portable performance certification. Adaptive pixel counts are recorded.'};
 }
 
-function malformedOwnership(){
+function malformedOwnership(mode){
  const bytes=fs.readFileSync(assetFile),oldLength=bytes.readUInt32LE(12),doc=JSON.parse(bytes.subarray(20,20+oldLength).toString('utf8'));
  assert.deepEqual(doc.extras.replacesComputeBoards,[0,1],'Fixture must start with the two-board production candidate');
- doc.extras.replacesComputeBoards=[0];
+ if(mode==='network-ownership')doc.extras.networkCards=['BF3-L','BF3-R'];
+ else doc.extras.replacesComputeBoards=[0];
  const raw=Buffer.from(JSON.stringify(doc)),json=Buffer.alloc(Math.ceil(raw.length/4)*4,32);raw.copy(json);
  const header=Buffer.from(bytes.subarray(0,20)),tail=bytes.subarray(20+oldLength);header.writeUInt32LE(20+json.length+tail.length,8);header.writeUInt32LE(json.length,12);
  return Buffer.concat([header,json,tail]);
@@ -130,11 +131,11 @@ function malformedOwnership(){
   await page.locator('[data-core-view="rear"]').click();await settle();assert.equal((await read()).scene.camera.view,'rear');await page.locator('[data-core-view="reset"]').click();await settle();assert.equal((await read()).scene.camera.view,'authored');
   await page.emulateMedia({reducedMotion:'reduce'});await settle();s=await read();assert.ok(s.scene.progress>=.99999);assert.equal(s.scene.idle.disabled,true);report.reducedMotion=s;await page.emulateMedia({reducedMotion:'no-preference'});check('Skip, Replay, interruption, orbit, Home, rear/reset and reduced motion retain behavior');
   await page.close();page=await createPage();await page.goto(url(false),{waitUntil:'domcontentloaded',timeout:120000});await ready();await seek(.354);const baseline=await read();assert.equal(baseline.scene.asset.enabled,false);assert.equal(baseline.observed.glError,0);report.proceduralBaseline={vertices:baseline.scene.vertices,geometryBuffers:baseline.scene.geometryBuffers,asset:baseline.scene.asset};await page.close();
-  for(const mode of ['404','one-board-metadata']){
-   page=await createPage(mode);await page.route('**/bare-compute-boards.glb',route=>mode==='404'?route.fulfill({status:404,contentType:'text/plain',body:'Intentional bare-board regression fixture'}):route.fulfill({status:200,contentType:'model/gltf-binary',body:malformedOwnership()}));
+  for(const mode of ['404','one-board-metadata','network-ownership']){
+   page=await createPage(mode);await page.route('**/bare-compute-boards.glb',route=>mode==='404'?route.fulfill({status:404,contentType:'text/plain',body:'Intentional bare-board regression fixture'}):route.fulfill({status:200,contentType:'model/gltf-binary',body:malformedOwnership(mode)}));
    await page.goto(url(true),{waitUntil:'domcontentloaded',timeout:120000});await ready();await page.waitForFunction(()=>document.querySelector('#system-core').paCoreScene.getState().asset.failed&&!document.querySelector('#system-core').paCoreScene.getState().asset.loading,null,{timeout:120000});await seek(.354);const fallback=await read();
    assert.equal(fallback.scene.ready,true);assert.equal(fallback.scene.asset.metadata,null);assert.equal(fallback.scene.vertices,baseline.scene.vertices,'Complete fallback vertex inventory');assert.equal(fallback.scene.geometryBuffers,baseline.scene.geometryBuffers);assert.deepEqual(fallback.scene.assembly,baseline.scene.assembly);assert.ok(fallback.observed.drawCalls>0);assert.equal(fallback.observed.glError,0);
-   assert.match(fallback.scene.asset.error,mode==='404'?/404/:/two boards/);report.fallbacks.push({mode,passed:true,...fallback});check(mode+': fail-closed complete baseline retained');await page.close();
+   assert.match(fallback.scene.asset.error,mode==='404'?/404/:mode==='network-ownership'?/all three declared cards/:/two boards/);report.fallbacks.push({mode,passed:true,...fallback});check(mode+': fail-closed complete baseline retained');await page.close();
   }
   assert.deepEqual(report.errors,[],'Normal operation has no shader, resource, or JavaScript errors');assert.deepEqual(report.external,[],'All runtime resources self-hosted');
   const unexpectedFailure=report.failureScenarioErrors.filter(e=>e.type==='http'||e.type==='requestfailed').filter(e=>!e.url.endsWith(assetPath));assert.deepEqual(unexpectedFailure,[],'Only the deliberate GLB failure is allowed');report.passed=true;

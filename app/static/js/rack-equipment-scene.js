@@ -837,6 +837,42 @@
       quad(p(a,innerRadius,top),p(b,innerRadius,top),p(b,innerRadius,bottom),p(a,innerRadius,bottom),edgeNormal.map(v=>-v));
     }
   }
+  function editorialCarrierStamp(m,x,y,z,w,h,thickness,windows){
+    // A pierced, folded ejector plate. Each window is an actual obround cut
+    // through the thin sheet; the dark interior is the recessed carrier stop,
+    // not a painted hole. Coordinates stay inside the accepted carrier box.
+    const emit=(p,n,c,metal=.82)=>m.data.push(...p,...n,...c,metal,0);
+    const quad=(a,b,c,d,n,color,metal)=>[a,b,c,a,c,d].forEach(p=>emit(p,n,color,metal));
+    const front=z+thickness/2,back=z-thickness/2,left=x-w/2,right=x+w/2;
+    let bottom=y-h/2;
+    for(const cut of windows){
+      const radius=cut.width/2,straight=(cut.height-cut.width)/2,low=cut.y-cut.height/2,high=cut.y+cut.height/2;
+      if(low>bottom)m.box(x,(bottom+low)/2,z,w,low-bottom,thickness,C.gold,.82);
+      // Split the circular end caps into horizontal bands. Real sidewalls have
+      // radial normals, with a small rolled edge catching the studio light.
+      const levels=[low];
+      for(let i=1;i<=6;i++)levels.push(cut.y-straight-radius*Math.cos(i*Math.PI/12));
+      levels.push(cut.y+straight);
+      for(let i=1;i<=6;i++)levels.push(cut.y+straight+radius*Math.sin(i*Math.PI/12));
+      const span=yy=>{const dy=Math.max(0,Math.abs(yy-cut.y)-straight);return Math.sqrt(Math.max(0,radius*radius-dy*dy));};
+      for(let i=1;i<levels.length;i++){
+        const a=levels[i-1],b=levels[i],ra=span(a),rb=span(b),cx=cut.x;
+        for(const side of [-1,1]){
+          const edge=side<0?left:right,pa=cx+side*ra,pb=cx+side*rb;
+          quad([edge,a,front],[pa,a,front],[pb,b,front],[edge,b,front],[0,0,1],C.gold,.82);
+          quad([edge,b,back],[pb,b,back],[pa,a,back],[edge,a,back],[0,0,-1],C.gold,.82);
+          const mid=(a+b)/2,dy=Math.sign(mid-cut.y)*Math.max(0,Math.abs(mid-cut.y)-straight),nx=-side*span(mid)/radius,ny=-dy/radius;
+          quad([pa,a,front],[pa,a,back],[pb,b,back],[pb,b,front],[nx,ny,0],C.darkGold,.76);
+          // Rolled punch rim is a narrow band on the sheet, not a floating wire.
+          const e=.0011;
+          quad([pa,a,front+.00015],[pa+side*e,a,front],[pb+side*e,b,front],[pb,b,front+.00015],[nx*.24,ny*.24,.97],C.goldEdge,.84);
+        }
+      }
+      bottom=high;
+    }
+    if(bottom<y+h/2)m.box(x,(bottom+y+h/2)/2,z,w,y+h/2-bottom,thickness,C.gold,.82);
+    for(const side of [-1,1])m.bevel(x+side*(w/2-.0017),y,z-.001,.0034,h,thickness+.002,C.gold,.001,.82);
+  }
   function editorialComputeFront(m,h){
     const B=m.box,V=m.bevel,T=m.tube,z=storageLayout.frontPlaneZ,slots=storageLayout.slots;
     const cages=[[-1.52,-.054,.244,.068],[-1.13,-.054,.244,.068],[.995,-.058,.244,.068],[1.37,-.058,.244,.068],[1.235,.064,.187,.046],[1.466,.064,.187,.046]];
@@ -850,6 +886,12 @@
     // The central RJ45 / USB service stack has a solid surround. Ventilation
     // stays in the established left/right NIC zones, clear of the USB stack.
     for(const [x,w] of [[-1.275,1.07],[1.279,.917]])editorialPerforation(m,x,.006,z+.036,w,h-.064,C.gold,1,.028,true,serviceHoles);
+    // Folded NIC face inserts have a visible seating line and a pressed lip.
+    // These sit over existing grille boundaries, never over the service mouths.
+    for(const [x,w] of [[-1.275,1.07],[1.279,.917]]){
+      for(const sy of [-1,1]){const yy=.006+sy*(h-.064)/2;B(x,yy,z+.043,w,.003,.003,C.darkGold,.53);V(x,yy+sy*.003,z+.047,w,.004,.008,C.goldEdge,.001,.84);}
+      for(const sx of [-1,1])editorialOpenSheet(m,x+sx*w/2,.006,z+.044,.005,h-.062,.012,C.gold,.82,serviceHoles);
+    }
     // Fine mesh is interrupted by genuinely recessed service cages, carriers,
     // ejectors and seams. No branding or exact proprietary port names.
     for(const slot of slots){
@@ -858,10 +900,28 @@
       // carrier. Their internal width is 15.7 mm around the 15 mm SSD body.
       const returnFront=z+.045,returnRear=slot.frontZ-.005,returnDepth=returnFront-returnRear;
       for(const side of [-1,1])B(x+side*(cw-wall)/2,y,(returnFront+returnRear)/2,wall,ch,returnDepth,C.gold,.82);
-      V(x,y,z+.065,cw,ch,.040,C.goldEdge,.004,.87);B(x,y,z+.089,cw-.034,ch-.043,.012,C.gold,.80);
-      B(x+cw*.37,y,z+.094,.005,ch-.025,.009,C.darkGold,.65);
-      B(x,y-ch*.32,z+.104,cw*.62,.019,.023,C.goldEdge,.86);B(x,y+ch*.34,z+.102,cw*.68,.008,.008,C.gold,.80);
-      B(x-cw*.22,y-.007,z+.099,.008,.035,.007,E.polymer,.13);B(x-cw*.21,y+.003,z+.103,.004,.007,.003,[.15,.23,.10],.2);
+      // Accepted outside width/height/depth are unchanged. A thin rolled shell,
+      // inset latch and visible pivot replace the previous solid gold block.
+      const rim=.009,latchX=x+cw*.08,latchW=cw*.58,latchH=ch*.73;
+      for(const side of [-1,1])V(x+side*(cw-rim)/2,y,z+.065,rim,ch,.040,C.goldEdge,.0025,.87);
+      for(const side of [-1,1])V(x,y+side*(ch-rim)/2,z+.065,cw-rim*2,rim,.040,C.goldEdge,.0025,.87);
+      // Stamped backing and a recessed dark stop are behind, and separate from,
+      // the ejector. The eight identical windows are part of each carrier.
+      B(x,y,z+.053,cw-rim*2,ch-rim*2,.009,C.darkGold,.56);
+      V(x-cw*.32,y,z+.082,.022,ch-.037,.010,C.gold,.0015,.82);
+      editorialCarrierStamp(m,latchX,y+.003,z+.091,latchW,latchH,.005,
+        [-.041,.002,.045].map(offset=>({x:latchX+cw*.06,y:y+offset,width:.022,height:.031})));
+      // Two small folded hinge cheeks terminate on the carrier, not in space.
+      const hingeY=y-ch*.34;
+      for(const side of [-1,1])V(latchX+side*latchW*.45,hingeY,z+.085,.010,.016,.017,C.gold,.002,.83);
+      T([latchX-latchW*.47,hingeY,z+.094],[latchX+latchW*.47,hingeY,z+.094],.0055,C.goldEdge,12,.86);
+      V(latchX,y-ch*.41,z+.101,latchW+.006,.018,.017,C.goldEdge,.003,.86);
+      B(latchX,y-ch*.401,z+.110,latchW*.73,.002,.0015,C.darkGold,.52);
+      // Restrained release seam and moulded, non-emissive status light pipe.
+      B(x+cw*.39,y,z+.088,.0025,ch-.028,.004,C.darkGold,.57);
+      V(x-cw*.32,y-ch*.33,z+.095,.018,.020,.011,C.gold,.002,.80);
+      B(x-cw*.32,y-.009,z+.090,.007,.028,.004,E.polymer,.13);
+      B(x-cw*.32,y+.001,z+.093,.0035,.006,.002,[.15,.23,.10],.2);
     }
     // Supplied reference orientation: left lower dual cage with RJ45 to its
     // right; upper-right DPU is reversed (RJ45 to its left); lower-right pair.

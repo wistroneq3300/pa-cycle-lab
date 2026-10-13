@@ -129,7 +129,7 @@
   }
   function build(modelProfile=profile,options={}) {
     const profile=modelProfile;
-    const parts={}; for(const id of ['chassis','board','packages','io','cooling-frame','cooling','flow-supply','flow-return','lid'])parts[id]=mesh();
+    const parts={}; for(const id of ['chassis','board','packages','io','network-cover','cooling-frame','cooling','flow-supply','flow-return','lid'])parts[id]=mesh();
     const ch=parts.chassis,board=parts.board,pkg=parts.packages,io=parts.io,cf=parts['cooling-frame'],cp=parts.cooling,lid=parts.lid;
     const sharedFront=window.PARackScene?.createComputeFront?.(profile.height);
     // Folded sheet chassis: thin base, upright walls, hemmed flanges and runners.
@@ -394,6 +394,8 @@
     }
     // Front I/O boards; their large shield cans match the published zoning.
     for(const x of [-1.29,1.29]){
+      const cover=options.replaceNetworking?parts['network-cover']:io;
+      if(!options.replaceNetworking){
       if(!sharedFront)pcbDetail(io,x,1.48,.90,1.82,2);
       else{
         // A single low seat plane carries each lower dual-port adapter. Its
@@ -402,16 +404,37 @@
         io.bevel(x,-.098,1.825,.90,.012,2.51,[.028,.041,.034],.065,.002);
         for(const sx of [-1,1])for(const z of [.65,2.66])io.ring(x+sx*.38,-.091,z,.022,.011,.002,C.gold,.78,16);
       }
-      io.bevel(x,-.017,1.47,.80,.080,1.36,C.nickel,.78,.009);
-      io.bevel(x,.029,1.47,.74,.013,1.28,[.47,.51,.52],.76,.003);
-      for(const side of [-1,1]){
-        io.line(x-.32,1.47+side*.54,x+.32,1.47+side*.54,.036,.005,C.darkSteel,.65);
-        for(let i=0;i<10;i++)io.box(x+side*.332,.039,1.09+i*.08,.021,.004,.041,C.darkSteel,.5);
       }
-      io.bevel(x,.038,1.77,.39,.004,.16,[.33,.37,.38],.63,.001);
-      for(let i=0;i<6;i++)io.line(x-.16,1.714+i*.020,x+.13-(i%3)*.040,1.714+i*.020,.041,.0025,C.steel,.72);
-      for(const sx of [-1,1])for(const z of [.89,2.07])io.screw(x+sx*.32,.040,z,.018);
-      for(let i=0;i<11;i++)io.box(x-.30+i*.06,.044,.99,.017,.021,.36,C.steel,.82);
+      if(options.replaceNetworking){
+        // Seated board spacers remain visible when the removable cover is off.
+        for(const side of [-1,1])for(const z of [.65,2.66])io.cylinder([x+side*.38,-.1125,z],[x+side*.38,-.104,z],.018,C.nickel,.84,16);
+        // Hollow removable cover: real components sit underneath its roof.
+        // Same exterior envelope as the legacy shield, with no solid box
+        // occupying the seated package. These faces hide only in inspection.
+        // The upper-right card begins at Z=2.15. Retain a real .005 gap
+        // beside its rear laminate edge; no change to either board position.
+        const coverFront=x>0?2.145:2.15,coverDepth=coverFront-.79,coverZ=(coverFront+.79)/2;
+        cover.bevel(x,.025,coverZ,.80,.005,coverDepth,C.nickel,.78,.001);
+        // Inspection exposes the die; the restored cover has a continuous
+        // die -> TIM -> metal pedestal -> roof contact, not an air gap.
+        // Contact thickness is a visual approximation, not an OEM stackup.
+        cover.box(x,-.0329,1.44,.265,.002,.276,[.29,.30,.29],.08);
+        cover.box(x,-.0047,1.44,.265,.0544,.276,C.nickel,.82);
+        for(const side of [-1,1]){
+          cover.box(x+side*.394,-.01725,coverZ,.012,.0795,coverDepth,C.nickel,.78);
+          cover.box(x,-.01725,coverZ+side*(coverDepth/2-.006),.776,.0795,.012,C.nickel,.78);
+        }
+        for(const side of [-1,1])for(const z of [.89,2.07])cover.cylinder([x+side*.32,-.092,z],[x+side*.32,.0225,z],.011,C.nickel,.84,12);
+      }else cover.bevel(x,-.017,1.47,.80,.080,1.36,C.nickel,.78,.009);
+      cover.bevel(x,.029,1.47,.74,.013,1.28,[.47,.51,.52],.76,.003);
+      for(const side of [-1,1]){
+        cover.line(x-.32,1.47+side*.54,x+.32,1.47+side*.54,.036,.005,C.darkSteel,.65);
+        for(let i=0;i<10;i++)cover.box(x+side*.332,.039,1.09+i*.08,.021,.004,.041,C.darkSteel,.5);
+      }
+      cover.bevel(x,.038,1.77,.39,.004,.16,[.33,.37,.38],.63,.001);
+      for(let i=0;i<6;i++)cover.line(x-.16,1.714+i*.020,x+.13-(i%3)*.040,1.714+i*.020,.041,.0025,C.steel,.72);
+      for(const sx of [-1,1])for(const z of [.89,2.07])cover.screw(x+sx*.32,.040,z,.018);
+      for(let i=0;i<11;i++)cover.box(x-.30+i*.06,.044,.99,.017,.021,.36,C.steel,.82);
     }
     pcbDetail(io,-.34,1.49,.58,1.09,8); // Management controller card.
     io.bevel(-.34,-.022,1.52,.27,.086,.31,C.chip,.08,.006);
@@ -478,7 +501,25 @@
         {id:'BF3-R',x:1.1825,y:-.058,z:2.60,w:.84,d:.90,ports:[.995,1.37]},
         {id:'CX7-R',x:1.3505,y:.064,z:2.60,w:.50,d:.90,ports:[1.235,1.466]}]){
         const cardY=card.y-.041;
-        if(card.id==='CX7-R')io.bevel(card.x,cardY,card.z,card.w,.009,card.d,[.028,.041,.034],.065,.002);
+        if(card.id==='CX7-R'&&!options.replaceNetworking)io.bevel(card.x,cardY,card.z,card.w,.009,card.d,[.028,.041,.034],.065,.002);
+        if(card.id==='CX7-R'&&options.replaceNetworking){
+          const cover=parts['network-cover'];
+          for(const side of [-1,1]){
+            const x=card.x+side*.213;
+            io.cylinder([x,-.092,2.19],[x,.0185,2.19],.0055,C.nickel,.84,16);
+            io.ring(x,.0285,2.19,.014,.008,.002,C.nickel,.84,16);
+          }
+          // Low-profile removable mezzanine spreader, below the original lid.
+          cover.bevel(card.x,.109,2.44,.34,.006,.42,C.nickel,.82,.002);
+          cover.box(card.x,.08135,2.435,.134,.0015,.138,[.29,.30,.29],.08);
+          cover.box(card.x,.09405,2.435,.134,.0239,.138,C.nickel,.82);
+          for(const side of [-1,1]){
+            // Side-controller solder toes stay outside the spreader skirt.
+            cover.box(card.x+side*.158,.06675,2.44,.006,.0785,.42,C.nickel,.82);
+            cover.box(card.x,.06675,2.44+side*.207,.310,.0785,.006,C.nickel,.82);
+          }
+          for(let fin=0;fin<9;fin++)cover.box(card.x-.14+fin*.035,.115,2.44,.006,.006,.36,C.steel,.85);
+        }
         // Shielded short cages remain distinct from the board and their opening.
         for(const x of card.ports){
           const w=card.id.startsWith('CX7')?.187:.244,h=card.id.startsWith('CX7')?.046:.068;

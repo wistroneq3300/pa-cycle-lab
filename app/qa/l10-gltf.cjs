@@ -120,6 +120,14 @@ async function reject(mutator, pattern, options = {}) {
     await reject(f => { const t = f.png(); f.doc.materials = [{ pbrMetallicRoughness: { baseColorTexture: t }, normalTexture: { index: 99 } }]; f.spec.material = 0; }, /texture index/, { decodeImage: async () => ({ width: 4, height: 4, close() { closed++; } }) });
     assert.equal(closed, 1);
   });
+  await test('silicon optical finish is bounded, opt-in and defaults to zero', async () => {
+    const f=fixture();f.spec.material=0;f.doc.materials=[{extras:{l10ThinFilmStrength:.15,l10ThinFilmThickness:400}}];
+    const m=(await api.parse(f.bytes())).primitives[0].material;
+    assert.equal(m.thinFilmStrength,.15);assert.equal(m.thinFilmThickness,400);
+    assert.equal((await api.parse(fixture().bytes())).primitives[0].material.thinFilmStrength,0);
+    for(const value of [-.01,.26,'0.1'])await reject(f=>{f.spec.material=0;f.doc.materials=[{extras:{l10ThinFilmStrength:value}}];},/thin-film strength/);
+    for(const value of [249,651,'400'])await reject(f=>{f.spec.material=0;f.doc.materials=[{extras:{l10ThinFilmThickness:value}}];},/thin-film thickness/);
+  });
   await test('malformed GLB lengths, magic, chunks and JSON fail closed', async () => {
     for (const [offset, value, pattern] of [[0, 0, /version 2/], [4, 1, /version 2/], [8, 25, /declared length/], [12, 0xfffffff0, /chunk length/], [16, 0, /first chunk/]]) {
       const bytes = fixture().bytes(); new DataView(bytes).setUint32(offset, value, true); await assert.rejects(api.parse(bytes), pattern);
@@ -203,6 +211,10 @@ async function reject(mutator, pattern, options = {}) {
       if(bare)assert.deepEqual(Array.from(result.metadata.extras.replacesComputeBoards),[0,1]);
       const expectedLayers=bare?['board','packages']:['board','cooling','cooling-frame','packages'];
       if(result.metadata.extras.replacesServiceGeometry===true)expectedLayers.push('io');
+      if(result.metadata.extras.replacesNetworking===true){
+        assert.ok(bare,'Networking ownership is restricted to the bare-board candidate');
+        assert.deepEqual(Array.from(result.metadata.extras.networkCards),['BF3-L','BF3-R','CX7-R']);expectedLayers.push('network');
+      }
       assert.deepEqual([...result.metadata.layers].sort(),expectedLayers.sort());
       const bounds = { min: [Infinity, Infinity, Infinity], max: [-Infinity, -Infinity, -Infinity] };
       for (const p of result.primitives) for (let k = 0; k < 3; k++) { bounds.min[k] = Math.min(bounds.min[k], p.bounds.min[k]); bounds.max[k] = Math.max(bounds.max[k], p.bounds.max[k]); }

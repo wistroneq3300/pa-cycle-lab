@@ -1,0 +1,80 @@
+PASS hierarchy + TRS are baked; animation layer is inherited
+PASS glTF default metallic-roughness is preserved, not guessed
+PASS inverse-transpose normal and Gram-Schmidt tangent under nonuniform scale
+PASS mirrored transforms correct triangle winding and tangent handedness
+PASS matrix transform and quaternion rotation are supported
+PASS accessor offsets, byte strides, and normalized unsigned UVs
+PASS nonindexed triangles and optional UV/tangent fallback
+PASS embedded image is deduplicated, channels/samplers/factors retained, disposal idempotent
+PASS material failures close already decoded images
+PASS silicon optical finish is bounded, opt-in and defaults to zero
+PASS malformed GLB lengths, magic, chunks and JSON fail closed
+PASS external buffers/images and unsupported extensions rejected
+PASS skins, animation, morphs, vertex colors and unsupported primitive modes rejected
+PASS out-of-bounds views/accessors/indices and nonfinite values rejected
+PASS hierarchy cycles/multiple parents/missing layers/singular transforms rejected
+PASS normal maps require authored tangent/UV; unsupported lighting factors rejected
+PASS WebGL 1 NPOT sampler requirements are explicit
+PASS network loader enforces same-origin HTTP(S), no redirects, status and byte budget
+{
+  "structuralAsset": "app/static/models/l10-prototype/bare-compute-boards.glb",
+  "asset": {
+    "generator": "Khronos glTF Blender I/O v4.5.51",
+    "version": "2.0"
+  },
+  "extras": {
+    "id": "dual-bare-compute-boards-r2",
+    "prototypeRevision": 5,
+    "replacesComputeBoards": [
+      0,
+      1
+    ],
+    "replacesServiceGeometry": true,
+    "replacesNetworking": true,
+    "networkCards": [
+      "BF3-L",
+      "BF3-R",
+      "CX7-R"
+    ],
+    "bareBoardOnly": true,
+    "packageCount": 6,
+    "cpuCount": 2,
+    "gpuCount": 4,
+    "coordinateUnits": "Existing PA raw units. Shared renderer scale [.688,1,.802] required.",
+    "approval": "OPT-IN visual study, not photorealism accepted",
+    "referenceConfidence": "User photographs and Figure 7 inform visible package faces and functional zones. Retained PA positions and dimensions; ASIC die patterns, concealed structure and network package geometry are original concept approximations, not OEM CAD or chip floorplans."
+  },
+  "bytes": 22030688,
+  "primitiveCount": 124,
+  "vertexCount": 499242,
+  "sourceVertexCount": 382787,
+  "imageCount": 20,
+  "imagePixels": 6864896,
+  "layers": [
+    "board",
+    "packages",
+    "network",
+    "io"
+  ],
+  "coordinateSystem": "glTF Y-up; node transforms baked; UV/image origin unchanged",
+  "strideFloats": 12,
+  "bounds": {
+    "min": [
+      -1.872499942779541,
+      -0.11100000143051147,
+      -2.9489998817443848
+    ],
+    "max": [
+      1.872499942779541,
+      0.08699999749660492,
+      3.0799999237060547
+    ]
+  },
+  "texturePrimitives": 21,
+  "normalMappedPrimitives": 23,
+  "alphaModes": [
+    "OPAQUE"
+  ]
+}
+PASS actual exported GLB structure and declared controllable hardware layers
+PASS 19 GLB adapter groups: bounded parser, transforms, material/texture fidelity, cleanup and rejection paths

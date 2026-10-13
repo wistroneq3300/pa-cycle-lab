@@ -7,7 +7,7 @@
     location.replace(location.pathname+'?'+params.toString());return;
   }
   const canvas=document.querySelector('#system-core'),scene=window.PACoreScene.mount(canvas);
-  const views=['bare-front','bare-storage','bare-section','bare-hero','rack'];
+  const views=['bare-front','bare-storage','bare-section','bare-hero','bare-packages','bare-network','rack'];
   function choose(view){
     if(!views.includes(view))view='bare-hero';
     scene.setProgress(view==='rack'?.723:.354);scene.resetOrbit();scene.setInspection(view==='rack'?null:view);

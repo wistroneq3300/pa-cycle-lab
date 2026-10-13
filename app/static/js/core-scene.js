@@ -126,6 +126,7 @@
     uniform sampler2D uEnvironment;uniform float uHasEnvironment;
     varying vec2 vUV;varying vec4 vTangent;
     uniform float uAsset;uniform float uAssetNormalScale;uniform float uAssetRoughness;uniform float uAssetAO;uniform float uAssetAlphaCutoff;uniform float uAssetAlphaMask;
+    uniform float uAssetFilmStrength;uniform float uAssetFilmThickness;
     uniform sampler2D uAssetBase;uniform sampler2D uAssetMR;uniform sampler2D uAssetNormal;uniform sampler2D uAssetOcclusion;
     vec3 srgbLinear(vec3 c){return mix(c/12.92,pow((c+.055)/1.055,vec3(2.4)),step(vec3(.04045),c));}
     varying vec4 vShadow;
@@ -162,12 +163,22 @@
       vec3 x=max(linear,vec3(0));
       return pow(clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),0.0,1.0),vec3(1.0/2.2));
     }
+    vec3 siliconFinish(vec3 f0,float cosine){
+      if(uAsset<.5||uAssetFilmStrength<=0.0)return f0;
+      // Restrained three-wavelength thin-film approximation on authored silicon
+      // only. Incident angle controls phase; no time animation or emitted light.
+      float refracted=sqrt(max(0.0,1.0-(1.0-cosine*cosine)/(1.46*1.46)));
+      vec3 phase=vec3(12.5663706*1.46*uAssetFilmThickness*refracted)/vec3(650.0,510.0,450.0);
+      vec3 response=.65+.35*cos(phase);
+      response/=max(dot(response,vec3(.2126,.7152,.0722)),.1);
+      return clamp(f0*mix(vec3(1.0),response,uAssetFilmStrength),vec3(0.0),vec3(.98));
+    }
     vec3 conductorLight(vec3 N,vec3 V,vec3 L,vec3 albedo,float metal,float rough){
       vec3 H=normalize(V+L);float nl=max(dot(N,L),0.0),nv=max(dot(N,V),.01),nh=max(dot(N,H),0.0),vh=max(dot(V,H),0.0);
       float a=rough*rough,a2=a*a,d=nh*nh*(a2-1.0)+1.0;
       float D=a2/(3.14159265*d*d+.0001),k=(rough+1.0)*(rough+1.0)/8.0;
       float G=(nv/(nv*(1.0-k)+k))*(nl/(nl*(1.0-k)+k));
-      vec3 F=mix(vec3(.04),albedo,metal);F+=(1.0-F)*pow(1.0-vh,5.0);
+      vec3 F=siliconFinish(mix(vec3(.04),albedo,metal),vh);F+=(1.0-F)*pow(1.0-vh,5.0);
       return F*D*G*nl/(4.0*nv*max(nl,.01)+.001);
     }
     void main(){
@@ -214,6 +225,7 @@
         R=reflect(-V,N);
         vec3 f0=mix(vec3(.04),specAlbedo,metal);
         float nv=max(dot(N,V),.001);
+        f0=siliconFinish(f0,nv);
         vec3 fresnelRough=f0+(max(vec3(1.0-rough),f0)-f0)*pow(1.0-nv,5.0);
         vec4 fit=rough*vec4(-1.0,-.0275,-.572,.022)+vec4(1.0,.0425,1.04,-.04);
         float a004=min(fit.x*fit.x,exp2(-9.28*nv))*fit.x+fit.y;
@@ -412,16 +424,18 @@
             if(environmentFailed)throw new Error('Prototype requires the reference studio environment');
             const plumbing=asset.metadata.extras;
             const replaceServiceGeometry=plumbing.replacesServiceGeometry===true;
+            const replaceNetworking=plumbing.replacesNetworking===true;
             if(replaceServiceGeometry!==asset.metadata.layers.includes('io'))throw new Error('Prototype service replacement requires its matching io layer');
-            if(bareAsset&&(plumbing.bareBoardOnly!==true||JSON.stringify(plumbing.replacesComputeBoards)!=='[0,1]'||asset.metadata.layers.length!==3||!asset.metadata.layers.includes('board')||!asset.metadata.layers.includes('packages')||!replaceServiceGeometry))throw new Error('Bare-board prototype must own two boards, packages and the retained service layer');
-            const replacement=window.PAL10Hardware.build(window.PAL10Hardware.profile,bareAsset?{omitBareBoards:true,replaceServiceGeometry}:{omitBoard:0,replaceLeftPlumbing:plumbing.replacesLeftPlumbing===true,supplyOverlayPath:plumbing.supplyOverlayPath,replaceServiceGeometry});
+            if(replaceNetworking!==asset.metadata.layers.includes('network')||(replaceNetworking&&(!bareAsset||JSON.stringify(plumbing.networkCards)!=='["BF3-L","BF3-R","CX7-R"]')))throw new Error('Networking replacement requires all three declared cards and its network layer');
+            if(bareAsset&&(plumbing.bareBoardOnly!==true||JSON.stringify(plumbing.replacesComputeBoards)!=='[0,1]'||asset.metadata.layers.length!==(replaceNetworking?4:3)||!asset.metadata.layers.includes('board')||!asset.metadata.layers.includes('packages')||!replaceServiceGeometry))throw new Error('Bare-board prototype must own two boards, packages and the retained service layer');
+            const replacement=window.PAL10Hardware.build(window.PAL10Hardware.profile,bareAsset?{omitBareBoards:true,replaceServiceGeometry,replaceNetworking}:{omitBoard:0,replaceLeftPlumbing:plumbing.replacesLeftPlumbing===true,supplyOverlayPath:plumbing.supplyOverlayPath,replaceServiceGeometry});
             stagedRuntime=window.PAL10AssetRuntime.upload(gl,asset,attributes,uniforms);
-            for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling','l10-flow-supply','l10-io']){
+            for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling','l10-flow-supply','l10-io',...(replaceNetworking?['l10-network-cover']:[])]){
               const data=replacement.meshes[name].data,buffer=gl.createBuffer();stagedParts[name]={buffer,count:data.length/12};
               gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
             }
             if(gl.getError()!==gl.NO_ERROR)throw new Error('Prototype replacement buffer upload failed');
-            for(const [name,mesh] of Object.entries(stagedParts)){vertices+=mesh.count-parts[name].count;gl.deleteBuffer(parts[name].buffer);parts[name]=mesh;}
+            for(const [name,mesh] of Object.entries(stagedParts)){vertices+=mesh.count-(parts[name]?.count||0);if(parts[name])gl.deleteBuffer(parts[name].buffer);parts[name]=mesh;}
             assetRuntime=stagedRuntime;
             vertices+=assetRuntime.metadata.vertices;assetLoading=false;canvas.dataset.coreAsset='ready';canvas.dataset.coreVertices=String(vertices);canvas.dataset.coreGeometryBuffers=String(Object.keys(parts).length+assetRuntime.metadata.primitives);shadowProgress=-1;requestDraw();
           }catch(error){stagedRuntime?.destroy();Object.values(stagedParts).forEach(p=>gl.deleteBuffer(p.buffer));asset.disposeImages();assetLoading=false;assetFailed=true;assetError=error.message;canvas.dataset.coreAsset='failed';requestDraw();}
@@ -503,6 +517,8 @@
             'bare-front':[0,0,3.0,0,0,3.15],
             'bare-storage':[0,1.46,3.3,-.075,.01,2.62],
             'bare-section':[1.38,.095,3.0,.46,.009,2.63],
+            'bare-packages':[-.24,1.05,4.5,-.965,.015,-1.70],
+            'bare-network':[-.12,1.16,5.7,0,.02,1.96],
             'bare-hero':[-.46,.86,11.5,0,.04,.35]
           },v=presets[inspection];
           camera[0]=v[0];camera[1]=v[1];camera[2]=v[2];camera[3]=(pose.x+v[3])*modelMatrix[0];camera[4]=pose.y+v[4];camera[5]=(pose.z+v[5])*modelMatrix[10];
@@ -561,7 +577,7 @@
     }
     function part(name,matrix,opacity=1,writeDepth=true){
       if(shadowPass&&(opacity<.96||!writeDepth||name==='floor'||name.includes('flow')))return;
-      const mesh=parts[name];if(!mesh||opacity<=.003)return;
+      const mesh=parts[name];if(!mesh||!mesh.count||opacity<=.003)return;
       gl.uniform1f(uniforms.uAsset,0);gl.disableVertexAttribArray(attributes.aUV);gl.disableVertexAttribArray(attributes.aTangent);
       gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
       gl.enableVertexAttribArray(attributes.aPosition);gl.vertexAttribPointer(attributes.aPosition,3,gl.FLOAT,false,48,0);
@@ -642,12 +658,14 @@
         const layer=(name,lift=0,opacity=1,depth=true)=>{
           const semantic=name.slice(4);
           if(inspection?.startsWith('bare-')&&['cooling-frame','cooling','flow-supply','flow-return','lid'].includes(semantic))return;
+          if(semantic==='network-cover'&&inspection?.startsWith('bare-'))return;
           if(inspection==='board'&&['packages','cooling-frame','cooling','flow-supply','flow-return'].includes(semantic))return;
           if(inspection==='packages'&&['cooling-frame','cooling','flow-supply','flow-return'].includes(semantic))return;
           m[13]=base[13]+lift;part(name,m,opacity,depth);
           if(assetRuntime)drawCalls+=assetRuntime.draw(semantic,m,opacity,depth,shadowPass);
         };
         layer('l10-chassis');layer('l10-board',l10.boardLift);layer('l10-packages',l10.packageLift);layer('l10-io',l10.ioLift);
+        if(assetRuntime?.metadata.extras.replacesNetworking){layer('l10-network',l10.ioLift);layer('l10-network-cover',l10.ioLift);}
         layer('l10-cooling-frame',l10.coolingLift);
         layer('l10-cooling',l10.coolingLift,1-l10.flow*.28,l10.flow<.01);
         // Conceptual directional overlays sit on the disclosed cold-plate
@@ -735,7 +753,7 @@
       return {left,right,bottom,top,heightFraction:(top-bottom)/2,widthFraction:(right-left)/2,nearest,clipped:left< -1||right>1||bottom< -1||top>1||nearest<.15};
     }
     const api={supported:true,
-      setInspection(value){if(!inspectionEnabled)throw new Error('Inspection cameras require l10AssetLab=1');if(value!==null&&!['board','packages','cooling','fans','power','bare-front','bare-storage','bare-section','bare-hero'].includes(value))throw new Error('Unknown asset inspection');inspection=value;cameraReady=false;shadowProgress=-1;requestDraw();},
+      setInspection(value){if(!inspectionEnabled)throw new Error('Inspection cameras require l10AssetLab=1');if(value!==null&&!['board','packages','cooling','fans','power','bare-front','bare-storage','bare-section','bare-hero','bare-packages','bare-network'].includes(value))throw new Error('Unknown asset inspection');inspection=value;cameraReady=false;shadowProgress=-1;requestDraw();},
       setProgress(value){const next=reduced.matches?1:clamp(Number(value)||0);if(Math.abs(next-progress)<.00001)return;activity();progress=next;if(manual&&!drag){manual=false;view='authored';yaw=0;pitch=0;syncOrbit();}armIdle();requestDraw();},
       setPointer(x,y){if(manual||drag||reduced.matches)return;pointerX=clamp(Number(x)||0,-1,1);pointerY=clamp(Number(y)||0,-1,1);requestDraw();},
       setOrbit,setView,resetOrbit,setTheme(value){const next=value===true||value==='light'?1:0;if(next===light)return;light=next;requestDraw();},
