@@ -1,0 +1,26 @@
+{
+  "A-hero": {
+    "meanAbsoluteChannelDifference255": 0.45672843992248063,
+    "pixelsDifferenceAbove2": 295378,
+    "fractionAbove2": 0.059628956718346254,
+    "maxChannelDifference": 60
+  },
+  "B-packages": {
+    "meanAbsoluteChannelDifference255": 2.5187044439061155,
+    "pixelsDifferenceAbove2": 1444390,
+    "fractionAbove2": 0.2915838985788114,
+    "maxChannelDifference": 70
+  },
+  "C-network": {
+    "meanAbsoluteChannelDifference255": 0.7902874677002584,
+    "pixelsDifferenceAbove2": 539680,
+    "fractionAbove2": 0.10894702842377262,
+    "maxChannelDifference": 57
+  },
+  "D-front": {
+    "meanAbsoluteChannelDifference255": 0.00011897071490094746,
+    "pixelsDifferenceAbove2": 129,
+    "fractionAbove2": 2.604166666666667e-05,
+    "maxChannelDifference": 11
+  }
+}

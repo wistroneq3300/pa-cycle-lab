@@ -6,11 +6,14 @@ The NVIDIA Figure 7 photograph supplies package-face and component-zone evidence
 not Lenovo package dimensions/netlists. Existing PA board/package anchors remain
 authoritative. Normalized scene coordinates are NOT manufacturing dimensions.
 """
-import bpy, bmesh, json, math, struct, hashlib
+import bpy, bmesh, json, math, struct, hashlib, sys, os, tempfile
 import numpy as np
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0,str(HERE))
+from bare_finish import finish_maps, contact_occlusion
+from preserve_finish_geometry import retain_geometry
 ROOT = HERE.parents[1]
 OUT = ROOT / 'app/static/models/l10-prototype'
 TEX = HERE / 'textures'
@@ -36,58 +39,11 @@ def image(name, values, linear=False):
     img.filepath_raw=str(TEX/(name+'.png'));img.file_format='PNG';img.save()
     return img
 
-# Original, deliberately restrained finish. These maps are an optical visual
-# approximation, not an OEM mask/floorplan, transistor map or copied photograph.
-n=1024;v,u=np.mgrid[0:n,0:n].astype(np.float32)/(n-1)
-grain=.5+.5*np.sin(u*3919+np.sin(v*271)*.24)*np.sin(v*3559)
-pcb=np.ones((n,n,4),np.float32)
-pcb[:,:,:3]=np.stack([.049+.0007*grain,.055+.0009*grain,.051+.0007*grain],axis=-1)
-pcb_img=image('bare-pcb-soldermask',pcb[::2,::2])
-mr=np.ones_like(pcb);mr[:,:,0]=1;mr[:,:,1]=.455+.010*grain;mr[:,:,2]=0
-pcb_mr=image('bare-pcb-metallicroughness',mr[::2,::2],True)
-nm=np.ones_like(pcb);nm[:,:,0]=.5+.001*np.sin(u*2671);nm[:,:,1]=.5+.001*np.sin(v*2311);nm[:,:,2]=1
-pcb_n=image('bare-pcb-micro-normal',nm[::2,::2],True)
-
-def silicon_maps(kind):
-    # Unequal optical fields and perimeter scribe witnesses are authored in UV
-    # space. No individual rectangle below is claimed to identify a real die
-    # function. Shape and density are inspired by the supplied chip photographs.
-    field=np.zeros_like(u);relief=np.zeros_like(u)
-    regions={
-      'cpu':[(.09,.08,.32,.18,0),(.45,.08,.46,.18,1),(.09,.30,.23,.34,1),(.36,.30,.24,.34,0),(.64,.30,.27,.34,1),(.09,.69,.44,.23,0),(.57,.69,.34,.23,1)],
-      'gpu':[(.07,.07,.38,.25,0),(.51,.07,.42,.25,1),(.07,.36,.25,.27,1),(.37,.36,.29,.27,0),(.71,.36,.22,.27,1),(.07,.68,.40,.25,0),(.52,.68,.41,.25,1)],
-      'network':[(.08,.08,.28,.27,0),(.40,.08,.52,.27,1),(.08,.40,.51,.22,1),(.64,.40,.28,.52,0),(.08,.67,.23,.25,0),(.36,.67,.23,.25,1)]
-    }[kind]
-    for index,(x,y,w,h,orient) in enumerate(regions):
-        inside=(u>x)&(u<x+w)&(v>y)&(v<y+h)
-        fu=(u-x)/w;fv=(v-y)/h
-        primary=fu if orient else fv;secondary=fv if orient else fu
-        bus=np.exp(-np.square(np.sin(primary*math.pi*(28+index*3))*5))
-        cross=np.exp(-np.square(np.sin(secondary*math.pi*(9+index))*8))
-        # Distinct coarse fields carry dense, restrained optical witnesses at a
-        # second scale. Their texture is neither a tiled checkerboard nor a
-        # copied physical floorplan; the actual colour shift is runtime-only.
-        micro=.006*np.sin(primary*math.pi*137)*(.5+.5*np.cos(secondary*math.pi*37))
-        tile=.026+(index%3)*.010-.042*bus-.015*cross+micro
-        field+=inside*tile;relief+=inside*(bus*.007+cross*.002)
-    # Small scribe/guard lines only; there is no baked rainbow or emissive data.
-    guard=((abs(u-.037)<.0012)|(abs(u-.963)<.0012)|(abs(v-.037)<.0012)|(abs(v-.963)<.0012))
-    field-=guard*.045
-    sil=np.ones_like(pcb)
-    pigment={'cpu':[.480,.515,.515],'gpu':[.465,.505,.510],'network':[.455,.495,.500]}[kind]
-    for k,base in enumerate(pigment):sil[:,:,k]=base+field+.003*grain
-    mr=np.ones_like(pcb);mr[:,:,1]=.190+.018*grain+relief;mr[:,:,2]=.64
-    gy,gx=np.gradient(relief)
-    nm=np.ones_like(pcb);nm[:,:,0]=.5-gx*.70;nm[:,:,1]=.5-gy*.70;nm[:,:,2]=1
-    return (image('bare-'+kind+'-silicon-finish',sil),image('bare-'+kind+'-silicon-metallicroughness',mr[::2,::2],True),image('bare-'+kind+'-silicon-normal',nm[::2,::2],True))
-silicon={kind:silicon_maps(kind) for kind in ['cpu','gpu','network']}
-
-# Reusable non-uniform machined finish at a scale that remains subtle in the
-# close-up. Geometry carries the edge break; this normal map never replaces it.
-mr=np.ones_like(pcb);mr[:,:,1]=.29+.024*grain+.014*np.sin(v*127);mr[:,:,2]=.91
-gold_mr=image('bare-gold-metallicroughness',mr[::2,::2],True)
-nm=np.ones_like(pcb);nm[:,:,0]=.5+.002*np.sin(u*2901);nm[:,:,1]=.5+.010*np.sin(v*2231);nm[:,:,2]=1
-metal_n=image('bare-metal-machining-normal',nm[::2,::2],True)
+# Shared deterministic finish authoring changes only material/image resources.
+finish=finish_maps(image)
+pcb_img,pcb_mr,pcb_n=finish['pcb']
+silicon={kind:finish[kind] for kind in ['cpu','gpu','network']}
+gold_mr=finish['gold_mr'];metal_n=finish['metal_n']
 
 def mat(name,color,metal=0,rough=.5,base=None,mr=None,normal=None):
     m=bpy.data.materials.new(name);m.use_nodes=True;m.diffuse_color=(*color,1)
@@ -102,31 +58,31 @@ def mat(name,color,metal=0,rough=.5,base=None,mr=None,normal=None):
         sep=m.node_tree.nodes.new('ShaderNodeSeparateColor');m.node_tree.links.new(tex(mr).outputs['Color'],sep.inputs['Color'])
         m.node_tree.links.new(sep.outputs['Green'],p.inputs['Roughness']);m.node_tree.links.new(sep.outputs['Blue'],p.inputs['Metallic'])
     if normal:
-        norm=m.node_tree.nodes.new('ShaderNodeNormalMap');norm.inputs['Strength'].default_value=.12
+        norm=m.node_tree.nodes.new('ShaderNodeNormalMap');norm.inputs['Strength'].default_value=.35
         m.node_tree.links.new(tex(normal).outputs['Color'],norm.inputs['Color']);m.node_tree.links.new(norm.outputs['Normal'],p.inputs['Normal'])
     m['authorship']='Original finish; no vendor image textures or measured BRDF';M[name]=m;return m
 
 mat('Black solder mask',(.023,.027,.024),0,.5,pcb_img,pcb_mr,pcb_n)
 mat('Black reverse solder mask',(.023,.027,.024),0,.5,pcb_img,pcb_mr)
 mat('Laminate cut edge',(.066,.071,.050),0,.68)
-mat('Package substrate',(.014,.018,.017),0,.40)
+mat('Package substrate',(.019,.024,.020),0,.44,None,finish['substrate_mr'])
 mat('Bonded underfill',(.007,.009,.008),0,.58)
-mat('Gold plated frame',(.58,.50,.29),.90,.31,None,gold_mr,metal_n)
-mat('Gold board contacts',(.63,.47,.22),.92,.36)
-mat('CPU nickel frame',(.41,.44,.44),.91,.29)
+mat('Gold plated frame',(.58,.50,.29),.96,.25,None,gold_mr,metal_n)
+mat('Gold board contacts',(.63,.47,.22),.96,.27)
+mat('CPU nickel frame',(.46,.49,.49),.94,.26,None,finish['nickel_mr'])
 for kind in ['cpu','gpu','network']:
     m=mat(kind.upper()+' exposed optical face',(.27,.3,.3),.72,.24,*silicon[kind])
-    m['l10ThinFilmStrength']={'cpu':.22,'gpu':.23,'network':.21}[kind]
+    m['l10ThinFilmStrength']={'cpu':.15,'gpu':.17,'network':.14}[kind]
     m['l10ThinFilmThickness']={'cpu':410.,'gpu':455.,'network':390.}[kind]
 mat('Die cut edge',(.11,.13,.14),.60,.28)
-mat('Molded IC body',(.016,.019,.020),0,.53)
-mat('Ferrite power stage',(.044,.048,.050),0,.66)
-mat('Passive ceramic',(.15,.13,.09),0,.43)
-mat('Solder fillet',(.43,.46,.47),.90,.23)
-mat('Connector polymer',(.009,.012,.013),0,.50)
+mat('Molded IC body',(.019,.021,.022),0,.57,None,finish['molding_mr'])
+mat('Ferrite power stage',(.052,.055,.056),0,.69,None,finish['ferrite_mr'])
+mat('Passive ceramic',(.17,.14,.095),0,.29,None,finish['ceramic_mr'])
+mat('Solder fillet',(.48,.50,.51),.92,.24,None,finish['solder_mr'])
+mat('Connector polymer',(.011,.014,.015),0,.48)
 mat('Silkscreen ink',(.40,.44,.40),0,.65)
 mat('Etched top marking',(.060,.066,.061),0,.61)
-mat('Buried copper witness',(.035,.044,.037),0,.36)
+mat('Buried copper witness',(.026,.033,.029),0,.38)
 mat('Dark nickel fastener',(.24,.26,.26),.91,.34)
 
 def coord(x,y,z):return x,-z,y
@@ -415,6 +371,8 @@ for card_id,cx,cz,w,d,bottom,top in [
         for x in [-.114,.115]:
             for lane in [-.008,0,.008]:ribbon(card_id+' NIC pair mask witness','network',card_id,bi,[(cx+x+lane,2.55),(cx+x+lane,2.60),(cx+x+lane*.5,2.625)],top+.0002,.0012)
 
+contact_occlusion(image,COL,M)
+
 # Append the already accepted service geometry without reconstructing it. This
 # preserves the eight axial fans and insulated central power harness precisely.
 with bpy.data.libraries.load(str(HERE/'compute-board-prototype.blend'),link=False) as (src,dst):
@@ -456,14 +414,25 @@ for layer,col in COL.items():
 bpy.ops.object.select_all(action='DESELECT')
 for o in exports:o.select_set(True)
 path=OUT/'bare-compute-boards.glb'
-bpy.ops.export_scene.gltf(filepath=str(path),export_format='GLB',use_selection=True,export_apply=True,export_yup=True,export_texcoords=True,export_normals=True,export_tangents=True,export_materials='EXPORT',export_extras=True,export_animations=False,export_cameras=False,export_lights=False,export_image_format='AUTO',export_draco_mesh_compression_enable=False)
-data=path.read_bytes();ln=struct.unpack_from('<I',data,12)[0];doc=json.loads(data[20:20+ln]);binary=data[28+ln:]
-doc['extras']={'id':'dual-bare-compute-boards-r2','prototypeRevision':5,'replacesComputeBoards':[0,1],'replacesServiceGeometry':True,'replacesNetworking':True,'networkCards':['BF3-L','BF3-R','CX7-R'],'bareBoardOnly':True,'packageCount':6,'cpuCount':2,'gpuCount':4,'coordinateUnits':'Existing PA raw units. Shared renderer scale [.688,1,.802] required.','approval':'OPT-IN visual study, not photorealism accepted','referenceConfidence':'User photographs and Figure 7 inform visible package faces and functional zones. Retained PA positions and dimensions; ASIC die patterns, concealed structure and network package geometry are original concept approximations, not OEM CAD or chip floorplans.'}
-for mesh in doc['meshes']:
-    for primitive in mesh['primitives']:
-        if 'normalTexture' not in doc['materials'][primitive['material']]:primitive['attributes'].pop('TANGENT',None)
-js=json.dumps(doc,separators=(',',':')).encode();js+=b' '*((-len(js))%4)
-blob=struct.pack('<III',0x46546c67,2,28+len(js)+len(binary))+struct.pack('<II',len(js),0x4e4f534a)+js+struct.pack('<II',len(binary),0x004e4942)+binary
-path.write_bytes(blob)
+# Stage on the destination volume. A rejected/missing baseline or interrupted
+# export must never replace the published GLB with an unvalidated candidate.
+# Authored maps and the editable .blend are intentionally still saved above.
+with tempfile.TemporaryDirectory(prefix='.bare-finish-',dir=str(OUT)) as staging:
+    candidate=Path(staging)/path.name
+    bpy.ops.export_scene.gltf(filepath=str(candidate),export_format='GLB',use_selection=True,export_apply=True,export_yup=True,export_texcoords=True,export_normals=True,export_tangents=True,export_materials='EXPORT',export_extras=True,export_animations=False,export_cameras=False,export_lights=False,export_image_format='AUTO',export_draco_mesh_compression_enable=False)
+    data=candidate.read_bytes();ln=struct.unpack_from('<I',data,12)[0];doc=json.loads(data[20:20+ln]);binary=data[28+ln:]
+    doc['extras']={'id':'dual-bare-compute-boards-r2','prototypeRevision':5,'replacesComputeBoards':[0,1],'replacesServiceGeometry':True,'replacesNetworking':True,'networkCards':['BF3-L','BF3-R','CX7-R'],'bareBoardOnly':True,'packageCount':6,'cpuCount':2,'gpuCount':4,'coordinateUnits':'Existing PA raw units. Shared renderer scale [.688,1,.802] required.','approval':'OPT-IN visual study, not photorealism accepted','referenceConfidence':'User photographs and Figure 7 inform visible package faces and functional zones. Retained PA positions and dimensions; ASIC die patterns, concealed structure and network package geometry are original concept approximations, not OEM CAD or chip floorplans.'}
+    for mesh in doc['meshes']:
+        for primitive in mesh['primitives']:
+            if 'normalTexture' not in doc['materials'][primitive['material']]:primitive['attributes'].pop('TANGENT',None)
+    for material in doc['materials']:
+        if material['name'].startswith('Black solder mask / '):
+            material.setdefault('extras',{})['l10ContactBoard']=material['name'].split(' / ')[1].replace(' contact AO','')
+            material['name']='Black solder mask'
+    doc,binary=retain_geometry(ROOT,doc,binary)
+    js=json.dumps(doc,separators=(',',':')).encode();js+=b' '*((-len(js))%4)
+    blob=struct.pack('<III',0x46546c67,2,28+len(js)+len(binary))+struct.pack('<II',len(js),0x4e4f534a)+js+struct.pack('<II',len(binary),0x004e4942)+binary
+    candidate.write_bytes(blob)
+    os.replace(candidate,path)
 triangles=sum(doc['accessors'][p['indices']]['count']//3 for m in doc['meshes'] for p in m['primitives'])
 print('BARE_BOARD_ASSET_RESULT '+json.dumps({'id':doc['extras']['id'],'sha256':hashlib.sha256(blob).hexdigest(),'bytes':len(blob),'triangles':triangles,'nodes':len(doc['nodes']),'primitives':sum(len(m['primitives']) for m in doc['meshes']),'materials':len(doc['materials']),'images':len(doc.get('images',[])),'sourceObjects':sum(len(c.objects) for c in COL.values()),'layers':['board','packages','io','network']}))

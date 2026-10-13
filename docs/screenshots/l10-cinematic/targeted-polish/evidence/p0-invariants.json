@@ -1,0 +1,140 @@
+{
+  "baseline": "08dbc28af276c6b62e30f9502d6befe4aa4ce145",
+  "passed": true,
+  "checks": [
+    "Chassis, board/package anchors, eight SSDs, slotLayout, gold front, ports, covers, fasteners and GLB opt-in/fallback/parser/manifest sources unchanged",
+    "Every physical triangle position/normal/winding/count, node transform and scene hierarchy unchanged",
+    "GLB ownership/count invariant replacesComputeBoards",
+    "GLB ownership/count invariant replacesServiceGeometry",
+    "GLB ownership/count invariant replacesNetworking",
+    "GLB ownership/count invariant networkCards",
+    "GLB ownership/count invariant bareBoardOnly",
+    "GLB ownership/count invariant packageCount",
+    "GLB ownership/count invariant cpuCount",
+    "GLB ownership/count invariant gpuCount",
+    "GLB ownership/count invariant coordinateUnits",
+    "Unchanged CAMERA_KEYS",
+    "Unchanged PLAN",
+    "Unchanged PLACEMENTS",
+    "35.2-second controller unchanged; 1001 identical assembly and camera samples; Rack placement and transitions unchanged",
+    "No Cycle, Telemetry, Agent, integration or engine files changed"
+  ],
+  "protectedFiles": [
+    {
+      "file": "app/static/js/l10-hardware.js",
+      "baselineSHA256": "98e8c82a9085e3a4dd61fe4c7eb2ebabbdece1b8198acc9008187e8efb464e1c",
+      "currentSHA256": "98e8c82a9085e3a4dd61fe4c7eb2ebabbdece1b8198acc9008187e8efb464e1c",
+      "LFNormalizedIdentical": true
+    },
+    {
+      "file": "app/static/js/rack-equipment-scene.js",
+      "baselineSHA256": "338279501f269583fab14418e00ebecb3c9a61828f0782deceb908ff03087b84",
+      "currentSHA256": "338279501f269583fab14418e00ebecb3c9a61828f0782deceb908ff03087b84",
+      "LFNormalizedIdentical": true
+    },
+    {
+      "file": "app/static/js/validation-overview.js",
+      "baselineSHA256": "be3f257f4f8a34980fcebdf676dd186d74f5c168ec0ad706785f3cd9f79d0983",
+      "currentSHA256": "be3f257f4f8a34980fcebdf676dd186d74f5c168ec0ad706785f3cd9f79d0983",
+      "LFNormalizedIdentical": true
+    },
+    {
+      "file": "app/static/js/l10-asset-runtime.js",
+      "baselineSHA256": "ce2116cdd3bfb13dca26e4250ce5c716a44199270bdc7cf9be8229b11801559a",
+      "currentSHA256": "ce2116cdd3bfb13dca26e4250ce5c716a44199270bdc7cf9be8229b11801559a",
+      "LFNormalizedIdentical": true
+    },
+    {
+      "file": "app/static/js/l10-gltf.js",
+      "baselineSHA256": "e11fe8cb0c147f857f4b63bb39fc3eb85e57e09fea637fed4dde8cf2a23152de",
+      "currentSHA256": "e11fe8cb0c147f857f4b63bb39fc3eb85e57e09fea637fed4dde8cf2a23152de",
+      "LFNormalizedIdentical": true
+    },
+    {
+      "file": "app/static/js/l10-bareboard-review.js",
+      "baselineSHA256": "6e8c7c444446e10353c145c99951221d3ce1934e2aa7c44e832b8a0be68da58f",
+      "currentSHA256": "6e8c7c444446e10353c145c99951221d3ce1934e2aa7c44e832b8a0be68da58f",
+      "LFNormalizedIdentical": true
+    },
+    {
+      "file": "RUNTIME_ENGINE_FILES.json",
+      "baselineSHA256": "8ec819b95446154fcc5b825ee531d88891c0fa1ff0824940be17a55b31237cdc",
+      "currentSHA256": "0131837a5066e6211252d814ab22915715f36dcefa549d3bd52575097596807c",
+      "LFNormalizedIdentical": true
+    }
+  ],
+  "glb": {
+    "baselineSHA256": "7e4f3f83dca2b963121981ccaabfd84cae5c0486811f5cafeedc21502f982d6a",
+    "currentSHA256": "da9bb7e452ab8cda686dae8ba76a6e0a342d974ffc1974d4325c12283c63ba09",
+    "geometrySHA256": "a15f1e773d009ff171adf2e765dfd23904dc334d22325c74742ae55f868077db",
+    "primitives": 124,
+    "triangles": 166414,
+    "meshSignatures": [
+      {
+        "name": "Board1 / routed FR4.001",
+        "triangles": 33400,
+        "sha256": "94c1c670d91fbd6d55872da5b574393ab048bcb297cd4cd44835212c07845a7e"
+      },
+      {
+        "name": "Board2 / routed FR4.001",
+        "triangles": 33400,
+        "sha256": "20a765aded25f37e2b49538ac736514d8ac9601ce93d6734c8042167fd7ce7da"
+      },
+      {
+        "name": "Board1/CPU / underfill.001",
+        "triangles": 2058,
+        "sha256": "3921f59e3ef40c5730703ec2d79ba1b46c1d2c022d160c77308738320b797f6d"
+      },
+      {
+        "name": "Board1/GPU_A / underfill.001",
+        "triangles": 2186,
+        "sha256": "68bf0d92a5e6fea4f76e8a88293b4a7ede3da3e874fc370d23d9292c12e4d381"
+      },
+      {
+        "name": "Board1/GPU_B / underfill.001",
+        "triangles": 2186,
+        "sha256": "ed40f425e2837d4f79ff02fe456d7d31aab578e29ccd2eb2c19cb5acf353c4ca"
+      },
+      {
+        "name": "Board2/CPU / underfill.001",
+        "triangles": 2058,
+        "sha256": "c0c192718096c18842db5ba8daa3577e81b9736f0790fa71b4dfc265ce09795f"
+      },
+      {
+        "name": "Board2/GPU_A / underfill.001",
+        "triangles": 2186,
+        "sha256": "1c208de4307ede920cc2351fe64f46b46ea2dbce82681d51aa5158f79ab1a835"
+      },
+      {
+        "name": "Board2/GPU_B / underfill.001",
+        "triangles": 2186,
+        "sha256": "69dfdd527c73a7652df9c6a57330c319d9adc2ae5c49a77ba7a4f2cb66f1920a"
+      },
+      {
+        "name": "BF3-L / black multilayer PCB.001",
+        "triangles": 25508,
+        "sha256": "ee2bbbb4e412d2256344c3dec0d54f37075e495dbd1571fe9f47cbaa29a0c332"
+      },
+      {
+        "name": "BF3-R / black multilayer PCB.001",
+        "triangles": 25508,
+        "sha256": "a1a933eee5d2cb1b475d2a989f20331543cd997d7872902d33cc7e358d038984"
+      },
+      {
+        "name": "CX7-R / black multilayer PCB.001",
+        "triangles": 8194,
+        "sha256": "b92f06a36a801e32f50ed3044a2006049b6a1f32a7ce9cb6e8860ed2e4245169"
+      },
+      {
+        "name": "Cube.002",
+        "triangles": 27544,
+        "sha256": "1b9e93d8533918cf465ec13c14c176b9dc168410e5dc03afbc5fcf17cc9405bc"
+      }
+    ]
+  },
+  "errors": [],
+  "limits": [
+    "Verifies physical geometry and source/pose invariants; screenshot review and real WebGL regression remain required.",
+    "Triangle signatures ignore material batching and cyclic corner order but preserve exact Float32 position/normal bytes, winding, duplicate counts and mesh ownership."
+  ]
+}

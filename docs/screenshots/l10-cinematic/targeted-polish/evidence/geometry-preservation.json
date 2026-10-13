@@ -1,0 +1,59 @@
+{
+  "status": "PASS",
+  "beforeSha256": "7e4f3f83dca2b963121981ccaabfd84cae5c0486811f5cafeedc21502f982d6a",
+  "afterSha256": "da9bb7e452ab8cda686dae8ba76a6e0a342d974ffc1974d4325c12283c63ba09",
+  "beforeBytes": 22030688,
+  "afterBytes": 25210276,
+  "nodesIdentical": 12,
+  "primitivesIdentical": 124,
+  "positionNormalUvIndices": "all accessor bytes identical",
+  "sharedTangents": "all shared tangent bytes identical",
+  "nodeTransformsOwnershipExtras": "all baseline keys identical; finish revision/provenance added",
+  "triangles": 166414,
+  "materialCountBefore": 25,
+  "materialCountAfter": 29,
+  "imagesBefore": 20,
+  "imagesAfter": 31,
+  "contactAoMaterials": [
+    {
+      "name": "Black solder mask",
+      "board": "board1"
+    },
+    {
+      "name": "Black solder mask",
+      "board": "board2"
+    },
+    {
+      "name": "Black solder mask",
+      "board": "bf3-l"
+    },
+    {
+      "name": "Black solder mask",
+      "board": "bf3-r"
+    },
+    {
+      "name": "Black solder mask",
+      "board": "cx7-r"
+    }
+  ],
+  "thinFilm": [
+    {
+      "name": "CPU exposed optical face",
+      "authorship": "Original finish; no vendor image textures or measured BRDF",
+      "l10ThinFilmStrength": 0.15,
+      "l10ThinFilmThickness": 410.0
+    },
+    {
+      "name": "GPU exposed optical face",
+      "authorship": "Original finish; no vendor image textures or measured BRDF",
+      "l10ThinFilmStrength": 0.17,
+      "l10ThinFilmThickness": 455.0
+    },
+    {
+      "name": "NETWORK exposed optical face",
+      "authorship": "Original finish; no vendor image textures or measured BRDF",
+      "l10ThinFilmStrength": 0.14,
+      "l10ThinFilmThickness": 390.0
+    }
+  ]
+}

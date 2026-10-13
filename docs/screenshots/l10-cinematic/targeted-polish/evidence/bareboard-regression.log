@@ -1,0 +1,15 @@
+PASS Bare asset loaded in normal dashboard with two-board ownership and no fallback
+PASS Film 1: real clock, GPU chassis pose, continuous bridge and exactly one U40 insertion
+PASS Film 2: real clock, GPU chassis pose, continuous bridge and exactly one U40 insertion
+PASS Film 3: real clock, GPU chassis pose, continuous bridge and exactly one U40 insertion
+PASS Four native 3440×1440 bridge frames captured using authored cameras
+PASS Skip, Replay, interruption, orbit, Home, rear/reset and reduced motion retain behavior
+PASS 404: fail-closed complete baseline retained
+PASS one-board-metadata: fail-closed complete baseline retained
+PASS network-ownership: fail-closed complete baseline retained
+{
+  "passed": true,
+  "films": 3,
+  "checks": 9,
+  "report": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-cinematic-l10\\artifacts\\l10-targeted-polish\\evidence\\browser\\regression.json"
+}

@@ -1,0 +1,173 @@
+{
+  "status": "PASS",
+  "change": "Source-only staged GLB export with atomic replace after geometry validation",
+  "validation": "AST parse and in-memory compile; no execution/rebuild/pycache",
+  "glbBlendAuthoredImagesUnchanged": true,
+  "verifiedFiles": [
+    {
+      "path": "assets/l10-prototype/textures/bare-bf3-l-contact-occlusion.png",
+      "sha256": "88cb89a1c6b86e482f33d907df1ce4c779a2d0f5ca6da3cd17bf15fd8e682eda",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-bf3-r-contact-occlusion.png",
+      "sha256": "ba2ba85b2053864eb4a1194d9fdca54b07761d23fc8d769c720ed74521c8b498",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-board1-contact-occlusion.png",
+      "sha256": "f236f0ea49fda7eb16fedfa7cb6d9718497e92c8304ae3a1f3ae6e597f953798",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-board2-contact-occlusion.png",
+      "sha256": "226d1ee814ac3c0aee86294ac9b144164786a6866f25a6f44aa308ff9c4630ad",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-ceramic-metallicroughness.png",
+      "sha256": "52337e6af6b83d50bfb08789ee3514edcd017e8e869022ab82c98ec099d56602",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-cpu-silicon-finish.png",
+      "sha256": "f2a7b34f921e5406243d95bc28b734228e28f0fa46714325b9a07544740c490d",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-cpu-silicon-metallicroughness.png",
+      "sha256": "3ce7957ab3b13c1d2961193831eb3f1e0cfe097cf81d3154827fabc9785c1812",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-cpu-silicon-normal.png",
+      "sha256": "4c4ff02b0456b347b920c3dc9da3e46d050fa7a74067e0a14d99a8b0da75383e",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-cx7-r-contact-occlusion.png",
+      "sha256": "d7a4723af74336377b295f99b6f2da058ef19fd86580e9d898b9e4ed5ca79d3a",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-ferrite-metallicroughness.png",
+      "sha256": "61ff9276cfdc3023ff621497efbcf1de4ebe7822ff409f90195d3b7dff8964b4",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-gold-metallicroughness.png",
+      "sha256": "e2aaa31be967753da8c26006ead9c6196f17c4fb3563dcba53632f611d93bcff",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-gpu-silicon-finish.png",
+      "sha256": "620401d4905ef2170ddc77b14bd9537616f512986721703fc75704daf7204bfb",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-gpu-silicon-metallicroughness.png",
+      "sha256": "6fcbd22d47208db4d4913318a6d4dae56f77064fdf048615954cdb01a6d5b3f7",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-gpu-silicon-normal.png",
+      "sha256": "e128d28a985a10962b0ad0471ffc0dc0fde5722ef17eda97af71de7b636b8408",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-metal-machining-normal.png",
+      "sha256": "8bace1f705656345cfff16702b33dacfb08b8cfaa4e638ea102f352f989b95dd",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-molding-metallicroughness.png",
+      "sha256": "0aa502e083917c9aea7f24aba302e5cd2f55c3abbf7507b9cda5ab45be4b2801",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-network-silicon-finish.png",
+      "sha256": "c8b3cfa15db1258a281d47af283af3a2c18762fc6622974b020cecd93e067e5e",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-network-silicon-metallicroughness.png",
+      "sha256": "519efd08085844fd9da5ccda96bca3d702be3ac26bc51e6e2bb8c117607fd6a2",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-network-silicon-normal.png",
+      "sha256": "be6a7265cf940f05759f4942d16c45ac76b9a19d80ea55ca61a501c6d1288e17",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-nickel-metallicroughness.png",
+      "sha256": "aa61b30b85d4a371379f9c0854d34b45cee2b1459f6b66ecfd008d2b2960e1f2",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-pcb-metallicroughness.png",
+      "sha256": "8645622dc828a1fbbd917a82bb2dab369f4e29c9d9cfd7a9cd80b9d6a03d454c",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-pcb-micro-normal.png",
+      "sha256": "4c82f99213fa0fa0814c5eddd3808586fd6803c15ed6893516b56dfb7d02d9a2",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-pcb-soldermask.png",
+      "sha256": "b8459f9803ec1adc32054732e5c01d081c188ee8f321c373323ccf9dae1b5c46",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-solder-metallicroughness.png",
+      "sha256": "943b42f6ec936a8e16e417630158004d5556548f0665783a4d53c418625bbbbc",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-substrate-metallicroughness.png",
+      "sha256": "5b33c815e525585e3c524b41509480b9db466ff96c0f630f50565829e033e97e",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/nickel-basecolor.png",
+      "sha256": "ec9576439cf87e741435ae2a0fcc6ec33df45919cd7d7dedec8f3ab1c3902866",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/nickel-metallicroughness.png",
+      "sha256": "b5bb8d1d2ad1246e615e67fbf91ed2f73086d5d7e0f7a08113b4e7f63c65a05f",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/nickel-normal.png",
+      "sha256": "8b7bdc0426116a8c46cee9d766d5b945d0aa562aa04c3ebd24cee4fe100e024e",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/polymer-basecolor.png",
+      "sha256": "510970f93564dd93138ece43105ed61d86360964bb1118e95ad5c51f61c703a6",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/polymer-metallicroughness.png",
+      "sha256": "8780450f257c53ad65160aae888a96d1509189c25786e1eaa8ad06f3471256c3",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/polymer-normal.png",
+      "sha256": "345b3514a58dbfcd55f1d8efe2c3ed6027bf0908c25c673dc0c9fcb0e3ef9842",
+      "unchanged": true
+    },
+    {
+      "path": "app/static/models/l10-prototype/bare-compute-boards.glb",
+      "sha256": "da9bb7e452ab8cda686dae8ba76a6e0a342d974ffc1974d4325c12283c63ba09",
+      "unchanged": true
+    },
+    {
+      "path": "assets/l10-prototype/bare-compute-boards.blend",
+      "sha256": "63b522686315770ec835c9cd1d9630d476d41c9f1d1aba5dd92c310d8ecc90a9",
+      "unchanged": true
+    }
+  ]
+}

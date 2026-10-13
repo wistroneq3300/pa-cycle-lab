@@ -1,0 +1,782 @@
+{
+  "source": "assets/l10-prototype/bare-compute-boards.blend",
+  "readOnly": true,
+  "images": [
+    {
+      "name": "bare-bf3-l-contact-occlusion",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 124411,
+      "packedSha256": "88cb89a1c6b86e482f33d907df1ce4c779a2d0f5ca6da3cd17bf15fd8e682eda",
+      "externalSha256": "88cb89a1c6b86e482f33d907df1ce4c779a2d0f5ca6da3cd17bf15fd8e682eda",
+      "pixelsSha256": "9b2d54cd1f08d8b8e9c84eb97c461ac3cec61e88be5eb46566a581ef1b768962",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-bf3-l-contact-occlusion.png"
+    },
+    {
+      "name": "bare-bf3-r-contact-occlusion",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 124130,
+      "packedSha256": "ba2ba85b2053864eb4a1194d9fdca54b07761d23fc8d769c720ed74521c8b498",
+      "externalSha256": "ba2ba85b2053864eb4a1194d9fdca54b07761d23fc8d769c720ed74521c8b498",
+      "pixelsSha256": "44987e436141482151e658b4b9e31963585dcc917d32ef1ea7a3be57988cdad9",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-bf3-r-contact-occlusion.png"
+    },
+    {
+      "name": "bare-board1-contact-occlusion",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 136580,
+      "packedSha256": "f236f0ea49fda7eb16fedfa7cb6d9718497e92c8304ae3a1f3ae6e597f953798",
+      "externalSha256": "f236f0ea49fda7eb16fedfa7cb6d9718497e92c8304ae3a1f3ae6e597f953798",
+      "pixelsSha256": "54f3f70c0b29949e1c7c7a7b3e1c7ecb1fa75d255f0de5cee0977d9c0f83996e",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-board1-contact-occlusion.png"
+    },
+    {
+      "name": "bare-board2-contact-occlusion",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 136476,
+      "packedSha256": "226d1ee814ac3c0aee86294ac9b144164786a6866f25a6f44aa308ff9c4630ad",
+      "externalSha256": "226d1ee814ac3c0aee86294ac9b144164786a6866f25a6f44aa308ff9c4630ad",
+      "pixelsSha256": "f99d399be9d66969985258e7b1ab65c5fec3baf616327506608e56c259f3c300",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-board2-contact-occlusion.png"
+    },
+    {
+      "name": "bare-ceramic-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 216898,
+      "packedSha256": "52337e6af6b83d50bfb08789ee3514edcd017e8e869022ab82c98ec099d56602",
+      "externalSha256": "52337e6af6b83d50bfb08789ee3514edcd017e8e869022ab82c98ec099d56602",
+      "pixelsSha256": "5da307a39a99ead030cbd6134a64be52831f629dc9f3d0e9d77280bfd51e786d",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-ceramic-metallicroughness.png"
+    },
+    {
+      "name": "bare-cpu-silicon-finish",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 763392,
+      "packedSha256": "f2a7b34f921e5406243d95bc28b734228e28f0fa46714325b9a07544740c490d",
+      "externalSha256": "f2a7b34f921e5406243d95bc28b734228e28f0fa46714325b9a07544740c490d",
+      "pixelsSha256": "d61c4c2c40f49e3c54814e649f9f4ac10110e9651897eba6d47974689013ec0e",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-cpu-silicon-finish.png"
+    },
+    {
+      "name": "bare-cpu-silicon-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 119130,
+      "packedSha256": "3ce7957ab3b13c1d2961193831eb3f1e0cfe097cf81d3154827fabc9785c1812",
+      "externalSha256": "3ce7957ab3b13c1d2961193831eb3f1e0cfe097cf81d3154827fabc9785c1812",
+      "pixelsSha256": "8d1d9a2af097d6a02fcdc2e39e7564bf41fc931dcfb48e87f7f47e4df158eafa",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-cpu-silicon-metallicroughness.png"
+    },
+    {
+      "name": "bare-cpu-silicon-normal",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 11169,
+      "packedSha256": "4c4ff02b0456b347b920c3dc9da3e46d050fa7a74067e0a14d99a8b0da75383e",
+      "externalSha256": "4c4ff02b0456b347b920c3dc9da3e46d050fa7a74067e0a14d99a8b0da75383e",
+      "pixelsSha256": "fb9c781df89a97409a5f817699c65e3449fc79f7d48f4b82fa1636ea919b7508",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-cpu-silicon-normal.png"
+    },
+    {
+      "name": "bare-cx7-r-contact-occlusion",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 84543,
+      "packedSha256": "d7a4723af74336377b295f99b6f2da058ef19fd86580e9d898b9e4ed5ca79d3a",
+      "externalSha256": "d7a4723af74336377b295f99b6f2da058ef19fd86580e9d898b9e4ed5ca79d3a",
+      "pixelsSha256": "23d687edf0f535a869e4a6b9ddb1f80beea72a1203c29c1d9ebe6fd086aec57a",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-cx7-r-contact-occlusion.png"
+    },
+    {
+      "name": "bare-ferrite-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 257536,
+      "packedSha256": "61ff9276cfdc3023ff621497efbcf1de4ebe7822ff409f90195d3b7dff8964b4",
+      "externalSha256": "61ff9276cfdc3023ff621497efbcf1de4ebe7822ff409f90195d3b7dff8964b4",
+      "pixelsSha256": "3245a8cd5086d5ebc5a2679b28fa7d60b0e790355ded9386e25d3322eb3323a1",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-ferrite-metallicroughness.png"
+    },
+    {
+      "name": "bare-gold-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 113559,
+      "packedSha256": "e2aaa31be967753da8c26006ead9c6196f17c4fb3563dcba53632f611d93bcff",
+      "externalSha256": "e2aaa31be967753da8c26006ead9c6196f17c4fb3563dcba53632f611d93bcff",
+      "pixelsSha256": "189dbb14f76e7e28055feb9eaf18d5efb2ac0d6784e9f891161e696357ed6d85",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-gold-metallicroughness.png"
+    },
+    {
+      "name": "bare-gpu-silicon-finish",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 747092,
+      "packedSha256": "620401d4905ef2170ddc77b14bd9537616f512986721703fc75704daf7204bfb",
+      "externalSha256": "620401d4905ef2170ddc77b14bd9537616f512986721703fc75704daf7204bfb",
+      "pixelsSha256": "92460f2fd368ac3734746d0492a07ba0415e85e624e3c6f07febd85737b5fcb9",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-gpu-silicon-finish.png"
+    },
+    {
+      "name": "bare-gpu-silicon-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 114619,
+      "packedSha256": "6fcbd22d47208db4d4913318a6d4dae56f77064fdf048615954cdb01a6d5b3f7",
+      "externalSha256": "6fcbd22d47208db4d4913318a6d4dae56f77064fdf048615954cdb01a6d5b3f7",
+      "pixelsSha256": "7d4e096e2c3c3750c7007e0d8898e5b834dcf2ebeb416a34b4fc58b5398e69dc",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-gpu-silicon-metallicroughness.png"
+    },
+    {
+      "name": "bare-gpu-silicon-normal",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 10016,
+      "packedSha256": "e128d28a985a10962b0ad0471ffc0dc0fde5722ef17eda97af71de7b636b8408",
+      "externalSha256": "e128d28a985a10962b0ad0471ffc0dc0fde5722ef17eda97af71de7b636b8408",
+      "pixelsSha256": "d36ef677a5ae312981158c74091575c96fee39bee6cba09cdecb719652428f62",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-gpu-silicon-normal.png"
+    },
+    {
+      "name": "bare-metal-machining-normal",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 167050,
+      "packedSha256": "8bace1f705656345cfff16702b33dacfb08b8cfaa4e638ea102f352f989b95dd",
+      "externalSha256": "8bace1f705656345cfff16702b33dacfb08b8cfaa4e638ea102f352f989b95dd",
+      "pixelsSha256": "abda3197ddc0b03f40d2a24ad744333ba7cd12149f8c8d463f9ed7e298e831ab",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-metal-machining-normal.png"
+    },
+    {
+      "name": "bare-molding-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 245952,
+      "packedSha256": "0aa502e083917c9aea7f24aba302e5cd2f55c3abbf7507b9cda5ab45be4b2801",
+      "externalSha256": "0aa502e083917c9aea7f24aba302e5cd2f55c3abbf7507b9cda5ab45be4b2801",
+      "pixelsSha256": "b0b7f18bf4babbe776c226cd24c0db76c506c4ef5002006e001a48abc2789342",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-molding-metallicroughness.png"
+    },
+    {
+      "name": "bare-network-silicon-finish",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 918869,
+      "packedSha256": "c8b3cfa15db1258a281d47af283af3a2c18762fc6622974b020cecd93e067e5e",
+      "externalSha256": "c8b3cfa15db1258a281d47af283af3a2c18762fc6622974b020cecd93e067e5e",
+      "pixelsSha256": "871c04d00c3a9a7bc7393544c7787ee03dce0935de2e647093e907fba1b82d04",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-network-silicon-finish.png"
+    },
+    {
+      "name": "bare-network-silicon-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 116852,
+      "packedSha256": "519efd08085844fd9da5ccda96bca3d702be3ac26bc51e6e2bb8c117607fd6a2",
+      "externalSha256": "519efd08085844fd9da5ccda96bca3d702be3ac26bc51e6e2bb8c117607fd6a2",
+      "pixelsSha256": "e40f6d4c484f8cf964fbd82dda67f756c3690ad24a425991b68d9cea490bdd36",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-network-silicon-metallicroughness.png"
+    },
+    {
+      "name": "bare-network-silicon-normal",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 10961,
+      "packedSha256": "be6a7265cf940f05759f4942d16c45ac76b9a19d80ea55ca61a501c6d1288e17",
+      "externalSha256": "be6a7265cf940f05759f4942d16c45ac76b9a19d80ea55ca61a501c6d1288e17",
+      "pixelsSha256": "bd4a4bb29c3f078ffd22e8a7c45452e5a5b62369bead4f5cf7ff0d11c356cb75",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-network-silicon-normal.png"
+    },
+    {
+      "name": "bare-nickel-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 210614,
+      "packedSha256": "aa61b30b85d4a371379f9c0854d34b45cee2b1459f6b66ecfd008d2b2960e1f2",
+      "externalSha256": "aa61b30b85d4a371379f9c0854d34b45cee2b1459f6b66ecfd008d2b2960e1f2",
+      "pixelsSha256": "d9114eabd118aea1320424763b590a00357fb5e85bcd9c61dc5d21d44e5156d3",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-nickel-metallicroughness.png"
+    },
+    {
+      "name": "bare-pcb-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 215397,
+      "packedSha256": "8645622dc828a1fbbd917a82bb2dab369f4e29c9d9cfd7a9cd80b9d6a03d454c",
+      "externalSha256": "8645622dc828a1fbbd917a82bb2dab369f4e29c9d9cfd7a9cd80b9d6a03d454c",
+      "pixelsSha256": "3168b0d9891c6be3468b977014e04222a4de29d94a1e666ee8e17754f583454e",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-pcb-metallicroughness.png"
+    },
+    {
+      "name": "bare-pcb-micro-normal",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 243025,
+      "packedSha256": "4c82f99213fa0fa0814c5eddd3808586fd6803c15ed6893516b56dfb7d02d9a2",
+      "externalSha256": "4c82f99213fa0fa0814c5eddd3808586fd6803c15ed6893516b56dfb7d02d9a2",
+      "pixelsSha256": "3b0ad416ed6b8a022d8b3df76d32adc9b39c6b0a619bddd20ff27373151f3bc2",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-pcb-micro-normal.png"
+    },
+    {
+      "name": "bare-pcb-soldermask",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 127885,
+      "packedSha256": "b8459f9803ec1adc32054732e5c01d081c188ee8f321c373323ccf9dae1b5c46",
+      "externalSha256": "b8459f9803ec1adc32054732e5c01d081c188ee8f321c373323ccf9dae1b5c46",
+      "pixelsSha256": "a26f3eb97d14373f601e976d640f55b44a69a83527dbdc527ad2378db2eb52d9",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-pcb-soldermask.png"
+    },
+    {
+      "name": "bare-solder-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 224894,
+      "packedSha256": "943b42f6ec936a8e16e417630158004d5556548f0665783a4d53c418625bbbbc",
+      "externalSha256": "943b42f6ec936a8e16e417630158004d5556548f0665783a4d53c418625bbbbc",
+      "pixelsSha256": "9dae54258832c02beacdab23e5b265288a903c4820f378435059637ba3927446",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-solder-metallicroughness.png"
+    },
+    {
+      "name": "bare-substrate-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 257403,
+      "packedSha256": "5b33c815e525585e3c524b41509480b9db466ff96c0f630f50565829e033e97e",
+      "externalSha256": "5b33c815e525585e3c524b41509480b9db466ff96c0f630f50565829e033e97e",
+      "pixelsSha256": "2e478b9fbce31cc17c3ace3e84bde4e74ec9a373f72df200c4bb40dd22fa99c9",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-substrate-metallicroughness.png"
+    },
+    {
+      "name": "nickel-basecolor.png",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 2190,
+      "packedSha256": "ec9576439cf87e741435ae2a0fcc6ec33df45919cd7d7dedec8f3ab1c3902866",
+      "externalSha256": "ec9576439cf87e741435ae2a0fcc6ec33df45919cd7d7dedec8f3ab1c3902866",
+      "pixelsSha256": "eef6d09921b1841441f2fe9ed4124c9731c69c4e41ca3e1b96c176b777da2ed9",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/nickel-basecolor.png"
+    },
+    {
+      "name": "nickel-metallicroughness.png",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 2580,
+      "packedSha256": "b5bb8d1d2ad1246e615e67fbf91ed2f73086d5d7e0f7a08113b4e7f63c65a05f",
+      "externalSha256": "b5bb8d1d2ad1246e615e67fbf91ed2f73086d5d7e0f7a08113b4e7f63c65a05f",
+      "pixelsSha256": "bbaabe859856b9b48d24e0929ea9d532a07c34e4008f32ffb4df597e81ab5d32",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/nickel-metallicroughness.png"
+    },
+    {
+      "name": "nickel-normal.png",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 1879,
+      "packedSha256": "8b7bdc0426116a8c46cee9d766d5b945d0aa562aa04c3ebd24cee4fe100e024e",
+      "externalSha256": "8b7bdc0426116a8c46cee9d766d5b945d0aa562aa04c3ebd24cee4fe100e024e",
+      "pixelsSha256": "277f026b989caa5b2f29bae9da7458bb634def040aae1945d7b8f8d2d208faa6",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/nickel-normal.png"
+    },
+    {
+      "name": "polymer-basecolor.png",
+      "size": [
+        128,
+        128
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 2699,
+      "packedSha256": "510970f93564dd93138ece43105ed61d86360964bb1118e95ad5c51f61c703a6",
+      "externalSha256": "510970f93564dd93138ece43105ed61d86360964bb1118e95ad5c51f61c703a6",
+      "pixelsSha256": "af33219c8509fa9f1b015f7be4045c902542359377b08d76351d3cd5ae664ec5",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/polymer-basecolor.png"
+    },
+    {
+      "name": "polymer-metallicroughness.png",
+      "size": [
+        128,
+        128
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 4612,
+      "packedSha256": "8780450f257c53ad65160aae888a96d1509189c25786e1eaa8ad06f3471256c3",
+      "externalSha256": "8780450f257c53ad65160aae888a96d1509189c25786e1eaa8ad06f3471256c3",
+      "pixelsSha256": "85fc0124f1585df6198829d04357306f1c4f1573a591017a41b9ace699c4327f",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/polymer-metallicroughness.png"
+    },
+    {
+      "name": "polymer-normal.png",
+      "size": [
+        128,
+        128
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 360,
+      "packedSha256": "345b3514a58dbfcd55f1d8efe2c3ed6027bf0908c25c673dc0c9fcb0e3ef9842",
+      "externalSha256": "345b3514a58dbfcd55f1d8efe2c3ed6027bf0908c25c673dc0c9fcb0e3ef9842",
+      "pixelsSha256": "59a2d69e1eb7ec8939b35441a65969fee98822795b2b719add501a46379bc50b",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/polymer-normal.png"
+    }
+  ],
+  "materials": [
+    {
+      "name": "Black solder mask / board1 contact AO",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Laminate cut edge",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Black reverse solder mask",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Gold board contacts",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Ferrite power stage",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Molded IC body",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Solder fillet",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Etched top marking",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Passive ceramic",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Connector polymer",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Silkscreen ink",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Buried copper witness",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Bonded underfill",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Black solder mask / board2 contact AO",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Package substrate",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "CPU nickel frame",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Die cut edge",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "CPU exposed optical face",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0.15
+    },
+    {
+      "name": "Gold plated frame",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "GPU exposed optical face",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0.17
+    },
+    {
+      "name": "Black solder mask / bf3-l contact AO",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "NETWORK exposed optical face",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0.14
+    },
+    {
+      "name": "Black solder mask / bf3-r contact AO",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Black solder mask / cx7-r contact AO",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Service matte polymer",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Fan rotor polymer",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Anodized retention",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Brushed nickel",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    },
+    {
+      "name": "Elastomer coolant hose",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0
+    }
+  ],
+  "status": "PASS",
+  "packedImageCount": 31,
+  "missingImages": 0,
+  "glbSha256": "da9bb7e452ab8cda686dae8ba76a6e0a342d974ffc1974d4325c12283c63ba09",
+  "embeddedImageCount": 31,
+  "embeddedImages": [
+    {
+      "name": "bare-pcb-micro-normal",
+      "sha256": "4c82f99213fa0fa0814c5eddd3808586fd6803c15ed6893516b56dfb7d02d9a2",
+      "bytes": 243025,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-board1-contact-occlusion",
+      "sha256": "f236f0ea49fda7eb16fedfa7cb6d9718497e92c8304ae3a1f3ae6e597f953798",
+      "bytes": 136580,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-pcb-soldermask",
+      "sha256": "b8459f9803ec1adc32054732e5c01d081c188ee8f321c373323ccf9dae1b5c46",
+      "bytes": 127885,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-pcb-metallicroughness",
+      "sha256": "8645622dc828a1fbbd917a82bb2dab369f4e29c9d9cfd7a9cd80b9d6a03d454c",
+      "bytes": 215397,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-ferrite-metallicroughness",
+      "sha256": "61ff9276cfdc3023ff621497efbcf1de4ebe7822ff409f90195d3b7dff8964b4",
+      "bytes": 257536,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-molding-metallicroughness",
+      "sha256": "0aa502e083917c9aea7f24aba302e5cd2f55c3abbf7507b9cda5ab45be4b2801",
+      "bytes": 245952,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-solder-metallicroughness",
+      "sha256": "943b42f6ec936a8e16e417630158004d5556548f0665783a4d53c418625bbbbc",
+      "bytes": 224894,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-ceramic-metallicroughness",
+      "sha256": "52337e6af6b83d50bfb08789ee3514edcd017e8e869022ab82c98ec099d56602",
+      "bytes": 216898,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-board2-contact-occlusion",
+      "sha256": "226d1ee814ac3c0aee86294ac9b144164786a6866f25a6f44aa308ff9c4630ad",
+      "bytes": 136476,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-substrate-metallicroughness",
+      "sha256": "5b33c815e525585e3c524b41509480b9db466ff96c0f630f50565829e033e97e",
+      "bytes": 257403,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-nickel-metallicroughness",
+      "sha256": "aa61b30b85d4a371379f9c0854d34b45cee2b1459f6b66ecfd008d2b2960e1f2",
+      "bytes": 210614,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-cpu-silicon-normal",
+      "sha256": "4c4ff02b0456b347b920c3dc9da3e46d050fa7a74067e0a14d99a8b0da75383e",
+      "bytes": 11169,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-cpu-silicon-finish",
+      "sha256": "f2a7b34f921e5406243d95bc28b734228e28f0fa46714325b9a07544740c490d",
+      "bytes": 763392,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-cpu-silicon-metallicroughness",
+      "sha256": "3ce7957ab3b13c1d2961193831eb3f1e0cfe097cf81d3154827fabc9785c1812",
+      "bytes": 119130,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-metal-machining-normal",
+      "sha256": "8bace1f705656345cfff16702b33dacfb08b8cfaa4e638ea102f352f989b95dd",
+      "bytes": 167050,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-gold-metallicroughness",
+      "sha256": "e2aaa31be967753da8c26006ead9c6196f17c4fb3563dcba53632f611d93bcff",
+      "bytes": 113559,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-gpu-silicon-normal",
+      "sha256": "e128d28a985a10962b0ad0471ffc0dc0fde5722ef17eda97af71de7b636b8408",
+      "bytes": 10016,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-gpu-silicon-finish",
+      "sha256": "620401d4905ef2170ddc77b14bd9537616f512986721703fc75704daf7204bfb",
+      "bytes": 747092,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-gpu-silicon-metallicroughness",
+      "sha256": "6fcbd22d47208db4d4913318a6d4dae56f77064fdf048615954cdb01a6d5b3f7",
+      "bytes": 114619,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-bf3-l-contact-occlusion",
+      "sha256": "88cb89a1c6b86e482f33d907df1ce4c779a2d0f5ca6da3cd17bf15fd8e682eda",
+      "bytes": 124411,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-network-silicon-normal",
+      "sha256": "be6a7265cf940f05759f4942d16c45ac76b9a19d80ea55ca61a501c6d1288e17",
+      "bytes": 10961,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-network-silicon-finish",
+      "sha256": "c8b3cfa15db1258a281d47af283af3a2c18762fc6622974b020cecd93e067e5e",
+      "bytes": 918869,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-network-silicon-metallicroughness",
+      "sha256": "519efd08085844fd9da5ccda96bca3d702be3ac26bc51e6e2bb8c117607fd6a2",
+      "bytes": 116852,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-bf3-r-contact-occlusion",
+      "sha256": "ba2ba85b2053864eb4a1194d9fdca54b07761d23fc8d769c720ed74521c8b498",
+      "bytes": 124130,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-cx7-r-contact-occlusion",
+      "sha256": "d7a4723af74336377b295f99b6f2da058ef19fd86580e9d898b9e4ed5ca79d3a",
+      "bytes": 84543,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "nickel-normal",
+      "sha256": "8b7bdc0426116a8c46cee9d766d5b945d0aa562aa04c3ebd24cee4fe100e024e",
+      "bytes": 1879,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "nickel-basecolor",
+      "sha256": "ec9576439cf87e741435ae2a0fcc6ec33df45919cd7d7dedec8f3ab1c3902866",
+      "bytes": 2190,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "nickel-metallicroughness",
+      "sha256": "b5bb8d1d2ad1246e615e67fbf91ed2f73086d5d7e0f7a08113b4e7f63c65a05f",
+      "bytes": 2580,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "polymer-normal",
+      "sha256": "345b3514a58dbfcd55f1d8efe2c3ed6027bf0908c25c673dc0c9fcb0e3ef9842",
+      "bytes": 360,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "polymer-basecolor",
+      "sha256": "510970f93564dd93138ece43105ed61d86360964bb1118e95ad5c51f61c703a6",
+      "bytes": 2699,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "polymer-metallicroughness",
+      "sha256": "8780450f257c53ad65160aae888a96d1509189c25786e1eaa8ad06f3471256c3",
+      "bytes": 4612,
+      "authoredBytesIdentical": true
+    }
+  ],
+  "geometryPolicy": "All accepted POSITION/NORMAL/UV/index/tangent accessors retained; see geometry-preservation.json",
+  "finishRevision": 1
+}

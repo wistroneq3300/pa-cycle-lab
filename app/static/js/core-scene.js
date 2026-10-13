@@ -121,7 +121,7 @@
     precision highp float;
     varying vec3 vPosition;varying vec3 vLocal;varying vec3 vNormal;varying vec4 vColor;varying vec2 vMaterial;
     uniform vec3 uEye;uniform vec3 uKeyPosition;uniform float uLightTheme;uniform float uTime;uniform float uScan;uniform float uScanY;
-    uniform float uRack;uniform float uQuality;uniform float uReveal;uniform float uDetail;uniform float uSectionX;
+    uniform float uRack;uniform float uQuality;uniform float uReveal;uniform float uDetail;uniform float uSectionX;uniform float uL10Finish;
     uniform sampler2D uShadowMap;uniform float uShadowPass;uniform float uHasShadow;uniform float uShadowTexel;
     uniform sampler2D uEnvironment;uniform float uHasEnvironment;
     varying vec2 vUV;varying vec4 vTangent;
@@ -137,6 +137,9 @@
       vec3 q=vShadow.xyz/vShadow.w*.5+.5;
       if(q.x<.002||q.x>.998||q.y<.002||q.y>.998||q.z>1.0)return 1.0;
       float bias=max(.00010,.00048*(1.0-max(dot(normal,light),0.0))),visible=0.0;
+      // The board's millimetre-scale parts need a smaller receiver offset than
+      // the Rack. Keep fascia and procedural/fallback receivers unchanged.
+      if(uAsset>.5||(uL10Finish>.5&&vLocal.z<2.85&&vColor.b>=vColor.r))bias*=.55;
       for(int x=-1;x<=1;x++)for(int y=-1;y<=1;y++)visible+=step(q.z-bias,shadowDepth(q.xy+vec2(float(x),float(y))*uShadowTexel));
       return visible/9.0;
     }
@@ -219,6 +222,17 @@
         if(vMaterial.x<-.5)rough=.64;
         vec3 tangent=normalize(abs(N.y)<.95?cross(vec3(0,1,0),N):cross(vec3(0,0,1),N));
         N=normalize(N+tangent*(fine-.5)*metal*.002);
+        // Rolled sheet grain follows the long chassis axis. Only the opt-in
+        // tray's neutral sheet metal receives it; shared gold fascia, carriers,
+        // ports and Rack equipment retain their original finish.
+        if(uL10Finish>.5&&vLocal.z<2.85&&vColor.b>=vColor.r&&metal>.7){
+          vec2 sheet=abs(N.y)>.7?vLocal.xz:vLocal.yz;
+          float roll=finishNoise(sheet*vec2(360.0,7.0));
+          float micro=finishNoise(sheet*vec2(790.0,31.0));
+          rough=clamp(.365+(roll-.5)*.008+(micro-.5)*.003,.35,.38);
+          vec3 across=abs(N.y)>.7?vec3(1,0,0):vec3(0,1,0);
+          N=normalize(N+across*((roll-.5)*.0014+(micro-.5)*.0005));
+        }
         // Legacy mesh colors are artist values, not measured maps. Calibrate
         // diffuse reflectance separately from conductor F0; retain dark paint.
         }
@@ -236,13 +250,13 @@
         physical+=albedo*(1.0-metal)*max(dot(N,key),0.0)*lit*.82;
         physical+=conductorLight(N,V,key,specAlbedo,metal,rough)*vec3(.95,.94,.92)*.48*lit;
         // Neutral front fill separates black rack rails from internal cavities.
-        physical+=albedo*(1.0-metal)*max(dot(N,normalize(vec3(-.5,.45,1.0))),0.0)*.22;
+        physical+=albedo*(1.0-metal)*max(dot(N,normalize(vec3(-.5,.45,1.0))),0.0)*.22*ao;
         // The photographed studio's rear sector is dark. A fixed broad service
         // softbox lights rear manifolds through every view, without a view-mode
         // toggle, glow, or lifting the opaque hoses to the same value as metal.
         vec3 serviceLight=normalize(vec3(-.15,.24,-1.0));
-        physical+=f0*boxLight(R,serviceLight,6.0)*.42;
-        physical+=albedo*(1.0-metal)*max(dot(N,serviceLight),0.0)*.35;
+        physical+=f0*boxLight(R,serviceLight,6.0)*.42*ao;
+        physical+=albedo*(1.0-metal)*max(dot(N,serviceLight),0.0)*.35*ao;
         physical*=.91+(broad-.5)*.025*metal;
         if(vMaterial.x<-.5)physical*=.97+(fine-.5)*.045;
         physical=mix(physical,albedo,clamp(vMaterial.y,0.0,1.0)*.72);
@@ -414,7 +428,7 @@
       Object.entries(built.meshes).forEach(([name,mesh])=>{const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,mesh.data,gl.STATIC_DRAW);parts[name]={buffer,count:mesh.data.length/12};vertices+=mesh.data.length/12;});
       ['aPosition','aNormal','aColor','aMaterial','aUV','aTangent'].forEach(name=>attributes[name]=gl.getAttribLocation(program,name));
       ['uViewProjection','uLightViewProjection','uModel','uPart','uOpacity','uEye','uKeyPosition','uLightTheme','uTime','uScan','uScanY','uRack','uQuality','uReveal','uDetail','uSectionX','uShadowMap','uShadowPass','uHasShadow','uShadowTexel','uEnvironment','uHasEnvironment'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
-      ['uAsset','uAssetNormalScale','uAssetRoughness','uAssetAO','uAssetAlphaCutoff','uAssetAlphaMask','uAssetBase','uAssetMR','uAssetNormal','uAssetOcclusion'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
+      ['uAsset','uAssetNormalScale','uAssetRoughness','uAssetAO','uAssetAlphaCutoff','uAssetAlphaMask','uAssetBase','uAssetMR','uAssetNormal','uAssetOcclusion','uAssetFilmStrength','uAssetFilmThickness','uL10Finish'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
       if(assetEnabled&&window.PAL10GLTF&&window.PAL10AssetRuntime){
         assetLoading=true;assetFailed=false;assetError='';canvas.dataset.coreAsset='loading';const generation=++assetGeneration;
         window.PAL10GLTF.load('/static/models/l10-prototype/'+(bareAsset?'bare-compute-boards.glb':'compute-board.glb')).then(asset=>{
@@ -578,6 +592,7 @@
     function part(name,matrix,opacity=1,writeDepth=true){
       if(shadowPass&&(opacity<.96||!writeDepth||name==='floor'||name.includes('flow')))return;
       const mesh=parts[name];if(!mesh||!mesh.count||opacity<=.003)return;
+      gl.uniform1f(uniforms.uL10Finish,bareAsset&&assetRuntime&&name==='l10-chassis'?1:0);
       gl.uniform1f(uniforms.uAsset,0);gl.disableVertexAttribArray(attributes.aUV);gl.disableVertexAttribArray(attributes.aTangent);
       gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
       gl.enableVertexAttribArray(attributes.aPosition);gl.vertexAttribPointer(attributes.aPosition,3,gl.FLOAT,false,48,0);

@@ -1,0 +1,98 @@
+[
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-cinematic-l10\\app\\static\\l10-bareboard-review.html",
+    "line": 0,
+    "snippet": "background rgb(18, 21, 22) on body \"L10 / Bare-board review 裸板 HeroCPU / GPU\" is outside DESIGN.md colors",
+    "advisory": true,
+    "ignoreValue": "rgb(18, 21, 22)"
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-cinematic-l10\\app\\static\\l10-bareboard-review.html",
+    "line": 0,
+    "snippet": "text color rgb(233, 230, 223) on h1 \"L10 / Bare-board review\" is outside DESIGN.md colors",
+    "advisory": true,
+    "ignoreValue": "rgb(233, 230, 223)"
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-cinematic-l10\\app\\static\\l10-bareboard-review.html",
+    "line": 0,
+    "snippet": "text color rgb(184, 184, 177) on button \"裸板 Hero\" is outside DESIGN.md colors",
+    "advisory": true,
+    "ignoreValue": "rgb(184, 184, 177)"
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-cinematic-l10\\app\\static\\l10-bareboard-review.html",
+    "line": 0,
+    "snippet": "background rgb(32, 36, 36) on button \"裸板 Hero\" is outside DESIGN.md colors",
+    "advisory": true,
+    "ignoreValue": "rgb(32, 36, 36)"
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-cinematic-l10\\app\\static\\l10-bareboard-review.html",
+    "line": 0,
+    "snippet": "border-top rgb(55, 60, 59) on button \"裸板 Hero\" is outside DESIGN.md colors",
+    "advisory": true,
+    "ignoreValue": "rgb(55, 60, 59)"
+  },
+  {
+    "antipattern": "design-system-radius",
+    "name": "Radius outside DESIGN.md",
+    "description": "A border-radius value is outside the DESIGN.md rounded scale. Use a documented radius token or update the design system if the new shape is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-cinematic-l10\\app\\static\\l10-bareboard-review.html",
+    "line": 0,
+    "snippet": "border-radius 4px on button \"裸板 Hero\" is outside the DESIGN.md rounded scale",
+    "advisory": true,
+    "ignoreValue": "4px"
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-cinematic-l10\\app\\static\\l10-bareboard-review.html",
+    "line": 0,
+    "snippet": "text color rgb(169, 173, 168) on span \"Concept display · 2 CPU / 4 GPU · BF3 × \" is outside DESIGN.md colors",
+    "advisory": true,
+    "ignoreValue": "rgb(169, 173, 168)"
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-cinematic-l10\\app\\static\\l10-bareboard-review.html",
+    "line": 0,
+    "snippet": "text color rgb(216, 198, 164) on a \"35.2 秒動畫與互動總覽 ↗\" is outside DESIGN.md colors",
+    "advisory": true,
+    "ignoreValue": "rgb(216, 198, 164)"
+  }
+]
