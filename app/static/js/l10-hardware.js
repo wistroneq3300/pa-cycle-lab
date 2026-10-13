@@ -126,7 +126,7 @@
     }
     return {data,box,bevel,cylinder,ring,screw,tube,line,tri,quad};
   }
-  function build(modelProfile=profile) {
+  function build(modelProfile=profile,options={}) {
     const profile=modelProfile;
     const parts={}; for(const id of ['chassis','board','packages','io','cooling-frame','cooling','flow-supply','flow-return','lid'])parts[id]=mesh();
     const ch=parts.chassis,board=parts.board,pkg=parts.packages,io=parts.io,cf=parts['cooling-frame'],cp=parts.cooling,lid=parts.lid;
@@ -218,9 +218,14 @@
         }
       }
     }
-    profile.boards.forEach((p,i)=>pcbDetail(board,p.x,p.z,p.width,p.depth,i*11));
+    // Asset prototype can replace one semantic board without spatially clipping
+    // triangles or removing the shared chassis, piping and flow overlays.
+    const omitted=Number.isInteger(options.omitBoard)?options.omitBoard:-1;
+    const discard=mesh();
+    profile.boards.forEach((p,i)=>pcbDetail(i===omitted?discard:board,p.x,p.z,p.width,p.depth,i*11));
     // Low-profile components are intentionally part of the board, not exploded chips.
     for(const b of profile.boards){
+      if(profile.boards.indexOf(b)===omitted)continue;
       for(let i=0;i<8;i++){
         const x=b.x-.60+i*.172;
         // A repeated power phase has a molded inductor, two terminated power
@@ -262,6 +267,9 @@
       }
     }
     profile.packages.forEach((p,index)=>{
+      const omit=p.board===omitted;
+      const pkg=omit?discard:parts.packages,board=omit?discard:parts.board;
+      const cf=omit?discard:parts['cooling-frame'],cp=omit?discard:parts.cooling;
       // Bonded board-integrated package: underfill meets the board, followed by
       // layered laminate, the bonded spreader flange and its contact cap. Do not
       // invent exposed silicon/HBM topology from a cold-plate-covered diagram.

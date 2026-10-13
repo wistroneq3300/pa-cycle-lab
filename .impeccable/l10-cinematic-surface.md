@@ -165,6 +165,21 @@ supply, return and lid groups. Future hardware must preserve these roles and
 the rack docking relationship or provide an adapter. The current factory is a
 single authored profile; the integration document records its actual limits.
 
+### Phase 4 prototype gate
+
+The default scene remains the existing hardware. `?l10AssetPrototype=1` opts
+into one left-board Blender/GLB prototype; `?l10AssetLab=1` additionally enables
+fixed comparison cameras. The GLB uses the same scene, lighting, film controller
+and docking anchors. It does not contain a separate film or camera. Load/upload
+failure retains the procedural board; loss of the reference environment also
+reverts the prototype. Neither query is a production quality approval.
+
+The prototype's photographic acceptance is **NOT ACCEPTED**. Its UV/PBR pipeline
+is usable, but uncovered PCB/package evidence and calibrated material data are
+missing. Do not expand the prototype to the other board or Rack based on the
+successful loader/regression tests. See `docs/L10_PHASE4_ASSET_PIPELINE.md` for
+the identical-camera comparisons and actual memory/performance cost.
+
 ## Do's and Don'ts
 
 - Do preserve the Wistron shell and keep scene styling local.

@@ -68,6 +68,8 @@
     "app/static/js/kvm-session.js",
     "app/static/js/kvm-solo.js",
     "app/static/js/kvm_broadcast.js",
+    "app/static/js/l10-asset-runtime.js",
+    "app/static/js/l10-gltf.js",
     "app/static/js/l10-hardware.js",
     "app/static/js/operations-ux.js",
     "app/static/js/pa-agent.js",

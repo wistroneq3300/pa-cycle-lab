@@ -1,0 +1,28 @@
+{
+  "id": "left-compute-board-prototype-v1",
+  "coordinates": "Existing PA raw coordinates: +Y up, +Z front. Not manufacturing units.",
+  "basis": "Lenovo GB300 official compute-tray top view; no cross-generation internal parts",
+  "board": { "x": -0.965, "z": -1.68, "width": 1.73, "depth": 2.32, "bottom": -0.0965, "top": -0.0715 },
+  "packages": [
+    { "id": "CPU", "x": -0.965, "z": -1.10, "width": 0.64, "depth": 0.64 },
+    { "id": "GPU_A", "x": -1.39, "z": -2.18, "width": 0.61, "depth": 0.66 },
+    { "id": "GPU_B", "x": -0.55, "z": -2.18, "width": 0.61, "depth": 0.66 }
+  ],
+  "powerStages": [
+    [-1.56, -1.62], [-1.36, -1.62], [-1.16, -1.62],
+    [-0.77, -1.62], [-0.57, -1.62], [-0.37, -1.62]
+  ],
+  "passiveBanks": [
+    { "x": -1.60, "z": -1.18, "axis": "z", "count": 6, "pitch": 0.060 },
+    { "x": -0.33, "z": -1.18, "axis": "z", "count": 6, "pitch": 0.060 },
+    { "x": -1.35, "z": -0.65, "axis": "x", "count": 9, "pitch": 0.092 },
+    { "x": -1.51, "z": -2.64, "axis": "x", "count": 12, "pitch": 0.102 }
+  ],
+  "contact": { "packageTop": 0.006, "timBottom": 0.006, "timTop": 0.0068, "copperBottom": 0.0068, "copperTop": 0.0355 },
+  "approximation": [
+    "Uncovered package footprints and board population are an explicit original visual approximation; official top drawing conceals these regions.",
+    "Visible cooling cover silhouette is image guided. Thickness, fastener specification, tube section and internal construction are not verified.",
+    "Long cooling-cover arms are non-certified exterior visualization; they do not establish hydraulic topology or a load-bearing retention design.",
+    "No original manufacturer CAD, scanned surface finish, BOM, netlist, die floorplan or manufacturing tolerances are included."
+  ]
+}

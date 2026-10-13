@@ -1,0 +1,620 @@
+{
+  "passed": true,
+  "checks": [
+    "Public hardware profile: two boards, 2 CPU / 4 GPU, package ownership and honest conceptual overlay",
+    "All authored stages compile and render in the same canvas, scene and GL context",
+    "Rendered assembly seats board, CPU/GPU, I/O, then cold plates; restrained reveal restores opaque metal",
+    "Same L10 remains U40 primary; no duplicate legacy tray or second insertion at handoff",
+    "Pure snapshots and rendered layer transforms are exactly reversible",
+    "Camera transition boundaries preserve pose, scale and camera continuity",
+    "1366 and 1920, dark and light: final framing, L10 visibility, labels and no horizontal overflow",
+    "Real forward/reverse scroll, keyboard and pointer orbit, replay cancellation",
+    "WebGL context loss restores actual geometry and final pose",
+    "Reduced motion lands fully assembled, disables replay and disposes scene/playback on route change"
+  ],
+  "stages": [
+    {
+      "label": "exploded",
+      "progress": 0,
+      "phase": "l10-exploded",
+      "l10": {
+        "board": 0,
+        "packages": 0,
+        "io": 0,
+        "cooling": 0,
+        "flow": 0,
+        "lid": 0,
+        "boardLift": 0.66,
+        "packageLift": 1.25,
+        "ioLift": 0.82,
+        "coolingLift": 2.05,
+        "phase": "l10-exploded",
+        "packageSeparation": "visual-only / board-integrated packages",
+        "flowMeaning": "conceptual thermal-flow overlay",
+        "profile": "liquid-compute-1u-v1"
+      },
+      "camera": {
+        "yaw": -0.5199999809265137,
+        "elevation": 0.6700000166893005,
+        "distance": 14.625226974487305,
+        "target": [
+          -3.646400213241577,
+          5.449999809265137,
+          5.49399995803833
+        ],
+        "eye": [
+          -9.342419624328613,
+          14.532060623168945,
+          15.442305564880371
+        ],
+        "fov": 0.5,
+        "view": "authored"
+      },
+      "drawCalls": 6,
+      "vertices": 1645692
+    },
+    {
+      "label": "board-seated",
+      "progress": 0.132,
+      "phase": "compute-board",
+      "l10": {
+        "board": 1,
+        "packages": 0,
+        "io": 0,
+        "cooling": 0,
+        "flow": 0,
+        "lid": 0,
+        "boardLift": 0,
+        "packageLift": 1.25,
+        "ioLift": 0.82,
+        "coolingLift": 2.05,
+        "phase": "compute-board",
+        "packageSeparation": "visual-only / board-integrated packages",
+        "flowMeaning": "conceptual thermal-flow overlay",
+        "profile": "liquid-compute-1u-v1"
+      },
+      "camera": {
+        "yaw": -0.4576401114463806,
+        "elevation": 0.6700000166893005,
+        "distance": 14.099495887756348,
+        "target": [
+          -3.646400213241577,
+          5.294429302215576,
+          5.49399995803833
+        ],
+        "eye": [
+          -8.529305458068848,
+          14.050019264221191,
+          15.408266067504883
+        ],
+        "fov": 0.5,
+        "view": "authored"
+      },
+      "drawCalls": 6,
+      "vertices": 1645692
+    },
+    {
+      "label": "cpu-gpu",
+      "progress": 0.166,
+      "phase": "cpu-gpu-assembly",
+      "l10": {
+        "board": 1,
+        "packages": 0.5312268595679013,
+        "io": 0,
+        "cooling": 0,
+        "flow": 0,
+        "lid": 0,
+        "boardLift": 0,
+        "packageLift": 0.5859664255401233,
+        "ioLift": 0.82,
+        "coolingLift": 2.05,
+        "phase": "cpu-gpu-assembly",
+        "packageSeparation": "visual-only / board-integrated packages",
+        "flowMeaning": "conceptual thermal-flow overlay",
+        "profile": "liquid-compute-1u-v1"
+      },
+      "camera": {
+        "yaw": -0.4166770279407501,
+        "elevation": 0.6700000166893005,
+        "distance": 14.43343734741211,
+        "target": [
+          -3.646400213241577,
+          5.122034549713135,
+          5.49399995803833
+        ],
+        "eye": [
+          -8.225140571594238,
+          14.084997177124023,
+          15.839266777038574
+        ],
+        "fov": 0.5,
+        "view": "authored"
+      },
+      "drawCalls": 6,
+      "vertices": 1645692
+    },
+    {
+      "label": "packages-seated",
+      "progress": 0.2,
+      "phase": "cpu-gpu-assembly",
+      "l10": {
+        "board": 1,
+        "packages": 1,
+        "io": 0,
+        "cooling": 0,
+        "flow": 0,
+        "lid": 0,
+        "boardLift": 0,
+        "packageLift": 0,
+        "ioLift": 0.82,
+        "coolingLift": 2.05,
+        "phase": "cpu-gpu-assembly",
+        "packageSeparation": "visual-only / board-integrated packages",
+        "flowMeaning": "conceptual thermal-flow overlay",
+        "profile": "liquid-compute-1u-v1"
+      },
+      "camera": {
+        "yaw": -0.3717232942581177,
+        "elevation": 0.6700000166893005,
+        "distance": 15.194833755493164,
+        "target": [
+          -3.646400213241577,
+          4.942729473114014,
+          5.49399995803833
+        ],
+        "eye": [
+          -7.972383499145508,
+          14.378508567810059,
+          16.590618133544922
+        ],
+        "fov": 0.5,
+        "view": "authored"
+      },
+      "drawCalls": 6,
+      "vertices": 1645692
+    },
+    {
+      "label": "io-seated",
+      "progress": 0.246,
+      "phase": "network-storage",
+      "l10": {
+        "board": 1,
+        "packages": 1,
+        "io": 1,
+        "cooling": 0,
+        "flow": 0,
+        "lid": 0,
+        "boardLift": 0,
+        "packageLift": 0,
+        "ioLift": 0,
+        "coolingLift": 2.05,
+        "phase": "network-storage",
+        "packageSeparation": "visual-only / board-integrated packages",
+        "flowMeaning": "conceptual thermal-flow overlay",
+        "profile": "liquid-compute-1u-v1"
+      },
+      "camera": {
+        "yaw": -0.31463271379470825,
+        "elevation": 0.6700108647346497,
+        "distance": 15.841215133666992,
+        "target": [
+          -3.646400213241577,
+          4.7822265625,
+          5.49399995803833
+        ],
+        "eye": [
+          -7.488924980163574,
+          14.619534492492676,
+          17.30105209350586
+        ],
+        "fov": 0.5,
+        "view": "authored"
+      },
+      "drawCalls": 6,
+      "vertices": 1645692
+    },
+    {
+      "label": "cooling-install",
+      "progress": 0.266,
+      "phase": "cooling-install",
+      "l10": {
+        "board": 1,
+        "packages": 1,
+        "io": 1,
+        "cooling": 0.40687312500000117,
+        "flow": 0,
+        "lid": 0,
+        "boardLift": 0,
+        "packageLift": 0,
+        "ioLift": 0,
+        "coolingLift": 1.2159100937499976,
+        "phase": "cooling-install",
+        "packageSeparation": "visual-only / board-integrated packages",
+        "flowMeaning": "conceptual thermal-flow overlay",
+        "profile": "liquid-compute-1u-v1"
+      },
+      "camera": {
+        "yaw": -0.29403385519981384,
+        "elevation": 0.7244336009025574,
+        "distance": 12.643705368041992,
+        "target": [
+          -3.646400213241577,
+          4.75599479675293,
+          5.49399995803833
+        ],
+        "eye": [
+          -6.39053201675415,
+          13.135122299194336,
+          14.556187629699707
+        ],
+        "fov": 0.5,
+        "view": "authored"
+      },
+      "drawCalls": 6,
+      "vertices": 1645692
+    },
+    {
+      "label": "cooling-reveal",
+      "progress": 0.312,
+      "phase": "cooling-reveal",
+      "l10": {
+        "board": 1,
+        "packages": 1,
+        "io": 1,
+        "cooling": 1,
+        "flow": 1,
+        "lid": 0,
+        "boardLift": 0,
+        "packageLift": 0,
+        "ioLift": 0,
+        "coolingLift": 0,
+        "phase": "cooling-reveal",
+        "packageSeparation": "visual-only / board-integrated packages",
+        "flowMeaning": "conceptual thermal-flow overlay",
+        "profile": "liquid-compute-1u-v1"
+      },
+      "camera": {
+        "yaw": -0.2616312503814697,
+        "elevation": 0.8599365949630737,
+        "distance": 13.371068954467773,
+        "target": [
+          -3.646400213241577,
+          4.750002861022949,
+          5.49399995803833
+        ],
+        "eye": [
+          -5.903031826019287,
+          14.882615089416504,
+          13.921530723571777
+        ],
+        "fov": 0.5,
+        "view": "authored"
+      },
+      "drawCalls": 8,
+      "vertices": 1645692
+    },
+    {
+      "label": "l10-hero",
+      "progress": 0.354,
+      "phase": "l10-hero",
+      "l10": {
+        "board": 1,
+        "packages": 1,
+        "io": 1,
+        "cooling": 1,
+        "flow": 0,
+        "lid": 0,
+        "boardLift": 0,
+        "packageLift": 0,
+        "ioLift": 0,
+        "coolingLift": 0,
+        "phase": "l10-hero",
+        "packageSeparation": "visual-only / board-integrated packages",
+        "flowMeaning": "conceptual thermal-flow overlay",
+        "profile": "liquid-compute-1u-v1"
+      },
+      "camera": {
+        "yaw": -0.25079086422920227,
+        "elevation": 0.8177372217178345,
+        "distance": 13.065511703491211,
+        "target": [
+          -3.646400213241577,
+          4.750001907348633,
+          5.49399995803833
+        ],
+        "eye": [
+          -5.8638410568237305,
+          14.282602310180664,
+          14.149638175964355
+        ],
+        "fov": 0.5,
+        "view": "authored"
+      },
+      "drawCalls": 6,
+      "vertices": 1645692
+    },
+    {
+      "label": "closure",
+      "progress": 0.4,
+      "phase": "chassis-close",
+      "l10": {
+        "board": 1,
+        "packages": 1,
+        "io": 1,
+        "cooling": 1,
+        "flow": 0,
+        "lid": 0.9203396915263062,
+        "boardLift": 0,
+        "packageLift": 0,
+        "ioLift": 0,
+        "coolingLift": 0,
+        "phase": "chassis-close",
+        "packageSeparation": "visual-only / board-integrated packages",
+        "flowMeaning": "conceptual thermal-flow overlay",
+        "profile": "liquid-compute-1u-v1"
+      },
+      "camera": {
+        "yaw": -0.2500002980232239,
+        "elevation": 0.7000441551208496,
+        "distance": 12.191160202026367,
+        "target": [
+          -3.646400213241577,
+          4.750001907348633,
+          5.49399995803833
+        ],
+        "eye": [
+          -5.953189373016357,
+          12.604174613952637,
+          14.528106689453125
+        ],
+        "fov": 0.5,
+        "view": "authored"
+      },
+      "drawCalls": 7,
+      "vertices": 1645692
+    },
+    {
+      "label": "bridge",
+      "progress": 0.48,
+      "phase": "camera-bridge",
+      "l10": {
+        "board": 1,
+        "packages": 1,
+        "io": 1,
+        "cooling": 1,
+        "flow": 0,
+        "lid": 1,
+        "boardLift": 0,
+        "packageLift": 0,
+        "ioLift": 0,
+        "coolingLift": 0,
+        "phase": "camera-bridge",
+        "packageSeparation": "visual-only / board-integrated packages",
+        "flowMeaning": "conceptual thermal-flow overlay",
+        "profile": "liquid-compute-1u-v1"
+      },
+      "camera": {
+        "yaw": -0.2844269275665283,
+        "elevation": 0.4385087490081787,
+        "distance": 33.62094497680664,
+        "target": [
+          -1.979408860206604,
+          2.5784859657287598,
+          2.98235821723938
+        ],
+        "eye": [
+          -10.521079063415527,
+          16.853595733642578,
+          32.19928741455078
+        ],
+        "fov": 0.5,
+        "view": "authored"
+      },
+      "drawCalls": 50,
+      "vertices": 1645692
+    },
+    {
+      "label": "rack-handoff",
+      "progress": 0.56,
+      "phase": "convergence",
+      "l10": {
+        "board": 1,
+        "packages": 1,
+        "io": 1,
+        "cooling": 1,
+        "flow": 0,
+        "lid": 1,
+        "boardLift": 0,
+        "packageLift": 0,
+        "ioLift": 0,
+        "coolingLift": 0,
+        "phase": "rack-integration",
+        "packageSeparation": "visual-only / board-integrated packages",
+        "flowMeaning": "conceptual thermal-flow overlay",
+        "profile": "liquid-compute-1u-v1"
+      },
+      "camera": {
+        "yaw": -0.3441317081451416,
+        "elevation": 0.13603715598583221,
+        "distance": 59.53683853149414,
+        "target": [
+          -0.000026477853680262342,
+          0.0000344915060850326,
+          0.000039893973735161126
+        ],
+        "eye": [
+          -19.900955200195312,
+          8.074298858642578,
+          55.52836227416992
+        ],
+        "fov": 0.5,
+        "view": "authored"
+      },
+      "drawCalls": 50,
+      "vertices": 1645692
+    },
+    {
+      "label": "rack-insertion",
+      "progress": 0.69,
+      "phase": "insert",
+      "l10": {
+        "board": 1,
+        "packages": 1,
+        "io": 1,
+        "cooling": 1,
+        "flow": 0,
+        "lid": 1,
+        "boardLift": 0,
+        "packageLift": 0,
+        "ioLift": 0,
+        "coolingLift": 0,
+        "phase": "rack-integration",
+        "packageSeparation": "visual-only / board-integrated packages",
+        "flowMeaning": "conceptual thermal-flow overlay",
+        "profile": "liquid-compute-1u-v1"
+      },
+      "camera": {
+        "yaw": -0.7162107825279236,
+        "elevation": 0.2662126123905182,
+        "distance": 15.800335884094238,
+        "target": [
+          -2.0325995053749324e-10,
+          4.649963855743408,
+          3.6895344257354736
+        ],
+        "eye": [
+          -10.008001327514648,
+          8.806706428527832,
+          15.187882423400879
+        ],
+        "fov": 0.5,
+        "view": "authored"
+      },
+      "drawCalls": 53,
+      "vertices": 1645692
+    },
+    {
+      "label": "complete",
+      "progress": 0.82,
+      "phase": "complete",
+      "l10": {
+        "board": 1,
+        "packages": 1,
+        "io": 1,
+        "cooling": 1,
+        "flow": 0,
+        "lid": 1,
+        "boardLift": 0,
+        "packageLift": 0,
+        "ioLift": 0,
+        "coolingLift": 0,
+        "phase": "rack-integration",
+        "packageSeparation": "visual-only / board-integrated packages",
+        "flowMeaning": "conceptual thermal-flow overlay",
+        "profile": "liquid-compute-1u-v1"
+      },
+      "camera": {
+        "yaw": -0.49000272154808044,
+        "elevation": 0.08500216901302338,
+        "distance": 43.44435501098633,
+        "target": [
+          -2.4324698308928524e-15,
+          0.00005564746606978588,
+          0.00004415373405208811
+        ],
+        "eye": [
+          -20.37232208251953,
+          3.688474655151367,
+          38.1939697265625
+        ],
+        "fov": 0.5,
+        "view": "authored"
+      },
+      "drawCalls": 54,
+      "vertices": 1645692
+    },
+    {
+      "label": "rack-exploded",
+      "progress": 0.89,
+      "phase": "exploded",
+      "l10": {
+        "board": 1,
+        "packages": 1,
+        "io": 1,
+        "cooling": 1,
+        "flow": 0,
+        "lid": 1,
+        "boardLift": 0,
+        "packageLift": 0,
+        "ioLift": 0,
+        "coolingLift": 0,
+        "phase": "rack-integration",
+        "packageSeparation": "visual-only / board-integrated packages",
+        "flowMeaning": "conceptual thermal-flow overlay",
+        "profile": "liquid-compute-1u-v1"
+      },
+      "camera": {
+        "yaw": -0.5999902486801147,
+        "elevation": 0.12999600172042847,
+        "distance": 47.4344482421875,
+        "target": [
+          -2.153829681071766e-19,
+          4.9273007896033505e-9,
+          3.909592649620208e-9
+        ],
+        "eye": [
+          -26.55713653564453,
+          6.148935794830322,
+          38.819271087646484
+        ],
+        "fov": 0.5,
+        "view": "authored"
+      },
+      "drawCalls": 53,
+      "vertices": 1645692
+    },
+    {
+      "label": "final",
+      "progress": 1,
+      "phase": "hero",
+      "l10": {
+        "board": 1,
+        "packages": 1,
+        "io": 1,
+        "cooling": 1,
+        "flow": 0,
+        "lid": 1,
+        "boardLift": 0,
+        "packageLift": 0,
+        "ioLift": 0,
+        "coolingLift": 0,
+        "phase": "rack-integration",
+        "packageSeparation": "visual-only / board-integrated packages",
+        "flowMeaning": "conceptual thermal-flow overlay",
+        "profile": "liquid-compute-1u-v1"
+      },
+      "camera": {
+        "yaw": -0.48001062870025635,
+        "elevation": 0.08500397950410843,
+        "distance": 43.438411712646484,
+        "target": [
+          -1.9045669205420814e-23,
+          4.3570648391305644e-13,
+          3.457135294183955e-13
+        ],
+        "eye": [
+          -19.986936569213867,
+          3.687992811203003,
+          38.39031982421875
+        ],
+        "fov": 0.5,
+        "view": "authored"
+      },
+      "drawCalls": 54,
+      "vertices": 1645692
+    }
+  ],
+  "errors": [],
+  "external": [],
+  "renderer": "Chromium native GL; no physical GPU frame-rate claim"
+}

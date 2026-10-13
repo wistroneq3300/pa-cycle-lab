@@ -112,10 +112,11 @@
   }
   const VERTEX=`
     attribute vec3 aPosition;attribute vec3 aNormal;attribute vec4 aColor;attribute vec2 aMaterial;
+    attribute vec2 aUV;attribute vec4 aTangent;varying vec2 vUV;varying vec4 vTangent;
     uniform mat4 uViewProjection;uniform mat4 uLightViewProjection;uniform mat4 uModel;uniform mat4 uPart;uniform float uOpacity;
     varying vec4 vShadow;
     varying vec3 vPosition;varying vec3 vLocal;varying vec3 vNormal;varying vec4 vColor;varying vec2 vMaterial;
-    void main(){mat4 model=uModel*uPart;vec4 world=model*vec4(aPosition,1.0);vPosition=world.xyz;vLocal=aPosition;vShadow=uLightViewProjection*world;vNormal=(mat3(uPart)*aNormal)/vec3(length(uModel[0].xyz),length(uModel[1].xyz),length(uModel[2].xyz));vColor=vec4(aColor.rgb,aColor.a*uOpacity);vMaterial=aMaterial;gl_Position=uViewProjection*world;}`;
+    void main(){mat4 model=uModel*uPart;vec4 world=model*vec4(aPosition,1.0);vPosition=world.xyz;vLocal=aPosition;vShadow=uLightViewProjection*world;vNormal=(mat3(uPart)*aNormal)/vec3(length(uModel[0].xyz),length(uModel[1].xyz),length(uModel[2].xyz));vColor=vec4(aColor.rgb,aColor.a*uOpacity);vMaterial=aMaterial;vUV=aUV;vTangent=vec4(mat3(model)*aTangent.xyz,aTangent.w);gl_Position=uViewProjection*world;}`;
   const FRAGMENT=`
     precision highp float;
     varying vec3 vPosition;varying vec3 vLocal;varying vec3 vNormal;varying vec4 vColor;varying vec2 vMaterial;
@@ -123,6 +124,10 @@
     uniform float uRack;uniform float uQuality;uniform float uReveal;uniform float uDetail;
     uniform sampler2D uShadowMap;uniform float uShadowPass;uniform float uHasShadow;uniform float uShadowTexel;
     uniform sampler2D uEnvironment;uniform float uHasEnvironment;
+    varying vec2 vUV;varying vec4 vTangent;
+    uniform float uAsset;uniform float uAssetNormalScale;uniform float uAssetRoughness;uniform float uAssetAO;uniform float uAssetAlphaCutoff;uniform float uAssetAlphaMask;
+    uniform sampler2D uAssetBase;uniform sampler2D uAssetMR;uniform sampler2D uAssetNormal;uniform sampler2D uAssetOcclusion;
+    vec3 srgbLinear(vec3 c){return mix(c/12.92,pow((c+.055)/1.055,vec3(2.4)),step(vec3(.04045),c));}
     varying vec4 vShadow;
     vec4 packedDepth(float value){vec4 result=vec4(fract(value*vec3(16777216.0,65536.0,256.0)),value);result.yzw-=result.xyz/256.0;return result;}
     float shadowDepth(vec2 uv){return dot(texture2D(uShadowMap,uv),vec4(1.0/16777216.0,1.0/65536.0,1.0/256.0,1.0));}
@@ -166,6 +171,8 @@
       return F*D*G*nl/(4.0*nv*max(nl,.01)+.001);
     }
     void main(){
+      vec4 assetBase=vec4(1.0);
+      if(uAsset>.5){assetBase=texture2D(uAssetBase,vUV);if(uAssetAlphaMask>.5&&assetBase.a*vColor.a<uAssetAlphaCutoff)discard;}
       if(uShadowPass>.5){gl_FragColor=packedDepth(gl_FragCoord.z);return;}
       if(vMaterial.y<-.5){gl_FragColor=vColor;return;}
       vec3 N=normalize(vNormal),V=normalize(uEye-vPosition),R=reflect(-V,N);
@@ -182,27 +189,39 @@
         // deliberately subtle and is not represented as a scanned OEM finish.
         vec3 an=abs(N);vec2 surface=an.y>an.x&&an.y>an.z?vLocal.xz:an.x>an.z?vLocal.zy:vLocal.xy;
         float fine=finishNoise(surface*vec2(9.0,73.0)),broad=finishNoise(surface*5.0);
+        vec3 albedo=pow(max(vColor.rgb,vec3(0)),vec3(1.65)),specAlbedo=vColor.rgb;
+        float ao=1.0;
+        if(uAsset>.5){
+          vec3 mr=texture2D(uAssetMR,vUV).rgb;
+          metal=clamp(vMaterial.x*mr.b,0.0,1.0);rough=clamp(uAssetRoughness*mr.g,.045,1.0);
+          albedo=srgbLinear(assetBase.rgb)*vColor.rgb;specAlbedo=albedo;
+          vec3 T=normalize(vTangent.xyz-N*dot(N,vTangent.xyz)),B=cross(N,T)*vTangent.w;
+          vec3 mapped=texture2D(uAssetNormal,vUV).xyz*2.0-1.0;mapped.xy*=uAssetNormalScale;
+          N=normalize(mat3(T,B,N)*normalize(mapped));if(!gl_FrontFacing)N=-N;
+          ao=mix(1.0,texture2D(uAssetOcclusion,vUV).r,uAssetAO);fine=.5;broad=.5;
+        }else{
         float luminance=dot(vColor.rgb,vec3(.2126,.7152,.0722));
         float coating=(1.0-smoothstep(.07,.21,luminance))*metal;
         metal*=1.0-coating*.88;
         rough=clamp(.29+(1.0-metal)*.32+coating*.08+(fine-.5)*.008+(broad-.5)*.020,.24,.78);
         if(vMaterial.x<-.5)rough=.64;
         vec3 tangent=normalize(abs(N.y)<.95?cross(vec3(0,1,0),N):cross(vec3(0,0,1),N));
-        N=normalize(N+tangent*(fine-.5)*metal*.002);R=reflect(-V,N);
+        N=normalize(N+tangent*(fine-.5)*metal*.002);
         // Legacy mesh colors are artist values, not measured maps. Calibrate
         // diffuse reflectance separately from conductor F0; retain dark paint.
-        vec3 albedo=pow(max(vColor.rgb,vec3(0)),vec3(1.65));
-        vec3 f0=mix(vec3(.04),vColor.rgb,metal);
+        }
+        R=reflect(-V,N);
+        vec3 f0=mix(vec3(.04),specAlbedo,metal);
         float nv=max(dot(N,V),.001);
         vec3 fresnelRough=f0+(max(vec3(1.0-rough),f0)-f0)*pow(1.0-nv,5.0);
         vec4 fit=rough*vec4(-1.0,-.0275,-.572,.022)+vec4(1.0,.0425,1.04,-.04);
         float a004=min(fit.x*fit.x,exp2(-9.28*nv))*fit.x+fit.y;
         vec2 brdf=vec2(-1.04,1.04)*a004+fit.zw;
         vec3 radiance=environmentSpecular(R,rough),irradiance=environmentStrip(N,6.0);
-        vec3 physical=irradiance*albedo*(1.0-metal)*(1.0-fresnelRough)*mix(.42,1.0,lit);
-        physical+=radiance*(f0*brdf.x+brdf.y)*mix(.58,1.0,lit);
+        vec3 physical=irradiance*albedo*(1.0-metal)*(1.0-fresnelRough)*mix(.42,1.0,lit)*ao;
+        physical+=radiance*(f0*brdf.x+brdf.y)*mix(.58,1.0,lit)*ao;
         physical+=albedo*(1.0-metal)*max(dot(N,key),0.0)*lit*.82;
-        physical+=conductorLight(N,V,key,vColor.rgb,metal,rough)*vec3(.95,.94,.92)*.48*lit;
+        physical+=conductorLight(N,V,key,specAlbedo,metal,rough)*vec3(.95,.94,.92)*.48*lit;
         // Neutral front fill separates black rack rails from internal cavities.
         physical+=albedo*(1.0-metal)*max(dot(N,normalize(vec3(-.5,.45,1.0))),0.0)*.22;
         // The photographed studio's rear sector is dark. A fixed broad service
@@ -353,6 +372,9 @@
     let shadowFramebuffer=null,shadowTexture=null,shadowDepthBuffer=null,shadowPass=false,shadowSize=2048;
     let shadowProgress=-1,shadowExplode=-1;
     let environmentTexture=null,environmentImage=null,environmentReady=false,environmentFailed=false,environmentGeneration=0;
+    const assetEnabled=hasL10()&&/(?:^|[?&])l10AssetPrototype=1(?:&|$)/.test(window.location?.search||'');
+    const inspectionEnabled=/(?:^|[?&])l10AssetLab=1(?:&|$)/.test(window.location?.search||'');
+    let assetRuntime=null,assetLoading=false,assetFailed=false,assetError='',assetGeneration=0,inspection=null;
     let progress=0,pointerX=0,pointerY=0,yaw=0,pitch=0,manual=false,drag=null,light=0,view='authored';
     let visible=true,intersecting=true,lastTime=0,lightTime=0,drawCalls=0,vertices=0,slowFrames=0,resolution=1,frameMs=16.7;
     let idleTimer=0,idleStart=0,idleWeight=0,idleExit=0,idleYaw=0,idlePitch=0,idleTravel=0;
@@ -376,8 +398,29 @@
       shaders.forEach(shader=>gl.deleteShader(shader));shaders.length=0;parts={};
       const built=createParts();shared=built.shared;vertices=0;
       Object.entries(built.meshes).forEach(([name,mesh])=>{const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,mesh.data,gl.STATIC_DRAW);parts[name]={buffer,count:mesh.data.length/12};vertices+=mesh.data.length/12;});
-      ['aPosition','aNormal','aColor','aMaterial'].forEach(name=>attributes[name]=gl.getAttribLocation(program,name));
+      ['aPosition','aNormal','aColor','aMaterial','aUV','aTangent'].forEach(name=>attributes[name]=gl.getAttribLocation(program,name));
       ['uViewProjection','uLightViewProjection','uModel','uPart','uOpacity','uEye','uKeyPosition','uLightTheme','uTime','uScan','uScanY','uRack','uQuality','uReveal','uDetail','uShadowMap','uShadowPass','uHasShadow','uShadowTexel','uEnvironment','uHasEnvironment'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
+      ['uAsset','uAssetNormalScale','uAssetRoughness','uAssetAO','uAssetAlphaCutoff','uAssetAlphaMask','uAssetBase','uAssetMR','uAssetNormal','uAssetOcclusion'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
+      if(assetEnabled&&window.PAL10GLTF&&window.PAL10AssetRuntime){
+        assetLoading=true;assetFailed=false;assetError='';canvas.dataset.coreAsset='loading';const generation=++assetGeneration;
+        window.PAL10GLTF.load('/static/models/l10-prototype/compute-board.glb').then(asset=>{
+          if(disposed||contextLost||generation!==assetGeneration){asset.disposeImages();return;}
+          let stagedRuntime=null;const stagedParts={};
+          try{
+            if(environmentFailed)throw new Error('Prototype requires the reference studio environment');
+            const replacement=window.PAL10Hardware.build(window.PAL10Hardware.profile,{omitBoard:0});
+            stagedRuntime=window.PAL10AssetRuntime.upload(gl,asset,attributes,uniforms);
+            for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling']){
+              const data=replacement.meshes[name].data,buffer=gl.createBuffer();stagedParts[name]={buffer,count:data.length/12};
+              gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
+            }
+            if(gl.getError()!==gl.NO_ERROR)throw new Error('Prototype replacement buffer upload failed');
+            for(const [name,mesh] of Object.entries(stagedParts)){vertices+=mesh.count-parts[name].count;gl.deleteBuffer(parts[name].buffer);parts[name]=mesh;}
+            assetRuntime=stagedRuntime;
+            vertices+=assetRuntime.metadata.vertices;assetLoading=false;canvas.dataset.coreAsset='ready';canvas.dataset.coreVertices=String(vertices);canvas.dataset.coreGeometryBuffers=String(Object.keys(parts).length+assetRuntime.metadata.primitives);shadowProgress=-1;requestDraw();
+          }catch(error){stagedRuntime?.destroy();Object.values(stagedParts).forEach(p=>gl.deleteBuffer(p.buffer));asset.disposeImages();assetLoading=false;assetFailed=true;assetError=error.message;canvas.dataset.coreAsset='failed';requestDraw();}
+        }).catch(error=>{if(disposed||generation!==assetGeneration)return;assetLoading=false;assetFailed=true;assetError=error.message;canvas.dataset.coreAsset='failed';requestDraw();});
+      }else if(assetEnabled){assetLoading=false;assetFailed=true;assetError='GLB loader or GPU adapter is unavailable; baseline retained';canvas.dataset.coreAsset='failed';}
       if(hasL10()){
         environmentReady=false;environmentFailed=false;canvas.dataset.coreEnvironment='loading';const generation=++environmentGeneration;
         environmentTexture=gl.createTexture();gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,environmentTexture);
@@ -393,7 +436,7 @@
           gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,environmentImage);
           gl.activeTexture(gl.TEXTURE0);environmentReady=true;canvas.dataset.coreEnvironment='ready';requestDraw();
         };
-        environmentImage.onerror=()=>{if(disposed||generation!==environmentGeneration)return;environmentFailed=true;canvas.dataset.coreEnvironment='failed';requestDraw();};
+        environmentImage.onerror=()=>{if(disposed||generation!==environmentGeneration)return;environmentFailed=true;canvas.dataset.coreEnvironment='failed';if(assetEnabled)restoreLegacyAsset('Reference studio environment failed; prototype reverted to baseline');requestDraw();};
         environmentImage.src='/static/img/l10/studio-small-09-radiance.png';
       }
       // Local RGBA depth target works on WebGL 1 without an extension or a
@@ -415,7 +458,17 @@
       canvas.dataset.coreModel='generic-liquid-cooled-compute';canvas.dataset.coreComputeTrays=String(classCounts.server);canvas.dataset.coreSwitchTrays=String(classCounts.nvlink);
       canvas.dataset.coreGeometryBuffers=String(Object.keys(parts).length);canvas.dataset.coreVertices=String(vertices);
     }
-    function release(){environmentGeneration++;if(environmentImage){environmentImage.onload=null;environmentImage.onerror=null;}environmentImage=null;if(gl&&!contextLost){if(parts)Object.values(parts).forEach(part=>gl.deleteBuffer(part.buffer));if(program)gl.deleteProgram(program);shaders.forEach(shader=>gl.deleteShader(shader));if(shadowFramebuffer)gl.deleteFramebuffer(shadowFramebuffer);if(shadowTexture)gl.deleteTexture(shadowTexture);if(shadowDepthBuffer)gl.deleteRenderbuffer(shadowDepthBuffer);if(environmentTexture)gl.deleteTexture(environmentTexture);}environmentTexture=null;environmentReady=false;shadowFramebuffer=null;shadowTexture=null;shadowDepthBuffer=null;parts=null;program=null;shared=null;shaders.length=0;}
+    function release(){assetGeneration++;assetRuntime?.destroy(contextLost);assetRuntime=null;assetLoading=false;environmentGeneration++;if(environmentImage){environmentImage.onload=null;environmentImage.onerror=null;}environmentImage=null;if(gl&&!contextLost){if(parts)Object.values(parts).forEach(part=>gl.deleteBuffer(part.buffer));if(program)gl.deleteProgram(program);shaders.forEach(shader=>gl.deleteShader(shader));if(shadowFramebuffer)gl.deleteFramebuffer(shadowFramebuffer);if(shadowTexture)gl.deleteTexture(shadowTexture);if(shadowDepthBuffer)gl.deleteRenderbuffer(shadowDepthBuffer);if(environmentTexture)gl.deleteTexture(environmentTexture);}environmentTexture=null;environmentReady=false;shadowFramebuffer=null;shadowTexture=null;shadowDepthBuffer=null;parts=null;program=null;shared=null;shaders.length=0;}
+    function restoreLegacyAsset(reason){
+      assetGeneration++;assetLoading=false;assetFailed=true;assetError=reason;canvas.dataset.coreAsset='failed';
+      if(assetRuntime){
+        vertices-=assetRuntime.metadata.vertices;assetRuntime.destroy();assetRuntime=null;
+        const legacy=window.PAL10Hardware.build();
+        for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling']){const mesh=parts[name],data=legacy.meshes[name].data;vertices+=data.length/12-mesh.count;gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);mesh.count=data.length/12;}
+      }
+      shadowProgress=-1;
+      canvas.dataset.coreVertices=String(vertices);canvas.dataset.coreGeometryBuffers=String(parts?Object.keys(parts).length:0);
+    }
     try{setup();}catch(error){release();fail(error.message);return noop;}
     function requestDraw(){if(!disposed&&!contextLost&&program&&parts&&!frame&&visible)frame=requestAnimationFrame(draw);}
     function syncOrbit(){canvas.dataset.coreYaw=yaw.toFixed(4);canvas.dataset.corePitch=pitch.toFixed(4);canvas.dataset.coreDragging=String(!!drag);}
@@ -430,6 +483,15 @@
       armIdle();requestDraw();
     }
     function updateCamera(now,aspect,dt){
+      // Explicit review-only camera. Both variants use these fixed numbers;
+      // asset bounds, material, load timing and lighting never affect the view.
+      if(inspection){
+        const pose=placementPose(PLACEMENTS[PRIMARY_INDEX],PRIMARY_INDEX,progress,0),board=inspection==='board';
+        camera[0]=-.34;camera[1]=board?1.12:.79;camera[2]=board?5.15:4.80;
+        camera[3]=(pose.x-.965)*modelMatrix[0];camera[4]=pose.y+.05;camera[5]=(pose.z-1.68)*modelMatrix[10];
+        target.set(camera.subarray(3));const ce=Math.cos(camera[1]);
+        eye[0]=target[0]+Math.sin(camera[0])*ce*camera[2];eye[1]=target[1]+Math.sin(camera[1])*camera[2];eye[2]=target[2]+Math.cos(camera[0])*ce*camera[2];cameraReady=true;cameraSettling=false;return;
+      }
       cameraKey(rackProgress(progress),key);
       let azimuth=key[0]+yaw,elevation=clamp(key[1]+pitch,-1.35,1.35),detail=key[2];
       if(idleStart){
@@ -482,6 +544,7 @@
     function part(name,matrix,opacity=1,writeDepth=true){
       if(shadowPass&&(opacity<.96||!writeDepth||name==='floor'||name.includes('flow')))return;
       const mesh=parts[name];if(!mesh||opacity<=.003)return;
+      gl.uniform1f(uniforms.uAsset,0);gl.disableVertexAttribArray(attributes.aUV);gl.disableVertexAttribArray(attributes.aTangent);
       gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
       gl.enableVertexAttribArray(attributes.aPosition);gl.vertexAttribPointer(attributes.aPosition,3,gl.FLOAT,false,48,0);
       gl.enableVertexAttribArray(attributes.aNormal);gl.vertexAttribPointer(attributes.aNormal,3,gl.FLOAT,false,48,12);
@@ -556,7 +619,13 @@
       if(hasL10()){
         const l10=sample.l10,base=matrices[PRIMARY_INDEX],m=new Float32Array(base);
         gl.uniform1f(uniforms.uRack,0);
-        const layer=(name,lift=0,opacity=1,depth=true)=>{m[13]=base[13]+lift;part(name,m,opacity,depth);};
+        const layer=(name,lift=0,opacity=1,depth=true)=>{
+          const semantic=name.slice(4);
+          if(inspection==='board'&&['packages','cooling-frame','cooling','flow-supply','flow-return'].includes(semantic))return;
+          if(inspection==='packages'&&['cooling-frame','cooling','flow-supply','flow-return'].includes(semantic))return;
+          m[13]=base[13]+lift;part(name,m,opacity,depth);
+          if(assetRuntime)drawCalls+=assetRuntime.draw(semantic,m,opacity,depth,shadowPass);
+        };
         layer('l10-chassis');layer('l10-board',l10.boardLift);layer('l10-packages',l10.packageLift);layer('l10-io',l10.ioLift);
         layer('l10-cooling-frame',l10.coolingLift);
         layer('l10-cooling',l10.coolingLift,1-l10.flow*.28,l10.flow<.01);
@@ -593,7 +662,7 @@
       canvas.dataset.coreIdle=idleStart?'showcase':'waiting';canvas.dataset.coreScan=sample.scan.toFixed(3);
       projected=projectEquipment(multiply(viewProjection,modelMatrix),rect);
       canvas.dispatchEvent(new CustomEvent('pa-core-projection',{bubbles:true,detail:projected}));
-      if(!ready&&(!hasL10()||environmentReady||environmentFailed)){const error=gl.getError();if(error!==gl.NO_ERROR){fail('WebGL render error '+error);return;}ready=true;canvas.dataset.coreState='ready';delete canvas.dataset.coreError;canvas.dispatchEvent(new CustomEvent('pa-core-ready',{bubbles:true}));}
+      if(!ready&&!assetLoading&&(!hasL10()||environmentReady||environmentFailed)){const error=gl.getError();if(error!==gl.NO_ERROR){fail('WebGL render error '+error);return;}ready=true;canvas.dataset.coreState='ready';delete canvas.dataset.coreError;canvas.dispatchEvent(new CustomEvent('pa-core-ready',{bubbles:true}));}
       // Settled inspection frames return to native display resolution. Playback
       // owns time and requests its next frame; a paused tray need not burn GPU.
       if(hasL10()&&!cameraSettling&&resolution<1){resolution=1;slowFrames=0;cameraSettling=true;}
@@ -615,7 +684,7 @@
     function onMove(event){if(!drag||event.pointerId!==drag.id)return;setOrbit(drag.yaw+(event.clientX-drag.x)*.006,drag.pitch+(event.clientY-drag.y)*.005);}
     function onUp(event){if(!drag||event.pointerId!==drag.id)return;try{if(canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId);}catch{}drag=null;syncOrbit();}
     function onKey(event){const step=event.shiftKey?.24:.12;if(event.key==='ArrowLeft')setOrbit(yaw-step,pitch);else if(event.key==='ArrowRight')setOrbit(yaw+step,pitch);else if(event.key==='ArrowUp')setOrbit(yaw,pitch-step);else if(event.key==='ArrowDown')setOrbit(yaw,pitch+step);else if(event.key==='Home'||event.key.toLowerCase()==='r')resetOrbit();else return;event.preventDefault();}
-    function onLost(event){event.preventDefault();contextLost=true;ready=false;if(frame)cancelAnimationFrame(frame);frame=0;clearTimeout(idleTimer);drag=null;syncOrbit();fail('WebGL context was lost');}
+    function onLost(event){event.preventDefault();contextLost=true;ready=false;if(frame)cancelAnimationFrame(frame);frame=0;clearTimeout(idleTimer);release();drag=null;syncOrbit();fail('WebGL context was lost');}
     function onRestored(){contextLost=false;try{setup();lastTime=0;requestDraw();armIdle();}catch(error){release();fail(error.message);}}
     function onVisibility(){visible=intersecting&&(typeof document==='undefined'||!document.hidden);lastTime=0;if(visible){requestDraw();armIdle();}else{clearTimeout(idleTimer);if(frame)cancelAnimationFrame(frame);frame=0;idleStart=0;idleWeight=0;}}
     function onReduced(){if(reduced.matches){clearTimeout(idleTimer);idleStart=0;idleWeight=0;progress=1;manual=false;view='authored';yaw=0;pitch=0;}else armIdle();requestDraw();}
@@ -641,11 +710,12 @@
       return {left,right,bottom,top,heightFraction:(top-bottom)/2,widthFraction:(right-left)/2,nearest,clipped:left< -1||right>1||bottom< -1||top>1||nearest<.15};
     }
     const api={supported:true,
+      setInspection(value){if(!inspectionEnabled)throw new Error('Inspection cameras require l10AssetLab=1');if(value!==null&&!['board','packages','cooling'].includes(value))throw new Error('Unknown asset inspection');inspection=value;cameraReady=false;shadowProgress=-1;requestDraw();},
       setProgress(value){const next=reduced.matches?1:clamp(Number(value)||0);if(Math.abs(next-progress)<.00001)return;activity();progress=next;if(manual&&!drag){manual=false;view='authored';yaw=0;pitch=0;syncOrbit();}armIdle();requestDraw();},
       setPointer(x,y){if(manual||drag||reduced.matches)return;pointerX=clamp(Number(x)||0,-1,1);pointerY=clamp(Number(y)||0,-1,1);requestDraw();},
       setOrbit,setView,resetOrbit,setTheme(value){const next=value===true||value==='light'?1:0;if(next===light)return;light=next;requestDraw();},
       getState(){return {supported:true,ready,contextLost,progress,yaw,pitch,dragging:!!drag,settling:cameraSettling,theme:light?'light':'dark',model:'generic-liquid-cooled-compute',l10:hasL10()?l10State(progress):null,rackProgress:rackProgress(progress),computeTrays:classCounts.server,switchTrays:classCounts.nvlink,networkSwitches:classCounts.switch,powerShelves:classCounts.powershelf,occupiedU:48,componentCount:PLACEMENTS.length,geometryBuffers:parts?Object.keys(parts).length:0,vertices,drawCalls,
-        camera:{yaw:camera[0],elevation:camera[1],distance:camera[2],target:Array.from(target),eye:Array.from(eye),fov:.50,view},bounds:projectionBounds(),callouts:projected?.callouts||[],projection:projected,geometry:shared?.quality||shared?.metadata||null,
+        camera:{yaw:camera[0],elevation:camera[1],distance:camera[2],target:Array.from(target),eye:Array.from(eye),fov:.50,view},inspection,asset:{enabled:assetEnabled,loading:assetLoading,failed:assetFailed,error:assetError,metadata:assetRuntime?.metadata||null},bounds:projectionBounds(),callouts:projected?.callouts||[],projection:projected,geometry:shared?.quality||shared?.metadata||null,
         quality:{resolution,frameMs,pixelCount:canvas.width*canvas.height,adaptive:true,contactShadows:!!shadowFramebuffer,shadowMapSize:shadowFramebuffer?shadowSize:0,environmentReady,environmentFailed,environment:'CC0 photographic studio / GGX log radiance'},idle:{active:!!idleStart,exiting:!!idleExit,weight:idleWeight,delay:6500,lastActivity,disabled:reduced.matches},assembly:assemblySnapshot(progress),disposed};},resize:requestDraw,
       destroy(){if(disposed)return;disposed=true;clearTimeout(idleTimer);if(frame)cancelAnimationFrame(frame);frame=0;drag=null;ro?.disconnect();io?.disconnect();window.removeEventListener('resize',requestDraw);Object.entries(events).forEach(([name,handler])=>canvas.removeEventListener(name,handler));activityEvents.forEach(name=>window.removeEventListener(name,activity));if(typeof document!=='undefined')document.removeEventListener('visibilitychange',onVisibility);reduced.removeEventListener?.('change',onReduced);canvas.style.touchAction=originalTouchAction;release();canvas.dataset.coreState='disposed';delete canvas.paCoreScene;}
     };canvas.paCoreScene=api;return api;

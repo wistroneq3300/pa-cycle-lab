@@ -1,0 +1,5 @@
+L10_SOURCE_VALIDATION {"sourceObjects": 822, "assembledMinY": -0.09650000184774399, "assembledMaxY": 0.10000000149011612, "contactPlanesVerified": 3, "errors": []}
+Blender 4.5.9 LTS (hash 8bf95cbd38d1 built 2026-04-21 01:33:45)
+Read blend: "C:\Users\kobei\OneDrive\文件\ChatGPT\New project\pa-cycle-cinematic-l10\assets\l10-prototype\compute-board-prototype.blend"
+
+Blender quit

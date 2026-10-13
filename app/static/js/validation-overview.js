@@ -142,7 +142,7 @@
     const schedule=()=>{if(!disposed&&!frame&&!document.hidden)frame=requestAnimationFrame(tick);};
     function tick(now){
       frame=0;if(disposed||document.hidden||mode==='stopped')return;
-      if(canvas.dataset.coreEnvironment==='loading'){lastTime=0;schedule();return;}
+      if(canvas.dataset.coreEnvironment==='loading'||canvas.dataset.coreAsset==='loading'){lastTime=0;schedule();return;}
       const dt=lastTime?Math.min(80,now-lastTime):0;lastTime=now;
       if(mode==='film'){
         elapsed=Math.min(FILM_MS,elapsed+dt);write(timedProgress(elapsed));

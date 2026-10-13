@@ -1,0 +1,49 @@
+{
+  "id": "left-compute-board-prototype-v1",
+  "file": "compute-board.glb",
+  "sha256": "c8467c0ac186b34ee95e549fc27f5da47ad3de4b8d09b72b68d6070e774985cc",
+  "bytes": 7768444,
+  "generator": "4.5.9 LTS",
+  "triangles": 59664,
+  "nodes": 8,
+  "meshes": 8,
+  "primitives": 41,
+  "materials": 15,
+  "embeddedImages": 15,
+  "source": "assets/l10-prototype/compute-board-prototype.blend",
+  "build": "assets/l10-prototype/build.py",
+  "export": "assets/l10-prototype/export_gltf.py",
+  "layers": [
+    "board",
+    "packages",
+    "cooling-frame",
+    "cooling"
+  ],
+  "units": "Normalized PA raw scene units, NOT glTF SI meters; renderer common [.688,1,.802] editorial transform remains required.",
+  "contact": {
+    "packageTop": 0.006,
+    "timBottom": 0.006,
+    "timTop": 0.0068,
+    "copperBottom": 0.0068,
+    "copperTop": 0.0355
+  },
+  "references": [
+    "https://pubs.lenovo.com/gb300-nvl72/zh-TW/compute_tray_top_view",
+    "https://lenovopress.lenovo.com/lp2357-lenovo-nvidia-gb300-nvl72-rack-scale-ai"
+  ],
+  "approximation": [
+    "Uncovered package footprints and board population are an explicit original visual approximation; official top drawing conceals these regions.",
+    "Visible cooling cover silhouette is image guided. Thickness, fastener specification, tube section and internal construction are not verified.",
+    "Long cooling-cover arms are non-certified exterior visualization; they do not establish hydraulic topology or a load-bearing retention design.",
+    "No original manufacturer CAD, scanned surface finish, BOM, netlist, die floorplan or manufacturing tolerances are included."
+  ],
+  "assetApproval": "PROTOTYPE / NOT PHOTOREALISM ACCEPTED",
+  "textureMethod": "Original deterministic UV-mapped fabrication appearance; not photo scans, vendor textures or random scatter",
+  "limitations": [
+    "No measured PBR material data",
+    "No uncovered official package/PCB view",
+    "Legacy local coolant port anchors retained; no OEM hydraulic reconstruction"
+  ],
+  "extensionsUsed": [],
+  "extensionsRequired": []
+}

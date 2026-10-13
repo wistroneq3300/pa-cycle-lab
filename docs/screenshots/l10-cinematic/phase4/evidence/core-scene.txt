@@ -1,0 +1,20 @@
+PASS Complete finite geometry; stable shared uploads; settled hero waits for idle timer
+PASS Editorial 48U plan: 41 components, no CDU, exact neutral lower infrastructure
+PASS Shared canonical geometry, no left number gutter, and one actual primary draw at its target
+PASS Full-rack assembly is exactly reversible and every device aligns before physical insertion
+PASS Actual uploaded telescoping rail meshes overlap throughout physical insertion
+PASS Actual equipment enclosures never collide during convergence or engineering separation
+PASS Four engineering callouts derive counts, representatives and anchors from the projected physical model
+PASS Resized and rotated standalone / assembled hardware stays inside the actual camera frustum
+PASS Four horizontal quadrants, rear view, top/bottom and release persistence
+PASS Reversible scroll/reset eases camera, uses shortest arc, and settles final hero
+PASS Keyboard orbit and reset; Reduced Motion still permits deliberate inspection
+PASS Theme, resize and complete idempotent disposal
+PASS Idle showcase enters after 6.5 seconds and every input family eases out
+PASS Restrained lighting avoids scanning HUD effects and reduced motion freezes animated shader light
+PASS Slow-frame capability reduction, camera convergence and settled final-pose idle hold
+PASS 360-degree original equipment, enclosed depth, attached service routing and material families
+PASS WebGL unavailable fallback does not install interactive listeners
+PASS Context loss, successful restoration, failed restoration and cleanup
+
+18/18 core-scene checks passed. Browser visual/GL validation is still required.

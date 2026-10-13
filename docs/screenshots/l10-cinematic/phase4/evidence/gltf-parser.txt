@@ -1,0 +1,58 @@
+PASS hierarchy + TRS are baked; animation layer is inherited
+PASS glTF default metallic-roughness is preserved, not guessed
+PASS inverse-transpose normal and Gram-Schmidt tangent under nonuniform scale
+PASS mirrored transforms correct triangle winding and tangent handedness
+PASS matrix transform and quaternion rotation are supported
+PASS accessor offsets, byte strides, and normalized unsigned UVs
+PASS nonindexed triangles and optional UV/tangent fallback
+PASS embedded image is deduplicated, channels/samplers/factors retained, disposal idempotent
+PASS material failures close already decoded images
+PASS malformed GLB lengths, magic, chunks and JSON fail closed
+PASS external buffers/images and unsupported extensions rejected
+PASS skins, animation, morphs, vertex colors and unsupported primitive modes rejected
+PASS out-of-bounds views/accessors/indices and nonfinite values rejected
+PASS hierarchy cycles/multiple parents/missing layers/singular transforms rejected
+PASS normal maps require authored tangent/UV; unsupported lighting factors rejected
+PASS WebGL 1 NPOT sampler requirements are explicit
+PASS network loader enforces same-origin HTTP(S), no redirects, status and byte budget
+{
+  "structuralAsset": "app/static/models/l10-prototype/compute-board.glb",
+  "asset": {
+    "generator": "Khronos glTF Blender I/O v4.5.51",
+    "version": "2.0"
+  },
+  "extras": {},
+  "bytes": 7768444,
+  "primitiveCount": 41,
+  "vertexCount": 178992,
+  "sourceVertexCount": 145200,
+  "imageCount": 15,
+  "imagePixels": 22806528,
+  "layers": [
+    "board",
+    "packages",
+    "cooling-frame",
+    "cooling"
+  ],
+  "coordinateSystem": "glTF Y-up; node transforms baked; UV/image origin unchanged",
+  "strideFloats": 12,
+  "bounds": {
+    "min": [
+      -1.8299999237060547,
+      -0.09650000184774399,
+      -2.8399999141693115
+    ],
+    "max": [
+      -0.09999996423721313,
+      0.10000000149011612,
+      -0.5199999809265137
+    ]
+  },
+  "texturePrimitives": 14,
+  "normalMappedPrimitives": 14,
+  "alphaModes": [
+    "OPAQUE"
+  ]
+}
+PASS actual exported GLB structure and four controllable hardware layers
+PASS 18 GLB adapter groups: bounded parser, transforms, material/texture fidelity, cleanup and rejection paths

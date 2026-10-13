@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L10 · Phase 4 Hardware Asset Comparison</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101519;color:#e5e8e8;font:16px/1.6 system-ui,sans-serif}main{max-width:1800px;margin:auto;padding:32px 28px}h1{font-size:28px;font-weight:600;margin:4px 0 12px}p{max-width:1050px;color:#bbc4c8;margin:8px 0 22px}.status{color:#e4b888;font-size:13px;letter-spacing:.1em}nav{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0}button{font:inherit;border:1px solid #4a575d;background:transparent;color:#d7e0e1;padding:9px 16px;border-radius:4px;cursor:pointer}button[aria-pressed=true]{background:#dce7e8;color:#152326;border-color:#dce7e8}a{color:#a7d8df;text-underline-offset:4px}.viewer{position:relative;aspect-ratio:3440/1440;background:#0b1115;overflow:hidden;border:1px solid #4a575d}.viewer img{position:absolute;width:100%;height:100%;object-fit:contain;top:0;left:0}.viewer #after{clip-path:inset(0 0 0 65%)}.line{position:absolute;top:0;bottom:0;left:65%;width:2px;background:#e9cf9d;pointer-events:none}.tags{display:flex;justify-content:space-between;margin:12px 0;font-size:14px;color:#c8d2d4}.controls{display:flex;align-items:center;gap:18px;margin:14px 0 22px}input{width:min(600px,70vw);accent-color:#e9cf9d}.links{display:flex;gap:24px;flex-wrap:wrap}.note{font-size:14px;border-top:1px solid #3b464b;padding-top:20px}output{min-width:4ch}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #e9cf9d;outline-offset:4px}@media(max-width:700px){main{padding:20px 12px}h1{font-size:23px}button{padding:6px 9px;font-size:14px}.tags{font-size:12px}}
+</style>
+<main>
+<div class="status">PROTOTYPE · PHOTOREALISM NOT ACCEPTED</div>
+<h1>L10 Hardware Asset · 四組實際渲染比較</h1>
+<p>只替換左側 Compute Board、1 CPU／2 GPU 與局部冷板。兩側使用完全相同的攝影機、燈光、HDR、曝光及 3440 × 1440 瀏覽器視口。滑動分界比較；原图連結可開啟完整解析度。這是資產管線原型，不是照片級驗收完成。</p>
+<nav aria-label="比較視角">
+<button type="button" data-index="0" aria-pressed="true">CPU / GPU</button>
+<button type="button" data-index="1" aria-pressed="false">Compute Board</button>
+<button type="button" data-index="2" aria-pressed="false">Cooling Assembly</button>
+<button type="button" data-index="3" aria-pressed="false">Complete L10 Hero</button>
+</nav>
+<div class="tags"><span>Before · Baseline hardware</span><span>After · Single-board GLB prototype</span></div>
+<div class="viewer"><img id="before" src="before/3440x1440-01-packages.png" alt="CPU GPU baseline 瀏覽器截圖"><img id="after" src="after/3440x1440-01-packages.png" alt="CPU GPU 單板原型瀏覽器截圖"><div class="line"></div></div>
+<div class="controls"><label for="split">比較分界</label><input id="split" type="range" min="0" max="100" value="65"><output for="split">65%</output></div>
+<p id="finding" aria-live="polite"></p>
+<div class="links"><a id="before-link" href="before/3440x1440-01-packages.png">開啟 Before 原圖</a><a id="after-link" href="after/3440x1440-01-packages.png">開啟 After 原圖</a><a href="../../../L10_PHASE4_ASSET_PIPELINE.md">完整交付報告</a><a href="evidence/independent-visual-review.md">獨立視覺審查</a><a href="evidence/comparison-summary.json">相機／效能證據</a></div>
+<p class="note">Baseline: 35b3408 · 相同 renderer 的資產 A/B。PNG 是完整頁面；3D canvas 為 2127 × 1272 原生像素。近照會裁切部分相鄰硬體。右板、全局管路、風扇、機殼與 Rack 保持原資產。沒有為了 After 改布光或後製圖片。人工評分不等於原廠尺寸認證或使用者批准。</p>
+</main>
+<script>
+const views=[
+['01-packages','CPU / GPU','Photorealism 70 → 67：分件與 UV 管線可用，但封裝仍像通用金屬蓋，灰橄欖色的大片反射與稀疏板面沒有達到真實封裝外觀。'],
+['02-board','Compute Board','Photorealism 64 → 58：After 比 Before 更空；隱藏封裝後，缺乏可讀的接合區與可信 PCB population。需要同版裸板照片，不能靠隨機元件填滿。'],
+['03-cooling','Cooling Assembly','Photorealism 71 → 74：銅色階梯輪廓、外臂與固定框是實際幾何改善；鰭片、分支、金屬表面和保留的銀色管路仍不足以匹配官方照片。'],
+['04-hero','Complete L10 Hero','Photorealism 72 → 70：完整外形與原構圖保留，但左銅／右銀是原型範圍造成的不一致，不是成熟整機配置。此版不得擴充到全系統。']
+];
+function select(i){const [id,title,note]=views[i];for(const side of ['before','after']){const src=side+'/3440x1440-'+id+'.png';document.getElementById(side).src=src;document.getElementById(side).alt=title+' '+side+' 實際瀏覽器渲染';document.getElementById(side+'-link').href=src;}document.querySelectorAll('button[data-index]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.index)===i)));document.getElementById('finding').textContent=note;}
+document.querySelectorAll('button[data-index]').forEach(b=>b.addEventListener('click',()=>select(Number(b.dataset.index))));
+document.getElementById('split').addEventListener('input',e=>{const n=e.target.value;document.getElementById('after').style.clipPath='inset(0 0 0 '+n+'%)';document.querySelector('.line').style.left=n+'%';document.querySelector('output').textContent=n+'%';});
+select(0);
+</script>
+</html>
