@@ -127,6 +127,7 @@
     varying vec2 vUV;varying vec4 vTangent;
     uniform float uAsset;uniform float uAssetNormalScale;uniform float uAssetRoughness;uniform float uAssetAO;uniform float uAssetAlphaCutoff;uniform float uAssetAlphaMask;
     uniform float uAssetFilmStrength;uniform float uAssetFilmThickness;
+    float filmThicknessRatio=1.0;
     uniform sampler2D uAssetBase;uniform sampler2D uAssetMR;uniform sampler2D uAssetNormal;uniform sampler2D uAssetOcclusion;
     vec3 srgbLinear(vec3 c){return mix(c/12.92,pow((c+.055)/1.055,vec3(2.4)),step(vec3(.04045),c));}
     varying vec4 vShadow;
@@ -139,7 +140,19 @@
       float bias=max(.00010,.00048*(1.0-max(dot(normal,light),0.0))),visible=0.0;
       // The board's millimetre-scale parts need a smaller receiver offset than
       // the Rack. Keep fascia and procedural/fallback receivers unchanged.
-      if(uAsset>.5||(uL10Finish>.5&&vLocal.z<2.85&&vColor.b>=vColor.r))bias*=.55;
+      if(uAsset>.5||(uL10Finish>.5&&vLocal.z<2.85&&vColor.b>=vColor.r)){
+        bias*=.55;
+        // Continuous tent PCF compares decoded depths at texel centres. It
+        // avoids the stepped contact edges of a moving 3x3 nearest kernel;
+        // projection, depth target, receiver bias and light remain unchanged.
+        vec2 pixel=q.xy/uShadowTexel-.5,origin=floor(pixel),phase=fract(pixel);
+        for(int x=-1;x<=2;x++)for(int y=-1;y<=2;y++){
+          vec2 offset=vec2(float(x),float(y));
+          vec2 weight=max(vec2(0),vec2(2)-abs(offset-phase));
+          visible+=weight.x*weight.y*step(q.z-bias,shadowDepth((origin+offset+.5)*uShadowTexel));
+        }
+        return visible/16.0;
+      }
       for(int x=-1;x<=1;x++)for(int y=-1;y<=1;y++)visible+=step(q.z-bias,shadowDepth(q.xy+vec2(float(x),float(y))*uShadowTexel));
       return visible/9.0;
     }
@@ -171,7 +184,7 @@
       // Restrained three-wavelength thin-film approximation on authored silicon
       // only. Incident angle controls phase; no time animation or emitted light.
       float refracted=sqrt(max(0.0,1.0-(1.0-cosine*cosine)/(1.46*1.46)));
-      vec3 phase=vec3(12.5663706*1.46*uAssetFilmThickness*refracted)/vec3(650.0,510.0,450.0);
+      vec3 phase=vec3(12.5663706*1.46*uAssetFilmThickness*filmThicknessRatio*refracted)/vec3(650.0,510.0,450.0);
       vec3 response=.65+.35*cos(phase);
       response/=max(dot(response,vec3(.2126,.7152,.0722)),.1);
       return clamp(f0*mix(vec3(1.0),response,uAssetFilmStrength),vec3(0.0),vec3(.98));
@@ -205,9 +218,13 @@
         vec3 an=abs(N);vec2 surface=an.y>an.x&&an.y>an.z?vLocal.xz:an.x>an.z?vLocal.zy:vLocal.xy;
         float fine=finishNoise(surface*vec2(9.0,73.0)),broad=finishNoise(surface*5.0);
         vec3 albedo=pow(max(vColor.rgb,vec3(0)),vec3(1.65)),specAlbedo=vColor.rgb;
-        float ao=1.0;
+        float ao=1.0,sheetAnisotropy=0.0;
         if(uAsset>.5){
           vec3 mr=texture2D(uAssetMR,vUV).rgb;
+          // Authored silicon only: MR red encodes optical coating thickness
+          // around the material's nanometre value. AO uses a separate texture.
+          // Colour shifts follow the Fresnel response, never emission.
+          if(uAssetFilmStrength>0.0)filmThicknessRatio=mix(.88,1.12,mr.r);
           metal=clamp(vMaterial.x*mr.b,0.0,1.0);rough=clamp(uAssetRoughness*mr.g,.045,1.0);
           albedo=srgbLinear(assetBase.rgb)*vColor.rgb;specAlbedo=albedo;
           vec3 T=normalize(vTangent.xyz-N*dot(N,vTangent.xyz)),B=cross(N,T)*vTangent.w;
@@ -232,11 +249,20 @@
           rough=clamp(.365+(roll-.5)*.008+(micro-.5)*.003,.35,.38);
           vec3 across=abs(N.y)>.7?vec3(1,0,0):vec3(0,1,0);
           N=normalize(N+across*((roll-.5)*.0014+(micro-.5)*.0005));
+          sheetAnisotropy=.24;
         }
         // Legacy mesh colors are artist values, not measured maps. Calibrate
         // diffuse reflectance separately from conductor F0; retain dark paint.
         }
         R=reflect(-V,N);
+        if(sheetAnisotropy>0.0){
+          // A bounded bent-reflection approximation for rolled sheet, using
+          // the existing IBL. The machining axis is the tray's long direction;
+          // no new light, environment, geometry or exposure is introduced.
+          vec3 axis=abs(N.z)>.95?vec3(1,0,0):normalize(vec3(0,0,1)-N*N.z);
+          vec3 projectedView=V-axis*dot(V,axis);
+          R=reflect(-V,normalize(mix(N,projectedView,sheetAnisotropy)));
+        }
         vec3 f0=mix(vec3(.04),specAlbedo,metal);
         float nv=max(dot(N,V),.001);
         f0=siliconFinish(f0,nv);

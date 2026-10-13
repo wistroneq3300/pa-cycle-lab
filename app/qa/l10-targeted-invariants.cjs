@@ -1,11 +1,16 @@
 /* Read-only P0 audit against the requested immutable polish baseline.
  * node app/qa/l10-targeted-invariants.cjs [report-basename]
+ * PA_L10_BASELINE may select another full commit; PA_L10_EVIDENCE_DIR may
+ * relocate new reports within this repository. Defaults remain unchanged.
  * Material batching may change; physical triangles, normals and poses may not.
  */
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process'),vm=require('node:vm'),crypto=require('node:crypto'),assert=require('node:assert/strict');
-const root=path.resolve(__dirname,'../..'),baseline='08dbc28af276c6b62e30f9502d6befe4aa4ce145';
-const outputDir=path.join(root,'artifacts/l10-targeted-polish/evidence');
+const root=path.resolve(__dirname,'../..'),baseline=process.env.PA_L10_BASELINE||'08dbc28af276c6b62e30f9502d6befe4aa4ce145';
+assert.match(baseline,/^[a-f0-9]{40}$/i,'A complete immutable baseline commit is required');
+const outputDir=path.resolve(root,process.env.PA_L10_EVIDENCE_DIR||'artifacts/l10-targeted-polish/evidence');
+const outputRelative=path.relative(root,outputDir);
+assert.ok(outputRelative&&!path.isAbsolute(outputRelative)&&outputRelative!=='..'&&!outputRelative.startsWith('..'+path.sep),'Evidence must stay inside this repository');
 const before=file=>cp.execFileSync('git',['show',baseline+':'+file],{cwd:root,maxBuffer:64*1024*1024});
 const after=file=>fs.readFileSync(path.join(root,file));
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex');

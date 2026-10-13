@@ -9,7 +9,8 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const root=path.resolve(__dirname,'../..');
 const out=path.resolve(root,process.env.PA_POLISH_OUTPUT||'docs/screenshots/l10-cinematic/targeted-polish');
-const baseline='08dbc28af276c6b62e30f9502d6befe4aa4ce145';
+const baseline=process.env.PA_POLISH_BASELINE||'08dbc28af276c6b62e30f9502d6befe4aa4ce145';
+assert.match(baseline,/^[0-9a-f]{40}$/i,'A full immutable baseline commit is required');
 const base=process.env.PA_PREVIEW_URL||'http://127.0.0.1:8774';
 const phase=process.env.PA_CAPTURE_PHASE||'both';
 assert.ok(['before','after','both'].includes(phase));
@@ -132,7 +133,7 @@ function htmlGallery(){
    }
    assert.equal(report.resources.before.sha256[environmentPath],report.resources.after.sha256[environmentPath],'Identical actual environment resource');
    assert.equal(report.source.before.displayTransformSha256,report.source.after.displayTransformSha256,'Identical display transform / exposure');
-   report.checks=['1001 authored animation poses exactly match 08dbc28','Four actual 3440×1440 native Chromium / WebGL pairs','Same camera matrices, studio environment, light and shadow uniforms, exposure, progress and scan state','Historical baseline runtime and candidate resource hashes actually served','Actual linked film uniforms and nonzero silicon reflectance at asset draw time; every asset draw emission is zero','Two compute boards, network layer, actual GLB loading and fallback OFF','No resource, shader or page errors and no external requests'];
+   report.checks=['1001 authored animation poses exactly match '+baseline,'Four actual 3440×1440 native Chromium / WebGL pairs','Same camera matrices, studio environment, light and shadow uniforms, exposure, progress and scan state','Historical baseline runtime and candidate resource hashes actually served','Actual linked film uniforms and nonzero silicon reflectance at asset draw time; every asset draw emission is zero','Two compute boards, network layer, actual GLB loading and fallback OFF','No resource, shader or page errors and no external requests'];
    report.pass=true;
   }
   assert.deepEqual(report.errors,[]);assert.deepEqual(report.external,[]);

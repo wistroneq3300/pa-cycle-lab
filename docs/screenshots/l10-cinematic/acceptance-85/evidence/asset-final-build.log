@@ -1,0 +1,72 @@
+Building compute board 1
+Building compute board 2
+Building network card BF3-L
+Building network card BF3-R
+Building network card CX7-R
+PCB_SURFACE board1 anchoredWitnesses=66
+CONTACT_AO board1 sourceObjects=746 min=0.3700000047683716
+PCB_SURFACE board2 anchoredWitnesses=66
+CONTACT_AO board2 sourceObjects=746 min=0.3700000047683716
+PCB_SURFACE bf3-l anchoredWitnesses=21
+CONTACT_AO bf3-l sourceObjects=489 min=0.3700000047683716
+PCB_SURFACE bf3-r anchoredWitnesses=21
+CONTACT_AO bf3-r sourceObjects=489 min=0.3700000047683716
+PCB_SURFACE cx7-r anchoredWitnesses=9
+CONTACT_AO cx7-r sourceObjects=154 min=0.3700000047683716
+Info: Saved as "bare-compute-boards.blend"
+INFO Draco mesh compression is available, use library at C:\Users\kobei\OneDrive\文件\ChatGPT\New project\pa-cycle-cinematic-l10\artifacts\l10-phase4\tools\blender-4.5.9-windows-x64\4.5\scripts\addons_core\io_scene_gltf2\extern_draco.dll
+20:10:14 | INFO: Starting glTF 2.0 export
+20:10:14 | INFO: Extracting primitive: Board1 / routed FR4.001
+20:10:14 | INFO: Occlusion and metal-roughness texture will be exported separately (use same-sized images if you want them combined)
+20:10:14 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+20:10:14 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+20:10:14 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+20:10:14 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+20:10:14 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+20:10:14 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+20:10:14 | INFO: Primitives created: 13
+20:10:14 | INFO: Extracting primitive: Board2 / routed FR4.001
+20:10:14 | INFO: Occlusion and metal-roughness texture will be exported separately (use same-sized images if you want them combined)
+20:10:14 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+20:10:14 | INFO: Primitives created: 13
+20:10:14 | INFO: Extracting primitive: Board1/CPU / underfill.001
+20:10:14 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+20:10:14 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+20:10:14 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+20:10:14 | INFO: Primitives created: 8
+20:10:14 | INFO: Extracting primitive: Board1/GPU_A / underfill.001
+20:10:14 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+20:10:14 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+20:10:14 | INFO: Primitives created: 7
+20:10:14 | INFO: Extracting primitive: Board1/GPU_B / underfill.001
+20:10:14 | INFO: Primitives created: 7
+20:10:14 | INFO: Extracting primitive: Board2/CPU / underfill.001
+20:10:14 | INFO: Primitives created: 8
+20:10:14 | INFO: Extracting primitive: Board2/GPU_A / underfill.001
+20:10:14 | INFO: Primitives created: 7
+20:10:14 | INFO: Extracting primitive: Board2/GPU_B / underfill.001
+20:10:14 | INFO: Primitives created: 7
+20:10:14 | INFO: Extracting primitive: BF3-L / black multilayer PCB.001
+20:10:15 | INFO: Occlusion and metal-roughness texture will be exported separately (use same-sized images if you want them combined)
+20:10:15 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+20:10:15 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+20:10:15 | INFO: Primitives created: 17
+20:10:15 | INFO: Extracting primitive: BF3-R / black multilayer PCB.001
+20:10:15 | INFO: Occlusion and metal-roughness texture will be exported separately (use same-sized images if you want them combined)
+20:10:15 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+20:10:15 | INFO: Primitives created: 17
+20:10:15 | INFO: Extracting primitive: CX7-R / black multilayer PCB.001
+20:10:15 | INFO: Occlusion and metal-roughness texture will be exported separately (use same-sized images if you want them combined)
+20:10:15 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+20:10:15 | INFO: Primitives created: 15
+20:10:15 | INFO: Extracting primitive: Cube.002
+20:10:15 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+20:10:15 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+20:10:15 | INFO: Primitives created: 5
+20:10:15 | INFO: Finished glTF 2.0 export in 1.2518436908721924 s
+
+GEOMETRY_RETENTION physical triangles verified; all accepted geometry accessor bytes retained
+BARE_BOARD_ASSET_RESULT {"id": "dual-bare-compute-boards-r2", "sha256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29", "bytes": 25533668, "triangles": 166414, "nodes": 12, "primitives": 124, "materials": 29, "images": 39, "sourceObjects": 3041, "layers": ["board", "packages", "io", "network"]}
+Blender 4.5.9 LTS (hash 8bf95cbd38d1 built 2026-04-21 01:33:45)
+
+Blender quit

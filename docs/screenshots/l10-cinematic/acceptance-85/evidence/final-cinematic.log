@@ -1,0 +1,16 @@
+PASS Public hardware profile: two boards, 2 CPU / 4 GPU, package ownership and honest conceptual overlay
+PASS All authored stages compile and render in the same canvas, scene and GL context
+PASS Rendered assembly seats board, CPU/GPU, I/O, then cold plates; restrained reveal restores opaque metal
+PASS Same L10 remains U40 primary; no duplicate legacy tray or second insertion at handoff
+PASS Pure snapshots and rendered layer transforms are exactly reversible
+PASS Camera transition boundaries preserve pose, scale and camera continuity
+PASS 1366 and 1920, dark and light: final framing, L10 visibility, labels and no horizontal overflow
+PASS Real forward/reverse scroll, keyboard and pointer orbit, replay cancellation
+PASS WebGL context loss restores actual geometry and final pose
+PASS Reduced motion lands fully assembled, disables replay and disposes scene/playback on route change
+{
+  "passed": true,
+  "checks": 10,
+  "stages": 15,
+  "report": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-cinematic-l10\\artifacts\\l10-acceptance85\\evidence\\browser\\l10-regression.json"
+}

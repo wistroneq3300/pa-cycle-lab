@@ -65,18 +65,19 @@ def mat(name,color,metal=0,rough=.5,base=None,mr=None,normal=None):
 mat('Black solder mask',(.023,.027,.024),0,.5,pcb_img,pcb_mr,pcb_n)
 mat('Black reverse solder mask',(.023,.027,.024),0,.5,pcb_img,pcb_mr)
 mat('Laminate cut edge',(.066,.071,.050),0,.68)
-mat('Package substrate',(.019,.024,.020),0,.44,None,finish['substrate_mr'])
+mat('Package substrate',(.019,.024,.020),0,.44,finish['substrate_base'],finish['substrate_mr'])
 mat('Bonded underfill',(.007,.009,.008),0,.58)
 mat('Gold plated frame',(.58,.50,.29),.96,.25,None,gold_mr,metal_n)
 mat('Gold board contacts',(.63,.47,.22),.96,.27)
 mat('CPU nickel frame',(.46,.49,.49),.94,.26,None,finish['nickel_mr'])
 for kind in ['cpu','gpu','network']:
     m=mat(kind.upper()+' exposed optical face',(.27,.3,.3),.72,.24,*silicon[kind])
-    m['l10ThinFilmStrength']={'cpu':.15,'gpu':.17,'network':.14}[kind]
+    m['l10ThinFilmStrength']={'cpu':.21,'gpu':.23,'network':.20}[kind]
     m['l10ThinFilmThickness']={'cpu':410.,'gpu':455.,'network':390.}[kind]
+    m['l10ThinFilmThicknessMap']='metallicRoughnessTexture.r: .5 = authored nm; [0,1] = [.88,1.12] multiplier; not AO'
 mat('Die cut edge',(.11,.13,.14),.60,.28)
-mat('Molded IC body',(.019,.021,.022),0,.57,None,finish['molding_mr'])
-mat('Ferrite power stage',(.052,.055,.056),0,.69,None,finish['ferrite_mr'])
+mat('Molded IC body',(.019,.021,.022),0,.57,finish['molding_base'],finish['molding_mr'])
+mat('Ferrite power stage',(.052,.055,.056),0,.69,finish['ferrite_base'],finish['ferrite_mr'])
 mat('Passive ceramic',(.17,.14,.095),0,.29,None,finish['ceramic_mr'])
 mat('Solder fillet',(.48,.50,.51),.92,.24,None,finish['solder_mr'])
 mat('Connector polymer',(.011,.014,.015),0,.48)
@@ -430,6 +431,7 @@ with tempfile.TemporaryDirectory(prefix='.bare-finish-',dir=str(OUT)) as staging
             material.setdefault('extras',{})['l10ContactBoard']=material['name'].split(' / ')[1].replace(' contact AO','')
             material['name']='Black solder mask'
     doc,binary=retain_geometry(ROOT,doc,binary)
+    doc['extras']['acceptance85FinishRevision']=2
     js=json.dumps(doc,separators=(',',':')).encode();js+=b' '*((-len(js))%4)
     blob=struct.pack('<III',0x46546c67,2,28+len(js)+len(binary))+struct.pack('<II',len(js),0x4e4f534a)+js+struct.pack('<II',len(binary),0x004e4942)+binary
     candidate.write_bytes(blob)

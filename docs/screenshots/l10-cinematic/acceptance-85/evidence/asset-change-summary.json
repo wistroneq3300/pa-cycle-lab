@@ -1,0 +1,210 @@
+{
+  "baselineCommit": "0a82b2f20c8aa6fc9219a809958843244857d037",
+  "implementationRounds": 2,
+  "finalAssetFrozen": true,
+  "sourceFiles": [
+    "assets/l10-prototype/bare_finish.py",
+    "assets/l10-prototype/bareboard.py"
+  ],
+  "editableSource": "assets/l10-prototype/bare-compute-boards.blend",
+  "delivery": "app/static/models/l10-prototype/bare-compute-boards.glb",
+  "glbSha256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29",
+  "glbBytes": 25533668,
+  "addedGlbBytes": 323392,
+  "nodes": 12,
+  "primitives": 124,
+  "triangles": 166414,
+  "materials": 29,
+  "imagesBefore": 31,
+  "imagesAfter": 39,
+  "updatedPngCount": 11,
+  "newPngCount": 8,
+  "pngChanges": [
+    {
+      "path": "assets/l10-prototype/textures/bare-cpu-silicon-finish.png",
+      "change": "updated",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 553807,
+      "sha256": "3e803e2589786bf473a98e7f45b5ba56b5aa1a0da8ad73af74c718e8991a54d6"
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-cpu-silicon-metallicroughness.png",
+      "change": "updated",
+      "width": 512,
+      "height": 512,
+      "bytes": 177098,
+      "sha256": "e695b205befdf5450c4c8474c3414fa67f6582dde8a2423febfffe290364b31e"
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-cpu-silicon-normal.png",
+      "change": "updated",
+      "width": 512,
+      "height": 512,
+      "bytes": 23195,
+      "sha256": "2e8a05cc502d310256a4f81c46a9fa685a277fd07baff0aa4a4abb5f1f75ce7d"
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-gold-metallicroughness.png",
+      "change": "updated",
+      "width": 512,
+      "height": 512,
+      "bytes": 115190,
+      "sha256": "9910751dad019225602180e1c5d471f7768addb60a7072729cc4f7e96360d32c"
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-gpu-silicon-finish.png",
+      "change": "updated",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 389918,
+      "sha256": "a677d5ca064ae2ffc5fcc8f91f8a65378ee1ed864de57cc90c4ca7f0aef97cc3"
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-gpu-silicon-metallicroughness.png",
+      "change": "updated",
+      "width": 512,
+      "height": 512,
+      "bytes": 200316,
+      "sha256": "aaf52f626458f2234d2f14240e0b82290bb740febde893892c21c01c6f61bdee"
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-gpu-silicon-normal.png",
+      "change": "updated",
+      "width": 512,
+      "height": 512,
+      "bytes": 31033,
+      "sha256": "fdc25659c4d359d4839d6182154a63612938ef2d21199fe7ac387cac97e83b13"
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-molding-metallicroughness.png",
+      "change": "updated",
+      "width": 512,
+      "height": 512,
+      "bytes": 245906,
+      "sha256": "d3c17a352b9856e4b6a5498cf2e5ebcc3782e5f0defd2bb35eb9b0e764623240"
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-network-silicon-finish.png",
+      "change": "updated",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 381104,
+      "sha256": "c1ab19fe5db0440e492baa2fe28d3b5aebb700575d40b069e6caafb65783dc4c"
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-network-silicon-metallicroughness.png",
+      "change": "updated",
+      "width": 512,
+      "height": 512,
+      "bytes": 183123,
+      "sha256": "ffee878642cfbb9505597a1e50b76f955408db767ccaaba5aaadf76c9eda27ea"
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-network-silicon-normal.png",
+      "change": "updated",
+      "width": 512,
+      "height": 512,
+      "bytes": 19122,
+      "sha256": "e3f5099ca32f9153d45a481e7cbfc175d07cb1cab8a49d23bbb4c6b6199cfecf"
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-bf3-l-pcb-finish.png",
+      "change": "new",
+      "width": 512,
+      "height": 512,
+      "bytes": 140266,
+      "sha256": "2d249154309c56c5d8d5716ad612b5fd829d538816c5c291279a633f55560b56"
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-bf3-r-pcb-finish.png",
+      "change": "new",
+      "width": 512,
+      "height": 512,
+      "bytes": 140266,
+      "sha256": "2d249154309c56c5d8d5716ad612b5fd829d538816c5c291279a633f55560b56"
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-board1-pcb-finish.png",
+      "change": "new",
+      "width": 512,
+      "height": 512,
+      "bytes": 141297,
+      "sha256": "a3a24a885bdb324b8884574f549cac9a0a717aada2a8064f5816c85484c1894a"
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-board2-pcb-finish.png",
+      "change": "new",
+      "width": 512,
+      "height": 512,
+      "bytes": 141229,
+      "sha256": "e3e5115daf6565a154f95802691ce7883e01c1901ffccf17bfa49f38c69990de"
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-cx7-r-pcb-finish.png",
+      "change": "new",
+      "width": 512,
+      "height": 512,
+      "bytes": 139221,
+      "sha256": "4cef0115b054a4e9a3ca98ea6ce2d042e4453ac27e2bbe5f0540c7842793f85a"
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-ferrite-finish.png",
+      "change": "new",
+      "width": 512,
+      "height": 512,
+      "bytes": 130729,
+      "sha256": "c9f13646d541c21c1cc157a5925c7031ca29ffc5cfa0e7c4e935af42e6d657d4"
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-molding-finish.png",
+      "change": "new",
+      "width": 512,
+      "height": 512,
+      "bytes": 137004,
+      "sha256": "994e17b160232b1e177b9ec8f3b6a8a114e65a334f41cbe1ebfb5cd3ac85f320"
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-substrate-finish.png",
+      "change": "new",
+      "width": 512,
+      "height": 512,
+      "bytes": 203844,
+      "sha256": "069f8e0a3d94bc9d1a6c96917278f68e4caa8ea18e7b9060ea13c087e44a048b"
+    }
+  ],
+  "geometry": "Every accepted POSITION/NORMAL/UV/index/shared tangent byte and node preserved; geometry-final.json",
+  "unchangedResources": [
+    "five contact AO PNGs",
+    "original isotropic PCB MR/normal",
+    "gold board contacts",
+    "network ports",
+    "IO/service materials",
+    "cooled compute GLB/manifest",
+    "layout.json",
+    "front gold/SSD geometry and materials"
+  ],
+  "materialChanges": [
+    "CPU/GPU/network: heterogeneous fine logic-like, array-like and IO motifs; no coarse shaded macroblocks",
+    "Silicon MR.r encodes optical thickness only: .5 center, normalized range maps .88..1.12 of authored nm; no emission",
+    "Silicon mean neutral reflectance/roughness calibrated as an authored approximation; film strengths .21/.23/.20, authored nm 410/455/390",
+    "Molded IC: restrained grouped laser witness, pin1 cue and continuous edge-to-top roughness .62..53",
+    "Existing substrate/ferrite bodies: fine material-specific base texture without changing placement or population",
+    "Five board-specific 512px color maps: local courtyards, editorial reference designators and short mask-covered exits anchored to existing bodies/pads",
+    "Package gold roughness .245 to .205; protected front gold is unchanged"
+  ],
+  "limits": [
+    "All finish maps are original approximations, not measured BRDF/scans",
+    "Optical motif regions are not a vendor die floorplan, verified function map or HBM count/layout",
+    "Generic IC laser witnesses are not copied logos, vendor identifiers, ratings or lot claims",
+    "Board designators/courtyards describe existing visual assembly, not an OEM BOM or electrical netlist",
+    "Original repeated small component geometry and sparse population remain; no invented ICs were added",
+    "The existing local AO remains an explicit height-field/horizon approximation, not ray-traced AO"
+  ],
+  "readOnlyFinalAudit": {
+    "ASTAndInMemoryCompile": "PASS",
+    "geometryAndOwnershipChanges": "none",
+    "newTextureLifetime": "existing asset adapter owns cached upload/delete; no new runtime asset resource path",
+    "publishedGlbWrite": "existing same-volume staged candidate plus geometry validation and atomic replace retained"
+  }
+}

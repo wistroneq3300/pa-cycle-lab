@@ -1,0 +1,12 @@
+[
+  {
+    "path": "assets/l10-prototype/compute-board-prototype.blend1",
+    "bytes": 557598,
+    "sha256": "01b5856ab7261a1ca0a8b9904ec8e82bccd611cfd3cbb687235e99b55b563e85"
+  },
+  {
+    "path": "assets/l10-prototype/textures/surface-normal.png",
+    "bytes": 1879,
+    "sha256": "6309b50efb72caed7d2c651cef994b57946026879d54fcc611fab351b22994d5"
+  }
+]

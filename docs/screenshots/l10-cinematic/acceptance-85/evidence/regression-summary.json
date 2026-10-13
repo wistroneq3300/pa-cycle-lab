@@ -1,0 +1,242 @@
+{
+  "baseline": "0a82b2f20c8aa6fc9219a809958843244857d037",
+  "scope": "Local final-candidate regression; remote CI is reported separately by the parent task.",
+  "asset": {
+    "file": "app\\static\\models\\l10-prototype\\bare-compute-boards.glb",
+    "bytes": 25533668,
+    "sha256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29"
+  },
+  "passed": true,
+  "webgl": {
+    "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "vendor": "Google Inc. (NVIDIA)"
+  },
+  "compiledShaderSHA256": [
+    "64e2e54e3632f73621340807c5c3743493687a30db286df38b136f8913ff484e",
+    "cc8c02bec0667ae1116bbbb961ca7aa7d8d73f036478bb425d501ed2212fc67a"
+  ],
+  "method": "Native Chromium/WebGL; three real-clock films. No animation, geometry, camera, lighting or resource timing mocks. Targeted GLB failure fixtures are isolated after normal-operation tests.",
+  "preview": "http://127.0.0.1:8775 (synthetic app/serve.py)",
+  "authoredDurationMs": 35200,
+  "films": [
+    {
+      "film": 1,
+      "frames": 2116,
+      "wallDurationMs": 35279.09999990463,
+      "observedDrawFPS": 59.95050894171669,
+      "drawIntervalsMs": {
+        "min": 12.399999856948853,
+        "median": 16.699999809265137,
+        "p95": 16.90000009536743,
+        "max": 33.5,
+        "mean": 16.6804255318698
+      },
+      "drawCalls": {
+        "min": 129,
+        "median": 173,
+        "p95": 177,
+        "max": 177,
+        "mean": 156.09120982986767
+      },
+      "insertionStarts": 1,
+      "insertionCompletions": 1,
+      "limitations": "Draw cadence and allocation estimates are measured on this host, not a GPU timer or portable performance certification. Adaptive pixel counts are recorded."
+    },
+    {
+      "film": 2,
+      "frames": 2117,
+      "wallDurationMs": 35298,
+      "observedDrawFPS": 59.94673919202221,
+      "drawIntervalsMs": {
+        "min": 13.200000047683716,
+        "median": 16.699999809265137,
+        "p95": 17,
+        "max": 33.40000009536743,
+        "mean": 16.68147448015123
+      },
+      "drawCalls": {
+        "min": 129,
+        "median": 173,
+        "p95": 177,
+        "max": 177,
+        "mean": 156.10108644307982
+      },
+      "insertionStarts": 1,
+      "insertionCompletions": 1,
+      "limitations": "Draw cadence and allocation estimates are measured on this host, not a GPU timer or portable performance certification. Adaptive pixel counts are recorded."
+    },
+    {
+      "film": 3,
+      "frames": 2116,
+      "wallDurationMs": 35281.5,
+      "observedDrawFPS": 59.94643084902853,
+      "drawIntervalsMs": {
+        "min": 13.099999904632568,
+        "median": 16.699999809265137,
+        "p95": 17,
+        "max": 33.40000009536743,
+        "mean": 16.681560283687944
+      },
+      "drawCalls": {
+        "min": 129,
+        "median": 173,
+        "p95": 177,
+        "max": 177,
+        "mean": 156.09120982986767
+      },
+      "insertionStarts": 1,
+      "insertionCompletions": 1,
+      "limitations": "Draw cadence and allocation estimates are measured on this host, not a GPU timer or portable performance certification. Adaptive pixel counts are recorded."
+    }
+  ],
+  "browserSuites": [
+    {
+      "file": "regression.json",
+      "passed": true,
+      "checks": [
+        "Bare asset loaded in normal dashboard with two-board ownership and no fallback",
+        "Film 1: real clock, GPU chassis pose, continuous bridge and exactly one U40 insertion",
+        "Film 2: real clock, GPU chassis pose, continuous bridge and exactly one U40 insertion",
+        "Film 3: real clock, GPU chassis pose, continuous bridge and exactly one U40 insertion",
+        "Four native 3440\u00d71440 bridge frames captured using authored cameras",
+        "Skip, Replay, interruption, orbit, Home, rear/reset and reduced motion retain behavior",
+        "404: fail-closed complete baseline retained",
+        "one-board-metadata: fail-closed complete baseline retained",
+        "network-ownership: fail-closed complete baseline retained"
+      ],
+      "errors": [],
+      "external": []
+    },
+    {
+      "file": "l10-regression.json",
+      "passed": true,
+      "checks": [
+        "Public hardware profile: two boards, 2 CPU / 4 GPU, package ownership and honest conceptual overlay",
+        "All authored stages compile and render in the same canvas, scene and GL context",
+        "Rendered assembly seats board, CPU/GPU, I/O, then cold plates; restrained reveal restores opaque metal",
+        "Same L10 remains U40 primary; no duplicate legacy tray or second insertion at handoff",
+        "Pure snapshots and rendered layer transforms are exactly reversible",
+        "Camera transition boundaries preserve pose, scale and camera continuity",
+        "1366 and 1920, dark and light: final framing, L10 visibility, labels and no horizontal overflow",
+        "Real forward/reverse scroll, keyboard and pointer orbit, replay cancellation",
+        "WebGL context loss restores actual geometry and final pose",
+        "Reduced motion lands fully assembled, disables replay and disposes scene/playback on route change"
+      ],
+      "errors": [],
+      "external": []
+    },
+    {
+      "file": "rack-isolation.json",
+      "passed": true,
+      "checks": [
+        "Original 36 components, 48U placement and external CDU remain intact; Overview callouts are isolated",
+        "Perspective/front/rear and both themes preserve exact geometry and compile/render without WebGL errors",
+        "Liquid-flow pause/resume, saved cabling hide/show, zoom and reset retain behavior",
+        "Device focus, expanded Escape, route disposal/re-entry and reduced-motion cooling are unchanged"
+      ],
+      "errors": [],
+      "external": []
+    }
+  ],
+  "expectedFailureFixtureErrors": [
+    {
+      "scenario": "404",
+      "type": "http",
+      "status": 404,
+      "url": "http://127.0.0.1:8775/static/models/l10-prototype/bare-compute-boards.glb"
+    },
+    {
+      "scenario": "404",
+      "type": "console",
+      "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "fallbackModes": [
+    {
+      "mode": "404",
+      "passed": true,
+      "assetFailure": {
+        "enabled": true,
+        "loading": false,
+        "failed": true,
+        "error": "L10 GLB: asset request failed (404)",
+        "metadata": null
+      }
+    },
+    {
+      "mode": "one-board-metadata",
+      "passed": true,
+      "assetFailure": {
+        "enabled": true,
+        "loading": false,
+        "failed": true,
+        "error": "Bare-board prototype must own two boards, packages and the retained service layer",
+        "metadata": null
+      }
+    },
+    {
+      "mode": "network-ownership",
+      "passed": true,
+      "assetFailure": {
+        "enabled": true,
+        "loading": false,
+        "failed": true,
+        "error": "Networking replacement requires all three declared cards and its network layer",
+        "metadata": null
+      }
+    }
+  ],
+  "staticSuites": {
+    "GLBParserGroups": 19,
+    "StorageLayoutGroups": 12,
+    "NetworkCollisionGroups": 11,
+    "NetworkCollisions": 0,
+    "Hardware": "PASS",
+    "P0InvariantGroups": 16,
+    "RuntimeManifestFiles": 220,
+    "EngineHash": "918aad2bfb79c78c3018910a72b7671c8aac159b0d39eee5314d97e0a7456e63"
+  },
+  "traceArchives": [
+    {
+      "file": "bare-film-1.json.gz",
+      "rawBytes": 4064653,
+      "compressedBytes": 546658,
+      "rawSHA256": "3e9a62d5698a493fe0880c7597f7b296f9ad8474da80f2300fcba06a9d82e51e",
+      "compressedSHA256": "2b0293567496fc1d8f819a79f2f771074947672b674c877234721b090142d4e8"
+    },
+    {
+      "file": "bare-film-2.json.gz",
+      "rawBytes": 4066736,
+      "compressedBytes": 547025,
+      "rawSHA256": "d2026146d869f5e291e50d803d4f2f3acfdd7f45d9f16d3b1a5aa6f6c5533f60",
+      "compressedSHA256": "096b0be3be3f623179f6c5fb73d6b875dfdc1766cc9f6997137054b4bb11fda5"
+    },
+    {
+      "file": "bare-film-3.json.gz",
+      "rawBytes": 4065016,
+      "compressedBytes": 546752,
+      "rawSHA256": "c74fb7288aa9a44fac999d0df2f89f9d4921e6eddd86e254aaee55c4085b6179",
+      "compressedSHA256": "7bdf1d241a8d8923f1d15bf31aab98ff3845b02876035bbfbc6a9f06ce49a447"
+    }
+  ],
+  "copiedEvidence": [
+    "regression.json",
+    "l10-regression.json",
+    "rack-isolation.json",
+    "final-bareboard.log",
+    "final-cinematic.log",
+    "final-rack.log",
+    "run-browser.cjs",
+    "3440x1440-bridge-0.40.png",
+    "3440x1440-bridge-0.42.png",
+    "3440x1440-bridge-0.48.png",
+    "3440x1440-bridge-0.56.png"
+  ],
+  "limitations": [
+    "The WebGL execution used the local NVIDIA RTX 4070/ANGLE D3D11 driver; it is not a cross-device benchmark.",
+    "Full-clock films use the normal dashboard canvas; the four bridge frames and A/B/C/D capture pairs use native 3440x1440 screenshots.",
+    "Intentional failure fixtures generate the explicitly retained 404 errors; normal-operation error lists are empty.",
+    "Regression PASS does not imply the subjective 85-point visual target or user acceptance."
+  ]
+}

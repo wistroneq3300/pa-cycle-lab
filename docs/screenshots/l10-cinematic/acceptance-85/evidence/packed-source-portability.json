@@ -1,0 +1,1049 @@
+{
+  "source": "assets/l10-prototype/bare-compute-boards.blend",
+  "sourceSha256": "070c689184f6cc45e979229a2a4698ebce4cce513b16cdbcf5f5d1c6d431c7bc",
+  "readOnly": true,
+  "images": [
+    {
+      "name": "bare-bf3-l-contact-occlusion",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 124411,
+      "packedSha256": "88cb89a1c6b86e482f33d907df1ce4c779a2d0f5ca6da3cd17bf15fd8e682eda",
+      "externalSha256": "88cb89a1c6b86e482f33d907df1ce4c779a2d0f5ca6da3cd17bf15fd8e682eda",
+      "pixelsSha256": "9b2d54cd1f08d8b8e9c84eb97c461ac3cec61e88be5eb46566a581ef1b768962",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-bf3-l-contact-occlusion.png"
+    },
+    {
+      "name": "bare-bf3-l-pcb-finish",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 140266,
+      "packedSha256": "2d249154309c56c5d8d5716ad612b5fd829d538816c5c291279a633f55560b56",
+      "externalSha256": "2d249154309c56c5d8d5716ad612b5fd829d538816c5c291279a633f55560b56",
+      "pixelsSha256": "6b09fc41155d30fbd579ade9843949345e947b1a2dab0037d6a9e3bb16b17dac",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-bf3-l-pcb-finish.png"
+    },
+    {
+      "name": "bare-bf3-r-contact-occlusion",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 124130,
+      "packedSha256": "ba2ba85b2053864eb4a1194d9fdca54b07761d23fc8d769c720ed74521c8b498",
+      "externalSha256": "ba2ba85b2053864eb4a1194d9fdca54b07761d23fc8d769c720ed74521c8b498",
+      "pixelsSha256": "44987e436141482151e658b4b9e31963585dcc917d32ef1ea7a3be57988cdad9",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-bf3-r-contact-occlusion.png"
+    },
+    {
+      "name": "bare-bf3-r-pcb-finish",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 140266,
+      "packedSha256": "2d249154309c56c5d8d5716ad612b5fd829d538816c5c291279a633f55560b56",
+      "externalSha256": "2d249154309c56c5d8d5716ad612b5fd829d538816c5c291279a633f55560b56",
+      "pixelsSha256": "6b09fc41155d30fbd579ade9843949345e947b1a2dab0037d6a9e3bb16b17dac",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-bf3-r-pcb-finish.png"
+    },
+    {
+      "name": "bare-board1-contact-occlusion",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 136580,
+      "packedSha256": "f236f0ea49fda7eb16fedfa7cb6d9718497e92c8304ae3a1f3ae6e597f953798",
+      "externalSha256": "f236f0ea49fda7eb16fedfa7cb6d9718497e92c8304ae3a1f3ae6e597f953798",
+      "pixelsSha256": "54f3f70c0b29949e1c7c7a7b3e1c7ecb1fa75d255f0de5cee0977d9c0f83996e",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-board1-contact-occlusion.png"
+    },
+    {
+      "name": "bare-board1-pcb-finish",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 141297,
+      "packedSha256": "a3a24a885bdb324b8884574f549cac9a0a717aada2a8064f5816c85484c1894a",
+      "externalSha256": "a3a24a885bdb324b8884574f549cac9a0a717aada2a8064f5816c85484c1894a",
+      "pixelsSha256": "016d6bae3fc1055be13c87f4efc23122dcbfb7e2a76b2a8cc0230f66ac1a0462",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-board1-pcb-finish.png"
+    },
+    {
+      "name": "bare-board2-contact-occlusion",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 136476,
+      "packedSha256": "226d1ee814ac3c0aee86294ac9b144164786a6866f25a6f44aa308ff9c4630ad",
+      "externalSha256": "226d1ee814ac3c0aee86294ac9b144164786a6866f25a6f44aa308ff9c4630ad",
+      "pixelsSha256": "f99d399be9d66969985258e7b1ab65c5fec3baf616327506608e56c259f3c300",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-board2-contact-occlusion.png"
+    },
+    {
+      "name": "bare-board2-pcb-finish",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 141229,
+      "packedSha256": "e3e5115daf6565a154f95802691ce7883e01c1901ffccf17bfa49f38c69990de",
+      "externalSha256": "e3e5115daf6565a154f95802691ce7883e01c1901ffccf17bfa49f38c69990de",
+      "pixelsSha256": "1d1efb8e075f15c17de5130d09036951b365e9068df94387620b1eb187f0152c",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-board2-pcb-finish.png"
+    },
+    {
+      "name": "bare-ceramic-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 216898,
+      "packedSha256": "52337e6af6b83d50bfb08789ee3514edcd017e8e869022ab82c98ec099d56602",
+      "externalSha256": "52337e6af6b83d50bfb08789ee3514edcd017e8e869022ab82c98ec099d56602",
+      "pixelsSha256": "5da307a39a99ead030cbd6134a64be52831f629dc9f3d0e9d77280bfd51e786d",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-ceramic-metallicroughness.png"
+    },
+    {
+      "name": "bare-cpu-silicon-finish",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 553807,
+      "packedSha256": "3e803e2589786bf473a98e7f45b5ba56b5aa1a0da8ad73af74c718e8991a54d6",
+      "externalSha256": "3e803e2589786bf473a98e7f45b5ba56b5aa1a0da8ad73af74c718e8991a54d6",
+      "pixelsSha256": "f59c6be8b5b1dd3ef5bfd7aea04f922924b042dfe5cf3c3f0816397c216d89ae",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-cpu-silicon-finish.png"
+    },
+    {
+      "name": "bare-cpu-silicon-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 177098,
+      "packedSha256": "e695b205befdf5450c4c8474c3414fa67f6582dde8a2423febfffe290364b31e",
+      "externalSha256": "e695b205befdf5450c4c8474c3414fa67f6582dde8a2423febfffe290364b31e",
+      "pixelsSha256": "680802c9068084dbfe8d3e1a93b43b31a31d6390951e501c4a7b16d0c968b56d",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-cpu-silicon-metallicroughness.png"
+    },
+    {
+      "name": "bare-cpu-silicon-normal",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 23195,
+      "packedSha256": "2e8a05cc502d310256a4f81c46a9fa685a277fd07baff0aa4a4abb5f1f75ce7d",
+      "externalSha256": "2e8a05cc502d310256a4f81c46a9fa685a277fd07baff0aa4a4abb5f1f75ce7d",
+      "pixelsSha256": "49163e409950d1a6fa423931350c528c6f5c1ba2ba491c8661691023e88ca1b2",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-cpu-silicon-normal.png"
+    },
+    {
+      "name": "bare-cx7-r-contact-occlusion",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 84543,
+      "packedSha256": "d7a4723af74336377b295f99b6f2da058ef19fd86580e9d898b9e4ed5ca79d3a",
+      "externalSha256": "d7a4723af74336377b295f99b6f2da058ef19fd86580e9d898b9e4ed5ca79d3a",
+      "pixelsSha256": "23d687edf0f535a869e4a6b9ddb1f80beea72a1203c29c1d9ebe6fd086aec57a",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-cx7-r-contact-occlusion.png"
+    },
+    {
+      "name": "bare-cx7-r-pcb-finish",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 139221,
+      "packedSha256": "4cef0115b054a4e9a3ca98ea6ce2d042e4453ac27e2bbe5f0540c7842793f85a",
+      "externalSha256": "4cef0115b054a4e9a3ca98ea6ce2d042e4453ac27e2bbe5f0540c7842793f85a",
+      "pixelsSha256": "deb046bd07be2a3b65a7203f1439c1f9ef0411d0c97db3bd765029050fbd6bfd",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-cx7-r-pcb-finish.png"
+    },
+    {
+      "name": "bare-ferrite-finish",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 130729,
+      "packedSha256": "c9f13646d541c21c1cc157a5925c7031ca29ffc5cfa0e7c4e935af42e6d657d4",
+      "externalSha256": "c9f13646d541c21c1cc157a5925c7031ca29ffc5cfa0e7c4e935af42e6d657d4",
+      "pixelsSha256": "89d4d16d1d3a1c1413dc57b9076596f3a924ca5cb30e15bf884dc24efa65962d",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-ferrite-finish.png"
+    },
+    {
+      "name": "bare-ferrite-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 257536,
+      "packedSha256": "61ff9276cfdc3023ff621497efbcf1de4ebe7822ff409f90195d3b7dff8964b4",
+      "externalSha256": "61ff9276cfdc3023ff621497efbcf1de4ebe7822ff409f90195d3b7dff8964b4",
+      "pixelsSha256": "3245a8cd5086d5ebc5a2679b28fa7d60b0e790355ded9386e25d3322eb3323a1",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-ferrite-metallicroughness.png"
+    },
+    {
+      "name": "bare-gold-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 115190,
+      "packedSha256": "9910751dad019225602180e1c5d471f7768addb60a7072729cc4f7e96360d32c",
+      "externalSha256": "9910751dad019225602180e1c5d471f7768addb60a7072729cc4f7e96360d32c",
+      "pixelsSha256": "9458ec25488b262aab4dc672bb73ebb911903621118bb8301cff3f8e6d8efe7d",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-gold-metallicroughness.png"
+    },
+    {
+      "name": "bare-gpu-silicon-finish",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 389918,
+      "packedSha256": "a677d5ca064ae2ffc5fcc8f91f8a65378ee1ed864de57cc90c4ca7f0aef97cc3",
+      "externalSha256": "a677d5ca064ae2ffc5fcc8f91f8a65378ee1ed864de57cc90c4ca7f0aef97cc3",
+      "pixelsSha256": "49a186df934f92fc30ac761d502861318207f339535ed456c005a06bbd74d01b",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-gpu-silicon-finish.png"
+    },
+    {
+      "name": "bare-gpu-silicon-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 200316,
+      "packedSha256": "aaf52f626458f2234d2f14240e0b82290bb740febde893892c21c01c6f61bdee",
+      "externalSha256": "aaf52f626458f2234d2f14240e0b82290bb740febde893892c21c01c6f61bdee",
+      "pixelsSha256": "562e44efe11184bcb24ac2e9e8492a74d968844a5449e0f52843d620b9974cde",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-gpu-silicon-metallicroughness.png"
+    },
+    {
+      "name": "bare-gpu-silicon-normal",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 31033,
+      "packedSha256": "fdc25659c4d359d4839d6182154a63612938ef2d21199fe7ac387cac97e83b13",
+      "externalSha256": "fdc25659c4d359d4839d6182154a63612938ef2d21199fe7ac387cac97e83b13",
+      "pixelsSha256": "6af080c58f7893076f2dff412ce546588dd06a2161f622dfc78f2388ffe963d8",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-gpu-silicon-normal.png"
+    },
+    {
+      "name": "bare-metal-machining-normal",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 167050,
+      "packedSha256": "8bace1f705656345cfff16702b33dacfb08b8cfaa4e638ea102f352f989b95dd",
+      "externalSha256": "8bace1f705656345cfff16702b33dacfb08b8cfaa4e638ea102f352f989b95dd",
+      "pixelsSha256": "abda3197ddc0b03f40d2a24ad744333ba7cd12149f8c8d463f9ed7e298e831ab",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-metal-machining-normal.png"
+    },
+    {
+      "name": "bare-molding-finish",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 137004,
+      "packedSha256": "994e17b160232b1e177b9ec8f3b6a8a114e65a334f41cbe1ebfb5cd3ac85f320",
+      "externalSha256": "994e17b160232b1e177b9ec8f3b6a8a114e65a334f41cbe1ebfb5cd3ac85f320",
+      "pixelsSha256": "4661ca4c42dea099f3f66ac66af13b72e27b68dfb8c2529a3718c1084644ce5b",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-molding-finish.png"
+    },
+    {
+      "name": "bare-molding-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 245906,
+      "packedSha256": "d3c17a352b9856e4b6a5498cf2e5ebcc3782e5f0defd2bb35eb9b0e764623240",
+      "externalSha256": "d3c17a352b9856e4b6a5498cf2e5ebcc3782e5f0defd2bb35eb9b0e764623240",
+      "pixelsSha256": "ae8cdca8587592ac34cbbe95e98754e75721b281436200a9a14d04df619182b8",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-molding-metallicroughness.png"
+    },
+    {
+      "name": "bare-network-silicon-finish",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 381104,
+      "packedSha256": "c1ab19fe5db0440e492baa2fe28d3b5aebb700575d40b069e6caafb65783dc4c",
+      "externalSha256": "c1ab19fe5db0440e492baa2fe28d3b5aebb700575d40b069e6caafb65783dc4c",
+      "pixelsSha256": "7116358a32c747f0145a064b916f4f6dd9f9a9b2ca3729f7a6aaf4f311704048",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-network-silicon-finish.png"
+    },
+    {
+      "name": "bare-network-silicon-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 183123,
+      "packedSha256": "ffee878642cfbb9505597a1e50b76f955408db767ccaaba5aaadf76c9eda27ea",
+      "externalSha256": "ffee878642cfbb9505597a1e50b76f955408db767ccaaba5aaadf76c9eda27ea",
+      "pixelsSha256": "d647d33588567006d2ce0058bf4065df0796d158812c9dba7cf1fd1ef1f52d5c",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-network-silicon-metallicroughness.png"
+    },
+    {
+      "name": "bare-network-silicon-normal",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 19122,
+      "packedSha256": "e3f5099ca32f9153d45a481e7cbfc175d07cb1cab8a49d23bbb4c6b6199cfecf",
+      "externalSha256": "e3f5099ca32f9153d45a481e7cbfc175d07cb1cab8a49d23bbb4c6b6199cfecf",
+      "pixelsSha256": "90e77387b947e52441fc5a6857b8d022aff7ae5bea79158539e320e72a94448b",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-network-silicon-normal.png"
+    },
+    {
+      "name": "bare-nickel-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 210614,
+      "packedSha256": "aa61b30b85d4a371379f9c0854d34b45cee2b1459f6b66ecfd008d2b2960e1f2",
+      "externalSha256": "aa61b30b85d4a371379f9c0854d34b45cee2b1459f6b66ecfd008d2b2960e1f2",
+      "pixelsSha256": "d9114eabd118aea1320424763b590a00357fb5e85bcd9c61dc5d21d44e5156d3",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-nickel-metallicroughness.png"
+    },
+    {
+      "name": "bare-pcb-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 215397,
+      "packedSha256": "8645622dc828a1fbbd917a82bb2dab369f4e29c9d9cfd7a9cd80b9d6a03d454c",
+      "externalSha256": "8645622dc828a1fbbd917a82bb2dab369f4e29c9d9cfd7a9cd80b9d6a03d454c",
+      "pixelsSha256": "3168b0d9891c6be3468b977014e04222a4de29d94a1e666ee8e17754f583454e",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-pcb-metallicroughness.png"
+    },
+    {
+      "name": "bare-pcb-micro-normal",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 243025,
+      "packedSha256": "4c82f99213fa0fa0814c5eddd3808586fd6803c15ed6893516b56dfb7d02d9a2",
+      "externalSha256": "4c82f99213fa0fa0814c5eddd3808586fd6803c15ed6893516b56dfb7d02d9a2",
+      "pixelsSha256": "3b0ad416ed6b8a022d8b3df76d32adc9b39c6b0a619bddd20ff27373151f3bc2",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-pcb-micro-normal.png"
+    },
+    {
+      "name": "bare-pcb-soldermask",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 127885,
+      "packedSha256": "b8459f9803ec1adc32054732e5c01d081c188ee8f321c373323ccf9dae1b5c46",
+      "externalSha256": "b8459f9803ec1adc32054732e5c01d081c188ee8f321c373323ccf9dae1b5c46",
+      "pixelsSha256": "a26f3eb97d14373f601e976d640f55b44a69a83527dbdc527ad2378db2eb52d9",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-pcb-soldermask.png"
+    },
+    {
+      "name": "bare-solder-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 224894,
+      "packedSha256": "943b42f6ec936a8e16e417630158004d5556548f0665783a4d53c418625bbbbc",
+      "externalSha256": "943b42f6ec936a8e16e417630158004d5556548f0665783a4d53c418625bbbbc",
+      "pixelsSha256": "9dae54258832c02beacdab23e5b265288a903c4820f378435059637ba3927446",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-solder-metallicroughness.png"
+    },
+    {
+      "name": "bare-substrate-finish",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 203844,
+      "packedSha256": "069f8e0a3d94bc9d1a6c96917278f68e4caa8ea18e7b9060ea13c087e44a048b",
+      "externalSha256": "069f8e0a3d94bc9d1a6c96917278f68e4caa8ea18e7b9060ea13c087e44a048b",
+      "pixelsSha256": "298a738a56642bcfbed0140804ae3c7cc1411a4d60dabf41cbe23767397702b8",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-substrate-finish.png"
+    },
+    {
+      "name": "bare-substrate-metallicroughness",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 257403,
+      "packedSha256": "5b33c815e525585e3c524b41509480b9db466ff96c0f630f50565829e033e97e",
+      "externalSha256": "5b33c815e525585e3c524b41509480b9db466ff96c0f630f50565829e033e97e",
+      "pixelsSha256": "2e478b9fbce31cc17c3ace3e84bde4e74ec9a373f72df200c4bb40dd22fa99c9",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/bare-substrate-metallicroughness.png"
+    },
+    {
+      "name": "nickel-basecolor.png",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 2190,
+      "packedSha256": "ec9576439cf87e741435ae2a0fcc6ec33df45919cd7d7dedec8f3ab1c3902866",
+      "externalSha256": "ec9576439cf87e741435ae2a0fcc6ec33df45919cd7d7dedec8f3ab1c3902866",
+      "pixelsSha256": "eef6d09921b1841441f2fe9ed4124c9731c69c4e41ca3e1b96c176b777da2ed9",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/nickel-basecolor.png"
+    },
+    {
+      "name": "nickel-metallicroughness.png",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 2580,
+      "packedSha256": "b5bb8d1d2ad1246e615e67fbf91ed2f73086d5d7e0f7a08113b4e7f63c65a05f",
+      "externalSha256": "b5bb8d1d2ad1246e615e67fbf91ed2f73086d5d7e0f7a08113b4e7f63c65a05f",
+      "pixelsSha256": "bbaabe859856b9b48d24e0929ea9d532a07c34e4008f32ffb4df597e81ab5d32",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/nickel-metallicroughness.png"
+    },
+    {
+      "name": "nickel-normal.png",
+      "size": [
+        512,
+        512
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 1879,
+      "packedSha256": "8b7bdc0426116a8c46cee9d766d5b945d0aa562aa04c3ebd24cee4fe100e024e",
+      "externalSha256": "8b7bdc0426116a8c46cee9d766d5b945d0aa562aa04c3ebd24cee4fe100e024e",
+      "pixelsSha256": "277f026b989caa5b2f29bae9da7458bb634def040aae1945d7b8f8d2d208faa6",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/nickel-normal.png"
+    },
+    {
+      "name": "polymer-basecolor.png",
+      "size": [
+        128,
+        128
+      ],
+      "colorSpace": "sRGB",
+      "packedBytes": 2699,
+      "packedSha256": "510970f93564dd93138ece43105ed61d86360964bb1118e95ad5c51f61c703a6",
+      "externalSha256": "510970f93564dd93138ece43105ed61d86360964bb1118e95ad5c51f61c703a6",
+      "pixelsSha256": "af33219c8509fa9f1b015f7be4045c902542359377b08d76351d3cd5ae664ec5",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/polymer-basecolor.png"
+    },
+    {
+      "name": "polymer-metallicroughness.png",
+      "size": [
+        128,
+        128
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 4612,
+      "packedSha256": "8780450f257c53ad65160aae888a96d1509189c25786e1eaa8ad06f3471256c3",
+      "externalSha256": "8780450f257c53ad65160aae888a96d1509189c25786e1eaa8ad06f3471256c3",
+      "pixelsSha256": "85fc0124f1585df6198829d04357306f1c4f1573a591017a41b9ace699c4327f",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/polymer-metallicroughness.png"
+    },
+    {
+      "name": "polymer-normal.png",
+      "size": [
+        128,
+        128
+      ],
+      "colorSpace": "Non-Color",
+      "packedBytes": 360,
+      "packedSha256": "345b3514a58dbfcd55f1d8efe2c3ed6027bf0908c25c673dc0c9fcb0e3ef9842",
+      "externalSha256": "345b3514a58dbfcd55f1d8efe2c3ed6027bf0908c25c673dc0c9fcb0e3ef9842",
+      "pixelsSha256": "59a2d69e1eb7ec8939b35441a65969fee98822795b2b719add501a46379bc50b",
+      "externalPixelsIdentical": true,
+      "path": "assets/l10-prototype/textures/polymer-normal.png"
+    }
+  ],
+  "materials": [
+    {
+      "name": "Black solder mask / board1 contact AO",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Laminate cut edge",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Black reverse solder mask",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Gold board contacts",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Ferrite power stage",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Molded IC body",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Solder fillet",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Etched top marking",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Passive ceramic",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Connector polymer",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Silkscreen ink",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Buried copper witness",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Bonded underfill",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Black solder mask / board2 contact AO",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Package substrate",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "CPU nickel frame",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Die cut edge",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "CPU exposed optical face",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0.21,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Gold plated frame",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "GPU exposed optical face",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0.23,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Black solder mask / bf3-l contact AO",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "NETWORK exposed optical face",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0.2,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Black solder mask / bf3-r contact AO",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Black solder mask / cx7-r contact AO",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Service matte polymer",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Fan rotor polymer",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Anodized retention",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Brushed nickel",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    },
+    {
+      "name": "Elastomer coolant hose",
+      "gltfScalarValuesMatchPackedSource": true,
+      "thinFilmStrength": 0,
+      "sourceAndExportEmissionZero": true
+    }
+  ],
+  "opticalThicknessMaps": [
+    {
+      "material": "CPU exposed optical face",
+      "image": "bare-cpu-silicon-metallicroughness",
+      "channel": "metallicRoughness.r",
+      "redMin": 0.125490203499794,
+      "redMax": 0.8784314393997192,
+      "redMean": 0.48364710807800293,
+      "redStd": 0.10155453532934189,
+      "redDistinctByteValues": 193,
+      "thicknessRatioRange": [
+        0.9101176488399506,
+        1.0908235454559325
+      ],
+      "authoredThicknessNm": 410.0,
+      "filmStrength": 0.21,
+      "thicknessConvention": "metallicRoughnessTexture.r: .5 = authored nm; [0,1] = [.88,1.12] multiplier; not AO",
+      "separateOcclusionTexture": true,
+      "embeddedRedMin": 0.125490203499794,
+      "embeddedRedMax": 0.8784314393997192,
+      "embeddedRedStd": 0.10155453532934189,
+      "embeddedRedPixelsMatchSource": true,
+      "embeddedPixelsSha256": "680802c9068084dbfe8d3e1a93b43b31a31d6390951e501c4a7b16d0c968b56d"
+    },
+    {
+      "material": "GPU exposed optical face",
+      "image": "bare-gpu-silicon-metallicroughness",
+      "channel": "metallicRoughness.r",
+      "redMin": 0.16470588743686676,
+      "redMax": 0.8784314393997192,
+      "redMean": 0.4928215742111206,
+      "redStd": 0.10019195079803467,
+      "redDistinctByteValues": 183,
+      "thicknessRatioRange": [
+        0.919529412984848,
+        1.0908235454559325
+      ],
+      "authoredThicknessNm": 455.0,
+      "filmStrength": 0.23,
+      "thicknessConvention": "metallicRoughnessTexture.r: .5 = authored nm; [0,1] = [.88,1.12] multiplier; not AO",
+      "separateOcclusionTexture": true,
+      "embeddedRedMin": 0.16470588743686676,
+      "embeddedRedMax": 0.8784314393997192,
+      "embeddedRedStd": 0.10019195079803467,
+      "embeddedRedPixelsMatchSource": true,
+      "embeddedPixelsSha256": "562e44efe11184bcb24ac2e9e8492a74d968844a5449e0f52843d620b9974cde"
+    },
+    {
+      "material": "NETWORK exposed optical face",
+      "image": "bare-network-silicon-metallicroughness",
+      "channel": "metallicRoughness.r",
+      "redMin": 0.12156863510608673,
+      "redMax": 0.8784314393997192,
+      "redMean": 0.49011093378067017,
+      "redStd": 0.10073011368513107,
+      "redDistinctByteValues": 190,
+      "thicknessRatioRange": [
+        0.9091764724254608,
+        1.0908235454559325
+      ],
+      "authoredThicknessNm": 390.0,
+      "filmStrength": 0.2,
+      "thicknessConvention": "metallicRoughnessTexture.r: .5 = authored nm; [0,1] = [.88,1.12] multiplier; not AO",
+      "separateOcclusionTexture": true,
+      "embeddedRedMin": 0.12156863510608673,
+      "embeddedRedMax": 0.8784314393997192,
+      "embeddedRedStd": 0.10073011368513107,
+      "embeddedRedPixelsMatchSource": true,
+      "embeddedPixelsSha256": "d647d33588567006d2ce0058bf4065df0796d158812c9dba7cf1fd1ef1f52d5c"
+    }
+  ],
+  "status": "PASS",
+  "packedImageCount": 39,
+  "missingImages": 0,
+  "glbSha256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29",
+  "embeddedImageCount": 39,
+  "embeddedImages": [
+    {
+      "name": "bare-pcb-micro-normal",
+      "sha256": "4c82f99213fa0fa0814c5eddd3808586fd6803c15ed6893516b56dfb7d02d9a2",
+      "bytes": 243025,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-board1-contact-occlusion",
+      "sha256": "f236f0ea49fda7eb16fedfa7cb6d9718497e92c8304ae3a1f3ae6e597f953798",
+      "bytes": 136580,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-board1-pcb-finish",
+      "sha256": "a3a24a885bdb324b8884574f549cac9a0a717aada2a8064f5816c85484c1894a",
+      "bytes": 141297,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-pcb-metallicroughness",
+      "sha256": "8645622dc828a1fbbd917a82bb2dab369f4e29c9d9cfd7a9cd80b9d6a03d454c",
+      "bytes": 215397,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-pcb-soldermask",
+      "sha256": "b8459f9803ec1adc32054732e5c01d081c188ee8f321c373323ccf9dae1b5c46",
+      "bytes": 127885,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-ferrite-finish",
+      "sha256": "c9f13646d541c21c1cc157a5925c7031ca29ffc5cfa0e7c4e935af42e6d657d4",
+      "bytes": 130729,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-ferrite-metallicroughness",
+      "sha256": "61ff9276cfdc3023ff621497efbcf1de4ebe7822ff409f90195d3b7dff8964b4",
+      "bytes": 257536,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-molding-finish",
+      "sha256": "994e17b160232b1e177b9ec8f3b6a8a114e65a334f41cbe1ebfb5cd3ac85f320",
+      "bytes": 137004,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-molding-metallicroughness",
+      "sha256": "d3c17a352b9856e4b6a5498cf2e5ebcc3782e5f0defd2bb35eb9b0e764623240",
+      "bytes": 245906,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-solder-metallicroughness",
+      "sha256": "943b42f6ec936a8e16e417630158004d5556548f0665783a4d53c418625bbbbc",
+      "bytes": 224894,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-ceramic-metallicroughness",
+      "sha256": "52337e6af6b83d50bfb08789ee3514edcd017e8e869022ab82c98ec099d56602",
+      "bytes": 216898,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-board2-contact-occlusion",
+      "sha256": "226d1ee814ac3c0aee86294ac9b144164786a6866f25a6f44aa308ff9c4630ad",
+      "bytes": 136476,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-board2-pcb-finish",
+      "sha256": "e3e5115daf6565a154f95802691ce7883e01c1901ffccf17bfa49f38c69990de",
+      "bytes": 141229,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-substrate-finish",
+      "sha256": "069f8e0a3d94bc9d1a6c96917278f68e4caa8ea18e7b9060ea13c087e44a048b",
+      "bytes": 203844,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-substrate-metallicroughness",
+      "sha256": "5b33c815e525585e3c524b41509480b9db466ff96c0f630f50565829e033e97e",
+      "bytes": 257403,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-nickel-metallicroughness",
+      "sha256": "aa61b30b85d4a371379f9c0854d34b45cee2b1459f6b66ecfd008d2b2960e1f2",
+      "bytes": 210614,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-cpu-silicon-normal",
+      "sha256": "2e8a05cc502d310256a4f81c46a9fa685a277fd07baff0aa4a4abb5f1f75ce7d",
+      "bytes": 23195,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-cpu-silicon-finish",
+      "sha256": "3e803e2589786bf473a98e7f45b5ba56b5aa1a0da8ad73af74c718e8991a54d6",
+      "bytes": 553807,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-cpu-silicon-metallicroughness",
+      "sha256": "e695b205befdf5450c4c8474c3414fa67f6582dde8a2423febfffe290364b31e",
+      "bytes": 177098,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-metal-machining-normal",
+      "sha256": "8bace1f705656345cfff16702b33dacfb08b8cfaa4e638ea102f352f989b95dd",
+      "bytes": 167050,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-gold-metallicroughness",
+      "sha256": "9910751dad019225602180e1c5d471f7768addb60a7072729cc4f7e96360d32c",
+      "bytes": 115190,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-gpu-silicon-normal",
+      "sha256": "fdc25659c4d359d4839d6182154a63612938ef2d21199fe7ac387cac97e83b13",
+      "bytes": 31033,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-gpu-silicon-finish",
+      "sha256": "a677d5ca064ae2ffc5fcc8f91f8a65378ee1ed864de57cc90c4ca7f0aef97cc3",
+      "bytes": 389918,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-gpu-silicon-metallicroughness",
+      "sha256": "aaf52f626458f2234d2f14240e0b82290bb740febde893892c21c01c6f61bdee",
+      "bytes": 200316,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-bf3-l-contact-occlusion",
+      "sha256": "88cb89a1c6b86e482f33d907df1ce4c779a2d0f5ca6da3cd17bf15fd8e682eda",
+      "bytes": 124411,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-bf3-l-pcb-finish",
+      "sha256": "2d249154309c56c5d8d5716ad612b5fd829d538816c5c291279a633f55560b56",
+      "bytes": 140266,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-network-silicon-normal",
+      "sha256": "e3f5099ca32f9153d45a481e7cbfc175d07cb1cab8a49d23bbb4c6b6199cfecf",
+      "bytes": 19122,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-network-silicon-finish",
+      "sha256": "c1ab19fe5db0440e492baa2fe28d3b5aebb700575d40b069e6caafb65783dc4c",
+      "bytes": 381104,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-network-silicon-metallicroughness",
+      "sha256": "ffee878642cfbb9505597a1e50b76f955408db767ccaaba5aaadf76c9eda27ea",
+      "bytes": 183123,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-bf3-r-contact-occlusion",
+      "sha256": "ba2ba85b2053864eb4a1194d9fdca54b07761d23fc8d769c720ed74521c8b498",
+      "bytes": 124130,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-bf3-r-pcb-finish",
+      "sha256": "2d249154309c56c5d8d5716ad612b5fd829d538816c5c291279a633f55560b56",
+      "bytes": 140266,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-cx7-r-contact-occlusion",
+      "sha256": "d7a4723af74336377b295f99b6f2da058ef19fd86580e9d898b9e4ed5ca79d3a",
+      "bytes": 84543,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "bare-cx7-r-pcb-finish",
+      "sha256": "4cef0115b054a4e9a3ca98ea6ce2d042e4453ac27e2bbe5f0540c7842793f85a",
+      "bytes": 139221,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "nickel-normal",
+      "sha256": "8b7bdc0426116a8c46cee9d766d5b945d0aa562aa04c3ebd24cee4fe100e024e",
+      "bytes": 1879,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "nickel-basecolor",
+      "sha256": "ec9576439cf87e741435ae2a0fcc6ec33df45919cd7d7dedec8f3ab1c3902866",
+      "bytes": 2190,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "nickel-metallicroughness",
+      "sha256": "b5bb8d1d2ad1246e615e67fbf91ed2f73086d5d7e0f7a08113b4e7f63c65a05f",
+      "bytes": 2580,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "polymer-normal",
+      "sha256": "345b3514a58dbfcd55f1d8efe2c3ed6027bf0908c25c673dc0c9fcb0e3ef9842",
+      "bytes": 360,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "polymer-basecolor",
+      "sha256": "510970f93564dd93138ece43105ed61d86360964bb1118e95ad5c51f61c703a6",
+      "bytes": 2699,
+      "authoredBytesIdentical": true
+    },
+    {
+      "name": "polymer-metallicroughness",
+      "sha256": "8780450f257c53ad65160aae888a96d1509189c25786e1eaa8ad06f3471256c3",
+      "bytes": 4612,
+      "authoredBytesIdentical": true
+    }
+  ],
+  "geometryPolicy": "All accepted POSITION/NORMAL/UV/index/tangent accessors retained; see geometry-preservation.json",
+  "finishRevision": 1,
+  "scriptSha256": "f0e09c97c1f96e37a2c3511579e490ef3da3c9f05c9051289ae96e7b4c4f7544",
+  "reproduction": {
+    "script": "artifacts/l10-acceptance-85/validate-packed-finish.py",
+    "command": "artifacts/l10-phase4/tools/blender-4.5.9-windows-x64/blender.exe --background --python artifacts/l10-acceptance-85/validate-packed-finish.py",
+    "pythonSource": "\"\"\"Read-only portability and source/material verification; never saves a blend.\"\"\"\nfrom pathlib import Path\nimport hashlib,json,struct\nimport bpy\nimport numpy as np\n\nroot=Path.cwd();source=root/'assets/l10-prototype/bare-compute-boards.blend'\nsource_hash=hashlib.sha256(source.read_bytes()).hexdigest()\nbpy.ops.wm.open_mainfile(filepath=str(source))\nreport={'source':source.relative_to(root).as_posix(),'sourceSha256':source_hash,'readOnly':True,'images':[],'materials':[],'opticalThicknessMaps':[]}\npixels_by_name={}\nfor im in bpy.data.images:\n    if im.source not in {'FILE','GENERATED'} or not im.size[0] or not im.size[1]:\n        continue\n    assert im.packed_file, 'Missing packed image: '+im.name\n    file=Path(bpy.path.abspath(im.filepath))\n    assert file.is_file(), 'Missing external source map: '+str(file)\n    packed=bytes(im.packed_file.data);external=file.read_bytes()\n    # Packed raster content is the portability source of truth. Also verify\n    # that editable external maps contain exactly the same decoded pixels.\n    original=np.empty(len(im.pixels),np.float32);im.pixels.foreach_get(original)\n    check=bpy.data.images.load(str(file),check_existing=False)\n    check.colorspace_settings.name=im.colorspace_settings.name\n    decoded=np.empty(len(check.pixels),np.float32);check.pixels.foreach_get(decoded)\n    assert original.shape==decoded.shape and np.array_equal(original,decoded), im.name+' pixel mismatch'\n    bpy.data.images.remove(check)\n    pixels_by_name[im.name]=original.reshape((im.size[1],im.size[0],4)).copy()\n    report['images'].append({'name':im.name,'size':list(im.size),'colorSpace':im.colorspace_settings.name,\n        'packedBytes':len(packed),'packedSha256':hashlib.sha256(packed).hexdigest(),\n        'externalSha256':hashlib.sha256(external).hexdigest(),'pixelsSha256':hashlib.sha256(original.tobytes()).hexdigest(),\n        'externalPixelsIdentical':True,'path':file.relative_to(root).as_posix()})\n\nglb=root/'app/static/models/l10-prototype/bare-compute-boards.glb';raw=glb.read_bytes()\nn=struct.unpack_from('<I',raw,12)[0];doc=json.loads(raw[20:20+n]);binary=raw[28+n:]\nmaterial_by_name={m.name:m for m in bpy.data.materials}\nfor material in doc['materials']:\n    board=material.get('extras',{}).get('l10ContactBoard')\n    name=material['name']+(' / '+board+' contact AO' if board else '')\n    source_material=material_by_name[name]\n    p=source_material.node_tree.nodes.get('Principled BSDF')\n    if not p:\n        continue\n    pbr=material.get('pbrMetallicRoughness',{})\n    for attribute,socket,default in [('metallicFactor','Metallic',1),('roughnessFactor','Roughness',1)]:\n        if not p.inputs[socket].is_linked:\n            assert abs(p.inputs[socket].default_value-pbr.get(attribute,default))<1e-6,(name,attribute)\n    if not p.inputs['Base Color'].is_linked:\n        assert np.allclose(p.inputs['Base Color'].default_value,pbr.get('baseColorFactor',[1]*4),atol=1e-6),name\n    for field in ('l10ThinFilmStrength','l10ThinFilmThickness'):\n        if field in source_material:\n            assert source_material[field]==material['extras'][field],(name,field)\n    if 'normalTexture' in material:\n        normals=[node for node in source_material.node_tree.nodes if node.type=='NORMAL_MAP']\n        assert len(normals)==1 and abs(normals[0].inputs['Strength'].default_value-material['normalTexture'].get('scale',1))<1e-6,name\n    # Emission is forbidden both in exported glTF and in the editable source.\n    assert not material.get('emissiveTexture'),name+' emissive texture'\n    assert np.array_equal(material.get('emissiveFactor',[0,0,0]),[0,0,0]),name+' emissive factor'\n    assert not any(node.type=='EMISSION' for node in source_material.node_tree.nodes),name+' emission node'\n    emission=p.inputs.get('Emission Color') or p.inputs.get('Emission')\n    strength=p.inputs.get('Emission Strength')\n    assert not emission or not emission.is_linked,name+' linked emission color'\n    assert not strength or not strength.is_linked,name+' linked emission strength'\n    emission_zero=(not strength or strength.default_value==0) or (emission and np.array_equal(list(emission.default_value)[:3],[0,0,0]))\n    assert emission_zero,name+' source emits light'\n    extras=material.get('extras',{})\n    if extras.get('l10ThinFilmStrength',0)>0:\n        texture=pbr['metallicRoughnessTexture']['index']\n        image_name=doc['images'][doc['textures'][texture]['source']]['name']\n        authored=next(key for key in pixels_by_name if key in (image_name,image_name+'.png'))\n        pixels=pixels_by_name[authored]\n        red=pixels[:,:,0]\n        lo,hi=float(red.min()),float(red.max())\n        assert 0<=lo<hi<=1 and hi-lo>.04, name+' requires authored variable MR.r thickness'\n        assert float(red.std())>.003,name+' optical map is effectively flat'\n        assert len(np.unique(np.rint(red*255).astype(np.uint8)))>8,name+' insufficient optical variation'\n        assert 0<extras['l10ThinFilmStrength']<=.25,name+' unbounded film strength'\n        assert 250<=extras['l10ThinFilmThickness']<=650,name+' unsupported film thickness'\n        assert source_material['l10ThinFilmThicknessMap']==extras['l10ThinFilmThicknessMap'],name+' thickness convention mismatch'\n        report['opticalThicknessMaps'].append({'material':name,'image':image_name,'channel':'metallicRoughness.r',\n            'redMin':lo,'redMax':hi,'redMean':float(red.mean()),'redStd':float(red.std()),\n            'redDistinctByteValues':int(len(np.unique(np.rint(red*255).astype(np.uint8)))),\n            'thicknessRatioRange':[.88+.24*lo,.88+.24*hi],\n            'authoredThicknessNm':extras['l10ThinFilmThickness'],'filmStrength':extras['l10ThinFilmStrength'],\n            'thicknessConvention':extras['l10ThinFilmThicknessMap'],'separateOcclusionTexture':True})\n    report['materials'].append({'name':name,'gltfScalarValuesMatchPackedSource':True,\n        'thinFilmStrength':material.get('extras',{}).get('l10ThinFilmStrength',0),'sourceAndExportEmissionZero':True})\n\nembedded=[]\nfor im in doc['images']:\n    view=doc['bufferViews'][im['bufferView']];offset=view.get('byteOffset',0)\n    data=binary[offset:offset+view['byteLength']]\n    digest=hashlib.sha256(data).hexdigest()\n    authored=next(p for p in report['images'] if p['name'] in (im['name'],im['name']+'.png'))\n    assert digest==authored['externalSha256'], im['name']+' embedded/source image mismatch'\n    optical=next((entry for entry in report['opticalThicknessMaps'] if entry['image']==im['name']),None)\n    if optical:\n        # Independently decode the actual GLB-embedded PNG. Exporters may treat\n        # metallicRoughness.r as unused; authored metadata alone cannot prove it\n        # survived export. Both raw image bytes and decoded red must agree.\n        probe=root/'artifacts/l10-acceptance-85/evidence'/(im['name']+'-embedded-probe.png')\n        probe.write_bytes(data)\n        decoded_image=bpy.data.images.load(str(probe),check_existing=False)\n        decoded_image.colorspace_settings.name='Non-Color'\n        decoded_pixels=np.empty(len(decoded_image.pixels),np.float32)\n        decoded_image.pixels.foreach_get(decoded_pixels)\n        decoded_pixels=decoded_pixels.reshape((decoded_image.size[1],decoded_image.size[0],4))\n        authored_pixels=pixels_by_name[authored['name']]\n        assert np.array_equal(decoded_pixels,authored_pixels),im['name']+' exported pixel mismatch'\n        red=decoded_pixels[:,:,0]\n        assert np.array_equal(red,authored_pixels[:,:,0]),im['name']+' MR red silently repacked'\n        optical.update(embeddedRedMin=float(red.min()),embeddedRedMax=float(red.max()),\n                       embeddedRedStd=float(red.std()),embeddedRedPixelsMatchSource=True,\n                       embeddedPixelsSha256=hashlib.sha256(decoded_pixels.tobytes()).hexdigest())\n        bpy.data.images.remove(decoded_image)\n        probe.unlink()\n    embedded.append({'name':im.get('name'),'sha256':digest,'bytes':len(data),'authoredBytesIdentical':True})\nassert len(report['opticalThicknessMaps'])==3,'CPU, GPU and network optical maps are required'\nassert hashlib.sha256(source.read_bytes()).hexdigest()==source_hash,'Source changed during read-only audit'\nassert hashlib.sha256(glb.read_bytes()).hexdigest()==hashlib.sha256(raw).hexdigest(),'GLB changed during audit'\nscript=Path(__file__).resolve()\nreport.update(status='PASS',packedImageCount=len(report['images']),missingImages=0,\n              glbSha256=hashlib.sha256(raw).hexdigest(),embeddedImageCount=len(embedded),embeddedImages=embedded,\n              geometryPolicy='All accepted POSITION/NORMAL/UV/index/tangent accessors retained; see geometry-preservation.json',\n              finishRevision=doc['extras']['targetedFinishRevision'],\n              scriptSha256=hashlib.sha256(script.read_bytes()).hexdigest(),\n              reproduction={'script':script.relative_to(root).as_posix(),\n                            'command':'artifacts/l10-phase4/tools/blender-4.5.9-windows-x64/blender.exe --background --python artifacts/l10-acceptance-85/validate-packed-finish.py',\n                            'pythonSource':script.read_text()})\nout=root/'artifacts/l10-acceptance-85/evidence/packed-source-portability.json'\nout.write_text(json.dumps(report,indent=2)+'\\n')\nprint(json.dumps({k:report[k] for k in ['status','packedImageCount','missingImages','glbSha256','embeddedImageCount','finishRevision']}))\n"
+  }
+}

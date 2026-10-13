@@ -1,0 +1,31 @@
+{
+  "before": {
+    "glbBytes": 25210276,
+    "triangles": 166414,
+    "primitives": 124,
+    "images": 31,
+    "materials": 29,
+    "drawCalls": 126,
+    "textureAllocationEstimateBytes": 72963442,
+    "textureObjects": 33,
+    "bufferBytes": 23963616,
+    "vertices": 499242,
+    "shadowMapSize": 2048,
+    "resolution": 1
+  },
+  "after": {
+    "glbBytes": 25533668,
+    "triangles": 166414,
+    "primitives": 124,
+    "images": 39,
+    "materials": 29,
+    "drawCalls": 126,
+    "textureAllocationEstimateBytes": 84148258,
+    "textureObjects": 41,
+    "bufferBytes": 23963616,
+    "vertices": 499242,
+    "shadowMapSize": 2048,
+    "resolution": 1
+  },
+  "capturedResourceHashesMatchFinalWorkingTree": true
+}
