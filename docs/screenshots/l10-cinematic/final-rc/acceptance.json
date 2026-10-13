@@ -1,0 +1,95 @@
+{
+  "schema": "pa-cycle-lab.l10-cinematic-final-rc.acceptance.v1",
+  "status": "兩輪已凍結；本機現行工程驗收 PASS；視覺 90 分目標未達",
+  "summary": "以 108ffbc5 V3 為基準，僅執行有測量與畫面支持的局部精修。正常 Dashboard 的動態流體核心更清楚；金屬大平面仍有 CAD 感，接觸陰影及加工細節在正常尺寸下仍偏弱。保守評估 86.5/100，不能標示照片級或 90 分驗收通過。第二輪完成後停止，不再開展第三輪。",
+  "commit": "本報告隨 Final RC 提交；精確提交 SHA、推送結果及該 SHA 的遠端 CI 請見最終交付訊息。避免自參照提交雜湊。",
+  "baselineCommit": "108ffbc5b4bc4faf4eb4f1ebf785ebd3b1c89a5c",
+  "branch": "codex/cinematic-l10-assembly-intro",
+  "overallScore": 86.5,
+  "targetScore": 90,
+  "targetMet": false,
+  "photographicAcceptance": false,
+  "scoringMethod": "沿用 V3 八項等權主觀視覺評分。基準 (86+88+87+87+85+85+86+87)/8=86.375，顯示 86.4；Final (86+88+88+87+85+85+86+87)/8=86.5。工程 PASS、法線修復、擋板保護與微小像素差異不轉換為藝術加分。分數不是客觀量測或使用者研究。",
+  "visualScores": [
+    {"item":"Cold Plate / 接頭真實感","before":86,"after":86,"reason":"既有接頭新增合理扳手平面與局部 AO，銅、鎳、橡膠分層保留；但蓋板仍過於均勻，正常 Dashboard 中細節改善有限，不支持整項加分。","evidence":"after/diagnostic-cold-plate-connector-macro.png"},
+    {"item":"Manifold / Plumbing","before":88,"after":88,"reason":"保留 V3 已改善的平順金屬反射；實體尺寸、端點與材質參數不變。本輪沒有以提高 Roughness 掩蓋缺陷，也不重複計入舊改善。","evidence":"after/diagnostic-manifold-macro.png"},
+    {"item":"Cooling Flow 可讀性","before":87,"after":88,"reason":"正常 2127×1272 Canvas 的分支核心約增加 32.35% 投影宽度；紅藍流體與移動前緣更可辨識。22 路由及六支路保留，同流速、相位與 3.8 秒 Reveal；仍需觀看動態才能判斷方向，靜態圖不充分。","evidence":"after/dashboard-flow-A-2127x1272.png"},
+    {"item":"金屬 / 橡膠材質","before":87,"after":87,"reason":"CPU/GPU 蓋板沿用不同加工語言，第二輪只微調既有方向性反射係數；肉眼變化輕微，無新增材質分數。原 MR、PBR 數值及照明不變。","evidence":"after/D-solid-cooling-assembly.png"},
+    {"item":"Contact Shadows","before":85,"after":85,"reason":"新增接頭局部 AO 有實際幾何烘焙來源，但正常全機畫面下管根陰影仍偏輕；不把烘焙完成等同照片級改善。","evidence":"after/diagnostic-cold-plate-connector-macro.png"},
+    {"item":"Camera Continuity","before":85,"after":85,"reason":"相機程式未改，原始錄影與抽幀未見本輪新增的關蓋裁切；完整開蓋總成停留仍短，Flow 近景不包含完整 SSD 正面。抽幀不是逐幀流暢度驗證。","evidence":"evidence/film-frames/index.html"},
+    {"item":"L10 → Rack 轉場","before":86,"after":86,"reason":"保留既有演出、位置及同一 L10 模型；U1–U9 九片與 U47–U48 兩片同型 1U 擋板保持正確，沒有 Server 面板零件。這是保護既有成果，不加分。","evidence":"after/rack-bottom-nine-1u-panels-crop.png"},
+    {"item":"整體 Cinematic 觀感","before":87,"after":87,"reason":"水流更清楚且風格克制，但大型冷板與上蓋仍屬精細技術視覺化，未達照片級。完整影片保留原始時間，不以亮度或速度加工改善觀感。","evidence":"film.webm"}
+  ],
+  "engineering": [
+    {"name":"GLB Parser / 裸板及水冷","status":"PASS","details":"兩份原解析器測試均 19/19；原始 assertions 未改。","evidence":"evidence/regression-cpu.json"},
+    {"name":"Six Cold Plate / TIM / Mounting / Flow Route / Clearance / Collision","status":"PASS","details":"Final geometry 13 項；保留並執行 18 個原 V2 安全檢查函式。六接觸座、24 固定接觸腳、22 流路、六支路、126 密封射線、20 安裝姿態；實際三角面碰撞 0、流體穿壁 0。包含負向 fixtures，沒有放寬既有 assertions。","evidence":"evidence/cooling-geometry.json"},
+    {"name":"SSD / BF3 × 2 / CX7 × 1 / Hardware","status":"PASS","details":"Storage 12、Network 11 與 Hardware 原測試通過；8 SSD、slotLayout 與網卡資產不變。","evidence":"evidence/regression-cpu.json"},
+    {"name":"Rack 1U Blanking / Rack Isolation Final Contract","status":"PASS","details":"版本化 Final contract 6/6；保留 Inventory 與邏輯分組，實際渲染 U1–U9 九片及 U47–U48 兩片同型 1U 面板。201 姿態、相機與 bounds 不變；只允許 V3 已批准 blanking 重用及本輪 gold rim 法線歸一化。","evidence":"evidence/rack-final-contract.json"},
+    {"name":"Core Scene 單位法線","status":"PASS","details":"原測試 19/19。修正 editorialCarrierStamp 的 [nx*.24,ny*.24,.97] 來源法線，3744 個 rim 頂點歸一化。保留方向、位置、色彩及材質；未改 1e-5 tolerance。","evidence":"evidence/regression-cpu.json"},
+    {"name":"Fluid Runtime / Pause / Seek / Replay / Skip / Reset / Reduced Motion / Fallback","status":"PASS","details":"原 runtime 8 組及 bareboard 9 組 browser checks 通過；真實 clock、3 次完整演出、失敗 fixtures、暫停位置穩定、相位與流速、金屬恢復、context loss 與遲到資源均保留測試。","evidence":"evidence/regression-browser.json"},
+    {"name":"Timeline / Cinematic / Environment / Rack 互動","status":"PASS","details":"Cinematic 10、Environment 10、Rack 4 組原 browser checks；15 stages、雙尺寸雙主題、Device Focus、Escape、orbit、Home/reset、context restore/disposal。39.7 秒、3.8 秒與 Stage 順序不變。","evidence":"evidence/regression-browser.json"},
+    {"name":"Runtime Manifest / Engine Hash / Protected Scope","status":"PASS","details":"225 個 runtime manifest 檔案檢查通過；Engine hash 不變。Scope 7 項證明 Cycle/Telemetry/Agent、既有測試、CSS、Timeline、裸板及使用者未追蹤檔案保留。","evidence":"evidence/scope.json"},
+    {"name":"Blender Source / Package / Dimensions","status":"PASS","details":"三项資產稽核通過；94,888 triangles、54 nodes、12 materials；74 個受保護檔案不變。新增接頭 AO，4 張原 MR 貼圖不變；重建精度差异有獨立 ledger。","evidence":"evidence/asset-audit.md"},
+    {"name":"原生 Chromium WebGL / 八階段 / Dashboard / 完整錄影證據","status":"PASS","details":"相同相機、光照、曝光、Tone Mapping；使用 NVIDIA RTX4070 ANGLE D3D11。原始 PNG 與影片來源 hashes 對應凍結候選；無影片 page/resource/WebGL 錯誤。此 PASS 是證據完整性，不代表照片級通過。","evidence":"evidence/artifact-consistency.json"},
+    {"name":"舊 l10-cooling-v2.cjs Whole-Rack Source Freeze","status":"KNOWN BASELINE FAIL","details":"已於 108ffbc 重現。舊測試把整份 Rack 原始碼完全凍結，與已批准 V3 1U blanking 修正衝突；保留原檔與失敗紀錄，不刪除、不降低斷言。現行允許範圍由更精確的版本化 Final Contract 驗證，不能宣稱舊測試 PASS。","evidence":"evidence/regression-baseline.json"},
+    {"name":"Remote CI / 本次提交","status":"NOT RUN","details":"此隨提交報告寫入時尚未 Push；最終交付訊息提供精確 SHA 的 CI 結果與 run URL。遠端 workflow 只驗 Runtime Manifest / Engine Hash，不冒充 GPU 視覺 QA。"},
+    {"name":"90/100 / 照片級視覺目標","status":"FAIL","details":"86.5/100，目標未達。兩輪結束，停止新增 L10 精修。"}
+  ],
+  "modifications": [
+    "Blender/build.py：12 條分支流體核心半徑 .0068 → .009；22 條中心線、端點、流向、六冷板接觸與實體水管管徑均不變。六冷板內流道 .009、主幹 .0105 原樣保留。",
+    "Blender/GLB：12 個既有接頭增加六面淺扳手平面，位於原 .020 最大半徑內；內孔半徑 .0145（孔徑 .029）、密封圈與軸線不變。不新增無用途裝飾。",
+    "PBR：新增 256×256 cooling-socket-contact-ao.png，以 CPU-L 同型接頭/管/冷板幾何進行每 texel 48 cosine rays、距離 .022 的局部 AO 烘焙，重用於 12 同型端口。只接入 Machined nickel fittings 的 occlusion；不改 Albedo/Metallic/Roughness，無 emission/bloom。",
+    "原四張 MR maps 與全部 12 材質 PBR factors 不變；受保護固體（除明列的 12 個接頭精修）POSITION/NORMAL 保留。GLB 未匯出 TANGENT accessor。Blender 重建產生生成 UV 最大 2.3841858e-7 差異，低於 .000123 個 512px texel；12 個增粗核心重焊接的法線浮點差異有獨立精度記錄。原 flow 距離 UV 與 header UV 精確保留。未宣稱全部 accessor byte-identical。",
+    "Runtime Round 1：調整光學密度前緣的寬度與對比，移除流體高頻 travelling normal ripple；保留 .85 流速、.38 波長、統一 Timeline、分支相位、熱色漸變、alpha 與 Fresnel。",
+    "Runtime Round 2：僅既有 CPU/GPU 蓋板方向性環境反射係數 .07/.16 → .14/.28；這是既有近似反射模型的微調，不宣稱 measured anisotropic BRDF。",
+    "Rack：只修 gold editorialCarrierStamp rim 法線來源為單位向量。原 V3 blanking renderer、設備數量、U 位、Inventory、所有其他 Mesh 與動畫保持不變。",
+    "更新兩處頁面 core/rack cache keys 與 companion GLB cache key。新增 Final contract、可重現 QA / capture / measurement scripts 及原始證據。未修改舊測試、Camera、Lighting、Exposure、Tone Mapping、HDR/IBL atlases、Timeline 或 Engine。"
+  ],
+  "measurements": {
+    "units": "原視覺化座標單位；不是毫米、OEM 實測或製造尺寸。",
+    "header": {"outerDiameter":0.034,"innerDiameter":0.024,"wallThickness":0.005},
+    "branch": {"outerDiameter":0.027,"innerDiameter":0.021,"wallThickness":0.003},
+    "ferrule": {"outerDiameter":0.040,"innerDiameter":0.029},
+    "minimumBranchShellGap":0.00799995,
+    "conservativeStraight12SidedBoreApothemMargin":0.00114222,
+    "closedLidClearance":0.007999986,
+    "dashboardCanvas": {"size":[2127,1272],"streamBeforePixels":[3.50,3.91],"streamAfterPixels":[4.64,5.17],"physicalODPixelsUnchanged":[6.95,7.76]},
+    "reviewCanvas": {"size":[3440,1440],"streamBeforePixels":[5.68,7.00],"streamAfterPixels":[7.51,9.27],"physicalODPixelsUnchanged":[11.27,13.90]},
+    "method": "實際 GLB 環頂點經捕捉的 VP × model × part 投影；獨立匹配實體管壁截面。幾何投影寬度不是保證可見寬度，遮擋、抗鋸齒、Fresnel 及對比會影響觀感。",
+    "whyNoPipeEnlargement": "實體管徑與現有接口合理匹配。放大两倍將使 header 頂 .134、branch 頂 .127 超出 lid .125，且平行 branch 外壁 gap 變成 -.019；因此不擴大實體管路。"
+  },
+  "hashes": {
+    "coolingGLBSHA256":"88eec60c20e775a431b446da311f3a1476cc2774173e628adc170ae3ac1f5a3f",
+    "coolingBlendSHA256":"fb6bfb9dffa9ba0784904f21a1f284d588974130f4534d9a9faa8cf8e80981d2",
+    "bareGLBSHA256Unchanged":"6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29",
+    "engineSHA256Unchanged":"918aad2bfb79c78c3018910a72b7671c8aac159b0d39eee5314d97e0a7456e63",
+    "filmSHA256":"aa453960a2e819545c7f2fd5f2821af64501be645020f65ec98378a1cb0e2bda"
+  },
+  "video": {
+    "file":"film.webm",
+    "authoredDurationSeconds":39.7,
+    "measuredReplayWallSeconds":39.827,
+    "uncutContainerDurationSeconds":44.88,
+    "resolution":[3440,1440],
+    "encodingFPS":25,
+    "bytes":6833639,
+    "method":"原生 Chromium Dashboard recordVideo；無 seek、替換 runtime、重建影格、插幀、時間拉伸或剪去停頓。檔案包含啟動及結束空檔，不宣稱容器恰為 39.7 秒。",
+    "review":"31 個原始編碼索引解碼 PNG 輔助抽樣檢視；時間標為容器時間，不猜測對應 authored time。結合完整 runtime clock trace 與連續性 contract；未聲稱人工逐幀觀看整片。",
+    "metadataNote":"錄影器讀取裸板 response.body 時 inspector cache 已釋放，記錄於 metadataErrors；這不是資源載入失敗。裸板未變更及 hash 由獨立 capture/scope/asset checks 證明，未隱藏該 metadata 限制。"
+  },
+  "rounds": [
+    {"round":1,"scope":"尺寸分析、分支核心與移動前緣、接頭及 AO、法線根因修復與 Final contracts","visualEvidence":"evidence/round1/","decision":"保留，可確認的視覺提升集中於正常 Dashboard 流體可讀性。"},
+    {"round":2,"scope":"只微調仍显均勻的 CPU/GPU 蓋板方向性反射","visualEvidence":"evidence/visual-round2-independent.json","decision":"保留克制變化，不加分。凍結，無第三輪。"}
+  ],
+  "unresolved": [
+    "視覺 90 分目標 FAIL：本輪 86.5/100；大面積冷板及上蓋仍帶 CAD/CGI 均勻感，沒有照片級驗收。",
+    "正常 Dashboard 的小接頭、密封圈與管根 AO 仍不突出；流向主要靠移動前緣判讀，靜態圖不能充分證明方向。",
+    "既有完整開蓋總成停留偏短；水流近景優先看六冷板與支路，SSD/正面部分離開畫面。Rack 導軌特寫也會裁掉下方設備，不宣稱全片任何時刻皆完整入鏡。關蓋本身完整入鏡。未更改 Camera 或縮短 Rack 演出。",
+    "完整原生影片容器 44.88 秒，包含完整 39.7 秒 authored 演出及前後空檔；不是精剪恰 39.7 秒的影片交付。",
+    "舊 V2 Whole-Rack Source Freeze 保留為 KNOWN BASELINE FAIL，由版本化精確 Final Contract 管理已批准例外；不能描述成舊測試全通過。",
+    "隨提交報告產生時 Remote CI 尚未執行，須以最終交付中該 SHA 的 run 結果為準；遠端不執行 GPU 視覺驗收。",
+    "impeccable 檢查仍指出既有 Dashboard shell 對比、小字及 token 等警告；本輪未修改 CSS，不將 exit 0 誤寫成 accessibility PASS。",
+    "尺寸為概念視覺化座標，不是 OEM CAD、加工圖、流量/壓降或 CFD/製造認證。"
+  ],
+  "releaseRecommendation": "可作工程穩定且維持 GLB opt-in 的 Final Release Candidate，待精確提交 SHA 的遠端 CI 成功。若正式 Release 的必要門檻是 90/100 或照片級，則建議不宣告達標；若接受已明列的視覺限制，可由使用者批准沿用本 RC。依要求結束 L10 視覺迭代，不建立新精修輪次，不自行 Merge、Tag 或部署。"
+}

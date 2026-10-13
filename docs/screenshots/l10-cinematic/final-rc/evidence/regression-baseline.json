@@ -1,0 +1,21 @@
+{
+  "mode": "baseline",
+  "started": "2026-10-13T17:20:27.076Z",
+  "assertions": "Original assertions unchanged; only report destinations relocated",
+  "results": [
+    {
+      "name": "old-v2",
+      "exit": 1,
+      "pass": false,
+      "elapsedMs": 3107
+    },
+    {
+      "name": "old-core",
+      "exit": 1,
+      "pass": false,
+      "elapsedMs": 5114
+    }
+  ],
+  "baseline": "108ffbc5b4bc4faf4eb4f1ebf785ebd3b1c89a5c",
+  "historicalReadRoutingOnly": true
+}

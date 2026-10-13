@@ -1,0 +1,46 @@
+{
+  "schema": "pa-cycle-lab.l10-final-rc.independent-visual-review.v1",
+  "round": 2,
+  "baselineCommit": "108ffbc5b4bc4faf4eb4f1ebf785ebd3b1c89a5c",
+  "recommendation": "keep, with no additional visual-score credit",
+  "reviewStatus": "Final static comparison complete; current Final RC movie review pending.",
+  "scope": "Only CPU/GPU cover anisotropy 0.07/0.16 to 0.14/0.28 is under comparison. No third visual refinement is recommended.",
+  "actualImagesOpened": [
+    "round1/D-solid-cooling-assembly.png",
+    "../after/D-solid-cooling-assembly.png",
+    "round1/diagnostic-cold-plate-connector-macro.png",
+    "../after/diagnostic-cold-plate-connector-macro.png",
+    "../before/A-cold-plate-installation.png",
+    "../after/A-cold-plate-installation.png",
+    "round1/context-open-assembly-16s.png",
+    "../after/context-open-assembly-16s.png"
+  ],
+  "comparisonLimit": "A-installation was not retained in the Round 1 archive, so its final image was compared with the original baseline, not represented as a direct Round 1 comparison. D, connector macro and the open-assembly 16-second pair are actual retained Round 1 versus Round 2 comparisons.",
+  "observations": [
+    "The cover response changes only slightly: the broad tonal gradient is marginally more directional, without introducing a noisy surface or a conspicuous painted stripe.",
+    "The macro retains metal collars, cover lips, copper stack and dark rubber separation; no new plastic hotspot, cloudy highlight or overexposed patch is apparent.",
+    "At complete-open-server scale the difference is negligible. The large cover planes still read mostly as uniform gray surfaces, and CPU/GPU finish differences remain subtle.",
+    "This is a safe restrained refinement, not a material transformation. A full extra point for Cold Plate or materials is not supported by the pictures.",
+    "The established Round 1 flow-width improvement remains the clearly visible Final RC gain. Source-normal normalization and regression success do not add artistic score."
+  ],
+  "equalWeightScoresSuggested": [
+    {"dimension": "Cold Plate realism", "score": 86},
+    {"dimension": "Manifold / Plumbing realism", "score": 88},
+    {"dimension": "Flow readability", "score": 88},
+    {"dimension": "Metal and rubber materials", "score": 87},
+    {"dimension": "Contact shadows", "score": 85},
+    {"dimension": "Camera continuity", "score": 85, "provisionalUntilCurrentMovieReview": true},
+    {"dimension": "L10 to Rack transition", "score": 86, "provisionalUntilCurrentMovieReview": true},
+    {"dimension": "Overall cinematic impression", "score": 87, "provisionalUntilCurrentMovieReview": true}
+  ],
+  "equalWeightMean": 86.5,
+  "formula": "(86 + 88 + 88 + 87 + 85 + 85 + 86 + 87) / 8",
+  "supports89": false,
+  "photographicAcceptance": false,
+  "remainingIssues": [
+    "Broad cold-plate covers remain too uniform for a photographic machining impression.",
+    "Small sealing/contact details remain subtle at the actual Dashboard scale.",
+    "Instantaneous flow direction still requires attention to the moving witness pattern; stream width alone cannot communicate temporal direction in a still."
+  ],
+  "nextAction": "Freeze visual edits after this second round. Complete current-artifact engineering checks and sampled movie review; report residual CGI/CAD character and the honest score."
+}

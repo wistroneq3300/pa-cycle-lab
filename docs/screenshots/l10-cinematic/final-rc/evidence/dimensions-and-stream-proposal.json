@@ -1,0 +1,976 @@
+{
+  "baseline": "108ffbc5b4bc4faf4eb4f1ebf785ebd3b1c89a5c",
+  "readOnly": true,
+  "glbSHA256": "5cfef980e39a446f3157e214b5e1f2c4058e6ba65b3e133557f5d5cd43d05cdc",
+  "checks": [
+    "Six actual GLB die/TIM/copper stacks, 24 frame-supported feet, exact covers and unchanged lid clearance"
+  ],
+  "units": "PA raw display units, not millimetres or an OEM hydraulic specification",
+  "displayScale": [
+    0.688,
+    1,
+    0.802
+  ],
+  "contacts": [
+    {
+      "id": "CPU-L",
+      "sourceComponent": "Board1/CPU",
+      "actualDieY": 0.005599997937679291,
+      "timBounds": {
+        "min": [
+          -1.0694999694824219,
+          0.005599997937679291,
+          -1.2454999685287476
+        ],
+        "max": [
+          -0.8604999780654907,
+          0.0063999975100159645,
+          -0.9545000791549683
+        ]
+      },
+      "feet": 4
+    },
+    {
+      "id": "GPU-L-OUTER",
+      "sourceComponent": "Board1/GPU_A",
+      "actualDieY": 0.005599997937679291,
+      "timBounds": {
+        "min": [
+          -1.5164999961853027,
+          0.005599997937679291,
+          -2.3984999656677246
+        ],
+        "max": [
+          -1.2634999752044678,
+          0.0063999975100159645,
+          -1.9615001678466797
+        ]
+      },
+      "feet": 4
+    },
+    {
+      "id": "GPU-L-INNER",
+      "sourceComponent": "Board1/GPU_B",
+      "actualDieY": 0.005599997937679291,
+      "timBounds": {
+        "min": [
+          -0.6765000224113464,
+          0.005599997937679291,
+          -2.3984999656677246
+        ],
+        "max": [
+          -0.4235000014305115,
+          0.0063999975100159645,
+          -1.9615001678466797
+        ]
+      },
+      "feet": 4
+    },
+    {
+      "id": "CPU-R",
+      "sourceComponent": "Board2/CPU",
+      "actualDieY": 0.005599997937679291,
+      "timBounds": {
+        "min": [
+          0.8604999780654907,
+          0.005599997937679291,
+          -1.2454999685287476
+        ],
+        "max": [
+          1.0694999694824219,
+          0.0063999975100159645,
+          -0.9545000791549683
+        ]
+      },
+      "feet": 4
+    },
+    {
+      "id": "GPU-R-INNER",
+      "sourceComponent": "Board2/GPU_A",
+      "actualDieY": 0.005599997937679291,
+      "timBounds": {
+        "min": [
+          0.4235000014305115,
+          0.005599997937679291,
+          -2.3984999656677246
+        ],
+        "max": [
+          0.6765000224113464,
+          0.0063999975100159645,
+          -1.9615001678466797
+        ]
+      },
+      "feet": 4
+    },
+    {
+      "id": "GPU-R-OUTER",
+      "sourceComponent": "Board2/GPU_B",
+      "actualDieY": 0.005599997937679291,
+      "timBounds": {
+        "min": [
+          1.2634999752044678,
+          0.005599997937679291,
+          -2.3984999656677246
+        ],
+        "max": [
+          1.5164999961853027,
+          0.0063999975100159645,
+          -1.9615001678466797
+        ]
+      },
+      "feet": 4
+    }
+  ],
+  "envelope": {
+    "minY": -0.005000002682209015,
+    "maxY": 0.11700001358985901,
+    "lidBottomY": 0.125,
+    "minimumVerticalLidClearance": 0.007999986410140991
+  },
+  "headerDimensions": [
+    {
+      "semantic": "supply",
+      "centerline": [
+        [
+          -1.78,
+          0.066,
+          -0.43
+        ],
+        [
+          1.78,
+          0.066,
+          -0.43
+        ]
+      ],
+      "length": 3.559999893702816,
+      "nominalOuterDiameter": 0.034,
+      "nominalInnerDiameter": 0.024,
+      "nominalWallThickness": 0.005,
+      "actualVertexRadialRange": {
+        "min": 0.01198557403867128,
+        "max": 0.017000019425589527
+      },
+      "streamRadius": 0.0105,
+      "streamRadialNominalMargin": 0.0014999999999999996,
+      "lidClearance": 0.041999999999999996,
+      "doubledOuterDiameterLidClearance": 0.024999999999999994
+    },
+    {
+      "semantic": "return",
+      "centerline": [
+        [
+          -1.78,
+          0.1,
+          -0.33
+        ],
+        [
+          1.78,
+          0.1,
+          -0.33
+        ]
+      ],
+      "length": 3.559999893702816,
+      "nominalOuterDiameter": 0.034,
+      "nominalInnerDiameter": 0.024,
+      "nominalWallThickness": 0.005,
+      "actualVertexRadialRange": {
+        "min": 0.011985561930552675,
+        "max": 0.01700002546835597
+      },
+      "streamRadius": 0.0105,
+      "streamRadialNominalMargin": 0.0014999999999999996,
+      "lidClearance": 0.007999999999999993,
+      "doubledOuterDiameterLidClearance": -0.009000000000000008
+    }
+  ],
+  "branchDimensions": [
+    {
+      "seat": "CPU-L",
+      "nominalOuterDiameter": 0.027,
+      "nominalInnerDiameter": 0.021,
+      "nominalWallThickness": 0.003,
+      "actualVertexRadialRange": {
+        "min": 0.010144996650033428,
+        "max": 0.013500010471454842
+      },
+      "streamRadius": 0.0068,
+      "streamRadialNominalMargin": 0.003700000000000001,
+      "plateWidth": 0.548,
+      "branchODtoPlateWidth": 0.049270072992700725
+    },
+    {
+      "seat": "GPU-L-OUTER",
+      "nominalOuterDiameter": 0.027,
+      "nominalInnerDiameter": 0.021,
+      "nominalWallThickness": 0.003,
+      "actualVertexRadialRange": {
+        "min": 0.01014499690184622,
+        "max": 0.013500036427994373
+      },
+      "streamRadius": 0.0068,
+      "streamRadialNominalMargin": 0.003700000000000001,
+      "plateWidth": 0.558,
+      "branchODtoPlateWidth": 0.04838709677419354
+    },
+    {
+      "seat": "GPU-L-INNER",
+      "nominalOuterDiameter": 0.027,
+      "nominalInnerDiameter": 0.021,
+      "nominalWallThickness": 0.003,
+      "actualVertexRadialRange": {
+        "min": 0.010144955747177956,
+        "max": 0.013500023889994666
+      },
+      "streamRadius": 0.0068,
+      "streamRadialNominalMargin": 0.003700000000000001,
+      "plateWidth": 0.558,
+      "branchODtoPlateWidth": 0.04838709677419354
+    },
+    {
+      "seat": "CPU-R",
+      "nominalOuterDiameter": 0.027,
+      "nominalInnerDiameter": 0.021,
+      "nominalWallThickness": 0.003,
+      "actualVertexRadialRange": {
+        "min": 0.010144955495364144,
+        "max": 0.013500014381936347
+      },
+      "streamRadius": 0.0068,
+      "streamRadialNominalMargin": 0.003700000000000001,
+      "plateWidth": 0.548,
+      "branchODtoPlateWidth": 0.049270072992700725
+    },
+    {
+      "seat": "GPU-R-INNER",
+      "nominalOuterDiameter": 0.027,
+      "nominalInnerDiameter": 0.021,
+      "nominalWallThickness": 0.003,
+      "actualVertexRadialRange": {
+        "min": 0.010144976324489182,
+        "max": 0.013500022668777659
+      },
+      "streamRadius": 0.0068,
+      "streamRadialNominalMargin": 0.003700000000000001,
+      "plateWidth": 0.558,
+      "branchODtoPlateWidth": 0.04838709677419354
+    },
+    {
+      "seat": "GPU-R-OUTER",
+      "nominalOuterDiameter": 0.027,
+      "nominalInnerDiameter": 0.021,
+      "nominalWallThickness": 0.003,
+      "actualVertexRadialRange": {
+        "min": 0.01014499690184622,
+        "max": 0.01350003021418396
+      },
+      "streamRadius": 0.0068,
+      "streamRadialNominalMargin": 0.003700000000000001,
+      "plateWidth": 0.558,
+      "branchODtoPlateWidth": 0.04838709677419354
+    }
+  ],
+  "nearestBranchPairs": [
+    {
+      "routes": [
+        "CPU-L/outlet",
+        "GPU-L-INNER/inlet"
+      ],
+      "centerlineDistance": 0.03499994551702244,
+      "nominalOuterSurfaceClearance": 0.007999945517022444,
+      "doubledOuterDiameterClearance": -0.019000054482977556
+    },
+    {
+      "routes": [
+        "CPU-R/inlet",
+        "GPU-R-INNER/outlet"
+      ],
+      "centerlineDistance": 0.034999966621398926,
+      "nominalOuterSurfaceClearance": 0.007999966621398926,
+      "doubledOuterDiameterClearance": -0.019000033378601074
+    },
+    {
+      "routes": [
+        "CPU-L/inlet",
+        "GPU-L-OUTER/outlet"
+      ],
+      "centerlineDistance": 0.04499995708465576,
+      "nominalOuterSurfaceClearance": 0.017999957084655762,
+      "doubledOuterDiameterClearance": -0.009000042915344238
+    },
+    {
+      "routes": [
+        "CPU-R/outlet",
+        "GPU-R-OUTER/inlet"
+      ],
+      "centerlineDistance": 0.04499995708465576,
+      "nominalOuterSurfaceClearance": 0.017999957084655762,
+      "doubledOuterDiameterClearance": -0.009000042915344238
+    },
+    {
+      "routes": [
+        "GPU-R-OUTER/inlet",
+        "GPU-R-OUTER/outlet"
+      ],
+      "centerlineDistance": 0.37999987602233887,
+      "nominalOuterSurfaceClearance": 0.35299987602233884,
+      "doubledOuterDiameterClearance": 0.3259998760223389
+    },
+    {
+      "routes": [
+        "GPU-L-OUTER/inlet",
+        "GPU-L-OUTER/outlet"
+      ],
+      "centerlineDistance": 0.37999987602233937,
+      "nominalOuterSurfaceClearance": 0.35299987602233934,
+      "doubledOuterDiameterClearance": 0.3259998760223394
+    },
+    {
+      "routes": [
+        "CPU-L/inlet",
+        "CPU-L/outlet"
+      ],
+      "centerlineDistance": 0.37999993562698364,
+      "nominalOuterSurfaceClearance": 0.3529999356269836,
+      "doubledOuterDiameterClearance": 0.32599993562698365
+    },
+    {
+      "routes": [
+        "CPU-R/inlet",
+        "CPU-R/outlet"
+      ],
+      "centerlineDistance": 0.3799999356269838,
+      "nominalOuterSurfaceClearance": 0.3529999356269838,
+      "doubledOuterDiameterClearance": 0.3259999356269838
+    }
+  ],
+  "connectorDimensions": [
+    {
+      "seat": "CPU-L",
+      "ports": [
+        {
+          "port": "inlet",
+          "center": [
+            -1.1549999713897705,
+            0.04500000178813934,
+            -0.7989999651908875
+          ],
+          "axialBounds": [
+            -0.8369999940395355,
+            -0.7909999651908874
+          ],
+          "length": 0.04600002884864807,
+          "actualRadialRange": {
+            "min": 0.014499964023767178,
+            "max": 0.020000037413653065
+          },
+          "outerDiameter": 0.04,
+          "boreDiameter": 0.029,
+          "maxRadialWall": 0.0055,
+          "hoseToBoreNominalRadialGap": 0.001,
+          "portAxisSeparation": 0.38,
+          "relativeOuterDiameterToPlateWidth": 0.072992700729927
+        },
+        {
+          "port": "outlet",
+          "center": [
+            -0.7749999761581421,
+            0.04500000178813934,
+            -0.7989999651908875
+          ],
+          "axialBounds": [
+            -0.8369999940395355,
+            -0.7909999651908874
+          ],
+          "length": 0.04600002884864807,
+          "actualRadialRange": {
+            "min": 0.01449997482088114,
+            "max": 0.020000025861722705
+          },
+          "outerDiameter": 0.04,
+          "boreDiameter": 0.029,
+          "maxRadialWall": 0.0055,
+          "hoseToBoreNominalRadialGap": 0.001,
+          "portAxisSeparation": 0.38,
+          "relativeOuterDiameterToPlateWidth": 0.072992700729927
+        }
+      ]
+    },
+    {
+      "seat": "GPU-L-OUTER",
+      "ports": [
+        {
+          "port": "inlet",
+          "center": [
+            -1.5800000429153442,
+            0.04500000178813934,
+            -1.8550000190734863
+          ],
+          "axialBounds": [
+            -1.8930000071525575,
+            -1.8470000190734863
+          ],
+          "length": 0.04599998807907113,
+          "actualRadialRange": {
+            "min": 0.014499964023767178,
+            "max": 0.020000037413653065
+          },
+          "outerDiameter": 0.04,
+          "boreDiameter": 0.029,
+          "maxRadialWall": 0.0055,
+          "hoseToBoreNominalRadialGap": 0.001,
+          "portAxisSeparation": 0.38,
+          "relativeOuterDiameterToPlateWidth": 0.07168458781362007
+        },
+        {
+          "port": "outlet",
+          "center": [
+            -1.1999999284744263,
+            0.04500000178813934,
+            -1.8550000190734863
+          ],
+          "axialBounds": [
+            -1.8930000071525575,
+            -1.8470000190734863
+          ],
+          "length": 0.04599998807907113,
+          "actualRadialRange": {
+            "min": 0.014499964023767178,
+            "max": 0.020000037413653065
+          },
+          "outerDiameter": 0.04,
+          "boreDiameter": 0.029,
+          "maxRadialWall": 0.0055,
+          "hoseToBoreNominalRadialGap": 0.001,
+          "portAxisSeparation": 0.38,
+          "relativeOuterDiameterToPlateWidth": 0.07168458781362007
+        }
+      ]
+    },
+    {
+      "seat": "GPU-L-INNER",
+      "ports": [
+        {
+          "port": "inlet",
+          "center": [
+            -0.7400000095367432,
+            0.04500000178813934,
+            -1.8550000190734863
+          ],
+          "axialBounds": [
+            -1.8930000071525575,
+            -1.8470000190734863
+          ],
+          "length": 0.04599998807907113,
+          "actualRadialRange": {
+            "min": 0.01449997482088114,
+            "max": 0.020000025861722705
+          },
+          "outerDiameter": 0.04,
+          "boreDiameter": 0.029,
+          "maxRadialWall": 0.0055,
+          "hoseToBoreNominalRadialGap": 0.001,
+          "portAxisSeparation": 0.38,
+          "relativeOuterDiameterToPlateWidth": 0.07168458781362007
+        },
+        {
+          "port": "outlet",
+          "center": [
+            -0.36000001430511475,
+            0.04500000178813934,
+            -1.8550000190734863
+          ],
+          "axialBounds": [
+            -1.8930000071525575,
+            -1.8470000190734863
+          ],
+          "length": 0.04599998807907113,
+          "actualRadialRange": {
+            "min": 0.014499990538109055,
+            "max": 0.02000001072883606
+          },
+          "outerDiameter": 0.04,
+          "boreDiameter": 0.029,
+          "maxRadialWall": 0.0055,
+          "hoseToBoreNominalRadialGap": 0.001,
+          "portAxisSeparation": 0.38,
+          "relativeOuterDiameterToPlateWidth": 0.07168458781362007
+        }
+      ]
+    },
+    {
+      "seat": "CPU-R",
+      "ports": [
+        {
+          "port": "inlet",
+          "center": [
+            0.7749999761581421,
+            0.04500000178813934,
+            -0.7989999651908875
+          ],
+          "axialBounds": [
+            -0.8369999940395355,
+            -0.7909999651908874
+          ],
+          "length": 0.04600002884864807,
+          "actualRadialRange": {
+            "min": 0.01449997482088114,
+            "max": 0.020000025861722705
+          },
+          "outerDiameter": 0.04,
+          "boreDiameter": 0.029,
+          "maxRadialWall": 0.0055,
+          "hoseToBoreNominalRadialGap": 0.001,
+          "portAxisSeparation": 0.38,
+          "relativeOuterDiameterToPlateWidth": 0.072992700729927
+        },
+        {
+          "port": "outlet",
+          "center": [
+            1.1549999713897705,
+            0.04500000178813934,
+            -0.7989999651908875
+          ],
+          "axialBounds": [
+            -0.8369999940395355,
+            -0.7909999651908874
+          ],
+          "length": 0.04600002884864807,
+          "actualRadialRange": {
+            "min": 0.014499964023767178,
+            "max": 0.020000037413653065
+          },
+          "outerDiameter": 0.04,
+          "boreDiameter": 0.029,
+          "maxRadialWall": 0.0055,
+          "hoseToBoreNominalRadialGap": 0.001,
+          "portAxisSeparation": 0.38,
+          "relativeOuterDiameterToPlateWidth": 0.072992700729927
+        }
+      ]
+    },
+    {
+      "seat": "GPU-R-INNER",
+      "ports": [
+        {
+          "port": "inlet",
+          "center": [
+            0.36000001430511475,
+            0.04500000178813934,
+            -1.8550000190734863
+          ],
+          "axialBounds": [
+            -1.8930000071525575,
+            -1.8470000190734863
+          ],
+          "length": 0.04599998807907113,
+          "actualRadialRange": {
+            "min": 0.014499990538109055,
+            "max": 0.02000001072883606
+          },
+          "outerDiameter": 0.04,
+          "boreDiameter": 0.029,
+          "maxRadialWall": 0.0055,
+          "hoseToBoreNominalRadialGap": 0.001,
+          "portAxisSeparation": 0.38,
+          "relativeOuterDiameterToPlateWidth": 0.07168458781362007
+        },
+        {
+          "port": "outlet",
+          "center": [
+            0.7400000095367432,
+            0.04500000178813934,
+            -1.8550000190734863
+          ],
+          "axialBounds": [
+            -1.8930000071525575,
+            -1.8470000190734863
+          ],
+          "length": 0.04599998807907113,
+          "actualRadialRange": {
+            "min": 0.01449997482088114,
+            "max": 0.020000025861722705
+          },
+          "outerDiameter": 0.04,
+          "boreDiameter": 0.029,
+          "maxRadialWall": 0.0055,
+          "hoseToBoreNominalRadialGap": 0.001,
+          "portAxisSeparation": 0.38,
+          "relativeOuterDiameterToPlateWidth": 0.07168458781362007
+        }
+      ]
+    },
+    {
+      "seat": "GPU-R-OUTER",
+      "ports": [
+        {
+          "port": "inlet",
+          "center": [
+            1.1999999284744263,
+            0.04500000178813934,
+            -1.8550000190734863
+          ],
+          "axialBounds": [
+            -1.8930000071525575,
+            -1.8470000190734863
+          ],
+          "length": 0.04599998807907113,
+          "actualRadialRange": {
+            "min": 0.014499964023767178,
+            "max": 0.020000037413653065
+          },
+          "outerDiameter": 0.04,
+          "boreDiameter": 0.029,
+          "maxRadialWall": 0.0055,
+          "hoseToBoreNominalRadialGap": 0.001,
+          "portAxisSeparation": 0.38,
+          "relativeOuterDiameterToPlateWidth": 0.07168458781362007
+        },
+        {
+          "port": "outlet",
+          "center": [
+            1.5800000429153442,
+            0.04500000178813934,
+            -1.8550000190734863
+          ],
+          "axialBounds": [
+            -1.8930000071525575,
+            -1.8470000190734863
+          ],
+          "length": 0.04599998807907113,
+          "actualRadialRange": {
+            "min": 0.014499964023767178,
+            "max": 0.020000037413653065
+          },
+          "outerDiameter": 0.04,
+          "boreDiameter": 0.029,
+          "maxRadialWall": 0.0055,
+          "hoseToBoreNominalRadialGap": 0.001,
+          "portAxisSeparation": 0.38,
+          "relativeOuterDiameterToPlateWidth": 0.07168458781362007
+        }
+      ]
+    }
+  ],
+  "proposedStream": {
+    "checks": [
+      "22 actual fluid meshes follow directed arc-length UVs; six parallel circuits join supply/header/plate/return without gaps",
+      "Actual triangle SAT detects no unapproved bareboard intersections or fluid-wall crossings; named TIM/frame contacts only and divider-containment checks"
+    ],
+    "status": "PASS",
+    "changedRouteIds": [
+      "CPU-L/inlet",
+      "CPU-L/outlet",
+      "GPU-L-OUTER/inlet",
+      "GPU-L-OUTER/outlet",
+      "GPU-L-INNER/inlet",
+      "GPU-L-INNER/outlet",
+      "CPU-R/inlet",
+      "CPU-R/outlet",
+      "GPU-R-INNER/inlet",
+      "GPU-R-INNER/outlet",
+      "GPU-R-OUTER/inlet",
+      "GPU-R-OUTER/outlet"
+    ],
+    "branchStreamRadius": 0.009,
+    "widthGainPercent": 32.35294117647059,
+    "nominalBoreMargin": 0.0015000000000000013,
+    "conservativeStraight12SideBoreMargin": 0.0011422211760352182,
+    "plateChannelRadius": 0.009,
+    "headerStreamRadius": 0.0105,
+    "physicalSolidMeshesUnchanged": true,
+    "flowRoutes": [
+      {
+        "id": "supply-trunk",
+        "length": 2.705696584668591,
+        "vertices": 1860,
+        "minU": 0,
+        "maxU": 2.7056965827941895
+      },
+      {
+        "id": "supply-header",
+        "length": 3.559999893702816,
+        "vertices": 132,
+        "minU": 2.7056965827941895,
+        "maxU": 6.2656965255737305
+      },
+      {
+        "id": "return-header",
+        "length": 3.559999893702816,
+        "vertices": 132,
+        "minU": 0,
+        "maxU": 3.559999942779541
+      },
+      {
+        "id": "return-trunk",
+        "length": 2.8143804870380746,
+        "vertices": 1860,
+        "minU": 3.559999942779541,
+        "maxU": 6.374380588531494
+      },
+      {
+        "id": "CPU-L/inlet",
+        "length": 0.38404485438778113,
+        "vertices": 1860,
+        "minU": 3.3306965827941895,
+        "maxU": 3.7147414684295654
+      },
+      {
+        "id": "CPU-L/channels",
+        "length": 3.086955009378257,
+        "vertices": 7044,
+        "minU": 3.7147414684295654,
+        "maxU": 6.801696300506592
+      },
+      {
+        "id": "CPU-L/outlet",
+        "length": 0.4795044957797431,
+        "vertices": 1284,
+        "minU": 6.801696300506592,
+        "maxU": 7.281200885772705
+      },
+      {
+        "id": "GPU-L-OUTER/inlet",
+        "length": 1.4393494427440745,
+        "vertices": 1860,
+        "minU": 2.9056966304779053,
+        "maxU": 4.345046043395996
+      },
+      {
+        "id": "GPU-L-OUTER/channels",
+        "length": 3.3749549773575596,
+        "vertices": 7044,
+        "minU": 4.345046043395996,
+        "maxU": 7.720000743865967
+      },
+      {
+        "id": "GPU-L-OUTER/outlet",
+        "length": 1.5355045196699646,
+        "vertices": 1284,
+        "minU": 7.720000743865967,
+        "maxU": 9.255505561828613
+      },
+      {
+        "id": "GPU-L-INNER/inlet",
+        "length": 1.4393494427237226,
+        "vertices": 1860,
+        "minU": 3.745696544647217,
+        "maxU": 5.185046195983887
+      },
+      {
+        "id": "GPU-L-INNER/channels",
+        "length": 3.3749549201052917,
+        "vertices": 7044,
+        "minU": 5.185046195983887,
+        "maxU": 8.560001373291016
+      },
+      {
+        "id": "GPU-L-INNER/outlet",
+        "length": 1.5355045196666974,
+        "vertices": 1284,
+        "minU": 8.560001373291016,
+        "maxU": 10.095505714416504
+      },
+      {
+        "id": "CPU-R/inlet",
+        "length": 0.38404485438365626,
+        "vertices": 1860,
+        "minU": 5.2606964111328125,
+        "maxU": 5.644741535186768
+      },
+      {
+        "id": "CPU-R/channels",
+        "length": 3.086954975365949,
+        "vertices": 7044,
+        "minU": 5.644741535186768,
+        "maxU": 8.731696128845215
+      },
+      {
+        "id": "CPU-R/outlet",
+        "length": 0.4795044957823754,
+        "vertices": 1284,
+        "minU": 8.731696128845215,
+        "maxU": 9.211200714111328
+      },
+      {
+        "id": "GPU-R-INNER/inlet",
+        "length": 1.4393494427217508,
+        "vertices": 1860,
+        "minU": 4.845696449279785,
+        "maxU": 6.285046100616455
+      },
+      {
+        "id": "GPU-R-INNER/channels",
+        "length": 3.3749549606709883,
+        "vertices": 7044,
+        "minU": 6.285046100616455,
+        "maxU": 9.660000801086426
+      },
+      {
+        "id": "GPU-R-INNER/outlet",
+        "length": 1.5355045196682136,
+        "vertices": 1284,
+        "minU": 9.660000801086426,
+        "maxU": 11.195505142211914
+      },
+      {
+        "id": "GPU-R-OUTER/inlet",
+        "length": 1.439349442725996,
+        "vertices": 1860,
+        "minU": 5.685696601867676,
+        "maxU": 7.1250457763671875
+      },
+      {
+        "id": "GPU-R-OUTER/channels",
+        "length": 3.3749551321925355,
+        "vertices": 7044,
+        "minU": 7.1250457763671875,
+        "maxU": 10.500000953674316
+      },
+      {
+        "id": "GPU-R-OUTER/outlet",
+        "length": 1.5355045196838717,
+        "vertices": 1284,
+        "minU": 10.500000953674316,
+        "maxU": 12.035505294799805
+      }
+    ],
+    "bareCollisionAudit": {
+      "testedPairs": 600,
+      "collisionPairs": 0,
+      "groups": [],
+      "samples": [],
+      "approvedContactSamples": [
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        },
+        {
+          "cooling": "Cooling V1 / cooling-mounts / CPU-L#0",
+          "bare": "Bare Board 1 / packages / Board1/CPU#3",
+          "plane": 0.0040000006556510925
+        }
+      ],
+      "contactTolerance": 0.000001
+    },
+    "fluidWallAudit": {
+      "collisionPairs": 0,
+      "groups": [],
+      "samples": [],
+      "scope": "Actual fluid stream surfaces vs every companion solid surface, including annular hose/port bores, headers, copper floors/walls/dividers and nickel covers."
+    },
+    "method": "In-memory radial expansion of the actual delivered branch stream triangles; unchanged V3 path, SAT, contact and containment assertions, including every bend/port/header junction against all companion solids and frozen bare hardware."
+  },
+  "physicalSizingConclusion": "Retain all physical OD/ID and centerlines. Doubling causes negative lid, branch-spacing and socket margins. A larger explanatory stream core is a separate bounded visualization change.",
+  "passed": true
+}

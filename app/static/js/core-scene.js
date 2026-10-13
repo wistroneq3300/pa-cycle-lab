@@ -255,10 +255,13 @@
         float warp=branchT*branchT*branchT*(branchT*(branchT*6.0-15.0)+10.0);
         float travel=vUV.x+uCoolingPhase.y*warp-uCoolingTravel;
         float packet=fract(travel/.38);
-        // A long trailing wake and short leading edge make direction legible.
-        float witness=smoothstep(.18,.69,packet)*(1.0-smoothstep(.78,.96,packet));
-        float fine=sin(travel*83.0+vUV.y*6.283185)*.003;
-        N=normalize(N+vec3(fine,0.0,-fine));R=reflect(-V,N);
+        // A resolved density front with a long coloured wake. Widen its
+        // plateau, not its wavelength or transport speed: the leading edge
+        // still travels on the same physical UV-distance clock at every join.
+        float witness=smoothstep(.12,.52,packet)*(1.0-smoothstep(.84,.98,packet));
+        // The smooth cylindrical volume supplies the surface reflection.
+        // No high-frequency travelling normal ripple: it fragmented the
+        // narrow dashboard silhouette into specular flecks.
         float nv=max(dot(N,V),0.0),f=.0204+.9796*pow(1.0-nv,5.0);
         float heat=uCoolingRoute.x<-.5?0.0:uCoolingRoute.x>.5?1.0:smoothstep(.08,.92,(vUV.x-uCoolingRoute.y)/uCoolingRoute.z);
         vec3 body=srgbLinear(mix(vec3(.045,.40,.78),vec3(.79,.105,.055),heat));
@@ -272,7 +275,7 @@
         // reduced the apparent diameter to a subpixel core on the dashboard.
         // Optical tint still deepens at the centre; no radii/speed are changed.
         float column=.62+.38*sqrt(nv);
-        vec3 scatter=mix(body,vec3(.70),witness*.24)*irradiance*(.64+witness*1.45)*column;
+        vec3 scatter=mix(body,vec3(.70),witness*.32)*irradiance*(.72+witness*1.10)*column;
         vec3 water=scatter+reflected*(f*.32+.012);
         gl_FragColor=vec4(displayTransform(water),vColor.a*(.94+.06*witness));return;
       }
@@ -309,7 +312,7 @@
           if(uCoolingFinish>.5&&abs(N.y)>.85){
             float machining=finishNoise(vLocal.xz*vec2(90.0,5.0));
             N=normalize(N+vec3((machining-.5)*.0012,0.0,0.0));
-            sheetAnisotropy=mix(.07,.16,step(1.5,uCoolingFinish));
+            sheetAnisotropy=mix(.14,.28,step(1.5,uCoolingFinish));
           }
         }else{
         float luminance=dot(vColor.rgb,vec3(.2126,.7152,.0722));
@@ -627,7 +630,7 @@
     }
     function loadCoolingCompanion(generation){
       coolingLoading=true;coolingFailed=false;coolingError='';canvas.dataset.coreCooling='loading';
-      window.PAL10GLTF.load('/static/models/l10-cooling-v1/cooling-assembly.glb?v=20261014-v3').then(asset=>{
+      window.PAL10GLTF.load('/static/models/l10-cooling-v1/cooling-assembly.glb?v=20261014-final-rc').then(asset=>{
         if(disposed||contextLost||generation!==assetGeneration){asset.disposeImages();return;}
         try{
           const meta=asset.metadata.extras;

@@ -7,6 +7,7 @@ Coordinates are PA raw display units, not CAD dimensions or SI metres.
 import bpy, bmesh, ast, json, math, struct, hashlib, tempfile, os
 from pathlib import Path
 from mathutils import Vector
+from mathutils.bvhtree import BVHTree
 import numpy as np
 
 HERE=Path(__file__).resolve().parent; ROOT=HERE.parents[1]
@@ -192,9 +193,16 @@ def port_ferrule(name,component,x,y,start,end):
              (start+.0102,.0186),(end-.010,.0186),(end-.0088,.020),
              (end-.0012,.020),(end,.0188)]
     sides=48;inner=.0145;verts=[];faces=[]
-    for z,r in profile:
+    for ring_index,(z,r) in enumerate(profile):
         for radius in (r,inner):
-            verts.extend(coord(x+radius*math.cos(j*math.tau/sides),y+radius*math.sin(j*math.tau/sides),z) for j in range(sides))
+            for j in range(sides):
+                angle=j*math.tau/sides;actual=radius
+                # Six shallow service-tool flats on the existing distal nut.
+                # The original .020 outer envelope and .0145 open bore remain.
+                if radius==r and ring_index in (5,6):
+                    delta=(angle+math.pi/6)%(math.pi/3)-math.pi/6
+                    actual=min(radius,.0192/math.cos(delta))
+                verts.append(coord(x+actual*math.cos(angle),y+actual*math.sin(angle),z))
     for i in range(len(profile)-1):
         for ring in (0,1):
             for j in range(sides):
@@ -211,18 +219,79 @@ def port_ferrule(name,component,x,y,start,end):
     for f in me.polygons:
         longitudinal=f.index<(len(profile)-1)*2*sides
         segment=f.index//(2*sides);ring=(f.index//sides)%2
-        cylindrical=longitudinal and (ring==1 or abs(profile[segment][1]-profile[segment+1][1])<1e-8)
+        cylindrical=longitudinal and (ring==1 or abs(profile[segment][1]-profile[segment+1][1])<1e-8 and segment!=5)
         f.use_smooth=cylindrical
         for li in f.loop_indices:
             p=me.vertices[me.loops[li].vertex_index].co;n=Vector((p.x-x,0,p.z-y)).normalized()
             normals[li]=(-n if ring==1 else n) if cylindrical else f.normal.copy()
             vi=me.loops[li].vertex_index;j=vi%sides
-            uv.data[li].uv=((-p.y-start)/(end-start),1 if longitudinal and f.index%sides==sides-1 and j==0 else j/sides)
+            angle_v=1 if longitudinal and f.index%sides==sides-1 and j==0 else j/sides
+            if longitudinal:
+                uv.data[li].uv=(.05+.90*(-p.y-start)/(end-start),(.55 if ring==1 else .02)+.38*angle_v)
+            else:
+                end_cap=f.index-(len(profile)-1)*2*sides>=sides
+                uv.data[li].uv=((.75 if end_cap else .25)+(p.x-x)/.020*.17,.475+(p.z-y)/.020*.04)
     me.normals_split_custom_set(normals)
-    obj['functionalDetail']='Compression ferrule shoulders, chamfered lips, retained open bore and original collar envelope'
+    obj['functionalDetail']='Compression ferrule with six bounded wrench flats, chamfered socket mouth, retained .0145 bore and original .020 collar envelope'
     # Visible elastomer sealing band occupies the machined sleeve groove.
     pipe(name+' captured seal','cooling-frame',component,[[x,y,start+.011],[x,y,start+.014]],.0192,'Gasket',sides=48,inner=.0186)
     return obj
+
+def bake_socket_contact_ao():
+    """CPU ray-traced local occlusion of the standardized socket/plate/hose joint.
+
+    All twelve joints have the same local port opening, ferrule, sealing band
+    and hose approach. A short .022 reach excludes distant layout differences.
+    This mask changes occlusion only, never the approved PBR scalar factors.
+    """
+    vertices=[];faces=[];deps=bpy.context.evaluated_depsgraph_get()
+    for layer,col in COL.items():
+        if layer=='cooling-fluid':continue
+        for obj in col.objects:
+            evaluated=obj.evaluated_get(deps);mesh=evaluated.to_mesh();mesh.calc_loop_triangles();offset=len(vertices)
+            vertices.extend(obj.matrix_world@v.co for v in mesh.vertices)
+            faces.extend(tuple(offset+i for i in t.vertices) for t in mesh.loop_triangles)
+            evaluated.to_mesh_clear()
+    bvh=BVHTree.FromPolygons(vertices,faces,all_triangles=True)
+    obj=bpy.data.objects['CPU-L inlet port collar'];me=obj.data;me.calc_loop_triangles();me.update()
+    size=256;samples=48;reach=.022;pixels=np.ones((size,size,4),dtype=np.float32);filled=np.zeros((size,size),dtype=bool)
+    # Cosine-weighted Hammersley rays; deterministic, no decorative noise.
+    directions=[]
+    for i in range(samples):
+        a=(i+.5)/samples;b=int(f'{i:032b}'[::-1],2)/2**32
+        directions.append((math.sqrt(a)*math.cos(math.tau*b),math.sqrt(a)*math.sin(math.tau*b),math.sqrt(1-a)))
+    tests=hits=0
+    for tri in me.loop_triangles:
+        uv=np.array([me.uv_layers.active.data[li].uv[:] for li in tri.loops],dtype=float)
+        positions=[obj.matrix_world@me.vertices[i].co for i in tri.vertices]
+        normals=[me.corner_normals[li].vector.copy() for li in tri.loops]
+        lo=np.maximum(0,np.floor(uv.min(axis=0)*size-.5).astype(int));hi=np.minimum(size-1,np.ceil(uv.max(axis=0)*size-.5).astype(int))
+        a,b,c=uv;den=(b[1]-c[1])*(a[0]-c[0])+(c[0]-b[0])*(a[1]-c[1])
+        if abs(den)<1e-14:continue
+        for py in range(lo[1],hi[1]+1):
+            for px in range(lo[0],hi[0]+1):
+                if filled[py,px]:continue
+                q=np.array([(px+.5)/size,(py+.5)/size]);u=((b[1]-c[1])*(q[0]-c[0])+(c[0]-b[0])*(q[1]-c[1]))/den;v=((c[1]-a[1])*(q[0]-c[0])+(a[0]-c[0])*(q[1]-c[1]))/den;weights=[u,v,1-u-v]
+                if min(weights)<-1e-8:continue
+                point=sum((positions[i]*weights[i] for i in range(3)),Vector());normal=sum((normals[i]*weights[i] for i in range(3)),Vector()).normalized()
+                guide=Vector((0,0,1)) if abs(normal.z)<.95 else Vector((0,1,0));tangent=normal.cross(guide).normalized();bitangent=normal.cross(tangent).normalized();blocked=0.
+                for dx,dy,dz in directions:
+                    _,_,_,distance=bvh.ray_cast(point+normal*.000015,tangent*dx+bitangent*dy+normal*dz,reach);tests+=1
+                    if distance is not None:blocked+=1-distance/reach;hits+=1
+                value=1-blocked/samples;pixels[py,px,:3]=value;filled[py,px]=True
+    # Four-texel island padding prevents white seams under MR/AO mip filtering.
+    original_mask=filled.copy()
+    for _ in range(4):
+        count=np.zeros((size,size));total=np.zeros((size,size));
+        for axis in (0,1):
+            for shift in (-1,1):
+                mask=np.roll(filled,shift,axis);count+=mask;total+=np.roll(pixels[:,:,0],shift,axis)*mask
+        grow=~filled&(count>0);pixels[grow,:3]=(total[grow]/count[grow])[:,None];filled|=grow
+    name='cooling-socket-contact-ao';img=bpy.data.images.new(name,width=size,height=size,alpha=True);img.colorspace_settings.name='Non-Color';img.pixels.foreach_set(pixels.ravel());img.filepath_raw=str(TEX/(name+'.png'));img.file_format='PNG';img.save();img.pack()
+    mat=M['Machined nickel fittings'];node=mat.node_tree.nodes.new('ShaderNodeTexImage');node.image=img;node.label='Local ray-traced socket contact occlusion'
+    group=bpy.data.node_groups.new('glTF Material Output','ShaderNodeTree');group.interface.new_socket(name='Occlusion',in_out='INPUT',socket_type='NodeSocketFloat');out=mat.node_tree.nodes.new('ShaderNodeGroup');out.node_tree=group;mat.node_tree.links.new(node.outputs['Color'],out.inputs['Occlusion'])
+    mat['contactAO']='Deterministic cosine-hemisphere ray tracing of standardized socket/plate/hose joint; .022 local reach; 48 samples; no albedo darkening'
+    return {'image':name+'.png','size':[size,size],'samplesPerTexel':samples,'distance':reach,'rayTests':tests,'rayHits':hits,'bakedTexels':int(original_mask.sum()),'minimum':float(pixels[original_mask,0].min()),'mean':float(pixels[original_mask,0].mean()),'geometrySource':'CPU-L inlet standardized socket/plate/hose joint; all actual companion solids excluding fluid','reuse':'Shared by twelve equivalent local joints; distant layout intentionally excluded','scope':'Machined nickel fittings occlusion only; same baseColor/metallic/roughness scalars'}
 
 def bore_junction(header,point,direction,radius):
     """Open a real branch passage through an annular manifold wall."""
@@ -339,16 +408,18 @@ for seat in seats:
     trim_branch_sleeve(inlet_hose,header_s)
     trim_branch_sleeve(outlet_hose,header_r)
     offset=rs['length']+(inlet[0]+1.78)
-    rin=route(sid+'/inlet','supply',inlet_pts,.0068,offset,'supply-header',sid+'/channels')
+    rin=route(sid+'/inlet','supply',inlet_pts,.009,offset,'supply-header',sid+'/channels')
     rchannel=route(sid+'/channels','plate-channel',channel,.009,offset+rin['length'],sid+'/inlet',sid+'/outlet')
-    rout=route(sid+'/outlet','return',outlet_pts,.0068,offset+rin['length']+rchannel['length'],sid+'/channels','return-header')
+    rout=route(sid+'/outlet','return',outlet_pts,.009,offset+rin['length']+rchannel['length'],sid+'/channels','return-header')
     seat.update({'plateWidth':w,'plateDepth':d,'timBottom':die_y,'timTop':tim_top,'copperContactBottom':tim_top,'copperContactTop':.022,'bodyBottom':.022,'coverBottom':.064,'coverTop':.073,'mountFootY':.004,'inlet':inlet,'outlet':outlet,'routeIds':[rin['id'],rchannel['id'],rout['id']]})
 
 manufactured_header_normals(manifold_s,SUPPLY_Y,SUPPLY_Z)
 manufactured_header_normals(manifold_r,RETURN_Y,RETURN_Z)
+contact_ao=bake_socket_contact_ao()
 metadata={'id':'l10-cooling-assembly-v1','revision':1,'sourceBareGLBSHA256':baseline_hash,'seats':seats,'mounts':mounts,'flowRoutes':routes,'layers':LAYERS,'coordinateUnits':'PA raw normalized tray coordinates; apply shared [.688,1,.802] once','approximation':scene['approximation'],'flowInterpretation':'Original six parallel serpentine circuits. Fluid meshes visualize stream cores within sealed passages; no CFD, pressure, thermal or real coolant claim. Shared return header is a mixing volume with local arc phase; branch transport distances remain physical.','envelope':{'lidUndersideY':.125,'maxExpectedY':.117,'frontLimitZ':-.313},'builderHelperSource':'assets/l10-prototype/build.py: pure helper definitions only'}
-metadata['finishRevision']=3
-metadata['finishChanges']=['Post-boolean analytic cylindrical manifold normals, flat port/end faces and explicit UV seam; 64-side headers within original radius','Five-segment 0.0022 cover edge breaks inside existing cover envelope','Twelve stepped compression ferrules with chamfered lips and captured elastomer seals inside original 0.020 collar radius','All existing CPU/GPU MR finishes, manifold roughness, bare assets, contact seats, TIM, mounts, stream meshes and route contracts retained']
+metadata['finishRevision']=4
+metadata['finishChanges']=['V3 manifold normals/UV/radii, covers, MR maps and all PBR scalar factors retained','Twelve branch stream cores .0068 to .009 inside unchanged .0105-radius bores; directed centerlines/arc UVs/speed unchanged; channel/header stream radii retained','Twelve original ferrules gain shallow bounded service-tool flats and ray-traced local socket contact occlusion; original .020 outer envelope/.0145 open bore retained','All bare assets, contact seats, TIM, mounts, physical tubing, protected inventory and 1U envelope retained']
+metadata['socketContactAO']=contact_ao
 metadata['fastenerRecesses']=fastener_recesses
 scene['assemblyContract']=json.dumps(metadata,separators=(',',':'))
 # Editable source is saved before export batching; every component remains named.

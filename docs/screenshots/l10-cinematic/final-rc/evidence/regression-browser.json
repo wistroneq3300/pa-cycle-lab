@@ -1,0 +1,39 @@
+{
+  "mode": "browser",
+  "started": "2026-10-13T17:35:23.136Z",
+  "assertions": "Original assertions unchanged; only report destinations relocated",
+  "results": [
+    {
+      "name": "runtime",
+      "exit": 0,
+      "pass": true,
+      "elapsedMs": 33123
+    },
+    {
+      "name": "bareboard",
+      "exit": 0,
+      "pass": true,
+      "elapsedMs": 165929
+    },
+    {
+      "name": "cinematic",
+      "exit": 0,
+      "pass": true,
+      "elapsedMs": 68360
+    },
+    {
+      "name": "environment",
+      "exit": 0,
+      "pass": true,
+      "elapsedMs": 11037
+    },
+    {
+      "name": "rack",
+      "exit": 0,
+      "pass": true,
+      "elapsedMs": 8329
+    }
+  ],
+  "baseline": null,
+  "historicalReadRoutingOnly": false
+}

@@ -1,0 +1,323 @@
+{
+  "passed": true,
+  "source": "film.webm",
+  "sourceSHA256": "aa453960a2e819545c7f2fd5f2821af64501be645020f65ec98378a1cb0e2bda",
+  "fps": 25,
+  "method": "FFmpeg PNG decode of exact zero-based encoded frame indices. Native3440×1440 pixels; no resize, grading, renderer reconstruction, interpolation or timewarp.",
+  "limits": [
+    "Container timestamps are not authored timeline timestamps. The uncut video includes setup before Replay; no guessed subtraction is applied.",
+    "Decoded stills complement the complete movie; they do not alone establish motion smoothness."
+  ],
+  "frames": [
+    {
+      "frameIndex": 0,
+      "nominalContainerTimeSeconds": 0,
+      "file": "evidence/film-frames/encoded-00000.png",
+      "sha256": "240c1b64c6a677c91d09e0e9b33fe428f373e4f743e3efa9f4f4fffc2fe00e79",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 50,
+      "nominalContainerTimeSeconds": 2,
+      "file": "evidence/film-frames/encoded-00050.png",
+      "sha256": "cd2f781b9e67181a2b06f95f48334ae697d45b0abf26c616eadf18d084324d99",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 100,
+      "nominalContainerTimeSeconds": 4,
+      "file": "evidence/film-frames/encoded-00100.png",
+      "sha256": "8eadd60c850b7174509a07a2fbcf1d890f36e720283c63b59912cf4595731104",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 150,
+      "nominalContainerTimeSeconds": 6,
+      "file": "evidence/film-frames/encoded-00150.png",
+      "sha256": "0a12b45c9fc133b6aacb294e68828cb33e302a3e87932a3678c026b4e4624314",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 200,
+      "nominalContainerTimeSeconds": 8,
+      "file": "evidence/film-frames/encoded-00200.png",
+      "sha256": "953b1ccf0abc7d2a431fe6301a751530560d7044a9ffd14719ae6c5d465dd6ce",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 250,
+      "nominalContainerTimeSeconds": 10,
+      "file": "evidence/film-frames/encoded-00250.png",
+      "sha256": "8cfebcfd35b3bbac7191b143043e27f10af1661ab4dfcf02d7968efb2a4d0abf",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 300,
+      "nominalContainerTimeSeconds": 12,
+      "file": "evidence/film-frames/encoded-00300.png",
+      "sha256": "8c8313028d2e0f260e22de78886a86a491d7e4b4990a4dd584f5dc80c9a4db8f",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 350,
+      "nominalContainerTimeSeconds": 14,
+      "file": "evidence/film-frames/encoded-00350.png",
+      "sha256": "dce4f1999820c7706e638cdb3eecff689276ac0e06bf10429a0b7e9bb0196316",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 400,
+      "nominalContainerTimeSeconds": 16,
+      "file": "evidence/film-frames/encoded-00400.png",
+      "sha256": "732ef337e4055e01c17e42e0fab2449f3e3f6f7ebe59a1f9973d83f85a8ad74e",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 450,
+      "nominalContainerTimeSeconds": 18,
+      "file": "evidence/film-frames/encoded-00450.png",
+      "sha256": "aff2fdd70fe597678ad3ce8b2a08b15913deef2e589ce165dc24b3ce2664cc18",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 459,
+      "nominalContainerTimeSeconds": 18.36,
+      "file": "evidence/film-frames/encoded-00459.png",
+      "sha256": "7ce6b2c6ac09ea200add265209932c5d9b8e5a679bf849073ade3d0257f49100",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 480,
+      "nominalContainerTimeSeconds": 19.2,
+      "file": "evidence/film-frames/encoded-00480.png",
+      "sha256": "a15aeda19a29897af8974bd1bdf8d582e6eb68333d4a5f336e4173142d54cf06",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 500,
+      "nominalContainerTimeSeconds": 20,
+      "file": "evidence/film-frames/encoded-00500.png",
+      "sha256": "1a2a8b85a68dfc319f2052066b9581e9e722b7febe94c84e468db21888a180ee",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 509,
+      "nominalContainerTimeSeconds": 20.36,
+      "file": "evidence/film-frames/encoded-00509.png",
+      "sha256": "c3646072b00f39b8afee8d3f83210f0766d237eeeec8b625be8efcdc264db95f",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 520,
+      "nominalContainerTimeSeconds": 20.8,
+      "file": "evidence/film-frames/encoded-00520.png",
+      "sha256": "c792aa9708c13e92b06bec5e5e646955c8e47123abcb34b33633cb0fc330a85a",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 530,
+      "nominalContainerTimeSeconds": 21.2,
+      "file": "evidence/film-frames/encoded-00530.png",
+      "sha256": "49ce3fbb583cafc2cc5a4f103ab863ce4536684a91ce2af0f3904a5075bf12c6",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 540,
+      "nominalContainerTimeSeconds": 21.6,
+      "file": "evidence/film-frames/encoded-00540.png",
+      "sha256": "db83e1d105ef9e5be5ac42824d43e6a00cc8e8bb4eb3129253d464f139edb8ba",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 550,
+      "nominalContainerTimeSeconds": 22,
+      "file": "evidence/film-frames/encoded-00550.png",
+      "sha256": "0c31570d00152d0ca5bf476d0cb5802181d79ac81a6c2eea04cc14088ff8dab3",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 560,
+      "nominalContainerTimeSeconds": 22.4,
+      "file": "evidence/film-frames/encoded-00560.png",
+      "sha256": "fa28f6e3d31bbc033af31d138f0c4a072149321c676d8dc1e5d4e596198a94d1",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 580,
+      "nominalContainerTimeSeconds": 23.2,
+      "file": "evidence/film-frames/encoded-00580.png",
+      "sha256": "596788fb6ad8370aeff58685927b205410eb98a49ce6d956ade4bf938f341ff2",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 600,
+      "nominalContainerTimeSeconds": 24,
+      "file": "evidence/film-frames/encoded-00600.png",
+      "sha256": "d9967b55093ac1cf5f6fd24bc02041b479b87bb830c907dad41fb81e05682cc2",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 650,
+      "nominalContainerTimeSeconds": 26,
+      "file": "evidence/film-frames/encoded-00650.png",
+      "sha256": "e188b139dbd032aca3e02415f61f5f963926201285fd228646e4abb51d8116bb",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 700,
+      "nominalContainerTimeSeconds": 28,
+      "file": "evidence/film-frames/encoded-00700.png",
+      "sha256": "47c5f5d5fa3cff1a40c694bea39807daee832e0113bae546d11cb84c4505cb49",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 750,
+      "nominalContainerTimeSeconds": 30,
+      "file": "evidence/film-frames/encoded-00750.png",
+      "sha256": "a470d9ab0d3557195f32efa108bbf7f2045b7beb6c05987df2354621f128094d",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 800,
+      "nominalContainerTimeSeconds": 32,
+      "file": "evidence/film-frames/encoded-00800.png",
+      "sha256": "adff77b1c15370e0bb1811299f1b6b4e7b9d18f4c05bf35f0200a5fb6a289d92",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 850,
+      "nominalContainerTimeSeconds": 34,
+      "file": "evidence/film-frames/encoded-00850.png",
+      "sha256": "22813c1739e2971fee9cdf5292573439acb23078b1b376f678566637c9891b70",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 900,
+      "nominalContainerTimeSeconds": 36,
+      "file": "evidence/film-frames/encoded-00900.png",
+      "sha256": "916ca36609cfaded8c3cc239bb76d01694bbb2c89c4ef46f1ab09b2a04076729",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 950,
+      "nominalContainerTimeSeconds": 38,
+      "file": "evidence/film-frames/encoded-00950.png",
+      "sha256": "c4f4730328b8e4989d9e600a4f2a0a70424554bd85d62accd7c190d449b6301b",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 1000,
+      "nominalContainerTimeSeconds": 40,
+      "file": "evidence/film-frames/encoded-01000.png",
+      "sha256": "e1fbbd2e8d564c70fa3405edc5e6be6cb288431f2146c668c07a233a8d9d7974",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 1050,
+      "nominalContainerTimeSeconds": 42,
+      "file": "evidence/film-frames/encoded-01050.png",
+      "sha256": "8e770b6e2e8c6b1235a49f14fd5017906af1127b7671ad5150e03c19f4b13d45",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    },
+    {
+      "frameIndex": 1120,
+      "nominalContainerTimeSeconds": 44.8,
+      "file": "evidence/film-frames/encoded-01120.png",
+      "sha256": "a82a2a16ddcc7620c12e94cec0698e8c5c41fa7b4c73db6ec063cce943f9d4df",
+      "dimensions": [
+        3440,
+        1440
+      ]
+    }
+  ]
+}

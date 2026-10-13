@@ -864,8 +864,8 @@
           const mid=(a+b)/2,dy=Math.sign(mid-cut.y)*Math.max(0,Math.abs(mid-cut.y)-straight),nx=-side*span(mid)/radius,ny=-dy/radius;
           quad([pa,a,front],[pa,a,back],[pb,b,back],[pb,b,front],[nx,ny,0],C.darkGold,.76);
           // Rolled punch rim is a narrow band on the sheet, not a floating wire.
-          const e=.0011;
-          quad([pa,a,front+.00015],[pa+side*e,a,front],[pb+side*e,b,front],[pb,b,front+.00015],[nx*.24,ny*.24,.97],C.goldEdge,.84);
+          const e=.0011,rim=[nx*.24,ny*.24,.97],rimLength=Math.hypot(...rim);
+          quad([pa,a,front+.00015],[pa+side*e,a,front],[pb+side*e,b,front],[pb,b,front+.00015],rim.map(v=>v/rimLength),C.goldEdge,.84);
         }
       }
       bottom=high;

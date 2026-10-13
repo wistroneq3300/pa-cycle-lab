@@ -1,0 +1,15 @@
+PASS Bareboard query with missing PAL10Hardware reaches ready Rack fallback
+PASS Missing-hardware fallback: destroying the scene releases every tracked live texture
+PASS Successful filtered atlas stays isolated to cooling draws; protected bare draws use original radiance
+PASS Only CPU satin nickel and GPU machined nickel cover draws receive cooling finish 1/2; every other material is 0
+PASS Lid uses the filtered atlas and does not rebind protected bare materials
+PASS Rack integration restores original environment for all ordinary procedural equipment
+PASS Context restoration reloads both atlases without accumulating live textures
+PASS Restored scene: destroying the scene releases every tracked live texture
+PASS Missing filtered atlas retains loaded cooling and falls back to original radiance
+PASS Filtered-atlas fallback: destroying the scene releases every tracked live texture
+{
+  "passed": true,
+  "checks": 10,
+  "output": "C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-cinematic-l10\\docs\\screenshots\\l10-cinematic\\final-rc\\evidence\\environment"
+}

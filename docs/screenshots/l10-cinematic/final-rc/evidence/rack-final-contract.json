@@ -1,0 +1,288 @@
+{
+  "passed": true,
+  "contract": {
+    "id": "l10-rack-final-rc",
+    "version": 1,
+    "v2Baseline": "5f8e059c6e0c1a614fe412b990a463d643fc0a32",
+    "preFixBaseline": "108ffbc5b4bc4faf4eb4f1ebf785ebd3b1c89a5c",
+    "approvedRenderingExceptions": [
+      {
+        "id": "v3-repeated-1u-blanking",
+        "from": "v2Baseline",
+        "meshKeys": [
+          "blanking:4",
+          "blanking:5"
+        ],
+        "rule": "Only exact repeated blanking:1 vertices, with Y translated to each occupied 1U center; no other vertex attribute changes or extra geometry."
+      },
+      {
+        "id": "final-rc-carrier-rim-unit-normal",
+        "from": "preFixBaseline",
+        "sourceFunction": "editorialCarrierStamp",
+        "rule": "Only normalize the existing rolled punch rim normal [nx*0.24,ny*0.24,0.97]; preserve direction, every position, color, metal and emission attribute, all indices/order and all bounds."
+      }
+    ],
+    "physicalBlankingUnits": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      47,
+      48
+    ],
+    "physicalPanelSizeU": 1,
+    "logicalComponentCount": 41,
+    "occupiedU": 48,
+    "uniqueAnimationSamples": 201,
+    "normalTolerance": 1e-7,
+    "protected": [
+      "inventory identity",
+      "placements",
+      "U positions",
+      "material attributes",
+      "routes",
+      "sockets",
+      "Rack camera keys",
+      "Rack fit bounds",
+      "Rack animation",
+      "Device Focus",
+      "Skip/Replay interactions"
+    ],
+    "legacyPolicy": "Never modify historical core-scene or Cooling V2 assertions. Retain their original raw failures and test hashes; report final original core-scene result separately from historical whole-source isolation."
+  },
+  "recordedAt": "2026-10-13T17:22:49.467Z",
+  "checks": [
+    "Actual Rack source differs from the pre-fix commit only by carrier rim normalization",
+    "Every non-normal attribute is bit-exact; changed normals preserve direction and become unit length",
+    "U1–9 and U47–48 are eleven exact 1U panel instances, matching the original upper panel",
+    "Official inventory is not rewritten; editorial identities, 41 placements and all 48 U centers remain unchanged",
+    "201 unique animation poses, Rack camera keys and fit bounds match V2 and pre-fix RC",
+    "All original assertions remain intact; original core-scene now passes without filtering"
+  ],
+  "sourceHashes": {
+    "v2": {
+      "rack": "338279501f269583fab14418e00ebecb3c9a61828f0782deceb908ff03087b84",
+      "core": "ed0e15aba980921bbc36c8e432b41f55d1d2b0c01663a2bd58481b23f73e0681"
+    },
+    "before": {
+      "rack": "a931c430420292485a538492c20a255f23b372f41f4f263407bfd5408670af8b",
+      "core": "9e3337044140c878c6f1b0da7ca37230272116c21ba11beab66342cd99f1fc2b"
+    },
+    "final": {
+      "rack": "b2ecfdb0394a1253da694bdb3d5eb810e8373bfb938eef46aac1bcd215b054f7",
+      "core": "453eb2a034a7125a0ac9f68631bdcf9bc5a1d1fb1289c2d72b31ce21ade47dcd"
+    }
+  },
+  "changedFromPreFix": [
+    "server:1"
+  ],
+  "changedFromV2": [
+    "blanking:4",
+    "blanking:5",
+    "server:1"
+  ],
+  "meshProof": {
+    "blanking:1": {
+      "v2": "d501913651056b1ce96105fc2883af8f9a45002e223d86d3b2fc94cd34a9cfd3",
+      "before": "d501913651056b1ce96105fc2883af8f9a45002e223d86d3b2fc94cd34a9cfd3",
+      "final": "d501913651056b1ce96105fc2883af8f9a45002e223d86d3b2fc94cd34a9cfd3",
+      "vertices": 2514,
+      "correctedNormalVertices": 0
+    },
+    "switch:1": {
+      "v2": "9c517556aca447a801ba2df3d8c38172e7c086766d5a3c81ebd0458bb5c8a1fe",
+      "before": "9c517556aca447a801ba2df3d8c38172e7c086766d5a3c81ebd0458bb5c8a1fe",
+      "final": "9c517556aca447a801ba2df3d8c38172e7c086766d5a3c81ebd0458bb5c8a1fe",
+      "vertices": 64896,
+      "correctedNormalVertices": 0
+    },
+    "powershelf:1": {
+      "v2": "e9ed982e1eeed0c9035ea9f940dad149a5e2984b865ac7c4304c61a3dfe74052",
+      "before": "e9ed982e1eeed0c9035ea9f940dad149a5e2984b865ac7c4304c61a3dfe74052",
+      "final": "e9ed982e1eeed0c9035ea9f940dad149a5e2984b865ac7c4304c61a3dfe74052",
+      "vertices": 38484,
+      "correctedNormalVertices": 0
+    },
+    "server:1": {
+      "v2": "dd9ace9d29f6d2837d8ce79f3b0a09d84b313a05ef805caac8c2239b95b61d62",
+      "before": "dd9ace9d29f6d2837d8ce79f3b0a09d84b313a05ef805caac8c2239b95b61d62",
+      "final": "3e96c841457cb984903dbd5e8541313f055d0ebbbb6478c66ab578d2a9b153ad",
+      "vertices": 78084,
+      "correctedNormalVertices": 3744
+    },
+    "nvlink:1": {
+      "v2": "77ec3d6e548d2715b499771f1d4c631b5c69cb5bfed0b3677bd8ed1e2afd1acc",
+      "before": "77ec3d6e548d2715b499771f1d4c631b5c69cb5bfed0b3677bd8ed1e2afd1acc",
+      "final": "77ec3d6e548d2715b499771f1d4c631b5c69cb5bfed0b3677bd8ed1e2afd1acc",
+      "vertices": 48132,
+      "correctedNormalVertices": 0
+    },
+    "blanking:5": {
+      "v2": "3457ef90a0c88fa715356773012911e95e32d9184420c5fa33b3e7924898a756",
+      "before": "018261adc2a9f339c4c8966606e66cd564b35cd436ba482166634468c1f9bd2f",
+      "final": "018261adc2a9f339c4c8966606e66cd564b35cd436ba482166634468c1f9bd2f",
+      "vertices": 12570,
+      "correctedNormalVertices": 0
+    },
+    "blanking:4": {
+      "v2": "4358d1a46ba26eeaaf750f5dd5e0fcab8d76648da10486e161e414ea66021ddd",
+      "before": "7b957edc1298824d4d1935c072ab9e08012b37fc41068307af3ea6b09b66f43e",
+      "final": "7b957edc1298824d4d1935c072ab9e08012b37fc41068307af3ea6b09b66f43e",
+      "vertices": 10056,
+      "correctedNormalVertices": 0
+    },
+    "frame": {
+      "v2": "826dca860682bb1cfd4e6fc4749d6f2f46d6a0ea85f9de6a22b7f06835804905",
+      "before": "826dca860682bb1cfd4e6fc4749d6f2f46d6a0ea85f9de6a22b7f06835804905",
+      "final": "826dca860682bb1cfd4e6fc4749d6f2f46d6a0ea85f9de6a22b7f06835804905",
+      "vertices": 31176,
+      "correctedNormalVertices": 0
+    },
+    "infrastructure": {
+      "v2": "a2ecb95444e5df04d867e9628d80b630922d0a22e34292684549e7168b38c7ed",
+      "before": "a2ecb95444e5df04d867e9628d80b630922d0a22e34292684549e7168b38c7ed",
+      "final": "a2ecb95444e5df04d867e9628d80b630922d0a22e34292684549e7168b38c7ed",
+      "vertices": 722172,
+      "correctedNormalVertices": 0
+    },
+    "connections": {
+      "v2": "ce71ff4203bb70242aa0192dd3a41e08ce2c6fbd9a37d9fc8a4bde91daf4755f",
+      "before": "ce71ff4203bb70242aa0192dd3a41e08ce2c6fbd9a37d9fc8a4bde91daf4755f",
+      "final": "ce71ff4203bb70242aa0192dd3a41e08ce2c6fbd9a37d9fc8a4bde91daf4755f",
+      "vertices": 362484,
+      "correctedNormalVertices": 0
+    }
+  },
+  "correctedVertices": 3744,
+  "maxUnitError": 3.7544679143408644e-8,
+  "maxDirectionError": 1.8259836864764623e-8,
+  "physicalPanels": [
+    {
+      "logicalName": "editorial-blank-1",
+      "u": 48,
+      "sizeU": 1,
+      "worldY": 7.050000000000001,
+      "depth": 0.18,
+      "meshFamily": "blanking:1"
+    },
+    {
+      "logicalName": "editorial-blank-2",
+      "u": 47,
+      "sizeU": 1,
+      "worldY": 6.75,
+      "depth": 0.18,
+      "meshFamily": "blanking:1"
+    },
+    {
+      "logicalName": "editorial-reserve-blank",
+      "u": 5,
+      "sizeU": 1,
+      "worldY": -5.849999999999999,
+      "depth": 0.18,
+      "meshFamily": "blanking:1"
+    },
+    {
+      "logicalName": "editorial-reserve-blank",
+      "u": 6,
+      "sizeU": 1,
+      "worldY": -5.549999999999999,
+      "depth": 0.18,
+      "meshFamily": "blanking:1"
+    },
+    {
+      "logicalName": "editorial-reserve-blank",
+      "u": 7,
+      "sizeU": 1,
+      "worldY": -5.249999999999999,
+      "depth": 0.18,
+      "meshFamily": "blanking:1"
+    },
+    {
+      "logicalName": "editorial-reserve-blank",
+      "u": 8,
+      "sizeU": 1,
+      "worldY": -4.949999999999999,
+      "depth": 0.18,
+      "meshFamily": "blanking:1"
+    },
+    {
+      "logicalName": "editorial-reserve-blank",
+      "u": 9,
+      "sizeU": 1,
+      "worldY": -4.6499999999999995,
+      "depth": 0.18,
+      "meshFamily": "blanking:1"
+    },
+    {
+      "logicalName": "editorial-infrastructure-blank",
+      "u": 1,
+      "sizeU": 1,
+      "worldY": -7.05,
+      "depth": 0.18,
+      "meshFamily": "blanking:1"
+    },
+    {
+      "logicalName": "editorial-infrastructure-blank",
+      "u": 2,
+      "sizeU": 1,
+      "worldY": -6.75,
+      "depth": 0.18,
+      "meshFamily": "blanking:1"
+    },
+    {
+      "logicalName": "editorial-infrastructure-blank",
+      "u": 3,
+      "sizeU": 1,
+      "worldY": -6.449999999999999,
+      "depth": 0.18,
+      "meshFamily": "blanking:1"
+    },
+    {
+      "logicalName": "editorial-infrastructure-blank",
+      "u": 4,
+      "sizeU": 1,
+      "worldY": -6.1499999999999995,
+      "depth": 0.18,
+      "meshFamily": "blanking:1"
+    }
+  ],
+  "logicalComponentCount": 41,
+  "occupiedU": 48,
+  "animationSamples": 201,
+  "dynamicCameraFitSamples": 201,
+  "originalTests": {
+    "beforeCore": {
+      "command": "node app/qa/core-scene.cjs",
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "stdout": "core-scene-before.stdout.log",
+      "stderr": "core-scene-before.stderr.log",
+      "testSHA256": "01536d0f69ce72f996263c13ec1b5c347f3c845ea01791e2ac90cbef1d74b280"
+    },
+    "finalCore": {
+      "command": "node app/qa/core-scene.cjs",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "core-scene-final.stdout.log",
+      "stderr": "core-scene-final.stderr.log",
+      "testSHA256": "01536d0f69ce72f996263c13ec1b5c347f3c845ea01791e2ac90cbef1d74b280"
+    },
+    "historicalCoolingV2": {
+      "command": "node app/qa/l10-cooling-v2.cjs",
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "stdout": "cooling-v2-historical-before.stdout.log",
+      "stderr": "cooling-v2-historical-before.stderr.log",
+      "testSHA256": "7d88b7ce8f2ae1feda806816739fb0813996c7c367c33632893985a75a036817"
+    }
+  },
+  "limits": "CPU geometry and source contract only; original browser interaction tests and actual pixels are separate acceptance evidence."
+}

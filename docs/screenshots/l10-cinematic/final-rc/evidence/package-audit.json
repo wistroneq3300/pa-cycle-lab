@@ -1,0 +1,1155 @@
+{
+  "baselineCommit": "108ffbc5b4bc4faf4eb4f1ebf785ebd3b1c89a5c",
+  "glbSHA256": "88eec60c20e775a431b446da311f3a1476cc2774173e628adc170ae3ac1f5a3f",
+  "bytes": 5077332,
+  "readOnly": true,
+  "checks": [],
+  "materials": [
+    {
+      "name": "Anodized retention",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.024000000208616257,
+        0.027000000700354576,
+        0.028999999165534973,
+        1
+      ],
+      "metallic": 0.75,
+      "roughness": 0.4699999988079071,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "doubleSided": true
+    },
+    {
+      "name": "TIM",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.1899999976158142,
+        0.20000000298023224,
+        0.1899999976158142,
+        1
+      ],
+      "metallic": 0,
+      "roughness": 0.7799999713897705,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "doubleSided": true
+    },
+    {
+      "name": "Machined copper",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.5600000023841858,
+        0.26499998569488525,
+        0.12999999523162842,
+        1
+      ],
+      "metallic": 1,
+      "roughness": 1,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "doubleSided": true
+    },
+    {
+      "name": "Gasket",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.010999999940395355,
+        0.014000000432133675,
+        0.014999999664723873,
+        1
+      ],
+      "metallic": 0,
+      "roughness": 0.8199999928474426,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "doubleSided": true
+    },
+    {
+      "name": "Brushed nickel",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.46000000834465027,
+        0.49000000953674316,
+        0.49000000953674316,
+        1
+      ],
+      "metallic": 1,
+      "roughness": 1,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "doubleSided": true
+    },
+    {
+      "name": "Dark nickel fastener",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.11500000208616257,
+        0.12999999523162842,
+        0.14000000059604645,
+        1
+      ],
+      "metallic": 0.9100000262260437,
+      "roughness": 0.36000001430511475,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "doubleSided": true
+    },
+    {
+      "name": "Recess oxide",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.012000000104308128,
+        0.01600000075995922,
+        0.017999999225139618,
+        1
+      ],
+      "metallic": 0.3799999952316284,
+      "roughness": 0.5899999737739563,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "doubleSided": true
+    },
+    {
+      "name": "Machined nickel fittings",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.4399999976158142,
+        0.4699999988079071,
+        0.47999998927116394,
+        1
+      ],
+      "metallic": 1,
+      "roughness": 0.3149999976158142,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "doubleSided": true
+    },
+    {
+      "name": "CPU satin nickel cover",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.4300000071525574,
+        0.46000000834465027,
+        0.4699999988079071,
+        1
+      ],
+      "metallic": 1,
+      "roughness": 1,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "doubleSided": true
+    },
+    {
+      "name": "GPU machined nickel cover",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.4300000071525574,
+        0.46000000834465027,
+        0.4699999988079071,
+        1
+      ],
+      "metallic": 1,
+      "roughness": 1,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "doubleSided": true
+    },
+    {
+      "name": "Elastomer hose",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.01899999938905239,
+        0.02199999988079071,
+        0.02500000037252903,
+        1
+      ],
+      "metallic": 0,
+      "roughness": 0.6499999761581421,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "doubleSided": true
+    },
+    {
+      "name": "Coolant water tracer",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.03500000014901161,
+        0.28999999165534973,
+        0.3400000035762787,
+        1
+      ],
+      "metallic": 0.12999999523162842,
+      "roughness": 0.23000000417232513,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "doubleSided": true
+    }
+  ],
+  "images": [
+    {
+      "name": "cooling-machined-metal-mr",
+      "sha256": "d0894df6d34a0d996ca2d3215b94cc0e5d6f6b2903df461985eb39a8803fcc18",
+      "acceptedMapBytesUnchanged": true
+    },
+    {
+      "name": "cooling-satin-nickel-mr",
+      "sha256": "af0ae0574dfc85a2e92011f10eaeb5587c930e6f76f78048d4806f6ff9301f8f",
+      "acceptedMapBytesUnchanged": true
+    },
+    {
+      "name": "cooling-cpu-cover-mr",
+      "sha256": "8a9e31f4bd575bc82504f2e956143387f9581447a0bd3b3b1b926f465358677d",
+      "acceptedMapBytesUnchanged": true
+    },
+    {
+      "name": "cooling-gpu-cover-mr",
+      "sha256": "f41a5f4277c3a0657f9ff1cf08291ee24dc0733b4be2dd93433e2ffa88486da9",
+      "acceptedMapBytesUnchanged": true
+    }
+  ],
+  "newAO": {
+    "name": "cooling-socket-contact-ao",
+    "sha256": "33ba196a67d5bddad115eb05f0145f9829c8742574ff1a1cf9e124b6e5da465b",
+    "material": "Machined nickel fittings",
+    "externalEmbeddedIdentical": true
+  },
+  "routes": [
+    {
+      "id": "supply-trunk",
+      "branch": false,
+      "oldRadius": 0.0105,
+      "newRadius": 0.0105,
+      "vertices": 343,
+      "indicesAndVertexArraysIdentical": true,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 0,
+      "maxNormalComponentDifference": 0
+    },
+    {
+      "id": "supply-header",
+      "branch": false,
+      "oldRadius": 0.0105,
+      "newRadius": 0.0105,
+      "vertices": 57,
+      "indicesAndVertexArraysIdentical": true,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 0,
+      "maxNormalComponentDifference": 0
+    },
+    {
+      "id": "return-header",
+      "branch": false,
+      "oldRadius": 0.0105,
+      "newRadius": 0.0105,
+      "vertices": 56,
+      "indicesAndVertexArraysIdentical": true,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 0,
+      "maxNormalComponentDifference": 0
+    },
+    {
+      "id": "return-trunk",
+      "branch": false,
+      "oldRadius": 0.0105,
+      "newRadius": 0.0105,
+      "vertices": 336,
+      "indicesAndVertexArraysIdentical": true,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 0,
+      "maxNormalComponentDifference": 0
+    },
+    {
+      "id": "CPU-L/inlet",
+      "branch": true,
+      "oldRadius": 0.0068,
+      "newRadius": 0.009,
+      "vertices": 336,
+      "indicesAndVertexArraysIdentical": false,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 1.2972775631503453e-7,
+      "maxNormalComponentDifference": 0.00011149048805236816
+    },
+    {
+      "id": "CPU-L/channels",
+      "branch": false,
+      "oldRadius": 0.009,
+      "newRadius": 0.009,
+      "vertices": 1200,
+      "indicesAndVertexArraysIdentical": true,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 0,
+      "maxNormalComponentDifference": 0
+    },
+    {
+      "id": "CPU-L/outlet",
+      "branch": true,
+      "oldRadius": 0.0068,
+      "newRadius": 0.009,
+      "vertices": 240,
+      "indicesAndVertexArraysIdentical": false,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 6.486387815751726e-8,
+      "maxNormalComponentDifference": 0.00009999563917517662
+    },
+    {
+      "id": "GPU-L-OUTER/inlet",
+      "branch": true,
+      "oldRadius": 0.0068,
+      "newRadius": 0.009,
+      "vertices": 336,
+      "indicesAndVertexArraysIdentical": false,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 1.2972775631503453e-7,
+      "maxNormalComponentDifference": 0.00019999999494757503
+    },
+    {
+      "id": "GPU-L-OUTER/channels",
+      "branch": false,
+      "oldRadius": 0.009,
+      "newRadius": 0.009,
+      "vertices": 1203,
+      "indicesAndVertexArraysIdentical": true,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 0,
+      "maxNormalComponentDifference": 0
+    },
+    {
+      "id": "GPU-L-OUTER/outlet",
+      "branch": true,
+      "oldRadius": 0.0068,
+      "newRadius": 0.009,
+      "vertices": 243,
+      "indicesAndVertexArraysIdentical": false,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 1.2972775631503453e-7,
+      "maxNormalComponentDifference": 0.00019999999494757503
+    },
+    {
+      "id": "GPU-L-INNER/inlet",
+      "branch": true,
+      "oldRadius": 0.0068,
+      "newRadius": 0.009,
+      "vertices": 339,
+      "indicesAndVertexArraysIdentical": false,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 1.2972775631503453e-7,
+      "maxNormalComponentDifference": 0.00010154396295547485
+    },
+    {
+      "id": "GPU-L-INNER/channels",
+      "branch": false,
+      "oldRadius": 0.009,
+      "newRadius": 0.009,
+      "vertices": 1205,
+      "indicesAndVertexArraysIdentical": true,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 0,
+      "maxNormalComponentDifference": 0
+    },
+    {
+      "id": "GPU-L-INNER/outlet",
+      "branch": true,
+      "oldRadius": 0.0068,
+      "newRadius": 0.009,
+      "vertices": 240,
+      "indicesAndVertexArraysIdentical": false,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 1.2972775631503453e-7,
+      "maxNormalComponentDifference": 0.00019999999494757503
+    },
+    {
+      "id": "CPU-R/inlet",
+      "branch": true,
+      "oldRadius": 0.0068,
+      "newRadius": 0.009,
+      "vertices": 336,
+      "indicesAndVertexArraysIdentical": false,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 6.486387815751726e-8,
+      "maxNormalComponentDifference": 0.00009999999747378752
+    },
+    {
+      "id": "CPU-R/channels",
+      "branch": false,
+      "oldRadius": 0.009,
+      "newRadius": 0.009,
+      "vertices": 1200,
+      "indicesAndVertexArraysIdentical": true,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 0,
+      "maxNormalComponentDifference": 0
+    },
+    {
+      "id": "CPU-R/outlet",
+      "branch": true,
+      "oldRadius": 0.0068,
+      "newRadius": 0.009,
+      "vertices": 240,
+      "indicesAndVertexArraysIdentical": false,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 1.2972775631503453e-7,
+      "maxNormalComponentDifference": 0.00011813640594482422
+    },
+    {
+      "id": "GPU-R-INNER/inlet",
+      "branch": true,
+      "oldRadius": 0.0068,
+      "newRadius": 0.009,
+      "vertices": 342,
+      "indicesAndVertexArraysIdentical": false,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 1.2972775631503453e-7,
+      "maxNormalComponentDifference": 0.00029999999242136255
+    },
+    {
+      "id": "GPU-R-INNER/channels",
+      "branch": false,
+      "oldRadius": 0.009,
+      "newRadius": 0.009,
+      "vertices": 1203,
+      "indicesAndVertexArraysIdentical": true,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 0,
+      "maxNormalComponentDifference": 0
+    },
+    {
+      "id": "GPU-R-INNER/outlet",
+      "branch": true,
+      "oldRadius": 0.0068,
+      "newRadius": 0.009,
+      "vertices": 242,
+      "indicesAndVertexArraysIdentical": false,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 1.2972775631503453e-7,
+      "maxNormalComponentDifference": 0.00011149048805236816
+    },
+    {
+      "id": "GPU-R-OUTER/inlet",
+      "branch": true,
+      "oldRadius": 0.0068,
+      "newRadius": 0.009,
+      "vertices": 336,
+      "indicesAndVertexArraysIdentical": false,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 1.2972775631503453e-7,
+      "maxNormalComponentDifference": 0.00019999999494757503
+    },
+    {
+      "id": "GPU-R-OUTER/channels",
+      "branch": false,
+      "oldRadius": 0.009,
+      "newRadius": 0.009,
+      "vertices": 1203,
+      "indicesAndVertexArraysIdentical": true,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 0,
+      "maxNormalComponentDifference": 0
+    },
+    {
+      "id": "GPU-R-OUTER/outlet",
+      "branch": true,
+      "oldRadius": 0.0068,
+      "newRadius": 0.009,
+      "vertices": 243,
+      "indicesAndVertexArraysIdentical": false,
+      "triangleCountsAndUniqueDistanceSectionUVsIdentical": true,
+      "fullRouteContractPreservedExceptApprovedRadius": true,
+      "maxPositionExpansionError": 1.2972775631503453e-7,
+      "maxNormalComponentDifference": 0.00019999999494757503
+    }
+  ],
+  "normalDifferenceInterpretation": "Branch normal differences are measured, not hidden. Radius changes cause Blender to re-weld export vertices and re-triangulate faces, so branch raw indices are not claimed unchanged. Normals are matched by identical arc/section UV and nearest baseline normal; each current vertex must equal the approved radial expansion within 3e-7. The other ten fluid primitives retain byte-equivalent accessor values; the independent geometry gate additionally checks containment and all protected primitives.",
+  "protectedPrimitiveAttributes": [
+    {
+      "node": "Cooling V1 / cooling-mounts / CPU-L",
+      "material": "Anodized retention",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-mounts / GPU-L-OUTER",
+      "material": "Anodized retention",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-mounts / GPU-L-INNER",
+      "material": "Anodized retention",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-mounts / CPU-R",
+      "material": "Anodized retention",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-mounts / GPU-R-INNER",
+      "material": "Anodized retention",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-mounts / GPU-R-OUTER",
+      "material": "Anodized retention",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / CPU-L",
+      "material": "TIM",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / CPU-L",
+      "material": "Machined copper",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / CPU-L",
+      "material": "Gasket",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 5.960464477539063e-8
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / CPU-L",
+      "material": "Brushed nickel",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.1920928955078125e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / CPU-L",
+      "material": "Dark nickel fastener",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / CPU-L",
+      "material": "Recess oxide",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-L-OUTER",
+      "material": "TIM",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-L-OUTER",
+      "material": "Machined copper",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.1920928955078125e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-L-OUTER",
+      "material": "Gasket",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.1920928955078125e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-L-OUTER",
+      "material": "Brushed nickel",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-L-OUTER",
+      "material": "Dark nickel fastener",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-L-OUTER",
+      "material": "Recess oxide",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-L-INNER",
+      "material": "TIM",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-L-INNER",
+      "material": "Machined copper",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.1920928955078125e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-L-INNER",
+      "material": "Gasket",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.1920928955078125e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-L-INNER",
+      "material": "Brushed nickel",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 5.960464477539063e-8
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-L-INNER",
+      "material": "Dark nickel fastener",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-L-INNER",
+      "material": "Recess oxide",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / CPU-R",
+      "material": "TIM",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / CPU-R",
+      "material": "Machined copper",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 2.384185791015625e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / CPU-R",
+      "material": "Gasket",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 2.384185791015625e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / CPU-R",
+      "material": "Brushed nickel",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / CPU-R",
+      "material": "Dark nickel fastener",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / CPU-R",
+      "material": "Recess oxide",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-R-INNER",
+      "material": "TIM",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-R-INNER",
+      "material": "Machined copper",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.1920928955078125e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-R-INNER",
+      "material": "Gasket",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-R-INNER",
+      "material": "Brushed nickel",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.1920928955078125e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-R-INNER",
+      "material": "Dark nickel fastener",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-R-INNER",
+      "material": "Recess oxide",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-R-OUTER",
+      "material": "TIM",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-R-OUTER",
+      "material": "Machined copper",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 2.384185791015625e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-R-OUTER",
+      "material": "Gasket",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.1920928955078125e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-R-OUTER",
+      "material": "Brushed nickel",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-R-OUTER",
+      "material": "Dark nickel fastener",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-frame / GPU-R-OUTER",
+      "material": "Recess oxide",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling / CPU-L",
+      "material": "CPU satin nickel cover",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 2.384185791015625e-7
+    },
+    {
+      "node": "Cooling V1 / cooling / CPU-L",
+      "material": "Dark nickel fastener",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling / CPU-L",
+      "material": "Recess oxide",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling / GPU-L-OUTER",
+      "material": "GPU machined nickel cover",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.1920928955078125e-7
+    },
+    {
+      "node": "Cooling V1 / cooling / GPU-L-OUTER",
+      "material": "Dark nickel fastener",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling / GPU-L-OUTER",
+      "material": "Recess oxide",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling / GPU-L-INNER",
+      "material": "GPU machined nickel cover",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling / GPU-L-INNER",
+      "material": "Dark nickel fastener",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling / GPU-L-INNER",
+      "material": "Recess oxide",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling / CPU-R",
+      "material": "CPU satin nickel cover",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 2.384185791015625e-7
+    },
+    {
+      "node": "Cooling V1 / cooling / CPU-R",
+      "material": "Dark nickel fastener",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling / CPU-R",
+      "material": "Recess oxide",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling / GPU-R-INNER",
+      "material": "GPU machined nickel cover",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.1920928955078125e-7
+    },
+    {
+      "node": "Cooling V1 / cooling / GPU-R-INNER",
+      "material": "Dark nickel fastener",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling / GPU-R-INNER",
+      "material": "Recess oxide",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling / GPU-R-OUTER",
+      "material": "GPU machined nickel cover",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling / GPU-R-OUTER",
+      "material": "Dark nickel fastener",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling / GPU-R-OUTER",
+      "material": "Recess oxide",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-channels / CPU-L",
+      "material": "Machined copper",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.1920928955078125e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-channels / GPU-L-OUTER",
+      "material": "Machined copper",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 5.960464477539063e-8
+    },
+    {
+      "node": "Cooling V1 / cooling-channels / GPU-L-INNER",
+      "material": "Machined copper",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 5.960464477539063e-8
+    },
+    {
+      "node": "Cooling V1 / cooling-channels / CPU-R",
+      "material": "Machined copper",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.7881393432617188e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-channels / GPU-R-INNER",
+      "material": "Machined copper",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.1920928955078125e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-channels / GPU-R-OUTER",
+      "material": "Machined copper",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 1.1920928955078125e-7
+    },
+    {
+      "node": "Cooling V1 / cooling-plumbing / supply",
+      "material": "Elastomer hose",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-plumbing / supply",
+      "material": "Brushed nickel",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-plumbing / supply",
+      "material": "Anodized retention",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-plumbing / return",
+      "material": "Elastomer hose",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-plumbing / return",
+      "material": "Brushed nickel",
+      "textureMapped": true,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-plumbing / return",
+      "material": "Anodized retention",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-plumbing / CPU-L",
+      "material": "Elastomer hose",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-plumbing / GPU-L-OUTER",
+      "material": "Elastomer hose",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-plumbing / GPU-L-INNER",
+      "material": "Elastomer hose",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-plumbing / CPU-R",
+      "material": "Elastomer hose",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-plumbing / GPU-R-INNER",
+      "material": "Elastomer hose",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-plumbing / GPU-R-OUTER",
+      "material": "Elastomer hose",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-fluid / supply-trunk",
+      "material": "Coolant water tracer",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-fluid / supply-header",
+      "material": "Coolant water tracer",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-fluid / return-header",
+      "material": "Coolant water tracer",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-fluid / return-trunk",
+      "material": "Coolant water tracer",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-fluid / CPU-L/channels",
+      "material": "Coolant water tracer",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-fluid / GPU-L-OUTER/channels",
+      "material": "Coolant water tracer",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-fluid / GPU-L-INNER/channels",
+      "material": "Coolant water tracer",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-fluid / CPU-R/channels",
+      "material": "Coolant water tracer",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-fluid / GPU-R-INNER/channels",
+      "material": "Coolant water tracer",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    },
+    {
+      "node": "Cooling V1 / cooling-fluid / GPU-R-OUTER/channels",
+      "material": "Coolant water tracer",
+      "textureMapped": false,
+      "positionsAndNormalsExact": true,
+      "maxUVDelta": 0
+    }
+  ],
+  "protectedUVInterpretation": "Rebuilding deterministic auto-projected UVs incurs <=2.3841858e-7 float32 drift on some cooling bodies/covers/fasteners (under .000123 texel at 512px). Positions and normals are exact; all UV deltas are bounded below 3e-7, and no original map pixels/factors change. Manifold/plumbing and the ten unchanged fluid meshes have zero UV drift. This is not described as byte-identical UV preservation.",
+  "nodes": 54,
+  "materialCount": 12,
+  "triangles": 94888,
+  "passed": true
+}

@@ -1,0 +1,23 @@
+{
+  "beforeCommit": "108ffbc5b4bc4faf4eb4f1ebf785ebd3b1c89a5c",
+  "recordedAt": "2026-10-13T17:15:50.781Z",
+  "sourceSHA256": "a931c430420292485a538492c20a255f23b372f41f4f263407bfd5408670af8b",
+  "core": {
+    "command": "node app/qa/core-scene.cjs",
+    "exitCode": 1,
+    "signal": null,
+    "error": null,
+    "stdout": "core-scene-before.stdout.log",
+    "stderr": "core-scene-before.stderr.log",
+    "testSHA256": "01536d0f69ce72f996263c13ec1b5c347f3c845ea01791e2ac90cbef1d74b280"
+  },
+  "legacy": {
+    "command": "node app/qa/l10-cooling-v2.cjs",
+    "exitCode": 1,
+    "signal": null,
+    "error": null,
+    "stdout": "cooling-v2-historical-before.stdout.log",
+    "stderr": "cooling-v2-historical-before.stderr.log",
+    "testSHA256": "7d88b7ce8f2ae1feda806816739fb0813996c7c367c33632893985a75a036817"
+  }
+}

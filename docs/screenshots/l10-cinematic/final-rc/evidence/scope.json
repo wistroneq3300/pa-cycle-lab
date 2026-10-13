@@ -1,0 +1,966 @@
+{
+  "baseline": "108ffbc5b4bc4faf4eb4f1ebf785ebd3b1c89a5c",
+  "pass": true,
+  "checks": [
+    "Every tracked bare asset, engine and integration file remains identical (canonical LF for text)",
+    "Existing untracked prototype files are preserved without modification",
+    "Timeline, controls, networking, storage, Cycle, Telemetry and Agent sources are unchanged",
+    "Both HTML shells differ only by the two explicit script cache keys; all historical tests remain intact",
+    "All production cameras, Rack animation, draw ordering and material routing are byte-identical outside the named cover-finish scalar",
+    "Fluid phase, distance, wavelength and thermal interpretation remain unchanged",
+    "Six seats, TIM, mounts, envelope and all route centerlines/endpoints/directions are exact"
+  ],
+  "protectedFiles": [
+    {
+      "file": "app/static/css/atelier.css",
+      "sha256": "534849c403d58e70a2d6e767e4a93b57b0ccec1e170cf387726dbbdad667e214"
+    },
+    {
+      "file": "app/static/css/bg.css",
+      "sha256": "07de9435755b3cc283e5408d4d28e1b481379371ec1a3b71477c1deb38410fb5"
+    },
+    {
+      "file": "app/static/css/cinematic.css",
+      "sha256": "569e1270a96cee1ff8571f577836b270569f7294f0f0457097135ba5c9dcc1cb"
+    },
+    {
+      "file": "app/static/css/cycle-workspace.css",
+      "sha256": "62dc4b43c7fba8ab35f2d2a24d6a2411b9b6692f5a5f02de0f3556ca5d4a63ab"
+    },
+    {
+      "file": "app/static/css/cycle.css",
+      "sha256": "8b7239d1547bf6ddde36872f58da6241f34c2fafe016744864ec10a1567b9bfc"
+    },
+    {
+      "file": "app/static/css/engineering-ux.css",
+      "sha256": "7e281291b1e5247042c74a376f649c53318a8e7f338a90d1d48d5a1413742799"
+    },
+    {
+      "file": "app/static/css/equipment-workspace.css",
+      "sha256": "ae5ea97a6f795215141974365a8eb84d8e21a61a12a8d340e7d919a797de816f"
+    },
+    {
+      "file": "app/static/css/hero-callouts.css",
+      "sha256": "91a9c1ea25915185a9390a723a31d98abb4d96e90105396b5e62ba4f767badb5"
+    },
+    {
+      "file": "app/static/css/inspection-refinement.css",
+      "sha256": "deb61bc8fc521a6de41d47f365257c6f06a87bdf9813161f2884ae812ca9488c"
+    },
+    {
+      "file": "app/static/css/kvm-solo.css",
+      "sha256": "232fe432870960040b6f150d70b4d20545557d143424c6d13b8f9594a7205bac"
+    },
+    {
+      "file": "app/static/css/operations-ux.css",
+      "sha256": "9b71f8c37e90c41999ad0413814388c22a4d956999e35ed70acd5f0e4ebfcdca"
+    },
+    {
+      "file": "app/static/css/polish.css",
+      "sha256": "39f54319300fe721d20e2c7b869824c5e399831acbeed40cdf338d21b6b02ebe"
+    },
+    {
+      "file": "app/static/css/premium.css",
+      "sha256": "6f0192a50fbba2801d26545652834233bb6d8e033fe6de51a54ed5636a10af82"
+    },
+    {
+      "file": "app/static/css/pro.css",
+      "sha256": "bfca62270967541f952a32e118823b7c07010b5686377b9aede246091e83b1d5"
+    },
+    {
+      "file": "app/static/css/product-detail.css",
+      "sha256": "79903bfb6159c4d32bd8dd4ecda7bec1d94696d99f7eee2b5ede67d58a9fbba3"
+    },
+    {
+      "file": "app/static/css/product.css",
+      "sha256": "348d8dd5f3dd7ceb9635dc0600ebc9b3931bb1b399ce5945d7df3c5bf58fb737"
+    },
+    {
+      "file": "app/static/css/style.css",
+      "sha256": "8c5839ea359a244bc12a2831ffdda258ec136ec7a79aa5fa6d3707c4d1423eb0"
+    },
+    {
+      "file": "app/static/css/telemetry-native.css",
+      "sha256": "1f4cdaba99b4950e61900f89d122c16be8753f17512070d5728faa91b863490f"
+    },
+    {
+      "file": "app/static/css/telemetry-provision.css",
+      "sha256": "8181972821b58a8e4ae00a042f2106cffb65a333c0b998d6fcf6a6db787ce08a"
+    },
+    {
+      "file": "app/static/css/topology.css",
+      "sha256": "633c8dbbc7934dab48315d6b719667fa58530914fed1bca12babd9dde85988c6"
+    },
+    {
+      "file": "app/static/css/validation-console.css",
+      "sha256": "6f7849623cae557ed9c517f2bb2f04f42183a6210f7e71b30339810287ac7e2a"
+    },
+    {
+      "file": "app/static/css/validation-overview.css",
+      "sha256": "8b0430aee284f3687d540110eea0a2aa9c924707c0839a6c055fddb783168d18"
+    },
+    {
+      "file": "app/static/css/wistron-boot.css",
+      "sha256": "dab2bfc0e2bdb876abe442654bf35856ad4abc1475eaad70ddf3f5785ce4a094"
+    },
+    {
+      "file": "app/static/css/wistron-light.css",
+      "sha256": "650a0b42a9b880870021a4863df2c889e0e363cfe0c25a4b14efeb41a383dd87"
+    },
+    {
+      "file": "app/static/css/workspace-cinematic.css",
+      "sha256": "00f89be24d454b7c1a1abc620a75c504b56769b13e4bbd420a029d5c6c184ec8"
+    },
+    {
+      "file": "app/static/css/workspace-reliability.css",
+      "sha256": "0d2d72803a7c9cfcf3900e318669d0912fa6f70a8e8d0bf5659be7e7a7c0813b"
+    },
+    {
+      "file": "app/static/css/workspace-ux.css",
+      "sha256": "ef04be8b1e83e514525ce388163ed7ca72d4160033fce03d3416994c051f711f"
+    },
+    {
+      "file": "app/static/models/l10-prototype/bare-compute-boards.glb",
+      "sha256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29"
+    },
+    {
+      "file": "app/static/models/l10-prototype/compute-board.glb",
+      "sha256": "cd454d2e6a36d6e78ab8416e5449a6595791bc1e0a45fb239b3fd40642d59bb1"
+    },
+    {
+      "file": "app/static/models/l10-prototype/manifest.json",
+      "sha256": "80fef5b13cf369c80f13548b4915eca7466a6d27423fa1f33aa3882d856a3f36"
+    },
+    {
+      "file": "assets/l10-prototype/README.md",
+      "sha256": "489b681f56878894ee618baa6398a8e9c4d890f3f74ed0f9061cf4fbf19ad0d6"
+    },
+    {
+      "file": "assets/l10-prototype/author_textures.py",
+      "sha256": "e2320aba7c615a66eace1bf5cb1db467f931a8671ad8e37ff1e50cf2b7f29b69"
+    },
+    {
+      "file": "assets/l10-prototype/bare-compute-boards.blend",
+      "sha256": "070c689184f6cc45e979229a2a4698ebce4cce513b16cdbcf5f5d1c6d431c7bc"
+    },
+    {
+      "file": "assets/l10-prototype/bare_finish.py",
+      "sha256": "06ac7c4cd11be66a907ef8c0190d1ad449d39b722729f1f3b3b9267dbed390f7"
+    },
+    {
+      "file": "assets/l10-prototype/bareboard.py",
+      "sha256": "a0e2a4b8ead786f07a4aa869ad992225f1cf8cccb80c04246bd223481f3bd5b3"
+    },
+    {
+      "file": "assets/l10-prototype/build.py",
+      "sha256": "7aa669de162016532fac36d4e3b5d15ba3d00d365b06c9c1cf971fe747e31a09"
+    },
+    {
+      "file": "assets/l10-prototype/compute-board-prototype.blend",
+      "sha256": "fb0695d908cac81c8a1ae0f8c9467d53479fe14de235591f2c2a6ece9067d94e"
+    },
+    {
+      "file": "assets/l10-prototype/experiments/README.md",
+      "sha256": "568b3e40501a9e9600472458e783e2848d233520e24135511255a96dbb498a78"
+    },
+    {
+      "file": "assets/l10-prototype/experiments/cycles_camera_probe.py",
+      "sha256": "b22451b2eba02d8ceac88a384f82d8f2a5a46c5bc52b0478c7949b519ad70ccc"
+    },
+    {
+      "file": "assets/l10-prototype/export_gltf.py",
+      "sha256": "ba3de0d360cb44ef0fc66ad8372b4b367dddfe1a1e02b96d542816872118e427"
+    },
+    {
+      "file": "assets/l10-prototype/layout.json",
+      "sha256": "34f315702b6a76d425a5aa037461a5d1a44fd845492df8a8c3c2e2d1038079bf"
+    },
+    {
+      "file": "assets/l10-prototype/preserve_core.py",
+      "sha256": "003d80b1e38c9c7a352b724b7a35b3bc3ac0d8822740d745bea007717bb356ad"
+    },
+    {
+      "file": "assets/l10-prototype/preserve_finish_geometry.py",
+      "sha256": "5b53b4dbcb232a9897440d75efa43cc60a86e0f016845d9e1c774c1d685286e3"
+    },
+    {
+      "file": "assets/l10-prototype/service_geometry.py",
+      "sha256": "d75febdc62d669e8d6e130684ae938d24bf988a753487c0108ba2dc1125f7d25"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-bf3-l-contact-occlusion.png",
+      "sha256": "88cb89a1c6b86e482f33d907df1ce4c779a2d0f5ca6da3cd17bf15fd8e682eda"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-bf3-l-pcb-finish.png",
+      "sha256": "2d249154309c56c5d8d5716ad612b5fd829d538816c5c291279a633f55560b56"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-bf3-r-contact-occlusion.png",
+      "sha256": "ba2ba85b2053864eb4a1194d9fdca54b07761d23fc8d769c720ed74521c8b498"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-bf3-r-pcb-finish.png",
+      "sha256": "2d249154309c56c5d8d5716ad612b5fd829d538816c5c291279a633f55560b56"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-board1-contact-occlusion.png",
+      "sha256": "f236f0ea49fda7eb16fedfa7cb6d9718497e92c8304ae3a1f3ae6e597f953798"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-board1-pcb-finish.png",
+      "sha256": "a3a24a885bdb324b8884574f549cac9a0a717aada2a8064f5816c85484c1894a"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-board2-contact-occlusion.png",
+      "sha256": "226d1ee814ac3c0aee86294ac9b144164786a6866f25a6f44aa308ff9c4630ad"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-board2-pcb-finish.png",
+      "sha256": "e3e5115daf6565a154f95802691ce7883e01c1901ffccf17bfa49f38c69990de"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-ceramic-metallicroughness.png",
+      "sha256": "52337e6af6b83d50bfb08789ee3514edcd017e8e869022ab82c98ec099d56602"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-cpu-silicon-finish.png",
+      "sha256": "3e803e2589786bf473a98e7f45b5ba56b5aa1a0da8ad73af74c718e8991a54d6"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-cpu-silicon-metallicroughness.png",
+      "sha256": "e695b205befdf5450c4c8474c3414fa67f6582dde8a2423febfffe290364b31e"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-cpu-silicon-normal.png",
+      "sha256": "2e8a05cc502d310256a4f81c46a9fa685a277fd07baff0aa4a4abb5f1f75ce7d"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-cx7-r-contact-occlusion.png",
+      "sha256": "d7a4723af74336377b295f99b6f2da058ef19fd86580e9d898b9e4ed5ca79d3a"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-cx7-r-pcb-finish.png",
+      "sha256": "4cef0115b054a4e9a3ca98ea6ce2d042e4453ac27e2bbe5f0540c7842793f85a"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-ferrite-finish.png",
+      "sha256": "c9f13646d541c21c1cc157a5925c7031ca29ffc5cfa0e7c4e935af42e6d657d4"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-ferrite-metallicroughness.png",
+      "sha256": "61ff9276cfdc3023ff621497efbcf1de4ebe7822ff409f90195d3b7dff8964b4"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-gold-metallicroughness.png",
+      "sha256": "9910751dad019225602180e1c5d471f7768addb60a7072729cc4f7e96360d32c"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-gpu-silicon-finish.png",
+      "sha256": "a677d5ca064ae2ffc5fcc8f91f8a65378ee1ed864de57cc90c4ca7f0aef97cc3"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-gpu-silicon-metallicroughness.png",
+      "sha256": "aaf52f626458f2234d2f14240e0b82290bb740febde893892c21c01c6f61bdee"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-gpu-silicon-normal.png",
+      "sha256": "fdc25659c4d359d4839d6182154a63612938ef2d21199fe7ac387cac97e83b13"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-metal-machining-normal.png",
+      "sha256": "8bace1f705656345cfff16702b33dacfb08b8cfaa4e638ea102f352f989b95dd"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-molding-finish.png",
+      "sha256": "994e17b160232b1e177b9ec8f3b6a8a114e65a334f41cbe1ebfb5cd3ac85f320"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-molding-metallicroughness.png",
+      "sha256": "d3c17a352b9856e4b6a5498cf2e5ebcc3782e5f0defd2bb35eb9b0e764623240"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-network-silicon-finish.png",
+      "sha256": "c1ab19fe5db0440e492baa2fe28d3b5aebb700575d40b069e6caafb65783dc4c"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-network-silicon-metallicroughness.png",
+      "sha256": "ffee878642cfbb9505597a1e50b76f955408db767ccaaba5aaadf76c9eda27ea"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-network-silicon-normal.png",
+      "sha256": "e3f5099ca32f9153d45a481e7cbfc175d07cb1cab8a49d23bbb4c6b6199cfecf"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-nickel-metallicroughness.png",
+      "sha256": "aa61b30b85d4a371379f9c0854d34b45cee2b1459f6b66ecfd008d2b2960e1f2"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-pcb-metallicroughness.png",
+      "sha256": "8645622dc828a1fbbd917a82bb2dab369f4e29c9d9cfd7a9cd80b9d6a03d454c"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-pcb-micro-normal.png",
+      "sha256": "4c82f99213fa0fa0814c5eddd3808586fd6803c15ed6893516b56dfb7d02d9a2"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-pcb-soldermask.png",
+      "sha256": "b8459f9803ec1adc32054732e5c01d081c188ee8f321c373323ccf9dae1b5c46"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-silicon-finish.png",
+      "sha256": "d0cc89eaa95a8477989119b7f2897a4284c6c5b0afe350bd18e9ed10c63a4a6e"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-silicon-metallicroughness.png",
+      "sha256": "89ebc8c09fb1a4c7f963e950c8529e3df5d2bb943c75b4ef7007d9b12c83d30b"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-silicon-normal.png",
+      "sha256": "38829e25394c07000a908881d29cd25a8e3e1ec01dd6858b6663586966097f1f"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-solder-metallicroughness.png",
+      "sha256": "943b42f6ec936a8e16e417630158004d5556548f0665783a4d53c418625bbbbc"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-substrate-finish.png",
+      "sha256": "069f8e0a3d94bc9d1a6c96917278f68e4caa8ea18e7b9060ea13c087e44a048b"
+    },
+    {
+      "file": "assets/l10-prototype/textures/bare-substrate-metallicroughness.png",
+      "sha256": "5b33c815e525585e3c524b41509480b9db466ff96c0f630f50565829e033e97e"
+    },
+    {
+      "file": "assets/l10-prototype/textures/copper-basecolor.png",
+      "sha256": "98de41888ef79b06ba26156ae9b2c2d7d305b0fc609505f49cc675aa145e62c0"
+    },
+    {
+      "file": "assets/l10-prototype/textures/copper-metallicroughness.png",
+      "sha256": "715d99ef44d81fd2e3431cd41ad7a8f7de15168a43326ff5f0f59b82759cb50c"
+    },
+    {
+      "file": "assets/l10-prototype/textures/copper-normal.png",
+      "sha256": "8b7bdc0426116a8c46cee9d766d5b945d0aa562aa04c3ebd24cee4fe100e024e"
+    },
+    {
+      "file": "assets/l10-prototype/textures/nickel-basecolor.png",
+      "sha256": "ec9576439cf87e741435ae2a0fcc6ec33df45919cd7d7dedec8f3ab1c3902866"
+    },
+    {
+      "file": "assets/l10-prototype/textures/nickel-metallicroughness.png",
+      "sha256": "b5bb8d1d2ad1246e615e67fbf91ed2f73086d5d7e0f7a08113b4e7f63c65a05f"
+    },
+    {
+      "file": "assets/l10-prototype/textures/nickel-normal.png",
+      "sha256": "8b7bdc0426116a8c46cee9d766d5b945d0aa562aa04c3ebd24cee4fe100e024e"
+    },
+    {
+      "file": "assets/l10-prototype/textures/package-basecolor.png",
+      "sha256": "0486447ddf0ee0291388f1c2f58ad89a671a62e33a844334cc79927af9a7047d"
+    },
+    {
+      "file": "assets/l10-prototype/textures/package-metallicroughness.png",
+      "sha256": "04c20a81f39dc3a0f74180302c96693bb5f0deec4c9c8c4f0458f539b12a71c2"
+    },
+    {
+      "file": "assets/l10-prototype/textures/package-normal.png",
+      "sha256": "8b7bdc0426116a8c46cee9d766d5b945d0aa562aa04c3ebd24cee4fe100e024e"
+    },
+    {
+      "file": "assets/l10-prototype/textures/pcb-basecolor.png",
+      "sha256": "fd41940c90cc27527d82efca1c0356b74a95818fce056dad8b9e5e2ea487bbda"
+    },
+    {
+      "file": "assets/l10-prototype/textures/pcb-metallicroughness.png",
+      "sha256": "0f862a6e738bb9ec3f37c55ced74e0ad06e0ab7d0894936b0329ae522d6efaa1"
+    },
+    {
+      "file": "assets/l10-prototype/textures/pcb-normal.png",
+      "sha256": "0f9812625308073ad4ae8dad05c160e0ada4d891ade1c464af2a589d55ad9930"
+    },
+    {
+      "file": "assets/l10-prototype/textures/polymer-basecolor.png",
+      "sha256": "510970f93564dd93138ece43105ed61d86360964bb1118e95ad5c51f61c703a6"
+    },
+    {
+      "file": "assets/l10-prototype/textures/polymer-metallicroughness.png",
+      "sha256": "8780450f257c53ad65160aae888a96d1509189c25786e1eaa8ad06f3471256c3"
+    },
+    {
+      "file": "assets/l10-prototype/textures/polymer-normal.png",
+      "sha256": "345b3514a58dbfcd55f1d8efe2c3ed6027bf0908c25c673dc0c9fcb0e3ef9842"
+    },
+    {
+      "file": "assets/l10-prototype/textures/surface-basecolor.png",
+      "sha256": "78a030243b2ba67e400c7e91f26971189d403e8ac8f728270b40d9746887b46c"
+    },
+    {
+      "file": "assets/l10-prototype/textures/surface-metallicroughness.png",
+      "sha256": "ac2a7fec57932cf920f53524b5e5a6c0bf07e94745a8d850437a25926aafdea1"
+    },
+    {
+      "file": "assets/l10-prototype/validate_blend.py",
+      "sha256": "c41ecb8def7acc600e47747fc31e5d32be093893af3281b0bdbedda5bbd1d1a1"
+    },
+    {
+      "file": "assets/l10-prototype/verify_finish_geometry.py",
+      "sha256": "5820b8d1efca2290895de938122fdbb73f9137a0919f61f69613aaface9721e7"
+    },
+    {
+      "file": "engine/vera_cycle/.gitattributes",
+      "sha256": "b84d51c90eed515dc66805acd2a0c7c153ae8b4f97afc239b82071a4f9e0b27e"
+    },
+    {
+      "file": "engine/vera_cycle/.gitignore",
+      "sha256": "33b3c51888c0fec255864343358d3ab618cc2dfc9573ea802238f167d8f43e0c"
+    },
+    {
+      "file": "engine/vera_cycle/.impeccable/design.json",
+      "sha256": "09746d56972e3f059878dfc766e147607fe2e012c0e81837ddfc6deeec708b03"
+    },
+    {
+      "file": "engine/vera_cycle/.impeccable/surfaces/cycle-report-py.md",
+      "sha256": "db7cd593bf894a33105f532c064be0e8e8d24a8fdfcdac2d5bc724cffabdfe9c"
+    },
+    {
+      "file": "engine/vera_cycle/README.md",
+      "sha256": "8e927233dfa1e06b07fe0b8a36e11d862171a98ea186d46d5b58002bbe788eee"
+    },
+    {
+      "file": "engine/vera_cycle/VERSION",
+      "sha256": "c40a8eeca3b26c0d19c9ae2b2c445a52d247469abfcc6773bb72bbe800054df9"
+    },
+    {
+      "file": "engine/vera_cycle/console_log.py",
+      "sha256": "4895243dac3397c791d136ff05323991ffb3c050d17ef81a0291ebb000402d02"
+    },
+    {
+      "file": "engine/vera_cycle/cycle_core.py",
+      "sha256": "0592e82c0b4349d58d24261c8a6328f8cd459152b41740b4919a9a223f12e335"
+    },
+    {
+      "file": "engine/vera_cycle/cycle_dmesg.py",
+      "sha256": "347214353cbb4e77db0a155a50bd6e4c23c526a9dbc8150d7e525d0353484596"
+    },
+    {
+      "file": "engine/vera_cycle/cycle_engine.py",
+      "sha256": "8c11a472c3c02546d553a709d51989452affe2c9a3bee2123e09bb6e24311a4b"
+    },
+    {
+      "file": "engine/vera_cycle/cycle_inventory_naboo.csv",
+      "sha256": "987153ac23248bdd845fe6dd262f717d6be423ba6a97e36f2fc1cef8b7272350"
+    },
+    {
+      "file": "engine/vera_cycle/cycle_inventory_neutrino.csv",
+      "sha256": "e50508677e3c7c074ec42dd2cfc102df3243dbae8a04a63cebf833de054eebd4"
+    },
+    {
+      "file": "engine/vera_cycle/cycle_report.py",
+      "sha256": "d567e2ad490f6508fb2256e7ce08b8ca116c5740a16587b9256838d8e2800800"
+    },
+    {
+      "file": "engine/vera_cycle/cycle_runtime.py",
+      "sha256": "8c51826af13905158fa63deb917c66250de5b4bf80509498c245121f2432b942"
+    },
+    {
+      "file": "engine/vera_cycle/cycle_specification_6969.py",
+      "sha256": "0d32bae80a5f0c5a1300e243893c6680ce358fa4fdc933963c9f32666a44af5f"
+    },
+    {
+      "file": "engine/vera_cycle/cycle_storage.py",
+      "sha256": "a12a9cf120238dcd5185e07afbbb1b702d92ddbb2dab5f9108ad692c5ce1e6d4"
+    },
+    {
+      "file": "engine/vera_cycle/cycle_transport.py",
+      "sha256": "143143319d6a63025fd9606334342799fc6f51b0debeecf79b350db422b31eed"
+    },
+    {
+      "file": "engine/vera_cycle/dev/DESIGN.md",
+      "sha256": "ef75f81acf3b9c275a3cf218b0d2726aef0d32f3f732db62c8b56681a090bdf2"
+    },
+    {
+      "file": "engine/vera_cycle/dev/IMPLEMENTATION_SPEC.md",
+      "sha256": "494f69567cf63a93a03744a9044140efd803bc0d653a20a07c1fff3079b9340e"
+    },
+    {
+      "file": "engine/vera_cycle/dev/PRODUCT.md",
+      "sha256": "a3961d869e11e130fcbe656f8906bd74a994bda2c488d5f4f902f463a508afb7"
+    },
+    {
+      "file": "engine/vera_cycle/dev/VERIFICATION.md",
+      "sha256": "daea6b14a507c54d2ec01fe05210e4cfbe50338d5dab93c0233ec99eba0b5ed4"
+    },
+    {
+      "file": "engine/vera_cycle/dev/dryrun_sim.py",
+      "sha256": "92554453b7091497d1ef20eab4cf25600d1006b60f3b0f61f722b7089a47e454"
+    },
+    {
+      "file": "engine/vera_cycle/dev/fixtures/real-hardware/README.md",
+      "sha256": "4ad41281a73a72b275feb6bd3ed0aaf6f11249907b3408e67365f664389f8d7f"
+    },
+    {
+      "file": "engine/vera_cycle/dev/fixtures/real-hardware/n1_sensor_list.txt",
+      "sha256": "ee6ccf9310de099b98523faa82ef3cf9ff8d0c248adfc6f3ef6e31e0f5824830"
+    },
+    {
+      "file": "engine/vera_cycle/dev/fixtures/real-hardware/n2_sensor_list.txt",
+      "sha256": "77664c8d5563f002b94851410a8cf544f8377c0b268ed018a84ce36d2a2f2532"
+    },
+    {
+      "file": "engine/vera_cycle/dev/fixtures/real-hardware/n3_sensor_list.txt",
+      "sha256": "66514addba44abfd673bc89ed2e057fb1b9297e402d895c88cfd59b816f72ecf"
+    },
+    {
+      "file": "engine/vera_cycle/dev/report_direction.md",
+      "sha256": "2841864492d45c3a49ad29e764f7bd1360f06873d27d45bd5e9136c10600c355"
+    },
+    {
+      "file": "engine/vera_cycle/dev/review/CODE_REVIEW_2026-09-29.md",
+      "sha256": "ab6e1be2190210d09ff186021d2ccf6c271bd5206090348bbbc94643af819697"
+    },
+    {
+      "file": "engine/vera_cycle/dev/review/REVIEW_zh-TW.md",
+      "sha256": "b60ed9185491945e4f9cbdd67534eaafebfc08280ba36267de942df2b8748971"
+    },
+    {
+      "file": "engine/vera_cycle/dev/review/offline_observations.json",
+      "sha256": "ba182bac7d7bc3565277ef4c3e3e81e2ab4af7583cd13184785ee1d8543fc680"
+    },
+    {
+      "file": "engine/vera_cycle/dev/review/offline_review.py",
+      "sha256": "9a609b3b49afb637d7a97758587d8bb5b9e92eff47d5e644ac21454d936508bc"
+    },
+    {
+      "file": "engine/vera_cycle/dev/tests/check_report.cjs",
+      "sha256": "2cc82a05a47941a30f9583bc0d7b3207917f9ff3f3a780ac2ac8744d04db8b96"
+    },
+    {
+      "file": "engine/vera_cycle/dev/tests/make_demo.py",
+      "sha256": "6d76ba010fec04d7b455a1ceea15e0f28f265f21b0d05189354aac788cf8e9dd"
+    },
+    {
+      "file": "engine/vera_cycle/dev/tests/test_cycle.py",
+      "sha256": "f4a1c02c359118654a3f60dfce11d9726952b5f3d81dcd6dc94a414f9b4a2e43"
+    },
+    {
+      "file": "engine/vera_cycle/dev/tests/test_hardware_completion.py",
+      "sha256": "77f604f3897591160772bc134804460c343f2da9665502a4a25a028e5a845496"
+    },
+    {
+      "file": "engine/vera_cycle/dev/tests/test_hardware_script.py",
+      "sha256": "0595562e9402a32a8cf87d209c8abfc068f9aa1d801131e068eb4673966410bb"
+    },
+    {
+      "file": "engine/vera_cycle/dev/tests/test_network_rules.py",
+      "sha256": "f3e7e81ec1f6dd527f09d8f1fb3f5778e7b80fa8305af7ae4afe4587f492adda"
+    },
+    {
+      "file": "engine/vera_cycle/dev/tests/test_nic_badges.py",
+      "sha256": "bac96e5c366c03695e4f018cceffd4ec647708eeedbc967d10b76b5a9d5a5c91"
+    },
+    {
+      "file": "engine/vera_cycle/dev/tests/test_p1_dmesg_parity.py",
+      "sha256": "9d5c14ca40da87aa0606c7b757be132ef408d36b9ab6c488e8131b0ee01a4be8"
+    },
+    {
+      "file": "engine/vera_cycle/dev/tests/test_p1_redfish_parity.py",
+      "sha256": "ec8eb41fbba6f43a77c8f4b5d8e591ab858e980eadda4f0c110be14e5bf6eef0"
+    },
+    {
+      "file": "engine/vera_cycle/dev/tests/test_p1_safety_regression.py",
+      "sha256": "ba09751b70ab00b69b716d3fac78cb53817f79473c69f8cdf32054373f591b72"
+    },
+    {
+      "file": "engine/vera_cycle/dev/tests/test_pci_endpoint_table.py",
+      "sha256": "e95a3197cb6f51dc4752b6e3997ff0b295e9b6e37ecc81610da57bd137924c6e"
+    },
+    {
+      "file": "engine/vera_cycle/dev/tests/test_redfish_session.py",
+      "sha256": "f7bab92e3248b8826a5e1718e76882de1ef6da299745cb38e656576aa50b6019"
+    },
+    {
+      "file": "engine/vera_cycle/dev/tests/test_report_classification.py",
+      "sha256": "f15d2b201e7c71c06579115a191d5f0d9ab5fc7643711b147318a9e6e38200d7"
+    },
+    {
+      "file": "engine/vera_cycle/dev/tests/test_review_regressions.py",
+      "sha256": "81fbcc1297158736a2101aa38d3c094f58e2e47038f4ee9c62919983e5c6c793"
+    },
+    {
+      "file": "engine/vera_cycle/dev/tests/test_runtime_process.py",
+      "sha256": "716f6d764a2c5adcba41d1c8d57c323b8b1fdf6066fc6c0f2fada7f2669ecbd0"
+    },
+    {
+      "file": "engine/vera_cycle/dev/tests/test_stop_menu.py",
+      "sha256": "6ce0e3a6f702ddc0957ecf5b4449693af0a7e07512bb6eff324678a1003cc179"
+    },
+    {
+      "file": "engine/vera_cycle/dev/tests/test_transport.py",
+      "sha256": "55e0a13d40cdd3a91e83587d9bc8f9646fb3b3f8e7ef1730230e14fe9ed7dc01"
+    },
+    {
+      "file": "engine/vera_cycle/docs/IMPLEMENTATION_2026-10-01.md",
+      "sha256": "9f60bd803dedcad79470951a90ac78c9772a53642e3eb9f1ded98f8121b0aa6b"
+    },
+    {
+      "file": "engine/vera_cycle/docs/TODO_updates.md",
+      "sha256": "e7b65ad003f7f517b78c3483adaab618e085f0fed8ea5e249adb6ea84f5ee5d3"
+    },
+    {
+      "file": "engine/vera_cycle/docs/vera_cycle_codex_requirements.md",
+      "sha256": "17aac7bd1be2701637d8f7ef3795c4125f8ac125d686e1b9b63aee2b55c3cf37"
+    },
+    {
+      "file": "engine/vera_cycle/eq3300_config.sh",
+      "sha256": "bd81c9d6a7fd30377265ceeb14818fc56c1a3cda62b8ed412590337fddecdb6b"
+    },
+    {
+      "file": "engine/vera_cycle/issue_policy.md",
+      "sha256": "ee2cf9ba09e08853822d190f303492385d4c45b01972fdc2ccd5e84c1f1a9bb0"
+    },
+    {
+      "file": "engine/vera_cycle/naboo_config.sh",
+      "sha256": "cc2b0712099c6d8da55cb98b67f4995bf9c7d067593308ccc1a99067e897132f"
+    },
+    {
+      "file": "engine/vera_cycle/neutrin_cycle.py",
+      "sha256": "5f77cc156a2b204a0d20eca96ab6791001e5b9c0df2968762df56a8aeabf8154"
+    },
+    {
+      "file": "engine/vera_cycle/neutrino_config.sh",
+      "sha256": "3d2cac6629f71c5cf79d3366a5f93e0e1593bb164b6e14440ce37350ec156096"
+    },
+    {
+      "file": "engine/vera_cycle/report.css",
+      "sha256": "760818cd2bb7eb0c38f5c2d6f69cb056b44f4c9e7a1aff4009e1d56bcef5410a"
+    },
+    {
+      "file": "engine/vera_cycle/report.js",
+      "sha256": "2247bf5286acd741726714f5e78d0df20e77e24d20f501fed2e36cad95e10fa8"
+    },
+    {
+      "file": "engine/vera_cycle/requirements.txt",
+      "sha256": "158cac3bc3a6fcd0d8295d222f9424e7dce6c5f94ca381ae528c520234cda7b9"
+    },
+    {
+      "file": "engine/vera_cycle/stop_cycle.sh",
+      "sha256": "89a5c8157bffa118f039c8f7f811c1822d5f51bd56336dcdf96a75acfa1c7223"
+    },
+    {
+      "file": "engine/vera_cycle/validation_checker.py",
+      "sha256": "f15cb775274556e617c5cc69e04d47d25aefe91419878649f09b1dfeecd4e8bf"
+    },
+    {
+      "file": "engine/vera_cycle/validation_checkers.json",
+      "sha256": "a26720f64bd20009efffcf2ec9a3e5912a0fe1a41f0c57e854ebe4a6a007c433"
+    },
+    {
+      "file": "engine/vera_cycle/validation_collectors.py",
+      "sha256": "f7b0ad76c5228f5adedc2485d87d522afb23f7af4d921efa1ee76bdeee23c688"
+    },
+    {
+      "file": "engine/vera_cycle/validation_events.py",
+      "sha256": "734d30247380174ed0a3afa1248d474b3dc0ad53a83e2f085d0ab3b18b3c5277"
+    },
+    {
+      "file": "engine/vera_cycle/validation_identity.py",
+      "sha256": "a216b3fbe5c51eff5e5b3072e5c9ca4092cb774d8e2dcb718a5d18ff81fb8fc5"
+    },
+    {
+      "file": "engine/vera_cycle/validation_rules.py",
+      "sha256": "c6d8cef522318fc6cac54f91ad001ffabfb3f08e78f9e55fa1e1d9a9f69184cf"
+    },
+    {
+      "file": "engine/vera_cycle/validation_transport.py",
+      "sha256": "7f0259323c53cdc1413ebe0c1132cfb118a2008f007ae3ad4964797da603cb05"
+    },
+    {
+      "file": "engine/vera_cycle/wistron-logo.svg",
+      "sha256": "f3c485b1914c717d9b06b174f27b4f79f689ba09ae0e85aed4a77d92a9a65136"
+    },
+    {
+      "file": "integration/__init__.py",
+      "sha256": "c6d416b462a824058f83df89d9a275c7fcf430b137c6780bac3ea07f003ac10d"
+    },
+    {
+      "file": "integration/agent_gateway.py",
+      "sha256": "3ac9949d8fb2fe573be852393700a422261a13bba04018d7a3b2bb5bf6f6e84e"
+    },
+    {
+      "file": "integration/agent_routes.py",
+      "sha256": "6187bb364b3886bb76df9b2f08af9d861b8b6d2efde64a17859e0b1072ee3166"
+    },
+    {
+      "file": "integration/agent_runs.py",
+      "sha256": "4978be49d52e1dce91247ffd576231c103807c519684e7d8543d50e846e6b143"
+    },
+    {
+      "file": "integration/authorization.py",
+      "sha256": "67aeb3c17d1f9bf806e8779c2badfc874e615ba540072d994a4bfece059a6daf"
+    },
+    {
+      "file": "integration/boundary.py",
+      "sha256": "8c84aaa84f270a617913dbf0c8aaa3df0a9a8cc7d8e73af2903e3d6987671bd5"
+    },
+    {
+      "file": "integration/control.py",
+      "sha256": "7a0c047c7140c87da89cfd821ed743f8a44c33679c6749118e6200cb300929b3"
+    },
+    {
+      "file": "integration/coordinator.py",
+      "sha256": "4eeab3ef4a379e6cac644f807f6b956a1bb4ecb80f3641a22abecbc6c61d12f0"
+    },
+    {
+      "file": "integration/credentials.py",
+      "sha256": "e9abdfb442f75c7e3542044fbb5c29f7ec873f8e58272ce6c1509efc872428e1"
+    },
+    {
+      "file": "integration/domain.py",
+      "sha256": "b8700bd64b5e2223e058bde92ae30d3651096724c12ddcfa7881b50ac8ab3c68"
+    },
+    {
+      "file": "integration/enrollment.py",
+      "sha256": "4358443fd6fa430a24a0e2ca5e970a0f3d7bfb88c3436386f2a6d6124fd164bb"
+    },
+    {
+      "file": "integration/events.py",
+      "sha256": "8a5d19dd3b754a896379d8845bc5581012b008268dd9d75675beb9e4d80e9edc"
+    },
+    {
+      "file": "integration/full_zip.py",
+      "sha256": "471bbc9b180f7577efc766c52b363fba137d73a93b2c3472986ffbdb8a6c868a"
+    },
+    {
+      "file": "integration/identity_sync.py",
+      "sha256": "dee29266b2b949d51fb779d6949149ac97277ca49ba3703864be032740959228"
+    },
+    {
+      "file": "integration/inspection.py",
+      "sha256": "a453f27bb14f977d5e5c85687bf8cdea660ea250e98e01ca4a0567942adf3918"
+    },
+    {
+      "file": "integration/inspection_advice.py",
+      "sha256": "c44dfdc3e188682068796db0923559501206eb6a236f3ce75cf1cbccab000a48"
+    },
+    {
+      "file": "integration/inspection_collection.py",
+      "sha256": "9c36252dacf10473693c7d9f57d2446b80c9d52ef1268f5c9e0b9ec9946b2728"
+    },
+    {
+      "file": "integration/inspection_fixture.py",
+      "sha256": "ace2c609db8cc81bbc4b0e4718ff2e239e2cfb76faa215df1e43d675304e46a1"
+    },
+    {
+      "file": "integration/inspection_routes.py",
+      "sha256": "00dbccc4168d1ac90cbe0d102bd674feee2ac7d5bb30ee1e2a1f6340ab0550c4"
+    },
+    {
+      "file": "integration/inspection_service.py",
+      "sha256": "90a0f50f3a5a185dc22afd09ad6eae59b4ece9540cad448799f69d222aca2d1f"
+    },
+    {
+      "file": "integration/inventory.py",
+      "sha256": "98360f31024315d65358651ab7d20610f12dd5fc1a02cd9eb8c804e83bc225a1"
+    },
+    {
+      "file": "integration/legacy_observation.py",
+      "sha256": "04781715a9f753bbb3ee245ff669b042112802a9a4f0a0e8b7c629d98869d7d9"
+    },
+    {
+      "file": "integration/local_provider.py",
+      "sha256": "2ec5c066007b447d613cd633853239d69f2f1a0b165991fc546f3cdc31838cb2"
+    },
+    {
+      "file": "integration/observation_service.py",
+      "sha256": "90139b82f19b108a35d4370a0c9498b5d07a58cec0d506a7e928b64fd1f93b7c"
+    },
+    {
+      "file": "integration/profiles.py",
+      "sha256": "bb10cc1b8c6a249d97ea58e731534be16b1739784976a5141169eb9860ba63db"
+    },
+    {
+      "file": "integration/project_access.py",
+      "sha256": "f59568c5836174bca240df89f26cb21282c0d8072e09d14db25f236fdaf721f8"
+    },
+    {
+      "file": "integration/runner.py",
+      "sha256": "e549df56b8ed344a1bc3b67cf15c2e1843aab4ac33c4593640b6ed48c037de7d"
+    },
+    {
+      "file": "integration/sessions.py",
+      "sha256": "f3e66754a68a40bb9bc9e461224c1bacfc8204b7731c88783a6bad13091af5dc"
+    },
+    {
+      "file": "integration/settings.py",
+      "sha256": "50549b1b12dd277869daa7b2462ca9665d6a5682bd643fba9b5864a1216d371e"
+    },
+    {
+      "file": "integration/store.py",
+      "sha256": "15134af12acb4ebac91201f458b3f0acd883e45bc033e9db0f44ec18f6915f46"
+    },
+    {
+      "file": "integration/synthetic.py",
+      "sha256": "4e3ebe4cde3eb0954c88471969e75240b0a6aeced6b5c9fdcf7dbe955f2723e7"
+    },
+    {
+      "file": "integration/targets.py",
+      "sha256": "d394fa05bfe38fede0648509e9ec11758daf97c14ab91f755762cfb13c6d06e1"
+    },
+    {
+      "file": "integration/telemetry_charts.py",
+      "sha256": "372bf30f8c798b6a1642a5e99e0f96b6fe86666715daa062a787d6c54136d7f8"
+    },
+    {
+      "file": "integration/telemetry_fixture.py",
+      "sha256": "eb719e6e36fa10ad9afaf7cda4e80a756c49abf13648d2556a6dc276d402dc24"
+    },
+    {
+      "file": "integration/telemetry_gpu.py",
+      "sha256": "d3804666331f283fe86add1d1dc878c59dcd5a69ac0af2f653cfd5e4bfdf2c6f"
+    },
+    {
+      "file": "integration/telemetry_monitoring.py",
+      "sha256": "14d4e4627442b426fbe53e7c646346c44dcad111c4f514fc2ae300b649d0de80"
+    },
+    {
+      "file": "integration/telemetry_provision.py",
+      "sha256": "bcfd4862201f3fdf1e956924c4eba9024376ee5a15da99061086191f76ed5cb9"
+    },
+    {
+      "file": "integration/telemetry_routes.py",
+      "sha256": "b8acde85672a49e73d1b92b0b1e8181f46cd5b509c1e21b613f758d6fdc9fca0"
+    },
+    {
+      "file": "integration/telemetry_store.py",
+      "sha256": "f357896e5799dfb1b8cf168c656efc77702475f75e0ee3a069786cc86f9d6f36"
+    },
+    {
+      "file": "integration/web.py",
+      "sha256": "56881ad570ab6bf353f392ee73d479dd764ef0eeb9c14607d837290bb28ae811"
+    },
+    {
+      "file": "assets/l10-prototype/compute-board-prototype.blend1",
+      "sha256": "01b5856ab7261a1ca0a8b9904ec8e82bccd611cfd3cbb687235e99b55b563e85",
+      "untrackedWorkspaceGuard": true
+    },
+    {
+      "file": "assets/l10-prototype/textures/surface-normal.png",
+      "sha256": "6309b50efb72caed7d2c651cef994b57946026879d54fcc611fab351b22994d5",
+      "untrackedWorkspaceGuard": true
+    }
+  ],
+  "streamChanges": [
+    {
+      "id": "CPU-L/inlet",
+      "beforeRadius": 0.0068,
+      "afterRadius": 0.009,
+      "boreRadius": 0.0105,
+      "radialMargin": 0.0015000000000000013
+    },
+    {
+      "id": "CPU-L/outlet",
+      "beforeRadius": 0.0068,
+      "afterRadius": 0.009,
+      "boreRadius": 0.0105,
+      "radialMargin": 0.0015000000000000013
+    },
+    {
+      "id": "GPU-L-OUTER/inlet",
+      "beforeRadius": 0.0068,
+      "afterRadius": 0.009,
+      "boreRadius": 0.0105,
+      "radialMargin": 0.0015000000000000013
+    },
+    {
+      "id": "GPU-L-OUTER/outlet",
+      "beforeRadius": 0.0068,
+      "afterRadius": 0.009,
+      "boreRadius": 0.0105,
+      "radialMargin": 0.0015000000000000013
+    },
+    {
+      "id": "GPU-L-INNER/inlet",
+      "beforeRadius": 0.0068,
+      "afterRadius": 0.009,
+      "boreRadius": 0.0105,
+      "radialMargin": 0.0015000000000000013
+    },
+    {
+      "id": "GPU-L-INNER/outlet",
+      "beforeRadius": 0.0068,
+      "afterRadius": 0.009,
+      "boreRadius": 0.0105,
+      "radialMargin": 0.0015000000000000013
+    },
+    {
+      "id": "CPU-R/inlet",
+      "beforeRadius": 0.0068,
+      "afterRadius": 0.009,
+      "boreRadius": 0.0105,
+      "radialMargin": 0.0015000000000000013
+    },
+    {
+      "id": "CPU-R/outlet",
+      "beforeRadius": 0.0068,
+      "afterRadius": 0.009,
+      "boreRadius": 0.0105,
+      "radialMargin": 0.0015000000000000013
+    },
+    {
+      "id": "GPU-R-INNER/inlet",
+      "beforeRadius": 0.0068,
+      "afterRadius": 0.009,
+      "boreRadius": 0.0105,
+      "radialMargin": 0.0015000000000000013
+    },
+    {
+      "id": "GPU-R-INNER/outlet",
+      "beforeRadius": 0.0068,
+      "afterRadius": 0.009,
+      "boreRadius": 0.0105,
+      "radialMargin": 0.0015000000000000013
+    },
+    {
+      "id": "GPU-R-OUTER/inlet",
+      "beforeRadius": 0.0068,
+      "afterRadius": 0.009,
+      "boreRadius": 0.0105,
+      "radialMargin": 0.0015000000000000013
+    },
+    {
+      "id": "GPU-R-OUTER/outlet",
+      "beforeRadius": 0.0068,
+      "afterRadius": 0.009,
+      "boreRadius": 0.0105,
+      "radialMargin": 0.0015000000000000013
+    }
+  ],
+  "limitations": [
+    "Model coordinates are normalized visualization units, not millimetres.",
+    "Source invariance and projected width are engineering evidence, not proof of photorealism."
+  ],
+  "unchangedRuntimeSources": [
+    "app/static/js/cycle-console.js",
+    "app/static/js/cycle-fleet.js",
+    "app/static/js/cycle-workspace.js",
+    "app/static/js/cycle.js",
+    "app/static/js/l10-asset-runtime.js",
+    "app/static/js/l10-gltf.js",
+    "app/static/js/l10-hardware.js",
+    "app/static/js/l10-timeline.js",
+    "app/static/js/pa-agent.js",
+    "app/static/js/telemetry-native.js",
+    "app/static/js/telemetry-provision.js"
+  ],
+  "originalTestFiles": 79,
+  "assetCacheKey": {
+    "before": "cooling-assembly.glb?v=20261014-v3",
+    "after": "cooling-assembly.glb?v=20261014-final-rc"
+  },
+  "coverFinishException": {
+    "before": "sheetAnisotropy=mix(.07,.16,step(1.5,uCoolingFinish));",
+    "after": "sheetAnisotropy=mix(.14,.28,step(1.5,uCoolingFinish));",
+    "scope": "CPU/GPU cover-only directional specular approximation; same PBR factors, textures, light and exposure"
+  }
+}

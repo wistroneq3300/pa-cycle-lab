@@ -1,0 +1,457 @@
+{
+  "pass": true,
+  "baseline": "1611dd2c31c48b880ca100141e0b723e126bef93",
+  "checks": [
+    "Exact baseline slotLayout and 8 SSD / 8 rear contacts",
+    "Six unchanged dual-port cage triangle streams",
+    "No duplicated procedural network PCBs",
+    "No changes to other procedural layers from network ownership",
+    "54 actual-triangle rays through six hollow cage mouths",
+    "All new network triangles stay in the three fixed board envelopes and below original lid",
+    "No network triangle enters any maximum-tolerance SSD body (triangle / box SAT)",
+    "54 complete seated-network / IO port-path rays remain open",
+    "Three die / TIM / metal pedestal / cover stacks have exact contact heights and approved footprints",
+    "No restored-cover surface penetration; exact PCB seating contacts recorded separately (spatial grid + triangle SAT)",
+    "Bounded silicon-only optical finish; no full-board iridescence"
+  ],
+  "limits": [
+    "Geometry tests do not prove photorealism, vendor dimensions, solder attachment or unseen electrical routing.",
+    "GLB image decoding here reads PNG dimensions only; actual texture/shader rendering is covered by l10-final-polish.cjs.",
+    "Mesh seating/component identity still requires Blender and screenshot inspection because delivery meshes are joined.",
+    "Cover audit checks triangle intersections with spatial broad phase; it is not a general watertight-solid containment or manufacturing tolerance certification."
+  ],
+  "cageSHA256": "fcb1baedf6ed612b18288ecdab83e5a2c0618a16c1b1c9c04837a4578481a876",
+  "ssdSHA256": "be57342a3517e314c3e992e6097ab218f214954898578f70b61b6978e2459cda",
+  "asset": {
+    "id": "dual-bare-compute-boards-r2",
+    "sha256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29",
+    "bytes": 25533668,
+    "layers": [
+      "board",
+      "packages",
+      "network",
+      "io"
+    ]
+  },
+  "network": {
+    "triangles": 59210,
+    "primitives": 49,
+    "boardTriangleCounts": {
+      "BF3-L": 25508,
+      "BF3-R": 25508,
+      "CX7-R": 8194
+    },
+    "bounds": {
+      "BF3-L": {
+        "min": [
+          -1.7400000095367432,
+          -0.10399999469518661,
+          0.5700000524520874
+        ],
+        "max": [
+          -0.8399999737739563,
+          -0.033900000154972076,
+          3.0799999237060547
+        ]
+      },
+      "BF3-R": {
+        "min": [
+          0.8399999737739563,
+          -0.10399999469518661,
+          0.5700000524520874
+        ],
+        "max": [
+          1.7400000095367432,
+          -0.033900000154972076,
+          3.0799999237060547
+        ]
+      },
+      "CX7-R": {
+        "min": [
+          1.1004999876022339,
+          0.01850000023841858,
+          2.1499998569488525
+        ],
+        "max": [
+          1.6004999876022339,
+          0.08060000091791153,
+          3.049999952316284
+        ]
+      }
+    },
+    "envelopes": [
+      {
+        "id": "BF3-L",
+        "min": [
+          -1.74001,
+          -0.10401,
+          0.56999
+        ],
+        "max": [
+          -0.83999,
+          0.0225,
+          3.08001
+        ]
+      },
+      {
+        "id": "BF3-R",
+        "min": [
+          0.83999,
+          -0.10401,
+          0.56999
+        ],
+        "max": [
+          1.74001,
+          0.0225,
+          3.08001
+        ]
+      },
+      {
+        "id": "CX7-R",
+        "min": [
+          1.10049,
+          0.01849,
+          2.14999
+        ],
+        "max": [
+          1.60051,
+          0.106,
+          3.05001
+        ]
+      }
+    ]
+  },
+  "ssdTriangleNarrowPhaseTests": 0,
+  "thermalSeats": [
+    {
+      "board": "BF3-L",
+      "x": -1.29,
+      "z": 1.44,
+      "y": -0.0339,
+      "width": 0.265,
+      "depth": 0.276,
+      "thickness": 0.002,
+      "roof": 0.0225
+    },
+    {
+      "board": "BF3-R",
+      "x": 1.29,
+      "z": 1.44,
+      "y": -0.0339,
+      "width": 0.265,
+      "depth": 0.276,
+      "thickness": 0.002,
+      "roof": 0.0225
+    },
+    {
+      "board": "CX7-R",
+      "x": 1.3505,
+      "z": 2.435,
+      "y": 0.0806,
+      "width": 0.134,
+      "depth": 0.138,
+      "thickness": 0.0015,
+      "roof": 0.106
+    }
+  ],
+  "coverAudit": {
+    "coverTriangles": 2892,
+    "narrowPhaseTests": 716,
+    "seatingContactPairs": 336,
+    "seatingSamples": [
+      {
+        "board": "BF3-L",
+        "planeY": -0.092,
+        "tolerance": 0.000001,
+        "networkMaterial": "Black solder mask",
+        "network": "Bare Board 1 / network / BF3-L#0",
+        "index": 27,
+        "cover": 136
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.092,
+        "tolerance": 0.000001,
+        "networkMaterial": "Black solder mask",
+        "network": "Bare Board 1 / network / BF3-L#0",
+        "index": 27,
+        "cover": 137
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.092,
+        "tolerance": 0.000001,
+        "networkMaterial": "Black solder mask",
+        "network": "Bare Board 1 / network / BF3-L#0",
+        "index": 27,
+        "cover": 138
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.092,
+        "tolerance": 0.000001,
+        "networkMaterial": "Black solder mask",
+        "network": "Bare Board 1 / network / BF3-L#0",
+        "index": 27,
+        "cover": 140
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.092,
+        "tolerance": 0.000001,
+        "networkMaterial": "Black solder mask",
+        "network": "Bare Board 1 / network / BF3-L#0",
+        "index": 27,
+        "cover": 141
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.092,
+        "tolerance": 0.000001,
+        "networkMaterial": "Black solder mask",
+        "network": "Bare Board 1 / network / BF3-L#0",
+        "index": 27,
+        "cover": 142
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.092,
+        "tolerance": 0.000001,
+        "networkMaterial": "Black solder mask",
+        "network": "Bare Board 1 / network / BF3-L#0",
+        "index": 27,
+        "cover": 144
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.092,
+        "tolerance": 0.000001,
+        "networkMaterial": "Black solder mask",
+        "network": "Bare Board 1 / network / BF3-L#0",
+        "index": 27,
+        "cover": 145
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.092,
+        "tolerance": 0.000001,
+        "networkMaterial": "Black solder mask",
+        "network": "Bare Board 1 / network / BF3-L#0",
+        "index": 27,
+        "cover": 146
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.092,
+        "tolerance": 0.000001,
+        "networkMaterial": "Black solder mask",
+        "network": "Bare Board 1 / network / BF3-L#0",
+        "index": 27,
+        "cover": 148
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.092,
+        "tolerance": 0.000001,
+        "networkMaterial": "Black solder mask",
+        "network": "Bare Board 1 / network / BF3-L#0",
+        "index": 27,
+        "cover": 149
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.092,
+        "tolerance": 0.000001,
+        "networkMaterial": "Black solder mask",
+        "network": "Bare Board 1 / network / BF3-L#0",
+        "index": 27,
+        "cover": 150
+      }
+    ],
+    "thermalContactPairs": 42,
+    "thermalByBoard": {
+      "BF3-L": 14,
+      "BF3-R": 14,
+      "CX7-R": 14
+    },
+    "thermalSamples": [
+      {
+        "board": "BF3-L",
+        "planeY": -0.0339,
+        "tolerance": 0.000001,
+        "networkMaterial": "NETWORK exposed optical face",
+        "footprint": [
+          0.265,
+          0.276
+        ],
+        "network": "Bare Board 1 / network / BF3-L#8",
+        "index": 0,
+        "cover": 66
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.0339,
+        "tolerance": 0.000001,
+        "networkMaterial": "NETWORK exposed optical face",
+        "footprint": [
+          0.265,
+          0.276
+        ],
+        "network": "Bare Board 1 / network / BF3-L#8",
+        "index": 0,
+        "cover": 67
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.0339,
+        "tolerance": 0.000001,
+        "networkMaterial": "NETWORK exposed optical face",
+        "footprint": [
+          0.265,
+          0.276
+        ],
+        "network": "Bare Board 1 / network / BF3-L#8",
+        "index": 0,
+        "cover": 70
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.0339,
+        "tolerance": 0.000001,
+        "networkMaterial": "NETWORK exposed optical face",
+        "footprint": [
+          0.265,
+          0.276
+        ],
+        "network": "Bare Board 1 / network / BF3-L#8",
+        "index": 0,
+        "cover": 71
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.0339,
+        "tolerance": 0.000001,
+        "networkMaterial": "NETWORK exposed optical face",
+        "footprint": [
+          0.265,
+          0.276
+        ],
+        "network": "Bare Board 1 / network / BF3-L#8",
+        "index": 0,
+        "cover": 74
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.0339,
+        "tolerance": 0.000001,
+        "networkMaterial": "NETWORK exposed optical face",
+        "footprint": [
+          0.265,
+          0.276
+        ],
+        "network": "Bare Board 1 / network / BF3-L#8",
+        "index": 0,
+        "cover": 75
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.0339,
+        "tolerance": 0.000001,
+        "networkMaterial": "NETWORK exposed optical face",
+        "footprint": [
+          0.265,
+          0.276
+        ],
+        "network": "Bare Board 1 / network / BF3-L#8",
+        "index": 0,
+        "cover": 68
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.0339,
+        "tolerance": 0.000001,
+        "networkMaterial": "NETWORK exposed optical face",
+        "footprint": [
+          0.265,
+          0.276
+        ],
+        "network": "Bare Board 1 / network / BF3-L#8",
+        "index": 1,
+        "cover": 70
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.0339,
+        "tolerance": 0.000001,
+        "networkMaterial": "NETWORK exposed optical face",
+        "footprint": [
+          0.265,
+          0.276
+        ],
+        "network": "Bare Board 1 / network / BF3-L#8",
+        "index": 1,
+        "cover": 74
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.0339,
+        "tolerance": 0.000001,
+        "networkMaterial": "NETWORK exposed optical face",
+        "footprint": [
+          0.265,
+          0.276
+        ],
+        "network": "Bare Board 1 / network / BF3-L#8",
+        "index": 1,
+        "cover": 75
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.0339,
+        "tolerance": 0.000001,
+        "networkMaterial": "NETWORK exposed optical face",
+        "footprint": [
+          0.265,
+          0.276
+        ],
+        "network": "Bare Board 1 / network / BF3-L#8",
+        "index": 1,
+        "cover": 64
+      },
+      {
+        "board": "BF3-L",
+        "planeY": -0.0339,
+        "tolerance": 0.000001,
+        "networkMaterial": "NETWORK exposed optical face",
+        "footprint": [
+          0.265,
+          0.276
+        ],
+        "network": "Bare Board 1 / network / BF3-L#8",
+        "index": 1,
+        "cover": 65
+      }
+    ],
+    "contactRule": "Only known PCB top-plane seating and the three named silicon / TIM planes within their checked pad footprints; tolerance 1e-6 raw units. No other component-surface exception.",
+    "collisionPairs": 0,
+    "collisionGroups": [],
+    "collisions": []
+  },
+  "opticalMaterials": [
+    {
+      "name": "CPU exposed optical face",
+      "strength": 0.21,
+      "thickness": 410
+    },
+    {
+      "name": "GPU exposed optical face",
+      "strength": 0.23,
+      "thickness": 455
+    },
+    {
+      "name": "NETWORK exposed optical face",
+      "strength": 0.2,
+      "thickness": 390
+    }
+  ]
+}

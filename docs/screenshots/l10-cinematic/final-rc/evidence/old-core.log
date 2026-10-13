@@ -1,0 +1,24 @@
+node:internal/assert/utils:77
+    throw err;
+    ^
+
+AssertionError [ERR_ASSERTION]: surface normal must be normalized
+    at C:\Users\kobei\OneDrive\文件\ChatGPT\New project\pa-cycle-cinematic-l10\app\qa\core-scene.cjs:79:14
+    at check (C:\Users\kobei\OneDrive\文件\ChatGPT\New project\pa-cycle-cinematic-l10\app\qa\core-scene.cjs:64:25)
+    at Object.<anonymous> (C:\Users\kobei\OneDrive\文件\ChatGPT\New project\pa-cycle-cinematic-l10\app\qa\core-scene.cjs:68:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object.<anonymous> (C:\Users\kobei\OneDrive\文件\ChatGPT\New project\pa-cycle-cinematic-l10\app\qa\l10-final-rc-regression.cjs:27:173)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

@@ -1,0 +1,19 @@
+{
+  "baseline": "445bd9c6287cbe7f69d6cbc1ffc9dd1c43c1905b",
+  "passed": false,
+  "checks": [
+    "Independent collision/path helpers retain piercing, coplanar, clearance and full-containment negative fixtures"
+  ],
+  "errors": [
+    "AssertionError [ERR_ASSERTION]: app/static/js/rack-equipment-scene.js unchanged\n+ actual - expected\n... Skipped lines\n\n  '/* PA Rack Engineering — original procedural equipment illustrations, not vendor CAD.\\n' +\n    \" * Live placement uses the application's 48U, top-U + occupied-U convention.\\n\" +\n    ' * Compute / NVLink / power front-panel vocabulary: NVIDIA DGX GB300 hardware guide\\n' +\n    ' * https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html (GB300 tabs).\\n' +\n    ' * Larger-U enclosures are generic derivatives, not claims of a vendor SKU.\\n' +\n...\n    '    function ring(x,y,z,r,wire,color,segments=18){\\n' +\n+   '      for(let i=0;i<segments;i++'... 106104 more characters\n-   '      for(let i=0;i<segments;i++'... 105640 more characters\n\n    at immutableBaseline (C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-cinematic-l10\\app\\qa\\l10-cooling-v2.cjs:174:106)\n    at main (C:\\Users\\kobei\\OneDrive\\文件\\ChatGPT\\New project\\pa-cycle-cinematic-l10\\app\\qa\\l10-cooling-v2.cjs:442:40)"
+  ],
+  "limits": [
+    "Independent geometric validation of a conceptual assembly, not manufacturing CAD, a verified OEM retention design or CFD.",
+    "Visual opacity/flow animation, real-clock playback, late loading failures and WebGL context lifecycle require the separate browser suite.",
+    "Triangle SAT plus named contact rules is complemented by channel containment sampling; arbitrary watertight solid topology is not certified."
+  ],
+  "bareAsset": {
+    "sha256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29",
+    "bytes": 25533668
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "skill": "impeccable",
+  "passType": "bounded local polish; two rounds only",
+  "detectorRuns": 1,
+  "command": "impeccable detect --json app/static/js/core-scene.js app/static/js/rack-equipment-scene.js app/static/index.html app/static/l10-cooling-v2-review.html",
+  "exitCode": 0,
+  "status": "WARN; not an accessibility or photorealism PASS",
+  "findings": [
+    "Inherited Dashboard shell contrast and 10/11px text warnings.",
+    "Inherited shell animated status dots, shadow/glow and decorative grid advisories.",
+    "Existing review-page palette and 4px control radius differ from the broader DESIGN.md token inventory."
+  ],
+  "disposition": "The RC changed neither CSS nor shell presentation. Both HTML files differ only in explicit script cache keys, independently checked in scope.json. These inherited findings were not suppressed or relabelled PASS, and no third/out-of-scope UI redesign was performed.",
+  "visualAuthority": "Unedited Chromium/WebGL images at actual 2127x1272 Dashboard and 3440x1440 review sizes; fixed camera/light/exposure/tone mapping.",
+  "limits": "Detector warnings do not measure metal realism, fluid readability or cinematic quality. Final scores come from image review and separately labelled sampled movie review."
+}

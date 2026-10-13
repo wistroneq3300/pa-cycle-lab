@@ -1,0 +1,72 @@
+{
+  "file": "after/rack-bottom-nine-1u-panels-crop.png",
+  "sha256": "9313b6ef35f8520d68b6e07c13c6a6f4b02aa8d0e5920cdd24ca0ade036c8386",
+  "clip": {
+    "x": 1587,
+    "y": 1027,
+    "width": 266,
+    "height": 227
+  },
+  "parentFrame": "after/rack-full-front.png",
+  "method": "Native Chromium screenshot clip of the original full-front WebGL frame; no resampling, zoom, pixel editing or camera change.",
+  "camera": {
+    "yaw": 0,
+    "elevation": 0.03500000014901161,
+    "distance": 42.169837951660156,
+    "target": [
+      0,
+      0,
+      0
+    ],
+    "eye": [
+      0,
+      1.4756430387496948,
+      42.144012451171875
+    ],
+    "fov": 0.5,
+    "view": "front"
+  },
+  "cameraUniforms": {
+    "eye": [
+      0,
+      1.4756430387496948,
+      42.144012451171875
+    ],
+    "viewProjection": [
+      1.6393886804580688,
+      0,
+      0,
+      0,
+      0,
+      3.913918972015381,
+      -0.03505122661590576,
+      -0.03499285504221916,
+      0,
+      -0.13704313337802887,
+      -1.0010546445846558,
+      -0.9993875622749329,
+      0,
+      0,
+      41.9399299621582,
+      42.169837951660156
+    ],
+    "model": [
+      0.6880000233650208,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0.8019999861717224,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  }
+}

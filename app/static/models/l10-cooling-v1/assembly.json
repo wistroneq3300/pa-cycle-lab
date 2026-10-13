@@ -1225,7 +1225,7 @@
         0.38404485438778113
       ],
       "length": 0.38404485438778113,
-      "radius": 0.0068,
+      "radius": 0.009,
       "uvOffset": 3.3306966132788203,
       "from": "supply-header",
       "to": "CPU-L/channels"
@@ -1947,7 +1947,7 @@
         0.4795044957797431
       ],
       "length": 0.4795044957797431,
-      "radius": 0.0068,
+      "radius": 0.009,
       "uvOffset": 6.8016964770448585,
       "from": "CPU-L/channels",
       "to": "return-header"
@@ -2116,7 +2116,7 @@
         1.4393494427440745
       ],
       "length": 1.4393494427440745,
-      "radius": 0.0068,
+      "radius": 0.009,
       "uvOffset": 2.9056965417532465,
       "from": "supply-header",
       "to": "GPU-L-OUTER/channels"
@@ -2838,7 +2838,7 @@
         1.5355045196699646
       ],
       "length": 1.5355045196699646,
-      "radius": 0.0068,
+      "radius": 0.009,
       "uvOffset": 7.720000961854881,
       "from": "GPU-L-OUTER/channels",
       "to": "return-header"
@@ -3007,7 +3007,7 @@
         1.4393494427237226
       ],
       "length": 1.4393494427237226,
-      "radius": 0.0068,
+      "radius": 0.009,
       "uvOffset": 3.7456965751318476,
       "from": "supply-header",
       "to": "GPU-L-INNER/channels"
@@ -3729,7 +3729,7 @@
         1.5355045196666974
       ],
       "length": 1.5355045196666974,
-      "radius": 0.0068,
+      "radius": 0.009,
       "uvOffset": 8.560000937960861,
       "from": "GPU-L-INNER/channels",
       "to": "return-header"
@@ -3898,7 +3898,7 @@
         0.38404485438365626
       ],
       "length": 0.38404485438365626,
-      "radius": 0.0068,
+      "radius": 0.009,
       "uvOffset": 5.260696560826734,
       "from": "supply-header",
       "to": "CPU-R/channels"
@@ -4620,7 +4620,7 @@
         0.4795044957823754
       ],
       "length": 0.4795044957823754,
-      "radius": 0.0068,
+      "radius": 0.009,
       "uvOffset": 8.731696390576339,
       "from": "CPU-R/channels",
       "to": "return-header"
@@ -4789,7 +4789,7 @@
         1.4393494427217508
       ],
       "length": 1.4393494427217508,
-      "radius": 0.0068,
+      "radius": 0.009,
       "uvOffset": 4.845696598973706,
       "from": "supply-header",
       "to": "GPU-R-INNER/channels"
@@ -5511,7 +5511,7 @@
         1.5355045196682136
       ],
       "length": 1.5355045196682136,
-      "radius": 0.0068,
+      "radius": 0.009,
       "uvOffset": 9.660001002366446,
       "from": "GPU-R-INNER/channels",
       "to": "return-header"
@@ -5680,7 +5680,7 @@
         1.439349442725996
       ],
       "length": 1.439349442725996,
-      "radius": 0.0068,
+      "radius": 0.009,
       "uvOffset": 5.685696513143018,
       "from": "supply-header",
       "to": "GPU-R-OUTER/channels"
@@ -6402,7 +6402,7 @@
         1.5355045196838717
       ],
       "length": 1.5355045196838717,
-      "radius": 0.0068,
+      "radius": 0.009,
       "uvOffset": 10.50000108806155,
       "from": "GPU-R-OUTER/channels",
       "to": "return-header"
@@ -6425,13 +6425,30 @@
     "frontLimitZ": -0.313
   },
   "builderHelperSource": "assets/l10-prototype/build.py: pure helper definitions only",
-  "finishRevision": 3,
+  "finishRevision": 4,
   "finishChanges": [
-    "Post-boolean analytic cylindrical manifold normals, flat port/end faces and explicit UV seam; 64-side headers within original radius",
-    "Five-segment 0.0022 cover edge breaks inside existing cover envelope",
-    "Twelve stepped compression ferrules with chamfered lips and captured elastomer seals inside original 0.020 collar radius",
-    "All existing CPU/GPU MR finishes, manifold roughness, bare assets, contact seats, TIM, mounts, stream meshes and route contracts retained"
+    "V3 manifold normals/UV/radii, covers, MR maps and all PBR scalar factors retained",
+    "Twelve branch stream cores .0068 to .009 inside unchanged .0105-radius bores; directed centerlines/arc UVs/speed unchanged; channel/header stream radii retained",
+    "Twelve original ferrules gain shallow bounded service-tool flats and ray-traced local socket contact occlusion; original .020 outer envelope/.0145 open bore retained",
+    "All bare assets, contact seats, TIM, mounts, physical tubing, protected inventory and 1U envelope retained"
   ],
+  "socketContactAO": {
+    "image": "cooling-socket-contact-ao.png",
+    "size": [
+      256,
+      256
+    ],
+    "samplesPerTexel": 48,
+    "distance": 0.022,
+    "rayTests": 2189568,
+    "rayHits": 936283,
+    "bakedTexels": 45616,
+    "minimum": 0.0016433788696303964,
+    "mean": 0.7089741230010986,
+    "geometrySource": "CPU-L inlet standardized socket/plate/hose joint; all actual companion solids excluding fluid",
+    "reuse": "Shared by twelve equivalent local joints; distant layout intentionally excluded",
+    "scope": "Machined nickel fittings occlusion only; same baseColor/metallic/roughness scalars"
+  },
   "fastenerRecesses": [
     {
       "id": "CPU-L/foot/-1/-1 captive fastener",
@@ -7490,13 +7507,13 @@
       "removedV1Slug": null
     }
   ],
-  "sha256": "5cfef980e39a446f3157e214b5e1f2c4058e6ba65b3e133557f5d5cd43d05cdc",
-  "bytes": 5050888,
+  "sha256": "88eec60c20e775a431b446da311f3a1476cc2774173e628adc170ae3ac1f5a3f",
+  "bytes": 5077332,
   "file": "cooling-assembly.glb",
   "source": "assets/l10-cooling-v1/cooling-assembly.blend",
   "builder": "assets/l10-cooling-v1/build.py",
   "triangles": 94888,
   "nodes": 54,
   "materials": 12,
-  "embeddedImages": 4
+  "embeddedImages": 5
 }

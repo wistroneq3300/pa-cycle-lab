@@ -1,0 +1,102 @@
+{
+  "schema": "pa-cycle-lab.l10-final-rc.independent-film-visual-review.v1",
+  "decision": "No new visible regression found in the inspected decoded movie samples; retain the conservative 86.5 visual judgment.",
+  "visualEditsFrozenAfterRounds": 2,
+  "source": {
+    "file": "../film.webm",
+    "sha256": "aa453960a2e819545c7f2fd5f2821af64501be645020f65ec98378a1cb0e2bda",
+    "sourceFileHashIndependentlyVerified": true,
+    "metadata": "video.json",
+    "frameManifest": "film-frames.json",
+    "frameGallery": "film-frames/index.html",
+    "recordingMethod": "Native Chromium recordVideo of the shipping Dashboard, with the full viewport and Dashboard chrome.",
+    "encodedDimensions": [3440, 1440],
+    "actualDashboardCanvasFromTrace": [2127, 1272],
+    "encodedFramesPerSecond": 25,
+    "containerDurationSeconds": 44.88,
+    "authoredDurationSeconds": 39.7,
+    "measuredReplayWallSeconds": 39.827,
+    "durationExplanation": "The native uncut container includes setup and completion overhead. Container time, Replay wall time and authored timeline time are distinct; no guessed time subtraction or time scaling is used."
+  },
+  "method": {
+    "actualDecodedFramesOpened": 20,
+    "zeroBasedEncodedFrameIndices": [300, 350, 400, 450, 459, 480, 500, 509, 520, 530, 540, 550, 560, 580, 600, 650, 700, 800, 950, 1120],
+    "reviewedFrameHashesMatchManifest": true,
+    "continuousHumanPlaybackClaimed": false,
+    "newBrowserOrRendererUsed": false,
+    "imageEditsPerformed": false,
+    "limits": [
+      "This is actual decoded-frame visual inspection, not continuous human playback or proof that every intervening frame is free of a jerk.",
+      "The 25 fps recording rate does not measure GPU rendering cadence or guarantee stable frame pacing.",
+      "The native VP8 recording and review display soften fine details; the uncompressed fixed PNG comparisons remain the primary material-detail evidence.",
+      "Static frames establish visible connectivity and changing flow witnesses, but cannot independently prove the complete velocity field or every route direction.",
+      "No new score is awarded merely because recording, geometry or runtime checks pass."
+    ]
+  },
+  "observations": [
+    {
+      "topic": "Cold Plate installation and manifold",
+      "frames": [300, 350],
+      "nominalContainerSeconds": [12, 14],
+      "finding": "The six cold plates and their relationship to the two compute boards remain legible. At the connection stage, the metal headers and dark hoses read coherently. Covers remain quite uniformly gray.",
+      "framingQualification": "These are cooling close-ups: the forward part of the server is outside the lower Canvas boundary. Do not describe the entire movie as uncropped."
+    },
+    {
+      "topic": "Dynamic flow at real Dashboard scale",
+      "frames": [400, 450, 459],
+      "nominalContainerSeconds": [16, 18, 18.36],
+      "finding": "All six connected serpentine plate branches are visible in the shipping Dashboard composition. Blue supply and red return remain distinguishable, and travel-witness patterns differ between samples. No bloom or neon-like glow is apparent.",
+      "remainingLimit": "The thinner branch tubes still require attention for instantaneous direction; native movie compression also weakens the finest witnesses."
+    },
+    {
+      "topic": "Metal restore and complete open assembly",
+      "frames": [480, 500, 509],
+      "nominalContainerSeconds": [19.2, 20, 20.36],
+      "finding": "Flow returns to opaque metal before the closure. The camera pulls back in an orderly progression; at frame 509 the complete open server, front panel and cooling assembly are contained.",
+      "remainingLimit": "The complete open-server presentation remains short. By frame 520 at 20.8 seconds the raised lid already covers most of the internals. This observation is not a precise measurement of total hold duration."
+    },
+    {
+      "topic": "Lid descent and closed state",
+      "frames": [520, 530, 540, 550, 560],
+      "nominalContainerSeconds": [20.8, 21.2, 21.6, 22, 22.4],
+      "finding": "The raised, descending and seated lid remains within the Canvas. No renewed cloud-like highlight, obvious penetration or material discontinuity is visible in these samples. The gold front stays consistent across the closure.",
+      "remainingLimit": "The lid is clean but still a broad, idealized satin plane; these frames do not support photographic realism."
+    },
+    {
+      "topic": "Closed server to Rack bridge",
+      "frames": [580, 600, 650, 700],
+      "nominalContainerSeconds": [23.2, 24, 26, 28],
+      "finding": "The closed server remains recognizable as the Rack appears, followed by the established equipment constellation and seating sequence. The lower blanking appears shallow and segmented rather than as a deep compute tray.",
+      "framingQualification": "At frame 600 some lower constellation equipment is outside the Canvas; frame 650 restores a contained overview. This is not evidence of a new RC camera change, and it is not concealed by claiming universal no-crop acceptance."
+    },
+    {
+      "topic": "Rack insertion, overview and final identity",
+      "frames": [800, 950, 1120],
+      "nominalContainerSeconds": [32, 38, 44.8],
+      "finding": "The Rack insertion close-up proceeds to the established overview and final complete Rack. The bottom remains repeated blanking faces without compute-server fronts; the gold compute equipment retains its established appearance.",
+      "framingQualification": "The rail-engagement close-up at frame 800 crops the lower equipment intentionally in the established sequence. The complete Rack fits in the later overview and endpoint samples.",
+      "engineeringSeparation": "The exact 1U panel count, U1-9 and U47-48 allocation, mesh/material reuse and unchanged placement/animation are established by rack-final-contract.json, not inferred solely from these movie pixels."
+    }
+  ],
+  "metadataCaveat": {
+    "runtimeErrorsReported": 0,
+    "metadataExtractionWarningsReported": 1,
+    "warning": "The inspector could not retain the response body for bare-compute-boards.glb while extracting recording metadata. This is an evidence-body extraction warning, not a reported render or GLB loading failure. Do not describe all metadata collection as warning-free."
+  },
+  "finalVisualScores": [
+    {"dimension": "Cold Plate realism", "score": 86, "reason": "Plausible stack, collars and cover edges; broad cover planes remain too uniform."},
+    {"dimension": "Manifold / Plumbing realism", "score": 88, "reason": "Coherent metal highlights and distinct hose finish retained without the former fine reflection waviness."},
+    {"dimension": "Flow readability", "score": 88, "reason": "Wider stream cores read more clearly at the actual Dashboard scale, with six connected branches and restrained color."},
+    {"dimension": "Metal and rubber materials", "score": 87, "reason": "Material families remain separated; anisotropy refinement is subtle and does not eliminate the CAD-like large planes."},
+    {"dimension": "Contact shadows", "score": 85, "reason": "Restrained contact grounding is plausible but narrow seal and screw details remain subtle at Dashboard scale."},
+    {"dimension": "Camera continuity", "score": 85, "reason": "Sampled pullback and lid progression remain coherent; the complete-open-server hold is still short. This is not full frame-pacing certification."},
+    {"dimension": "L10 to Rack transition", "score": 86, "reason": "Server identity and the established Rack bridge/assembly sequence remain coherent in the decoded samples; no new points for unchanged behavior."},
+    {"dimension": "Overall cinematic impression", "score": 87, "reason": "Readable cooling and clean closure remain convincing engineering presentation, with residual material simplification and a brief complete-assembly pause."}
+  ],
+  "equalWeightMean": 86.5,
+  "formula": "(86 + 88 + 88 + 87 + 85 + 85 + 86 + 87) / 8",
+  "target89Supported": false,
+  "photographicAcceptance": false,
+  "sixStageDiagnostics": {"A": 86, "B": 88, "C": 88, "D": 87, "E": 86, "F": 87},
+  "finalRecommendation": "Keep the bounded two-round result and report the residual limitations. No third visual edit is proposed. Engineering acceptance and photographic visual acceptance remain separate."
+}

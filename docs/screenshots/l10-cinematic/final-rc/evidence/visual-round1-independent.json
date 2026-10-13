@@ -1,0 +1,134 @@
+{
+  "schema": "pa-cycle-lab.l10-final-rc.independent-visual-review.v1",
+  "round": 1,
+  "reviewer": "independent rack and visual reviewer",
+  "baselineCommit": "108ffbc5b4bc4faf4eb4f1ebf785ebd3b1c89a5c",
+  "method": {
+    "actualImagesOpened": 30,
+    "pairs": [
+      "A-cold-plate-installation",
+      "B-manifold-plumbing",
+      "C-dynamic-cooling-flow",
+      "D-solid-cooling-assembly",
+      "E-lid-closure",
+      "F-rack-integration",
+      "G-bare-board-hero",
+      "H-gold-front",
+      "dashboard-flow-A-2127x1272",
+      "dashboard-flow-B-2127x1272",
+      "diagnostic-cold-plate-connector-macro",
+      "diagnostic-manifold-macro",
+      "context-lid-1-before",
+      "context-lid-2-middle",
+      "context-lid-3-after"
+    ],
+    "sourceDirectoriesAtReview": ["../before", "../after"],
+    "retainedRound1Samples": "round1/",
+    "reviewMode": "Actual Chromium/WebGL PNG inspection, not generated imagery and not continuous movie playback.",
+    "limits": [
+      "Final RC movie has not yet been reviewed; temporal dimensions remain provisional.",
+      "A still pair can show connected flow paths and changed travel witnesses, but cannot certify smooth motion or frame pacing.",
+      "Source correctness, geometry checks and successful assertions do not count as visual-score gains.",
+      "Round 1 after images may be replaced by final Round 2 captures; the retained round1 directory preserves representative comparison evidence."
+    ]
+  },
+  "captureChecks": {
+    "dashboardCanvasAndCssCanvas": [2127, 1272],
+    "dashboardAAuthoredElapsedMs": 12019.999999999573,
+    "dashboardBAuthoredElapsedMs": 13159.999999999172,
+    "dashboardStoppedAndProgressEqualsTarget": true,
+    "dashboardAGlError": 0,
+    "dashboardBGlError": 0,
+    "dashboardABeforeAfterCameraMaximumComponentDifference": 0.00003814697265625,
+    "dashboardBBeforeAfterCameraMaximumComponentDifference": 0.000033855438232421875,
+    "dashboardCaptureCameraTolerance": 0.002,
+    "fixedReviewCanvas": [3440, 1440],
+    "sampledFixedCameraExactMatches": ["D-solid-cooling-assembly", "context-lid-2-middle"],
+    "note": "Dashboard camera values are settled to the existing capture tolerance, not claimed bit-identical. The sampled fixed review-camera uniforms are exact before/after matches."
+  },
+  "equalWeightDimensions": [
+    {
+      "dimension": "Cold Plate realism",
+      "baseline": 86,
+      "round1": 86,
+      "reason": "Cover lips, copper stack, screws and collars remain credible, but the broad lid faces remain almost uniformly gray. CPU/GPU surface-processing differences are too subtle to justify a new point."
+    },
+    {
+      "dimension": "Manifold / Plumbing realism",
+      "baseline": 88,
+      "round1": 88,
+      "reason": "Coherent long metal highlights remain free of the earlier fragmented waviness. This is retained V3 quality; no substantial new visual gain is visible against the 108ffbc baseline."
+    },
+    {
+      "dimension": "Flow readability",
+      "baseline": 87,
+      "round1": 88,
+      "reason": "Wider stream cores are visibly easier to follow at the actual 2127x1272 Dashboard size, including the six connected plate branches. Blue supply and red return remain distinct without neon or bloom. Instantaneous direction still requires attention to the travel witnesses."
+    },
+    {
+      "dimension": "Metal and rubber materials",
+      "baseline": 87,
+      "round1": 87,
+      "reason": "Copper, nickel and matte hose materials remain separated. Broad covers still read as idealized CAD planes; no material-score increase is justified yet."
+    },
+    {
+      "dimension": "Contact shadows",
+      "baseline": 85,
+      "round1": 85,
+      "reason": "The connector/root contact treatment is restrained and slightly more grounded in the macro, but the visible difference is small and weak at Dashboard scale. Do not round it up solely because an AO asset was added."
+    },
+    {
+      "dimension": "Camera continuity",
+      "baseline": 85,
+      "round1": 85,
+      "provisionalUntilFinalMovieReview": true,
+      "reason": "The three authored-camera closure samples retain framing and show no new clipping; still inspection cannot validate every temporal transition."
+    },
+    {
+      "dimension": "L10 to Rack transition",
+      "baseline": 86,
+      "round1": 86,
+      "provisionalUntilFinalMovieReview": true,
+      "reason": "The Rack endpoint and equipment identity show no visible regression. The current movie must still be sampled before final temporal acceptance."
+    },
+    {
+      "dimension": "Overall cinematic impression",
+      "baseline": 87,
+      "round1": 87,
+      "provisionalUntilFinalMovieReview": true,
+      "reason": "The flow readability gain is real but local. Large uniform metal planes still keep the whole presentation below a photographic or 89-level judgment."
+    }
+  ],
+  "provisionalOverall": {
+    "equalWeightMean": 86.5,
+    "formula": "(86 + 88 + 88 + 87 + 85 + 85 + 86 + 87) / 8",
+    "target89Supported": false,
+    "notPhotographicAcceptance": true
+  },
+  "stageObservations": [
+    {"stage": "A", "score": 86, "observation": "Installation relationships are legible; large cover faces remain flat and uniform."},
+    {"stage": "B", "score": 88, "observation": "Manifold highlights remain coherent; no new reflection ripples are apparent."},
+    {"stage": "C", "score": 88, "observation": "The stream core is more legible at review and actual Dashboard sizes without a glowing-fluid appearance."},
+    {"stage": "D", "score": 87, "observation": "The assembly remains coherent, but broad gray covers dominate the residual simplified-CAD impression."},
+    {"stage": "E", "score": 86, "observation": "No renewed cloudy highlight, sampled lid penetration or gold-front discontinuity is apparent. New motion acceptance remains pending."},
+    {"stage": "F", "score": 87, "observation": "The Rack composition remains unchanged. Repeated shallow blanking was already correct in the baseline; it earns no additional RC score."},
+    {"stage": "G", "status": "protected appearance retained", "observation": "No visible bare-board material or layout regression in the fixed hero pair."},
+    {"stage": "H", "status": "protected appearance retained", "observation": "The gold front retains its established color and equipment identity. Normal normalization is engineering correctness, not an artistic gain."}
+  ],
+  "round2Recommendation": {
+    "count": 1,
+    "action": "A single cover-only directional specular / anisotropy comparison is justified by visibly uniform large cover planes.",
+    "proposedParameters": {"cpuBefore": 0.07, "cpuAfter": 0.14, "gpuBefore": 0.16, "gpuAfter": 0.28},
+    "judgment": "No objection to this bounded comparison; the parameter values themselves do not guarantee realism or a higher score.",
+    "freeze": ["camera", "lighting", "exposure", "tone mapping", "metallic/roughness factors", "other materials", "flow speed", "flow routes", "geometry", "Rack animation"],
+    "acceptIf": "A/D and the connector macro show smooth, view-consistent machining direction and better CPU/GPU separation without plastic hotspots, visible stripes, cloudy artifacts or overexposure.",
+    "revertIf": "The single comparison does not show a credible benefit or introduces any of the listed artifacts.",
+    "doNotExpand": ["No further stream-width increase", "No stronger global or connector AO", "No global roughness workaround", "No third polish round"]
+  },
+  "engineeringSeparation": {
+    "carrierRimNormalFixVisualScoreGain": 0,
+    "reason": "The corrected source vector retains direction and the fragment shader already normalizes interpolated normals; source normalization must not be presented as visible improvement without evidence.",
+    "blanking": "Every physical panel remains 1U. Exact reuse and unchanged U allocation belong to the separate final Rack contract, not to subjective image scoring.",
+    "legacyContractStatus": "The old V3 whole-mesh equality contract is superseded by the explicit permitted rim-normal exception; it is not described as a known failure at baseline 108ffbc."
+  }
+}

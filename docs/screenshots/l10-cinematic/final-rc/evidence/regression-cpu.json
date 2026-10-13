@@ -1,0 +1,57 @@
+{
+  "mode": "cpu",
+  "started": "2026-10-13T17:28:16.752Z",
+  "assertions": "Original assertions unchanged; only report destinations relocated",
+  "results": [
+    {
+      "name": "core-scene",
+      "exit": 0,
+      "pass": true,
+      "elapsedMs": 170808
+    },
+    {
+      "name": "parser-bare",
+      "exit": 0,
+      "pass": true,
+      "elapsedMs": 2130
+    },
+    {
+      "name": "parser-companion",
+      "exit": 0,
+      "pass": true,
+      "elapsedMs": 1104
+    },
+    {
+      "name": "storage-layout",
+      "exit": 0,
+      "pass": true,
+      "elapsedMs": 1076
+    },
+    {
+      "name": "network-asset",
+      "exit": 0,
+      "pass": true,
+      "elapsedMs": 3528
+    },
+    {
+      "name": "hardware",
+      "exit": 0,
+      "pass": true,
+      "elapsedMs": 1946
+    },
+    {
+      "name": "runtime-manifest",
+      "exit": 0,
+      "pass": true,
+      "elapsedMs": 135
+    },
+    {
+      "name": "engine-hash",
+      "exit": 0,
+      "pass": true,
+      "elapsedMs": 542
+    }
+  ],
+  "baseline": null,
+  "historicalReadRoutingOnly": false
+}

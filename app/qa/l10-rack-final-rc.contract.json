@@ -1,0 +1,28 @@
+{
+  "id": "l10-rack-final-rc",
+  "version": 1,
+  "v2Baseline": "5f8e059c6e0c1a614fe412b990a463d643fc0a32",
+  "preFixBaseline": "108ffbc5b4bc4faf4eb4f1ebf785ebd3b1c89a5c",
+  "approvedRenderingExceptions": [
+    {
+      "id": "v3-repeated-1u-blanking",
+      "from": "v2Baseline",
+      "meshKeys": ["blanking:4", "blanking:5"],
+      "rule": "Only exact repeated blanking:1 vertices, with Y translated to each occupied 1U center; no other vertex attribute changes or extra geometry."
+    },
+    {
+      "id": "final-rc-carrier-rim-unit-normal",
+      "from": "preFixBaseline",
+      "sourceFunction": "editorialCarrierStamp",
+      "rule": "Only normalize the existing rolled punch rim normal [nx*0.24,ny*0.24,0.97]; preserve direction, every position, color, metal and emission attribute, all indices/order and all bounds."
+    }
+  ],
+  "physicalBlankingUnits": [1, 2, 3, 4, 5, 6, 7, 8, 9, 47, 48],
+  "physicalPanelSizeU": 1,
+  "logicalComponentCount": 41,
+  "occupiedU": 48,
+  "uniqueAnimationSamples": 201,
+  "normalTolerance": 0.0000001,
+  "protected": ["inventory identity", "placements", "U positions", "material attributes", "routes", "sockets", "Rack camera keys", "Rack fit bounds", "Rack animation", "Device Focus", "Skip/Replay interactions"],
+  "legacyPolicy": "Never modify historical core-scene or Cooling V2 assertions. Retain their original raw failures and test hashes; report final original core-scene result separately from historical whole-source isolation."
+}

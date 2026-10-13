@@ -1,0 +1,284 @@
+{
+  "method": "Direct RGB difference of original native PNGs; no resampling, enhancement or perceptual-score conversion.",
+  "stages": [
+    {
+      "first": "before/G-bare-board-hero.png",
+      "second": "after/G-bare-board-hero.png",
+      "dimensions": [
+        3440,
+        1440
+      ],
+      "changedPixels": 66,
+      "totalPixels": 4953600,
+      "maxChannelDelta": 7,
+      "meanChannelDelta": 3.4789513350559864e-05,
+      "sha256": [
+        "0a6ca35705813e0fd272bc0816e40ad1bbd325ce26366b093588b30c338f263e",
+        "f72740c132a6c3909d9eb40019d00fcd681641c4b947c2327315b88f9310dd4e"
+      ]
+    },
+    {
+      "first": "before/A-cold-plate-installation.png",
+      "second": "after/A-cold-plate-installation.png",
+      "dimensions": [
+        3440,
+        1440
+      ],
+      "changedPixels": 253036,
+      "totalPixels": 4953600,
+      "maxChannelDelta": 160,
+      "meanChannelDelta": 0.32227457472006893,
+      "sha256": [
+        "b3cb8899a6c55ec17d0477feb5925886f9294bda489c22d49184b66990f98850",
+        "2bf1d744b23e363b1f2364a93b686b873f9b726ce31cc7f001d29fa8b0db1932"
+      ]
+    },
+    {
+      "first": "before/B-manifold-plumbing.png",
+      "second": "after/B-manifold-plumbing.png",
+      "dimensions": [
+        3440,
+        1440
+      ],
+      "changedPixels": 225653,
+      "totalPixels": 4953600,
+      "maxChannelDelta": 174,
+      "meanChannelDelta": 0.5308627395564168,
+      "sha256": [
+        "7a4cd6a3b271760cb2bcbbeb5ce4be7e6bc23c9b380234b7c89b4f3919e85d6f",
+        "36545032bf1f2d0708168fef3d34d3c7ebe2945b6279f56eb0ea0a8975141cbf"
+      ]
+    },
+    {
+      "first": "before/C-dynamic-cooling-flow.png",
+      "second": "after/C-dynamic-cooling-flow.png",
+      "dimensions": [
+        3440,
+        1440
+      ],
+      "changedPixels": 311409,
+      "totalPixels": 4953600,
+      "maxChannelDelta": 174,
+      "meanChannelDelta": 0.5042270268087855,
+      "sha256": [
+        "c497ff1c9634c72fcb9dc56aee486ac93427e6b9a465eecc13af1852d73af64a",
+        "e84c995fa86b065931ee5ed77d5ad91e095748652e3408823aae92d3de86d618"
+      ]
+    },
+    {
+      "first": "before/D-solid-cooling-assembly.png",
+      "second": "after/D-solid-cooling-assembly.png",
+      "dimensions": [
+        3440,
+        1440
+      ],
+      "changedPixels": 224495,
+      "totalPixels": 4953600,
+      "maxChannelDelta": 174,
+      "meanChannelDelta": 0.524828003875969,
+      "sha256": [
+        "4447a44679204708943d08da9bdc23d381afa92d48cf4a2788d114ad6c9cb339",
+        "72c7a029100b52943d9c763d44943f3c4c006389da9a84dc78f9a072e6a22d34"
+      ]
+    },
+    {
+      "first": "before/E-lid-closure.png",
+      "second": "after/E-lid-closure.png",
+      "dimensions": [
+        3440,
+        1440
+      ],
+      "changedPixels": 2,
+      "totalPixels": 4953600,
+      "maxChannelDelta": 1,
+      "meanChannelDelta": 3.364556416881998e-07,
+      "sha256": [
+        "2ec321dcbbb580acf944e889166c08bd1f2c6a75b7dc569ddd3791676787dbbf",
+        "05e0009ac32a21710a8d9d484acf49608c8a7e178df4719e8201af93524e33eb"
+      ]
+    },
+    {
+      "first": "before/H-gold-front.png",
+      "second": "after/H-gold-front.png",
+      "dimensions": [
+        3440,
+        1440
+      ],
+      "changedPixels": 116,
+      "totalPixels": 4953600,
+      "maxChannelDelta": 9,
+      "meanChannelDelta": 0.00011378929801894918,
+      "sha256": [
+        "4613d607b2a9eb217f77c811bc9b3bee2ed71f380b32d1045c052ef2041547aa",
+        "220650ffb7bdbbd208f6c0308f628b9a8061ce6de4ef7ccc8266f07a4d5a629d"
+      ]
+    },
+    {
+      "first": "before/F-rack-integration.png",
+      "second": "after/F-rack-integration.png",
+      "dimensions": [
+        3440,
+        1440
+      ],
+      "changedPixels": 221,
+      "totalPixels": 4953600,
+      "maxChannelDelta": 22,
+      "meanChannelDelta": 0.00012267172695951765,
+      "sha256": [
+        "fd702a47609d058271fab22e8ce9f147b40eaf6acea5e34404be889df2eca19d",
+        "2da09bc3af3762a965cd31e3b349feca1452236ee09e41282d48f74e501c692c"
+      ]
+    }
+  ],
+  "protected": [
+    {
+      "first": "before/guard-network.png",
+      "second": "after/guard-network.png",
+      "dimensions": [
+        3440,
+        1440
+      ],
+      "changedPixels": 143,
+      "totalPixels": 4953600,
+      "maxChannelDelta": 14,
+      "meanChannelDelta": 0.00010383021102497847,
+      "sha256": [
+        "a3be829f6edf8e140a3f507fb3654ba7f317733fcc6375ec7676b2387bba5201",
+        "df3eadc80b83f75b7d6468cf9495c1253ad0ff1c1a10c7449394f36c20c81c2a"
+      ]
+    },
+    {
+      "first": "before/rack-full-front.png",
+      "second": "after/rack-full-front.png",
+      "dimensions": [
+        3440,
+        1440
+      ],
+      "changedPixels": 348,
+      "totalPixels": 4953600,
+      "maxChannelDelta": 11,
+      "meanChannelDelta": 0.0001227390180878553,
+      "sha256": [
+        "19c6455e2237216733eb74154539bca995737dbbc1d6b5534c4f96c668008674",
+        "a4e7ab315c2ec81715b61f3ce9ac9eafb1ff56e2eb6019010a50c2aa8b45174d"
+      ]
+    },
+    {
+      "first": "before/rack-bottom-nine-1u-panels-crop.png",
+      "second": "after/rack-bottom-nine-1u-panels-crop.png",
+      "dimensions": [
+        266,
+        227
+      ],
+      "changedPixels": 159,
+      "totalPixels": 60382,
+      "maxChannelDelta": 3,
+      "meanChannelDelta": 0.0017665308646064501,
+      "sha256": [
+        "9de8bc2b41d3360e38c6510fb4093cbc83ae91c08f7d3437e3d67c5942b346e9",
+        "9313b6ef35f8520d68b6e07c13c6a6f4b02aa8d0e5920cdd24ca0ade036c8386"
+      ]
+    }
+  ],
+  "flow": [
+    {
+      "first": "after/C-dynamic-cooling-flow.png",
+      "second": "after/C-dynamic-cooling-flow-B.png",
+      "dimensions": [
+        3440,
+        1440
+      ],
+      "changedPixels": 156550,
+      "totalPixels": 4953600,
+      "maxChannelDelta": 118,
+      "meanChannelDelta": 1.2868424983850129,
+      "sha256": [
+        "e84c995fa86b065931ee5ed77d5ad91e095748652e3408823aae92d3de86d618",
+        "21cc80b396f6ba22324cc8b08ce37a6e0ae011a6a3681b90fb47ef86c172e6a2"
+      ]
+    },
+    {
+      "first": "after/dashboard-flow-A-2127x1272.png",
+      "second": "after/dashboard-flow-B-2127x1272.png",
+      "dimensions": [
+        2127,
+        1272
+      ],
+      "changedPixels": 132503,
+      "totalPixels": 2705544,
+      "maxChannelDelta": 113,
+      "meanChannelDelta": 1.0678172917042439,
+      "sha256": [
+        "0d7e0a08154af7c5f3fb978d223aa5f2e3555df35e03faff1826221f7de89095",
+        "27908d16044c09160ec49d06891fafba2901f57f7192ba477c9be419edff33e9"
+      ]
+    }
+  ],
+  "secondRound": [
+    {
+      "first": "evidence/round1/D-solid-cooling-assembly.png",
+      "second": "after/D-solid-cooling-assembly.png",
+      "dimensions": [
+        3440,
+        1440
+      ],
+      "changedPixels": 221367,
+      "totalPixels": 4953600,
+      "maxChannelDelta": 63,
+      "meanChannelDelta": 0.5189613614341085,
+      "sha256": [
+        "ba97dd6f85634c2a46d3424c0cc39c4f8516ea3f5dacb1632e3961aa177ebb76",
+        "72c7a029100b52943d9c763d44943f3c4c006389da9a84dc78f9a072e6a22d34"
+      ]
+    },
+    {
+      "first": "evidence/round1/diagnostic-cold-plate-connector-macro.png",
+      "second": "after/diagnostic-cold-plate-connector-macro.png",
+      "dimensions": [
+        3440,
+        1440
+      ],
+      "changedPixels": 309084,
+      "totalPixels": 4953600,
+      "maxChannelDelta": 29,
+      "meanChannelDelta": 0.2929429774978467,
+      "sha256": [
+        "670d7ee8c570877b5373f6cb0d79159d6d7bc71843b52299f23b3fccb4c05668",
+        "37dff19760ffcfac662b1fca1b843edff103e707addc69be4d50dd54569716de"
+      ]
+    },
+    {
+      "first": "evidence/round1/E-lid-closure.png",
+      "second": "after/E-lid-closure.png",
+      "dimensions": [
+        3440,
+        1440
+      ],
+      "changedPixels": 12,
+      "totalPixels": 4953600,
+      "maxChannelDelta": 23,
+      "meanChannelDelta": 2.509959086993971e-05,
+      "sha256": [
+        "d7e3a846b52831f0b99263a5c12969919e8de7d4175773fb9b238d5ec7aa0dac",
+        "05e0009ac32a21710a8d9d484acf49608c8a7e178df4719e8201af93524e33eb"
+      ]
+    },
+    {
+      "first": "evidence/round1/context-open-assembly-16s.png",
+      "second": "after/context-open-assembly-16s.png",
+      "dimensions": [
+        3440,
+        1440
+      ],
+      "changedPixels": 29572,
+      "totalPixels": 4953600,
+      "maxChannelDelta": 14,
+      "meanChannelDelta": 0.012605176033591731,
+      "sha256": [
+        "22964062a156493b1af265ad05bb4c960b32b572a8314f49e0725f9e36748fbb",
+        "48900b5f0bda16f4a23f59691f711872426be34c0be7dd1cd83d4ac21fb947b8"
+      ]
+    }
+  ],
+  "limits": "RGB change counts are not quality or correctness scores. Protected geometry, material, normal directions, camera/light uniforms and directed phase are checked independently. Small raster differences can follow the explicitly authorized normal normalization."
+}
