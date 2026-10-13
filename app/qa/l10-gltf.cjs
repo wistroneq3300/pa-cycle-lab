@@ -199,7 +199,9 @@ async function reject(mutator, pattern, options = {}) {
           return { width: header.getUint32(16, false), height: header.getUint32(20, false) };
         }
       });
-      const expectedLayers=['board','cooling','cooling-frame','packages'];
+      const bare=result.metadata.extras.bareBoardOnly===true;
+      if(bare)assert.deepEqual(Array.from(result.metadata.extras.replacesComputeBoards),[0,1]);
+      const expectedLayers=bare?['board','packages']:['board','cooling','cooling-frame','packages'];
       if(result.metadata.extras.replacesServiceGeometry===true)expectedLayers.push('io');
       assert.deepEqual([...result.metadata.layers].sort(),expectedLayers.sort());
       const bounds = { min: [Infinity, Infinity, Infinity], max: [-Infinity, -Infinity, -Infinity] };

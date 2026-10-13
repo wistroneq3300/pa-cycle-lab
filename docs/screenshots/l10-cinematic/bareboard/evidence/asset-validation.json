@@ -1,0 +1,77 @@
+{
+  "metadata": {
+    "asset": {
+      "generator": "Khronos glTF Blender I/O v4.5.51",
+      "version": "2.0"
+    },
+    "extras": {
+      "id": "dual-bare-compute-boards-r1",
+      "prototypeRevision": 4,
+      "replacesComputeBoards": [
+        0,
+        1
+      ],
+      "replacesServiceGeometry": true,
+      "bareBoardOnly": true,
+      "packageCount": 6,
+      "cpuCount": 2,
+      "gpuCount": 4,
+      "coordinateUnits": "Existing PA raw units. Shared renderer scale [.688,1,.802] required.",
+      "approval": "OPT-IN visual study, not photorealism accepted",
+      "referenceConfidence": "Figure 7 visible package face and functional zones; retained PA Lenovo-based positions; dimensions and unseen details approximate."
+    },
+    "bytes": 15544292,
+    "primitiveCount": 71,
+    "vertexCount": 370620,
+    "sourceVertexCount": 297560,
+    "imageCount": 11,
+    "imagePixels": 2146304,
+    "layers": [
+      "board",
+      "packages",
+      "io"
+    ],
+    "coordinateSystem": "glTF Y-up; node transforms baked; UV/image origin unchanged",
+    "strideFloats": 12
+  },
+  "bounds": {
+    "board": {
+      "min": [
+        -1.8299999237060547,
+        -0.09650000184774399,
+        -2.8399999141693115
+      ],
+      "max": [
+        1.8299999237060547,
+        -0.029500000178813934,
+        -0.5199999809265137
+      ]
+    },
+    "packages": {
+      "min": [
+        -1.7230000495910645,
+        -0.07050000131130219,
+        -2.5380001068115234
+      ],
+      "max": [
+        1.7230000495910645,
+        0.005599997937679291,
+        -0.7520000338554382
+      ]
+    },
+    "io": {
+      "min": [
+        -1.872499942779541,
+        -0.11100000143051147,
+        -2.9489998817443848
+      ],
+      "max": [
+        1.872499942779541,
+        0.08699999749660492,
+        1.2399998903274536
+      ]
+    }
+  },
+  "normalMappedPrimitives": 8,
+  "ioPositionPreserved": true
+}

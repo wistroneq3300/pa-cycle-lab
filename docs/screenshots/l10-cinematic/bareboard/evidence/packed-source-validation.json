@@ -1,0 +1,21 @@
+{
+  "packedImages": [
+    "bare-pcb-metallicroughness",
+    "bare-pcb-soldermask",
+    "bare-silicon-finish",
+    "bare-silicon-metallicroughness",
+    "bare-silicon-normal",
+    "nickel-basecolor.png",
+    "nickel-metallicroughness.png",
+    "nickel-normal.png",
+    "polymer-basecolor.png",
+    "polymer-metallicroughness.png",
+    "polymer-normal.png"
+  ],
+  "imageCount": 11,
+  "missingImages": [],
+  "geometryMaterialsPixelsUnchanged": true,
+  "glbSha256": "be63569c9a013e9e3adeb5408550ea38d6490c05647fb7a11cca088414effc50",
+  "glbUnchanged": true,
+  "sourceBytes": 10745044
+}

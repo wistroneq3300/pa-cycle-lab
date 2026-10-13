@@ -121,7 +121,7 @@
     precision highp float;
     varying vec3 vPosition;varying vec3 vLocal;varying vec3 vNormal;varying vec4 vColor;varying vec2 vMaterial;
     uniform vec3 uEye;uniform vec3 uKeyPosition;uniform float uLightTheme;uniform float uTime;uniform float uScan;uniform float uScanY;
-    uniform float uRack;uniform float uQuality;uniform float uReveal;uniform float uDetail;
+    uniform float uRack;uniform float uQuality;uniform float uReveal;uniform float uDetail;uniform float uSectionX;
     uniform sampler2D uShadowMap;uniform float uShadowPass;uniform float uHasShadow;uniform float uShadowTexel;
     uniform sampler2D uEnvironment;uniform float uHasEnvironment;
     varying vec2 vUV;varying vec4 vTangent;
@@ -171,6 +171,7 @@
       return F*D*G*nl/(4.0*nv*max(nl,.01)+.001);
     }
     void main(){
+      if(vLocal.x>uSectionX)discard;
       vec4 assetBase=vec4(1.0);
       if(uAsset>.5){assetBase=texture2D(uAssetBase,vUV);if(uAssetAlphaMask>.5&&assetBase.a*vColor.a<uAssetAlphaCutoff)discard;}
       if(uShadowPass>.5){gl_FragColor=packedDepth(gl_FragCoord.z);return;}
@@ -372,7 +373,8 @@
     let shadowFramebuffer=null,shadowTexture=null,shadowDepthBuffer=null,shadowPass=false,shadowSize=2048;
     let shadowProgress=-1,shadowExplode=-1;
     let environmentTexture=null,environmentImage=null,environmentReady=false,environmentFailed=false,environmentGeneration=0;
-    const assetEnabled=hasL10()&&/(?:^|[?&])l10AssetPrototype=1(?:&|$)/.test(window.location?.search||'');
+    const bareAsset=/(?:^|[?&])l10Bareboard=1(?:&|$)/.test(window.location?.search||'');
+    const assetEnabled=hasL10()&&(bareAsset||/(?:^|[?&])l10AssetPrototype=1(?:&|$)/.test(window.location?.search||''));
     const inspectionEnabled=/(?:^|[?&])l10AssetLab=1(?:&|$)/.test(window.location?.search||'');
     let assetRuntime=null,assetLoading=false,assetFailed=false,assetError='',assetGeneration=0,inspection=null;
     let progress=0,pointerX=0,pointerY=0,yaw=0,pitch=0,manual=false,drag=null,light=0,view='authored';
@@ -399,11 +401,11 @@
       const built=createParts();shared=built.shared;vertices=0;
       Object.entries(built.meshes).forEach(([name,mesh])=>{const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,mesh.data,gl.STATIC_DRAW);parts[name]={buffer,count:mesh.data.length/12};vertices+=mesh.data.length/12;});
       ['aPosition','aNormal','aColor','aMaterial','aUV','aTangent'].forEach(name=>attributes[name]=gl.getAttribLocation(program,name));
-      ['uViewProjection','uLightViewProjection','uModel','uPart','uOpacity','uEye','uKeyPosition','uLightTheme','uTime','uScan','uScanY','uRack','uQuality','uReveal','uDetail','uShadowMap','uShadowPass','uHasShadow','uShadowTexel','uEnvironment','uHasEnvironment'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
+      ['uViewProjection','uLightViewProjection','uModel','uPart','uOpacity','uEye','uKeyPosition','uLightTheme','uTime','uScan','uScanY','uRack','uQuality','uReveal','uDetail','uSectionX','uShadowMap','uShadowPass','uHasShadow','uShadowTexel','uEnvironment','uHasEnvironment'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
       ['uAsset','uAssetNormalScale','uAssetRoughness','uAssetAO','uAssetAlphaCutoff','uAssetAlphaMask','uAssetBase','uAssetMR','uAssetNormal','uAssetOcclusion'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
       if(assetEnabled&&window.PAL10GLTF&&window.PAL10AssetRuntime){
         assetLoading=true;assetFailed=false;assetError='';canvas.dataset.coreAsset='loading';const generation=++assetGeneration;
-        window.PAL10GLTF.load('/static/models/l10-prototype/compute-board.glb').then(asset=>{
+        window.PAL10GLTF.load('/static/models/l10-prototype/'+(bareAsset?'bare-compute-boards.glb':'compute-board.glb')).then(asset=>{
           if(disposed||contextLost||generation!==assetGeneration){asset.disposeImages();return;}
           let stagedRuntime=null;const stagedParts={};
           try{
@@ -411,7 +413,8 @@
             const plumbing=asset.metadata.extras;
             const replaceServiceGeometry=plumbing.replacesServiceGeometry===true;
             if(replaceServiceGeometry!==asset.metadata.layers.includes('io'))throw new Error('Prototype service replacement requires its matching io layer');
-            const replacement=window.PAL10Hardware.build(window.PAL10Hardware.profile,{omitBoard:0,replaceLeftPlumbing:plumbing.replacesLeftPlumbing===true,supplyOverlayPath:plumbing.supplyOverlayPath,replaceServiceGeometry});
+            if(bareAsset&&(plumbing.bareBoardOnly!==true||JSON.stringify(plumbing.replacesComputeBoards)!=='[0,1]'||asset.metadata.layers.length!==3||!asset.metadata.layers.includes('board')||!asset.metadata.layers.includes('packages')||!replaceServiceGeometry))throw new Error('Bare-board prototype must own two boards, packages and the retained service layer');
+            const replacement=window.PAL10Hardware.build(window.PAL10Hardware.profile,bareAsset?{omitBareBoards:true,replaceServiceGeometry}:{omitBoard:0,replaceLeftPlumbing:plumbing.replacesLeftPlumbing===true,supplyOverlayPath:plumbing.supplyOverlayPath,replaceServiceGeometry});
             stagedRuntime=window.PAL10AssetRuntime.upload(gl,asset,attributes,uniforms);
             for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling','l10-flow-supply','l10-io']){
               const data=replacement.meshes[name].data,buffer=gl.createBuffer();stagedParts[name]={buffer,count:data.length/12};
@@ -495,6 +498,15 @@
         // Additional opt-in evidence cameras; never used by the authored film.
         if(inspection==='fans'){camera[1]=.68;camera[2]=3.5;camera[3]=(pose.x-.85)*modelMatrix[0];camera[5]=(pose.z+.055)*modelMatrix[10];}
         if(inspection==='power'){camera[1]=1.12;camera[2]=5.3;camera[3]=pose.x*modelMatrix[0];camera[5]=(pose.z+.62)*modelMatrix[10];}
+        if(inspection.startsWith('bare-')){
+          const presets={
+            'bare-front':[0,0,3.0,0,0,3.15],
+            'bare-storage':[0,1.46,3.3,-.075,.01,2.62],
+            'bare-section':[1.38,.095,3.0,.46,.009,2.63],
+            'bare-hero':[-.46,.86,11.5,0,.04,.35]
+          },v=presets[inspection];
+          camera[0]=v[0];camera[1]=v[1];camera[2]=v[2];camera[3]=(pose.x+v[3])*modelMatrix[0];camera[4]=pose.y+v[4];camera[5]=(pose.z+v[5])*modelMatrix[10];
+        }
         target.set(camera.subarray(3));const ce=Math.cos(camera[1]);
         eye[0]=target[0]+Math.sin(camera[0])*ce*camera[2];eye[1]=target[1]+Math.sin(camera[1])*camera[2];eye[2]=target[2]+Math.cos(camera[0])*ce*camera[2];cameraReady=true;cameraSettling=false;return;
       }
@@ -608,6 +620,7 @@
       gl.uniform1f(uniforms.uHasEnvironment,environmentReady?1:0);
       if(environmentTexture){gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,environmentTexture);gl.uniform1i(uniforms.uEnvironment,1);gl.activeTexture(gl.TEXTURE0);}
       const drawScene=()=>{
+      gl.uniform1f(uniforms.uSectionX,10000);
       gl.uniform1f(uniforms.uRack,sample.rackOpacity);
       part('floor',floorMatrix,sample.rackOpacity,false);
       for(let i=0;i<PLACEMENTS.length;i++){
@@ -625,8 +638,10 @@
       if(hasL10()){
         const l10=sample.l10,base=matrices[PRIMARY_INDEX],m=new Float32Array(base);
         gl.uniform1f(uniforms.uRack,0);
+        gl.uniform1f(uniforms.uSectionX,inspection==='bare-section'?.58:10000);
         const layer=(name,lift=0,opacity=1,depth=true)=>{
           const semantic=name.slice(4);
+          if(inspection?.startsWith('bare-')&&['cooling-frame','cooling','flow-supply','flow-return','lid'].includes(semantic))return;
           if(inspection==='board'&&['packages','cooling-frame','cooling','flow-supply','flow-return'].includes(semantic))return;
           if(inspection==='packages'&&['cooling-frame','cooling','flow-supply','flow-return'].includes(semantic))return;
           m[13]=base[13]+lift;part(name,m,opacity,depth);
@@ -639,6 +654,10 @@
         // envelope; they are not invented proprietary internal microchannels.
         layer('l10-flow-supply',0,l10.flow*.88,false);layer('l10-flow-return',0,l10.flow*.88,false);
         if(progress>=.37)layer('l10-lid',.50*(1-l10.lid),interval(.37,.376,progress));
+        // A real geometric section through the same tray, with the lid seated
+        // at its unchanged closed height. The cut plane removes the near wall.
+        if(inspection==='bare-section'){m[13]=base[13];part('l10-lid',m,1,true);}
+        gl.uniform1f(uniforms.uSectionX,10000);
       }
       if(sample.scan>.001&&!reduced.matches){moving[13]=sample.scanY;moving[14]=0;part('scanPlane',moving,sample.scan*.55,false);}
       };
@@ -716,7 +735,7 @@
       return {left,right,bottom,top,heightFraction:(top-bottom)/2,widthFraction:(right-left)/2,nearest,clipped:left< -1||right>1||bottom< -1||top>1||nearest<.15};
     }
     const api={supported:true,
-      setInspection(value){if(!inspectionEnabled)throw new Error('Inspection cameras require l10AssetLab=1');if(value!==null&&!['board','packages','cooling','fans','power'].includes(value))throw new Error('Unknown asset inspection');inspection=value;cameraReady=false;shadowProgress=-1;requestDraw();},
+      setInspection(value){if(!inspectionEnabled)throw new Error('Inspection cameras require l10AssetLab=1');if(value!==null&&!['board','packages','cooling','fans','power','bare-front','bare-storage','bare-section','bare-hero'].includes(value))throw new Error('Unknown asset inspection');inspection=value;cameraReady=false;shadowProgress=-1;requestDraw();},
       setProgress(value){const next=reduced.matches?1:clamp(Number(value)||0);if(Math.abs(next-progress)<.00001)return;activity();progress=next;if(manual&&!drag){manual=false;view='authored';yaw=0;pitch=0;syncOrbit();}armIdle();requestDraw();},
       setPointer(x,y){if(manual||drag||reduced.matches)return;pointerX=clamp(Number(x)||0,-1,1);pointerY=clamp(Number(y)||0,-1,1);requestDraw();},
       setOrbit,setView,resetOrbit,setTheme(value){const next=value===true||value==='light'?1:0;if(next===light)return;light=next;requestDraw();},

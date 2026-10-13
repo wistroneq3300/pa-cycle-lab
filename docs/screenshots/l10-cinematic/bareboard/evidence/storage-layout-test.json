@@ -1,0 +1,81 @@
+{
+  "pass": true,
+  "checks": [
+    "8 unique drive axes and dimensions",
+    "Complete carrier and aperture clearance",
+    "17 mm pitch / .6 mm inter-carrier gap",
+    "Management board and connector separation",
+    "72 actual triangle storage aperture rays and 7 physical dividers",
+    "117 network/RJ45/USB aperture rays",
+    "Byte-identical shared rack and L10 facade",
+    "Actual SSD meshes and maximum tolerance vs guides",
+    "32 actual floor and closed-lid coverage samples",
+    "Side-standing rear connector plane",
+    "Network PCB collision audit",
+    "Six network cages meet their facade"
+  ],
+  "layout": "e1s-15mm-eight-bay-v1",
+  "bodyMM": {
+    "width": 15,
+    "height": 33.75,
+    "depth": 118.75
+  },
+  "clearancesMM": {
+    "bodyToFloor": 1.2,
+    "bodyToLid": 2.8419708029197084,
+    "carrierToFloor": 0.2749999999999993,
+    "carrierToLid": 1.916970802919709,
+    "betweenCarriers": 0.6000000000000014
+  },
+  "actualClearances": [
+    {
+      "id": "ssd-01",
+      "maximumBodyToLidMM": 2.7169708029197097,
+      "maximumBodyToFloorMM": 1.0750000000000002,
+      "minimumSideGuideClearanceMM": 0.15349999999999392
+    },
+    {
+      "id": "ssd-02",
+      "maximumBodyToLidMM": 2.7169708029197097,
+      "maximumBodyToFloorMM": 1.0750000000000002,
+      "minimumSideGuideClearanceMM": 0.15349999999999392
+    },
+    {
+      "id": "ssd-03",
+      "maximumBodyToLidMM": 2.7169708029197097,
+      "maximumBodyToFloorMM": 1.0750000000000002,
+      "minimumSideGuideClearanceMM": 0.1535
+    },
+    {
+      "id": "ssd-04",
+      "maximumBodyToLidMM": 2.7169708029197097,
+      "maximumBodyToFloorMM": 1.0750000000000002,
+      "minimumSideGuideClearanceMM": 0.15349999999999847
+    },
+    {
+      "id": "ssd-05",
+      "maximumBodyToLidMM": 2.7169708029197097,
+      "maximumBodyToFloorMM": 1.0750000000000002,
+      "minimumSideGuideClearanceMM": 0.15349999999999847
+    },
+    {
+      "id": "ssd-06",
+      "maximumBodyToLidMM": 2.7169708029197097,
+      "maximumBodyToFloorMM": 1.0750000000000002,
+      "minimumSideGuideClearanceMM": 0.15349999999999847
+    },
+    {
+      "id": "ssd-07",
+      "maximumBodyToLidMM": 2.7169708029197097,
+      "maximumBodyToFloorMM": 1.0750000000000002,
+      "minimumSideGuideClearanceMM": 0.1535
+    },
+    {
+      "id": "ssd-08",
+      "maximumBodyToLidMM": 2.7169708029197097,
+      "maximumBodyToFloorMM": 1.0750000000000002,
+      "minimumSideGuideClearanceMM": 0.1535
+    }
+  ],
+  "facadeTriangles": 8684
+}

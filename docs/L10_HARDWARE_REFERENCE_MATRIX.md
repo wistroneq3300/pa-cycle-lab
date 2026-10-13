@@ -1,5 +1,7 @@
 # L10 hardware reference matrix
 
+> 2026-10-13 bare-board / eight-bay correction: [new image catalog](L10_BAREBOARD_REFERENCE_CATALOG.md), [editable asset mapping](L10_BAREBOARD_ASSET.md), and [actual visual acceptance](L10_BAREBOARD_ACCEPTANCE.md). The user's explicitly selected concept configuration is authoritative for this opt-in study: left BF3 dual-port, right BF3 dual-port, upper-right CX7 dual-port, eight 15 mm E1.S SSDs. It is not presented as an OEM SKU. Kioxia dimensions now govern storage; NVIDIA's uncovered-board image governs the visible CPU/GPU face vocabulary, while the PA Lenovo-based board/package anchors remain unchanged. No new cooling assembly is added.
+
 > 2026-10-13 reference-image follow-up: [Reference Image Catalog](L10_REFERENCE_IMAGE_CATALOG.md) records seven actually retrieved images, their resolutions and three unavailable LTT detail photos. [Bounded correction and acceptance](L10_REFERENCE_REVIEW.md) supersedes only the fan/central-power implementation notes below. Lenovo remains the mechanical baseline; ASUS is cross-vendor visual evidence. CPU/GPU, PCB population and hidden cold-plate internals remain approximations.
 
 Reviewed 2026-10-13. This document records the mechanical evidence behind the original PA Manager display asset. It is not a service procedure, engineering drawing, OEM CAD model, or claim of dimensional certification.
