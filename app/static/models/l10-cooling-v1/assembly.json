@@ -6425,12 +6425,12 @@
     "frontLimitZ": -0.313
   },
   "builderHelperSource": "assets/l10-prototype/build.py: pure helper definitions only",
-  "finishRevision": 2,
+  "finishRevision": 3,
   "finishChanges": [
-    "Separate CPU cross-lapped and GPU longitudinal-milled nickel cover finishes",
-    "Satin nickel manifold, distinct machined nickel fittings and copper",
-    "Real recessed drives inside 48 original fastener head envelopes; 24 raised fake drive slugs removed",
-    "Separate elastomer and gasket roughness; all fluid geometry, UVs and material unchanged"
+    "Post-boolean analytic cylindrical manifold normals, flat port/end faces and explicit UV seam; 64-side headers within original radius",
+    "Five-segment 0.0022 cover edge breaks inside existing cover envelope",
+    "Twelve stepped compression ferrules with chamfered lips and captured elastomer seals inside original 0.020 collar radius",
+    "All existing CPU/GPU MR finishes, manifold roughness, bare assets, contact seats, TIM, mounts, stream meshes and route contracts retained"
   ],
   "fastenerRecesses": [
     {
@@ -7490,12 +7490,12 @@
       "removedV1Slug": null
     }
   ],
-  "sha256": "de55d9e6516c2fa1efdf4e3894b98adfd49f00fae8659214178f782a428de913",
-  "bytes": 3547240,
+  "sha256": "5cfef980e39a446f3157e214b5e1f2c4058e6ba65b3e133557f5d5cd43d05cdc",
+  "bytes": 5050888,
   "file": "cooling-assembly.glb",
   "source": "assets/l10-cooling-v1/cooling-assembly.blend",
   "builder": "assets/l10-cooling-v1/build.py",
-  "triangles": 69344,
+  "triangles": 94888,
   "nodes": 54,
   "materials": 12,
   "embeddedImages": 4

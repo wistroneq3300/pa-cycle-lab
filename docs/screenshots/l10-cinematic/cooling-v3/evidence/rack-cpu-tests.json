@@ -1,0 +1,64 @@
+{
+  "baseline": "5f8e059c6e0c1a614fe412b990a463d643fc0a32",
+  "runs": [
+    {
+      "command": "node app/qa/l10-blanking-v3.cjs",
+      "exitCode": 0,
+      "passed": true,
+      "proof": "rack-geometry.json",
+      "checks": 4,
+      "uniqueAnimationSamples": 201,
+      "dynamicCameraFitSamples": 201
+    },
+    {
+      "command": "node app/qa/l10-storage-layout.cjs",
+      "exitCode": 0,
+      "passed": true,
+      "checks": 12,
+      "scope": "8 E1.S drives, carrier/aperture clearances, network/RJ45/USB apertures, byte-identical rack/L10 facade, guides, floor/lid samples, network PCB collision and six cages"
+    },
+    {
+      "command": "node --check app/static/js/rack-equipment-scene.js",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "command": "node app/qa/core-scene.cjs",
+      "exitCode": 1,
+      "passed": false,
+      "firstFailingCheck": "Complete finite geometry; stable shared uploads; settled hero waits for idle timer",
+      "assertion": "surface normal must be normalized",
+      "baselineReproduced": true,
+      "source": "app/static/js/rack-equipment-scene.js editorialPullOpening",
+      "existingNormalExpression": "[nx*.24,ny*.24,.97]",
+      "normal": [0.04411296173930168, 0.23591110110282898, 0.9700000286102295],
+      "normalLength": 0.9992497468204874,
+      "position": [-0.5974109768867493, -0.05540940538048744, 3.2326500415802],
+      "resolution": "Preserved the existing assertion and protected golden-front geometry; no normalization fix was applied in the blanking task."
+    }
+  ],
+  "diagnosticContinuation": {
+    "description": "In-memory test runner continued after assertion failures to inspect remaining tests; source assertions were not changed and process exit status stayed nonzero.",
+    "existingChecksPassedAfterFirstFailure": 17,
+    "existingFailures": 1,
+    "newBlankingCheckSeparatelyPassedAfterSignedZeroPreservationFix": true,
+    "fullSuitePassClaimed": false,
+    "passingCoverage": [
+      "41 components and exact 48U occupancy",
+      "Canonical geometry upload and exactly one primary tray",
+      "Reversible alignment/insertion choreography",
+      "Telescoping rail overlap",
+      "Equipment collision during convergence and separation",
+      "Projected callout counts and anchors",
+      "Camera frustum containment",
+      "Orbit, release persistence and shortest-arc reset",
+      "Keyboard interaction and Reduced Motion",
+      "Theme, resize and idempotent disposal",
+      "Idle entry/exit and restrained lighting",
+      "Slow-frame convergence and settled hold",
+      "Equipment service routing and material families",
+      "WebGL fallback, context restoration and cleanup"
+    ]
+  },
+  "visualAcceptance": "CPU checks do not constitute photographic or real Chromium/WebGL visual acceptance."
+}

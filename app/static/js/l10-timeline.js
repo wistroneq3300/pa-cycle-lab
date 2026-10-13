@@ -47,7 +47,9 @@
   function cameraWeights(p){
     const t=timeAt(p,'coolingV2')/1000,span=(a,b)=>smoother((t-a)/(b-a));
     return {bare:1-span(6.7,7.5),detail:span(2.5,4.1)*(1-span(6.3,7.5)),
-      cooling:span(6.3,7.5)*(1-span(15.1,16.5)),reveal:span(9.6,10.5)*(1-span(14.3,15.1))};
+      // Begin the pullback during metal restoration, preserving every authored
+      // marker while giving the complete assembly a slower lead-in to closure.
+      cooling:span(6.3,7.5)*(1-span(14.3,16.5)),reveal:span(9.6,10.5)*(1-span(14.3,15.1))};
   }
   window.PAL10Timeline=Object.freeze({definitions,stages:Object.freeze(stages),markers,progressAt,timeAt,sample,stageProgress,coolingPose,cameraWeights});
 })();

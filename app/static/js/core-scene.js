@@ -164,7 +164,7 @@
     varying vec3 vPosition;varying vec3 vLocal;varying vec3 vNormal;varying vec4 vColor;varying vec2 vMaterial;
     uniform vec3 uEye;uniform vec3 uKeyPosition;uniform float uLightTheme;uniform float uTime;uniform float uScan;uniform float uScanY;
     uniform float uRack;uniform float uQuality;uniform float uReveal;uniform float uDetail;uniform float uSectionX;uniform float uL10Finish;
-    uniform float uCoolingFlow;uniform float uCoolingTravel;
+    uniform float uCoolingFlow;uniform float uCoolingTravel;uniform float uCoolingFinish;
     uniform vec4 uCoolingRoute;uniform vec2 uCoolingPhase;
     uniform sampler2D uShadowMap;uniform float uShadowPass;uniform float uHasShadow;uniform float uShadowTexel;
     uniform sampler2D uEnvironment;uniform float uHasEnvironment;
@@ -256,22 +256,25 @@
         float travel=vUV.x+uCoolingPhase.y*warp-uCoolingTravel;
         float packet=fract(travel/.38);
         // A long trailing wake and short leading edge make direction legible.
-        float witness=smoothstep(.32,.78,packet)*(1.0-smoothstep(.84,.94,packet));
+        float witness=smoothstep(.18,.69,packet)*(1.0-smoothstep(.78,.96,packet));
         float fine=sin(travel*83.0+vUV.y*6.283185)*.003;
         N=normalize(N+vec3(fine,0.0,-fine));R=reflect(-V,N);
         float nv=max(dot(N,V),0.0),f=.0204+.9796*pow(1.0-nv,5.0);
         float heat=uCoolingRoute.x<-.5?0.0:uCoolingRoute.x>.5?1.0:smoothstep(.08,.92,(vUV.x-uCoolingRoute.y)/uCoolingRoute.z);
-        vec3 body=srgbLinear(mix(vec3(.065,.36,.72),vec3(.72,.13,.075),heat));
+        vec3 body=srgbLinear(mix(vec3(.045,.40,.78),vec3(.79,.105,.055),heat));
         vec3 irradiance=uHasEnvironment>.5?environmentStrip(N,6.0):vec3(.45);
-        vec3 reflected=uHasEnvironment>.5?environmentSpecular(R,.10):vec3(.30);
+        vec3 reflected=uHasEnvironment>.5?environmentSpecular(R,.17):vec3(.30);
         // Longer optical paths through the centre retain the thermal tint;
         // the existing cylindrical surface supplies the edge reflection.
         // Sparse pale density fronts have a sharp leading edge and a long
         // coloured wake, so motion remains readable at normal viewing size.
-        float column=.30+.70*sqrt(nv);
-        vec3 scatter=mix(body,vec3(.64),witness*.18)*irradiance*(.42+witness*1.18)*column;
-        vec3 water=scatter+reflected*(f*.60+.008);
-        gl_FragColor=vec4(displayTransform(water),vColor.a*(.86+.12*witness));return;
+        // Keep the full existing bore projection readable: the old dark rim
+        // reduced the apparent diameter to a subpixel core on the dashboard.
+        // Optical tint still deepens at the centre; no radii/speed are changed.
+        float column=.62+.38*sqrt(nv);
+        vec3 scatter=mix(body,vec3(.70),witness*.24)*irradiance*(.64+witness*1.45)*column;
+        vec3 water=scatter+reflected*(f*.32+.012);
+        gl_FragColor=vec4(displayTransform(water),vColor.a*(.94+.06*witness));return;
       }
       float metal=clamp(vMaterial.x,0.0,1.0),polymer=1.0-metal;
       float grain=fract(sin(dot(floor(vLocal*310.0),vec3(127.1,311.7,74.7)))*43758.5453);
@@ -300,6 +303,14 @@
           vec3 mapped=texture2D(uAssetNormal,vUV).xyz*2.0-1.0;mapped.xy*=uAssetNormalScale;
           N=normalize(mat3(T,B,N)*normalize(mapped));if(!gl_FrontFacing)N=-N;
           ao=mix(1.0,texture2D(uAssetOcclusion,vUV).r,uAssetAO);fine=.5;broad=.5;
+          // Cover-only machining response. Preserve all GLB PBR factors/maps
+          // and the analytic manifold normals. GPU grain follows the long
+          // plate axis; CPU satin has the subtler directional reflection.
+          if(uCoolingFinish>.5&&abs(N.y)>.85){
+            float machining=finishNoise(vLocal.xz*vec2(90.0,5.0));
+            N=normalize(N+vec3((machining-.5)*.0012,0.0,0.0));
+            sheetAnisotropy=mix(.07,.16,step(1.5,uCoolingFinish));
+          }
         }else{
         float luminance=dot(vColor.rgb,vec3(.2126,.7152,.0722));
         float coating=(1.0-smoothstep(.07,.21,luminance))*metal;
@@ -311,14 +322,15 @@
         // Rolled sheet grain follows the long chassis axis. Only the opt-in
         // tray's neutral sheet metal receives it; shared gold fascia, carriers,
         // ports and Rack equipment retain their original finish.
-        if(uL10Finish>.5&&vLocal.z<2.85&&vColor.b>=vColor.r&&metal>.7){
+        if(uL10Finish>.5&&(vLocal.z<2.85||uL10Finish>1.5)&&vColor.b>=vColor.r&&metal>.7){
           vec2 sheet=abs(N.y)>.7?vLocal.xz:vLocal.yz;
           float roll=finishNoise(sheet*vec2(360.0,7.0));
           float micro=finishNoise(sheet*vec2(790.0,31.0));
-          rough=clamp(.365+(roll-.5)*.008+(micro-.5)*.003,.35,.38);
+          float sheetRoughness=uL10Finish>1.5?.305:.365;
+          rough=clamp(sheetRoughness+(roll-.5)*.008+(micro-.5)*.003,.29,.38);
           vec3 across=abs(N.y)>.7?vec3(1,0,0):vec3(0,1,0);
           N=normalize(N+across*((roll-.5)*.0014+(micro-.5)*.0005));
-          sheetAnisotropy=.24;
+          sheetAnisotropy=uL10Finish>1.5?.10:.24;
         }
         // Legacy mesh colors are artist values, not measured maps. Calibrate
         // diffuse reflectance separately from conductor F0; retain dark paint.
@@ -494,6 +506,7 @@
     let shadowFramebuffer=null,shadowTexture=null,shadowDepthBuffer=null,shadowPass=false,shadowSize=2048;
     let shadowProgress=-1,shadowExplode=-1;
     let environmentTexture=null,environmentImage=null,environmentReady=false,environmentFailed=false,environmentGeneration=0;
+    let coolingEnvironmentTexture=null,coolingEnvironmentImage=null,coolingEnvironmentReady=false,coolingEnvironmentFailed=false;
     const bareAsset=/(?:^|[?&])l10Bareboard=1(?:&|$)/.test(window.location?.search||'');
     const assetEnabled=hasL10()&&(bareAsset||/(?:^|[?&])l10AssetPrototype=1(?:&|$)/.test(window.location?.search||''));
     const inspectionEnabled=/(?:^|[?&])l10AssetLab=1(?:&|$)/.test(window.location?.search||'');
@@ -524,7 +537,7 @@
       Object.entries(built.meshes).forEach(([name,mesh])=>{const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,mesh.data,gl.STATIC_DRAW);parts[name]={buffer,count:mesh.data.length/12};vertices+=mesh.data.length/12;});
       ['aPosition','aNormal','aColor','aMaterial','aUV','aTangent'].forEach(name=>attributes[name]=gl.getAttribLocation(program,name));
       ['uViewProjection','uLightViewProjection','uModel','uPart','uOpacity','uEye','uKeyPosition','uLightTheme','uTime','uScan','uScanY','uRack','uQuality','uReveal','uDetail','uSectionX','uShadowMap','uShadowPass','uHasShadow','uShadowTexel','uEnvironment','uHasEnvironment'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
-      ['uAsset','uAssetNormalScale','uAssetRoughness','uAssetAO','uAssetAlphaCutoff','uAssetAlphaMask','uAssetBase','uAssetMR','uAssetNormal','uAssetOcclusion','uAssetFilmStrength','uAssetFilmThickness','uL10Finish','uCoolingFlow','uCoolingTravel','uCoolingRoute','uCoolingPhase'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
+      ['uAsset','uAssetNormalScale','uAssetRoughness','uAssetAO','uAssetAlphaCutoff','uAssetAlphaMask','uAssetBase','uAssetMR','uAssetNormal','uAssetOcclusion','uAssetFilmStrength','uAssetFilmThickness','uL10Finish','uCoolingFlow','uCoolingTravel','uCoolingRoute','uCoolingPhase','uCoolingFinish'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
       if(assetEnabled&&window.PAL10GLTF&&window.PAL10AssetRuntime){
         assetLoading=true;assetFailed=false;assetError='';canvas.dataset.coreAsset='loading';const generation=++assetGeneration;
         window.PAL10GLTF.load('/static/models/l10-prototype/'+(bareAsset?'bare-compute-boards.glb':'compute-board.glb')).then(asset=>{
@@ -569,6 +582,25 @@
         };
         environmentImage.onerror=()=>{if(disposed||generation!==environmentGeneration)return;environmentFailed=true;canvas.dataset.coreEnvironment='failed';if(assetEnabled)restoreLegacyAsset('Reference studio environment failed; prototype reverted to baseline');requestDraw();};
         environmentImage.src='/static/img/l10/studio-small-09-radiance.png';
+        if(bareAsset){
+          // Same photographic radiance, exposure and rotation; only the offline
+          // convolution is improved. Protected bare/Rack draws use the old atlas.
+          coolingEnvironmentReady=false;coolingEnvironmentFailed=false;
+          coolingEnvironmentTexture=gl.createTexture();gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,coolingEnvironmentTexture);
+          gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,255]));
+          for(const parameter of [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER])gl.texParameteri(gl.TEXTURE_2D,parameter,gl.LINEAR);
+          for(const parameter of [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T])gl.texParameteri(gl.TEXTURE_2D,parameter,gl.CLAMP_TO_EDGE);
+          gl.activeTexture(gl.TEXTURE0);coolingEnvironmentImage=new Image();
+          coolingEnvironmentImage.onload=()=>{
+            if(disposed||contextLost||generation!==environmentGeneration)return;
+            gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,coolingEnvironmentTexture);
+            gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL,gl.NONE);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,false);
+            gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,coolingEnvironmentImage);
+            gl.activeTexture(gl.TEXTURE0);coolingEnvironmentReady=true;requestDraw();
+          };
+          coolingEnvironmentImage.onerror=()=>{if(disposed||generation!==environmentGeneration)return;coolingEnvironmentFailed=true;requestDraw();};
+          coolingEnvironmentImage.src='/static/img/l10/studio-small-09-cooling-radiance.png?v=20261014-v3';
+        }
       }
       // Local RGBA depth target works on WebGL 1 without an extension or a
       // second renderer/context. Shadow resources share context-loss lifecycle.
@@ -595,7 +627,7 @@
     }
     function loadCoolingCompanion(generation){
       coolingLoading=true;coolingFailed=false;coolingError='';canvas.dataset.coreCooling='loading';
-      window.PAL10GLTF.load('/static/models/l10-cooling-v1/cooling-assembly.glb?v=20261013-v2').then(asset=>{
+      window.PAL10GLTF.load('/static/models/l10-cooling-v1/cooling-assembly.glb?v=20261014-v3').then(asset=>{
         if(disposed||contextLost||generation!==assetGeneration){asset.disposeImages();return;}
         try{
           const meta=asset.metadata.extras;
@@ -617,10 +649,13 @@
         }catch(error){asset.disposeImages();coolingLoading=false;coolingFailed=true;coolingError=error.message;canvas.dataset.coreCooling='fallback';requestDraw();}
       }).catch(error=>{if(disposed||generation!==assetGeneration)return;coolingLoading=false;coolingFailed=true;coolingError=error.message;canvas.dataset.coreCooling='fallback';requestDraw();});
     }
-    function release(){assetGeneration++;releaseCooling();assetRuntime?.destroy(contextLost);assetRuntime=null;assetLoading=false;environmentGeneration++;if(environmentImage){environmentImage.onload=null;environmentImage.onerror=null;}environmentImage=null;if(gl&&!contextLost){if(parts)Object.values(parts).forEach(part=>gl.deleteBuffer(part.buffer));if(program)gl.deleteProgram(program);shaders.forEach(shader=>gl.deleteShader(shader));if(shadowFramebuffer)gl.deleteFramebuffer(shadowFramebuffer);if(shadowTexture)gl.deleteTexture(shadowTexture);if(shadowDepthBuffer)gl.deleteRenderbuffer(shadowDepthBuffer);if(environmentTexture)gl.deleteTexture(environmentTexture);}environmentTexture=null;environmentReady=false;shadowFramebuffer=null;shadowTexture=null;shadowDepthBuffer=null;parts=null;program=null;shared=null;shaders.length=0;}
+    function release(){assetGeneration++;releaseCooling();assetRuntime?.destroy(contextLost);assetRuntime=null;assetLoading=false;environmentGeneration++;for(const img of [environmentImage,coolingEnvironmentImage])if(img){img.onload=null;img.onerror=null;}environmentImage=null;coolingEnvironmentImage=null;if(gl&&!contextLost){if(parts)Object.values(parts).forEach(part=>gl.deleteBuffer(part.buffer));if(program)gl.deleteProgram(program);shaders.forEach(shader=>gl.deleteShader(shader));if(shadowFramebuffer)gl.deleteFramebuffer(shadowFramebuffer);if(shadowTexture)gl.deleteTexture(shadowTexture);if(shadowDepthBuffer)gl.deleteRenderbuffer(shadowDepthBuffer);if(environmentTexture)gl.deleteTexture(environmentTexture);if(coolingEnvironmentTexture)gl.deleteTexture(coolingEnvironmentTexture);}environmentTexture=null;coolingEnvironmentTexture=null;environmentReady=false;coolingEnvironmentReady=false;shadowFramebuffer=null;shadowTexture=null;shadowDepthBuffer=null;parts=null;program=null;shared=null;shaders.length=0;}
     function restoreLegacyAsset(reason){
       assetGeneration++;assetLoading=false;assetFailed=true;assetError=reason;canvas.dataset.coreAsset='failed';
       releaseCooling();coolingFailed=true;coolingError=reason;
+      if(coolingEnvironmentImage){coolingEnvironmentImage.onload=null;coolingEnvironmentImage.onerror=null;coolingEnvironmentImage=null;}
+      if(coolingEnvironmentTexture&&!contextLost)gl.deleteTexture(coolingEnvironmentTexture);
+      coolingEnvironmentTexture=null;coolingEnvironmentReady=false;coolingEnvironmentFailed=true;
       if(assetRuntime){
         vertices-=assetRuntime.metadata.vertices;assetRuntime.destroy();assetRuntime=null;
         const legacy=window.PAL10Hardware.build();
@@ -658,6 +693,8 @@
             'cooling-close':[-.34,.79,4.80,-.965,.05,-1.68],
             'cooling-rear':[3.02,.54,6.2,0,.04,-2.00],
             'cooling-section':[-.24,.13,4.60,-.965,.04,-1.68],
+            'cooling-manifold':[-.20,.40,2.80,-.88,.08,-.40],
+            'cooling-connector':[-.24,.48,1.75,-.775,.06,-.97],
             'bare-front':[0,0,3.0,0,0,3.15],
             'bare-storage':[0,1.46,3.3,-.075,.01,2.62],
             'bare-section':[1.38,.095,3.0,.46,.009,2.63],
@@ -666,6 +703,13 @@
             'bare-hero':[-.46,.86,11.5,0,.04,.35]
           },v=presets[inspection];
           camera[0]=v[0];camera[1]=v[1];camera[2]=v[2];camera[3]=(pose.x+v[3])*modelMatrix[0];camera[4]=pose.y+v[4];camera[5]=(pose.z+v[5])*modelMatrix[10];
+        }
+        if(inspection.startsWith('rack-blanking-')){
+          // Native-resolution material/geometry evidence only; never part of
+          // the film, focus interaction, or authored Rack camera choreography.
+          camera[0]=-.18;camera[1]=.08;camera[2]=6.2;camera[3]=0;
+          camera[4]=inspection==='rack-blanking-bottom'?-6.60:6.90;
+          camera[5]=3.05*modelMatrix[10];
         }
         target.set(camera.subarray(3));const ce=Math.cos(camera[1]);
         eye[0]=target[0]+Math.sin(camera[0])*ce*camera[2];eye[1]=target[1]+Math.sin(camera[1])*camera[2];eye[2]=target[2]+Math.cos(camera[0])*ce*camera[2];cameraReady=true;cameraSettling=false;return;
@@ -705,6 +749,12 @@
         closeTarget[1]=mix(closeTarget[1],pose.y+.04,coolingCamera.bare);
         closeTarget[2]=mix(closeTarget[2],(pose.z-1.70)*modelMatrix[10],coolingCamera.detail);
         const lo=[closeTarget[0]-1.47,pose.y-.14,(pose.z-3.1)*modelMatrix[10]],hi=[closeTarget[0]+1.47,pose.y+.22+l10.coolingLift,(pose.z+3.1)*modelMatrix[10]];
+        // Fit the real, raised cover before it becomes visible. This changes
+        // framing only; the lid transform, closure and Rack bridge stay intact.
+        if(coolingRuntime&&progress<.407){
+          const lidTop=pose.y+.137+.50*(1-l10.lid)+.03;
+          hi[1]+=Math.max(0,lidTop-hi[1])*interval(.35,.37,progress);
+        }
         let closeFit=mix(fittedDistance(lo,hi,closeTarget,closeYaw+yaw,closeElevation+pitch,aspect,.79,.89),Math.max(4.5,3.7/aspect),coolingCamera.detail);
         const focus=coolingCamera.cooling||0;
         if(focus>0){
@@ -731,11 +781,20 @@
       target[0]=camera[3];target[1]=camera[4];target[2]=camera[5];
       eye[0]=target[0]+sy*ce*camera[2];eye[1]=target[1]+se*camera[2];eye[2]=target[2]+cy*ce*camera[2];
     }
+    function bindEnvironment(cooling=false){
+      if(!environmentTexture)return;
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D,cooling&&coolingEnvironmentReady?coolingEnvironmentTexture:environmentTexture);
+      gl.uniform1i(uniforms.uEnvironment,1);gl.activeTexture(gl.TEXTURE0);
+    }
     function part(name,matrix,opacity=1,writeDepth=true){
       if(shadowPass&&(opacity<.96||!writeDepth||name==='floor'||name.includes('flow')))return;
       const mesh=parts[name];if(!mesh||!mesh.count||opacity<=.003)return;
-      gl.uniform1f(uniforms.uL10Finish,bareAsset&&assetRuntime&&name==='l10-chassis'?1:0);
+      const polishedLid=!!coolingRuntime&&name==='l10-lid';
+      bindEnvironment(polishedLid);
+      gl.uniform1f(uniforms.uL10Finish,polishedLid?2:bareAsset&&assetRuntime&&name==='l10-chassis'?1:0);
       gl.uniform1f(uniforms.uCoolingFlow,0);
+      gl.uniform1f(uniforms.uCoolingFinish,0);
       gl.uniform1f(uniforms.uAsset,0);gl.disableVertexAttribArray(attributes.aUV);gl.disableVertexAttribArray(attributes.aTangent);
       gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
       gl.enableVertexAttribArray(attributes.aPosition);gl.vertexAttribPointer(attributes.aPosition,3,gl.FLOAT,false,48,0);
@@ -832,21 +891,25 @@
             if(inspection?.startsWith('bare-')||inspection==='board'||inspection==='packages')return;
             if(shadowPass&&fluid)return;
             m[13]=base[13]+lift;m[14]=base[14]+(semantic==='cooling-plumbing'?l10.plumbingZ:0);
+            bindEnvironment(true);
             gl.uniform1f(uniforms.uL10Finish,0);gl.uniform1f(uniforms.uCoolingFlow,fluid?1:0);
-            drawCalls+=coolingRuntime.draw(semantic,m,opacity,depth,shadowPass,fluid?p=>{
-              const binding=flowBindings[p.name.replace(/^Cooling V1 \/ cooling-fluid \/ /,'').replace(/#\d+$/,'')];
-              gl.uniform4fv(uniforms.uCoolingRoute,binding.route);gl.uniform2fv(uniforms.uCoolingPhase,binding.phase);
-            }:null);
-            gl.uniform1f(uniforms.uCoolingFlow,0);
+            drawCalls+=coolingRuntime.draw(semantic,m,opacity,depth,shadowPass,p=>{
+              gl.uniform1f(uniforms.uCoolingFinish,p.material.name==='CPU satin nickel cover'?1:p.material.name==='GPU machined nickel cover'?2:0);
+              if(fluid){
+                const binding=flowBindings[p.name.replace(/^Cooling V1 \/ cooling-fluid \/ /,'').replace(/#\d+$/,'')];
+                gl.uniform4fv(uniforms.uCoolingRoute,binding.route);gl.uniform2fv(uniforms.uCoolingPhase,binding.phase);
+              }
+            });
+            gl.uniform1f(uniforms.uCoolingFlow,0);gl.uniform1f(uniforms.uCoolingFinish,0);
           };
           coolingLayer('cooling-mounts',0,l10.coolingVisibility);
           coolingLayer('cooling-frame',l10.coolingLift,l10.coolingVisibility);
           coolingLayer('cooling-channels',l10.coolingLift,l10.coolingVisibility);
           // Fluid is an actual volume inside the passages. Composite ghosted
           // metal covers afterward; the whole envelope stays in place.
-          coolingLayer('cooling-fluid',0,l10.flow*.92,false,true);
+          coolingLayer('cooling-fluid',0,l10.flow,false,true);
           coolingLayer('cooling',l10.coolingLift,l10.coolingVisibility*(1-l10.flow*.94),l10.flow<.001);
-          coolingLayer('cooling-plumbing',l10.plumbingLift,l10.plumbingVisibility*(1-l10.flow*.89),l10.flow<.001);
+          coolingLayer('cooling-plumbing',l10.plumbingLift,l10.plumbingVisibility*(1-l10.flow*.94),l10.flow<.001);
         }else{
           layer('l10-cooling-frame',l10.coolingLift);
           layer('l10-cooling',l10.coolingLift,1-l10.flow*.28,l10.flow<.01);
@@ -886,7 +949,7 @@
       canvas.dataset.coreIdle=idleStart?'showcase':'waiting';canvas.dataset.coreScan=sample.scan.toFixed(3);
       projected=projectEquipment(multiply(viewProjection,modelMatrix),rect);
       canvas.dispatchEvent(new CustomEvent('pa-core-projection',{bubbles:true,detail:projected}));
-      if(!ready&&!assetLoading&&!coolingLoading&&(!hasL10()||environmentReady||environmentFailed)){const error=gl.getError();if(error!==gl.NO_ERROR){fail('WebGL render error '+error);return;}ready=true;canvas.dataset.coreState='ready';delete canvas.dataset.coreError;canvas.dispatchEvent(new CustomEvent('pa-core-ready',{bubbles:true}));}
+      if(!ready&&!assetLoading&&!coolingLoading&&(!hasL10()||!bareAsset||coolingEnvironmentReady||coolingEnvironmentFailed)&&(!hasL10()||environmentReady||environmentFailed)){const error=gl.getError();if(error!==gl.NO_ERROR){fail('WebGL render error '+error);return;}ready=true;canvas.dataset.coreState='ready';delete canvas.dataset.coreError;canvas.dispatchEvent(new CustomEvent('pa-core-ready',{bubbles:true}));}
       // Settled inspection frames return to native display resolution. Playback
       // owns time and requests its next frame; a paused tray need not burn GPU.
       if(hasL10()&&!cameraSettling&&resolution<1){resolution=1;slowFrames=0;cameraSettling=true;}
@@ -934,14 +997,14 @@
       return {left,right,bottom,top,heightFraction:(top-bottom)/2,widthFraction:(right-left)/2,nearest,clipped:left< -1||right>1||bottom< -1||top>1||nearest<.15};
     }
     const api={supported:true,
-      setInspection(value){if(!inspectionEnabled)throw new Error('Inspection cameras require l10AssetLab=1');if(value!==null&&!['board','packages','cooling','fans','power','bare-front','bare-storage','bare-section','bare-hero','bare-packages','bare-network','cooling-hero','cooling-close','cooling-rear','cooling-section'].includes(value))throw new Error('Unknown asset inspection');inspection=value;cameraReady=false;shadowProgress=-1;requestDraw();},
+      setInspection(value){if(!inspectionEnabled)throw new Error('Inspection cameras require l10AssetLab=1');if(value!==null&&!['board','packages','cooling','fans','power','bare-front','bare-storage','bare-section','bare-hero','bare-packages','bare-network','cooling-hero','cooling-close','cooling-rear','cooling-section','cooling-manifold','cooling-connector','rack-blanking-bottom','rack-blanking-upper'].includes(value))throw new Error('Unknown asset inspection');inspection=value;cameraReady=false;shadowProgress=-1;requestDraw();},
       setProgress(value){const next=reduced.matches?1:clamp(Number(value)||0);if(Math.abs(next-progress)<.00001)return;activity();progress=next;if(manual&&!drag){manual=false;view='authored';yaw=0;pitch=0;syncOrbit();}armIdle();requestDraw();},
       setPointer(x,y){if(manual||drag||reduced.matches)return;pointerX=clamp(Number(x)||0,-1,1);pointerY=clamp(Number(y)||0,-1,1);requestDraw();},
       setOrbit,setView,resetOrbit,setTheme(value){const next=value===true||value==='light'?1:0;if(next===light)return;light=next;requestDraw();},
       getState(){return {supported:true,ready,contextLost,progress,yaw,pitch,dragging:!!drag,settling:cameraSettling,theme:light?'light':'dark',model:'generic-liquid-cooled-compute',l10:hasL10()?(coolingRuntime?coolingAssemblyState(progress):l10State(progress)):null,rackProgress:rackProgress(progress),computeTrays:classCounts.server,switchTrays:classCounts.nvlink,networkSwitches:classCounts.switch,powerShelves:classCounts.powershelf,occupiedU:48,componentCount:PLACEMENTS.length,geometryBuffers:parts?Object.keys(parts).length:0,vertices,drawCalls,
         camera:{yaw:camera[0],elevation:camera[1],distance:camera[2],target:Array.from(target),eye:Array.from(eye),fov:.50,view},inspection,asset:{enabled:assetEnabled,loading:assetLoading,failed:assetFailed,error:assetError,metadata:assetRuntime?.metadata||null},bounds:projectionBounds(),callouts:projected?.callouts||[],projection:projected,geometry:shared?.quality||shared?.metadata||null,
         cooling:{enabled:bareAsset,ready:!!coolingRuntime,loading:coolingLoading,failed:coolingFailed,error:coolingError,metadata:coolingRuntime?.metadata||null},
-        quality:{resolution,frameMs,pixelCount:canvas.width*canvas.height,adaptive:true,contactShadows:!!shadowFramebuffer,shadowMapSize:shadowFramebuffer?shadowSize:0,environmentReady,environmentFailed,environment:'CC0 photographic studio / GGX log radiance'},idle:{active:!!idleStart,exiting:!!idleExit,weight:idleWeight,delay:6500,lastActivity,disabled:reduced.matches},assembly:assemblySnapshot(progress,{coolingV1:!!coolingRuntime}),disposed};},resize:requestDraw,
+        quality:{resolution,frameMs,pixelCount:canvas.width*canvas.height,adaptive:true,contactShadows:!!shadowFramebuffer,shadowMapSize:shadowFramebuffer?shadowSize:0,environmentReady,environmentFailed,coolingEnvironmentReady,coolingEnvironmentFailed,environment:'CC0 photographic studio / GGX log radiance'},idle:{active:!!idleStart,exiting:!!idleExit,weight:idleWeight,delay:6500,lastActivity,disabled:reduced.matches},assembly:assemblySnapshot(progress,{coolingV1:!!coolingRuntime}),disposed};},resize:requestDraw,
       destroy(){if(disposed)return;disposed=true;clearTimeout(idleTimer);if(frame)cancelAnimationFrame(frame);frame=0;drag=null;ro?.disconnect();io?.disconnect();window.removeEventListener('resize',requestDraw);Object.entries(events).forEach(([name,handler])=>canvas.removeEventListener(name,handler));activityEvents.forEach(name=>window.removeEventListener(name,activity));if(typeof document!=='undefined')document.removeEventListener('visibilitychange',onVisibility);reduced.removeEventListener?.('change',onReduced);canvas.style.touchAction=originalTouchAction;release();canvas.dataset.coreState='disposed';delete canvas.paCoreScene;}
     };canvas.paCoreScene=api;return api;
   }

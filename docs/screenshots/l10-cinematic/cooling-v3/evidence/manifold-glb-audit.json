@@ -1,0 +1,294 @@
+{
+  "method": "Independent decoding of exported GLB POSITION/NORMAL/TEXCOORD/index accessors; geometric triangle normals isolate true straight manifold outer surfaces.",
+  "baselineCommit": "5f8e059c6e0c1a614fe412b990a463d643fc0a32",
+  "glbSHA256": "5cfef980e39a446f3157e214b5e1f2c4058e6ba65b3e133557f5d5cd43d05cdc",
+  "scriptSHA256": "2c33699b992c3491de9744a7245193774fc790d1ba722316674d79e92d26b4ff",
+  "before": [
+    {
+      "component": "supply",
+      "exteriorTriangles": 232,
+      "corners": 696,
+      "radialNormalErrorDegrees": {
+        "mean": 54.58270241188386,
+        "max": 78.65625967855743,
+        "over5": 696
+      },
+      "maxAxialNormal": 0.7386190891265869,
+      "UVWrapCrossingTriangles": 2
+    },
+    {
+      "component": "return",
+      "exteriorTriangles": 220,
+      "corners": 660,
+      "radialNormalErrorDegrees": {
+        "mean": 54.54822649968876,
+        "max": 77.97757052188214,
+        "over5": 660
+      },
+      "maxAxialNormal": 0.7242871522903442,
+      "UVWrapCrossingTriangles": 2
+    }
+  ],
+  "after": [
+    {
+      "component": "supply",
+      "exteriorTriangles": 428,
+      "corners": 1284,
+      "radialNormalErrorDegrees": {
+        "mean": 0.0013232058015881245,
+        "max": 0.019553019795916112,
+        "over5": 0
+      },
+      "maxAxialNormal": 0,
+      "UVWrapCrossingTriangles": 0
+    },
+    {
+      "component": "return",
+      "exteriorTriangles": 428,
+      "corners": 1284,
+      "radialNormalErrorDegrees": {
+        "mean": 0.0013721503118281967,
+        "max": 0.03141767991007676,
+        "over5": 0
+      },
+      "maxAxialNormal": 0,
+      "UVWrapCrossingTriangles": 0
+    }
+  ],
+  "materialPreservation": [
+    {
+      "name": "Anodized retention",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.024000000208616257,
+        0.027000000700354576,
+        0.028999999165534973,
+        1
+      ],
+      "metallic": 0.75,
+      "roughness": 0.4699999988079071,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "normalTexture": false
+    },
+    {
+      "name": "TIM",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.1899999976158142,
+        0.20000000298023224,
+        0.1899999976158142,
+        1
+      ],
+      "metallic": 0,
+      "roughness": 0.7799999713897705,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "normalTexture": false
+    },
+    {
+      "name": "Machined copper",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.5600000023841858,
+        0.26499998569488525,
+        0.12999999523162842,
+        1
+      ],
+      "metallic": 1,
+      "roughness": 1,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "normalTexture": false
+    },
+    {
+      "name": "Gasket",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.010999999940395355,
+        0.014000000432133675,
+        0.014999999664723873,
+        1
+      ],
+      "metallic": 0,
+      "roughness": 0.8199999928474426,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "normalTexture": false
+    },
+    {
+      "name": "Brushed nickel",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.46000000834465027,
+        0.49000000953674316,
+        0.49000000953674316,
+        1
+      ],
+      "metallic": 1,
+      "roughness": 1,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "normalTexture": false
+    },
+    {
+      "name": "Dark nickel fastener",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.11500000208616257,
+        0.12999999523162842,
+        0.14000000059604645,
+        1
+      ],
+      "metallic": 0.9100000262260437,
+      "roughness": 0.36000001430511475,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "normalTexture": false
+    },
+    {
+      "name": "Recess oxide",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.012000000104308128,
+        0.01600000075995922,
+        0.017999999225139618,
+        1
+      ],
+      "metallic": 0.3799999952316284,
+      "roughness": 0.5899999737739563,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "normalTexture": false
+    },
+    {
+      "name": "Machined nickel fittings",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.4399999976158142,
+        0.4699999988079071,
+        0.47999998927116394,
+        1
+      ],
+      "metallic": 1,
+      "roughness": 0.3149999976158142,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "normalTexture": false
+    },
+    {
+      "name": "CPU satin nickel cover",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.4300000071525574,
+        0.46000000834465027,
+        0.4699999988079071,
+        1
+      ],
+      "metallic": 1,
+      "roughness": 1,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "normalTexture": false
+    },
+    {
+      "name": "GPU machined nickel cover",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.4300000071525574,
+        0.46000000834465027,
+        0.4699999988079071,
+        1
+      ],
+      "metallic": 1,
+      "roughness": 1,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "normalTexture": false
+    },
+    {
+      "name": "Elastomer hose",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.01899999938905239,
+        0.02199999988079071,
+        0.02500000037252903,
+        1
+      ],
+      "metallic": 0,
+      "roughness": 0.6499999761581421,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "normalTexture": false
+    },
+    {
+      "name": "Coolant water tracer",
+      "scalarFactorsUnchanged": true,
+      "baseColor": [
+        0.03500000014901161,
+        0.28999999165534973,
+        0.3400000035762787,
+        1
+      ],
+      "metallic": 0.12999999523162842,
+      "roughness": 0.23000000417232513,
+      "emissive": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "normalTexture": false
+    }
+  ],
+  "streamPreservation": {
+    "routes": 22,
+    "allPositionsNormalsUVsIndicesIdentical": true,
+    "flowRoutesContractIdentical": true
+  },
+  "passed": true
+}

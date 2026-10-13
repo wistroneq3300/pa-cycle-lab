@@ -1,0 +1,31 @@
+{
+  "mode": "browser",
+  "started": "2026-10-13T16:35:47.739Z",
+  "assertions": "Original assertions unchanged; only report destinations relocated",
+  "results": [
+    {
+      "name": "runtime",
+      "exit": 0,
+      "pass": true,
+      "elapsedMs": 31490
+    },
+    {
+      "name": "bareboard",
+      "exit": 0,
+      "pass": true,
+      "elapsedMs": 165929
+    },
+    {
+      "name": "cinematic",
+      "exit": 0,
+      "pass": true,
+      "elapsedMs": 68093
+    },
+    {
+      "name": "rack",
+      "exit": 0,
+      "pass": true,
+      "elapsedMs": 6336
+    }
+  ]
+}

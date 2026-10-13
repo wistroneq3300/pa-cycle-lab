@@ -1,0 +1,18 @@
+{
+  "round": 1,
+  "baseline": "5f8e059c6e0c1a614fe412b990a463d643fc0a32",
+  "coreSceneSHA256": "243c71868402fa9cca89b86215984ec442d4dee809fd3b8ce991233303d47e5f",
+  "coolingGLBSHA256": "5cfef980e39a446f3157e214b5e1f2c4058e6ba65b3e133557f5d5cd43d05cdc",
+  "controlledCaptureArchive": "artifacts/l10-cooling-v3/round1/after",
+  "controlledComparisonArchive": "artifacts/l10-cooling-v3/round1/comparison.json",
+  "settledDashboardArchive": "artifacts/l10-cooling-v3/round1/settled-dashboard",
+  "browserRegression": "evidence/regression-browser-round1.json",
+  "publishedSelectedRound1Evidence": [
+    "evidence/round1/E-lid-closure.png",
+    "evidence/round1/D-solid-cooling-assembly.png",
+    "evidence/round1/diagnostic-cold-plate-connector-macro.png"
+  ],
+  "captureCorrection": "Initial dashboard screenshots in the first archive were captured during camera damping and are preview-only. Corrected acceptance screenshots use two animation frames before waiting, assert settled camera state, and compare flow camera components with the baseline. They are preserved separately in settled-dashboard. This correction did not change the renderer.",
+  "visualScore": null,
+  "status": "Preserved before Round 2; engineering evidence does not establish a photorealism score."
+}

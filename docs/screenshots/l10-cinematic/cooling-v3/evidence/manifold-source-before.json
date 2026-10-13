@@ -1,0 +1,41 @@
+{
+  "source": "assets\\l10-cooling-v1\\cooling-assembly.blend",
+  "readOnly": true,
+  "measurements": [
+    {
+      "object": "Supply distribution manifold",
+      "vertices": 464,
+      "faces": 260,
+      "outerFaces": 44,
+      "outerCornerCount": 320,
+      "radialNormalErrorDegrees": {
+        "max": 78.6565817969114,
+        "mean": 52.20410342435565,
+        "over5": 320
+      },
+      "maxUnphysicalAxialNormal": 0.7386031150817871,
+      "capFaces": 64,
+      "smoothedCapFaces": 64,
+      "outerUVWrapCrossingFaces": 1,
+      "customNormals": false
+    },
+    {
+      "object": "Return collection manifold",
+      "vertices": 440,
+      "faces": 260,
+      "outerFaces": 44,
+      "outerCornerCount": 308,
+      "radialNormalErrorDegrees": {
+        "max": 77.97545736439132,
+        "mean": 51.92931100074417,
+        "over5": 308
+      },
+      "maxUnphysicalAxialNormal": 0.7243147492408752,
+      "capFaces": 64,
+      "smoothedCapFaces": 64,
+      "outerUVWrapCrossingFaces": 1,
+      "customNormals": false
+    }
+  ],
+  "interpretation": "Straight manifold exterior normals should be radial with zero axial X component; annular end faces must remain planar; texture seam quads must not span most of V."
+}

@@ -1,0 +1,24 @@
+{
+  "source": "https://polyhaven.com/a/studio_small_09",
+  "author": "Sergej Majboroda",
+  "license": "CC0",
+  "source_sha256": "e7cfda5f4e98e623db12b8bfd0184e048488e4855d9c83e2751fb44a32e80c45",
+  "source_exposure": 0.38,
+  "width": 512,
+  "strip_height": 256,
+  "strips": 7,
+  "samples": 1024,
+  "source_mip_levels": 10,
+  "roughness": [
+    0.045,
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    1
+  ],
+  "last_strip": "cosine-weighted irradiance / pi",
+  "encoding": "opaque RGB log2(1 + radiance * 16) / log2(513), range 32",
+  "derivation": "GGX importance sampling with PDF/solid-angle source mip footprints in linear radiance; periodic longitude and clamped latitude; same source illumination and exposure as original atlas",
+  "scope": "Cooling companion and lid only; original bare/Rack atlas retained"
+}

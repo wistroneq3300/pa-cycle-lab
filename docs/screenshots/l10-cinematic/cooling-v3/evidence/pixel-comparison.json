@@ -1,0 +1,72 @@
+{
+  "method": "Direct RGB difference of unchanged native PNGs; no resampling, image correction or perceptual-score conversion.",
+  "protected": [
+    {
+      "first": "before/guard-gold-front.png",
+      "second": "after/guard-gold-front.png",
+      "dimensions": [
+        3440,
+        1440
+      ],
+      "changedPixels": 48,
+      "totalPixels": 4953600,
+      "maxChannelDelta": 15,
+      "meanChannelDelta": 4.8180447889750214e-05,
+      "sha256": [
+        "3df4a9d62eeb5e77da89747412e84d24d447791a7e067a796d117f7f387c5339",
+        "23317745e59cc40faaeb7c0cd2133ddf05516631d37c2879342e8a817104f092"
+      ]
+    },
+    {
+      "first": "before/guard-network.png",
+      "second": "after/guard-network.png",
+      "dimensions": [
+        3440,
+        1440
+      ],
+      "changedPixels": 192,
+      "totalPixels": 4953600,
+      "maxChannelDelta": 6,
+      "meanChannelDelta": 3.963447459086994e-05,
+      "sha256": [
+        "048715ef2b9ae988d31eb4ef9295457074cf102770f4df4dfe08345f1a49d6bf",
+        "2bf1e2a0a877de2ae1f86b0ce1aa03757e263ae60d29a35a4a2fd0a609b58f1e"
+      ]
+    }
+  ],
+  "flow": [
+    {
+      "first": "after/C-dynamic-cooling-flow.png",
+      "second": "after/C-dynamic-cooling-flow-B.png",
+      "dimensions": [
+        3440,
+        1440
+      ],
+      "changedPixels": 145967,
+      "totalPixels": 4953600,
+      "maxChannelDelta": 108,
+      "meanChannelDelta": 1.1620953111541774,
+      "sha256": [
+        "b024aeefc72a2a01031997cbf630adf5513f81a9da152612ca9bb4eb1b5bd524",
+        "a3c97b06430ac19e07a9325e9ef759fd7652d8bf8a204d775cedfc3b84fd97ce"
+      ]
+    },
+    {
+      "first": "after/dashboard-flow-A-2127x1272.png",
+      "second": "after/dashboard-flow-B-2127x1272.png",
+      "dimensions": [
+        2127,
+        1272
+      ],
+      "changedPixels": 128459,
+      "totalPixels": 2705544,
+      "maxChannelDelta": 106,
+      "meanChannelDelta": 0.9703031996522695,
+      "sha256": [
+        "5731262b759782fa257ec49b67a142b870801f91fb1577a805ce60652e6a21a4",
+        "1a50a450c6db2fda54eca719509b7d46d49343747d669318f3a5726f3500106b"
+      ]
+    }
+  ],
+  "limits": "Protected geometry/material bytes are audited separately. Pixel differences report driver/raster effects, not proof of visual equivalence. Flow drawing/clock/camera invariants are checked in comparison.json and runtime suites."
+}

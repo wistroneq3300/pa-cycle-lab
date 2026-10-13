@@ -142,11 +142,87 @@ def pipe(name,layer,component,points,r,mat,offset=0,sides=12,inner=0):
       faces.extend([tuple(range(sides-1,-1,-1)),tuple(range((len(P)-1)*sides,len(P)*sides))])
     me=bpy.data.meshes.new(name);me.from_pydata(verts,[],faces);me.update();bm=bmesh.new();bm.from_mesh(me);bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(me);bm.free()
     o=bpy.data.objects.new(name,me);COL[layer].objects.link(o);tag(o,layer,component);me.materials.append(M[mat]);uv=me.uv_layers.new(name='UVMap')
+    wall_faces=(len(P)-1)*rings*sides
     for poly in me.polygons:
-        poly.use_smooth=len(poly.vertices)==4
+        # Preserve the accepted stream core/UV contract. Physical shells need
+        # a split at their planar annular ends and a real UV wrap boundary.
+        poly.use_smooth=len(poly.vertices)==4 if layer=='cooling-fluid' else poly.index<wall_faces
+        seam=layer!='cooling-fluid' and poly.index<wall_faces and poly.index%sides==sides-1
         for li in poly.loop_indices:
-            vi=me.loops[li].vertex_index;uv.data[li].uv=(offset+arc[vi//stride],(vi%sides)/sides)
+            vi=me.loops[li].vertex_index;j=vi%sides
+            uv.data[li].uv=(offset+arc[vi//stride],1 if seam and j==0 else j/sides)
     o['routeId']=name;o['flowArcLength']=arc[-1];o['flowDirection']='positive U = inlet to outlet';o['boreRadius']=inner;return o,arc
+
+def manufactured_header_normals(obj,yy,zz):
+    """Restore analytic lathe normals after all six real branch booleans.
+
+    A smoothed two-ring tube averages its end caps across its entire length;
+    the booleans additionally average port walls into the long outer faces.
+    Weighted normals do not recover a cylinder from those long thin faces.
+    Split loop normals keep true radial exterior/bore shading, while actual
+    planar end faces and machined port walls retain their own face normals.
+    """
+    me=obj.data;me.update();normals=[None]*len(me.loops);uv=me.uv_layers.active
+    for face in me.polygons:
+        c=face.center;radial=Vector((0,c.y+zz,c.z-yy));radius=radial.length
+        alignment=face.normal.dot(radial.normalized()) if radius else 0
+        outer=radius>.0165 and alignment>.98 and abs(face.normal.x)<1e-4
+        inner=radius<.0122 and alignment<-.98 and abs(face.normal.x)<1e-4
+        cylinder_face=outer or inner;face.use_smooth=cylinder_face
+        # Boolean-interpolated UVs preserve the axial mapping but may bridge
+        # the wrap. Reconstruct only true cylinder faces from their angle.
+        values=[]
+        for li in face.loop_indices:
+            p=me.vertices[me.loops[li].vertex_index].co
+            n=Vector((0,p.y+zz,p.z-yy)).normalized()
+            normals[li]=n if outer else -n if inner else face.normal.copy()
+            if cylinder_face:values.append((li,(math.atan2(-(p.z-yy),-(p.y+zz))/math.tau)%1))
+        if values:
+            wrap=max(v for _,v in values)-min(v for _,v in values)>.5
+            for li,v in values:
+                p=me.vertices[me.loops[li].vertex_index].co
+                uv.data[li].uv=(p.x+1.78,v+1 if wrap and v<.5 else v)
+    me.normals_split_custom_set(normals)
+    obj['normalPolicy']='Analytic radial outer/bore loop normals after booleans; flat end/port faces'
+    obj['uvPolicy']='Axial distance U; wrapped cylindrical V with explicit per-loop seam'
+
+def port_ferrule(name,component,x,y,start,end):
+    """Stepped compression sleeve inside the original 0.020-radius envelope."""
+    profile=[(start,.0188),(start+.0012,.020),(start+.009,.020),
+             (start+.0102,.0186),(end-.010,.0186),(end-.0088,.020),
+             (end-.0012,.020),(end,.0188)]
+    sides=48;inner=.0145;verts=[];faces=[]
+    for z,r in profile:
+        for radius in (r,inner):
+            verts.extend(coord(x+radius*math.cos(j*math.tau/sides),y+radius*math.sin(j*math.tau/sides),z) for j in range(sides))
+    for i in range(len(profile)-1):
+        for ring in (0,1):
+            for j in range(sides):
+                k=(j+1)%sides;a=i*2*sides+ring*sides;b=(i+1)*2*sides+ring*sides
+                f=(a+j,a+k,b+k,b+j);faces.append(f if ring==0 else tuple(reversed(f)))
+    for i in (0,len(profile)-1):
+        a=i*2*sides
+        for j in range(sides):
+            k=(j+1)%sides;f=(a+j,a+sides+j,a+sides+k,a+k);faces.append(f if i==0 else tuple(reversed(f)))
+    me=bpy.data.meshes.new(name);me.from_pydata(verts,[],faces);me.update()
+    bm=bmesh.new();bm.from_mesh(me);bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(me);bm.free()
+    obj=bpy.data.objects.new(name,me);COL['cooling-frame'].objects.link(obj);tag(obj,'cooling-frame',component);me.materials.append(M['Machined nickel fittings'])
+    uv=me.uv_layers.new(name='UVMap');normals=[None]*len(me.loops)
+    for f in me.polygons:
+        longitudinal=f.index<(len(profile)-1)*2*sides
+        segment=f.index//(2*sides);ring=(f.index//sides)%2
+        cylindrical=longitudinal and (ring==1 or abs(profile[segment][1]-profile[segment+1][1])<1e-8)
+        f.use_smooth=cylindrical
+        for li in f.loop_indices:
+            p=me.vertices[me.loops[li].vertex_index].co;n=Vector((p.x-x,0,p.z-y)).normalized()
+            normals[li]=(-n if ring==1 else n) if cylindrical else f.normal.copy()
+            vi=me.loops[li].vertex_index;j=vi%sides
+            uv.data[li].uv=((-p.y-start)/(end-start),1 if longitudinal and f.index%sides==sides-1 and j==0 else j/sides)
+    me.normals_split_custom_set(normals)
+    obj['functionalDetail']='Compression ferrule shoulders, chamfered lips, retained open bore and original collar envelope'
+    # Visible elastomer sealing band occupies the machined sleeve groove.
+    pipe(name+' captured seal','cooling-frame',component,[[x,y,start+.011],[x,y,start+.014]],.0192,'Gasket',sides=48,inner=.0186)
+    return obj
 
 def bore_junction(header,point,direction,radius):
     """Open a real branch passage through an annular manifold wall."""
@@ -180,13 +256,13 @@ pipe('Rear return line','cooling-plumbing','return',return_main,.017,'Elastomer 
 rs=route('supply-trunk','supply',supply_main,.0105,0,'supply-qd','supply-header')
 header_s=[[-1.78,SUPPLY_Y,SUPPLY_Z],[1.78,SUPPLY_Y,SUPPLY_Z]]
 header_r=[[-1.78,RETURN_Y,RETURN_Z],[1.78,RETURN_Y,RETURN_Z]]
-manifold_s,_=pipe('Supply distribution manifold','cooling-plumbing','supply',header_s,.017,'Brushed nickel',sides=20,inner=.012)
-manifold_r,_=pipe('Return collection manifold','cooling-plumbing','return',header_r,.017,'Brushed nickel',sides=20,inner=.012)
+manifold_s,_=pipe('Supply distribution manifold','cooling-plumbing','supply',header_s,.017,'Brushed nickel',sides=64,inner=.012)
+manifold_r,_=pipe('Return collection manifold','cooling-plumbing','return',header_r,.017,'Brushed nickel',sides=64,inner=.012)
 # Close the unused end of each header. The short hollow extension keeps the
 # stream-core endpoint clear of the blind plug; external QDs remain open.
 for side,yy,zz,semantic in [(1,SUPPLY_Y,SUPPLY_Z,'supply'),(-1,RETURN_Y,RETURN_Z,'return')]:
-    pipe(semantic+' header blind-end sleeve','cooling-plumbing',semantic,[[side*1.78,yy,zz],[side*1.786,yy,zz]],.017,'Brushed nickel',sides=20,inner=.012)
-    pipe(semantic+' header sealed blind plug','cooling-plumbing',semantic,[[side*1.786,yy,zz],[side*1.792,yy,zz]],.017,'Brushed nickel',sides=20)
+    pipe(semantic+' header blind-end sleeve','cooling-plumbing',semantic,[[side*1.78,yy,zz],[side*1.786,yy,zz]],.017,'Brushed nickel',sides=64,inner=.012)
+    pipe(semantic+' header sealed blind plug','cooling-plumbing',semantic,[[side*1.786,yy,zz],[side*1.792,yy,zz]],.017,'Brushed nickel',sides=64)
 route('supply-header','supply',header_s,.0105,rs['length'],'supply-trunk','six-plate-inlets')
 route('return-header','return',header_r,.0105,0,'six-plate-outlets','return-trunk')
 route('return-trunk','return',return_main,.0105,3.56,'return-header','return-qd')
@@ -225,7 +301,11 @@ for seat in seats:
         # Divider terminates short of its U-turn at alternating ends.
         gap=.059;length=2*end-gap;shift=gap/2 if i%2==0 else -gap/2
         cube(sid+' microchannel divider '+str(i+1),'cooling-channels',sid,x+float((lane[i]+lane[i+1])/2),.046,z+shift,.032,.036,length,'Machined copper',.001)
-    cube(sid+' sealed nickel cover','cooling',sid,x,.0685,z,w,.009,d,'CPU satin nickel cover' if cpu else 'GPU machined nickel cover',.0018)
+    cover=cube(sid+' sealed nickel cover','cooling',sid,x,.0685,z,w,.009,d,'CPU satin nickel cover' if cpu else 'GPU machined nickel cover',.0018)
+    # Preserve every cover plane and envelope, refining only the tiny edge
+    # break: five facets resolve a continuous manufactured highlight.
+    cover.modifiers['Physical edge break'].width=.0022
+    cover.modifiers['Physical edge break'].segments=5
     # Compressible dark gasket follows the perimeter between rim and cover.
     for side in [-1,1]:
         cube(sid+' cover gasket side','cooling-frame',sid,x+side*(w-.011)/2,.064,z,.006,.001,d-.010,'Gasket',.0001)
@@ -248,7 +328,7 @@ for seat in seats:
     inlet=channel[0];outlet=channel[-1]
     # Separate radial fittings seat at real openings and enclose fluid endpoints.
     for label,p in [('inlet',inlet),('outlet',outlet)]:
-        pipe(sid+' '+label+' port collar','cooling-frame',sid,[[p[0],p[1],z+d/2-.012],[p[0],p[1],p[2]+.008]],.020,'Machined nickel fittings',sides=20,inner=.0145)
+        port_ferrule(sid+' '+label+' port collar',sid,p[0],p[1],z+d/2-.012,p[2]+.008)
     # Hoses rise forward of each coldplate then clear every closed cover.
     inlet_pts=path([[inlet[0],SUPPLY_Y,SUPPLY_Z],[inlet[0],.100,-.56],[inlet[0],.100,inlet[2]+.16],[inlet[0],inlet[1],inlet[2]+.05],inlet],.048)
     outlet_pts=path([outlet,[outlet[0],outlet[1],outlet[2]+.05],[outlet[0],.100,outlet[2]+.16],[outlet[0],.100,RETURN_Z]],.048)
@@ -264,9 +344,11 @@ for seat in seats:
     rout=route(sid+'/outlet','return',outlet_pts,.0068,offset+rin['length']+rchannel['length'],sid+'/channels','return-header')
     seat.update({'plateWidth':w,'plateDepth':d,'timBottom':die_y,'timTop':tim_top,'copperContactBottom':tim_top,'copperContactTop':.022,'bodyBottom':.022,'coverBottom':.064,'coverTop':.073,'mountFootY':.004,'inlet':inlet,'outlet':outlet,'routeIds':[rin['id'],rchannel['id'],rout['id']]})
 
+manufactured_header_normals(manifold_s,SUPPLY_Y,SUPPLY_Z)
+manufactured_header_normals(manifold_r,RETURN_Y,RETURN_Z)
 metadata={'id':'l10-cooling-assembly-v1','revision':1,'sourceBareGLBSHA256':baseline_hash,'seats':seats,'mounts':mounts,'flowRoutes':routes,'layers':LAYERS,'coordinateUnits':'PA raw normalized tray coordinates; apply shared [.688,1,.802] once','approximation':scene['approximation'],'flowInterpretation':'Original six parallel serpentine circuits. Fluid meshes visualize stream cores within sealed passages; no CFD, pressure, thermal or real coolant claim. Shared return header is a mixing volume with local arc phase; branch transport distances remain physical.','envelope':{'lidUndersideY':.125,'maxExpectedY':.117,'frontLimitZ':-.313},'builderHelperSource':'assets/l10-prototype/build.py: pure helper definitions only'}
-metadata['finishRevision']=2
-metadata['finishChanges']=['Separate CPU cross-lapped and GPU longitudinal-milled nickel cover finishes','Satin nickel manifold, distinct machined nickel fittings and copper','Real recessed drives inside 48 original fastener head envelopes; 24 raised fake drive slugs removed','Separate elastomer and gasket roughness; all fluid geometry, UVs and material unchanged']
+metadata['finishRevision']=3
+metadata['finishChanges']=['Post-boolean analytic cylindrical manifold normals, flat port/end faces and explicit UV seam; 64-side headers within original radius','Five-segment 0.0022 cover edge breaks inside existing cover envelope','Twelve stepped compression ferrules with chamfered lips and captured elastomer seals inside original 0.020 collar radius','All existing CPU/GPU MR finishes, manifold roughness, bare assets, contact seats, TIM, mounts, stream meshes and route contracts retained']
 metadata['fastenerRecesses']=fastener_recesses
 scene['assemblyContract']=json.dumps(metadata,separators=(',',':'))
 # Editable source is saved before export batching; every component remains named.

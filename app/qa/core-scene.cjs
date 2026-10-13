@@ -112,9 +112,9 @@ check('Editorial 48U plan: 41 components, no CDU, exact neutral lower infrastruc
   assert.deepEqual(Array.from({length:48},(_,i)=>i+1).filter(u=>!occupied.has(u)),[]);
   assert.deepEqual(plain(snapshot.emptyU),[]);
   const reserved=rows.find(row=>row.name==='editorial-reserve-blank');
-  assert.ok(reserved,'One reserved blanking panel must occupy the gap above the CDU');
+  assert.ok(reserved,'One reserved blanking occupancy group must occupy U5-U9');
   assert.deepEqual({type:reserved.type,top:reserved.top,bottom:reserved.bottom,size:reserved.size},{type:'blanking',top:9,bottom:5,size:5});
-  for(let u=5;u<=9;u++)assert.equal(occupied.get(u),reserved.name,'The same 5U panel must cover U'+u);
+  for(let u=5;u<=9;u++)assert.equal(occupied.get(u),reserved.name,'The same inventory group must cover U'+u);
   assert.deepEqual(rows.filter(r=>r.type==='server').map(r=>r.top).sort((a,b)=>b-a),[40,39,38,37,36,35,34,33,32,22,21,20,19,18,17,16,15,14]);
   assert.ok(rows.filter(r=>r.type==='server'||r.type==='nvlink').every(r=>r.size===1));
   const primary=rows.find(r=>r.name===snapshot.primaryName);
@@ -122,6 +122,34 @@ check('Editorial 48U plan: 41 components, no CDU, exact neutral lower infrastruc
   assert.equal(snapshot.targetU,40);near(snapshot.targetPose.y,primary.y,'Primary target must come from its own placement');
   assert.equal(snapshot.staticPlacements.length,40);
   assert.equal(snapshot.staticPlacements.some(r=>r.name===snapshot.primaryName),false,'Primary must not be duplicated in the static rack');
+  h.scene.destroy();
+});
+
+check('All blanking groups contain only exact repeated upper 1U panels',()=>{
+  const h=harness(),snapshot=h.scope.PACoreScene.assemblySnapshot(1),records=snapshot.placements.map(p=>({name:p.name,mgx_type:p.type,rack_u:p.top,rack_size:p.size}));
+  const original=JSON.stringify(records),shared=h.scope.PARackScene.buildEditorialParts(records),panel=shared.equipment['blanking:1'],stride=shared.stride;
+  assert.equal(JSON.stringify(records),original,'Rendering must not rewrite logical inventory groups');
+  assert.equal(shared.placements.length,41);assert.equal(shared.occupiedU,48);
+  assert.ok(panel.max[1]-panel.min[1]<=shared.unit,'Physical panel fits one U');
+  near(panel.depth,.18,'The existing upper 1U panel stays shallow');
+  assert.ok(panel.max[2]-panel.min[2]<.40,'Blanking is a shallow closure, without chassis or drawer depth');
+  const physicalUnits=[];
+  for(const row of shared.placements.filter(p=>p.type==='blanking')){
+    const group=shared.equipment[row.meshKey];
+    assert.equal(group.data.length,panel.data.length*row.size,'No extra server, port, grille, SSD or rail geometry');
+    assert.equal(group.depth,panel.depth);assert.equal(group.min[0],panel.min[0]);assert.equal(group.max[0],panel.max[0]);assert.equal(group.min[2],panel.min[2]);assert.equal(group.max[2],panel.max[2]);
+    for(let unit=0;unit<row.size;unit++){
+      const offset=(unit-(row.size-1)/2)*shared.unit,top=row.bottom+unit;
+      near(row.y+offset,(top-.5)*shared.unit-48*shared.unit/2,'Every physical 1U panel lands at its original U center');
+      physicalUnits.push(top);
+      for(let i=0;i<panel.data.length;i++){
+        const actual=group.data[unit*panel.data.length+i];
+        if(i%stride===1)near(actual,panel.data[i]+offset,'Only local Y is translated',1e-6);
+        else assert.equal(actual,panel.data[i],'Upper/lower panel mesh, normals and materials are identical');
+      }
+    }
+  }
+  assert.deepEqual(physicalUnits.sort((a,b)=>a-b),[1,2,3,4,5,6,7,8,9,47,48]);
   h.scene.destroy();
 });
 

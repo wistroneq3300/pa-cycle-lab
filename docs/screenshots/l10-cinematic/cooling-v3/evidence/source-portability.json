@@ -1,0 +1,831 @@
+{
+  "result": "PASS",
+  "source": "assets/l10-cooling-v1/cooling-assembly.blend",
+  "sourceSHA256": "46a5d517d444dcc3788fd36c0eb4612c3fa752af4eef10aa7dc2e44ff10ac615",
+  "glbSHA256": "5cfef980e39a446f3157e214b5e1f2c4058e6ba65b3e133557f5d5cd43d05cdc",
+  "scriptSHA256": "2b130679510503a90a172e9cf67edcb2f2389aea8bc2a4d3efb66f65246061fa",
+  "readOnly": true,
+  "measurements": [
+    {
+      "object": "Supply distribution manifold",
+      "vertices": 940,
+      "faces": 586,
+      "outerFaces": 142,
+      "outerCornerCount": 712,
+      "radialNormalErrorDegrees": {
+        "max": 0.03956468264845247,
+        "mean": 0.006957488937175437,
+        "over5": 0
+      },
+      "maxUnphysicalAxialNormal": 2.125278115272522e-06,
+      "capFaces": 152,
+      "smoothedCapFaces": 0,
+      "outerUVWrapCrossingFaces": 0,
+      "customNormals": true
+    },
+    {
+      "object": "Return collection manifold",
+      "vertices": 928,
+      "faces": 592,
+      "outerFaces": 148,
+      "outerCornerCount": 724,
+      "radialNormalErrorDegrees": {
+        "max": 0.033542591487495554,
+        "mean": 0.008619634727907435,
+        "over5": 0
+      },
+      "maxUnphysicalAxialNormal": 2.9169023036956787e-06,
+      "capFaces": 152,
+      "smoothedCapFaces": 0,
+      "outerUVWrapCrossingFaces": 0,
+      "customNormals": true
+    }
+  ],
+  "interpretation": "Straight manifold exterior normals should be radial with zero axial X component; annular end faces must remain planar; texture seam quads must not span most of V.",
+  "images": [
+    {
+      "name": "cooling-cpu-cover-mr",
+      "packed": true,
+      "width": 256,
+      "height": 256,
+      "externalSHA256": "8a9e31f4bd575bc82504f2e956143387f9581447a0bd3b3b1b926f465358677d",
+      "decodedPixelsSHA256": "eb80360db8653b4a52826d2b8e3ba326b7a583f877070391255c50cdb5c6052e",
+      "packedExternalPixelIdentical": true,
+      "baselineTextureBytesIdentical": true,
+      "decodedRoughness": {
+        "min": 0.3294117748737335,
+        "max": 0.4705882668495178,
+        "mean": 0.4467862546443939
+      }
+    },
+    {
+      "name": "cooling-gpu-cover-mr",
+      "packed": true,
+      "width": 256,
+      "height": 256,
+      "externalSHA256": "f41a5f4277c3a0657f9ff1cf08291ee24dc0733b4be2dd93433e2ffa88486da9",
+      "decodedPixelsSHA256": "77995f9f9a48f6c3f4d3f7c1e326dfdaed24ef8fdd83d47c9209e06dbf1ac235",
+      "packedExternalPixelIdentical": true,
+      "baselineTextureBytesIdentical": true,
+      "decodedRoughness": {
+        "min": 0.29019609093666077,
+        "max": 0.3803921937942505,
+        "mean": 0.3484446704387665
+      }
+    },
+    {
+      "name": "cooling-machined-metal-mr",
+      "packed": true,
+      "width": 256,
+      "height": 256,
+      "externalSHA256": "d0894df6d34a0d996ca2d3215b94cc0e5d6f6b2903df461985eb39a8803fcc18",
+      "decodedPixelsSHA256": "5fd5d04b0cc5a20ea52900b83852e580b26ebd10ed0dc0be428ffc2f4e324a80",
+      "packedExternalPixelIdentical": true,
+      "baselineTextureBytesIdentical": true,
+      "decodedRoughness": {
+        "min": 0.3176470696926117,
+        "max": 0.3607843220233917,
+        "mean": 0.3399895131587982
+      }
+    },
+    {
+      "name": "cooling-satin-nickel-mr",
+      "packed": true,
+      "width": 256,
+      "height": 256,
+      "externalSHA256": "af0ae0574dfc85a2e92011f10eaeb5587c930e6f76f78048d4806f6ff9301f8f",
+      "decodedPixelsSHA256": "31ec59c9f14d68d135d9a7f5b8308c5b8029cd7ec57079a0600d834c029a6ef0",
+      "packedExternalPixelIdentical": true,
+      "baselineTextureBytesIdentical": true,
+      "decodedRoughness": {
+        "min": 0.5882353186607361,
+        "max": 0.6117647290229797,
+        "mean": 0.6000120043754578
+      }
+    }
+  ],
+  "embeddedImages": [
+    {
+      "name": "cooling-machined-metal-mr",
+      "sha256": "d0894df6d34a0d996ca2d3215b94cc0e5d6f6b2903df461985eb39a8803fcc18",
+      "equalsPackedAndExternal": true
+    },
+    {
+      "name": "cooling-satin-nickel-mr",
+      "sha256": "af0ae0574dfc85a2e92011f10eaeb5587c930e6f76f78048d4806f6ff9301f8f",
+      "equalsPackedAndExternal": true
+    },
+    {
+      "name": "cooling-cpu-cover-mr",
+      "sha256": "8a9e31f4bd575bc82504f2e956143387f9581447a0bd3b3b1b926f465358677d",
+      "equalsPackedAndExternal": true
+    },
+    {
+      "name": "cooling-gpu-cover-mr",
+      "sha256": "f41a5f4277c3a0657f9ff1cf08291ee24dc0733b4be2dd93433e2ffa88486da9",
+      "equalsPackedAndExternal": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "Anodized retention",
+      "scalarSourceMatchesExport": true,
+      "zeroEmission": true,
+      "normalTexture": false
+    },
+    {
+      "name": "TIM",
+      "scalarSourceMatchesExport": true,
+      "zeroEmission": true,
+      "normalTexture": false
+    },
+    {
+      "name": "Machined copper",
+      "scalarSourceMatchesExport": true,
+      "zeroEmission": true,
+      "normalTexture": false
+    },
+    {
+      "name": "Gasket",
+      "scalarSourceMatchesExport": true,
+      "zeroEmission": true,
+      "normalTexture": false
+    },
+    {
+      "name": "Brushed nickel",
+      "scalarSourceMatchesExport": true,
+      "zeroEmission": true,
+      "normalTexture": false
+    },
+    {
+      "name": "Dark nickel fastener",
+      "scalarSourceMatchesExport": true,
+      "zeroEmission": true,
+      "normalTexture": false
+    },
+    {
+      "name": "Recess oxide",
+      "scalarSourceMatchesExport": true,
+      "zeroEmission": true,
+      "normalTexture": false
+    },
+    {
+      "name": "Machined nickel fittings",
+      "scalarSourceMatchesExport": true,
+      "zeroEmission": true,
+      "normalTexture": false
+    },
+    {
+      "name": "CPU satin nickel cover",
+      "scalarSourceMatchesExport": true,
+      "zeroEmission": true,
+      "normalTexture": false
+    },
+    {
+      "name": "GPU machined nickel cover",
+      "scalarSourceMatchesExport": true,
+      "zeroEmission": true,
+      "normalTexture": false
+    },
+    {
+      "name": "Elastomer hose",
+      "scalarSourceMatchesExport": true,
+      "zeroEmission": true,
+      "normalTexture": false
+    },
+    {
+      "name": "Coolant water tracer",
+      "scalarSourceMatchesExport": true,
+      "zeroEmission": true,
+      "normalTexture": false
+    }
+  ],
+  "protectedHashes": [
+    {
+      "path": "app/static/models/l10-prototype/bare-compute-boards.glb",
+      "sha256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "app/static/models/l10-prototype/compute-board.glb",
+      "sha256": "cd454d2e6a36d6e78ab8416e5449a6595791bc1e0a45fb239b3fd40642d59bb1",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "app/static/models/l10-prototype/manifest.json",
+      "sha256": "a8f90d55bbd9a78c47a39976b6fde0ef2e142fab24b88131771aad112adce5d5",
+      "baselineIdentical": true,
+      "comparison": "LF-normalized text",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/README.md",
+      "sha256": "be5544bd03361d2401750b03ba87c99140ceb1e4e47387684b243e6f38eb0233",
+      "baselineIdentical": true,
+      "comparison": "LF-normalized text",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/author_textures.py",
+      "sha256": "6b7af23cd259dd6d1f8fed1ab4a640a9c2021e2d14ebc4640f905c6b20a33f5c",
+      "baselineIdentical": true,
+      "comparison": "LF-normalized text",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/bare-compute-boards.blend",
+      "sha256": "070c689184f6cc45e979229a2a4698ebce4cce513b16cdbcf5f5d1c6d431c7bc",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/bare_finish.py",
+      "sha256": "06ac7c4cd11be66a907ef8c0190d1ad449d39b722729f1f3b3b9267dbed390f7",
+      "baselineIdentical": true,
+      "comparison": "LF-normalized text",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/bareboard.py",
+      "sha256": "1780ccc708a6fa0d7e5cd7f90af4ca703c4d458e83798b8d0bf9fb63534e4fd2",
+      "baselineIdentical": true,
+      "comparison": "LF-normalized text",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/build.py",
+      "sha256": "73128e53001f3e7493c01a05d9df7c5abfb8107db4b9cfb222eea3411fd91d23",
+      "baselineIdentical": true,
+      "comparison": "LF-normalized text",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/compute-board-prototype.blend",
+      "sha256": "fb0695d908cac81c8a1ae0f8c9467d53479fe14de235591f2c2a6ece9067d94e",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/experiments/README.md",
+      "sha256": "568b3e40501a9e9600472458e783e2848d233520e24135511255a96dbb498a78",
+      "baselineIdentical": true,
+      "comparison": "LF-normalized text",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/experiments/cycles_camera_probe.py",
+      "sha256": "b22451b2eba02d8ceac88a384f82d8f2a5a46c5bc52b0478c7949b519ad70ccc",
+      "baselineIdentical": true,
+      "comparison": "LF-normalized text",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/export_gltf.py",
+      "sha256": "7ac81a4249f467715d06dd3a643f5a921b7071a804b6aac7ea021132ccc645ee",
+      "baselineIdentical": true,
+      "comparison": "LF-normalized text",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/layout.json",
+      "sha256": "f9ddbcea7488cc0339e37806d19bdca3943d171e9d48fd278b458db10ad439ec",
+      "baselineIdentical": true,
+      "comparison": "LF-normalized text",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/preserve_core.py",
+      "sha256": "003d80b1e38c9c7a352b724b7a35b3bc3ac0d8822740d745bea007717bb356ad",
+      "baselineIdentical": true,
+      "comparison": "LF-normalized text",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/preserve_finish_geometry.py",
+      "sha256": "5b53b4dbcb232a9897440d75efa43cc60a86e0f016845d9e1c774c1d685286e3",
+      "baselineIdentical": true,
+      "comparison": "LF-normalized text",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/service_geometry.py",
+      "sha256": "d75febdc62d669e8d6e130684ae938d24bf988a753487c0108ba2dc1125f7d25",
+      "baselineIdentical": true,
+      "comparison": "LF-normalized text",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-bf3-l-contact-occlusion.png",
+      "sha256": "88cb89a1c6b86e482f33d907df1ce4c779a2d0f5ca6da3cd17bf15fd8e682eda",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-bf3-l-pcb-finish.png",
+      "sha256": "2d249154309c56c5d8d5716ad612b5fd829d538816c5c291279a633f55560b56",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-bf3-r-contact-occlusion.png",
+      "sha256": "ba2ba85b2053864eb4a1194d9fdca54b07761d23fc8d769c720ed74521c8b498",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-bf3-r-pcb-finish.png",
+      "sha256": "2d249154309c56c5d8d5716ad612b5fd829d538816c5c291279a633f55560b56",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-board1-contact-occlusion.png",
+      "sha256": "f236f0ea49fda7eb16fedfa7cb6d9718497e92c8304ae3a1f3ae6e597f953798",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-board1-pcb-finish.png",
+      "sha256": "a3a24a885bdb324b8884574f549cac9a0a717aada2a8064f5816c85484c1894a",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-board2-contact-occlusion.png",
+      "sha256": "226d1ee814ac3c0aee86294ac9b144164786a6866f25a6f44aa308ff9c4630ad",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-board2-pcb-finish.png",
+      "sha256": "e3e5115daf6565a154f95802691ce7883e01c1901ffccf17bfa49f38c69990de",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-ceramic-metallicroughness.png",
+      "sha256": "52337e6af6b83d50bfb08789ee3514edcd017e8e869022ab82c98ec099d56602",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-cpu-silicon-finish.png",
+      "sha256": "3e803e2589786bf473a98e7f45b5ba56b5aa1a0da8ad73af74c718e8991a54d6",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-cpu-silicon-metallicroughness.png",
+      "sha256": "e695b205befdf5450c4c8474c3414fa67f6582dde8a2423febfffe290364b31e",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-cpu-silicon-normal.png",
+      "sha256": "2e8a05cc502d310256a4f81c46a9fa685a277fd07baff0aa4a4abb5f1f75ce7d",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-cx7-r-contact-occlusion.png",
+      "sha256": "d7a4723af74336377b295f99b6f2da058ef19fd86580e9d898b9e4ed5ca79d3a",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-cx7-r-pcb-finish.png",
+      "sha256": "4cef0115b054a4e9a3ca98ea6ce2d042e4453ac27e2bbe5f0540c7842793f85a",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-ferrite-finish.png",
+      "sha256": "c9f13646d541c21c1cc157a5925c7031ca29ffc5cfa0e7c4e935af42e6d657d4",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-ferrite-metallicroughness.png",
+      "sha256": "61ff9276cfdc3023ff621497efbcf1de4ebe7822ff409f90195d3b7dff8964b4",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-gold-metallicroughness.png",
+      "sha256": "9910751dad019225602180e1c5d471f7768addb60a7072729cc4f7e96360d32c",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-gpu-silicon-finish.png",
+      "sha256": "a677d5ca064ae2ffc5fcc8f91f8a65378ee1ed864de57cc90c4ca7f0aef97cc3",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-gpu-silicon-metallicroughness.png",
+      "sha256": "aaf52f626458f2234d2f14240e0b82290bb740febde893892c21c01c6f61bdee",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-gpu-silicon-normal.png",
+      "sha256": "fdc25659c4d359d4839d6182154a63612938ef2d21199fe7ac387cac97e83b13",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-metal-machining-normal.png",
+      "sha256": "8bace1f705656345cfff16702b33dacfb08b8cfaa4e638ea102f352f989b95dd",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-molding-finish.png",
+      "sha256": "994e17b160232b1e177b9ec8f3b6a8a114e65a334f41cbe1ebfb5cd3ac85f320",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-molding-metallicroughness.png",
+      "sha256": "d3c17a352b9856e4b6a5498cf2e5ebcc3782e5f0defd2bb35eb9b0e764623240",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-network-silicon-finish.png",
+      "sha256": "c1ab19fe5db0440e492baa2fe28d3b5aebb700575d40b069e6caafb65783dc4c",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-network-silicon-metallicroughness.png",
+      "sha256": "ffee878642cfbb9505597a1e50b76f955408db767ccaaba5aaadf76c9eda27ea",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-network-silicon-normal.png",
+      "sha256": "e3f5099ca32f9153d45a481e7cbfc175d07cb1cab8a49d23bbb4c6b6199cfecf",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-nickel-metallicroughness.png",
+      "sha256": "aa61b30b85d4a371379f9c0854d34b45cee2b1459f6b66ecfd008d2b2960e1f2",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-pcb-metallicroughness.png",
+      "sha256": "8645622dc828a1fbbd917a82bb2dab369f4e29c9d9cfd7a9cd80b9d6a03d454c",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-pcb-micro-normal.png",
+      "sha256": "4c82f99213fa0fa0814c5eddd3808586fd6803c15ed6893516b56dfb7d02d9a2",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-pcb-soldermask.png",
+      "sha256": "b8459f9803ec1adc32054732e5c01d081c188ee8f321c373323ccf9dae1b5c46",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-silicon-finish.png",
+      "sha256": "d0cc89eaa95a8477989119b7f2897a4284c6c5b0afe350bd18e9ed10c63a4a6e",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-silicon-metallicroughness.png",
+      "sha256": "89ebc8c09fb1a4c7f963e950c8529e3df5d2bb943c75b4ef7007d9b12c83d30b",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-silicon-normal.png",
+      "sha256": "38829e25394c07000a908881d29cd25a8e3e1ec01dd6858b6663586966097f1f",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-solder-metallicroughness.png",
+      "sha256": "943b42f6ec936a8e16e417630158004d5556548f0665783a4d53c418625bbbbc",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-substrate-finish.png",
+      "sha256": "069f8e0a3d94bc9d1a6c96917278f68e4caa8ea18e7b9060ea13c087e44a048b",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/bare-substrate-metallicroughness.png",
+      "sha256": "5b33c815e525585e3c524b41509480b9db466ff96c0f630f50565829e033e97e",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/copper-basecolor.png",
+      "sha256": "98de41888ef79b06ba26156ae9b2c2d7d305b0fc609505f49cc675aa145e62c0",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/copper-metallicroughness.png",
+      "sha256": "715d99ef44d81fd2e3431cd41ad7a8f7de15168a43326ff5f0f59b82759cb50c",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/copper-normal.png",
+      "sha256": "8b7bdc0426116a8c46cee9d766d5b945d0aa562aa04c3ebd24cee4fe100e024e",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/nickel-basecolor.png",
+      "sha256": "ec9576439cf87e741435ae2a0fcc6ec33df45919cd7d7dedec8f3ab1c3902866",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/nickel-metallicroughness.png",
+      "sha256": "b5bb8d1d2ad1246e615e67fbf91ed2f73086d5d7e0f7a08113b4e7f63c65a05f",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/nickel-normal.png",
+      "sha256": "8b7bdc0426116a8c46cee9d766d5b945d0aa562aa04c3ebd24cee4fe100e024e",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/package-basecolor.png",
+      "sha256": "0486447ddf0ee0291388f1c2f58ad89a671a62e33a844334cc79927af9a7047d",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/package-metallicroughness.png",
+      "sha256": "04c20a81f39dc3a0f74180302c96693bb5f0deec4c9c8c4f0458f539b12a71c2",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/package-normal.png",
+      "sha256": "8b7bdc0426116a8c46cee9d766d5b945d0aa562aa04c3ebd24cee4fe100e024e",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/pcb-basecolor.png",
+      "sha256": "fd41940c90cc27527d82efca1c0356b74a95818fce056dad8b9e5e2ea487bbda",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/pcb-metallicroughness.png",
+      "sha256": "0f862a6e738bb9ec3f37c55ced74e0ad06e0ab7d0894936b0329ae522d6efaa1",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/pcb-normal.png",
+      "sha256": "0f9812625308073ad4ae8dad05c160e0ada4d891ade1c464af2a589d55ad9930",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/polymer-basecolor.png",
+      "sha256": "510970f93564dd93138ece43105ed61d86360964bb1118e95ad5c51f61c703a6",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/polymer-metallicroughness.png",
+      "sha256": "8780450f257c53ad65160aae888a96d1509189c25786e1eaa8ad06f3471256c3",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/polymer-normal.png",
+      "sha256": "345b3514a58dbfcd55f1d8efe2c3ed6027bf0908c25c673dc0c9fcb0e3ef9842",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/surface-basecolor.png",
+      "sha256": "78a030243b2ba67e400c7e91f26971189d403e8ac8f728270b40d9746887b46c",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/textures/surface-metallicroughness.png",
+      "sha256": "ac2a7fec57932cf920f53524b5e5a6c0bf07e94745a8d850437a25926aafdea1",
+      "baselineIdentical": true,
+      "comparison": "exact binary bytes",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/validate_blend.py",
+      "sha256": "c41ecb8def7acc600e47747fc31e5d32be093893af3281b0bdbedda5bbd1d1a1",
+      "baselineIdentical": true,
+      "comparison": "LF-normalized text",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/verify_finish_geometry.py",
+      "sha256": "5820b8d1efca2290895de938122fdbb73f9137a0919f61f69613aaface9721e7",
+      "baselineIdentical": true,
+      "comparison": "LF-normalized text",
+      "tracked": true
+    },
+    {
+      "path": "assets/l10-prototype/compute-board-prototype.blend1",
+      "sha256": "01b5856ab7261a1ca0a8b9904ec8e82bccd611cfd3cbb687235e99b55b563e85",
+      "preexistingUntrackedIdentical": true,
+      "tracked": false
+    },
+    {
+      "path": "assets/l10-prototype/textures/surface-normal.png",
+      "sha256": "6309b50efb72caed7d2c651cef994b57946026879d54fcc611fab351b22994d5",
+      "preexistingUntrackedIdentical": true,
+      "tracked": false
+    }
+  ],
+  "sourceAndGLBContractsIdentical": true,
+  "sourceObjects": 316,
+  "editableLayerObjectCounts": {
+    "cooling-mounts": 24,
+    "cooling-frame": 186,
+    "cooling": 30,
+    "cooling-channels": 30,
+    "cooling-plumbing": 24,
+    "cooling-fluid": 22
+  },
+  "manifoldSurfaceAudit": {
+    "topology": [
+      {
+        "object": "Supply distribution manifold",
+        "triangles": 1904,
+        "duplicatePositionTriangles": 0,
+        "degenerateTriangles": 0,
+        "boundaryEdges": 0,
+        "nonmanifoldEdges": 0
+      },
+      {
+        "object": "supply header blind-end sleeve",
+        "triangles": 512,
+        "duplicatePositionTriangles": 0,
+        "degenerateTriangles": 0,
+        "boundaryEdges": 0,
+        "nonmanifoldEdges": 0
+      },
+      {
+        "object": "supply header sealed blind plug",
+        "triangles": 252,
+        "duplicatePositionTriangles": 0,
+        "degenerateTriangles": 0,
+        "boundaryEdges": 0,
+        "nonmanifoldEdges": 0
+      },
+      {
+        "object": "Return collection manifold",
+        "triangles": 1880,
+        "duplicatePositionTriangles": 0,
+        "degenerateTriangles": 0,
+        "boundaryEdges": 0,
+        "nonmanifoldEdges": 0
+      },
+      {
+        "object": "return header blind-end sleeve",
+        "triangles": 512,
+        "duplicatePositionTriangles": 0,
+        "degenerateTriangles": 0,
+        "boundaryEdges": 0,
+        "nonmanifoldEdges": 0
+      },
+      {
+        "object": "return header sealed blind plug",
+        "triangles": 252,
+        "duplicatePositionTriangles": 0,
+        "degenerateTriangles": 0,
+        "boundaryEdges": 0,
+        "nonmanifoldEdges": 0
+      }
+    ],
+    "exteriorTriangles": 1368,
+    "nearCoplanarThreshold": 1e-05,
+    "overlapAreaThreshold": 1e-10,
+    "projectedCandidatePairsTested": 650,
+    "unexpectedExteriorNearCoincidentPairs": [],
+    "matingEndCapInterfaces": [
+      {
+        "semantic": "supply",
+        "x": 1.78,
+        "objects": [
+          "Supply distribution manifold",
+          "supply header blind-end sleeve"
+        ],
+        "triangles": 256,
+        "totalFaceArea": 0.0009095994558787049
+      },
+      {
+        "semantic": "supply",
+        "x": 1.786,
+        "objects": [
+          "supply header blind-end sleeve",
+          "supply header sealed blind plug"
+        ],
+        "triangles": 190,
+        "totalFaceArea": 0.0013612622327753212
+      },
+      {
+        "semantic": "return",
+        "x": -1.78,
+        "objects": [
+          "Return collection manifold",
+          "return header blind-end sleeve"
+        ],
+        "triangles": 256,
+        "totalFaceArea": 0.000909599418034449
+      },
+      {
+        "semantic": "return",
+        "x": -1.786,
+        "objects": [
+          "return header blind-end sleeve",
+          "return header sealed blind plug"
+        ],
+        "triangles": 190,
+        "totalFaceArea": 0.0013612622189496419
+      }
+    ],
+    "limitation": "The preserved blind-end sleeve/plug assemblies contain opposing internal mating caps at x=1.780/1.786 (supply) and -1.780/-1.786 (return). They are recorded, not claimed absent. The exposed cylindrical walls have no measured duplicate/near-coincident positive-area faces; this focused audit is not an arbitrary global self-intersection certification."
+  }
+}

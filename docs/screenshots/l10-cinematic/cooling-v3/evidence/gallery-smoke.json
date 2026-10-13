@@ -1,0 +1,506 @@
+{
+  "pass": true,
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "documentWidth": 1440,
+      "score": "86.4",
+      "scoreVisible": true,
+      "heading": "Final visual review · Final frozen Round 2 · 86.4 / 100；89 未達",
+      "images": 55
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "score": "86.4",
+      "scoreVisible": true,
+      "heading": "Final visual review · Final frozen Round 2 · 86.4 / 100；89 未達",
+      "images": 55
+    }
+  ],
+  "links": [
+    {
+      "href": "comparison.json",
+      "status": 200
+    },
+    {
+      "href": "evidence/cooling-geometry.json",
+      "status": 200
+    },
+    {
+      "href": "after/diagnostic-cold-plate-connector-macro.png",
+      "status": 200
+    },
+    {
+      "href": "after/close-manifold.png",
+      "status": 200
+    },
+    {
+      "href": "after/dashboard-flow-A-2127x1272.png",
+      "status": 200
+    },
+    {
+      "href": "after/D-solid-cooling-assembly.png",
+      "status": 200
+    },
+    {
+      "href": "evidence/visual-final.md",
+      "status": 200
+    },
+    {
+      "href": "after/F-rack-integration.png",
+      "status": 200
+    },
+    {
+      "href": "evidence/regression-cpu.json",
+      "status": 200
+    },
+    {
+      "href": "evidence/regression-browser.json",
+      "status": 200
+    },
+    {
+      "href": "evidence/environment/environment-lifecycle.json",
+      "status": 200
+    },
+    {
+      "href": "evidence/rack-geometry.json",
+      "status": 200
+    },
+    {
+      "href": "evidence/rack-cpu-tests.json",
+      "status": 200
+    },
+    {
+      "href": "evidence/original-v2-contract.json",
+      "status": 200
+    },
+    {
+      "href": "evidence/round1-ledger.json",
+      "status": 200
+    },
+    {
+      "href": "before/A-cold-plate-installation.png",
+      "status": 200
+    },
+    {
+      "href": "before/A-cold-plate-installation.json",
+      "status": 200
+    },
+    {
+      "href": "after/A-cold-plate-installation.png",
+      "status": 200
+    },
+    {
+      "href": "after/A-cold-plate-installation.json",
+      "status": 200
+    },
+    {
+      "href": "before/B-manifold-plumbing.png",
+      "status": 200
+    },
+    {
+      "href": "before/B-manifold-plumbing.json",
+      "status": 200
+    },
+    {
+      "href": "after/B-manifold-plumbing.png",
+      "status": 200
+    },
+    {
+      "href": "after/B-manifold-plumbing.json",
+      "status": 200
+    },
+    {
+      "href": "before/C-dynamic-cooling-flow.png",
+      "status": 200
+    },
+    {
+      "href": "before/C-dynamic-cooling-flow.json",
+      "status": 200
+    },
+    {
+      "href": "after/C-dynamic-cooling-flow.png",
+      "status": 200
+    },
+    {
+      "href": "after/C-dynamic-cooling-flow.json",
+      "status": 200
+    },
+    {
+      "href": "before/D-solid-cooling-assembly.png",
+      "status": 200
+    },
+    {
+      "href": "before/D-solid-cooling-assembly.json",
+      "status": 200
+    },
+    {
+      "href": "after/D-solid-cooling-assembly.json",
+      "status": 200
+    },
+    {
+      "href": "before/E-lid-closure.png",
+      "status": 200
+    },
+    {
+      "href": "before/E-lid-closure.json",
+      "status": 200
+    },
+    {
+      "href": "after/E-lid-closure.png",
+      "status": 200
+    },
+    {
+      "href": "after/E-lid-closure.json",
+      "status": 200
+    },
+    {
+      "href": "before/F-rack-integration.png",
+      "status": 200
+    },
+    {
+      "href": "before/F-rack-integration.json",
+      "status": 200
+    },
+    {
+      "href": "after/F-rack-integration.json",
+      "status": 200
+    },
+    {
+      "href": "before/dashboard-flow-A-2127x1272.png",
+      "status": 200
+    },
+    {
+      "href": "before/dashboard-flow-B-2127x1272.png",
+      "status": 200
+    },
+    {
+      "href": "after/dashboard-flow-B-2127x1272.png",
+      "status": 200
+    },
+    {
+      "href": "before/dashboard-solid-2127x1272.png",
+      "status": 200
+    },
+    {
+      "href": "after/dashboard-solid-2127x1272.png",
+      "status": 200
+    },
+    {
+      "href": "before/dashboard-flow-full-page-3440x1440.png",
+      "status": 200
+    },
+    {
+      "href": "after/dashboard-flow-full-page-3440x1440.png",
+      "status": 200
+    },
+    {
+      "href": "before/close-manifold.png",
+      "status": 200
+    },
+    {
+      "href": "before/close-manifold.json",
+      "status": 200
+    },
+    {
+      "href": "after/close-manifold.json",
+      "status": 200
+    },
+    {
+      "href": "before/close-cold-plate-connectors.png",
+      "status": 200
+    },
+    {
+      "href": "before/close-cold-plate-connectors.json",
+      "status": 200
+    },
+    {
+      "href": "after/close-cold-plate-connectors.png",
+      "status": 200
+    },
+    {
+      "href": "after/close-cold-plate-connectors.json",
+      "status": 200
+    },
+    {
+      "href": "after/diagnostic-manifold-macro.png",
+      "status": 200
+    },
+    {
+      "href": "after/diagnostic-manifold-macro.json",
+      "status": 200
+    },
+    {
+      "href": "after/diagnostic-cold-plate-connector-macro.json",
+      "status": 200
+    },
+    {
+      "href": "after/context-open-assembly-16s.png",
+      "status": 200
+    },
+    {
+      "href": "after/context-open-assembly-16s.json",
+      "status": 200
+    },
+    {
+      "href": "before/lid-1-before.png",
+      "status": 200
+    },
+    {
+      "href": "before/lid-1-before.json",
+      "status": 200
+    },
+    {
+      "href": "after/lid-1-before.png",
+      "status": 200
+    },
+    {
+      "href": "after/lid-1-before.json",
+      "status": 200
+    },
+    {
+      "href": "before/lid-2-middle.png",
+      "status": 200
+    },
+    {
+      "href": "before/lid-2-middle.json",
+      "status": 200
+    },
+    {
+      "href": "after/lid-2-middle.png",
+      "status": 200
+    },
+    {
+      "href": "after/lid-2-middle.json",
+      "status": 200
+    },
+    {
+      "href": "before/lid-3-after.png",
+      "status": 200
+    },
+    {
+      "href": "before/lid-3-after.json",
+      "status": 200
+    },
+    {
+      "href": "after/lid-3-after.png",
+      "status": 200
+    },
+    {
+      "href": "after/lid-3-after.json",
+      "status": 200
+    },
+    {
+      "href": "before/context-lid-1-before.png",
+      "status": 200
+    },
+    {
+      "href": "before/context-lid-1-before.json",
+      "status": 200
+    },
+    {
+      "href": "after/context-lid-1-before.png",
+      "status": 200
+    },
+    {
+      "href": "after/context-lid-1-before.json",
+      "status": 200
+    },
+    {
+      "href": "before/context-lid-2-middle.png",
+      "status": 200
+    },
+    {
+      "href": "before/context-lid-2-middle.json",
+      "status": 200
+    },
+    {
+      "href": "after/context-lid-2-middle.png",
+      "status": 200
+    },
+    {
+      "href": "after/context-lid-2-middle.json",
+      "status": 200
+    },
+    {
+      "href": "before/context-lid-3-after.png",
+      "status": 200
+    },
+    {
+      "href": "before/context-lid-3-after.json",
+      "status": 200
+    },
+    {
+      "href": "after/context-lid-3-after.png",
+      "status": 200
+    },
+    {
+      "href": "after/context-lid-3-after.json",
+      "status": 200
+    },
+    {
+      "href": "before/rack-full-front.png",
+      "status": 200
+    },
+    {
+      "href": "before/rack-full-front.json",
+      "status": 200
+    },
+    {
+      "href": "after/rack-full-front.png",
+      "status": 200
+    },
+    {
+      "href": "after/rack-full-front.json",
+      "status": 200
+    },
+    {
+      "href": "before/rack-exploded-context.png",
+      "status": 200
+    },
+    {
+      "href": "before/rack-exploded-context.json",
+      "status": 200
+    },
+    {
+      "href": "after/rack-exploded-context.png",
+      "status": 200
+    },
+    {
+      "href": "after/rack-exploded-context.json",
+      "status": 200
+    },
+    {
+      "href": "before/rack-bottom-1u-panels-crop.png",
+      "status": 200
+    },
+    {
+      "href": "before/rack-bottom-1u-panels-crop.json",
+      "status": 200
+    },
+    {
+      "href": "after/rack-bottom-1u-panels-crop.png",
+      "status": 200
+    },
+    {
+      "href": "after/rack-bottom-1u-panels-crop.json",
+      "status": 200
+    },
+    {
+      "href": "before/rack-adjacent-1u-panels-crop.png",
+      "status": 200
+    },
+    {
+      "href": "before/rack-adjacent-1u-panels-crop.json",
+      "status": 200
+    },
+    {
+      "href": "after/rack-adjacent-1u-panels-crop.png",
+      "status": 200
+    },
+    {
+      "href": "after/rack-adjacent-1u-panels-crop.json",
+      "status": 200
+    },
+    {
+      "href": "before/rack-upper-1u-panels-crop.png",
+      "status": 200
+    },
+    {
+      "href": "before/rack-upper-1u-panels-crop.json",
+      "status": 200
+    },
+    {
+      "href": "after/rack-upper-1u-panels-crop.png",
+      "status": 200
+    },
+    {
+      "href": "after/rack-upper-1u-panels-crop.json",
+      "status": 200
+    },
+    {
+      "href": "after/diagnostic-rack-bottom-1u-panels.png",
+      "status": 200
+    },
+    {
+      "href": "after/diagnostic-rack-bottom-1u-panels.json",
+      "status": 200
+    },
+    {
+      "href": "after/diagnostic-rack-upper-1u-panels.png",
+      "status": 200
+    },
+    {
+      "href": "after/diagnostic-rack-upper-1u-panels.json",
+      "status": 200
+    },
+    {
+      "href": "before/guard-network.png",
+      "status": 200
+    },
+    {
+      "href": "before/guard-network.json",
+      "status": 200
+    },
+    {
+      "href": "after/guard-network.png",
+      "status": 200
+    },
+    {
+      "href": "after/guard-network.json",
+      "status": 200
+    },
+    {
+      "href": "before/guard-gold-front.png",
+      "status": 200
+    },
+    {
+      "href": "before/guard-gold-front.json",
+      "status": 200
+    },
+    {
+      "href": "after/guard-gold-front.png",
+      "status": 200
+    },
+    {
+      "href": "after/guard-gold-front.json",
+      "status": 200
+    },
+    {
+      "href": "evidence/round1/E-lid-closure.png",
+      "status": 200
+    },
+    {
+      "href": "evidence/round1/E-lid-closure.json",
+      "status": 200
+    },
+    {
+      "href": "evidence/round1/D-solid-cooling-assembly.png",
+      "status": 200
+    },
+    {
+      "href": "evidence/round1/D-solid-cooling-assembly.json",
+      "status": 200
+    },
+    {
+      "href": "evidence/round1/diagnostic-cold-plate-connector-macro.png",
+      "status": 200
+    },
+    {
+      "href": "evidence/round1/diagnostic-cold-plate-connector-macro.json",
+      "status": 200
+    },
+    {
+      "href": "film.webm",
+      "status": 200
+    },
+    {
+      "href": "evidence/video.json",
+      "status": 200
+    }
+  ],
+  "errors": []
+}

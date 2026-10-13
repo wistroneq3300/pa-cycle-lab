@@ -1014,7 +1014,7 @@
   }
   function createEditorialEquipment(item){
     const base=createEquipment(item),m=meshBuilder(),B=m.box,V=m.bevel,T=m.tube,h=item.height,type=item.mgx_type;
-    const depth=type==='blanking'?(item.size>1?5.94:.18):({server:5.85,nvlink:5.95,switch:4.55,powershelf:4.95}[type]||base.depth),rear=FRONT-depth;
+    const depth=type==='blanking'?.18:({server:5.85,nvlink:5.95,switch:4.55,powershelf:4.95}[type]||base.depth),rear=FRONT-depth;
     // Homepage facades are independently authored from the inspected photos;
     // never modify the operational inventory renderer or its port topology.
     if(!['server','nvlink','powershelf','switch'].includes(type))for(let i=0;i<base.mesh.data.length;i+=33)if(base.mesh.data[i+2]>FRONT+.041&&base.mesh.data[i+13]>FRONT+.041&&base.mesh.data[i+24]>FRONT+.041)for(let j=0;j<33;j++)m.data.push(base.mesh.data[i+j]);
@@ -1133,15 +1133,22 @@
         for(const dx of [-.031,.031])B(x+.126+dx,-.007,rear-.178,.008,.037,.011,E.port,.82);
         B(x+.126,.033,rear-.178,.009,.028,.011,E.port,.82);B(x+.294,0,rear-.144,.015,h-.085,.050,E.edge,.80);
       }
-    }else if(type==='blanking'&&item.size>1){
-      // Neutral utility / structural bay. No CDU, HMI, fluid ports or pump body.
-      V(0,0,rear-.059,3.72,h-.055,.10,E.frame,.022,-.7);
-      for(const x of [-1.20,0,1.20]){B(x,0,rear-.116,.016,h-.17,.020,E.seam,.1);for(const sy of [-1,1])screw(m,x+.34,sy*(h/2-.095),rear-.12,-1);}
-      for(const side of [-1,1]){B(side*1.72,0,rear-.127,.075,Math.min(.45,h*.55),.040,E.fold,.7);B(side*1.72,0,rear-.151,.026,Math.min(.30,h*.38),.022,E.edge,.8);}
     }
     const min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
     for(let i=0;i<m.data.length;i+=11)for(let axis=0;axis<3;axis++){min[axis]=Math.min(min[axis],m.data[i+axis]);max[axis]=Math.max(max[axis],m.data[i+axis]);}
     return {mesh:m,depth,rear,min,max};
+  }
+  function createEditorialBlankingGroup(panel,size){
+    if(size===1)return panel;
+    // Inventory groups describe occupied U, not a physical multi-U enclosure.
+    // Repeat the very same upper 1U panel, including its normals, finish, ears
+    // and fasteners. Only local Y changes; the group's existing pose remains.
+    const mesh=meshBuilder(),source=panel.mesh.data,extent=(size-1)*U/2;
+    for(let unit=0;unit<size;unit++){
+      const offset=(unit-(size-1)/2)*U;
+      for(let i=0;i<source.length;i+=11)for(let field=0;field<11;field++)mesh.data.push(field===1?source[i+field]+offset:source[i+field]);
+    }
+    return {mesh,depth:panel.depth,rear:panel.rear,min:[panel.min[0],panel.min[1]-extent,panel.min[2]],max:[panel.max[0],panel.max[1]+extent,panel.max[2]]};
   }
   function createEditorialStructure(items){
     const frame=createFrame(),infrastructure=meshBuilder(),connections=meshBuilder(),routes=[],sockets=[],F=frame.box,FV=frame.bevel,B=infrastructure.box,V=infrastructure.bevel,T=infrastructure.tube;
@@ -1292,10 +1299,13 @@
   function buildEditorialParts(records){
     const inspected=inspectPlacement(records.filter(i=>i.rack_mount!=='external'&&i.mgx_type!=='cdu'));
     if(inspected.invalid.length||inspected.unplaced.length)throw new Error('Editorial rack requires valid, non-overlapping placed components');
+    let blankingPanel;
     const equipment={},placements=inspected.valid.map(item=>{
       const meshKey=item.mgx_type+':'+item.size;
       if(!equipment[meshKey]){
-        const built=createEditorialEquipment(item);
+        const built=item.mgx_type==='blanking'
+          ?createEditorialBlankingGroup(blankingPanel||(blankingPanel=createEditorialEquipment({...item,size:1,height:U-.026})),item.size)
+          :createEditorialEquipment(item);
         equipment[meshKey]=Object.freeze({data:new Float32Array(built.mesh.data),depth:built.depth,min:Object.freeze([...built.min]),max:Object.freeze([...built.max])});
       }
       return Object.freeze({name:item.name,type:item.mgx_type,top:item.top,bottom:item.bottom,size:item.size,y:item.y,height:item.height,meshKey});
