@@ -1,0 +1,1247 @@
+{
+  "passed": true,
+  "viewport": {
+    "width": 3440,
+    "height": 1440,
+    "deviceScaleFactor": 1
+  },
+  "comparison": "Phase 5 commit 3ce4b9c6e5467abe9d27050e5af0240b07fff3dc versus evidence-based service geometry; same opt-in renderer/camera/light/exposure/progress. Local GLB fixtures, not CDN benchmarks.",
+  "loading": {
+    "before": {
+      "assetReadySamplesMs": [
+        1893,
+        1716,
+        1690
+      ],
+      "min": 1690,
+      "median": 1716,
+      "p95": 1893,
+      "max": 1893,
+      "mean": 1766.3333333333333,
+      "glbBytes": 8806972,
+      "glbSHA256": "fe898a419c0f613bd003ef964e921dcc7c43771c4ed841bdbcd92da695857bc7",
+      "method": "Three fresh browser contexts; localhost GLB byte fixtures. Navigation through both environmentReady and asset upload completion. Includes shell/build/decode/upload; not a CDN or isolated download benchmark."
+    },
+    "after": {
+      "assetReadySamplesMs": [
+        1862,
+        1865,
+        1861
+      ],
+      "min": 1861,
+      "median": 1862,
+      "p95": 1865,
+      "max": 1865,
+      "mean": 1862.6666666666667,
+      "glbBytes": 10631940,
+      "glbSHA256": "cd454d2e6a36d6e78ab8416e5449a6595791bc1e0a45fb239b3fd40642d59bb1",
+      "method": "Three fresh browser contexts; localhost GLB byte fixtures. Navigation through both environmentReady and asset upload completion. Includes shell/build/decode/upload; not a CDN or isolated download benchmark."
+    }
+  },
+  "checks": [
+    "before: 6 native 3440x1440 captures, no lighting/exposure override",
+    "before: complete real-clock film, unchanged layer sequence, bridge and U40 identity",
+    "after: 6 native 3440x1440 captures, no lighting/exposure override",
+    "after: complete real-clock film, unchanged layer sequence, bridge and U40 identity",
+    "Opt-in: Skip, Replay, keyboard orbit and rear/reset remain operational",
+    "Opt-in: WebGL context loss restores GLB and retained final pose",
+    "Opt-in: reduced motion retains assembled Rack and disables idle motion",
+    "6 comparisons: exact camera, object pose, native pixels, lighting, environment and shader sources",
+    "Blocked GLB network request falls back to renderable legacy geometry",
+    "Mismatched IO ownership fails closed and retains every legacy fan, cable and board",
+    "Blocked studio environment restores the baseline without falsely reporting a textured prototype"
+  ],
+  "errors": [],
+  "external": [],
+  "sources": {
+    "before": {
+      "environmentSHA256": "d8896d4633a204501e51deb29f655e3244993b816db18ef974b812d51d905f6e",
+      "environmentBytes": 902906,
+      "compiledShaderSHA256": [
+        "cc8c02bec0667ae1116bbbb961ca7aa7d8d73f036478bb425d501ed2212fc67a",
+        "fec3a85f6223c5a7c62936c3ba79ec7887daa25457805aab46260d4d4884f880"
+      ]
+    },
+    "after": {
+      "environmentSHA256": "d8896d4633a204501e51deb29f655e3244993b816db18ef974b812d51d905f6e",
+      "environmentBytes": 902906,
+      "compiledShaderSHA256": [
+        "cc8c02bec0667ae1116bbbb961ca7aa7d8d73f036478bb425d501ed2212fc67a",
+        "fec3a85f6223c5a7c62936c3ba79ec7887daa25457805aab46260d4d4884f880"
+      ]
+    }
+  },
+  "loaderFallback": {
+    "passed": true,
+    "asset": {
+      "enabled": true,
+      "loading": false,
+      "failed": true,
+      "error": "Failed to fetch",
+      "metadata": null
+    },
+    "vertices": 1645692,
+    "observed": {
+      "drawCalls": 6,
+      "submittedVerticesOrIndices": 299358,
+      "shadowDrawCalls": 0,
+      "shadowSubmittedVerticesOrIndices": 0,
+      "lighting": {
+        "uKeyPosition": [
+          -13.646400451660156,
+          23.149999618530273,
+          19.61400032043457
+        ],
+        "uLightTheme": 0,
+        "uHasEnvironment": 1,
+        "uReveal": 1
+      }
+    }
+  },
+  "environmentFallback": {
+    "passed": true,
+    "asset": {
+      "enabled": true,
+      "loading": false,
+      "failed": true,
+      "error": "Reference studio environment failed; prototype reverted to baseline",
+      "metadata": null
+    },
+    "quality": {
+      "resolution": 1,
+      "frameMs": 16.700000000000003,
+      "pixelCount": 2705544,
+      "adaptive": true,
+      "contactShadows": true,
+      "shadowMapSize": 2048,
+      "environmentReady": false,
+      "environmentFailed": true,
+      "environment": "CC0 photographic studio / GGX log radiance"
+    },
+    "vertices": 1645692
+  },
+  "serviceOwnershipFallback": {
+    "passed": true,
+    "asset": {
+      "enabled": true,
+      "loading": false,
+      "failed": true,
+      "error": "Prototype service replacement requires its matching io layer",
+      "metadata": null
+    },
+    "vertices": 1645692
+  },
+  "photorealism": "NOT ACCEPTED; functional test result does not establish visual acceptance",
+  "pairs": [
+    {
+      "id": "01-packages",
+      "matched": {
+        "camera": true,
+        "pixels": true,
+        "lightingUniforms": true,
+        "assembly": true
+      },
+      "before": {
+        "file": "before/3440x1440-01-packages.png",
+        "sha256": "12bdad6b55a92ad9f98a2ada6b9938883476292caafdd00bcd245607549cbfd6",
+        "progress": 0.21,
+        "inspection": "packages",
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        },
+        "camera": {
+          "yaw": -0.3400000035762787,
+          "elevation": 0.7900000214576721,
+          "distance": 4.800000190734863,
+          "target": [
+            -4.3103203773498535,
+            4.699999809265137,
+            4.266639709472656
+          ],
+          "eye": [
+            -5.436992168426514,
+            8.109695434570312,
+            7.451696395874023
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "observed": {
+          "drawCalls": 39,
+          "submittedVerticesOrIndices": 342075,
+          "shadowDrawCalls": 39,
+          "shadowSubmittedVerticesOrIndices": 342075,
+          "lighting": {
+            "uKeyPosition": [
+              -13.646400451660156,
+              23.149999618530273,
+              19.61400032043457
+            ],
+            "uLightTheme": 0,
+            "uHasEnvironment": 1,
+            "uReveal": 1
+          }
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 55.033841407999994,
+          "pixelCount": 2705544,
+          "adaptive": true,
+          "contactShadows": true,
+          "shadowMapSize": 2048,
+          "environmentReady": true,
+          "environmentFailed": false,
+          "environment": "CC0 photographic studio / GGX log radiance"
+        },
+        "geometryVertices": 1813497,
+        "asset": {
+          "bytes": 8806972,
+          "primitiveCount": 44,
+          "vertexCount": 231540,
+          "sourceVertexCount": 171117,
+          "imageCount": 17,
+          "imagePixels": 6078464,
+          "bufferBytes": 11113920,
+          "textureBytes": 32418494,
+          "textureObjects": 19
+        }
+      },
+      "after": {
+        "file": "after/3440x1440-01-packages.png",
+        "sha256": "a5608d741f4e6e6f6fe82806d788fa0c40e9901bd3cbb32f08abac8422ffc5bb",
+        "progress": 0.21,
+        "inspection": "packages",
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        },
+        "camera": {
+          "yaw": -0.3400000035762787,
+          "elevation": 0.7900000214576721,
+          "distance": 4.800000190734863,
+          "target": [
+            -4.3103203773498535,
+            4.699999809265137,
+            4.266639709472656
+          ],
+          "eye": [
+            -5.436992168426514,
+            8.109695434570312,
+            7.451696395874023
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "observed": {
+          "drawCalls": 44,
+          "submittedVerticesOrIndices": 398571,
+          "shadowDrawCalls": 44,
+          "shadowSubmittedVerticesOrIndices": 398571,
+          "lighting": {
+            "uKeyPosition": [
+              -13.646400451660156,
+              23.149999618530273,
+              19.61400032043457
+            ],
+            "uLightTheme": 0,
+            "uHasEnvironment": 1,
+            "uReveal": 1
+          }
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 46.186481408,
+          "pixelCount": 2705544,
+          "adaptive": true,
+          "contactShadows": true,
+          "shadowMapSize": 2048,
+          "environmentReady": true,
+          "environmentFailed": false,
+          "environment": "CC0 photographic studio / GGX log radiance"
+        },
+        "geometryVertices": 1869993,
+        "asset": {
+          "bytes": 10631940,
+          "primitiveCount": 49,
+          "vertexCount": 314172,
+          "sourceVertexCount": 216139,
+          "imageCount": 17,
+          "imagePixels": 6078464,
+          "bufferBytes": 15080256,
+          "textureBytes": 32418494,
+          "textureObjects": 19
+        }
+      }
+    },
+    {
+      "id": "02-board",
+      "matched": {
+        "camera": true,
+        "pixels": true,
+        "lightingUniforms": true,
+        "assembly": true
+      },
+      "before": {
+        "file": "before/3440x1440-02-board.png",
+        "sha256": "f4c272d1a5c4dee416acfe0a7a1aeec35db40e07d442b69a0c20ffd3eb9be740",
+        "progress": 0.11,
+        "inspection": "board",
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        },
+        "camera": {
+          "yaw": -0.3400000035762787,
+          "elevation": 1.1200000047683716,
+          "distance": 5.150000095367432,
+          "target": [
+            -4.3103203773498535,
+            4.699999809265137,
+            4.266639709472656
+          ],
+          "eye": [
+            -5.058587074279785,
+            9.335516929626465,
+            6.381959438323975
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "observed": {
+          "drawCalls": 14,
+          "submittedVerticesOrIndices": 298812,
+          "shadowDrawCalls": 14,
+          "shadowSubmittedVerticesOrIndices": 298812,
+          "lighting": {
+            "uKeyPosition": [
+              -13.646400451660156,
+              23.149999618530273,
+              19.61400032043457
+            ],
+            "uLightTheme": 0,
+            "uHasEnvironment": 1,
+            "uReveal": 1
+          }
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 53.50048775167999,
+          "pixelCount": 2705544,
+          "adaptive": true,
+          "contactShadows": true,
+          "shadowMapSize": 2048,
+          "environmentReady": true,
+          "environmentFailed": false,
+          "environment": "CC0 photographic studio / GGX log radiance"
+        },
+        "geometryVertices": 1813497,
+        "asset": {
+          "bytes": 8806972,
+          "primitiveCount": 44,
+          "vertexCount": 231540,
+          "sourceVertexCount": 171117,
+          "imageCount": 17,
+          "imagePixels": 6078464,
+          "bufferBytes": 11113920,
+          "textureBytes": 32418494,
+          "textureObjects": 19
+        }
+      },
+      "after": {
+        "file": "after/3440x1440-02-board.png",
+        "sha256": "d4bf664e44e1868ebb1a60dbb42673709db3e65e115c1afd82e7195e36966a2e",
+        "progress": 0.11,
+        "inspection": "board",
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        },
+        "camera": {
+          "yaw": -0.3400000035762787,
+          "elevation": 1.1200000047683716,
+          "distance": 5.150000095367432,
+          "target": [
+            -4.3103203773498535,
+            4.699999809265137,
+            4.266639709472656
+          ],
+          "eye": [
+            -5.058587074279785,
+            9.335516929626465,
+            6.381959438323975
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "observed": {
+          "drawCalls": 19,
+          "submittedVerticesOrIndices": 355308,
+          "shadowDrawCalls": 19,
+          "shadowSubmittedVerticesOrIndices": 355308,
+          "lighting": {
+            "uKeyPosition": [
+              -13.646400451660156,
+              23.149999618530273,
+              19.61400032043457
+            ],
+            "uLightTheme": 0,
+            "uHasEnvironment": 1,
+            "uReveal": 1
+          }
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 45.00702215168,
+          "pixelCount": 2705544,
+          "adaptive": true,
+          "contactShadows": true,
+          "shadowMapSize": 2048,
+          "environmentReady": true,
+          "environmentFailed": false,
+          "environment": "CC0 photographic studio / GGX log radiance"
+        },
+        "geometryVertices": 1869993,
+        "asset": {
+          "bytes": 10631940,
+          "primitiveCount": 49,
+          "vertexCount": 314172,
+          "sourceVertexCount": 216139,
+          "imageCount": 17,
+          "imagePixels": 6078464,
+          "bufferBytes": 15080256,
+          "textureBytes": 32418494,
+          "textureObjects": 19
+        }
+      }
+    },
+    {
+      "id": "03-cooling",
+      "matched": {
+        "camera": true,
+        "pixels": true,
+        "lightingUniforms": true,
+        "assembly": true
+      },
+      "before": {
+        "file": "before/3440x1440-03-cooling.png",
+        "sha256": "ade37c7f903864a3dd6833a7ca34596b4fa100fdf83a682cd3044e1ec5ae9e5e",
+        "progress": 0.354,
+        "inspection": "cooling",
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        },
+        "camera": {
+          "yaw": -0.3400000035762787,
+          "elevation": 0.7900000214576721,
+          "distance": 4.800000190734863,
+          "target": [
+            -4.3103203773498535,
+            4.699999809265137,
+            4.266639709472656
+          ],
+          "eye": [
+            -5.436992168426514,
+            8.109695434570312,
+            7.451696395874023
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "observed": {
+          "drawCalls": 50,
+          "submittedVerticesOrIndices": 454563,
+          "shadowDrawCalls": 50,
+          "shadowSubmittedVerticesOrIndices": 454563,
+          "lighting": {
+            "uKeyPosition": [
+              -13.646400451660156,
+              23.149999618530273,
+              19.61400032043457
+            ],
+            "uLightTheme": 0,
+            "uHasEnvironment": 1,
+            "uReveal": 1
+          }
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 52.028468241612785,
+          "pixelCount": 2705544,
+          "adaptive": true,
+          "contactShadows": true,
+          "shadowMapSize": 2048,
+          "environmentReady": true,
+          "environmentFailed": false,
+          "environment": "CC0 photographic studio / GGX log radiance"
+        },
+        "geometryVertices": 1813497,
+        "asset": {
+          "bytes": 8806972,
+          "primitiveCount": 44,
+          "vertexCount": 231540,
+          "sourceVertexCount": 171117,
+          "imageCount": 17,
+          "imagePixels": 6078464,
+          "bufferBytes": 11113920,
+          "textureBytes": 32418494,
+          "textureObjects": 19
+        }
+      },
+      "after": {
+        "file": "after/3440x1440-03-cooling.png",
+        "sha256": "67b73a430bf8e0b0473dc9fdd92d2b25a0e646a1680a508bb21b9bf026d2c27e",
+        "progress": 0.354,
+        "inspection": "cooling",
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        },
+        "camera": {
+          "yaw": -0.3400000035762787,
+          "elevation": 0.7900000214576721,
+          "distance": 4.800000190734863,
+          "target": [
+            -4.3103203773498535,
+            4.699999809265137,
+            4.266639709472656
+          ],
+          "eye": [
+            -5.436992168426514,
+            8.109695434570312,
+            7.451696395874023
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "observed": {
+          "drawCalls": 55,
+          "submittedVerticesOrIndices": 511059,
+          "shadowDrawCalls": 55,
+          "shadowSubmittedVerticesOrIndices": 511059,
+          "lighting": {
+            "uKeyPosition": [
+              -13.646400451660156,
+              23.149999618530273,
+              19.61400032043457
+            ],
+            "uLightTheme": 0,
+            "uHasEnvironment": 1,
+            "uReveal": 1
+          }
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 43.8747412656128,
+          "pixelCount": 2705544,
+          "adaptive": true,
+          "contactShadows": true,
+          "shadowMapSize": 2048,
+          "environmentReady": true,
+          "environmentFailed": false,
+          "environment": "CC0 photographic studio / GGX log radiance"
+        },
+        "geometryVertices": 1869993,
+        "asset": {
+          "bytes": 10631940,
+          "primitiveCount": 49,
+          "vertexCount": 314172,
+          "sourceVertexCount": 216139,
+          "imageCount": 17,
+          "imagePixels": 6078464,
+          "bufferBytes": 15080256,
+          "textureBytes": 32418494,
+          "textureObjects": 19
+        }
+      }
+    },
+    {
+      "id": "04-hero",
+      "matched": {
+        "camera": true,
+        "pixels": true,
+        "lightingUniforms": true,
+        "assembly": true
+      },
+      "before": {
+        "file": "before/3440x1440-04-hero.png",
+        "sha256": "1b6dd63e29000713b39ac355d71bb0ec32e11ee05a5f86fbda417f32c8b96531",
+        "progress": 0.354,
+        "inspection": null,
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        },
+        "camera": {
+          "yaw": -0.2507784962654114,
+          "elevation": 0.8176891207695007,
+          "distance": 13.065162658691406,
+          "target": [
+            -3.646400213241577,
+            4.75,
+            5.49399995803833
+          ],
+          "eye": [
+            -5.86378812789917,
+            14.281915664672852,
+            14.14987850189209
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "observed": {
+          "drawCalls": 50,
+          "submittedVerticesOrIndices": 454563,
+          "shadowDrawCalls": 0,
+          "shadowSubmittedVerticesOrIndices": 0,
+          "lighting": {
+            "uKeyPosition": [
+              -13.646400451660156,
+              23.149999618530273,
+              19.61400032043457
+            ],
+            "uLightTheme": 0,
+            "uHasEnvironment": 1,
+            "uReveal": 1
+          }
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 49.25471633147031,
+          "pixelCount": 2705544,
+          "adaptive": true,
+          "contactShadows": true,
+          "shadowMapSize": 2048,
+          "environmentReady": true,
+          "environmentFailed": false,
+          "environment": "CC0 photographic studio / GGX log radiance"
+        },
+        "geometryVertices": 1813497,
+        "asset": {
+          "bytes": 8806972,
+          "primitiveCount": 44,
+          "vertexCount": 231540,
+          "sourceVertexCount": 171117,
+          "imageCount": 17,
+          "imagePixels": 6078464,
+          "bufferBytes": 11113920,
+          "textureBytes": 32418494,
+          "textureObjects": 19
+        }
+      },
+      "after": {
+        "file": "after/3440x1440-04-hero.png",
+        "sha256": "9a0193325e23d0135b4c10299030717a947ad2de9280167b25ce0ebce51eba17",
+        "progress": 0.354,
+        "inspection": null,
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        },
+        "camera": {
+          "yaw": -0.2507784962654114,
+          "elevation": 0.8176891207695007,
+          "distance": 13.065162658691406,
+          "target": [
+            -3.646400213241577,
+            4.75,
+            5.49399995803833
+          ],
+          "eye": [
+            -5.86378812789917,
+            14.281915664672852,
+            14.14987850189209
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "observed": {
+          "drawCalls": 55,
+          "submittedVerticesOrIndices": 511059,
+          "shadowDrawCalls": 0,
+          "shadowSubmittedVerticesOrIndices": 0,
+          "lighting": {
+            "uKeyPosition": [
+              -13.646400451660156,
+              23.149999618530273,
+              19.61400032043457
+            ],
+            "uLightTheme": 0,
+            "uHasEnvironment": 1,
+            "uReveal": 1
+          }
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 41.74424155038878,
+          "pixelCount": 2705544,
+          "adaptive": true,
+          "contactShadows": true,
+          "shadowMapSize": 2048,
+          "environmentReady": true,
+          "environmentFailed": false,
+          "environment": "CC0 photographic studio / GGX log radiance"
+        },
+        "geometryVertices": 1869993,
+        "asset": {
+          "bytes": 10631940,
+          "primitiveCount": 49,
+          "vertexCount": 314172,
+          "sourceVertexCount": 216139,
+          "imageCount": 17,
+          "imagePixels": 6078464,
+          "bufferBytes": 15080256,
+          "textureBytes": 32418494,
+          "textureObjects": 19
+        }
+      }
+    },
+    {
+      "id": "05-fans",
+      "matched": {
+        "camera": true,
+        "pixels": true,
+        "lightingUniforms": true,
+        "assembly": true
+      },
+      "before": {
+        "file": "before/3440x1440-05-fans.png",
+        "sha256": "5491a435b3c8abe123cf6f33688ce0086f22be807bbcafe6e97d89aacd32ce88",
+        "progress": 0.354,
+        "inspection": "fans",
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        },
+        "camera": {
+          "yaw": -0.3400000035762787,
+          "elevation": 0.6800000071525574,
+          "distance": 3.5,
+          "target": [
+            -4.231200218200684,
+            4.699999809265137,
+            5.658109664916992
+          ],
+          "eye": [
+            -5.138786792755127,
+            6.90077543258667,
+            8.223820686340332
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "observed": {
+          "drawCalls": 50,
+          "submittedVerticesOrIndices": 454563,
+          "shadowDrawCalls": 50,
+          "shadowSubmittedVerticesOrIndices": 454563,
+          "lighting": {
+            "uKeyPosition": [
+              -13.646400451660156,
+              23.149999618530273,
+              19.61400032043457
+            ],
+            "uLightTheme": 0,
+            "uHasEnvironment": 1,
+            "uReveal": 1
+          }
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 47.952527678211496,
+          "pixelCount": 2705544,
+          "adaptive": true,
+          "contactShadows": true,
+          "shadowMapSize": 2048,
+          "environmentReady": true,
+          "environmentFailed": false,
+          "environment": "CC0 photographic studio / GGX log radiance"
+        },
+        "geometryVertices": 1813497,
+        "asset": {
+          "bytes": 8806972,
+          "primitiveCount": 44,
+          "vertexCount": 231540,
+          "sourceVertexCount": 171117,
+          "imageCount": 17,
+          "imagePixels": 6078464,
+          "bufferBytes": 11113920,
+          "textureBytes": 32418494,
+          "textureObjects": 19
+        }
+      },
+      "after": {
+        "file": "after/3440x1440-05-fans.png",
+        "sha256": "176c909f2de9185b97223aa7ce5d8aa6f928d59c601be00fd8baa68ffe7828c7",
+        "progress": 0.354,
+        "inspection": "fans",
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        },
+        "camera": {
+          "yaw": -0.3400000035762787,
+          "elevation": 0.6800000071525574,
+          "distance": 3.5,
+          "target": [
+            -4.231200218200684,
+            4.699999809265137,
+            5.658109664916992
+          ],
+          "eye": [
+            -5.138786792755127,
+            6.90077543258667,
+            8.223820686340332
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "observed": {
+          "drawCalls": 55,
+          "submittedVerticesOrIndices": 511059,
+          "shadowDrawCalls": 55,
+          "shadowSubmittedVerticesOrIndices": 511059,
+          "lighting": {
+            "uKeyPosition": [
+              -13.646400451660156,
+              23.149999618530273,
+              19.61400032043457
+            ],
+            "uLightTheme": 0,
+            "uHasEnvironment": 1,
+            "uReveal": 1
+          }
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 40.742471888373224,
+          "pixelCount": 2705544,
+          "adaptive": true,
+          "contactShadows": true,
+          "shadowMapSize": 2048,
+          "environmentReady": true,
+          "environmentFailed": false,
+          "environment": "CC0 photographic studio / GGX log radiance"
+        },
+        "geometryVertices": 1869993,
+        "asset": {
+          "bytes": 10631940,
+          "primitiveCount": 49,
+          "vertexCount": 314172,
+          "sourceVertexCount": 216139,
+          "imageCount": 17,
+          "imagePixels": 6078464,
+          "bufferBytes": 15080256,
+          "textureBytes": 32418494,
+          "textureObjects": 19
+        }
+      }
+    },
+    {
+      "id": "06-power",
+      "matched": {
+        "camera": true,
+        "pixels": true,
+        "lightingUniforms": true,
+        "assembly": true
+      },
+      "before": {
+        "file": "before/3440x1440-06-power.png",
+        "sha256": "a891bbfe7b1969ae98d0cda6480be607f22b2ad5cb547b313000ddbf89165cca",
+        "progress": 0.354,
+        "inspection": "power",
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        },
+        "camera": {
+          "yaw": -0.3400000035762787,
+          "elevation": 1.1200000047683716,
+          "distance": 5.300000190734863,
+          "target": [
+            -3.646400213241577,
+            4.699999809265137,
+            6.111239910125732
+          ],
+          "eye": [
+            -4.416460990905762,
+            9.470532417297363,
+            8.28817081451416
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "observed": {
+          "drawCalls": 50,
+          "submittedVerticesOrIndices": 454563,
+          "shadowDrawCalls": 50,
+          "shadowSubmittedVerticesOrIndices": 454563,
+          "lighting": {
+            "uKeyPosition": [
+              -13.646400451660156,
+              23.149999618530273,
+              19.61400032043457
+            ],
+            "uLightTheme": 0,
+            "uHasEnvironment": 1,
+            "uReveal": 1
+          }
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 46.70242657108303,
+          "pixelCount": 2705544,
+          "adaptive": true,
+          "contactShadows": true,
+          "shadowMapSize": 2048,
+          "environmentReady": true,
+          "environmentFailed": false,
+          "environment": "CC0 photographic studio / GGX log radiance"
+        },
+        "geometryVertices": 1813497,
+        "asset": {
+          "bytes": 8806972,
+          "primitiveCount": 44,
+          "vertexCount": 231540,
+          "sourceVertexCount": 171117,
+          "imageCount": 17,
+          "imagePixels": 6078464,
+          "bufferBytes": 11113920,
+          "textureBytes": 32418494,
+          "textureObjects": 19
+        }
+      },
+      "after": {
+        "file": "after/3440x1440-06-power.png",
+        "sha256": "1c842b24de765e3052183893718749d23979c68f0575bfbf471992f51d471b80",
+        "progress": 0.354,
+        "inspection": "power",
+        "canvas": {
+          "width": 2127,
+          "height": 1272
+        },
+        "webgl": {
+          "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+          "vendor": "Google Inc. (NVIDIA)"
+        },
+        "camera": {
+          "yaw": -0.3400000035762787,
+          "elevation": 1.1200000047683716,
+          "distance": 5.300000190734863,
+          "target": [
+            -3.646400213241577,
+            4.699999809265137,
+            6.111239910125732
+          ],
+          "eye": [
+            -4.416460990905762,
+            9.470532417297363,
+            8.28817081451416
+          ],
+          "fov": 0.5,
+          "view": "authored"
+        },
+        "observed": {
+          "drawCalls": 55,
+          "submittedVerticesOrIndices": 511059,
+          "shadowDrawCalls": 55,
+          "shadowSubmittedVerticesOrIndices": 511059,
+          "lighting": {
+            "uKeyPosition": [
+              -13.646400451660156,
+              23.149999618530273,
+              19.61400032043457
+            ],
+            "uLightTheme": 0,
+            "uHasEnvironment": 1,
+            "uReveal": 1
+          }
+        },
+        "quality": {
+          "resolution": 1,
+          "frameMs": 39.780773012838296,
+          "pixelCount": 2705544,
+          "adaptive": true,
+          "contactShadows": true,
+          "shadowMapSize": 2048,
+          "environmentReady": true,
+          "environmentFailed": false,
+          "environment": "CC0 photographic studio / GGX log radiance"
+        },
+        "geometryVertices": 1869993,
+        "asset": {
+          "bytes": 10631940,
+          "primitiveCount": 49,
+          "vertexCount": 314172,
+          "sourceVertexCount": 216139,
+          "imageCount": 17,
+          "imagePixels": 6078464,
+          "bufferBytes": 15080256,
+          "textureBytes": 32418494,
+          "textureObjects": 19
+        }
+      }
+    }
+  ],
+  "runs": [
+    {
+      "variant": "before",
+      "frames": 2117,
+      "rawObservedFrames": 2117,
+      "postFilmObservationsOmitted": 0,
+      "endpointRule": "First actual draw with progress >= 0.99999 (renderer progress epsilon); later idle draws remain in raw trace but are excluded from film metrics.",
+      "wallDurationMs": 35300.199999809265,
+      "authoredFilmDurationMs": 35200,
+      "observedDrawFPS": 59.946569362252276,
+      "drawIntervalsMs": {
+        "min": 14.899999856948853,
+        "median": 16.699999809265137,
+        "p95": 16.90000009536743,
+        "max": 33.60000014305115,
+        "mean": 16.681521739085365
+      },
+      "drawCalls": {
+        "min": 50,
+        "median": 94,
+        "p95": 98,
+        "max": 98,
+        "mean": 77.10108644307984
+      },
+      "submittedVerticesOrIndices": {
+        "min": 454563,
+        "median": 2853795,
+        "p95": 3216711,
+        "max": 3216711,
+        "mean": 1912261.6169107228
+      },
+      "shadowDrawCalls": {
+        "min": 0,
+        "median": 93,
+        "p95": 97,
+        "max": 97,
+        "mean": 75.27633443552196
+      },
+      "shadowSubmittedVerticesOrIndices": {
+        "min": 0,
+        "median": 2853411,
+        "p95": 3216327,
+        "max": 3216327,
+        "mean": 1828066.4341048654
+      },
+      "geometryVertices": {
+        "min": 1813497,
+        "median": 1813497,
+        "p95": 1813497,
+        "max": 1813497,
+        "mean": 1813497
+      },
+      "nativePixels": {
+        "min": 2191530,
+        "median": 2705544,
+        "p95": 2705544,
+        "max": 2705544,
+        "mean": 2515672.0358998585
+      },
+      "resolutionChanges": [
+        {
+          "progress": 0.0006482800732749848,
+          "from": 1,
+          "to": 0.9,
+          "pixelCount": 2191530
+        },
+        {
+          "progress": 0.4073918810800229,
+          "from": 0.9,
+          "to": 1,
+          "pixelCount": 2705544
+        }
+      ],
+      "bridge": {
+        "frames": 389,
+        "eyeStep": {
+          "min": 3.0946694831062226e-05,
+          "median": 0.020746962586223598,
+          "p95": 0.45362874353567784,
+          "max": 0.4649994059266144,
+          "mean": 0.12096525897211456
+        },
+        "trayStep": {
+          "min": 0,
+          "median": 0,
+          "p95": 0.14333315232141491,
+          "max": 0.22108366947703895,
+          "mean": 0.013564668285839231
+        }
+      },
+      "limitations": "Observed native-browser draw cadence on this host, not GPU timer measurements or portable device certification. Raw draw counts include any repeated renderer draws before a projection event. Adaptive resolution changes are recorded and prevent an equal-pixel FPS speedup claim when variants differ."
+    },
+    {
+      "variant": "after",
+      "frames": 2117,
+      "rawObservedFrames": 2117,
+      "postFilmObservationsOmitted": 0,
+      "endpointRule": "First actual draw with progress >= 0.99999 (renderer progress epsilon); later idle draws remain in raw trace but are excluded from film metrics.",
+      "wallDurationMs": 35302.799999952316,
+      "authoredFilmDurationMs": 35200,
+      "observedDrawFPS": 59.94639953303969,
+      "drawIntervalsMs": {
+        "min": 14.899999856948853,
+        "median": 16.699999809265137,
+        "p95": 16.90000009536743,
+        "max": 33.40000009536743,
+        "mean": 16.681568998132175
+      },
+      "drawCalls": {
+        "min": 55,
+        "median": 99,
+        "p95": 103,
+        "max": 103,
+        "mean": 82.10108644307984
+      },
+      "submittedVerticesOrIndices": {
+        "min": 511059,
+        "median": 2910291,
+        "p95": 3273207,
+        "max": 3273207,
+        "mean": 1968757.6169107228
+      },
+      "shadowDrawCalls": {
+        "min": 0,
+        "median": 98,
+        "p95": 102,
+        "max": 102,
+        "mean": 80.24326877657062
+      },
+      "shadowSubmittedVerticesOrIndices": {
+        "min": 0,
+        "median": 2909907,
+        "p95": 3272823,
+        "max": 3272823,
+        "mean": 1884188.8186112423
+      },
+      "geometryVertices": {
+        "min": 1869993,
+        "median": 1869993,
+        "p95": 1869993,
+        "max": 1869993,
+        "mean": 1869993
+      },
+      "nativePixels": {
+        "min": 2191530,
+        "median": 2705544,
+        "p95": 2705544,
+        "max": 2705544,
+        "mean": 2514700.8238072745
+      },
+      "resolutionChanges": [
+        {
+          "progress": 7.384421945654069e-05,
+          "from": 1,
+          "to": 0.9,
+          "pixelCount": 2191530
+        },
+        {
+          "progress": 0.4073907134128213,
+          "from": 0.9,
+          "to": 1,
+          "pixelCount": 2705544
+        }
+      ],
+      "bridge": {
+        "frames": 389,
+        "eyeStep": {
+          "min": 3.0248168043429766e-05,
+          "median": 0.020745135096255352,
+          "p95": 0.45361212233035675,
+          "max": 0.46731222719035687,
+          "mean": 0.12096507695233519
+        },
+        "trayStep": {
+          "min": 0,
+          "median": 0,
+          "p95": 0.14243836324137857,
+          "max": 0.22107944443709684,
+          "mean": 0.013564668285839227
+        }
+      },
+      "limitations": "Observed native-browser draw cadence on this host, not GPU timer measurements or portable device certification. Raw draw counts include any repeated renderer draws before a projection event. Adaptive resolution changes are recorded and prevent an equal-pixel FPS speedup claim when variants differ."
+    }
+  ],
+  "supplemental": [
+    {
+      "label": "cooling-reveal",
+      "progress": 0.312,
+      "file": "after/3440x1440-cooling-reveal.png",
+      "sha256": "cf365aff88732a8c49e159688e756dc01df3cb9fa4a3199552637de61c15efcc"
+    },
+    {
+      "label": "bridge",
+      "progress": 0.48,
+      "file": "after/3440x1440-bridge.png",
+      "sha256": "2f11a7c893c82c86f3979207b9ce19755852de0de8f721a5e3a389e56bdaecdf"
+    },
+    {
+      "label": "rack-final",
+      "progress": 1,
+      "file": "after/3440x1440-rack-final.png",
+      "sha256": "ca4febfe952ebb6c011f6f11cc2f4217ef6778652fb2b354cf7ebdf3a2facaf9"
+    }
+  ]
+}

@@ -1,0 +1,2964 @@
+{
+  "baseline": "3ce4b9c6e5467abe9d27050e5af0240b07fff3dc",
+  "scope": "Actual exported GLB decoded through runtime loader; source sampled cable paths; no image-quality assertion.",
+  "passed": true,
+  "errors": [],
+  "glb": {
+    "baselineSHA256": "fe898a419c0f613bd003ef964e921dcc7c43771c4ed841bdbcd92da695857bc7",
+    "currentSHA256": "cd454d2e6a36d6e78ab8416e5449a6595791bc1e0a45fb239b3fd40642d59bb1",
+    "baselineBytes": 8806972,
+    "currentBytes": 10631940,
+    "revision": 3
+  },
+  "preservedPrimitives": [
+    {
+      "layer": "board",
+      "name": "L10 prototype / board#0",
+      "vertices": 636,
+      "baselineSHA256": "6d22886ae31f9237c6e7d68ed599e95a5dbcd3dea6104a6eda090905a337ef40",
+      "currentSHA256": "6d22886ae31f9237c6e7d68ed599e95a5dbcd3dea6104a6eda090905a337ef40",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.8295819759368896,
+          -0.09650000184774399,
+          -2.839547634124756
+        ],
+        "max": [
+          -0.10044151544570923,
+          -0.07149999588727951,
+          -0.5204522609710693
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.8295819759368896,
+          -0.09650000184774399,
+          -2.839547634124756
+        ],
+        "max": [
+          -0.10044151544570923,
+          -0.07149999588727951,
+          -0.5204522609710693
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "board",
+      "name": "L10 prototype / board#1",
+      "vertices": 4584,
+      "baselineSHA256": "0cf43f5877e72def8533d21c0e5ed22871fc67ba3f36485df70758559a1cfa45",
+      "currentSHA256": "0cf43f5877e72def8533d21c0e5ed22871fc67ba3f36485df70758559a1cfa45",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.8299999237060547,
+          -0.09650000184774399,
+          -2.8399999141693115
+        ],
+        "max": [
+          -0.09999996423721313,
+          -0.07149999588727951,
+          -0.5199999809265137
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.8299999237060547,
+          -0.09650000184774399,
+          -2.8399999141693115
+        ],
+        "max": [
+          -0.09999996423721313,
+          -0.07149999588727951,
+          -0.5199999809265137
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "board",
+      "name": "L10 prototype / board#2",
+      "vertices": 18192,
+      "baselineSHA256": "1e4f8970c77e631db61b3e9dbc5cce4f89efb29eed116c0fd993930543e42615",
+      "currentSHA256": "1e4f8970c77e631db61b3e9dbc5cce4f89efb29eed116c0fd993930543e42615",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.8029999732971191,
+          -0.07150000333786011,
+          -2.809000015258789
+        ],
+        "max": [
+          -0.12700003385543823,
+          -0.04399999976158142,
+          -0.5509999990463257
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.8029999732971191,
+          -0.07150000333786011,
+          -2.809000015258789
+        ],
+        "max": [
+          -0.12700003385543823,
+          -0.04399999976158142,
+          -0.5509999990463257
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "board",
+      "name": "L10 prototype / board#3",
+      "vertices": 2256,
+      "baselineSHA256": "9c0796ced8d5c4a474a9f4497172f851b1d4deb23bb78f142f470664bcc710e2",
+      "currentSHA256": "9c0796ced8d5c4a474a9f4497172f851b1d4deb23bb78f142f470664bcc710e2",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.784999966621399,
+          -0.07049999386072159,
+          -2.7910001277923584
+        ],
+        "max": [
+          -0.14499998092651367,
+          -0.05849999561905861,
+          -0.5690000057220459
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.784999966621399,
+          -0.07049999386072159,
+          -2.7910001277923584
+        ],
+        "max": [
+          -0.14499998092651367,
+          -0.05849999561905861,
+          -0.5690000057220459
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "board",
+      "name": "L10 prototype / board#4",
+      "vertices": 5688,
+      "baselineSHA256": "807f7c1a8b25152bb954bc06acebff925f3dbe322fd19b6d95aa85900642710e",
+      "currentSHA256": "807f7c1a8b25152bb954bc06acebff925f3dbe322fd19b6d95aa85900642710e",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.809000015258789,
+          -0.0754999965429306,
+          -2.7955501079559326
+        ],
+        "max": [
+          -0.125,
+          -0.05650000274181366,
+          -0.5644500255584717
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.809000015258789,
+          -0.0754999965429306,
+          -2.7955501079559326
+        ],
+        "max": [
+          -0.125,
+          -0.05650000274181366,
+          -0.5644500255584717
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "board",
+      "name": "L10 prototype / board#5",
+      "vertices": 6204,
+      "baselineSHA256": "9adfed36bca1286bdd2139aeb7a2579ab23822c2c7de7fe44e981ce091fed5d8",
+      "currentSHA256": "9adfed36bca1286bdd2139aeb7a2579ab23822c2c7de7fe44e981ce091fed5d8",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.6875600814819336,
+          -0.07050000131130219,
+          -2.692500114440918
+        ],
+        "max": [
+          -0.3163999915122986,
+          -0.051500000059604645,
+          -0.593500018119812
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.6875600814819336,
+          -0.07050000131130219,
+          -2.692500114440918
+        ],
+        "max": [
+          -0.3163999915122986,
+          -0.051500000059604645,
+          -0.593500018119812
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "board",
+      "name": "L10 prototype / board#6",
+      "vertices": 70128,
+      "baselineSHA256": "d887be54bef2e86871d92923bda7e2d25dbe3b083db35ddf1ff60c78e2342d4f",
+      "currentSHA256": "d887be54bef2e86871d92923bda7e2d25dbe3b083db35ddf1ff60c78e2342d4f",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.808500051498413,
+          -0.07150000333786011,
+          -2.696000099182129
+        ],
+        "max": [
+          -0.12549996376037598,
+          -0.05377999693155289,
+          -0.534500002861023
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.808500051498413,
+          -0.07150000333786011,
+          -2.696000099182129
+        ],
+        "max": [
+          -0.12549996376037598,
+          -0.05377999693155289,
+          -0.534500002861023
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "board",
+      "name": "L10 prototype / board#7",
+      "vertices": 1452,
+      "baselineSHA256": "a0ddb7a7e6ba3be800bdd6486b1899fb8e029dfa3278859880ef90a833024f4e",
+      "currentSHA256": "a0ddb7a7e6ba3be800bdd6486b1899fb8e029dfa3278859880ef90a833024f4e",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.6129999160766602,
+          -0.07049999386072159,
+          -2.681999921798706
+        ],
+        "max": [
+          -0.296999990940094,
+          -0.031000003218650818,
+          -0.5830000638961792
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.6129999160766602,
+          -0.07049999386072159,
+          -2.681999921798706
+        ],
+        "max": [
+          -0.296999990940094,
+          -0.031000003218650818,
+          -0.5830000638961792
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "board",
+      "name": "L10 prototype / board#8",
+      "vertices": 6204,
+      "baselineSHA256": "753fce584082ffb3160cd2d0f2cc49e3cdba52f241f4155e21b9fde7fea5b5ed",
+      "currentSHA256": "753fce584082ffb3160cd2d0f2cc49e3cdba52f241f4155e21b9fde7fea5b5ed",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.7955000400543213,
+          -0.07150000333786011,
+          -2.684000015258789
+        ],
+        "max": [
+          -0.13849997520446777,
+          -0.017999999225139618,
+          -0.5474998950958252
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.7955000400543213,
+          -0.07150000333786011,
+          -2.684000015258789
+        ],
+        "max": [
+          -0.13849997520446777,
+          -0.017999999225139618,
+          -0.5474998950958252
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "board",
+      "name": "L10 prototype / board#9",
+      "vertices": 216,
+      "baselineSHA256": "57692d1704d67a7d0bf025fba7ce8bf88f083cd411a3e38611fb5774d425ba69",
+      "currentSHA256": "57692d1704d67a7d0bf025fba7ce8bf88f083cd411a3e38611fb5774d425ba69",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.5779999494552612,
+          -0.030900001525878906,
+          -1.662500023841858
+        ],
+        "max": [
+          -0.3319999575614929,
+          -0.030100002884864807,
+          -1.659500002861023
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.5779999494552612,
+          -0.030900001525878906,
+          -1.662500023841858
+        ],
+        "max": [
+          -0.3319999575614929,
+          -0.030100002884864807,
+          -1.659500002861023
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "board",
+      "name": "L10 prototype / board#10",
+      "vertices": 1692,
+      "baselineSHA256": "0c303ee81775ed5cfd5cc6df7c012779d2c9bf6240c0688feae78ef2477fed6e",
+      "currentSHA256": "0c303ee81775ed5cfd5cc6df7c012779d2c9bf6240c0688feae78ef2477fed6e",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.712499976158142,
+          -0.07149999588727951,
+          -2.5275001525878906
+        ],
+        "max": [
+          -0.22750002145767212,
+          -0.06809999793767929,
+          -0.7625000476837158
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.712499976158142,
+          -0.07149999588727951,
+          -2.5275001525878906
+        ],
+        "max": [
+          -0.22750002145767212,
+          -0.06809999793767929,
+          -0.7625000476837158
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / CPU#0",
+      "vertices": 564,
+      "baselineSHA256": "d04d5970b75463aca5e85da4ccf2dd107895ca730730ff5001b2362395fb9507",
+      "currentSHA256": "d04d5970b75463aca5e85da4ccf2dd107895ca730730ff5001b2362395fb9507",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.2939999103546143,
+          -0.06809999793767929,
+          -1.4290000200271606
+        ],
+        "max": [
+          -0.6359999775886536,
+          -0.054499998688697815,
+          -0.7710000276565552
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.2939999103546143,
+          -0.06809999793767929,
+          -1.4290000200271606
+        ],
+        "max": [
+          -0.6359999775886536,
+          -0.054499998688697815,
+          -0.7710000276565552
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / CPU#1",
+      "vertices": 564,
+      "baselineSHA256": "a76937001556dd2933a08e88febda91108e8af64c3261b5ee6d4fb1837236104",
+      "currentSHA256": "a76937001556dd2933a08e88febda91108e8af64c3261b5ee6d4fb1837236104",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.3350000381469727,
+          -0.05450000241398811,
+          -1.4700000286102295
+        ],
+        "max": [
+          -0.5949999690055847,
+          -0.03849999979138374,
+          -0.7300000190734863
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.3350000381469727,
+          -0.05450000241398811,
+          -1.4700000286102295
+        ],
+        "max": [
+          -0.5949999690055847,
+          -0.03849999979138374,
+          -0.7300000190734863
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / CPU#2",
+      "vertices": 288,
+      "baselineSHA256": "5f75b3980ef1b24cd8f9d85e1140d887fe24fa2c34ccf18e6df33062e6f3371f",
+      "currentSHA256": "5f75b3980ef1b24cd8f9d85e1140d887fe24fa2c34ccf18e6df33062e6f3371f",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.3350000381469727,
+          -0.052299998700618744,
+          -1.4700000286102295
+        ],
+        "max": [
+          -0.5950000286102295,
+          -0.04370000213384628,
+          -0.7300000190734863
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.3350000381469727,
+          -0.052299998700618744,
+          -1.4700000286102295
+        ],
+        "max": [
+          -0.5950000286102295,
+          -0.04370000213384628,
+          -0.7300000190734863
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / CPU#3",
+      "vertices": 1704,
+      "baselineSHA256": "f8b98d9fb08ad04c8198b73924fde13e9762ee39468d63255b333ec549cd9b47",
+      "currentSHA256": "f8b98d9fb08ad04c8198b73924fde13e9762ee39468d63255b333ec549cd9b47",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.2725000381469727,
+          -0.03849999979138374,
+          -1.4075000286102295
+        ],
+        "max": [
+          -0.6575000286102295,
+          0.006000004708766937,
+          -0.7925000190734863
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.2725000381469727,
+          -0.03849999979138374,
+          -1.4075000286102295
+        ],
+        "max": [
+          -0.6575000286102295,
+          0.006000004708766937,
+          -0.7925000190734863
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / CPU#4",
+      "vertices": 564,
+      "baselineSHA256": "9075f58cdd8402e094a091b97a567bd7b8dd03e8f07511e3472f435c41d9573b",
+      "currentSHA256": "9075f58cdd8402e094a091b97a567bd7b8dd03e8f07511e3472f435c41d9573b",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.2630000114440918,
+          -0.008999999612569809,
+          -1.3980000019073486
+        ],
+        "max": [
+          -0.6669999361038208,
+          0.00599999725818634,
+          -0.8020000457763672
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.2630000114440918,
+          -0.008999999612569809,
+          -1.3980000019073486
+        ],
+        "max": [
+          -0.6669999361038208,
+          0.00599999725818634,
+          -0.8020000457763672
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / CPU#5",
+      "vertices": 1320,
+      "baselineSHA256": "4c97e18043d9e182d9155625795d996bba6c25d20595eba795ee682248f26d03",
+      "currentSHA256": "4c97e18043d9e182d9155625795d996bba6c25d20595eba795ee682248f26d03",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.1862000226974487,
+          -0.03700000047683716,
+          -1.4570000171661377
+        ],
+        "max": [
+          -0.7437999844551086,
+          -0.02799999713897705,
+          -0.7430000305175781
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.1862000226974487,
+          -0.03700000047683716,
+          -1.4570000171661377
+        ],
+        "max": [
+          -0.7437999844551086,
+          -0.02799999713897705,
+          -0.7430000305175781
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / CPU#6",
+      "vertices": 2640,
+      "baselineSHA256": "df93bb92a80af9d85c05d82da6f4273d4acd62439f75f80ea181d9c9f00e83ed",
+      "currentSHA256": "df93bb92a80af9d85c05d82da6f4273d4acd62439f75f80ea181d9c9f00e83ed",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.1877000331878662,
+          -0.03700000047683716,
+          -1.4574999809265137
+        ],
+        "max": [
+          -0.7422999739646912,
+          -0.028999999165534973,
+          -0.7424999475479126
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.1877000331878662,
+          -0.03700000047683716,
+          -1.4574999809265137
+        ],
+        "max": [
+          -0.7422999739646912,
+          -0.028999999165534973,
+          -0.7424999475479126
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / CPU#7",
+      "vertices": 2760,
+      "baselineSHA256": "c816c21c32def801b6479a2a58736e66938f589e2e40c4560b3ae29bd9297f2d",
+      "currentSHA256": "c816c21c32def801b6479a2a58736e66938f589e2e40c4560b3ae29bd9297f2d",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.3200000524520874,
+          -0.03799999877810478,
+          -1.2660000324249268
+        ],
+        "max": [
+          -0.6100000143051147,
+          -0.03720000013709068,
+          -0.9460000395774841
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.3200000524520874,
+          -0.03799999877810478,
+          -1.2660000324249268
+        ],
+        "max": [
+          -0.6100000143051147,
+          -0.03720000013709068,
+          -0.9460000395774841
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / GPU_A#0",
+      "vertices": 564,
+      "baselineSHA256": "34cb46ed1470cb4a30a70fe2df46d5e1757c23523a896cfeb09e5b159510a5be",
+      "currentSHA256": "34cb46ed1470cb4a30a70fe2df46d5e1757c23523a896cfeb09e5b159510a5be",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.7039999961853027,
+          -0.06809999793767929,
+          -2.5190000534057617
+        ],
+        "max": [
+          -1.0759999752044678,
+          -0.054499998688697815,
+          -1.8410000801086426
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.7039999961853027,
+          -0.06809999793767929,
+          -2.5190000534057617
+        ],
+        "max": [
+          -1.0759999752044678,
+          -0.054499998688697815,
+          -1.8410000801086426
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / GPU_A#1",
+      "vertices": 564,
+      "baselineSHA256": "92a6c79cb7399c83efa412746d9c41b65d5d4de8c4fe90463f9fe1b1b1291f2b",
+      "currentSHA256": "92a6c79cb7399c83efa412746d9c41b65d5d4de8c4fe90463f9fe1b1b1291f2b",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.7450000047683716,
+          -0.05450000241398811,
+          -2.559999942779541
+        ],
+        "max": [
+          -1.034999966621399,
+          -0.03849999979138374,
+          -1.8000000715255737
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.7450000047683716,
+          -0.05450000241398811,
+          -2.559999942779541
+        ],
+        "max": [
+          -1.034999966621399,
+          -0.03849999979138374,
+          -1.8000000715255737
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / GPU_A#2",
+      "vertices": 288,
+      "baselineSHA256": "e000a157985d6909e7ab15e3f4ecb42b5aa2f62f80466913047fd7fb1f0c41ea",
+      "currentSHA256": "e000a157985d6909e7ab15e3f4ecb42b5aa2f62f80466913047fd7fb1f0c41ea",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.744999885559082,
+          -0.052299998700618744,
+          -2.559999942779541
+        ],
+        "max": [
+          -1.0350000858306885,
+          -0.04370000213384628,
+          -1.7999999523162842
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.744999885559082,
+          -0.052299998700618744,
+          -2.559999942779541
+        ],
+        "max": [
+          -1.0350000858306885,
+          -0.04370000213384628,
+          -1.7999999523162842
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / GPU_A#3",
+      "vertices": 1704,
+      "baselineSHA256": "6b4282c5f772a324ac8ca334ce1bb12b8fd558e4cb26e568f0e8b803eca4db43",
+      "currentSHA256": "6b4282c5f772a324ac8ca334ce1bb12b8fd558e4cb26e568f0e8b803eca4db43",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.6725000143051147,
+          -0.03849999979138374,
+          -2.487499952316284
+        ],
+        "max": [
+          -1.1074999570846558,
+          0.006000004708766937,
+          -1.872499942779541
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.6725000143051147,
+          -0.03849999979138374,
+          -2.487499952316284
+        ],
+        "max": [
+          -1.1074999570846558,
+          0.006000004708766937,
+          -1.872499942779541
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / GPU_A#4",
+      "vertices": 564,
+      "baselineSHA256": "7e4801ddf2c52dfc864829244cc60d4713f7cfb0038879ef91c6cbfc287c748d",
+      "currentSHA256": "7e4801ddf2c52dfc864829244cc60d4713f7cfb0038879ef91c6cbfc287c748d",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.6629999876022339,
+          -0.008999999612569809,
+          -2.4780001640319824
+        ],
+        "max": [
+          -1.1169999837875366,
+          0.00599999725818634,
+          -1.8820000886917114
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.6629999876022339,
+          -0.008999999612569809,
+          -2.4780001640319824
+        ],
+        "max": [
+          -1.1169999837875366,
+          0.00599999725818634,
+          -1.8820000886917114
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / GPU_A#5",
+      "vertices": 1848,
+      "baselineSHA256": "fb7ea0d5bddd17dc697a1e76a7f207d22af48512328ebf9ff6a7f9659630c9c3",
+      "currentSHA256": "fb7ea0d5bddd17dc697a1e76a7f207d22af48512328ebf9ff6a7f9659630c9c3",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.6013000011444092,
+          -0.03700000047683716,
+          -2.546999931335449
+        ],
+        "max": [
+          -1.1786999702453613,
+          -0.02799999713897705,
+          -1.812999963760376
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.6013000011444092,
+          -0.03700000047683716,
+          -2.546999931335449
+        ],
+        "max": [
+          -1.1786999702453613,
+          -0.02799999713897705,
+          -1.812999963760376
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / GPU_A#6",
+      "vertices": 3696,
+      "baselineSHA256": "6db69eb260f88ebb446ba27948a8562f4e82c4d720b2da28ec5c39dd24595b4d",
+      "currentSHA256": "6db69eb260f88ebb446ba27948a8562f4e82c4d720b2da28ec5c39dd24595b4d",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.602799892425537,
+          -0.03700000047683716,
+          -2.5475001335144043
+        ],
+        "max": [
+          -1.1772000789642334,
+          -0.028999999165534973,
+          -1.8125
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.602799892425537,
+          -0.03700000047683716,
+          -2.5475001335144043
+        ],
+        "max": [
+          -1.1772000789642334,
+          -0.028999999165534973,
+          -1.8125
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / GPU_A#7",
+      "vertices": 2760,
+      "baselineSHA256": "d866746d7e7a72958a3bde8e85acf4dcb287dbc958ab44b3a7f927c5c072c93d",
+      "currentSHA256": "d866746d7e7a72958a3bde8e85acf4dcb287dbc958ab44b3a7f927c5c072c93d",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.7300000190734863,
+          -0.03799999877810478,
+          -2.3459999561309814
+        ],
+        "max": [
+          -1.0499999523162842,
+          -0.03720000013709068,
+          -2.0260000228881836
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.7300000190734863,
+          -0.03799999877810478,
+          -2.3459999561309814
+        ],
+        "max": [
+          -1.0499999523162842,
+          -0.03720000013709068,
+          -2.0260000228881836
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / GPU_B#0",
+      "vertices": 564,
+      "baselineSHA256": "d3905281b8182bf22dce0ed7c2a1f6cf9d7dee81a9d6cdc1ee9f167f8f367a31",
+      "currentSHA256": "d3905281b8182bf22dce0ed7c2a1f6cf9d7dee81a9d6cdc1ee9f167f8f367a31",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -0.8640000224113464,
+          -0.06809999793767929,
+          -2.5190000534057617
+        ],
+        "max": [
+          -0.23600000143051147,
+          -0.054499998688697815,
+          -1.8410000801086426
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -0.8640000224113464,
+          -0.06809999793767929,
+          -2.5190000534057617
+        ],
+        "max": [
+          -0.23600000143051147,
+          -0.054499998688697815,
+          -1.8410000801086426
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / GPU_B#1",
+      "vertices": 564,
+      "baselineSHA256": "9f6b54555174a16e3addc72df201338e1edd73354d8b2b8e5d2d356ae62f0dbd",
+      "currentSHA256": "9f6b54555174a16e3addc72df201338e1edd73354d8b2b8e5d2d356ae62f0dbd",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -0.9049999713897705,
+          -0.05450000241398811,
+          -2.559999942779541
+        ],
+        "max": [
+          -0.19500002264976501,
+          -0.03849999979138374,
+          -1.8000000715255737
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -0.9049999713897705,
+          -0.05450000241398811,
+          -2.559999942779541
+        ],
+        "max": [
+          -0.19500002264976501,
+          -0.03849999979138374,
+          -1.8000000715255737
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / GPU_B#2",
+      "vertices": 288,
+      "baselineSHA256": "dcbfc812a796b52273c0ff940b2d64739e4b6e5f93e195d6f35125ad1c338ec3",
+      "currentSHA256": "dcbfc812a796b52273c0ff940b2d64739e4b6e5f93e195d6f35125ad1c338ec3",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -0.9049999713897705,
+          -0.052299998700618744,
+          -2.559999942779541
+        ],
+        "max": [
+          -0.19499999284744263,
+          -0.04370000213384628,
+          -1.7999999523162842
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -0.9049999713897705,
+          -0.052299998700618744,
+          -2.559999942779541
+        ],
+        "max": [
+          -0.19499999284744263,
+          -0.04370000213384628,
+          -1.7999999523162842
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / GPU_B#3",
+      "vertices": 1704,
+      "baselineSHA256": "f5d71bbae001c68846477713a79561f7141d82734510785ecf08112b0a4baee0",
+      "currentSHA256": "f5d71bbae001c68846477713a79561f7141d82734510785ecf08112b0a4baee0",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -0.8324999809265137,
+          -0.03849999979138374,
+          -2.487499952316284
+        ],
+        "max": [
+          -0.26750001311302185,
+          0.006000004708766937,
+          -1.872499942779541
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -0.8324999809265137,
+          -0.03849999979138374,
+          -2.487499952316284
+        ],
+        "max": [
+          -0.26750001311302185,
+          0.006000004708766937,
+          -1.872499942779541
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / GPU_B#4",
+      "vertices": 564,
+      "baselineSHA256": "c046116b51661dee131c4e105b2915f5cd03da230f204f51ea6fd35c3dd41ffd",
+      "currentSHA256": "c046116b51661dee131c4e105b2915f5cd03da230f204f51ea6fd35c3dd41ffd",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -0.8230000138282776,
+          -0.008999999612569809,
+          -2.4780001640319824
+        ],
+        "max": [
+          -0.2770000100135803,
+          0.00599999725818634,
+          -1.8820000886917114
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -0.8230000138282776,
+          -0.008999999612569809,
+          -2.4780001640319824
+        ],
+        "max": [
+          -0.2770000100135803,
+          0.00599999725818634,
+          -1.8820000886917114
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / GPU_B#5",
+      "vertices": 1848,
+      "baselineSHA256": "056b402b3a05e9289838095c01edaf9503f97d80626d85db6898803ed01e33e6",
+      "currentSHA256": "056b402b3a05e9289838095c01edaf9503f97d80626d85db6898803ed01e33e6",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -0.7612999677658081,
+          -0.03700000047683716,
+          -2.546999931335449
+        ],
+        "max": [
+          -0.33869999647140503,
+          -0.02799999713897705,
+          -1.812999963760376
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -0.7612999677658081,
+          -0.03700000047683716,
+          -2.546999931335449
+        ],
+        "max": [
+          -0.33869999647140503,
+          -0.02799999713897705,
+          -1.812999963760376
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / GPU_B#6",
+      "vertices": 3696,
+      "baselineSHA256": "e890b4a8ce7cf0fb4ca4dba02fc691535723ec7a3350e5b1415913f1e1e93f6a",
+      "currentSHA256": "e890b4a8ce7cf0fb4ca4dba02fc691535723ec7a3350e5b1415913f1e1e93f6a",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -0.7627999782562256,
+          -0.03700000047683716,
+          -2.5475001335144043
+        ],
+        "max": [
+          -0.33720001578330994,
+          -0.028999999165534973,
+          -1.8125
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -0.7627999782562256,
+          -0.03700000047683716,
+          -2.5475001335144043
+        ],
+        "max": [
+          -0.33720001578330994,
+          -0.028999999165534973,
+          -1.8125
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "packages",
+      "name": "L10 prototype / packages / GPU_B#7",
+      "vertices": 2760,
+      "baselineSHA256": "eea36946c8888f5f2b9e1a54a0ec923aa11225861b2ef69df2e2938c88d595a2",
+      "currentSHA256": "eea36946c8888f5f2b9e1a54a0ec923aa11225861b2ef69df2e2938c88d595a2",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -0.8899999856948853,
+          -0.03799999877810478,
+          -2.3459999561309814
+        ],
+        "max": [
+          -0.21000000834465027,
+          -0.03720000013709068,
+          -2.0260000228881836
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -0.8899999856948853,
+          -0.03799999877810478,
+          -2.3459999561309814
+        ],
+        "max": [
+          -0.21000000834465027,
+          -0.03720000013709068,
+          -2.0260000228881836
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "cooling-frame",
+      "name": "L10 prototype / cooling-frame#0",
+      "vertices": 108,
+      "baselineSHA256": "524e979e4f3b9b6e1708d038154d7be1c18c3d00621945a71baa36a3c0252dec",
+      "currentSHA256": "524e979e4f3b9b6e1708d038154d7be1c18c3d00621945a71baa36a3c0252dec",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.6705999374389648,
+          0.006000000052154064,
+          -2.48360013961792
+        ],
+        "max": [
+          -0.2694000005722046,
+          0.006799999624490738,
+          -0.8056000471115112
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.6705999374389648,
+          0.006000000052154064,
+          -2.48360013961792
+        ],
+        "max": [
+          -0.2694000005722046,
+          0.006799999624490738,
+          -0.8056000471115112
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "cooling-frame",
+      "name": "L10 prototype / cooling-frame#1",
+      "vertices": 15696,
+      "baselineSHA256": "4dadaaaef36ef436fd8889fa60769b3934b0e7ffd90edb4130f57e471b62ac05",
+      "currentSHA256": "4dadaaaef36ef436fd8889fa60769b3934b0e7ffd90edb4130f57e471b62ac05",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.7360000610351562,
+          0.006800000090152025,
+          -2.5510001182556152
+        ],
+        "max": [
+          -0.2040000557899475,
+          0.07400000095367432,
+          -0.7390000224113464
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.7360000610351562,
+          0.006800000090152025,
+          -2.5510001182556152
+        ],
+        "max": [
+          -0.2040000557899475,
+          0.07400000095367432,
+          -0.7390000224113464
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "cooling-frame",
+      "name": "L10 prototype / cooling-frame#2",
+      "vertices": 25896,
+      "baselineSHA256": "3ab905b990d539d27e517a2044153c27ec9332799896ec14aa65605edc8f89f8",
+      "currentSHA256": "3ab905b990d539d27e517a2044153c27ec9332799896ec14aa65605edc8f89f8",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.8600000143051147,
+          -0.0689999982714653,
+          -2.7578341960906982
+        ],
+        "max": [
+          -0.13899999856948853,
+          0.12000000476837158,
+          -0.6740000247955322
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.8600000143051147,
+          -0.0689999982714653,
+          -2.7578341960906982
+        ],
+        "max": [
+          -0.13899999856948853,
+          0.12000000476837158,
+          -0.6740000247955322
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "cooling-frame",
+      "name": "L10 prototype / cooling-frame#3",
+      "vertices": 21708,
+      "baselineSHA256": "d881716748fa1c7345793fb4523b95be18cc9bb1f054c1e57e1c4730bdcf2067",
+      "currentSHA256": "d881716748fa1c7345793fb4523b95be18cc9bb1f054c1e57e1c4730bdcf2067",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.8619999885559082,
+          0.009454740211367607,
+          -2.789116144180298
+        ],
+        "max": [
+          -0.15099996328353882,
+          0.12200000137090683,
+          -0.6859999895095825
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.8619999885559082,
+          0.009454740211367607,
+          -2.789116144180298
+        ],
+        "max": [
+          -0.15099996328353882,
+          0.12200000137090683,
+          -0.6859999895095825
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "cooling-frame",
+      "name": "L10 prototype / cooling-frame#4",
+      "vertices": 1692,
+      "baselineSHA256": "04f5863741d3779c54cfa52b4e303cda1b121d5c51dde7e8242b568a91e04c14",
+      "currentSHA256": "04f5863741d3779c54cfa52b4e303cda1b121d5c51dde7e8242b568a91e04c14",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.681999921798706,
+          0.035499997437000275,
+          -2.497000217437744
+        ],
+        "max": [
+          -0.2580000162124634,
+          0.03749999776482582,
+          -0.7800000309944153
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.681999921798706,
+          0.035499997437000275,
+          -2.497000217437744
+        ],
+        "max": [
+          -0.2580000162124634,
+          0.03749999776482582,
+          -0.7800000309944153
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "cooling-frame",
+      "name": "L10 prototype / cooling-frame#5",
+      "vertices": 7932,
+      "baselineSHA256": "c7245b342bd6cdd58c861d5ce8bcc53ec9febd45378e8e00a4bb52605679671d",
+      "currentSHA256": "c7245b342bd6cdd58c861d5ce8bcc53ec9febd45378e8e00a4bb52605679671d",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.8580001592636108,
+          0.009351963177323341,
+          -2.796844244003296
+        ],
+        "max": [
+          -0.3030000329017639,
+          0.11800000816583633,
+          -1.0820000171661377
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.8580001592636108,
+          0.009351963177323341,
+          -2.796844244003296
+        ],
+        "max": [
+          -0.3030000329017639,
+          0.11800000816583633,
+          -1.0820000171661377
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "cooling",
+      "name": "L10 prototype / cooling / CPU#0",
+      "vertices": 1140,
+      "baselineSHA256": "d587d4431fd949372e4100baae9b015df047541981e7ff5d11411e7e8031ae15",
+      "currentSHA256": "d587d4431fd949372e4100baae9b015df047541981e7ff5d11411e7e8031ae15",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.2899999618530273,
+          0.03750000149011612,
+          -1.3899999856948853
+        ],
+        "max": [
+          -0.6399999856948853,
+          0.07400000095367432,
+          -0.8149999976158142
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.2899999618530273,
+          0.03750000149011612,
+          -1.3899999856948853
+        ],
+        "max": [
+          -0.6399999856948853,
+          0.07400000095367432,
+          -0.8149999976158142
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "cooling",
+      "name": "L10 prototype / cooling / GPU_A#0",
+      "vertices": 2868,
+      "baselineSHA256": "d0d9bfb8b98c98b02b77b8dce8d361bc7303fb27b7f40a59cb2c356561904119",
+      "currentSHA256": "d0d9bfb8b98c98b02b77b8dce8d361bc7303fb27b7f40a59cb2c356561904119",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -1.5729999542236328,
+          0.03750000149011612,
+          -2.4260001182556152
+        ],
+        "max": [
+          -1.2070000171661377,
+          0.07500000298023224,
+          -1.934000015258789
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -1.5729999542236328,
+          0.03750000149011612,
+          -2.4260001182556152
+        ],
+        "max": [
+          -1.2070000171661377,
+          0.07500000298023224,
+          -1.934000015258789
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    },
+    {
+      "layer": "cooling",
+      "name": "L10 prototype / cooling / GPU_B#0",
+      "vertices": 2868,
+      "baselineSHA256": "4ad7b6fdd2679cfc126e401ffe7f771a5224560bc31e32207d3a65c0a6900bf0",
+      "currentSHA256": "4ad7b6fdd2679cfc126e401ffe7f771a5224560bc31e32207d3a65c0a6900bf0",
+      "geometryByteIdentical": true,
+      "canonicalTrianglesIdenticalAt1e6": true,
+      "channelComparisons": {
+        "positions": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "normals": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "uv": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        },
+        "tangents": {
+          "at1e6": true,
+          "at1e5": true,
+          "maxIndexwiseDelta": 0
+        }
+      },
+      "baselineBounds": {
+        "min": [
+          -0.7329999804496765,
+          0.03750000149011612,
+          -2.4260001182556152
+        ],
+        "max": [
+          -0.367000013589859,
+          0.07500000298023224,
+          -1.934000015258789
+        ]
+      },
+      "currentBounds": {
+        "min": [
+          -0.7329999804496765,
+          0.03750000149011612,
+          -2.4260001182556152
+        ],
+        "max": [
+          -0.367000013589859,
+          0.07500000298023224,
+          -1.934000015258789
+        ]
+      },
+      "materialAndEmbeddedImagesIdentical": true
+    }
+  ],
+  "io": {
+    "primitives": 5,
+    "vertices": 82632
+  },
+  "fans": [
+    {
+      "center": [
+        -1.69,
+        -0.012,
+        0.055
+      ],
+      "actualBounds": {
+        "min": [
+          -1.872499942779541,
+          -0.11100000143051147,
+          -0.1850000023841858
+        ],
+        "max": [
+          -1.5074999332427979,
+          0.08699999749660492,
+          0.29499998688697815
+        ]
+      },
+      "frontAxialOpeningHits": 0,
+      "rearAxialOpeningHits": 0,
+      "frontFrameHits": 2,
+      "rearFrameHits": 2,
+      "hubRadiusAtBladeRoots": [
+        0.0247864430277658,
+        0.02492682763482271,
+        0.024809400056738155,
+        0.024845104116720407,
+        0.024867096249070464,
+        0.02479842986146002,
+        0.02495993510072489
+      ],
+      "bladeRootRadiusWorld": 0.023,
+      "minimumHubRootOverlap": 0.0017864430277657987
+    },
+    {
+      "center": [
+        -1.27,
+        -0.012,
+        0.055
+      ],
+      "actualBounds": {
+        "min": [
+          -1.4525001049041748,
+          -0.11100000143051147,
+          -0.1850000023841858
+        ],
+        "max": [
+          -1.0875000953674316,
+          0.08699999749660492,
+          0.29499998688697815
+        ]
+      },
+      "frontAxialOpeningHits": 0,
+      "rearAxialOpeningHits": 0,
+      "frontFrameHits": 2,
+      "rearFrameHits": 2,
+      "hubRadiusAtBladeRoots": [
+        0.024786533905602866,
+        0.024926859770582236,
+        0.024809359073975443,
+        0.024845055506632564,
+        0.02486705446998541,
+        0.02479841893315356,
+        0.02495997703589371
+      ],
+      "bladeRootRadiusWorld": 0.023,
+      "minimumHubRootOverlap": 0.0017865339056028669
+    },
+    {
+      "center": [
+        -0.85,
+        -0.012,
+        0.055
+      ],
+      "actualBounds": {
+        "min": [
+          -1.0325000286102295,
+          -0.11100000143051147,
+          -0.1850000023841858
+        ],
+        "max": [
+          -0.6675000190734863,
+          0.08699999749660492,
+          0.29499998688697815
+        ]
+      },
+      "frontAxialOpeningHits": 0,
+      "rearAxialOpeningHits": 0,
+      "frontFrameHits": 2,
+      "rearFrameHits": 2,
+      "hubRadiusAtBladeRoots": [
+        0.024786543467792646,
+        0.024926796240363328,
+        0.024809380722181463,
+        0.024845102756201082,
+        0.024867057919809157,
+        0.024798426862510527,
+        0.024959953447361242
+      ],
+      "bladeRootRadiusWorld": 0.023,
+      "minimumHubRootOverlap": 0.0017865434677926464
+    },
+    {
+      "center": [
+        -0.43,
+        -0.012,
+        0.055
+      ],
+      "actualBounds": {
+        "min": [
+          -0.6124999523162842,
+          -0.11100000143051147,
+          -0.1850000023841858
+        ],
+        "max": [
+          -0.24750006198883057,
+          0.08699999749660492,
+          0.29499998688697815
+        ]
+      },
+      "frontAxialOpeningHits": 0,
+      "rearAxialOpeningHits": 0,
+      "frontFrameHits": 2,
+      "rearFrameHits": 2,
+      "hubRadiusAtBladeRoots": [
+        0.024786517838188783,
+        0.024926828375776217,
+        0.024809371154566686,
+        0.024845092122787,
+        0.02486704878057177,
+        0.02479842664483446,
+        0.024959992147300783
+      ],
+      "bladeRootRadiusWorld": 0.023,
+      "minimumHubRootOverlap": 0.0017865178381887836
+    },
+    {
+      "center": [
+        0.43,
+        -0.012,
+        0.055
+      ],
+      "actualBounds": {
+        "min": [
+          0.24749994277954102,
+          -0.11100000143051147,
+          -0.1850000023841858
+        ],
+        "max": [
+          0.6124999523162842,
+          0.08699999749660492,
+          0.29499998688697815
+        ]
+      },
+      "frontAxialOpeningHits": 0,
+      "rearAxialOpeningHits": 0,
+      "frontFrameHits": 2,
+      "rearFrameHits": 2,
+      "hubRadiusAtBladeRoots": [
+        0.02478656643192466,
+        0.02492678418958353,
+        0.024809388261967474,
+        0.024845043195325968,
+        0.024867093637877622,
+        0.02479842279602118,
+        0.024959937721672956
+      ],
+      "bladeRootRadiusWorld": 0.023,
+      "minimumHubRootOverlap": 0.001786566431924659
+    },
+    {
+      "center": [
+        0.85,
+        -0.012,
+        0.055
+      ],
+      "actualBounds": {
+        "min": [
+          0.6675000190734863,
+          -0.11100000143051147,
+          -0.1850000023841858
+        ],
+        "max": [
+          1.0324997901916504,
+          0.08699999749660492,
+          0.29499998688697815
+        ]
+      },
+      "frontAxialOpeningHits": 0,
+      "rearAxialOpeningHits": 0,
+      "frontFrameHits": 2,
+      "rearFrameHits": 2,
+      "hubRadiusAtBladeRoots": [
+        0.02478661847403956,
+        0.024926816324996395,
+        0.024809368155871425,
+        0.024845110351496835,
+        0.024867051858792597,
+        0.024798415941365233,
+        0.024959979656841765
+      ],
+      "bladeRootRadiusWorld": 0.023,
+      "minimumHubRootOverlap": 0.0017866184740395613
+    },
+    {
+      "center": [
+        1.27,
+        -0.012,
+        0.055
+      ],
+      "actualBounds": {
+        "min": [
+          1.0875000953674316,
+          -0.11100000143051147,
+          -0.1850000023841858
+        ],
+        "max": [
+          1.4524998664855957,
+          0.08699999749660492,
+          0.29499998688697815
+        ]
+      },
+      "frontAxialOpeningHits": 0,
+      "rearAxialOpeningHits": 0,
+      "frontFrameHits": 2,
+      "rearFrameHits": 2,
+      "hubRadiusAtBladeRoots": [
+        0.024786507884545388,
+        0.024926838944893063,
+        0.02480941088132551,
+        0.024845097881893926,
+        0.024867115460563506,
+        0.024798430507509118,
+        0.02495989701674718
+      ],
+      "bladeRootRadiusWorld": 0.023,
+      "minimumHubRootOverlap": 0.001786507884545388
+    },
+    {
+      "center": [
+        1.69,
+        -0.012,
+        0.055
+      ],
+      "actualBounds": {
+        "min": [
+          1.507500171661377,
+          -0.11100000143051147,
+          -0.1850000023841858
+        ],
+        "max": [
+          1.872499942779541,
+          0.08699999749660492,
+          0.29499998688697815
+        ]
+      },
+      "frontAxialOpeningHits": 0,
+      "rearAxialOpeningHits": 0,
+      "frontFrameHits": 2,
+      "rearFrameHits": 2,
+      "hubRadiusAtBladeRoots": [
+        0.024786559926660342,
+        0.024926871080999224,
+        0.024809349021165036,
+        0.02484493350374014,
+        0.024867073682050312,
+        0.024798415505739822,
+        0.024959938951175174
+      ],
+      "bladeRootRadiusWorld": 0.023,
+      "minimumHubRootOverlap": 0.0017865599266603423
+    }
+  ],
+  "powerChipClearance": [
+    {
+      "chip": 1,
+      "box": {
+        "min": [
+          0.11850000000000002,
+          -0.0065,
+          0.71
+        ],
+        "max": [
+          0.1615,
+          0.0185,
+          1.07
+        ]
+      },
+      "nearest": {
+        "distance": 0.06044693655990172,
+        "point": [
+          0.11589448664279102,
+          0.026000000536441803,
+          1.129923229482193
+        ],
+        "conductor": 6
+      },
+      "gap": 0.05194693655990172
+    },
+    {
+      "chip": 2,
+      "box": {
+        "min": [
+          0.17950000000000002,
+          -0.0065,
+          0.71
+        ],
+        "max": [
+          0.2225,
+          0.0185,
+          1.07
+        ]
+      },
+      "nearest": {
+        "distance": 0.06046692844722686,
+        "point": [
+          0.17950000000000002,
+          0.026000000536441803,
+          1.1299999952316284
+        ],
+        "conductor": 6
+      },
+      "gap": 0.05196692844722686
+    },
+    {
+      "chip": 3,
+      "box": {
+        "min": [
+          0.24050000000000002,
+          -0.0065,
+          0.71
+        ],
+        "max": [
+          0.28350000000000003,
+          0.0185,
+          1.07
+        ]
+      },
+      "nearest": {
+        "distance": 0.06451743695991398,
+        "point": [
+          0.21799999475479126,
+          0.026000000536441803,
+          1.1299999952316284
+        ],
+        "conductor": 6
+      },
+      "gap": 0.05601743695991398
+    },
+    {
+      "chip": 4,
+      "box": {
+        "min": [
+          0.3015,
+          -0.0065,
+          0.71
+        ],
+        "max": [
+          0.34450000000000003,
+          0.0185,
+          1.07
+        ]
+      },
+      "nearest": {
+        "distance": 0.10309461824844175,
+        "point": [
+          0.21799999475479126,
+          0.026000000536441803,
+          1.1299999952316284
+        ],
+        "conductor": 6
+      },
+      "gap": 0.09459461824844176
+    },
+    {
+      "chip": 5,
+      "box": {
+        "min": [
+          0.3625,
+          -0.0065,
+          0.71
+        ],
+        "max": [
+          0.4055,
+          0.0185,
+          1.07
+        ]
+      },
+      "nearest": {
+        "distance": 0.15664131304259232,
+        "point": [
+          0.21799999475479126,
+          0.026000000536441803,
+          1.1299999952316284
+        ],
+        "conductor": 6
+      },
+      "gap": 0.14814131304259232
+    },
+    {
+      "chip": 6,
+      "box": {
+        "min": [
+          0.4235,
+          -0.0065,
+          0.71
+        ],
+        "max": [
+          0.4665,
+          0.0185,
+          1.07
+        ]
+      },
+      "nearest": {
+        "distance": 0.21421134795249028,
+        "point": [
+          0.21799999475479126,
+          0.026000000536441803,
+          1.1299999952316284
+        ],
+        "conductor": 6
+      },
+      "gap": 0.20571134795249027
+    },
+    {
+      "chip": 7,
+      "box": {
+        "min": [
+          0.4845,
+          -0.0065,
+          0.71
+        ],
+        "max": [
+          0.5275,
+          0.0185,
+          1.07
+        ]
+      },
+      "nearest": {
+        "distance": 0.27327367643360445,
+        "point": [
+          0.21799999475479126,
+          0.026000000536441803,
+          1.1299999952316284
+        ],
+        "conductor": 6
+      },
+      "gap": 0.26477367643360444
+    }
+  ],
+  "centralCable": {
+    "actualMinY": -0.0030000023543834686,
+    "actualMaxY": 0.0429999977350235,
+    "actualMinX": -0.06700003147125244,
+    "actualMaxX": 0.06700003147125244,
+    "boardGap": 0.032999968528747564,
+    "crossBoardTubeGap": 0.047499997138977054
+  },
+  "terminal": {
+    "bounds": {
+      "min": [
+        0.19,
+        -0.0055,
+        1.11
+      ],
+      "max": [
+        0.37,
+        0.0355,
+        1.24
+      ]
+    },
+    "pcbContactGap": 0,
+    "powerChipZGap": 0.040000000000000036,
+    "cmosXGap": 0.419
+  },
+  "rearBoot": {
+    "actualMinZ": -2.9489998817443848,
+    "socketInnerZ": -2.949,
+    "socketGap": 1.182556150780556e-7
+  }
+}

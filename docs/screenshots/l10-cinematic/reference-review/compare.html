@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L10 · 硬體參考修正比較</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101519;color:#e5e8e8;font:16px/1.6 system-ui,"Microsoft JhengHei",sans-serif}html{scrollbar-color:#708087 #182127}::selection{background:#527a79;color:#fff}main{max-width:2000px;margin:auto;padding:32px 28px}h1{font-size:28px;font-weight:600;letter-spacing:-.02em;margin:4px 0 12px;line-height:1.3}h2{font-size:20px;margin:28px 0 10px;font-weight:600}p{max-width:1100px;color:#bbc4c8;margin:8px 0 20px}nav{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0}button{font:inherit;border:1px solid #607077;background:transparent;color:#d7e0e1;padding:9px 16px;border-radius:4px;cursor:pointer}button:hover{background:#233137}button[aria-selected=true]{background:#dce7e8;color:#152326;border-color:#dce7e8}button[aria-selected=true]:hover{background:#c2d6d6}a{color:#a7d8df;text-underline-offset:4px;overflow-wrap:anywhere}.viewer{position:relative;aspect-ratio:3440/1440;background:#0b1115;overflow:hidden;border:1px solid #607077}.viewer img{position:absolute;width:100%;height:100%;object-fit:contain;top:0;left:0}.viewer #after{clip-path:inset(0 0 0 50%)}.line{position:absolute;top:0;bottom:0;left:50%;width:2px;background:#e9cf9d;pointer-events:none}.viewer.pending img,.viewer.failed img,.viewer.pending .line,.viewer.failed .line{visibility:hidden}.image-state{display:none;position:absolute;inset:0;place-content:center;text-align:center;padding:24px;background:#0b1115;color:#e4c2a3}.viewer.pending .image-state,.viewer.failed .image-state{display:grid}.tags{display:flex;justify-content:space-between;gap:16px;margin:12px 0;font-size:14px;color:#c8d2d4}.controls{display:flex;align-items:center;flex-wrap:wrap;gap:18px;margin:14px 0 20px}input{width:min(600px,70vw);accent-color:#e9cf9d}input:disabled{opacity:.45}.links{display:flex;gap:12px 24px;flex-wrap:wrap}.note{font-size:14px;border-top:1px solid #48555b;padding-top:18px}.metadata{font-size:14px;font-variant-numeric:tabular-nums}.sources{padding-left:22px;max-width:1100px;color:#bbc4c8}.sources li{margin:7px 0}output{min-width:4ch}button:focus-visible,a:focus-visible,input:focus-visible,[role=tabpanel]:focus-visible{outline:3px solid #e9cf9d;outline-offset:4px}@media(max-width:700px){main{padding:20px 12px}h1{font-size:23px}button{padding:8px 10px;font-size:14px}.tags{font-size:12px}.controls{gap:10px}input{width:min(470px,65vw)}.image-state{font-size:13px;padding:12px}.sources{padding-left:18px}}
+</style>
+</head>
+<body>
+<main>
+<h1>L10 · 六視角硬體參考修正比較</h1>
+<p>Before 為 <strong>3ce4b9c</strong> 的單板 opt-in 原型；After 為本輪 <strong>opt-in service-only revision</strong>，只修正風扇匣體與中央供電線束。CPU／GPU 封裝、Compute Board 與 Cold Plate 沒有重新建模。這些視角用於檢查保留情況，不宣稱其照片級品質已提升。</p>
+<p>滑動分界比較實際 Chromium / WebGL 截圖，左為 Before、右為 After。原圖為 3440 × 1440；六組相機、光照、曝光及 shader 一致性已經瀏覽器 QA 確認。機械與功能測試通過，但照片級品質仍為 NOT ACCEPTED；具體缺陷與分數見驗收紀錄。</p>
+<nav role="tablist" aria-label="比較視角">
+<button type="button" id="tab-0" data-index="0" role="tab" aria-controls="comparison-panel" aria-selected="true">CPU / GPU</button>
+<button type="button" id="tab-1" data-index="1" role="tab" aria-controls="comparison-panel" aria-selected="false" tabindex="-1">Compute Board</button>
+<button type="button" id="tab-2" data-index="2" role="tab" aria-controls="comparison-panel" aria-selected="false" tabindex="-1">Cooling Assembly</button>
+<button type="button" id="tab-3" data-index="3" role="tab" aria-controls="comparison-panel" aria-selected="false" tabindex="-1">Complete L10 Hero</button>
+<button type="button" id="tab-4" data-index="4" role="tab" aria-controls="comparison-panel" aria-selected="false" tabindex="-1">Fans</button>
+<button type="button" id="tab-5" data-index="5" role="tab" aria-controls="comparison-panel" aria-selected="false" tabindex="-1">Central Power</button>
+</nav>
+<section id="comparison-panel" role="tabpanel" aria-labelledby="tab-0" tabindex="0">
+<div class="tags"><span>Before · 3ce4b9c 原型</span><span>After · 風扇／中央供電修正</span></div>
+<div class="viewer pending" id="viewer"><img id="before" alt=""><img id="after" alt=""><div class="line"></div><div class="image-state" id="image-state" role="status">正在載入原始截圖…</div></div>
+<div class="controls"><label for="split">比較分界</label><input id="split" type="range" min="0" max="100" value="50" disabled><output for="split">50%</output><button id="reload" type="button">重新載入截圖</button></div>
+<p id="finding" aria-live="polite"></p>
+<p id="dimensions" class="metadata">尚未取得圖片尺寸。</p>
+<div class="links"><a id="before-link" href="before/3440x1440-01-packages.png">開啟 Before 原圖</a><a id="after-link" href="after/3440x1440-01-packages.png">開啟 After 原圖</a><a href="../../../L10_REFERENCE_REVIEW.md">本輪交付與驗收紀錄</a><a href="../../../L10_REFERENCE_IMAGE_CATALOG.md">Reference Image Catalog</a><a href="evidence/comparison-summary.json">相機／效能證據</a></div>
+</section>
+<section aria-labelledby="source-title">
+<h2 id="source-title">實際參考來源與使用界線</h2>
+<ul class="sources">
+<li><a href="https://lenovopress.lenovo.com/assets/images/LP2357/Lenovo%20NVIDIA%20GB300%20Compute%20tray%20internal%20view.png" target="_blank" rel="noopener">Lenovo 官方 Compute Tray 內部照片</a>與<a href="https://pubs.lenovo.com/gb300-nvl72/compute_tray_top_view" target="_blank" rel="noopener">官方俯視圖</a>是主要機構基準；封裝與大部分 PCB 被冷板遮蔽，不能据此補造不可見零件。</li>
+<li><a href="https://servers.asus.com/products/detail/overview/XA-GB721-E2" target="_blank" rel="noopener">ASUS 官方 Compute Tray</a>與<a href="https://www.lttlabs.com/articles/2026/06/06/asus-test-server-tour" target="_blank" rel="noopener">LTT Labs ASUS 實機文章</a>只提供跨廠商的一般機構、材料與液冷參考，不把 ASUS 內部配置混入 Lenovo 模型。</li>
+<li>LTT 指定的 Single Bianca、Uninstalled Cooling Assembly、Annotated Uninstalled Cooling Assembly 三張 gallery 圖仍為 <strong>SOURCE UNAVAILABLE</strong>。已取得的公開整機主圖不能代替這三張圖，也不能證明未見的接觸面或內流道。</li>
+</ul>
+</section>
+<p class="note">本頁只包含專案原創模型的瀏覽器截圖，沒有廠商圖片、CAD 或照片貼圖。來源照片僅保留於本機 ignored 研究目錄。圖片使用完整像素與原始構圖，未後製；PNG 是完整瀏覽器頁面，3D canvas 的實際尺寸以證據檔為準。原有 35.2 秒動畫與 Rack 互動的回歸結果應閱讀本輪驗收紀錄，不能由靜態圖推定。</p>
+</main>
+<script>
+'use strict';
+const views=[
+['01-packages','CPU / GPU','封裝未重新建模。此視角檢查風扇與供電線束修正是否影響既有封裝呈現；没有裸 Lenovo 封裝的新證據，不增加 socket、HBM 或未驗證晶粒。'],
+['02-board','Compute Board','PCB 未重新建模。板邊與遮蔽區仍沿用基準；本輪不以增加規則元件或假走線宣稱高精度升級。'],
+['03-cooling','Cooling Assembly','冷板與單板 GLB 未重新建模。此視角檢查周邊風扇、中央線束及管路空間；微流道仍不作原廠已知結構的宣稱。'],
+['04-hero','Complete L10 Hero','整體視角檢查局部風扇／中央供電修改是否維持原有動畫構圖與其他資產。這不是完整 L10 或 L11 重建。'],
+['05-fans','Fans','本輪修改重點：依實際圖片修正風扇匣體外觀、端面層級及引線收束。型號、內部馬達與葉片精確曲率仍是 visual approximation。'],
+['06-power','Central Power','本輪修改重點：中央供電通道、前部 PDB／CMOS 避讓及後端接續。投影交叉不等於穿模，實際淨空與動態干涉須以機械檢查和連續影格驗證。']
+];
+let selected=0,version=0;
+const buttons=[...document.querySelectorAll('button[data-index]')];
+const byId=id=>document.getElementById(id);
+function select(index){
+  selected=index;const ticket=++version,[id,title,note]=views[index],loaded={};
+  byId('viewer').className='viewer pending';byId('image-state').textContent='正在載入原始截圖…';byId('split').disabled=true;byId('dimensions').textContent='尚未取得圖片尺寸。';
+  byId('comparison-panel').setAttribute('aria-labelledby','tab-'+index);
+  buttons.forEach(button=>{const active=Number(button.dataset.index)===index;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;});
+  byId('finding').textContent=note;
+  for(const side of ['before','after']){
+    const src=side+'/3440x1440-'+id+'.png',img=byId(side);
+    img.alt=title+' '+side+' 原始 Chromium / WebGL 截圖';byId(side+'-link').href=src;
+    img.onload=()=>{if(ticket!==version)return;loaded[side]=img.naturalWidth+' × '+img.naturalHeight; if(loaded.before&&loaded.after){byId('viewer').className='viewer';byId('split').disabled=false;byId('dimensions').textContent='Before '+loaded.before+' px · After '+loaded.after+' px。檔案已載入；不代表品質或同相機驗收通過。';}};
+    img.onerror=()=>{if(ticket!==version)return;byId('viewer').className='viewer failed';byId('split').disabled=true;byId('image-state').textContent=(side==='before'?'Before':'After')+' 截圖尚未產生或路徑不可讀。完成捕圖後請按「重新載入截圖」。';byId('dimensions').textContent='缺少實際截圖；此視角不可判定驗收結果。';};
+    img.src=src;
+  }
+}
+buttons.forEach(button=>button.addEventListener('click',()=>select(Number(button.dataset.index))));
+document.querySelector('nav').addEventListener('keydown',event=>{let index=selected;if(event.key==='ArrowRight')index=(index+1)%views.length;else if(event.key==='ArrowLeft')index=(index+views.length-1)%views.length;else if(event.key==='Home')index=0;else if(event.key==='End')index=views.length-1;else return;event.preventDefault();select(index);buttons[index].focus();});
+byId('split').addEventListener('input',event=>{const n=event.target.value;byId('after').style.clipPath='inset(0 0 0 '+n+'%)';document.querySelector('.line').style.left=n+'%';document.querySelector('output').textContent=n+'%';});
+byId('reload').addEventListener('click',()=>select(selected));
+select(0);
+</script>
+</body>
+</html>

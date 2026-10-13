@@ -1,5 +1,7 @@
 # L10 hardware reference matrix
 
+> 2026-10-13 reference-image follow-up: [Reference Image Catalog](L10_REFERENCE_IMAGE_CATALOG.md) records seven actually retrieved images, their resolutions and three unavailable LTT detail photos. [Bounded correction and acceptance](L10_REFERENCE_REVIEW.md) supersedes only the fan/central-power implementation notes below. Lenovo remains the mechanical baseline; ASUS is cross-vendor visual evidence. CPU/GPU, PCB population and hidden cold-plate internals remain approximations.
+
 Reviewed 2026-10-13. This document records the mechanical evidence behind the original PA Manager display asset. It is not a service procedure, engineering drawing, OEM CAD model, or claim of dimensional certification.
 
 ## Primary baseline and evidence confidence

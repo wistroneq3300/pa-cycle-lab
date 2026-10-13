@@ -186,7 +186,7 @@ async function reject(mutator, pattern, options = {}) {
   });
   if (process.argv[2] === '--asset') {
     assert.ok(process.argv[3], '--asset requires a GLB path');
-    await test('actual exported GLB structure and four controllable hardware layers', async () => {
+    await test('actual exported GLB structure and declared controllable hardware layers', async () => {
       const source = fs.readFileSync(path.resolve(process.argv[3]));
       const result = await api.parse(source.buffer.slice(source.byteOffset, source.byteOffset + source.byteLength), {
         // This is structural image inspection, not a claim of browser decoding.
@@ -199,7 +199,9 @@ async function reject(mutator, pattern, options = {}) {
           return { width: header.getUint32(16, false), height: header.getUint32(20, false) };
         }
       });
-      assert.deepEqual([...result.metadata.layers].sort(), ['board', 'cooling', 'cooling-frame', 'packages']);
+      const expectedLayers=['board','cooling','cooling-frame','packages'];
+      if(result.metadata.extras.replacesServiceGeometry===true)expectedLayers.push('io');
+      assert.deepEqual([...result.metadata.layers].sort(),expectedLayers.sort());
       const bounds = { min: [Infinity, Infinity, Infinity], max: [-Infinity, -Infinity, -Infinity] };
       for (const p of result.primitives) for (let k = 0; k < 3; k++) { bounds.min[k] = Math.min(bounds.min[k], p.bounds.min[k]); bounds.max[k] = Math.max(bounds.max[k], p.bounds.max[k]); }
       console.log(JSON.stringify({ structuralAsset: process.argv[3], ...result.metadata, bounds, texturePrimitives: result.primitives.filter(p => p.material.baseColorTexture).length, normalMappedPrimitives: result.primitives.filter(p => p.material.normalTexture).length, alphaModes: [...new Set(result.primitives.map(p => p.material.alphaMode))] }, null, 2));

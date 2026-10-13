@@ -1,0 +1,13 @@
+{
+  "engine_hash": "918aad2bfb79c78c3018910a72b7671c8aac159b0d39eee5314d97e0a7456e63",
+  "manifest": {
+    "duplicate": [],
+    "passed": true,
+    "files": 218,
+    "missing": [],
+    "extra": [],
+    "updated": false
+  },
+  "limitations": "Local checks; remote CI separately verified on the pushed commit.",
+  "python": "3.11.9"
+}

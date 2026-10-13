@@ -1,0 +1,113 @@
+{
+  "baseline": "3ce4b9c6e5467abe9d27050e5af0240b07fff3dc",
+  "generatedAt": "2026-10-13T04:17:28.915Z",
+  "passed": true,
+  "scope": "CPU byte/pose invariants; no photorealism or browser-performance assertion",
+  "defaultMeshes": [
+    {
+      "name": "l10-chassis",
+      "bytes": 946368,
+      "baselineSHA256": "9c5ad3eeaf01fb109167796968fd715fc334dba26ee619fa227e71e85ebbfc13",
+      "currentSHA256": "9c5ad3eeaf01fb109167796968fd715fc334dba26ee619fa227e71e85ebbfc13",
+      "byteIdentical": true
+    },
+    {
+      "name": "l10-board",
+      "bytes": 4223232,
+      "baselineSHA256": "ea1ef1608e0ce6eaae28cb50f540eaa9313e8c1604bce63aed16bfc8d74b36c0",
+      "currentSHA256": "ea1ef1608e0ce6eaae28cb50f540eaa9313e8c1604bce63aed16bfc8d74b36c0",
+      "byteIdentical": true
+    },
+    {
+      "name": "l10-packages",
+      "bytes": 852768,
+      "baselineSHA256": "7997db60533181bee20282fcf569299f2b4eca77f03fa93077e9a4fab3a04521",
+      "currentSHA256": "7997db60533181bee20282fcf569299f2b4eca77f03fa93077e9a4fab3a04521",
+      "byteIdentical": true
+    },
+    {
+      "name": "l10-io",
+      "bytes": 5656896,
+      "baselineSHA256": "39e83c7b9ff193dc48303b73914246be9d82c7727841cc0c6144e4c954343bcb",
+      "currentSHA256": "39e83c7b9ff193dc48303b73914246be9d82c7727841cc0c6144e4c954343bcb",
+      "byteIdentical": true
+    },
+    {
+      "name": "l10-cooling-frame",
+      "bytes": 2517120,
+      "baselineSHA256": "0e62b0ae521a9ad49b48c491e66cf6bffad7dc3cd4e8934fdabe9bfea28955bb",
+      "currentSHA256": "0e62b0ae521a9ad49b48c491e66cf6bffad7dc3cd4e8934fdabe9bfea28955bb",
+      "byteIdentical": true
+    },
+    {
+      "name": "l10-cooling",
+      "bytes": 172800,
+      "baselineSHA256": "67d07df8d5ab5be45deb5e86109d33618225ca24f24a933eddc4397909c61732",
+      "currentSHA256": "67d07df8d5ab5be45deb5e86109d33618225ca24f24a933eddc4397909c61732",
+      "byteIdentical": true
+    },
+    {
+      "name": "l10-flow-supply",
+      "bytes": 202176,
+      "baselineSHA256": "55aadaa80756748f4175f68338398adb527db75d0821b858d32bda095057bf15",
+      "currentSHA256": "55aadaa80756748f4175f68338398adb527db75d0821b858d32bda095057bf15",
+      "byteIdentical": true
+    },
+    {
+      "name": "l10-flow-return",
+      "bytes": 202176,
+      "baselineSHA256": "6697c3cd64d34ff2b18cd9cbbc24751ea01637c3b7c41c0ebb8082803af8b71d",
+      "currentSHA256": "6697c3cd64d34ff2b18cd9cbbc24751ea01637c3b7c41c0ebb8082803af8b71d",
+      "byteIdentical": true
+    },
+    {
+      "name": "l10-lid",
+      "bytes": 129024,
+      "baselineSHA256": "5ca024144b668b63a54c1cecc7efb028ac22e6e7e444dc9c76d4f3b8743d21a4",
+      "currentSHA256": "5ca024144b668b63a54c1cecc7efb028ac22e6e7e444dc9c76d4f3b8743d21a4",
+      "byteIdentical": true
+    }
+  ],
+  "serviceOption": {
+    "changedMeshes": [
+      "l10-io"
+    ],
+    "flagAloneLeavesDefaultIdentical": true,
+    "wrongBoardLeavesGeometryIdentical": true,
+    "defaultAfterPrototypeBuildIdentical": true,
+    "ioVerticesBefore": 117852,
+    "ioVerticesAfter": 91716
+  },
+  "shaders": {
+    "VERTEX": {
+      "baselineSHA256": "cc8c02bec0667ae1116bbbb961ca7aa7d8d73f036478bb425d501ed2212fc67a",
+      "currentSHA256": "cc8c02bec0667ae1116bbbb961ca7aa7d8d73f036478bb425d501ed2212fc67a",
+      "sourceIdentical": true
+    },
+    "FRAGMENT": {
+      "baselineSHA256": "fec3a85f6223c5a7c62936c3ba79ec7887daa25457805aab46260d4d4884f880",
+      "currentSHA256": "fec3a85f6223c5a7c62936c3ba79ec7887daa25457805aab46260d4d4884f880",
+      "sourceIdentical": true
+    }
+  },
+  "timeline": {
+    "durationMs": 35200,
+    "controllerSHA256": "be3f257f4f8a34980fcebdf676dd186d74f5c168ec0ad706785f3cd9f79d0983",
+    "entireControllerIdentical": true,
+    "cameraKeysIdentical": true,
+    "profileAndRackAnchorsIdentical": true,
+    "functions": {
+      "cameraKey": "4af96a0d58140e942b5a398601cdcb336e6fc13b26c7e10386b767b80f2eaba7",
+      "l10State": "561a3009b839c532c28f3395518b0996352a86abc4878214b7d9fb7089fde777",
+      "rackProgress": "8699a3a44d5359a444d59357837654c64069a56794bbc1181ee569465df47e74",
+      "rackMotion": "af4212e905fef90f4c88594834c6fa78da50edcca49d8bf4adf3b5e44f27b852",
+      "motion": "44bcd2e5eca87e5c89b4ae67f3b2bbb4ac0645a2199449817dd01c721c9f71e5",
+      "rackPlacementPose": "81f0bb822e404a04f91dc7a43f897adba98c8cd06a538e18e3bba99a027365ec",
+      "placementPose": "e1c4700cab4cc3e74b72bf8b980b86b4153040aecf169a59cacfe759b0cc1a06",
+      "assemblySnapshot": "5ee4eb63a3c262c5443e4e9bfc493594948f2909e13d4e8552a40d2bc2be9024"
+    },
+    "poseSamples": 1001,
+    "posesIdentical": true
+  },
+  "errors": []
+}

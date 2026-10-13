@@ -1,0 +1,21 @@
+{
+  "sourceObjects": 1261,
+  "assembledMinY": -0.11100000143051147,
+  "assembledMaxY": 0.12200000137090683,
+  "contactPlanesVerified": 3,
+  "contactInterfacesVerified": 24,
+  "pcbMetalMaskLinked": true,
+  "serviceGeometry": {
+    "fanCount": 8,
+    "openFrames": 16,
+    "openApertureRays": 16,
+    "unobstructedDucts": 8,
+    "visibleRecessedLatches": 8,
+    "seatedRotors": 8,
+    "cableCount": 6,
+    "clearanceSamples": 246,
+    "rearSocketContact": -2.9489998817443848,
+    "pdbTerminalBottom": -0.005500000901520252
+  },
+  "errors": []
+}

@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "results": [
+    {
+      "file": "artifacts/l10-reference-review/reference-comparison.html",
+      "tabCount": 6,
+      "allReferencedImagesLoaded": true,
+      "errors": []
+    },
+    {
+      "file": "docs/screenshots/l10-cinematic/reference-review/compare.html",
+      "tabCount": 6,
+      "allReferencedImagesLoaded": true,
+      "errors": []
+    }
+  ]
+}

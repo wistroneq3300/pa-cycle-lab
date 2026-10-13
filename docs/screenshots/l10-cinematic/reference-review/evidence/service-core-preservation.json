@@ -1,0 +1,19 @@
+{
+  "baselineCommit": "3ce4b9c6e5467abe9d27050e5af0240b07fff3dc",
+  "baselineSha256": "fe898a419c0f613bd003ef964e921dcc7c43771c4ed841bdbcd92da695857bc7",
+  "currentSha256": "cd454d2e6a36d6e78ab8416e5449a6595791bc1e0a45fb239b3fd40642d59bb1",
+  "preservedChecks": {
+    "nodes": true,
+    "meshes": true,
+    "accessors": true,
+    "bufferViews": true,
+    "materials": true,
+    "textures": true,
+    "images": true,
+    "samplers": true,
+    "originalBinaryPrefixIdentical": true
+  },
+  "allPassed": true,
+  "addedNodes": 1,
+  "imageCount": 17
+}

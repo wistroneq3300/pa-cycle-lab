@@ -4,7 +4,7 @@ blender --background --factory-startup --python assets/l10-prototype/build.py
 Author textures first using author_textures.py. All measurements below use the
 existing display anchors. This is NOT extracted vendor CAD or manufacturing data.
 """
-import bpy, bmesh, json, math, runpy
+import bpy, bmesh, json, math, runpy, sys
 from pathlib import Path
 from mathutils import Vector
 
@@ -13,18 +13,30 @@ ROOT=HERE.parents[1]
 OUT=ROOT/'app/static/models/l10-prototype'
 OUT.mkdir(parents=True,exist_ok=True)
 L=json.loads((HERE/'layout.json').read_text())
-bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
-for data in list(bpy.data.materials):bpy.data.materials.remove(data)
+SERVICE_ONLY='--service-only' in sys.argv
+bpy.context.preferences.filepaths.save_version=0
+if SERVICE_ONLY:
+    bpy.ops.wm.open_mainfile(filepath=str(HERE/'compute-board-prototype.blend'))
+    if bpy.data.collections.get('io'):
+      for o in list(bpy.data.collections['io'].objects):bpy.data.objects.remove(o,do_unlink=True)
+else:
+    bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
+    for data in list(bpy.data.materials):bpy.data.materials.remove(data)
 scene=bpy.context.scene;scene.unit_settings.system='NONE'
 scene['reference']='Original Phase 5 asset; Lenovo official internal photo/top diagram. ASUS/LTT physical construction only; pi3g package finish only.'
 scene['referenceConfidence']='Diagram; uncooled packages and concealed PCB are visual approximation.'
 scene['coordinateContract']='Blender (x,-z,y) exports through glTF Y-up to PA (x,y,z).'
 COL={}
-for layer in ['board','packages','cooling-frame','cooling']:
-    c=bpy.data.collections.new(layer);scene.collection.children.link(c);COL[layer]=c
+for layer in ['board','packages','cooling-frame','cooling','io']:
+    c=bpy.data.collections.get(layer) if SERVICE_ONLY else None
+    if c is None:
+      c=bpy.data.collections.new(layer);scene.collection.children.link(c)
+    COL[layer]=c
 M={}
 
 def material(name,color,metal,rough,textures=None,normal_scale=.15):
+    if SERVICE_ONLY and bpy.data.materials.get(name):
+      M[name]=bpy.data.materials[name];return M[name]
     m=bpy.data.materials.new(name);m.use_nodes=True;m.diffuse_color=(*color,1)
     p=m.node_tree.nodes.get('Principled BSDF')
     p.inputs['Base Color'].default_value=(*color,1)
@@ -184,186 +196,190 @@ def tube(name,layer,component,points,r,mat,sides=12):
 
 def local_points(x,z,points,y):return [[x+X,y,z+Z] for X,Z in points]
 
-b=L['board'];cx=b['x'];cz=b['z'];bw=b['width'];bd=b['depth'];t=b['top']
-# The source object keeps real mounting through-holes. Not simply exported old JS.
-pcb=cube('Primary board · drilled FR4','board','pcb',cx,(b['top']+b['bottom'])/2,cz,bw,b['top']-b['bottom'],bd,'PCB soldermask',.002)
-for sx in [-1,1]:
- for sz in [-1,1]:
-    x=cx+sx*(bw/2-.058);z=cz+sz*(bd/2-.062)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=24,radius=.014,depth=.10,location=coord(x,-.08,z))
-    cut=bpy.context.object;mod=pcb.modifiers.new('Drilled M-hole','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cut
-    bpy.context.view_layer.objects.active=pcb;bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cut,do_unlink=True)
-    cylinder('Board plated mounting annulus','board','mounting hole',x,t+.0007,z,.031,.0014,'Gold contact',24,inner=.014)
-    screw('Board captive fastener','board',x,t+.007,z,.013)
-uv_project(pcb,True)
-# Soldermask texture only on broad PCB faces; cross section remains FR4 laminate.
-pcb.data.materials.append(M['PCB laminate edge'])
-for p in pcb.data.polygons:
-    if abs(p.normal.z)<.7:p.material_index=1
-
-def smd(name,x,z,w=.040,d=.025,h=.015,mat='Ceramic dielectric'):
-    cube(name+' dielectric','board','terminated passive',x,t+h/2+.001,z,w*.68,h,d,mat,.001)
-    for s in [-1,1]:
-      cube(name+' termination','board','terminated passive',x+s*w*.41,t+h*.44+.001,z,w*.20,h*.88,d+.001,'Solder termination',.0005)
-      cube(name+' solder fillet','board','solder pad',x+s*w*.43,t+.001,z,w*.28,.002,d+.007,'Solder termination',.0004)
-for n,bank in enumerate(L['passiveBanks']):
- for i in range(bank['count']):
-    x=bank['x']+(i*bank['pitch'] if bank['axis']=='x' else 0)
-    z=bank['z']+(i*bank['pitch'] if bank['axis']=='z' else 0)
-    smd(f'C{n*20+i+1}',x,z,h=.014 if n%2 else .019)
-for i,(x,z) in enumerate(L['powerStages']):
-    # Grouped power conditioning is visual completion beneath covered regions;
-    # it is deliberately not presented as a photographed component BOM/netlist.
-    cube(f'L{i+1} ferrite power choke','board','power stage',x,t+.021,z,.106,.039,.086,'Ferrite mold',.004)
-    for s in [-1,1]:cube(f'L{i+1} folded terminal','board','power stage',x,t+.007,z+s*.047,.084,.014,.018,'Solder termination',.001)
-    for j in [-1,1]:
-      smd(f'Q{i*2+(j+1)//2}',x+j*.047,z+.110,.055,.061,.014,'Black polymer')
-    cube(f'L{i+1} witness line','board','power stage',x,t+.041,z-.011,.036,.0008,.003,'Silkscreen',0)
-
-# Explicit compact islands: a controller, a shunt and differently sized bypass
-# groups share a functional footprint. These are NOT random fake complexity.
-for island in L['componentIslands']:
-    X,Z=island['x'],island['z'];a=math.radians(island['rotation'])
-    def pos(dx,dz):return X+dx*math.cos(a)-dz*math.sin(a),Z+dx*math.sin(a)+dz*math.cos(a)
-    x,z=pos(0,0)
-    cube(island['id']+' controller','board','approximate conditioning island',x,t+.011,z,.080,.020,.068,'Black polymer',.002)
-    for j,(dx,dz,w,d,h,mat) in enumerate([(-.066,-.026,.034,.023,.012,'Ceramic dielectric'),(-.067,.022,.029,.021,.010,'Ceramic dielectric'),(.064,-.019,.031,.026,.012,'Ferrite mold'),(.058,.033,.024,.017,.009,'Ceramic dielectric'),(-.015,.062,.023,.032,.014,'Ceramic dielectric'),(.016,.060,.023,.032,.014,'Ceramic dielectric')]):
-      x,z=pos(dx,dz);smd(island['id']+f' termination {j}',x,z,w,d,h,mat)
-    for dx in [-.036,.036]:
-      for dz in [-.023,-.008,.007,.022]:
-        x,z=pos(dx,dz);cube(island['id']+' lead','board','approximate conditioning island',x,t+.002,z,.016,.004,.008,'Solder termination',.0003)
-
-# Edge connector cavity, keyed separator, spring contacts and solder tails.
-# Its outboard long location is visible in the official picture; pitch is authored.
-def connector(name,x,z,length,along='z'):
-    w,d=(.068,length) if along=='z' else (length,.068)
-    cube(name+' base','board','edge connector',x,t+.009,z,w,.018,d,'Black polymer',.002)
-    for side in [-1,1]:
-      cube(name+' housing wall','board','edge connector',x+(side*.030 if along=='z' else 0),t+.030,z+(side*.030 if along=='x' else 0),.012 if along=='z' else length,.039,length if along=='z' else .012,'Black polymer',.001)
-    count=max(6,int(length/.033))
-    for i in range(count):
-      offset=-length/2+.025+i*(length-.05)/max(1,count-1)
-      X=x+(offset if along=='x' else 0);Z=z+(offset if along=='z' else 0)
-      cube(name+' contact','board','edge connector',X,t+.024,Z,.032 if along=='z' else .005,.007,.005 if along=='z' else .032,'Gold contact',.0004)
-      for side in [-1,1]:cube(name+' solder foot','board','edge connector',X+(side*.041 if along=='z' else 0),t+.003,Z+(side*.041 if along=='x' else 0),.019 if along=='z' else .007,.006,.007 if along=='z' else .019,'Solder termination',.0006)
-    for end in [-1,1]:
-      cube(name+' end key','board','edge connector',x+(end*length*.49 if along=='x' else 0),t+.032,z+(end*length*.49 if along=='z' else 0),.075 if along=='z' else .018,.043,.018 if along=='z' else .075,'Black polymer',.002)
-connector('Outboard management mezzanine connector',-1.727,-1.24,.73)
-connector('Inboard service connector A',-.223,-1.09,.25)
-connector('Inboard service connector B',-.223,-1.49,.24)
-connector('Forward board connector',-.975,-.585,.44,'x')
-connector('Outboard rear low-profile interface',-1.758,-2.19,.34)
-connector('Inboard rear low-profile interface',-.176,-2.18,.32)
-
-# A narrow stamped stiffener and visible edge locations follow the Lenovo
-# drawing. Contact counts/pitch remain authored approximation.
-for X in [-1.802,-.132]:
-    cube('Board perimeter stiffener','board','visible edge retention',X,t+.008,-1.69,.014,.014,1.99,'Anodized retention',.001)
-for X,Z in [(-1.705,-1.72),(-.225,-1.72),(-1.705,-.825),(-.225,-.825)]:
-    cylinder('Edge plated locator','board','visible edge retention',X,t+.001,Z,.021,.002,'Gold contact',24,inner=.009)
-
-for p in L['packages']:
-    x,z,w,d=p['x'],p['z'],p['width'],p['depth'];ident=p['id']
-    # Bonded footprint belongs to the board; section views do not leave a blank
-    # green rectangle and do not invent field-replaceable sockets or BGA balls.
-    cube(ident+' bonded footprint','board','bonded visual-section footprint',x,t+.0017,z,w+.035,.0034,d+.035,'Bonded epoxy underfill',.002)
-    cube(ident+' bonded underfill','packages',ident,x,-.0613,z,w+.018,.0136,d+.018,'Bonded epoxy underfill',.002)
-    cube(ident+' organic substrate','packages',ident,x,-.0465,z,w+.10,.016,d+.10,'Package organic laminate',.002)
-    # Layered substrate edge is construction, not decorative fake exposed BGA pins.
-    for sy in [-.0515,-.0445]:
-      for side in [-1,1]:
-        cube(ident+' laminate edge','packages',ident,x+side*(w/2+.049),sy,z,.002,.0016,d+.086,'PCB laminate edge',0)
-        cube(ident+' laminate edge','packages',ident,x,sy,z+side*(d/2+.049),w+.086,.0016,.002,'PCB laminate edge',0)
-    # Thin stepped heat spreader. pi3g supports surface/edge appearance only,
-    # not Lenovo package dimensions or internal die/HBM configuration.
-    inset=.025 if ident=='CPU' else .045
-    corner=.019 if ident=='CPU' else .030
-    W=w-inset;D=d-inset
-    pts=[(x-W/2+corner,z-D/2),(x+W/2-corner,z-D/2),(x+W/2,z-D/2+corner),(x+W/2,z+D/2-corner),(x+W/2-corner,z+D/2),(x-W/2+corner,z+D/2),(x-W/2,z+D/2-corner),(x-W/2,z-D/2+corner)]
-    polyprism(ident+' spreader shoulder','packages',ident,pts,-.0385,-.009,'Brushed nickel',.003)
-    cube(ident+' lapped contact surface','packages',ident,x,-.0015,z,W-.019,.015,D-.019,'Lapped package spreader',.004)
-    cylinder(ident+' orientation witness','packages',ident,x-W*.41,.0059,z-D*.41,.009,.0002,'Brushed nickel',24)
-    for side in [-1,1]:
-      for i in range(5 if ident=='CPU' else 7):
-        count=5 if ident=='CPU' else 7
-        X=x-w*.33+i*w*.66/(count-1);Z=z+side*(d/2+.029)
-        cube(ident+' substrate decoupler','packages',ident,X,-.0325,Z,.020,.009,.016,'Ceramic dielectric',.0007)
-        for s in [-1,1]:cube(ident+' decoupler solder cap','packages',ident,X+s*.009,-.033,Z,.005,.008,.017,'Solder termination',.0004)
-      for i in range(5):
-        cylinder(ident+' substrate witness pad','packages',ident,x+side*(w/2+.029),-.0376,z-.16+i*.077,.006,.0008,'Gold contact',12)
-
-    # Exact old contact-plane contract; external plate envelope is updated.
-    cube(ident+' compliant TIM','cooling-frame',ident,x,.0064,z,w*.92,.0008,d*.92,'TIM',0)
-    cube(ident+' copper contact foot','cooling-frame',ident,x,.02115,z,w+.082,.0287,d+.082,'Machined copper',.004)
-    # Opaque retention perimeter and corners remain solid while cover ghosts.
+if not SERVICE_ONLY:
+    b=L['board'];cx=b['x'];cz=b['z'];bw=b['width'];bd=b['depth'];t=b['top']
+    # The source object keeps real mounting through-holes. Not simply exported old JS.
+    pcb=cube('Primary board · drilled FR4','board','pcb',cx,(b['top']+b['bottom'])/2,cz,bw,b['top']-b['bottom'],bd,'PCB soldermask',.002)
     for sx in [-1,1]:
-      for sz in [-1,1]:
-        X=x+sx*(w/2+.077);Z=z+sz*(d/2+.077)
-        cylinder(ident+' board preload washer','board',ident,X,-.070,Z,.026,.002,'Solder termination',20,inner=.013)
-        cylinder(ident+' retention stand-off','cooling-frame',ident,X,-.0125,Z,.015,.113,'Anodized retention',20)
-        cube(ident+' mounting ear','cooling-frame',ident,x+sx*(w/2+.05),.056,z+sz*(d/2+.05),.112,.034,.112,'Anodized retention',.008)
-        screw(ident+' captive plate screw','cooling-frame',X,.079,Z,.017)
-    if ident.startswith('GPU'):
-      # Narrow stepped cross and perimeter round copper line: externally visible
-      # Lenovo evidence. No internal channel or ASUS flex-sensor claim.
-      for side in [-1,1]:
-        cube(ident+' retaining side rail','cooling-frame',ident,x+side*(w/2+.027),.048,z,.023,.019,d+.10,'Anodized retention',.003)
-        cube(ident+' retaining end rail','cooling-frame',ident,x,.048,z+side*(d/2+.027),w+.10,.019,.023,'Anodized retention',.003)
-      cube(ident+' thin exterior surface pattern','cooling-frame',ident,x,.0365,z,w-.026,.002,d-.026,'Thin exterior surface pattern',.001)
-      a,b0,c=.072,.126,.246
-      outline=[(-a,-c),(a,-c),(a,-b0),(b0,-b0),(b0,-a),(.183,-a),(.183,a),(b0,a),(b0,b0),(a,b0),(a,c),(-a,c),(-a,b0),(-b0,b0),(-b0,a),(-.183,a),(-.183,-a),(-b0,-a),(-b0,-b0),(-a,-b0)]
-      polyprism(ident+' narrow stepped copper cover','cooling',ident,[(x+X,z+Z)for X,Z in outline],.0375,.075,'Machined copper',.004)
-      rim=[(-.12,.332),(-.292,.332),(-.292,-.304),(.292,-.304),(.292,.332),(.12,.332)]
-      tube(ident+' external perimeter copper tube','cooling-frame',ident,rounded_path(local_points(x,z,rim,.060),.084,9),.014,'Machined copper',16)
-      # Two short shoulders bridge the perimeter to compatible plate collars.
-      for side in [-1,1]:
-        cube(ident+' copper terminal shoulder','cooling-frame',ident,x+side*.12,.050,z+.322,.055,.034,.078,'Machined copper',.004)
-    else:
-      # Thin patterned exterior is not a fin field. Function is undisclosed in
-      # Lenovo evidence; ASUS sensor construction is not copied as an OEM fact.
-      cube('CPU thin exterior surface pattern','cooling-frame',ident,x,.0365,z,.655,.002,.640,'Thin exterior surface pattern',.001)
-      outline=[(-.325,-.290),(.325,-.290),(.325,.285),(.186,.285),(.186,-.139),(-.186,-.139),(-.186,.285),(-.325,.285)]
-      polyprism('CPU U-arm copper cover','cooling',ident,[(x+X,z+Z)for X,Z in outline],.0375,.074,'Machined copper',.006)
-      rim=[(-.28,0),(-.345,.115),(-.345,.326),(.345,.326),(.345,.115),(.28,0)]
-      tube('CPU external curved copper tube','cooling-frame',ident,rounded_path(local_points(x,z,rim,.055),.085,9),.014,'Machined copper',16)
-      # Two short copper side arms are visible exterior adaptation, not invented
-      # hydraulic channels. Their positions respect existing package clearances.
-      for side in [-1,1]:
-        X=x+side*.34
-        pts=[(X-.046,z-.304),(X+.046,z-.304),(X+.046,z-.535),(X+.021,z-.575),(X-.046,z-.575)]
-        polyprism('CPU rear retention arm','cooling-frame','image-guided exterior arm',pts,.031,.059,'Machined copper',.004)
-    # These legacy ports are required for original global pipe alignment.
-    for s in [-1,1]:
-      X=x+s*(.28 if ident=='CPU' else .12)
-      Z=z if ident=='CPU' else z+(d+.126)/2-.03
-      cylinder(ident+' coolant port collar','cooling-frame','legacy plumbing interface',X,.083,Z,.031,.034,'Brushed nickel',24,inner=.018)
+     for sz in [-1,1]:
+        x=cx+sx*(bw/2-.058);z=cz+sz*(bd/2-.062)
+        bpy.ops.mesh.primitive_cylinder_add(vertices=24,radius=.014,depth=.10,location=coord(x,-.08,z))
+        cut=bpy.context.object;mod=pcb.modifiers.new('Drilled M-hole','BOOLEAN');mod.operation='DIFFERENCE';mod.object=cut
+        bpy.context.view_layer.objects.active=pcb;bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(cut,do_unlink=True)
+        cylinder('Board plated mounting annulus','board','mounting hole',x,t+.0007,z,.031,.0014,'Gold contact',24,inner=.014)
+        screw('Board captive fastener','board',x,t+.007,z,.013)
+    uv_project(pcb,True)
+    # Soldermask texture only on broad PCB faces; cross section remains FR4 laminate.
+    pcb.data.materials.append(M['PCB laminate edge'])
+    for p in pcb.data.polygons:
+        if abs(p.normal.z)<.7:p.material_index=1
 
-# Asset-owned left hoses replace exactly three legacy segments, never overlay
-# them. Black elastomer with finite-radius bends and restrained ferrules. Global
-# crossover/right-board loop and physical rear QDs remain owned by the scene.
-paths=[
- [[-1.84,.026,-2.79],[-1.84,.100,-2.61],[-1.84,.100,-1.60],[-1.51,.100,-1.60],[-1.51,.100,-1.817]],
- [[-1.27,.100,-1.817],[-1.15,.100,-1.757],[-.79,.100,-1.757],[-.67,.100,-1.817]],
- [[-.43,.100,-1.817],[-.321,.100,-1.686],[-.321,.100,-1.10],[-.685,.100,-1.10]]
-]
-L['hoseContract']['sampledPaths']=[rounded_path(p,.105,10)for p in paths]
-curvatures=[]
-for path in L['hoseContract']['sampledPaths']:
-    for a,b,c in zip(path,path[1:],path[2:]):
-      A,B,C=map(Vector,[a,b,c]);ab=(A-B).length;bc=(B-C).length;ca=(C-A).length;cross=(B-A).cross(C-A).length
-      if cross>1e-8:curvatures.append(ab*bc*ca/(2*cross))
-L['hoseContract']['minBendRadius']=round(min(curvatures),6)
-for i,path in enumerate(L['hoseContract']['sampledPaths']):
-    tube('Left coolant hose '+str(i+1),'cooling-frame','legacy-compatible hose',path,.018,'Elastomer coolant hose',16)
-    for end in [0,-1]:
-      point=Vector(path[end]);toward=Vector(path[1] if end==0 else path[-2]);axis=(toward-point).normalized()
-      tube('Hose termination crimp '+str(i+1),'cooling-frame','ferrule at known endpoint',[list(point+axis*.010),list(point+axis*.038)],.022,'Brushed nickel',20)
-      tube('Hose collar band '+str(i+1),'cooling-frame','endpoint clamp',[list(point+axis*.043),list(point+axis*.050)],.020,'Anodized retention',20)
-      if not(i==0 and end==0):
-        # The plate collar is vertical; a short real elbow turns to the hose.
-        # Its spigot is seated in the collar, not a horizontal blind connection.
-        elbow=[list(point-Vector((0,.033,0))),list(point-Vector((0,.013,0))),list(point+axis*.015),list(point+axis*.025)]
-        tube('Seated metallic elbow '+str(i+1),'cooling-frame','known-anchor elbow',rounded_path(elbow,.012,5),.016,'Brushed nickel',16)
+    def smd(name,x,z,w=.040,d=.025,h=.015,mat='Ceramic dielectric'):
+        cube(name+' dielectric','board','terminated passive',x,t+h/2+.001,z,w*.68,h,d,mat,.001)
+        for s in [-1,1]:
+          cube(name+' termination','board','terminated passive',x+s*w*.41,t+h*.44+.001,z,w*.20,h*.88,d+.001,'Solder termination',.0005)
+          cube(name+' solder fillet','board','solder pad',x+s*w*.43,t+.001,z,w*.28,.002,d+.007,'Solder termination',.0004)
+    for n,bank in enumerate(L['passiveBanks']):
+     for i in range(bank['count']):
+        x=bank['x']+(i*bank['pitch'] if bank['axis']=='x' else 0)
+        z=bank['z']+(i*bank['pitch'] if bank['axis']=='z' else 0)
+        smd(f'C{n*20+i+1}',x,z,h=.014 if n%2 else .019)
+    for i,(x,z) in enumerate(L['powerStages']):
+        # Grouped power conditioning is visual completion beneath covered regions;
+        # it is deliberately not presented as a photographed component BOM/netlist.
+        cube(f'L{i+1} ferrite power choke','board','power stage',x,t+.021,z,.106,.039,.086,'Ferrite mold',.004)
+        for s in [-1,1]:cube(f'L{i+1} folded terminal','board','power stage',x,t+.007,z+s*.047,.084,.014,.018,'Solder termination',.001)
+        for j in [-1,1]:
+          smd(f'Q{i*2+(j+1)//2}',x+j*.047,z+.110,.055,.061,.014,'Black polymer')
+        cube(f'L{i+1} witness line','board','power stage',x,t+.041,z-.011,.036,.0008,.003,'Silkscreen',0)
+
+    # Explicit compact islands: a controller, a shunt and differently sized bypass
+    # groups share a functional footprint. These are NOT random fake complexity.
+    for island in L['componentIslands']:
+        X,Z=island['x'],island['z'];a=math.radians(island['rotation'])
+        def pos(dx,dz):return X+dx*math.cos(a)-dz*math.sin(a),Z+dx*math.sin(a)+dz*math.cos(a)
+        x,z=pos(0,0)
+        cube(island['id']+' controller','board','approximate conditioning island',x,t+.011,z,.080,.020,.068,'Black polymer',.002)
+        for j,(dx,dz,w,d,h,mat) in enumerate([(-.066,-.026,.034,.023,.012,'Ceramic dielectric'),(-.067,.022,.029,.021,.010,'Ceramic dielectric'),(.064,-.019,.031,.026,.012,'Ferrite mold'),(.058,.033,.024,.017,.009,'Ceramic dielectric'),(-.015,.062,.023,.032,.014,'Ceramic dielectric'),(.016,.060,.023,.032,.014,'Ceramic dielectric')]):
+          x,z=pos(dx,dz);smd(island['id']+f' termination {j}',x,z,w,d,h,mat)
+        for dx in [-.036,.036]:
+          for dz in [-.023,-.008,.007,.022]:
+            x,z=pos(dx,dz);cube(island['id']+' lead','board','approximate conditioning island',x,t+.002,z,.016,.004,.008,'Solder termination',.0003)
+
+    # Edge connector cavity, keyed separator, spring contacts and solder tails.
+    # Its outboard long location is visible in the official picture; pitch is authored.
+    def connector(name,x,z,length,along='z'):
+        w,d=(.068,length) if along=='z' else (length,.068)
+        cube(name+' base','board','edge connector',x,t+.009,z,w,.018,d,'Black polymer',.002)
+        for side in [-1,1]:
+          cube(name+' housing wall','board','edge connector',x+(side*.030 if along=='z' else 0),t+.030,z+(side*.030 if along=='x' else 0),.012 if along=='z' else length,.039,length if along=='z' else .012,'Black polymer',.001)
+        count=max(6,int(length/.033))
+        for i in range(count):
+          offset=-length/2+.025+i*(length-.05)/max(1,count-1)
+          X=x+(offset if along=='x' else 0);Z=z+(offset if along=='z' else 0)
+          cube(name+' contact','board','edge connector',X,t+.024,Z,.032 if along=='z' else .005,.007,.005 if along=='z' else .032,'Gold contact',.0004)
+          for side in [-1,1]:cube(name+' solder foot','board','edge connector',X+(side*.041 if along=='z' else 0),t+.003,Z+(side*.041 if along=='x' else 0),.019 if along=='z' else .007,.006,.007 if along=='z' else .019,'Solder termination',.0006)
+        for end in [-1,1]:
+          cube(name+' end key','board','edge connector',x+(end*length*.49 if along=='x' else 0),t+.032,z+(end*length*.49 if along=='z' else 0),.075 if along=='z' else .018,.043,.018 if along=='z' else .075,'Black polymer',.002)
+    connector('Outboard management mezzanine connector',-1.727,-1.24,.73)
+    connector('Inboard service connector A',-.223,-1.09,.25)
+    connector('Inboard service connector B',-.223,-1.49,.24)
+    connector('Forward board connector',-.975,-.585,.44,'x')
+    connector('Outboard rear low-profile interface',-1.758,-2.19,.34)
+    connector('Inboard rear low-profile interface',-.176,-2.18,.32)
+
+    # A narrow stamped stiffener and visible edge locations follow the Lenovo
+    # drawing. Contact counts/pitch remain authored approximation.
+    for X in [-1.802,-.132]:
+        cube('Board perimeter stiffener','board','visible edge retention',X,t+.008,-1.69,.014,.014,1.99,'Anodized retention',.001)
+    for X,Z in [(-1.705,-1.72),(-.225,-1.72),(-1.705,-.825),(-.225,-.825)]:
+        cylinder('Edge plated locator','board','visible edge retention',X,t+.001,Z,.021,.002,'Gold contact',24,inner=.009)
+
+    for p in L['packages']:
+        x,z,w,d=p['x'],p['z'],p['width'],p['depth'];ident=p['id']
+        # Bonded footprint belongs to the board; section views do not leave a blank
+        # green rectangle and do not invent field-replaceable sockets or BGA balls.
+        cube(ident+' bonded footprint','board','bonded visual-section footprint',x,t+.0017,z,w+.035,.0034,d+.035,'Bonded epoxy underfill',.002)
+        cube(ident+' bonded underfill','packages',ident,x,-.0613,z,w+.018,.0136,d+.018,'Bonded epoxy underfill',.002)
+        cube(ident+' organic substrate','packages',ident,x,-.0465,z,w+.10,.016,d+.10,'Package organic laminate',.002)
+        # Layered substrate edge is construction, not decorative fake exposed BGA pins.
+        for sy in [-.0515,-.0445]:
+          for side in [-1,1]:
+            cube(ident+' laminate edge','packages',ident,x+side*(w/2+.049),sy,z,.002,.0016,d+.086,'PCB laminate edge',0)
+            cube(ident+' laminate edge','packages',ident,x,sy,z+side*(d/2+.049),w+.086,.0016,.002,'PCB laminate edge',0)
+        # Thin stepped heat spreader. pi3g supports surface/edge appearance only,
+        # not Lenovo package dimensions or internal die/HBM configuration.
+        inset=.025 if ident=='CPU' else .045
+        corner=.019 if ident=='CPU' else .030
+        W=w-inset;D=d-inset
+        pts=[(x-W/2+corner,z-D/2),(x+W/2-corner,z-D/2),(x+W/2,z-D/2+corner),(x+W/2,z+D/2-corner),(x+W/2-corner,z+D/2),(x-W/2+corner,z+D/2),(x-W/2,z+D/2-corner),(x-W/2,z-D/2+corner)]
+        polyprism(ident+' spreader shoulder','packages',ident,pts,-.0385,-.009,'Brushed nickel',.003)
+        cube(ident+' lapped contact surface','packages',ident,x,-.0015,z,W-.019,.015,D-.019,'Lapped package spreader',.004)
+        cylinder(ident+' orientation witness','packages',ident,x-W*.41,.0059,z-D*.41,.009,.0002,'Brushed nickel',24)
+        for side in [-1,1]:
+          for i in range(5 if ident=='CPU' else 7):
+            count=5 if ident=='CPU' else 7
+            X=x-w*.33+i*w*.66/(count-1);Z=z+side*(d/2+.029)
+            cube(ident+' substrate decoupler','packages',ident,X,-.0325,Z,.020,.009,.016,'Ceramic dielectric',.0007)
+            for s in [-1,1]:cube(ident+' decoupler solder cap','packages',ident,X+s*.009,-.033,Z,.005,.008,.017,'Solder termination',.0004)
+          for i in range(5):
+            cylinder(ident+' substrate witness pad','packages',ident,x+side*(w/2+.029),-.0376,z-.16+i*.077,.006,.0008,'Gold contact',12)
+
+        # Exact old contact-plane contract; external plate envelope is updated.
+        cube(ident+' compliant TIM','cooling-frame',ident,x,.0064,z,w*.92,.0008,d*.92,'TIM',0)
+        cube(ident+' copper contact foot','cooling-frame',ident,x,.02115,z,w+.082,.0287,d+.082,'Machined copper',.004)
+        # Opaque retention perimeter and corners remain solid while cover ghosts.
+        for sx in [-1,1]:
+          for sz in [-1,1]:
+            X=x+sx*(w/2+.077);Z=z+sz*(d/2+.077)
+            cylinder(ident+' board preload washer','board',ident,X,-.070,Z,.026,.002,'Solder termination',20,inner=.013)
+            cylinder(ident+' retention stand-off','cooling-frame',ident,X,-.0125,Z,.015,.113,'Anodized retention',20)
+            cube(ident+' mounting ear','cooling-frame',ident,x+sx*(w/2+.05),.056,z+sz*(d/2+.05),.112,.034,.112,'Anodized retention',.008)
+            screw(ident+' captive plate screw','cooling-frame',X,.079,Z,.017)
+        if ident.startswith('GPU'):
+          # Narrow stepped cross and perimeter round copper line: externally visible
+          # Lenovo evidence. No internal channel or ASUS flex-sensor claim.
+          for side in [-1,1]:
+            cube(ident+' retaining side rail','cooling-frame',ident,x+side*(w/2+.027),.048,z,.023,.019,d+.10,'Anodized retention',.003)
+            cube(ident+' retaining end rail','cooling-frame',ident,x,.048,z+side*(d/2+.027),w+.10,.019,.023,'Anodized retention',.003)
+          cube(ident+' thin exterior surface pattern','cooling-frame',ident,x,.0365,z,w-.026,.002,d-.026,'Thin exterior surface pattern',.001)
+          a,b0,c=.072,.126,.246
+          outline=[(-a,-c),(a,-c),(a,-b0),(b0,-b0),(b0,-a),(.183,-a),(.183,a),(b0,a),(b0,b0),(a,b0),(a,c),(-a,c),(-a,b0),(-b0,b0),(-b0,a),(-.183,a),(-.183,-a),(-b0,-a),(-b0,-b0),(-a,-b0)]
+          polyprism(ident+' narrow stepped copper cover','cooling',ident,[(x+X,z+Z)for X,Z in outline],.0375,.075,'Machined copper',.004)
+          rim=[(-.12,.332),(-.292,.332),(-.292,-.304),(.292,-.304),(.292,.332),(.12,.332)]
+          tube(ident+' external perimeter copper tube','cooling-frame',ident,rounded_path(local_points(x,z,rim,.060),.084,9),.014,'Machined copper',16)
+          # Two short shoulders bridge the perimeter to compatible plate collars.
+          for side in [-1,1]:
+            cube(ident+' copper terminal shoulder','cooling-frame',ident,x+side*.12,.050,z+.322,.055,.034,.078,'Machined copper',.004)
+        else:
+          # Thin patterned exterior is not a fin field. Function is undisclosed in
+          # Lenovo evidence; ASUS sensor construction is not copied as an OEM fact.
+          cube('CPU thin exterior surface pattern','cooling-frame',ident,x,.0365,z,.655,.002,.640,'Thin exterior surface pattern',.001)
+          outline=[(-.325,-.290),(.325,-.290),(.325,.285),(.186,.285),(.186,-.139),(-.186,-.139),(-.186,.285),(-.325,.285)]
+          polyprism('CPU U-arm copper cover','cooling',ident,[(x+X,z+Z)for X,Z in outline],.0375,.074,'Machined copper',.006)
+          rim=[(-.28,0),(-.345,.115),(-.345,.326),(.345,.326),(.345,.115),(.28,0)]
+          tube('CPU external curved copper tube','cooling-frame',ident,rounded_path(local_points(x,z,rim,.055),.085,9),.014,'Machined copper',16)
+          # Two short copper side arms are visible exterior adaptation, not invented
+          # hydraulic channels. Their positions respect existing package clearances.
+          for side in [-1,1]:
+            X=x+side*.34
+            pts=[(X-.046,z-.304),(X+.046,z-.304),(X+.046,z-.535),(X+.021,z-.575),(X-.046,z-.575)]
+            polyprism('CPU rear retention arm','cooling-frame','image-guided exterior arm',pts,.031,.059,'Machined copper',.004)
+        # These legacy ports are required for original global pipe alignment.
+        for s in [-1,1]:
+          X=x+s*(.28 if ident=='CPU' else .12)
+          Z=z if ident=='CPU' else z+(d+.126)/2-.03
+          cylinder(ident+' coolant port collar','cooling-frame','legacy plumbing interface',X,.083,Z,.031,.034,'Brushed nickel',24,inner=.018)
+
+    # Asset-owned left hoses replace exactly three legacy segments, never overlay
+    # them. Black elastomer with finite-radius bends and restrained ferrules. Global
+    # crossover/right-board loop and physical rear QDs remain owned by the scene.
+    paths=[
+     [[-1.84,.026,-2.79],[-1.84,.100,-2.61],[-1.84,.100,-1.60],[-1.51,.100,-1.60],[-1.51,.100,-1.817]],
+     [[-1.27,.100,-1.817],[-1.15,.100,-1.757],[-.79,.100,-1.757],[-.67,.100,-1.817]],
+     [[-.43,.100,-1.817],[-.321,.100,-1.686],[-.321,.100,-1.10],[-.685,.100,-1.10]]
+    ]
+    L['hoseContract']['sampledPaths']=[rounded_path(p,.105,10)for p in paths]
+    curvatures=[]
+    for path in L['hoseContract']['sampledPaths']:
+        for a,b,c in zip(path,path[1:],path[2:]):
+          A,B,C=map(Vector,[a,b,c]);ab=(A-B).length;bc=(B-C).length;ca=(C-A).length;cross=(B-A).cross(C-A).length
+          if cross>1e-8:curvatures.append(ab*bc*ca/(2*cross))
+    L['hoseContract']['minBendRadius']=round(min(curvatures),6)
+    for i,path in enumerate(L['hoseContract']['sampledPaths']):
+        tube('Left coolant hose '+str(i+1),'cooling-frame','legacy-compatible hose',path,.018,'Elastomer coolant hose',16)
+        for end in [0,-1]:
+          point=Vector(path[end]);toward=Vector(path[1] if end==0 else path[-2]);axis=(toward-point).normalized()
+          tube('Hose termination crimp '+str(i+1),'cooling-frame','ferrule at known endpoint',[list(point+axis*.010),list(point+axis*.038)],.022,'Brushed nickel',20)
+          tube('Hose collar band '+str(i+1),'cooling-frame','endpoint clamp',[list(point+axis*.043),list(point+axis*.050)],.020,'Anodized retention',20)
+          if not(i==0 and end==0):
+            # The plate collar is vertical; a short real elbow turns to the hose.
+            # Its spigot is seated in the collar, not a horizontal blind connection.
+            elbow=[list(point-Vector((0,.033,0))),list(point-Vector((0,.013,0))),list(point+axis*.015),list(point+axis*.025)]
+            tube('Seated metallic elbow '+str(i+1),'cooling-frame','known-anchor elbow',rounded_path(elbow,.012,5),.016,'Brushed nickel',16)
+
+# The optional service-only build preserves the four existing source layers.
+runpy.run_path(str(HERE/'service_geometry.py'))['build_service_geometry'](globals())
 (HERE/'layout.json').write_text(json.dumps(L,indent=2)+'\n')
 
 # Keep editable semantic component objects and modifiers in the Blender source.

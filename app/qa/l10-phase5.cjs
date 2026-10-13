@@ -8,20 +8,37 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const base=process.env.PA_PREVIEW_URL||'http://127.0.0.1:8774';
 assert.ok(['127.0.0.1','localhost','[::1]'].includes(new URL(base).hostname),'Run against a local synthetic preview');
-const out=path.resolve(__dirname,'../../artifacts/l10-phase5');
-const baseline=path.resolve(__dirname,'../../artifacts/l10-phase5/baseline/phase4-compute-board.glb');
+const referenceReview=process.argv.includes('--reference-review');
+const out=path.resolve(__dirname,'../../artifacts/'+(referenceReview?'l10-reference-review':'l10-phase5'));
+const baseline=path.join(out,'baseline',referenceReview?'phase5-compute-board.glb':'phase4-compute-board.glb');
+const baselineCommit=referenceReview?'3ce4b9c6e5467abe9d27050e5af0240b07fff3dc':'031830a1c7faf5484b358e0964551e8656e1d852';
+const baselineHash=referenceReview?'fe898a419c0f613bd003ef964e921dcc7c43771c4ed841bdbcd92da695857bc7':'c8467c0ac186b34ee95e549fc27f5da47ad3de4b8d09b72b68d6070e774985cc';
 const current=path.resolve(__dirname,'../static/models/l10-prototype/compute-board.glb');
 // Reproduce the historical comparison from Git without checking out or mutating
 // either branch. The frozen fixture is deliberately outside runtime assets.
 if(!fs.existsSync(baseline)){
-  const bytes=require('node:child_process').execFileSync('git',['show','031830a1c7faf5484b358e0964551e8656e1d852:app/static/models/l10-prototype/compute-board.glb'],{cwd:path.resolve(__dirname,'../..'),maxBuffer:16*1024*1024});
+  const bytes=require('node:child_process').execFileSync('git',['show',baselineCommit+':app/static/models/l10-prototype/compute-board.glb'],{cwd:path.resolve(__dirname,'../..'),maxBuffer:24*1024*1024});
   fs.mkdirSync(path.dirname(baseline),{recursive:true});fs.writeFileSync(baseline,bytes);
 }
-assert.equal(crypto.createHash('sha256').update(fs.readFileSync(baseline)).digest('hex'),'c8467c0ac186b34ee95e549fc27f5da47ad3de4b8d09b72b68d6070e774985cc','Before must be the verified Phase 4 GLB');
+assert.equal(crypto.createHash('sha256').update(fs.readFileSync(baseline)).digest('hex'),baselineHash,'Before must be the verified historical GLB');
 const stages=[{id:'01-packages',inspection:'packages',progress:.21},{id:'02-board',inspection:'board',progress:.11},{id:'03-cooling',inspection:'cooling',progress:.354},{id:'04-hero',inspection:null,progress:.354}];
+if(referenceReview)stages.push({id:'05-fans',inspection:'fans',progress:.354},{id:'06-power',inspection:'power',progress:.354});
 for(const name of ['before','after','evidence'])fs.mkdirSync(path.join(out,name),{recursive:true});
 const report={passed:false,viewport:{width:3440,height:1440,deviceScaleFactor:1},comparison:'Phase 4 GLB versus Phase 5 GLB; both opt-in with identical renderer/camera/light/exposure/progress. Local route serves both saved GLB byte streams; load timings are fixture timings, not CDN benchmarks.',loading:{},checks:[],pairs:[],runs:[],errors:[],external:[],failureScenarioErrors:[],sources:{}};
+if(referenceReview)report.comparison='Phase 5 commit '+baselineCommit+' versus evidence-based service geometry; same opt-in renderer/camera/light/exposure/progress. Local GLB fixtures, not CDN benchmarks.';
 const sha=buffer=>crypto.createHash('sha256').update(buffer).digest('hex');
+// Corrupt only the service ownership declaration, retaining the valid binary
+// payload and io mesh. The browser must reject this before omitting legacy IO.
+function inconsistentServiceFixture(){
+  const bytes=fs.readFileSync(current),oldLength=bytes.readUInt32LE(12);
+  const doc=JSON.parse(bytes.subarray(20,20+oldLength).toString('utf8'));
+  assert.equal(doc.extras.replacesServiceGeometry,true);
+  doc.extras.replacesServiceGeometry=false;
+  const raw=Buffer.from(JSON.stringify(doc)),json=Buffer.alloc(Math.ceil(raw.length/4)*4,32);raw.copy(json);
+  const header=Buffer.from(bytes.subarray(0,20)),tail=bytes.subarray(20+oldLength);
+  header.writeUInt32LE(20+json.length+tail.length,8);header.writeUInt32LE(json.length,12);
+  return Buffer.concat([header,json,tail]);
+}
 const distance=(a,b)=>Math.hypot(...a.map((n,i)=>n-b[i]));
 const summary=values=>{const sorted=values.slice().sort((a,b)=>a-b);return {min:sorted[0],median:sorted[Math.floor(sorted.length*.5)],p95:sorted[Math.min(sorted.length-1,Math.floor(sorted.length*.95))],max:sorted.at(-1),mean:values.reduce((a,b)=>a+b,0)/values.length};};
 
@@ -156,7 +173,7 @@ if(process.argv.includes('--measure-loading-only')){
         let pair=report.pairs.find(p=>p.id===stage.id);if(!pair){pair={id:stage.id};report.pairs.push(pair);}pair[variant]=evidence;
         console.log('CAPTURE '+variant+' '+stage.id+' '+state.scene.quality.pixelCount+' native canvas pixels');
       }
-      check(variant+': four native 3440x1440 captures, no lighting/exposure override');
+      check(variant+': '+stages.length+' native 3440x1440 captures, no lighting/exposure override');
       if(enabled){
         report.supplemental=[];
         for(const [label,progress,inspection] of [['cooling-reveal',.312,'cooling'],['bridge',.48,null],['rack-final',1,null]]){
@@ -189,9 +206,18 @@ if(process.argv.includes('--measure-loading-only')){
       assert.equal(pair.after.scene.theme,pair.before.scene.theme);assert.deepEqual(pair.after.scene.assembly,pair.before.scene.assembly,pair.id+': same object pose and progress');
       pair.matched={camera:true,pixels:true,lightingUniforms:true,assembly:true};
     }
-    assert.equal(report.sources.after.environmentSHA256,report.sources.before.environmentSHA256);assert.deepEqual(report.sources.after.compiledShaderSHA256,report.sources.before.compiledShaderSHA256,'Both variants compile exactly the same shaders');check('Four comparisons: exact camera, object pose, native pixels, lighting, environment and shader sources');
+    assert.equal(report.sources.after.environmentSHA256,report.sources.before.environmentSHA256);assert.deepEqual(report.sources.after.compiledShaderSHA256,report.sources.before.compiledShaderSHA256,'Both variants compile exactly the same shaders');check(stages.length+' comparisons: exact camera, object pose, native pixels, lighting, environment and shader sources');
     page=await createPage(true);await page.route('**/*.glb',route=>route.abort('failed'));await page.goto(url(true),{waitUntil:'domcontentloaded',timeout:120000});await ready();await page.waitForFunction(()=>document.querySelector('#system-core').paCoreScene.getState().asset.failed===true,null,{timeout:120000});await seek(.354);
     const fallback=await read();assert.equal(fallback.scene.ready,true);assert.equal(fallback.scene.asset.failed,true);assert.ok(fallback.observed.drawCalls>0);assert.equal(fallback.scene.assembly.targetU,40);report.loaderFallback={passed:true,asset:fallback.scene.asset,vertices:fallback.scene.vertices,observed:fallback.observed};check('Blocked GLB network request falls back to renderable legacy geometry');
+    if(referenceReview){
+      await page.close();page=await createPage(true);
+      await page.route('**/compute-board.glb',route=>route.fulfill({body:inconsistentServiceFixture(),contentType:'model/gltf-binary'}));
+      await page.goto(url(),{waitUntil:'domcontentloaded',timeout:120000});await ready();
+      await page.waitForFunction(()=>document.querySelector('#system-core').paCoreScene.getState().asset.failed===true,null,{timeout:120000});await seek(.354);
+      const invalid=await read();assert.equal(invalid.scene.vertices,fallback.scene.vertices);assert.ok(invalid.observed.drawCalls>0);
+      report.serviceOwnershipFallback={passed:true,asset:invalid.scene.asset,vertices:invalid.scene.vertices};
+      check('Mismatched IO ownership fails closed and retains every legacy fan, cable and board');
+    }
     await page.close();page=await createPage(true);await page.route('**/studio-small-09-radiance.png',route=>route.abort('failed'));await page.goto(url(true),{waitUntil:'domcontentloaded',timeout:120000});
     await page.waitForFunction(()=>{const c=document.querySelector('#system-core'),s=c?.paCoreScene?.getState();return c?.dataset.coreState==='ready'&&s.quality.environmentFailed&&s.asset.failed&&!s.asset.loading;},null,{timeout:120000});await seek(.354);
     const missingHDR=await read();assert.equal(missingHDR.scene.quality.environmentReady,false);assert.equal(missingHDR.scene.asset.failed,true);assert.ok(missingHDR.observed.drawCalls>0);assert.equal(missingHDR.scene.vertices,fallback.scene.vertices,'Missing studio reference restores the complete baseline geometry');report.environmentFallback={passed:true,asset:missingHDR.scene.asset,quality:missingHDR.scene.quality,vertices:missingHDR.scene.vertices};check('Blocked studio environment restores the baseline without falsely reporting a textured prototype');

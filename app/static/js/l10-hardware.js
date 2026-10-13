@@ -222,6 +222,7 @@
     // triangles or removing the shared chassis, piping and flow overlays.
     const omitted=Number.isInteger(options.omitBoard)?options.omitBoard:-1;
     const replaceLeftPlumbing=omitted===0&&options.replaceLeftPlumbing===true;
+    const replaceServiceGeometry=omitted===0&&options.replaceServiceGeometry===true;
     if(replaceLeftPlumbing&&(!Array.isArray(options.supplyOverlayPath)||options.supplyOverlayPath.length<2||options.supplyOverlayPath.length>512||options.supplyOverlayPath.some(p=>!Array.isArray(p)||p.length!==3||p.some(v=>!Number.isFinite(v)||Math.abs(v)>4))))throw new Error('Invalid prototype supply path');
     const discard=mesh();
     profile.boards.forEach((p,i)=>pcbDetail(i===omitted?discard:board,p.x,p.z,p.width,p.depth,i*11));
@@ -357,7 +358,7 @@
     });
 
     // Eight compact fan cartridges leave a central power-cable corridor.
-    for(const x of [-1.69,-1.27,-.85,-.43,.43,.85,1.27,1.69]){
+    if(!replaceServiceGeometry)for(const x of [-1.69,-1.27,-.85,-.43,.43,.85,1.27,1.69]){
       io.bevel(x,-.012,.055,.365,.198,.48,C.black,.10,.008);
       io.box(x,.091,.055,.278,.011,.386,C.darkSteel,.42);
       for(const z of [-.192,.302]){
@@ -408,11 +409,15 @@
     io.box(.37,.001,1.74,.17,.015,.42,C.chip,.06);io.screw(.37,.015,1.985,.015);
     io.box(.37,-.002,1.45,.20,.041,.055,C.black,.08);
     // Flat, insulated laminated busbar through the central corridor.
+    // Opt-in revision 3 owns the image-guided cable and front termination;
+    // all boards, CMOS, rear socket and unrelated I/O stay in this mesh.
+    if(!replaceServiceGeometry){
     io.bevel(0,-.035,-.73,.16,.063,3.75,C.black,.10,.006);
     io.box(-.033,-.001,-.73,.025,.009,3.63,[.11,.115,.11],.35);
     io.box(.033,-.001,-.73,.025,.009,3.63,[.09,.092,.09],.30);
     io.bevel(0,-.034,1.10,.72,.076,.46,C.darkSteel,.53,.008);
     for(let i=0;i<8;i++)io.box(-.29+i*.083,.020,1.09,.035,.022,.27,C.steel,.74);
+    }
 
     // Front: eight individually framed E1.S carriers with captive latches.
     // Their rear sockets now meet one shared vertical backplane. The public

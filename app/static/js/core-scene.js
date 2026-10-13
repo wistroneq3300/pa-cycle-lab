@@ -409,9 +409,11 @@
           try{
             if(environmentFailed)throw new Error('Prototype requires the reference studio environment');
             const plumbing=asset.metadata.extras;
-            const replacement=window.PAL10Hardware.build(window.PAL10Hardware.profile,{omitBoard:0,replaceLeftPlumbing:plumbing.replacesLeftPlumbing===true,supplyOverlayPath:plumbing.supplyOverlayPath});
+            const replaceServiceGeometry=plumbing.replacesServiceGeometry===true;
+            if(replaceServiceGeometry!==asset.metadata.layers.includes('io'))throw new Error('Prototype service replacement requires its matching io layer');
+            const replacement=window.PAL10Hardware.build(window.PAL10Hardware.profile,{omitBoard:0,replaceLeftPlumbing:plumbing.replacesLeftPlumbing===true,supplyOverlayPath:plumbing.supplyOverlayPath,replaceServiceGeometry});
             stagedRuntime=window.PAL10AssetRuntime.upload(gl,asset,attributes,uniforms);
-            for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling','l10-flow-supply']){
+            for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling','l10-flow-supply','l10-io']){
               const data=replacement.meshes[name].data,buffer=gl.createBuffer();stagedParts[name]={buffer,count:data.length/12};
               gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
             }
@@ -465,7 +467,7 @@
       if(assetRuntime){
         vertices-=assetRuntime.metadata.vertices;assetRuntime.destroy();assetRuntime=null;
         const legacy=window.PAL10Hardware.build();
-        for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling','l10-flow-supply']){const mesh=parts[name],data=legacy.meshes[name].data;vertices+=data.length/12-mesh.count;gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);mesh.count=data.length/12;}
+        for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling','l10-flow-supply','l10-io']){const mesh=parts[name],data=legacy.meshes[name].data;vertices+=data.length/12-mesh.count;gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);mesh.count=data.length/12;}
       }
       shadowProgress=-1;
       canvas.dataset.coreVertices=String(vertices);canvas.dataset.coreGeometryBuffers=String(parts?Object.keys(parts).length:0);
@@ -490,6 +492,9 @@
         const pose=placementPose(PLACEMENTS[PRIMARY_INDEX],PRIMARY_INDEX,progress,0),board=inspection==='board';
         camera[0]=-.34;camera[1]=board?1.12:.79;camera[2]=board?5.15:4.80;
         camera[3]=(pose.x-.965)*modelMatrix[0];camera[4]=pose.y+.05;camera[5]=(pose.z-1.68)*modelMatrix[10];
+        // Additional opt-in evidence cameras; never used by the authored film.
+        if(inspection==='fans'){camera[1]=.68;camera[2]=3.5;camera[3]=(pose.x-.85)*modelMatrix[0];camera[5]=(pose.z+.055)*modelMatrix[10];}
+        if(inspection==='power'){camera[1]=1.12;camera[2]=5.3;camera[3]=pose.x*modelMatrix[0];camera[5]=(pose.z+.62)*modelMatrix[10];}
         target.set(camera.subarray(3));const ce=Math.cos(camera[1]);
         eye[0]=target[0]+Math.sin(camera[0])*ce*camera[2];eye[1]=target[1]+Math.sin(camera[1])*camera[2];eye[2]=target[2]+Math.cos(camera[0])*ce*camera[2];cameraReady=true;cameraSettling=false;return;
       }
@@ -711,7 +716,7 @@
       return {left,right,bottom,top,heightFraction:(top-bottom)/2,widthFraction:(right-left)/2,nearest,clipped:left< -1||right>1||bottom< -1||top>1||nearest<.15};
     }
     const api={supported:true,
-      setInspection(value){if(!inspectionEnabled)throw new Error('Inspection cameras require l10AssetLab=1');if(value!==null&&!['board','packages','cooling'].includes(value))throw new Error('Unknown asset inspection');inspection=value;cameraReady=false;shadowProgress=-1;requestDraw();},
+      setInspection(value){if(!inspectionEnabled)throw new Error('Inspection cameras require l10AssetLab=1');if(value!==null&&!['board','packages','cooling','fans','power'].includes(value))throw new Error('Unknown asset inspection');inspection=value;cameraReady=false;shadowProgress=-1;requestDraw();},
       setProgress(value){const next=reduced.matches?1:clamp(Number(value)||0);if(Math.abs(next-progress)<.00001)return;activity();progress=next;if(manual&&!drag){manual=false;view='authored';yaw=0;pitch=0;syncOrbit();}armIdle();requestDraw();},
       setPointer(x,y){if(manual||drag||reduced.matches)return;pointerX=clamp(Number(x)||0,-1,1);pointerY=clamp(Number(y)||0,-1,1);requestDraw();},
       setOrbit,setView,resetOrbit,setTheme(value){const next=value===true||value==='light'?1:0;if(next===light)return;light=next;requestDraw();},

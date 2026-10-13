@@ -1,12 +1,12 @@
 /* A deliberately bounded glTF 2.0 / GLB adapter for the PA WebGL 1 renderer.
  * No scene engine, external resources, vendor CAD, or extension guessing.
  * Geometry is expanded and node transforms are baked. Runtime animation still
- * owns the four semantic L10 layers. Images are NOT flipped or color converted:
+ * owns the semantic L10 layers, including optional service IO. Images are NOT flipped or color converted:
  * the renderer must decode sRGB base color and sample MR/normal/AO as linear.
  */
 (() => {
   'use strict';
-  const LAYERS = new Set(['board', 'packages', 'cooling-frame', 'cooling']);
+  const LAYERS = new Set(['board', 'packages', 'cooling-frame', 'cooling', 'io']);
   const COMPONENTS = {
     5120: [1, 'getInt8', 127, true], 5121: [1, 'getUint8', 255, false],
     5122: [2, 'getInt16', 32767, true], 5123: [2, 'getUint16', 65535, false],

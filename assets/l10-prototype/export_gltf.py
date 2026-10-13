@@ -1,13 +1,18 @@
 """Re-export an edited .blend without rebuilding authored source geometry.
 blender --background --python assets/l10-prototype/export_gltf.py
 """
-import bpy, json, struct, hashlib
+import bpy, json, struct, hashlib, sys, runpy
 from pathlib import Path
 HERE=Path(__file__).resolve().parent;ROOT=HERE.parents[1]
 OUT=ROOT/'app/static/models/l10-prototype';OUT.mkdir(parents=True,exist_ok=True)
 L=json.loads((HERE/'layout.json').read_text())
+SERVICE_ONLY='--service-only' in sys.argv
+export_path=OUT/'compute-board.glb'
+if SERVICE_ONLY:
+    export_path=ROOT/'artifacts/l10-asset-build/service-export.glb'
+    export_path.parent.mkdir(parents=True,exist_ok=True)
 bpy.ops.wm.open_mainfile(filepath=str(HERE/'compute-board-prototype.blend'))
-COL={name:bpy.data.collections[name]for name in ['board','packages','cooling-frame','cooling']}
+COL={name:bpy.data.collections[name]for name in ['board','packages','cooling-frame','cooling','io']}
 export_col=bpy.data.collections.new('GLB EXPORT BATCHES');bpy.context.scene.collection.children.link(export_col)
 exports=[];deps=bpy.context.evaluated_depsgraph_get()
 
@@ -51,20 +56,21 @@ for layer,col in COL.items():
     joined['referenceConfidence']='image-guided exterior; hidden topology is visual approximation'
     joined['approximation']='Original mesh; no OEM CAD, unpublished package floorplan or interior microchannels.'
     joined['coordinateUnits']='Normalized PA raw scene units, NOT glTF SI meters; common runtime scale [.688,1,.802] still applies.'
-    joined['contract']='One left board, three integrated packages. Independent visual layers do not imply field serviceability.'
+    joined['contract']='Eight retained-position fans and a central insulated power cable; original IO animation offset.' if layer=='io' else 'One left board, three integrated packages. Independent visual layers do not imply field serviceability.'
     exports.append(joined)
 bpy.ops.object.select_all(action='DESELECT')
 for o in exports:o.select_set(True)
-bpy.ops.export_scene.gltf(filepath=str(OUT/'compute-board.glb'),export_format='GLB',use_selection=True,
+bpy.ops.export_scene.gltf(filepath=str(export_path),export_format='GLB',use_selection=True,
  export_apply=True,export_yup=True,export_texcoords=True,export_normals=True,export_tangents=True,
  export_materials='EXPORT',export_extras=True,export_animations=False,export_cameras=False,export_lights=False,
  export_image_format='AUTO',export_draco_mesh_compression_enable=False)
-data=(OUT/'compute-board.glb').read_bytes();ln,typ=struct.unpack_from('<II',data,12);doc=json.loads(data[20:20+ln])
+data=export_path.read_bytes();ln,typ=struct.unpack_from('<II',data,12);doc=json.loads(data[20:20+ln])
 # Root extras are consumed transactionally by the existing renderer. A Phase 4
 # GLB has no replacement flag and therefore retains all legacy local plumbing.
-doc['extras']={'prototypeRevision':2,'replacesLeftPlumbing':True,
+doc['extras']={'prototypeRevision':3,'replacesLeftPlumbing':True,'replacesServiceGeometry':True,
  'supplyOverlayPath':L['hoseContract']['sampledPaths'][0],
  'leftPlumbingPaths':L['hoseContract']['sampledPaths'],
+ 'serviceGeometry':{'fanCount':8,'cableCount':6,'source':'assets/l10-prototype/service_geometry.py'},
  'surfacePatternFunction':'Unconfirmed Lenovo exterior pattern; not fins or a claimed leak sensor'}
 # Normal-free materials have no use for a tangent attribute. Omit it rather than
 # shipping unused degenerate vectors generated on collapsed physical edge seams.
@@ -72,8 +78,13 @@ doc['extras']={'prototypeRevision':2,'replacesLeftPlumbing':True,
 for mesh in doc['meshes']:
  for p in mesh['primitives']:
   if 'normalTexture' not in doc['materials'][p['material']]:p['attributes'].pop('TANGENT',None)
+preserved=None
+binary=data[28+ln:]
+if SERVICE_ONLY:
+    preserve=runpy.run_path(str(HERE/'preserve_core.py'))['append_service']
+    doc,binary,preserved=preserve(ROOT,doc,binary)
 js=json.dumps(doc,separators=(',',':'),ensure_ascii=False).encode('utf-8');js+=b' '*((-len(js))%4)
-binchunk=data[20+ln:]
+binchunk=struct.pack('<II',len(binary),0x004e4942)+binary
 data=struct.pack('<III',0x46546c67,2,20+len(js)+len(binchunk))+struct.pack('<II',len(js),0x4e4f534a)+js+binchunk
 (OUT/'compute-board.glb').write_bytes(data)
 triangles=sum(doc['accessors'][p['indices']]['count']//3 for m in doc['meshes']for p in m['primitives'])
@@ -82,10 +93,11 @@ manifest={
  'generator':bpy.app.version_string,'triangles':triangles,'nodes':len(doc['nodes']),'meshes':len(doc['meshes']),
  'primitives':sum(len(m['primitives'])for m in doc['meshes']),'materials':len(doc['materials']),'embeddedImages':len(doc.get('images',[])),
  'source':'assets/l10-prototype/compute-board-prototype.blend','build':'assets/l10-prototype/build.py',
- 'export':'assets/l10-prototype/export_gltf.py','layers':['board','packages','cooling-frame','cooling'],
+ 'export':'assets/l10-prototype/export_gltf.py','layers':['board','packages','cooling-frame','cooling','io'],
  'units':'Normalized PA raw scene units, NOT glTF SI meters; renderer common [.688,1,.802] editorial transform remains required.',
  'contact':L['contact'],'references':['https://pubs.lenovo.com/gb300-nvl72/compute_tray_top_view','https://lenovopress.lenovo.com/lp2357-lenovo-nvidia-gb300-nvl72-rack-scale-ai','https://www.lttlabs.com/articles/2026/06/06/asus-test-server-tour','https://servers.asus.com/products/detail/overview/XA-GB721-E2','https://pi3g.com/gigabyte-w775-v10-l01-dgx-station-gb300/'],
- 'prototypeRevision':2,'hoseContract':L['hoseContract'],
+ 'prototypeRevision':3,'hoseContract':L['hoseContract'],'serviceGeometry':L['serviceGeometry'],
+ 'preservedCore':preserved,
  'approximation':L['approximation'],'assetApproval':'PROTOTYPE / NOT PHOTOREALISM ACCEPTED',
  'textureMethod':'Original deterministic UV-mapped fabrication appearance; not photo scans, vendor textures or random scatter',
  'limitations':['No measured PBR material data','No uncovered Lenovo package/PCB view; ASUS bare-board layout is not transplanted','Legacy local coolant port anchors retained; no OEM hydraulic reconstruction','Thin dark/gold Lenovo exterior pattern has unconfirmed function','ASUS/LTT and workstation references inform general construction/surface appearance only'],
