@@ -1,0 +1,171 @@
+{
+  "method": "Native Chromium hardware WebGL; observer-only calls and fetch hashing. Existing preview-fixtures isolates backend. Same semantic time, native inspection camera, and 2127x1272 canvas. No material, shader, geometry or clock substitutions.",
+  "modes": [
+    {
+      "name": "dashboard",
+      "entry": "/?l10AssetLab=1#/dashboard",
+      "canvas": [
+        2127,
+        1272
+      ],
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "draws": 233,
+      "fluidDraws": 22,
+      "orderedDrawSHA256": "66505ad81f35455397be7cd1a4238dce92462bf58381cb66f63c5ae32d22ffd3",
+      "assets": [
+        {
+          "path": "/static/models/l10-prototype/bare-compute-boards.glb",
+          "status": 200,
+          "bytes": 25533668,
+          "sha256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29"
+        },
+        {
+          "path": "/static/models/l10-cooling-v1/cooling-assembly.glb",
+          "status": 200,
+          "bytes": 5077332,
+          "sha256": "88eec60c20e775a431b446da311f3a1476cc2774173e628adc170ae3ac1f5a3f"
+        }
+      ],
+      "shaders": [
+        {
+          "type": 35633,
+          "sha256": "cc8c02bec0667ae1116bbbb961ca7aa7d8d73f036478bb425d501ed2212fc67a"
+        },
+        {
+          "type": 35632,
+          "sha256": "c13070434f61b7506d0f7bf9d2a00f6b1738f9719b8fb4fe445f08c1f35ed912"
+        }
+      ],
+      "screenshot": "dashboard-12300-native.png",
+      "pngSHA256": "f45f68855856e3717512f5c9ffea55509242f2ec770b5347c7404c61a2977791"
+    },
+    {
+      "name": "opt-in",
+      "entry": "/?l10AssetLab=1&l10Bareboard=1#/dashboard",
+      "canvas": [
+        2127,
+        1272
+      ],
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "draws": 233,
+      "fluidDraws": 22,
+      "orderedDrawSHA256": "66505ad81f35455397be7cd1a4238dce92462bf58381cb66f63c5ae32d22ffd3",
+      "assets": [
+        {
+          "path": "/static/models/l10-prototype/bare-compute-boards.glb",
+          "status": 200,
+          "bytes": 25533668,
+          "sha256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29"
+        },
+        {
+          "path": "/static/models/l10-cooling-v1/cooling-assembly.glb",
+          "status": 200,
+          "bytes": 5077332,
+          "sha256": "88eec60c20e775a431b446da311f3a1476cc2774173e628adc170ae3ac1f5a3f"
+        }
+      ],
+      "shaders": [
+        {
+          "type": 35633,
+          "sha256": "cc8c02bec0667ae1116bbbb961ca7aa7d8d73f036478bb425d501ed2212fc67a"
+        },
+        {
+          "type": 35632,
+          "sha256": "c13070434f61b7506d0f7bf9d2a00f6b1738f9719b8fb4fe445f08c1f35ed912"
+        }
+      ],
+      "screenshot": "opt-in-12300-native.png",
+      "pngSHA256": "b96a0797e9a5a6e0e427c9febb6d387b7be06f03eec8fc9bc8abcb5610ba7c97"
+    },
+    {
+      "name": "review",
+      "entry": "/static/l10-cooling-v2-review.html?l10AssetLab=1&l10Bareboard=1&stage=flow",
+      "canvas": [
+        2127,
+        1272
+      ],
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "draws": 233,
+      "fluidDraws": 22,
+      "orderedDrawSHA256": "66505ad81f35455397be7cd1a4238dce92462bf58381cb66f63c5ae32d22ffd3",
+      "assets": [
+        {
+          "path": "/static/models/l10-prototype/bare-compute-boards.glb",
+          "status": 200,
+          "bytes": 25533668,
+          "sha256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29"
+        },
+        {
+          "path": "/static/models/l10-cooling-v1/cooling-assembly.glb",
+          "status": 200,
+          "bytes": 5077332,
+          "sha256": "88eec60c20e775a431b446da311f3a1476cc2774173e628adc170ae3ac1f5a3f"
+        }
+      ],
+      "shaders": [
+        {
+          "type": 35633,
+          "sha256": "cc8c02bec0667ae1116bbbb961ca7aa7d8d73f036478bb425d501ed2212fc67a"
+        },
+        {
+          "type": 35632,
+          "sha256": "c13070434f61b7506d0f7bf9d2a00f6b1738f9719b8fb4fe445f08c1f35ed912"
+        }
+      ],
+      "screenshot": "review-12300-native.png",
+      "pngSHA256": "7bebcd91e418169c7e5c35e63f995f37929a13da83ebda679a42a8f7ff337fa5"
+    }
+  ],
+  "faults": [
+    {
+      "fault": "slow",
+      "pass": true,
+      "duration": 39700,
+      "elapsed": 0,
+      "totalDraws": 0,
+      "help": "正在載入 L10 展示…"
+    },
+    {
+      "fault": "cooling",
+      "pass": true,
+      "duration": 39700,
+      "elapsed": 0,
+      "totalDraws": 0,
+      "help": "L10 展示載入失敗，請重新整理頁面；管理功能不受影響。"
+    },
+    {
+      "fault": "environment",
+      "pass": true,
+      "duration": 39700,
+      "elapsed": 0,
+      "totalDraws": 0,
+      "help": "L10 展示載入失敗，請重新整理頁面；管理功能不受影響。"
+    },
+    {
+      "fault": "cooling-environment",
+      "pass": true,
+      "duration": 39700,
+      "elapsed": 0,
+      "totalDraws": 0,
+      "help": "L10 展示載入失敗，請重新整理頁面；管理功能不受影響。"
+    },
+    {
+      "fault": "hardware",
+      "pass": true,
+      "duration": 39700,
+      "elapsed": 0,
+      "totalDraws": 0,
+      "help": "L10 展示載入失敗，請重新整理頁面；管理功能不受影響。"
+    },
+    {
+      "fault": "core",
+      "pass": true,
+      "duration": 39700,
+      "elapsed": 0,
+      "totalDraws": 0,
+      "help": "L10 展示載入失敗，請重新整理頁面；管理功能不受影響。"
+    }
+  ],
+  "errors": [],
+  "pass": true
+}

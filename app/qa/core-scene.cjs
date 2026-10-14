@@ -12,7 +12,7 @@ const source=fs.readFileSync(path.join(__dirname,'../static/js/core-scene.js'),'
 const sharedSource=fs.readFileSync(path.join(__dirname,'../static/js/rack-equipment-scene.js'),'utf8');
 const results=[];
 
-function harness({reduced=false,unavailable=false}={}){
+function harness({reduced=false,unavailable=false,profile}={}){
   let clock=0,nextFrame=0,draws=0,deletedBuffers=0,deletedPrograms=0,compileFailure=false,nextBuffer=0,activeBuffer=null;
   const frames=new Map(),events=new Map(),globalEvents=new Map(),timers=new Map(),uploads=[],captured=new Set(),dispatched=[],drawRecords=[],uploadedByBuffer=new Map(),uniformValues={};
   let canvasSize={width:810,height:610};
@@ -30,7 +30,7 @@ function harness({reduced=false,unavailable=false}={}){
     deleteBuffer:()=>deletedBuffers++,deleteProgram:()=>deletedPrograms++
   },{get:(target,key)=>key in target?target[key]:(/^[A-Z_]+$/.test(key)?1:()=>{})});
   const canvas={
-    style:{touchAction:'pan-y'},dataset:{},width:0,height:0,
+    style:{touchAction:'pan-y'},dataset:profile?{coreProfile:profile}:{},width:0,height:0,
     getContext:()=>unavailable?null:gl,getBoundingClientRect:()=>({...canvasSize}),
     addEventListener:(name,fn)=>events.set(name,fn),removeEventListener:name=>events.delete(name),
     dispatchEvent:event=>dispatched.push(event.type),focus(){},
@@ -448,6 +448,14 @@ check('360-degree original equipment, enclosed depth, attached service routing a
 check('WebGL unavailable fallback does not install interactive listeners',()=>{
   const h=harness({unavailable:true});assert.equal(h.scene.supported,false);assert.equal(h.canvas.dataset.coreState,'fallback');assert.equal(h.events.size,0);assert.equal(h.frames.size,0);
   h.scene.setOrbit(1,1);h.scene.setProgress(1);h.scene.setTheme('light');h.scene.destroy();
+});
+
+check('Requested complete L10 profile fails visibly if the hardware module is missing',()=>{
+  const h=harness({profile:'coolingV2'});h.flush(10);
+  assert.equal(h.scene.supported,false);assert.equal(h.canvas.dataset.coreProfile,'coolingV2');
+  assert.equal(h.canvas.dataset.coreState,'fallback');assert.match(h.canvas.dataset.coreError,/L10 hardware.*failed to load/i);
+  assert.deepEqual(h.dispatched,['pa-core-fallback']);assert.equal(h.stats().draws,0);assert.equal(h.uploads.length,0);
+  assert.equal(h.events.size,0);assert.equal(h.frames.size,0);h.scene.destroy();
 });
 
 check('Context loss, successful restoration, failed restoration and cleanup',()=>{

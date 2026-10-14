@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L10 Cinematic P1 — 修復與驗收</title>
+<style>
+body{max-width:1120px;margin:40px auto;padding:0 24px;background:#f7f8f6;color:#18333f;font:16px/1.65 system-ui,"Microsoft JhengHei",sans-serif}h1{font-size:30px}h2{margin-top:44px;font-size:23px}a{color:#006c93}code{overflow-wrap:anywhere;font-size:.88em}table{border-collapse:collapse;width:100%;margin:20px 0}th,td{border:1px solid #becbd0;padding:10px;text-align:left;vertical-align:top}video,img{width:100%;height:auto;background:#091017}figure{margin:18px 0}figcaption{margin-top:6px}.pair{display:grid;grid-template-columns:1fr 1fr;gap:20px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}@media(max-width:760px){.pair,.three{display:block}table{font-size:13px}}
+</style>
+<h1>L10 Cinematic P1 修復與驗收</h1>
+<p>基準：<code>b3664ea97d52f1e6d756de00cfb5a8c84821c0cc</code><br>分支：<code>codex/cinematic-l10-assembly-intro</code>。本次只修正正式入口管路版本、水流辨識度、SSD 共面衝突及相關載入保護。</p>
+<p>驗收環境為本機真實 Chromium / NVIDIA RTX 4070 / ANGLE D3D11 WebGL，非軟體繪圖。Backend 使用既有 preview fixtures 隔離；沒有接觸硬體或部署正式服務。影片為原生 recordVideo（25 fps 編碼）；render-loop telemetry 約 60 fps，兩者不能混稱。</p>
+
+<h2>Root Cause 與 Before / After</h2>
+<table><thead><tr><th>問題</th><th>Before（b3664ea）</th><th>修復</th></tr></thead><tbody>
+<tr><td>正式播放與驗收管路不一致</td><td>驗收頁自動加入 <code>l10Bareboard=1</code>；一般 <code>/#/dashboard</code> 沒有此 flag，直接選 procedural legacy，不是 GLB 載入失敗。完整資產有六組蛇形冷卻迴路／22 fluid buffers；legacy 使用不同管徑、接頭位置與兩個 procedural flow meshes。</td><td>Dashboard canvas 明確請求 <code>data-core-profile="coolingV2"</code>。一般入口、原 opt-in 入口、review 使用相同 GLB、GPU buffers、Shader 與 draw sequence。</td></tr>
+<tr><td>水流只出現約一秒、幾乎不動</td><td>一般入口選到 35.2 秒 legacy movie，完全顯示 flow 僅 8.65–9.7 秒，沒有 cooling travel shader 分支。即使 opt-in 的 GPU travel 正常，原 fluid alpha 約 0.94–1.0、波包佔比過寬，整條路徑近乎同時亮起。</td><td>正式入口鎖定既有 39.7 秒 coolingV2。只調整 fluid branch 的密度波包與 alpha（0.18–1.0），形成可見間隔與前緣；速度 0.85、週期 0.38、分支相位校正、供回水方向不變。</td></tr>
+<tr><td>SSD 閃爍</td><td><code>l10-io</code> 的八顆 SSD：深色外殼負 X 面與鎳色 insert 寬面精確共面。每顆 4 組正面積重疊 triangle pairs，共 32 組；同一 transform、opaque 材質、LEQUAL depth 下產生 Z-fighting，不是動畫抖動或重複整顆 Mesh。</td><td>外殼寬面改為 insert 周围的四條邊框，移除隱藏的重疊面。SSD 外形尺寸、insert 座標、法線與材質不變；不是調整燈光、depth bias 或降低畫質。</td></tr>
+<tr><td>失敗時版本混搭</td><td>cooling GLB 失敗可留下 bare-board GLB + legacy procedural cooling，且 clock 切回 legacy。</td><td>完整 profile 未就緒不畫半套模型、不消耗播放時間；失敗使用既有靜態提示，禁用播放控制。恢復不會自動重播失敗片段。</td></tr>
+</tbody></table>
+<p>未發現 selective checkout 造成已保存 RC 資產混搭：歷史影片記錄的 8 項資源 hash 全部與基準一致；驗收 12 項中 11 項 byte-identical，review HTML 的差異僅 LF/CRLF。影片 metadata 的較早 HEAD 不是資產內容差異。使用者當時實際觀看的 URL／影片未另行提供，因此不把本機重現冒充已確認的線上影片來源。詳見 <a href="baseline-audit.json">基準稽核</a>、<a href="baseline-geometry.json">管路與 Mesh 清冊</a>。</p>
+
+<h2>模式一致性：12.3 秒、相同相機矩陣</h2>
+<table><thead><tr><th>模式</th><th>修復前 draw calls</th><th>修復後 draw calls</th><th>修復後 fluid draws</th></tr></thead><tbody>
+<tr><td>一般 Dashboard</td><td>7（已进入 legacy 蓋板階段）</td><td>233</td><td>22</td></tr>
+<tr><td>RC opt-in Dashboard</td><td>233</td><td>233</td><td>22</td></tr>
+<tr><td>冷卻驗收頁</td><td>233</td><td>233</td><td>22</td></tr>
+</tbody></table>
+<p>三模式均使用原生 <code>cooling-hero</code> inspection API，2127×1272 canvas，同一時間與 <code>uViewProjection / uModel / uEye</code>。Dashboard 僅加 <code>l10AssetLab=1</code> 開啟既有檢查 API，沒有加入模型選擇 flag；無參數一般入口另外完成全片驗證。Ordered GPU draws／buffers／uniforms hash 完全一致，PNG 並非逐位元完全相同（少量 GPU 像素差異）。</p>
+<div class="three">
+<figure><a href="integration/dashboard-12300-native.png"><img src="integration/dashboard-12300-native.png" alt="正式入口原生 WebGL 12.3 秒"></a><figcaption>正式入口</figcaption></figure>
+<figure><a href="integration/opt-in-12300-native.png"><img src="integration/opt-in-12300-native.png" alt="RC opt-in 原生 WebGL 12.3 秒"></a><figcaption>原 RC opt-in</figcaption></figure>
+<figure><a href="integration/review-12300-native.png"><img src="integration/review-12300-native.png" alt="驗收頁原生 WebGL 12.3 秒"></a><figcaption>驗收頁</figcaption></figure>
+</div>
+<p>對照修復前：<a href="before/ordinary-12300-webgl.png">一般入口原生畫面</a>、<a href="before/acceptance-12300-webgl.png">驗收頁原生畫面</a>。實際 draw calls、資產 request/response SHA、compiled Shader SHA 與 GPU buffer SHA 記錄：<a href="integration/dashboard.json">正式入口</a>／<a href="integration/opt-in.json">opt-in</a>／<a href="integration/review.json">review</a>／<a href="integration/summary.json">彙總</a>。</p>
+
+<h2>水流動態驗收</h2>
+<p>保留 flow 10.5–14.3 秒（含淡入）、39.7 秒全片；沒有延長到 5–6 秒，也沒有移動 Rack 時序。固定相機的三個時間點：GPU travel 依序為 <code>0.595 → 1.530 → 2.465</code>，幾何／相機簽章不變，波包位置與渲染像素改變。供水 → 冷板 → 回水方向與分支接縫相位保持一致。</p>
+<div class="three">
+<figure><a href="integration/flow-11200-fixed-camera-native.png"><img src="integration/flow-11200-fixed-camera-native.png" alt="11.2 秒固定相機水流位置"></a><figcaption>11.2 秒</figcaption></figure>
+<figure><a href="integration/flow-12300-fixed-camera-native.png"><img src="integration/flow-12300-fixed-camera-native.png" alt="12.3 秒固定相機水流位置"></a><figcaption>12.3 秒</figcaption></figure>
+<figure><a href="integration/flow-13400-fixed-camera-native.png"><img src="integration/flow-13400-fixed-camera-native.png" alt="13.4 秒固定相機水流位置"></a><figcaption>13.4 秒</figcaption></figure>
+</div>
+<p><a href="integration/flow-fixed-camera.json">逐路 uniform／矩陣／像素差異證據</a>。全片連續播放中，11.0–14.3 秒的完整水流期間每幀維持 22 個 fluid draws，travel 持續更新，原生解析度 1，沒有 JS／WebGL error。查看原尺寸影片能辨認波包沿蛇形彎道及支管移動；保留原始細管徑，因此縮小成 dashboard 縮圖時方向感較弱。</p>
+<div class="pair">
+<figure><video controls preload="metadata" src="before/film.webm"></video><figcaption>Before：基準 RC opt-in，既有 authored camera／39.7 秒。<a href="before/playback.json">telemetry</a></figcaption></figure>
+<figure><video controls preload="metadata" src="after/film.webm"></video><figcaption>After：一般 <code>/#/dashboard</code>，既有 authored camera／39.7 秒。<a href="after/playback.json">telemetry</a></figcaption></figure>
+</div>
+<p>影片完整錄製 Replay，期間沒有 seek；上方固定相機圖片是另外的確定性檢查，不冒充電影相機。原始水流材質並未被任意不透明替代 Mesh 遮擋；full-profile 渲染維持既有展示剖視與 22 條流體，不修改冷板或管殼幾何。</p>
+
+<h2>SSD 連續驗收</h2>
+<p>既有 <code>setOrbit</code> 控制的 8 秒連續相機掃描，18 個 SSD-01 寬面追蹤點；這是揭露共面衝突的診斷相機，非 authored film camera。Before 重現 660 次深色外殼／鎳色面切換；After 沒有深色覆蓋樣本或材質切換。相鄰採樣亮度跳動 P95 由 64.0092 降為 1.2126（降低 98.11%），全程 native resolution=1；沒有改動 PBR、光照或 Depth 狀態。</p>
+<div class="pair">
+<figure><video controls preload="metadata" src="ssd/before/ssd-orbit.webm"></video><figcaption>Before：共面 Z-fighting。<a href="ssd/before/ssd-playback.json">逐幀像素與材質切換量測</a></figcaption></figure>
+<figure><video controls preload="metadata" src="ssd/after/ssd-orbit.webm"></video><figcaption>After：沒有深色／鎳色切換。<a href="ssd/after/ssd-playback.json">逐幀像素与材質切換量測</a></figcaption></figure>
+</div>
+<p>CPU 幾何測試覆蓋全部八顆 SSD、procedural 與實際 coolingV2 build：32 組重疊變為 0、無裂縫／邊框自重疊；其餘 I/O triangles 及非 I/O meshes byte-identical。</p>
+
+<h2>修改檔案、保留範圍與測試</h2>
+<table><thead><tr><th>檔案</th><th>範圍</th></tr></thead><tbody>
+<tr><td><code>app/static/js/core-scene.js</code></td><td>正式 profile 選擇、完整資產就緒／失敗保護、fluid density 波包與透明度。</td></tr>
+<tr><td><code>app/static/js/validation-overview.js</code></td><td>明確 coolingV2、載入期間停止 clock、失敗控制與提示。</td></tr>
+<tr><td><code>app/static/js/l10-hardware.js</code></td><td>僅 SSD 負 X 面的共面隱藏表面移除。</td></tr>
+<tr><td><code>app/static/index.html</code>、三個 <code>l10-*-review.html</code></td><td>修改 JS 的 cache keys，避免舊版腳本快取。</td></tr>
+<tr><td><code>app/qa/core-scene.cjs</code>、<code>app/qa/l10-p1-*.cjs</code></td><td>依賴失敗、播放器生命週期、SSD 幾何與影片、全片與模式一致性回歸。</td></tr>
+</tbody></table>
+<p><a href="preservation.json">保留範圍證明</a>：103 個受保護檔案與基準相同；1,001 個採樣點的 default／coolingV2 pose、camera、Rack、flowTravel 完全一致。GLB、貼圖、Rack 幾何、Timeline、Camera、Lighting、非 fluid PBR 與其他動畫未改。外形尺寸保持不變；唯一局部幾何修正為 SSD 隱藏共面重疊。</p>
+<p><a href="cpu-regression.log">CPU 回歸結果</a>、<a href="integration/summary.json">Chromium 整合結果</a>。測試含 slow load、GLB 503、兩種 environment 503、hardware／scene JS 503；在失敗期間 0 draw、0 時間前進、不切回 legacy。Runtime manifest 檢查通過（225 files）；沒有新增 runtime 檔案。</p>
+<p>GLB SHA256（前後相同）：<br><code>bare-compute-boards.glb: 6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29</code><br><code>cooling-assembly.glb: 88eec60c20e775a431b446da311f3a1476cc2774173e628adc170ae3ac1f5a3f</code>。路徑的 <code>cooling-v1</code> 是既有資產名稱，不表示播放器使用 legacy。JS／compiled Shader 的實際 SHA256 請見三模式資源與 draw 記錄。</p>
+<p><a href="delivery-manifest.json">交付 SHA256 清冊</a>會再次比對五份實際播放／模式紀錄與目前 runtime 檔案，避免證據來自先前候選版本；並記錄所有證據檔案 hash。測試工作目錄的 review HTML 保留既有混合 LF/CRLF，Git 提交時正規化，不影響 script 內容與 URLs。</p>
+<p>驗收只涵蓋本次兩個 P1 與模式／載入一致性，未宣稱跨瀏覽器、所有低階 GPU 或整個管理平台的全面驗收。沒有 merge、reset、force push 或部署；兩個原有未追蹤素材保持不動。</p>
+</html>

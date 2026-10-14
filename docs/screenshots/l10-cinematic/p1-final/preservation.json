@@ -1,0 +1,502 @@
+{
+  "passed": true,
+  "generatedUTC": "2026-10-14T03:07:14.106Z",
+  "baseline": "b3664ea97d52f1e6d756de00cfb5a8c84821c0cc",
+  "method": "Read-only VM instrumentation using unchanged functions from app/qa/l10-final-rc-geometry.cjs. No historical evidence files or runtime sources were edited.",
+  "checks": [
+    "Central legacy 35.2s and approved cooling 39.7s mappings/inverses; all original lid/Rack intervals and smoothstep curves retain exact +4.5s offset",
+    "1001 deterministic cooling states: seated bare board, second-based plate/plumbing descent and constant fluid speed, explicit reveal/restore, solid before lid, unchanged Rack from .40",
+    "All 22 UV route bindings: continuous packet phase at six full circuits and trunks, forward local phase, matched manifold endpoint speed"
+  ],
+  "limits": [
+    "CPU preservation and source audit, not actual GPU playback.",
+    "SSD body negative-X overlapping faces and fluid density shader are the authorized targeted exceptions.",
+    "Profile selection and readiness/failure lifecycle are intentional controller changes."
+  ],
+  "timeline": {
+    "legacyDurationMs": 35200,
+    "coolingDurationMs": 39700,
+    "legacyKeys": [
+      [
+        0,
+        0
+      ],
+      [
+        1.7,
+        0.065
+      ],
+      [
+        3.3,
+        0.135
+      ],
+      [
+        5.4,
+        0.202
+      ],
+      [
+        6.6,
+        0.248
+      ],
+      [
+        8.4,
+        0.292
+      ],
+      [
+        8.65,
+        0.3
+      ],
+      [
+        9.7,
+        0.325
+      ],
+      [
+        9.9,
+        0.333
+      ],
+      [
+        12,
+        0.376
+      ],
+      [
+        13,
+        0.407
+      ],
+      [
+        17.5,
+        0.56
+      ],
+      [
+        21,
+        0.653333
+      ],
+      [
+        23.8,
+        0.733333
+      ],
+      [
+        26.2,
+        0.8
+      ],
+      [
+        27.2,
+        0.84
+      ],
+      [
+        29.7,
+        0.893333
+      ],
+      [
+        30.7,
+        0.906667
+      ],
+      [
+        33.2,
+        0.96
+      ],
+      [
+        35.2,
+        1
+      ]
+    ],
+    "coolingKeys": [
+      [
+        0,
+        0
+      ],
+      [
+        1.7,
+        0.065
+      ],
+      [
+        3.3,
+        0.135
+      ],
+      [
+        5.4,
+        0.202
+      ],
+      [
+        7.5,
+        0.248
+      ],
+      [
+        9.3,
+        0.276
+      ],
+      [
+        9.6,
+        0.278
+      ],
+      [
+        9.9,
+        0.284
+      ],
+      [
+        10.5,
+        0.292
+      ],
+      [
+        11,
+        0.3
+      ],
+      [
+        13.9,
+        0.325
+      ],
+      [
+        14.3,
+        0.333
+      ],
+      [
+        15.1,
+        0.345
+      ],
+      [
+        16.5,
+        0.376
+      ],
+      [
+        17.5,
+        0.407
+      ],
+      [
+        22,
+        0.56
+      ],
+      [
+        25.5,
+        0.653333
+      ],
+      [
+        28.3,
+        0.733333
+      ],
+      [
+        30.7,
+        0.8
+      ],
+      [
+        31.7,
+        0.84
+      ],
+      [
+        34.2,
+        0.893333
+      ],
+      [
+        35.2,
+        0.906667
+      ],
+      [
+        37.7,
+        0.96
+      ],
+      [
+        39.7,
+        1
+      ]
+    ],
+    "lidAndRackOffsetMs": 4500,
+    "independentClockSamplesPerMode": 1601,
+    "lidAndRackSamples": 1001
+  },
+  "poseAudit": {
+    "samples": 1001,
+    "range": [
+      0,
+      1
+    ],
+    "step": 0.001,
+    "compared": [
+      "legacy snapshot",
+      "coolingV2 snapshot",
+      "cooling state including flowTravel",
+      "cooling camera",
+      "default camera",
+      "Rack plan and placements"
+    ],
+    "baselineSHA256": "c8c88c1f3ec87fa685058ca1ea93f95dac579f4b0db640e679e71d0c8307ae0d",
+    "candidateSHA256": "c8c88c1f3ec87fa685058ca1ea93f95dac579f4b0db640e679e71d0c8307ae0d"
+  },
+  "fluidJunctionAudit": {
+    "period": 0.38,
+    "globalPhaseSpeed": 0.85,
+    "rows": [
+      {
+        "seat": "CPU-L",
+        "length": 3.950504359545781,
+        "correction": 0.1837990510172567,
+        "joins": [
+          {
+            "id": "supply/inlet",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "inlet/channel",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "channel/outlet",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "outlet/return",
+            "phaseMismatch": 0
+          }
+        ],
+        "minPhaseDerivative": 1,
+        "maxPhaseDerivative": 1.0872352462602979,
+        "manifoldEndpointSpeed": 0.85
+      },
+      {
+        "seat": "GPU-L-OUTER",
+        "length": 6.349808939771599,
+        "correction": 0.06449459000072721,
+        "joins": [
+          {
+            "id": "supply/inlet",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "inlet/channel",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "channel/outlet",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "outlet/return",
+            "phaseMismatch": 0
+          }
+        ],
+        "minPhaseDerivative": 1,
+        "maxPhaseDerivative": 1.0190442511575337,
+        "manifoldEndpointSpeed": 0.85
+      },
+      {
+        "seat": "GPU-L-INNER",
+        "length": 6.349808882495712,
+        "correction": 0.06449452806732481,
+        "joins": [
+          {
+            "id": "supply/inlet",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "inlet/channel",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "channel/outlet",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "outlet/return",
+            "phaseMismatch": -1.7763568394002505e-15
+          }
+        ],
+        "minPhaseDerivative": 1,
+        "maxPhaseDerivative": 1.0190442330413423,
+        "manifoldEndpointSpeed": 0.85
+      },
+      {
+        "seat": "CPU-R",
+        "length": 3.9505043255319805,
+        "correction": 0.18379908503105646,
+        "joins": [
+          {
+            "id": "supply/inlet",
+            "phaseMismatch": -8.881784197001252e-16
+          },
+          {
+            "id": "inlet/channel",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "channel/outlet",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "outlet/return",
+            "phaseMismatch": 0
+          }
+        ],
+        "minPhaseDerivative": 1,
+        "maxPhaseDerivative": 1.0872352631551223,
+        "manifoldEndpointSpeed": 0.85
+      },
+      {
+        "seat": "GPU-R-INNER",
+        "length": 6.349808923060953,
+        "correction": 0.06449448750208298,
+        "joins": [
+          {
+            "id": "supply/inlet",
+            "phaseMismatch": -8.881784197001252e-16
+          },
+          {
+            "id": "inlet/channel",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "channel/outlet",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "outlet/return",
+            "phaseMismatch": -1.7763568394002505e-15
+          }
+        ],
+        "minPhaseDerivative": 1,
+        "maxPhaseDerivative": 1.0190442209413937,
+        "manifoldEndpointSpeed": 0.85
+      },
+      {
+        "seat": "GPU-R-OUTER",
+        "length": 6.349809094602403,
+        "correction": 0.06449443516992481,
+        "joins": [
+          {
+            "id": "supply/inlet",
+            "phaseMismatch": -8.881784197001252e-16
+          },
+          {
+            "id": "inlet/channel",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "channel/outlet",
+            "phaseMismatch": 0
+          },
+          {
+            "id": "outlet/return",
+            "phaseMismatch": 1.7763568394002505e-15
+          }
+        ],
+        "minPhaseDerivative": 1,
+        "maxPhaseDerivative": 1.0190442049740365,
+        "manifoldEndpointSpeed": 0.85
+      }
+    ],
+    "method": "Actual unchanged route lengths and UV offsets; modulo phase checked at all six supply/inlet/channel/outlet/return joins and both trunks, with positive interior derivative and exact endpoint speed match."
+  },
+  "protectedTrackedScope": {
+    "paths": [
+      "assets",
+      "app/static/models",
+      "app/static/img",
+      "app/static/js/l10-timeline.js",
+      "app/static/js/rack-equipment-scene.js",
+      "app/static/js/l10-gltf.js",
+      "app/static/js/l10-asset-runtime.js",
+      "app/static/js/cinematic.js"
+    ],
+    "files": 103,
+    "changed": [],
+    "note": "Git comparison excludes pre-existing untracked user files; none are modified."
+  },
+  "protectedShaderAndPureScene": {
+    "normalization": "CRLF to LF; only uCoolingFlow fragment branch replaced with the same marker",
+    "baselineSHA256": "453c2c74ae64e9d367f8b149b5b640cd23975d019ade09e03c435b4586342cbb",
+    "candidateSHA256": "453c2c74ae64e9d367f8b149b5b640cd23975d019ade09e03c435b4586342cbb",
+    "exact": true
+  },
+  "resourceHashes": [
+    {
+      "path": "app/static/js/l10-timeline.js",
+      "comparison": "UTF-8 LF normalized",
+      "baselineSHA256": "6d7ef4b01ac274540906eb1ba7aed4fac347b4987c11c4fa3a1d2e6f36440bdc",
+      "candidateSHA256": "6d7ef4b01ac274540906eb1ba7aed4fac347b4987c11c4fa3a1d2e6f36440bdc"
+    },
+    {
+      "path": "app/static/js/rack-equipment-scene.js",
+      "comparison": "UTF-8 LF normalized",
+      "baselineSHA256": "b2ecfdb0394a1253da694bdb3d5eb810e8373bfb938eef46aac1bcd215b054f7",
+      "candidateSHA256": "b2ecfdb0394a1253da694bdb3d5eb810e8373bfb938eef46aac1bcd215b054f7"
+    },
+    {
+      "path": "app/static/js/l10-gltf.js",
+      "comparison": "UTF-8 LF normalized",
+      "baselineSHA256": "94a64352124c96eda34214c3cc9796db9d836a697bbc3c46e2dbe2d94b8b7e3c",
+      "candidateSHA256": "94a64352124c96eda34214c3cc9796db9d836a697bbc3c46e2dbe2d94b8b7e3c"
+    },
+    {
+      "path": "app/static/js/l10-asset-runtime.js",
+      "comparison": "UTF-8 LF normalized",
+      "baselineSHA256": "81e4441956c9aa1fec97afa27b9f351d5a93120556d1678dc22ad2ad97537619",
+      "candidateSHA256": "81e4441956c9aa1fec97afa27b9f351d5a93120556d1678dc22ad2ad97537619"
+    },
+    {
+      "path": "app/static/js/cinematic.js",
+      "comparison": "UTF-8 LF normalized",
+      "baselineSHA256": "2824bd51d3d4682b4a964fdddcbca8defda6b2795ffe78039d1daed2da39df5d",
+      "candidateSHA256": "2824bd51d3d4682b4a964fdddcbca8defda6b2795ffe78039d1daed2da39df5d"
+    },
+    {
+      "path": "app/static/models/l10-prototype/bare-compute-boards.glb",
+      "comparison": "raw bytes",
+      "baselineSHA256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29",
+      "candidateSHA256": "6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29"
+    },
+    {
+      "path": "app/static/models/l10-cooling-v1/cooling-assembly.glb",
+      "comparison": "raw bytes",
+      "baselineSHA256": "88eec60c20e775a431b446da311f3a1476cc2774173e628adc170ae3ac1f5a3f",
+      "candidateSHA256": "88eec60c20e775a431b446da311f3a1476cc2774173e628adc170ae3ac1f5a3f"
+    },
+    {
+      "path": "app/static/models/l10-cooling-v1/assembly.json",
+      "comparison": "UTF-8 LF normalized",
+      "baselineSHA256": "255bca08c365c3837211f584b932d9f333be80c714590abfb3f4a8473b12a596",
+      "candidateSHA256": "255bca08c365c3837211f584b932d9f333be80c714590abfb3f4a8473b12a596"
+    },
+    {
+      "path": "app/static/img/l10/studio-small-09-radiance.png",
+      "comparison": "raw bytes",
+      "baselineSHA256": "d8896d4633a204501e51deb29f655e3244993b816db18ef974b812d51d905f6e",
+      "candidateSHA256": "d8896d4633a204501e51deb29f655e3244993b816db18ef974b812d51d905f6e"
+    },
+    {
+      "path": "app/static/img/l10/studio-small-09-cooling-radiance.png",
+      "comparison": "raw bytes",
+      "baselineSHA256": "9e24492fc1ae5b20c380f1cf6a94694983a6c902a7f4e4f047dddbcb9822428d",
+      "candidateSHA256": "9e24492fc1ae5b20c380f1cf6a94694983a6c902a7f4e4f047dddbcb9822428d"
+    }
+  ],
+  "candidateSourceHashes": [
+    {
+      "path": "app/static/js/core-scene.js",
+      "sha256": "e64bc0ef8779f5da5fb8526b27dc1586f09a23d37dac50808f0dc8e4a3d289eb"
+    },
+    {
+      "path": "app/static/js/l10-hardware.js",
+      "sha256": "a32753d395b5a0dba8eb4e75905c58e120b4fad58263ed0f82dc9b7dffbfe206"
+    },
+    {
+      "path": "app/static/js/validation-overview.js",
+      "sha256": "b5bfcf5b768a3aa4b8833da9f620d480a46eab5daf2f3b048833561b2aabe19b"
+    },
+    {
+      "path": "app/qa/core-scene.cjs",
+      "sha256": "259ae68eb606efe1c9eb15e5c876a292c974fa8ab3b1b41025c17d18fb048490"
+    },
+    {
+      "path": "app/qa/l10-p1-player.cjs",
+      "sha256": "a8390af4fa275dc6134c51e1899af8dfe07a455379f0c59109d3cb6545e5ad7e"
+    }
+  ],
+  "finalControllerVerifiedUTC": "2026-10-14T03:10:15.937Z",
+  "cpuRegression": {
+    "evidence": "cpu-regression.log",
+    "coreSceneChecks": 20,
+    "playerChecks": 8,
+    "hardwareVertices": 310470,
+    "storageLayoutGroups": 12,
+    "ssdInvariantGroups": 6,
+    "ssdDrives": 8,
+    "ssdBuildModes": 2,
+    "syntaxChecks": 3,
+    "allPassed": true
+  }
+}

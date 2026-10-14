@@ -23,7 +23,7 @@
         <button class="btn primary" type="button" data-vo-enter>進入系統與專案</button>
       </div>
       <div class="cine-stage vo-scene" id="core-stage" data-phase="system">
-        <div class="cine-core" id="core-visual"><img class="cine-fallback" src="/static/img/server-hero.png" alt="伺服器設備視圖"><canvas id="system-core" tabindex="0" role="img" aria-label="L10 分解與組裝、CPU 與 GPU 封裝、液冷示意、連續機櫃整合與 System Overview" aria-describedby="core-interaction-help"></canvas><svg class="vo-device-callouts" data-vo-callouts aria-hidden="true"></svg></div>
+        <div class="cine-core" id="core-visual"><img class="cine-fallback" src="/static/img/server-hero.png" alt="伺服器設備視圖"><canvas id="system-core" data-core-profile="coolingV2" tabindex="0" role="img" aria-label="L10 分解與組裝、CPU 與 GPU 封裝、液冷示意、連續機櫃整合與 System Overview" aria-describedby="core-interaction-help"></canvas><svg class="vo-device-callouts" data-vo-callouts aria-hidden="true"></svg></div>
         <div class="vo-phase"><span data-vo-phase-number>01</span><div><b data-vo-phase-title>L10 SYSTEM</b><small data-vo-phase-detail>SERVER FOCUS</small></div></div>
         <div class="vo-l10-note" data-vo-l10-note></div>
         <div class="vo-cinematic-progress" aria-hidden="true"><i data-vo-progress></i></div>
@@ -80,7 +80,9 @@
   // The scene owns geometry and camera interpolation. This is the single owner
   // of cinematic time; cinematic.js only mounts/themes the compact scene.
   const timeline=window.PAL10Timeline;
-  const timelineMode=canvas=>canvas.dataset.coreCooling==='ready'?'coolingV2':'legacy';
+  // A requested shipping profile is stable while loading and after failure.
+  // Resource readiness must never silently select the legacy movie instead.
+  const timelineMode=canvas=>canvas.dataset.coreProfile==='coolingV2'||canvas.dataset.coreCooling==='ready'?'coolingV2':'legacy';
   const shots=[
     [0,'l10-exploded','01','L10 Exploded View','COMPUTE / COOLING / ENCLOSURE'],
     [.065,'compute-board','02','L10 Assembly','COMPUTE BOARD'],
@@ -103,7 +105,7 @@
     const progress=clamp(value);canvas.paCoreScene?.setProgress(progress);
     stage.dataset.phase=progress<.407?'system':progress<.80?'integration':'rack';
     let shot=shots[0];for(const candidate of shots){if(progress<candidate[0])break;shot=candidate;}
-    const coolingV1=canvas.dataset.coreCooling==='ready',clock=timeline.sample(progress,timelineMode(canvas));
+    const coolingV1=timelineMode(canvas)==='coolingV2',clock=timeline.sample(progress,timelineMode(canvas));
     if(coolingV1){
       const coolingShots={bare:['bare-board','01','L10 Bare-board View','2 CPU / 4 GPU / TWO COMPUTE BOARDS'],silicon:['silicon-detail','03','CPU / GPU Detail','SILICON / PACKAGE / HBM'],
         'plate-install':['cooling-install','05','Cold Plate Installation','SIX CONTACT SURFACES / TIM / RETENTION'],plumbing:['manifold-connect','05','Manifold Connection','SUPPLY / RETURN / SEALED FITTINGS'],
@@ -134,17 +136,32 @@
     const callouts=window.PAHeroCallouts?.mount(story.querySelector('[data-vo-callouts]'),canvas);
     const select=root.querySelector('[data-vo-select]'),replay=root.querySelector('[data-vo-replay]'),skip=root.querySelector('[data-vo-skip]');select.onchange=()=>{selectedProject=select.value;renderData();};root.querySelector('[data-vo-enter]').onclick=()=>window.cineEnterSelected();replay.onclick=()=>play(true);skip.onclick=()=>{if(document.activeElement===skip)replay.focus({preventScroll:true});seek(1);canvas.paCoreScene?.resetOrbit();};
     const refreshExisting=!!overview;void loadOverview(refreshExisting,refreshExisting);
-    let frame=0,timer=0,refreshTimer=0,disposed=false,mode='stopped',elapsed=0,lastTime=0,lastScroll=scrollY,progress=1,target=1,activeTimeline=timelineMode(canvas);
+    let frame=0,timer=0,refreshTimer=0,disposed=false,mode='stopped',elapsed=0,lastTime=0,lastScroll=scrollY,progress=0,target=0,pendingSeek=null,activeTimeline=timelineMode(canvas);
+    const sceneReady=()=>canvas.dataset.coreState==='ready';
+    const sceneFailed=()=>canvas.dataset.coreState==='fallback'||document.getElementById('core-stage')?.dataset.scene==='fallback';
     const syncTimeline=()=>{const next=timelineMode(canvas);if(next!==activeTimeline){activeTimeline=next;elapsed=timeline.timeAt(progress,next);}return timeline.definitions[activeTimeline];};
     const write=value=>{progress=clamp(value);applyProgress(progress);};
     const cancel=()=>{mode='stopped';clearTimeout(timer);cancelAnimationFrame(frame);frame=0;lastTime=0;};
     const schedule=()=>{if(!disposed&&!frame&&!document.hidden)frame=requestAnimationFrame(tick);};
+    const syncControls=()=>{
+      const available=sceneReady(),failed=sceneFailed();
+      replay.disabled=!available||reduced.matches;replay.setAttribute('aria-disabled',String(replay.disabled));
+      skip.disabled=!available;skip.setAttribute('aria-disabled',String(skip.disabled));
+      replay.title=!available?(failed?'展示載入失敗，請重新整理頁面':'展示載入中'):reduced.matches?'已依減少動態效果偏好停用重播':'重播 L10 與 Rack 展示';
+      story.querySelectorAll('[data-core-view]').forEach(button=>button.disabled=!available);
+      const help=document.getElementById('core-interaction-help');
+      if(help){help.setAttribute('role','status');help.textContent=available?'按住拖曳旋轉 · 方向鍵查看 · Home 重設':failed?'L10 展示載入失敗，請重新整理頁面；管理功能不受影響。':'正在載入 L10 展示…';}
+    };
+    const failed=()=>{cancel();pendingSeek=null;syncControls();};
     function tick(now){
       frame=0;if(disposed||document.hidden||mode==='stopped')return;
+      if(sceneFailed()){failed();return;}
+      if(!sceneReady()){lastTime=0;schedule();return;}
       if(canvas.dataset.coreEnvironment==='loading'||canvas.dataset.coreAsset==='loading'||canvas.dataset.coreCooling==='loading'){lastTime=0;schedule();return;}
       const dt=lastTime?Math.min(80,now-lastTime):0;lastTime=now;
       const film=syncTimeline();
       if(mode==='film'){
+        if(elapsed===0)try{sessionStorage.setItem(replayKey,'1');}catch{}
         elapsed=Math.min(film.durationMs,elapsed+dt);write(timeline.progressAt(elapsed,activeTimeline));
         if(elapsed===film.durationMs){mode='stopped';lastTime=0;return;}
       }else{
@@ -154,10 +171,14 @@
       }
       schedule();
     }
-    function seek(value){cancel();syncTimeline();target=reduced.matches?1:clamp(value);write(target);elapsed=timeline.timeAt(target,activeTimeline);lastScroll=scrollY;}
+    function seek(value){
+      cancel();if(sceneFailed()){failed();return;}syncTimeline();target=reduced.matches?1:clamp(value);lastScroll=scrollY;
+      if(!sceneReady()){pendingSeek=target;return;}
+      pendingSeek=null;write(target);elapsed=timeline.timeAt(target,activeTimeline);
+    }
     const manualScroll=()=>{
       const nextScroll=scrollY,delta=nextScroll-lastScroll;lastScroll=nextScroll;
-      if(disposed||Math.abs(delta)<.5)return;
+      if(disposed||!sceneReady()||Math.abs(delta)<.5)return;
       if(reduced.matches){seek(1);return;}
       // Take over at the current cinematic position. Using absolute document Y
       // here used to snap a completed rack back into a server on first scroll.
@@ -171,28 +192,32 @@
     const wheel=()=>{if(mode==='film')cancel();};
     const tools=story.querySelector('#core-tools');
     function play(force=false){
+      if(sceneFailed()){failed();return;}
       if(reduced.matches){seek(1);return;}
-      cancel();elapsed=0;target=0;write(0);lastScroll=scrollY;
-      try{sessionStorage.setItem(replayKey,'1');}catch{}
+      cancel();pendingSeek=null;elapsed=0;target=0;write(0);lastScroll=scrollY;
       mode='film';timer=setTimeout(schedule,force?80:800);
     }
     const motionChange=()=>{
-      replay.disabled=reduced.matches;replay.setAttribute('aria-disabled',String(reduced.matches));
-      replay.title=reduced.matches?'已依減少動態效果偏好停用重播':'重播 L10 與 Rack 展示';
+      syncControls();
       if(reduced.matches)seek(1);
     };
     const visibilityChange=()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;lastTime=0;}else if(mode!=='stopped')schedule();};
-    const ready=()=>{syncTimeline();applyProgress(progress);};
+    const ready=()=>{
+      if(!sceneReady())return;
+      syncTimeline();syncControls();
+      if(pendingSeek!==null){write(pendingSeek);pendingSeek=null;elapsed=timeline.timeAt(progress,activeTimeline);}else applyProgress(progress);
+      lastTime=0;if(mode!=='stopped')schedule();
+    };
     let played=false;try{played=sessionStorage.getItem(replayKey)==='1';}catch{}
     motionChange();if(reduced.matches||played)seek(1);else play();
     // Deterministic public playback control also lets QA exercise the real
     // phase labels, scan overlay and progress ownership when seeking a shot.
     story.paHeroPlayback={seek,seekTime:ms=>seek(timeline.progressAt(ms,timelineMode(canvas))),pause:cancel,
-      resume:()=>{if(reduced.matches||progress>=1)return;syncTimeline();elapsed=timeline.timeAt(progress,activeTimeline);mode='film';lastTime=0;schedule();},
+      resume:()=>{if(sceneFailed()){failed();return;}if(reduced.matches||progress>=1)return;syncTimeline();elapsed=timeline.timeAt(progress,activeTimeline);mode='film';lastTime=0;schedule();},
       skip:()=>skip.click(),replay:()=>play(true),getState:()=>({progress,target,mode,duration:timeline.definitions[timelineMode(canvas)].durationMs,elapsedMs:timeline.timeAt(progress,timelineMode(canvas)),timelineMode:timelineMode(canvas),reducedMotion:reduced.matches})};
     refreshTimer=setInterval(()=>{if(!document.hidden&&root.isConnected)void loadOverview(true,true);},REFRESH_MS);
-    window.addEventListener('scroll',manualScroll,{passive:true});canvas.addEventListener('pointerdown',input,{passive:true});canvas.addEventListener('touchstart',input,{passive:true});canvas.addEventListener('keydown',input);story.addEventListener('wheel',wheel,{passive:true});tools?.addEventListener('click',input);canvas.addEventListener('pa-core-ready',ready);document.addEventListener('visibilitychange',visibilityChange);reduced.addEventListener('change',motionChange);
-    teardown=()=>{disposed=true;cancel();callouts?.destroy();clearInterval(refreshTimer);delete story.paHeroPlayback;window.removeEventListener('scroll',manualScroll);canvas.removeEventListener('pointerdown',input);canvas.removeEventListener('touchstart',input);canvas.removeEventListener('keydown',input);story.removeEventListener('wheel',wheel);tools?.removeEventListener('click',input);canvas.removeEventListener('pa-core-ready',ready);document.removeEventListener('visibilitychange',visibilityChange);reduced.removeEventListener('change',motionChange);};
+    window.addEventListener('scroll',manualScroll,{passive:true});canvas.addEventListener('pointerdown',input,{passive:true});canvas.addEventListener('touchstart',input,{passive:true});canvas.addEventListener('keydown',input);story.addEventListener('wheel',wheel,{passive:true});tools?.addEventListener('click',input);canvas.addEventListener('pa-core-ready',ready);canvas.addEventListener('pa-core-fallback',failed);document.addEventListener('visibilitychange',visibilityChange);reduced.addEventListener('change',motionChange);
+    teardown=()=>{disposed=true;cancel();callouts?.destroy();clearInterval(refreshTimer);delete story.paHeroPlayback;window.removeEventListener('scroll',manualScroll);canvas.removeEventListener('pointerdown',input);canvas.removeEventListener('touchstart',input);canvas.removeEventListener('keydown',input);story.removeEventListener('wheel',wheel);tools?.removeEventListener('click',input);canvas.removeEventListener('pa-core-ready',ready);canvas.removeEventListener('pa-core-fallback',failed);document.removeEventListener('visibilitychange',visibilityChange);reduced.removeEventListener('change',motionChange);};
   }
   window.cineOpenProject=name=>{const project=projectByName(name);productProject(name,project?.level==='L11'?'rack':'system');};
   window.openProjectInspection=name=>{const machine=machines.find(item=>item.project===name&&item.mgx_type!=='blanking'&&!item.passive);if(!machine){window.cineOpenProject(name);return;}openMachine(machine.name);setTimeout(()=>window.productDetailTab?.('sensors',true),0);};

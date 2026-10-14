@@ -1,0 +1,375 @@
+L10 P1 final CPU regression
+Date UTC: 2026-10-14T03:06:12.943Z
+Note: WebGL doubles and CPU tests; real GPU evidence is separate.
+SHA256 e64bc0ef8779f5da5fb8526b27dc1586f09a23d37dac50808f0dc8e4a3d289eb app/static/js/core-scene.js
+SHA256 8f1d31edda9a70b6d5a864002c85e13ec7ac1d265ab71a8b42601be322176a20 app/static/js/validation-overview.js
+SHA256 a32753d395b5a0dba8eb4e75905c58e120b4fad58263ed0f82dc9b7dffbfe206 app/static/js/l10-hardware.js
+SHA256 6d7ef4b01ac274540906eb1ba7aed4fac347b4987c11c4fa3a1d2e6f36440bdc app/static/js/l10-timeline.js
+
+COMMAND: node app/qa/core-scene.cjs
+PASS Complete finite geometry; stable shared uploads; settled hero waits for idle timer
+PASS Editorial 48U plan: 41 components, no CDU, exact neutral lower infrastructure
+PASS All blanking groups contain only exact repeated upper 1U panels
+PASS Shared canonical geometry, no left number gutter, and one actual primary draw at its target
+PASS Full-rack assembly is exactly reversible and every device aligns before physical insertion
+PASS Actual uploaded telescoping rail meshes overlap throughout physical insertion
+PASS Actual equipment enclosures never collide during convergence or engineering separation
+PASS Four engineering callouts derive counts, representatives and anchors from the projected physical model
+PASS Resized and rotated standalone / assembled hardware stays inside the actual camera frustum
+PASS Four horizontal quadrants, rear view, top/bottom and release persistence
+PASS Reversible scroll/reset eases camera, uses shortest arc, and settles final hero
+PASS Keyboard orbit and reset; Reduced Motion still permits deliberate inspection
+PASS Theme, resize and complete idempotent disposal
+PASS Idle showcase enters after 6.5 seconds and every input family eases out
+PASS Restrained lighting avoids scanning HUD effects and reduced motion freezes animated shader light
+PASS Slow-frame capability reduction, camera convergence and settled final-pose idle hold
+PASS 360-degree original equipment, enclosed depth, attached service routing and material families
+PASS WebGL unavailable fallback does not install interactive listeners
+PASS Requested complete L10 profile fails visibly if the hardware module is missing
+PASS Context loss, successful restoration, failed restoration and cleanup
+
+20/20 core-scene checks passed. Browser visual/GL validation is still required.
+
+EXIT: 0
+
+COMMAND: node app/qa/l10-p1-player.cjs
+PASS Ordinary Dashboard explicitly requests coolingV2 before mounting; undefined/loading state never spends movie time
+PASS Seek queues during loading and an explicit Resume starts at that target only after complete readiness
+PASS Fallback cancels pending film/seek; Replay, Resume, Skip, direct seek and scroll cannot bypass the error
+PASS Failure before player mount is visible and never falls through to legacy playback
+PASS Existing mount fallback marker reports missing core script even without renderer state
+PASS A mid-film renderer failure holds the current authored time and recovery does not auto-resume
+PASS Reduced Motion and a prior completed visit queue the final pose until resources are ready
+PASS Visibility pauses wall time and teardown removes the failure/ready listeners
+{
+  "pass": true,
+  "checks": 8,
+  "scope": "Real shipping player and timeline source; deterministic DOM/RAF lifecycle tests, not WebGL verification"
+}
+
+EXIT: 0
+
+COMMAND: node app/qa/l10-hardware.cjs
+PASS 310470 finite vertices, normalized surfaces, six package/TIM/copper contacts and bonded underfill, eight aligned board supports, 24 cold-plate retention contacts, profile isolation
+
+EXIT: 0
+
+COMMAND: node app/qa/l10-storage-layout.cjs
+{
+  "pass": true,
+  "checks": [
+    "8 unique drive axes and dimensions",
+    "Complete carrier and aperture clearance",
+    "17 mm pitch / .6 mm inter-carrier gap",
+    "Management board and connector separation",
+    "72 actual triangle storage aperture rays and 7 physical dividers",
+    "117 network/RJ45/USB aperture rays",
+    "Byte-identical shared rack and L10 facade",
+    "Actual SSD meshes and maximum tolerance vs guides",
+    "32 actual floor and closed-lid coverage samples",
+    "Side-standing rear connector plane",
+    "Network PCB collision audit",
+    "Six network cages meet their facade"
+  ],
+  "layout": "e1s-15mm-eight-bay-v1",
+  "bodyMM": {
+    "width": 15,
+    "height": 33.75,
+    "depth": 118.75
+  },
+  "clearancesMM": {
+    "bodyToFloor": 1.2,
+    "bodyToLid": 2.8419708029197084,
+    "carrierToFloor": 0.2749999999999993,
+    "carrierToLid": 1.916970802919709,
+    "betweenCarriers": 0.6000000000000014
+  },
+  "actualClearances": [
+    {
+      "id": "ssd-01",
+      "maximumBodyToLidMM": 2.7169708029197097,
+      "maximumBodyToFloorMM": 1.0750000000000002,
+      "minimumSideGuideClearanceMM": 0.15349999999999392
+    },
+    {
+      "id": "ssd-02",
+      "maximumBodyToLidMM": 2.7169708029197097,
+      "maximumBodyToFloorMM": 1.0750000000000002,
+      "minimumSideGuideClearanceMM": 0.15349999999999392
+    },
+    {
+      "id": "ssd-03",
+      "maximumBodyToLidMM": 2.7169708029197097,
+      "maximumBodyToFloorMM": 1.0750000000000002,
+      "minimumSideGuideClearanceMM": 0.1535
+    },
+    {
+      "id": "ssd-04",
+      "maximumBodyToLidMM": 2.7169708029197097,
+      "maximumBodyToFloorMM": 1.0750000000000002,
+      "minimumSideGuideClearanceMM": 0.15349999999999847
+    },
+    {
+      "id": "ssd-05",
+      "maximumBodyToLidMM": 2.7169708029197097,
+      "maximumBodyToFloorMM": 1.0750000000000002,
+      "minimumSideGuideClearanceMM": 0.15349999999999847
+    },
+    {
+      "id": "ssd-06",
+      "maximumBodyToLidMM": 2.7169708029197097,
+      "maximumBodyToFloorMM": 1.0750000000000002,
+      "minimumSideGuideClearanceMM": 0.15349999999999847
+    },
+    {
+      "id": "ssd-07",
+      "maximumBodyToLidMM": 2.7169708029197097,
+      "maximumBodyToFloorMM": 1.0750000000000002,
+      "minimumSideGuideClearanceMM": 0.1535
+    },
+    {
+      "id": "ssd-08",
+      "maximumBodyToLidMM": 2.7169708029197097,
+      "maximumBodyToFloorMM": 1.0750000000000002,
+      "minimumSideGuideClearanceMM": 0.1535
+    }
+  ],
+  "facadeTriangles": 18152
+}
+
+EXIT: 0
+
+COMMAND: node app/qa/l10-p1-ssd.cjs
+{
+  "pass": true,
+  "reference": "b3664ea97d52f1e6d756de00cfb5a8c84821c0cc",
+  "checks": [
+    "Eight SSDs retain exact envelope and material data",
+    "Baseline reproduces the coplanar overlap",
+    "No body/insert or border self-overlap after repair",
+    "No gaps in the corrected side",
+    "Every other mesh and I/O triangle remains byte-identical",
+    "Procedural and actual coolingV2 replacement builds"
+  ],
+  "results": [
+    {
+      "mode": "procedural",
+      "drives": [
+        {
+          "id": "ssd-01",
+          "beforeOverlap": {
+            "area": 0.17734819061712054,
+            "pairs": 4
+          },
+          "afterOverlap": {
+            "area": 0,
+            "pairs": 0
+          }
+        },
+        {
+          "id": "ssd-02",
+          "beforeOverlap": {
+            "area": 0.17734819061712054,
+            "pairs": 4
+          },
+          "afterOverlap": {
+            "area": 0,
+            "pairs": 0
+          }
+        },
+        {
+          "id": "ssd-03",
+          "beforeOverlap": {
+            "area": 0.17734819061712054,
+            "pairs": 4
+          },
+          "afterOverlap": {
+            "area": 0,
+            "pairs": 0
+          }
+        },
+        {
+          "id": "ssd-04",
+          "beforeOverlap": {
+            "area": 0.17734819061712054,
+            "pairs": 4
+          },
+          "afterOverlap": {
+            "area": 0,
+            "pairs": 0
+          }
+        },
+        {
+          "id": "ssd-05",
+          "beforeOverlap": {
+            "area": 0.17734819061712054,
+            "pairs": 4
+          },
+          "afterOverlap": {
+            "area": 0,
+            "pairs": 0
+          }
+        },
+        {
+          "id": "ssd-06",
+          "beforeOverlap": {
+            "area": 0.17734819061712054,
+            "pairs": 4
+          },
+          "afterOverlap": {
+            "area": 0,
+            "pairs": 0
+          }
+        },
+        {
+          "id": "ssd-07",
+          "beforeOverlap": {
+            "area": 0.17734819061712054,
+            "pairs": 4
+          },
+          "afterOverlap": {
+            "area": 0,
+            "pairs": 0
+          }
+        },
+        {
+          "id": "ssd-08",
+          "beforeOverlap": {
+            "area": 0.17734819061712054,
+            "pairs": 4
+          },
+          "afterOverlap": {
+            "area": 0,
+            "pairs": 0
+          }
+        }
+      ]
+    },
+    {
+      "mode": "coolingV2-runtime",
+      "drives": [
+        {
+          "id": "ssd-01",
+          "beforeOverlap": {
+            "area": 0.17734819061712054,
+            "pairs": 4
+          },
+          "afterOverlap": {
+            "area": 0,
+            "pairs": 0
+          }
+        },
+        {
+          "id": "ssd-02",
+          "beforeOverlap": {
+            "area": 0.17734819061712054,
+            "pairs": 4
+          },
+          "afterOverlap": {
+            "area": 0,
+            "pairs": 0
+          }
+        },
+        {
+          "id": "ssd-03",
+          "beforeOverlap": {
+            "area": 0.17734819061712054,
+            "pairs": 4
+          },
+          "afterOverlap": {
+            "area": 0,
+            "pairs": 0
+          }
+        },
+        {
+          "id": "ssd-04",
+          "beforeOverlap": {
+            "area": 0.17734819061712054,
+            "pairs": 4
+          },
+          "afterOverlap": {
+            "area": 0,
+            "pairs": 0
+          }
+        },
+        {
+          "id": "ssd-05",
+          "beforeOverlap": {
+            "area": 0.17734819061712054,
+            "pairs": 4
+          },
+          "afterOverlap": {
+            "area": 0,
+            "pairs": 0
+          }
+        },
+        {
+          "id": "ssd-06",
+          "beforeOverlap": {
+            "area": 0.17734819061712054,
+            "pairs": 4
+          },
+          "afterOverlap": {
+            "area": 0,
+            "pairs": 0
+          }
+        },
+        {
+          "id": "ssd-07",
+          "beforeOverlap": {
+            "area": 0.17734819061712054,
+            "pairs": 4
+          },
+          "afterOverlap": {
+            "area": 0,
+            "pairs": 0
+          }
+        },
+        {
+          "id": "ssd-08",
+          "beforeOverlap": {
+            "area": 0.17734819061712054,
+            "pairs": 4
+          },
+          "afterOverlap": {
+            "area": 0,
+            "pairs": 0
+          }
+        }
+      ]
+    }
+  ]
+}
+
+EXIT: 0
+
+FINAL SOURCE FREEZE: 2026-10-14T03:10:15.728Z
+SHA256 e64bc0ef8779f5da5fb8526b27dc1586f09a23d37dac50808f0dc8e4a3d289eb app/static/js/core-scene.js
+SHA256 b5bfcf5b768a3aa4b8833da9f620d480a46eab5daf2f3b048833561b2aabe19b app/static/js/validation-overview.js
+SHA256 a32753d395b5a0dba8eb4e75905c58e120b4fad58263ed0f82dc9b7dffbfe206 app/static/js/l10-hardware.js
+SHA256 6d7ef4b01ac274540906eb1ba7aed4fac347b4987c11c4fa3a1d2e6f36440bdc app/static/js/l10-timeline.js
+
+COMMAND: node app/qa/l10-p1-player.cjs
+PASS Ordinary Dashboard explicitly requests coolingV2 before mounting; undefined/loading state never spends movie time
+PASS Seek queues during loading and an explicit Resume starts at that target only after complete readiness
+PASS Fallback cancels pending film/seek; Replay, Resume, Skip, direct seek and scroll cannot bypass the error
+PASS Failure before player mount is visible and never falls through to legacy playback
+PASS Existing mount fallback marker reports missing core script even without renderer state
+PASS A mid-film renderer failure holds the current authored time and recovery does not auto-resume
+PASS Reduced Motion and a prior completed visit queue the final pose until resources are ready
+PASS Visibility pauses wall time and teardown removes the failure/ready listeners
+{
+  "pass": true,
+  "checks": 8,
+  "scope": "Real shipping player and timeline source; deterministic DOM/RAF lifecycle tests, not WebGL verification"
+}
+EXIT: 0
+
+COMMAND: node --check app/static/js/validation-overview.js
+EXIT: 0
+
+COMMAND: node --check app/static/js/core-scene.js
+EXIT: 0
+
+COMMAND: node --check app/static/js/l10-hardware.js
+EXIT: 0

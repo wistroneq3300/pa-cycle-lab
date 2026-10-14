@@ -255,10 +255,10 @@
         float warp=branchT*branchT*branchT*(branchT*(branchT*6.0-15.0)+10.0);
         float travel=vUV.x+uCoolingPhase.y*warp-uCoolingTravel;
         float packet=fract(travel/.38);
-        // A resolved density front with a long coloured wake. Widen its
-        // plateau, not its wavelength or transport speed: the leading edge
-        // still travels on the same physical UV-distance clock at every join.
-        float witness=smoothstep(.12,.52,packet)*(1.0-smoothstep(.84,.98,packet));
+        // Separate the fronts with a low-density interval. The long trailing
+        // ramp and short leading edge make positive-U transport legible;
+        // retain the period used by the branch/header phase correction.
+        float witness=smoothstep(.44,.78,packet)*(1.0-smoothstep(.94,.995,packet));
         // The smooth cylindrical volume supplies the surface reflection.
         // No high-frequency travelling normal ripple: it fragmented the
         // narrow dashboard silhouette into specular flecks.
@@ -277,7 +277,9 @@
         float column=.62+.38*sqrt(nv);
         vec3 scatter=mix(body,vec3(.70),witness*.32)*irradiance*(.72+witness*1.10)*column;
         vec3 water=scatter+reflected*(f*.32+.012);
-        gl_FragColor=vec4(displayTransform(water),vColor.a*(.94+.06*witness));return;
+        // Density must change coverage as well as tint. Nearly opaque gaps
+        // previously made the complete circuit look uniformly illuminated.
+        gl_FragColor=vec4(displayTransform(water),vColor.a*(.18+.82*witness));return;
       }
       float metal=clamp(vMaterial.x,0.0,1.0),polymer=1.0-metal;
       float grain=fract(sin(dot(floor(vLocal*310.0),vec3(127.1,311.7,74.7)))*43758.5453);
@@ -510,7 +512,10 @@
     let shadowProgress=-1,shadowExplode=-1;
     let environmentTexture=null,environmentImage=null,environmentReady=false,environmentFailed=false,environmentGeneration=0;
     let coolingEnvironmentTexture=null,coolingEnvironmentImage=null,coolingEnvironmentReady=false,coolingEnvironmentFailed=false;
-    const bareAsset=/(?:^|[?&])l10Bareboard=1(?:&|$)/.test(window.location?.search||'');
+    // The shipping Cinematic and the inspection page request the same complete
+    // assembly. A missing URL flag must not silently select another model.
+    const bareAsset=canvas.dataset.coreProfile==='coolingV2'||/(?:^|[?&])l10Bareboard=1(?:&|$)/.test(window.location?.search||'');
+    if(bareAsset){canvas.dataset.coreProfile='coolingV2';canvas.dataset.coreState='loading';}
     const assetEnabled=hasL10()&&(bareAsset||/(?:^|[?&])l10AssetPrototype=1(?:&|$)/.test(window.location?.search||''));
     const inspectionEnabled=/(?:^|[?&])l10AssetLab=1(?:&|$)/.test(window.location?.search||'');
     let assetRuntime=null,assetLoading=false,assetFailed=false,assetError='',assetGeneration=0,inspection=null;
@@ -528,10 +533,12 @@
     const matrices=PLACEMENTS.map(item=>translation(0,item.y,0)),poses=PLACEMENTS.map(()=>({}));
     let projected=null;
     const fail=(reason='WebGL is unavailable')=>{canvas.dataset.coreState='fallback';canvas.dataset.coreError=String(reason);canvas.dispatchEvent(new CustomEvent('pa-core-fallback',{bubbles:true,detail:{reason:String(reason)}}));};
+    if(bareAsset&&!hasL10()){fail('L10 hardware renderer failed to load');return noop;}
     try{gl=canvas.getContext('webgl',{alpha:true,antialias:true,depth:true,premultipliedAlpha:false,powerPreference:'high-performance',preserveDrawingBuffer:false});}catch(error){fail(error.message);return noop;}if(!gl){fail();return noop;}
     function compile(type,source){const shader=gl.createShader(type);shaders.push(shader);gl.shaderSource(shader,source);gl.compileShader(shader);if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS))throw new Error('Core scene shader compilation failed: '+gl.getShaderInfoLog(shader));return shader;}
     function setup(){
       shadowProgress=-1;shadowExplode=-1;
+      if(bareAsset){coolingFailed=false;coolingError='';canvas.dataset.coreState='loading';}
       maxBufferSize=Math.min(4096,Number(gl.getParameter(gl.MAX_RENDERBUFFER_SIZE))||4096);
       program=gl.createProgram();gl.attachShader(program,compile(gl.VERTEX_SHADER,VERTEX));gl.attachShader(program,compile(gl.FRAGMENT_SHADER,FRAGMENT));gl.linkProgram(program);
       if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error('Core scene shader linking failed: '+gl.getProgramInfoLog(program));
@@ -583,7 +590,7 @@
           gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,environmentImage);
           gl.activeTexture(gl.TEXTURE0);environmentReady=true;canvas.dataset.coreEnvironment='ready';requestDraw();
         };
-        environmentImage.onerror=()=>{if(disposed||generation!==environmentGeneration)return;environmentFailed=true;canvas.dataset.coreEnvironment='failed';if(assetEnabled)restoreLegacyAsset('Reference studio environment failed; prototype reverted to baseline');requestDraw();};
+        environmentImage.onerror=()=>{if(disposed||generation!==environmentGeneration)return;environmentFailed=true;canvas.dataset.coreEnvironment='failed';if(assetEnabled)restoreLegacyAsset('Reference studio environment failed');requestDraw();};
         environmentImage.src='/static/img/l10/studio-small-09-radiance.png';
         if(bareAsset){
           // Same photographic radiance, exposure and rotation; only the offline
@@ -661,8 +668,10 @@
       coolingEnvironmentTexture=null;coolingEnvironmentReady=false;coolingEnvironmentFailed=true;
       if(assetRuntime){
         vertices-=assetRuntime.metadata.vertices;assetRuntime.destroy();assetRuntime=null;
-        const legacy=window.PAL10Hardware.build();
-        for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling','l10-flow-supply','l10-flow-return','l10-io','l10-network-cover']){const mesh=parts[name],data=legacy.meshes[name].data;vertices+=data.length/12-mesh.count;gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);mesh.count=data.length/12;}
+        if(!bareAsset){
+          const legacy=window.PAL10Hardware.build();
+          for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling','l10-flow-supply','l10-flow-return','l10-io','l10-network-cover']){const mesh=parts[name],data=legacy.meshes[name].data;vertices+=data.length/12-mesh.count;gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);mesh.count=data.length/12;}
+        }
       }
       shadowProgress=-1;
       canvas.dataset.coreVertices=String(vertices);canvas.dataset.coreGeometryBuffers=String(parts?Object.keys(parts).length:0);
@@ -833,6 +842,16 @@
     }
     function draw(now){
       frame=0;if(disposed||contextLost||!program||!parts||!visible)return;
+      if(bareAsset&&(!assetRuntime||!coolingRuntime||!environmentReady||!coolingEnvironmentReady||assetFailed||coolingFailed||environmentFailed||coolingEnvironmentFailed)){
+        // Never present a partially replaced tray as the accepted Cinematic.
+        // Asset callbacks schedule the next draw; failure requires a reload or
+        // successful context recovery rather than a hidden legacy fallback.
+        ready=false;lastTime=0;gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.depthMask(true);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+        if(assetFailed||coolingFailed||environmentFailed||coolingEnvironmentFailed){
+          if(canvas.dataset.coreState!=='fallback')fail(assetError||coolingError||(coolingEnvironmentFailed?'Cooling environment failed':'Reference studio environment failed'));
+        }else canvas.dataset.coreState='loading';
+        return;
+      }
       const elapsed=lastTime?now-lastTime:16.7,dt=Math.min(250,elapsed);lastTime=now;
       if(elapsed<2000&&elapsed>3){frameMs=frameMs*.96+elapsed*.04;if(frameMs>29)slowFrames++;else slowFrames=Math.max(0,slowFrames-1);}
       if(slowFrames>24&&resolution>.7){resolution=Math.max(.7,resolution-.1);slowFrames=0;}

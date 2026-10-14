@@ -68,7 +68,7 @@
       faces.forEach(f=>quad(p(...f[0]),p(...f[1]),p(...f[2]),p(...f[3]),f[4],color,m));
     }
     // Machined edge breaks catch studio reflections without exaggerated radii.
-    function bevel(x,y,z,w,h,d,color,m=.82,r=.012) {
+    function bevel(x,y,z,w,h,d,color,m=.82,r=.012,negativeXInset=null) {
       r=Math.min(r,w*.15,d*.15,h*.30); const rings=[];
       for(const [dy,inset] of [[-h/2,r],[-h/2+r,0],[h/2-r,0],[h/2,r]]) {
         const X=w/2-inset,Z=d/2-inset,b=Math.max(.002,r-inset*.55);
@@ -76,7 +76,18 @@
       }
       for(let j=0;j<3;j++)for(let i=0;i<8;i++){
         const k=(i+1)%8,a=rings[j][i],b=rings[j+1][i],c=rings[j+1][k],d0=rings[j][k];
-        quad(a,b,c,d0,unit(cross(sub(b,a),sub(c,a))),color,m);
+        const normal=unit(cross(sub(b,a),sub(c,a)));
+        if(negativeXInset&&j===1&&i===6){
+          // A flush insert owns its exposed surface. Retain the enclosure's
+          // exact envelope, but do not emit a second coplanar surface beneath
+          // the insert: different triangle diagonals otherwise fight in depth.
+          const plate=negativeXInset,edge=Math.min(plate.radius,plate.width*.15,plate.depth*.15,plate.height*.30);
+          const halfY=plate.height/2-edge,halfZ=plate.depth/2-Math.max(.002,edge);
+          const lowY=y-halfY,highY=y+halfY,lowZ=z-halfZ,highZ=z+halfZ;
+          const strip=(y0,y1,z0,z1)=>quad([a[0],y0,z1],[a[0],y1,z1],[a[0],y1,z0],[a[0],y0,z0],normal,color,m);
+          strip(a[1],lowY,c[2],a[2]);strip(highY,b[1],c[2],a[2]);
+          strip(lowY,highY,c[2],lowZ);strip(lowY,highY,highZ,a[2]);
+        }else quad(a,b,c,d0,normal,color,m);
       }
       for(let i=0;i<8;i++){const k=(i+1)%8;tri([x,y+h/2,z],rings[3][k],rings[3][i],[0,1,0],color,m);tri([x,y-h/2,z],rings[0][i],rings[0][k],[0,-1,0],color,m);}
     }
@@ -476,8 +487,9 @@
         const {x,y,body}=slot,z=(slot.frontZ+slot.rearZ)/2;
         // E1.S whole 15 mm thermal enclosure. The broad face lies in YZ;
         // the 33.75 mm edge is presented at the narrow extraction opening.
-        io.bevel(x,y,z,body.width,body.height,body.depth,[.040,.045,.049],.32,.0025);
-        io.bevel(x-body.width/2+.002,y,z,.004,body.height-.013,body.depth-.030,C.nickel,.82,.001);
+        const sidePlate={width:.004,height:body.height-.013,depth:body.depth-.030,radius:.001};
+        io.bevel(x,y,z,body.width,body.height,body.depth,[.040,.045,.049],.32,.0025,sidePlate);
+        io.bevel(x-body.width/2+.002,y,z,sidePlate.width,sidePlate.height,sidePlate.depth,C.nickel,.82,sidePlate.radius);
         // Longitudinal shallow extrusion channels, all within the 15 mm envelope.
         for(let j=0;j<9;j++)io.box(x+body.width/2-.001,y-body.height*.39+j*body.height*.098,z,.0018,.0035,body.depth-.045,[.020,.023,.026],.18);
         for(const end of [-1,1])io.box(x,y,z+end*(body.depth/2-.007),body.width-.006,body.height-.009,.010,C.darkSteel,.69);
