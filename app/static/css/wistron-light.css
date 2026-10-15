@@ -277,6 +277,13 @@
 :root[data-theme="light"] .pd-workspace :is(.pd-wait,.pd-unavailable) p {color:#55717e}
 :root[data-theme="light"] .pd-workspace .p-tilt:hover {box-shadow:inset 0 1px #fff,0 12px 25px #2347541a;border-color:#94b9c6}
 :root[data-theme="light"] .pd-firmware-summary {border-color:#b8cbd380}
+:root[data-theme="light"] .pd-firmware-disclosure { background:linear-gradient(140deg,#fdfefa,#eef3f0); border-color:#c3d1d5; box-shadow:var(--p-shadow); }
+:root[data-theme="light"] .pd-firmware-summary-head { color:#244957; }
+:root[data-theme="light"] .pd-firmware-summary-head:hover { background:rgba(36,73,87,.04); }
+:root[data-theme="light"] .pd-firmware-summary-head-text h3 { color:#244957; }
+:root[data-theme="light"] .pd-firmware-summary-head-note { color:#557481; }
+:root[data-theme="light"] .pd-firmware-caret { color:#557481; }
+:root[data-theme="light"] .pd-firmware-disclosure-body { border-top-color:#c3d1d5; }
 
 /* L11 — silver engineering deck surrounding a dark physical instrument. */
 :root[data-theme="light"] .p-rack-kpis {background:linear-gradient(115deg,#e1ebec,#f2f6ef);border-color:#b8cbd0}

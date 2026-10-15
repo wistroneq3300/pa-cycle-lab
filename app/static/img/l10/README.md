@@ -61,3 +61,21 @@ geometry remain authored approximations. This asset establishes neither measured
 OEM materials, manufacturing geometry nor photographic acceptance. Phase 3
 review is recorded separately in
 [L10 Phase 3 acceptance](../../../../docs/L10_PHASE3_ACCEPTANCE.md).
+
+## Cooling V3 filtered variant
+
+`studio-small-09-cooling-radiance.png` is derived from the **same source HDR,
+exposure 0.38, orientation, strip dimensions and encoding**. The
+[V3 offline generator](../../../qa/l10-cooling-prefilter.py) uses 1,024 GGX
+samples with PDF / latitude-solid-angle source mip footprints and trilinear
+filtering in linear radiance before log encoding. This integrates small bright
+emitters instead of repeating point-sampled highlight lobes. Its matching JSON
+records the derivation and source hash. It is not a new light rig or higher
+material roughness.
+
+Only the opt-in cooling companion and its lid use this texture. The accepted
+bare board, gold front and Rack keep the original atlas. If the filtered atlas
+fails to load, those cooling draws use the original atlas; readiness, disposal
+and context restoration follow the existing scene lifecycle. The separate
+`coolingEnvironmentReady` / `coolingEnvironmentFailed` quality flags expose this
+degradation rather than claiming filtered quality when the asset is absent.

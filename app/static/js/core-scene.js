@@ -41,6 +41,47 @@
       phase:p<.065?'l10-exploded':p<.135?'compute-board':p<.202?'cpu-gpu-assembly':p<.248?'network-storage':p<.292?'cooling-install':p<.333?'cooling-reveal':p<.376?'l10-hero':p<.407?'chassis-close':p<.56?'camera-bridge':'rack-integration',
       packageSeparation:'visual-only / board-integrated packages',flowMeaning:'conceptual thermal-flow overlay',profile:window.PAL10Hardware?.profile?.id||null};
   }
+  // The companion cooling assembly starts with the accepted, seated bare board.
+  // Its authored prefix rejoins the unchanged lid/Rack choreography.
+  // No independent clock: seeking, Replay and Reduced Motion share one state.
+  function coolingAssemblyState(p){
+    const state=l10State(p),cooling=interval(.248,.278,p),plumbing=interval(.276,.291,p);
+    return {...state,board:1,packages:1,io:1,boardLift:0,packageLift:0,ioLift:0,
+      cooling,coolingLift:1.0*(1-cooling),plumbing,plumbingLift:.60*(1-interval(.276,.284,p)),
+      plumbingZ:.10*(1-interval(.284,.291,p)),
+      coolingVisibility:interval(.240,.248,p),plumbingVisibility:interval(.267,.276,p),
+      // Distance, not brightness, advances along the authored channel UVs.
+      flowTravel:Math.max(0,(p-.292)/.041)*3.6,
+      phase:p<.135?'bare-board':p<.248?'silicon-detail':p<.276?'cooling-install':p<.292?'manifold-connect':state.phase,
+      packageSeparation:'board-integrated / seated throughout cooling installation',
+      flowMeaning:'Advected coolant visualization in original conceptual channels; not CFD or measured flow',
+      coolingAssembly:'l10-cooling-assembly-v2',...window.PAL10Timeline?.coolingPose(p)};
+  }
+  function coolingAssemblyCamera(p){
+    if(window.PAL10Timeline)return window.PAL10Timeline.cameraWeights(p);
+    return {bare:1-interval(.235,.248,p),detail:interval(.095,.155,p)*(1-interval(.225,.248,p))};
+  }
+  function coolingFlowBindings(routes){
+    if(!Array.isArray(routes)||routes.length!==22||new Set(routes.map(r=>r.id)).size!==22||routes.some(r=>
+      !['supply','return','plate-channel'].includes(r.semantic)||!Number.isFinite(r.length)||r.length<=0||!Number.isFinite(r.uvOffset)||r.uvOffset<0||
+      !Array.isArray(r.points)||r.points.length<2||r.points.some(p=>!Array.isArray(p)||p.length!==3||!p.every(Number.isFinite))))throw new Error('Cooling requires 22 finite directed routes');
+    const byId=Object.fromEntries(routes.map(r=>[r.id,r])),period=.38,bindings={};
+    for(const r of routes){
+      let start=0,length=1,correction=0;
+      const seat=r.id.match(/^(.*)\/(inlet|channels|outlet)$/)?.[1];
+      if(seat){
+        const a=byId[seat+'/inlet'],b=byId[seat+'/channels'],c=byId[seat+'/outlet'],header=byId['return-header'];
+        if(!a||!b||!c||!header)throw new Error('Incomplete cooling branch');
+        start=a.uvOffset;length=a.length+b.length+c.length;
+        const desired=header.uvOffset+c.points.at(-1)[0]-header.points[0][0];
+        const delta=desired-(start+length);correction=delta-Math.round(delta/period)*period;
+      }
+      // Quintic phase correction distributes at most half one packet along a
+      // branch. Its endpoint derivative is zero: direction, phase and speed
+      // agree with both headers. It is visual transport, not CFD.
+      bindings[r.id]={route:[r.semantic==='supply'?-1:r.semantic==='return'?1:0,r.uvOffset,r.length,start],phase:[length,correction],period};
+    }return bindings;
+  }
   const groupTravel={server:1.52,nvlink:2.68,powershelf:.78,switch:1.94,blanking:.14};
   const groupLateral={server:0,nvlink:.60,powershelf:.30,switch:-.38,blanking:0};
   const classInfo={server:['COMPUTE TRAY','AI COMPUTE NODE'],nvlink:['NVLINK SWITCH TRAY','HIGH-SPEED GPU FABRIC'],switch:['NETWORK SWITCH','RACK NETWORK FABRIC'],powershelf:['POWER SHELF','RACK POWER DELIVERY']};
@@ -102,8 +143,9 @@
     }
     return out;
   }
-  function assemblySnapshot(value){
+  function assemblySnapshot(value,options={}){
     const progress=clamp(Number(value)||0),sample=motion(progress),{alignment,insertion,pullback,rackOpacity,explode}=sample;
+    if(options.coolingV1&&hasL10()){sample.l10=coolingAssemblyState(progress);if(progress<.407)sample.phase=sample.l10.phase;}
     const placements=PLACEMENTS.map((item,index)=>({...item,...placementPose(item,index,progress,explode),constellation:choreography[index].constellation.slice(),seatStart:choreography[index].seatStart,seatEnd:choreography[index].seatEnd,primary:item.name===PRIMARY}));
     const primary=placements.find(item=>item.primary),primaryPose={x:primary.x,y:primary.y,z:primary.z,scale:1};
     return {...sample,model:'generic-liquid-cooled-compute',
@@ -121,11 +163,15 @@
     precision highp float;
     varying vec3 vPosition;varying vec3 vLocal;varying vec3 vNormal;varying vec4 vColor;varying vec2 vMaterial;
     uniform vec3 uEye;uniform vec3 uKeyPosition;uniform float uLightTheme;uniform float uTime;uniform float uScan;uniform float uScanY;
-    uniform float uRack;uniform float uQuality;uniform float uReveal;uniform float uDetail;
+    uniform float uRack;uniform float uQuality;uniform float uReveal;uniform float uDetail;uniform float uSectionX;uniform float uL10Finish;
+    uniform float uCoolingFlow;uniform float uCoolingTravel;uniform float uCoolingFinish;
+    uniform vec4 uCoolingRoute;uniform vec2 uCoolingPhase;
     uniform sampler2D uShadowMap;uniform float uShadowPass;uniform float uHasShadow;uniform float uShadowTexel;
     uniform sampler2D uEnvironment;uniform float uHasEnvironment;
     varying vec2 vUV;varying vec4 vTangent;
     uniform float uAsset;uniform float uAssetNormalScale;uniform float uAssetRoughness;uniform float uAssetAO;uniform float uAssetAlphaCutoff;uniform float uAssetAlphaMask;
+    uniform float uAssetFilmStrength;uniform float uAssetFilmThickness;
+    float filmThicknessRatio=1.0;
     uniform sampler2D uAssetBase;uniform sampler2D uAssetMR;uniform sampler2D uAssetNormal;uniform sampler2D uAssetOcclusion;
     vec3 srgbLinear(vec3 c){return mix(c/12.92,pow((c+.055)/1.055,vec3(2.4)),step(vec3(.04045),c));}
     varying vec4 vShadow;
@@ -136,6 +182,21 @@
       vec3 q=vShadow.xyz/vShadow.w*.5+.5;
       if(q.x<.002||q.x>.998||q.y<.002||q.y>.998||q.z>1.0)return 1.0;
       float bias=max(.00010,.00048*(1.0-max(dot(normal,light),0.0))),visible=0.0;
+      // The board's millimetre-scale parts need a smaller receiver offset than
+      // the Rack. Keep fascia and procedural/fallback receivers unchanged.
+      if(uAsset>.5||(uL10Finish>.5&&vLocal.z<2.85&&vColor.b>=vColor.r)){
+        bias*=.55;
+        // Continuous tent PCF compares decoded depths at texel centres. It
+        // avoids the stepped contact edges of a moving 3x3 nearest kernel;
+        // projection, depth target, receiver bias and light remain unchanged.
+        vec2 pixel=q.xy/uShadowTexel-.5,origin=floor(pixel),phase=fract(pixel);
+        for(int x=-1;x<=2;x++)for(int y=-1;y<=2;y++){
+          vec2 offset=vec2(float(x),float(y));
+          vec2 weight=max(vec2(0),vec2(2)-abs(offset-phase));
+          visible+=weight.x*weight.y*step(q.z-bias,shadowDepth((origin+offset+.5)*uShadowTexel));
+        }
+        return visible/16.0;
+      }
       for(int x=-1;x<=1;x++)for(int y=-1;y<=1;y++)visible+=step(q.z-bias,shadowDepth(q.xy+vec2(float(x),float(y))*uShadowTexel));
       return visible/9.0;
     }
@@ -162,20 +223,64 @@
       vec3 x=max(linear,vec3(0));
       return pow(clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),0.0,1.0),vec3(1.0/2.2));
     }
+    vec3 siliconFinish(vec3 f0,float cosine){
+      if(uAsset<.5||uAssetFilmStrength<=0.0)return f0;
+      // Restrained three-wavelength thin-film approximation on authored silicon
+      // only. Incident angle controls phase; no time animation or emitted light.
+      float refracted=sqrt(max(0.0,1.0-(1.0-cosine*cosine)/(1.46*1.46)));
+      vec3 phase=vec3(12.5663706*1.46*uAssetFilmThickness*filmThicknessRatio*refracted)/vec3(650.0,510.0,450.0);
+      vec3 response=.65+.35*cos(phase);
+      response/=max(dot(response,vec3(.2126,.7152,.0722)),.1);
+      return clamp(f0*mix(vec3(1.0),response,uAssetFilmStrength),vec3(0.0),vec3(.98));
+    }
     vec3 conductorLight(vec3 N,vec3 V,vec3 L,vec3 albedo,float metal,float rough){
       vec3 H=normalize(V+L);float nl=max(dot(N,L),0.0),nv=max(dot(N,V),.01),nh=max(dot(N,H),0.0),vh=max(dot(V,H),0.0);
       float a=rough*rough,a2=a*a,d=nh*nh*(a2-1.0)+1.0;
       float D=a2/(3.14159265*d*d+.0001),k=(rough+1.0)*(rough+1.0)/8.0;
       float G=(nv/(nv*(1.0-k)+k))*(nl/(nl*(1.0-k)+k));
-      vec3 F=mix(vec3(.04),albedo,metal);F+=(1.0-F)*pow(1.0-vh,5.0);
+      vec3 F=siliconFinish(mix(vec3(.04),albedo,metal),vh);F+=(1.0-F)*pow(1.0-vh,5.0);
       return F*D*G*nl/(4.0*nv*max(nl,.01)+.001);
     }
     void main(){
+      if(vLocal.x>uSectionX)discard;
       vec4 assetBase=vec4(1.0);
       if(uAsset>.5){assetBase=texture2D(uAssetBase,vUV);if(uAssetAlphaMask>.5&&assetBase.a*vColor.a<uAssetAlphaCutoff)discard;}
       if(uShadowPass>.5){gl_FragColor=packedDepth(gl_FragCoord.z);return;}
       if(vMaterial.y<-.5){gl_FragColor=vColor;return;}
       vec3 N=normalize(vNormal),V=normalize(uEye-vPosition),R=reflect(-V,N);
+      if(uCoolingFlow>.5){
+        // The UV coordinate is authored arc length through the connected
+        // fluid volume. Density witnesses advect; nothing emits or blooms.
+        float branchT=clamp((vUV.x-uCoolingRoute.w)/uCoolingPhase.x,0.0,1.0);
+        float warp=branchT*branchT*branchT*(branchT*(branchT*6.0-15.0)+10.0);
+        float travel=vUV.x+uCoolingPhase.y*warp-uCoolingTravel;
+        float packet=fract(travel/.38);
+        // Separate the fronts with a low-density interval. The long trailing
+        // ramp and short leading edge make positive-U transport legible;
+        // retain the period used by the branch/header phase correction.
+        float witness=smoothstep(.44,.78,packet)*(1.0-smoothstep(.94,.995,packet));
+        // The smooth cylindrical volume supplies the surface reflection.
+        // No high-frequency travelling normal ripple: it fragmented the
+        // narrow dashboard silhouette into specular flecks.
+        float nv=max(dot(N,V),0.0),f=.0204+.9796*pow(1.0-nv,5.0);
+        float heat=uCoolingRoute.x<-.5?0.0:uCoolingRoute.x>.5?1.0:smoothstep(.08,.92,(vUV.x-uCoolingRoute.y)/uCoolingRoute.z);
+        vec3 body=srgbLinear(mix(vec3(.045,.40,.78),vec3(.79,.105,.055),heat));
+        vec3 irradiance=uHasEnvironment>.5?environmentStrip(N,6.0):vec3(.45);
+        vec3 reflected=uHasEnvironment>.5?environmentSpecular(R,.17):vec3(.30);
+        // Longer optical paths through the centre retain the thermal tint;
+        // the existing cylindrical surface supplies the edge reflection.
+        // Sparse pale density fronts have a sharp leading edge and a long
+        // coloured wake, so motion remains readable at normal viewing size.
+        // Keep the full existing bore projection readable: the old dark rim
+        // reduced the apparent diameter to a subpixel core on the dashboard.
+        // Optical tint still deepens at the centre; no radii/speed are changed.
+        float column=.62+.38*sqrt(nv);
+        vec3 scatter=mix(body,vec3(.70),witness*.32)*irradiance*(.72+witness*1.10)*column;
+        vec3 water=scatter+reflected*(f*.32+.012);
+        // Density must change coverage as well as tint. Nearly opaque gaps
+        // previously made the complete circuit look uniformly illuminated.
+        gl_FragColor=vec4(displayTransform(water),vColor.a*(.18+.82*witness));return;
+      }
       float metal=clamp(vMaterial.x,0.0,1.0),polymer=1.0-metal;
       float grain=fract(sin(dot(floor(vLocal*310.0),vec3(127.1,311.7,74.7)))*43758.5453);
       float rough=.24+polymer*.44+(grain-.5)*.032;
@@ -190,15 +295,27 @@
         vec3 an=abs(N);vec2 surface=an.y>an.x&&an.y>an.z?vLocal.xz:an.x>an.z?vLocal.zy:vLocal.xy;
         float fine=finishNoise(surface*vec2(9.0,73.0)),broad=finishNoise(surface*5.0);
         vec3 albedo=pow(max(vColor.rgb,vec3(0)),vec3(1.65)),specAlbedo=vColor.rgb;
-        float ao=1.0;
+        float ao=1.0,sheetAnisotropy=0.0;
         if(uAsset>.5){
           vec3 mr=texture2D(uAssetMR,vUV).rgb;
+          // Authored silicon only: MR red encodes optical coating thickness
+          // around the material's nanometre value. AO uses a separate texture.
+          // Colour shifts follow the Fresnel response, never emission.
+          if(uAssetFilmStrength>0.0)filmThicknessRatio=mix(.88,1.12,mr.r);
           metal=clamp(vMaterial.x*mr.b,0.0,1.0);rough=clamp(uAssetRoughness*mr.g,.045,1.0);
           albedo=srgbLinear(assetBase.rgb)*vColor.rgb;specAlbedo=albedo;
           vec3 T=normalize(vTangent.xyz-N*dot(N,vTangent.xyz)),B=cross(N,T)*vTangent.w;
           vec3 mapped=texture2D(uAssetNormal,vUV).xyz*2.0-1.0;mapped.xy*=uAssetNormalScale;
           N=normalize(mat3(T,B,N)*normalize(mapped));if(!gl_FrontFacing)N=-N;
           ao=mix(1.0,texture2D(uAssetOcclusion,vUV).r,uAssetAO);fine=.5;broad=.5;
+          // Cover-only machining response. Preserve all GLB PBR factors/maps
+          // and the analytic manifold normals. GPU grain follows the long
+          // plate axis; CPU satin has the subtler directional reflection.
+          if(uCoolingFinish>.5&&abs(N.y)>.85){
+            float machining=finishNoise(vLocal.xz*vec2(90.0,5.0));
+            N=normalize(N+vec3((machining-.5)*.0012,0.0,0.0));
+            sheetAnisotropy=mix(.14,.28,step(1.5,uCoolingFinish));
+          }
         }else{
         float luminance=dot(vColor.rgb,vec3(.2126,.7152,.0722));
         float coating=(1.0-smoothstep(.07,.21,luminance))*metal;
@@ -207,12 +324,34 @@
         if(vMaterial.x<-.5)rough=.64;
         vec3 tangent=normalize(abs(N.y)<.95?cross(vec3(0,1,0),N):cross(vec3(0,0,1),N));
         N=normalize(N+tangent*(fine-.5)*metal*.002);
+        // Rolled sheet grain follows the long chassis axis. Only the opt-in
+        // tray's neutral sheet metal receives it; shared gold fascia, carriers,
+        // ports and Rack equipment retain their original finish.
+        if(uL10Finish>.5&&(vLocal.z<2.85||uL10Finish>1.5)&&vColor.b>=vColor.r&&metal>.7){
+          vec2 sheet=abs(N.y)>.7?vLocal.xz:vLocal.yz;
+          float roll=finishNoise(sheet*vec2(360.0,7.0));
+          float micro=finishNoise(sheet*vec2(790.0,31.0));
+          float sheetRoughness=uL10Finish>1.5?.305:.365;
+          rough=clamp(sheetRoughness+(roll-.5)*.008+(micro-.5)*.003,.29,.38);
+          vec3 across=abs(N.y)>.7?vec3(1,0,0):vec3(0,1,0);
+          N=normalize(N+across*((roll-.5)*.0014+(micro-.5)*.0005));
+          sheetAnisotropy=uL10Finish>1.5?.10:.24;
+        }
         // Legacy mesh colors are artist values, not measured maps. Calibrate
         // diffuse reflectance separately from conductor F0; retain dark paint.
         }
         R=reflect(-V,N);
+        if(sheetAnisotropy>0.0){
+          // A bounded bent-reflection approximation for rolled sheet, using
+          // the existing IBL. The machining axis is the tray's long direction;
+          // no new light, environment, geometry or exposure is introduced.
+          vec3 axis=abs(N.z)>.95?vec3(1,0,0):normalize(vec3(0,0,1)-N*N.z);
+          vec3 projectedView=V-axis*dot(V,axis);
+          R=reflect(-V,normalize(mix(N,projectedView,sheetAnisotropy)));
+        }
         vec3 f0=mix(vec3(.04),specAlbedo,metal);
         float nv=max(dot(N,V),.001);
+        f0=siliconFinish(f0,nv);
         vec3 fresnelRough=f0+(max(vec3(1.0-rough),f0)-f0)*pow(1.0-nv,5.0);
         vec4 fit=rough*vec4(-1.0,-.0275,-.572,.022)+vec4(1.0,.0425,1.04,-.04);
         float a004=min(fit.x*fit.x,exp2(-9.28*nv))*fit.x+fit.y;
@@ -223,13 +362,13 @@
         physical+=albedo*(1.0-metal)*max(dot(N,key),0.0)*lit*.82;
         physical+=conductorLight(N,V,key,specAlbedo,metal,rough)*vec3(.95,.94,.92)*.48*lit;
         // Neutral front fill separates black rack rails from internal cavities.
-        physical+=albedo*(1.0-metal)*max(dot(N,normalize(vec3(-.5,.45,1.0))),0.0)*.22;
+        physical+=albedo*(1.0-metal)*max(dot(N,normalize(vec3(-.5,.45,1.0))),0.0)*.22*ao;
         // The photographed studio's rear sector is dark. A fixed broad service
         // softbox lights rear manifolds through every view, without a view-mode
         // toggle, glow, or lifting the opaque hoses to the same value as metal.
         vec3 serviceLight=normalize(vec3(-.15,.24,-1.0));
-        physical+=f0*boxLight(R,serviceLight,6.0)*.42;
-        physical+=albedo*(1.0-metal)*max(dot(N,serviceLight),0.0)*.35;
+        physical+=f0*boxLight(R,serviceLight,6.0)*.42*ao;
+        physical+=albedo*(1.0-metal)*max(dot(N,serviceLight),0.0)*.35*ao;
         physical*=.91+(broad-.5)*.025*metal;
         if(vMaterial.x<-.5)physical*=.97+(fine-.5)*.045;
         physical=mix(physical,albedo,clamp(vMaterial.y,0.0,1.0)*.72);
@@ -372,9 +511,15 @@
     let shadowFramebuffer=null,shadowTexture=null,shadowDepthBuffer=null,shadowPass=false,shadowSize=2048;
     let shadowProgress=-1,shadowExplode=-1;
     let environmentTexture=null,environmentImage=null,environmentReady=false,environmentFailed=false,environmentGeneration=0;
-    const assetEnabled=hasL10()&&/(?:^|[?&])l10AssetPrototype=1(?:&|$)/.test(window.location?.search||'');
+    let coolingEnvironmentTexture=null,coolingEnvironmentImage=null,coolingEnvironmentReady=false,coolingEnvironmentFailed=false;
+    // The shipping Cinematic and the inspection page request the same complete
+    // assembly. A missing URL flag must not silently select another model.
+    const bareAsset=canvas.dataset.coreProfile==='coolingV2'||/(?:^|[?&])l10Bareboard=1(?:&|$)/.test(window.location?.search||'');
+    if(bareAsset){canvas.dataset.coreProfile='coolingV2';canvas.dataset.coreState='loading';}
+    const assetEnabled=hasL10()&&(bareAsset||/(?:^|[?&])l10AssetPrototype=1(?:&|$)/.test(window.location?.search||''));
     const inspectionEnabled=/(?:^|[?&])l10AssetLab=1(?:&|$)/.test(window.location?.search||'');
     let assetRuntime=null,assetLoading=false,assetFailed=false,assetError='',assetGeneration=0,inspection=null;
+    let coolingRuntime=null,coolingLoading=false,coolingFailed=false,coolingError='',flowBindings={};
     let progress=0,pointerX=0,pointerY=0,yaw=0,pitch=0,manual=false,drag=null,light=0,view='authored';
     let visible=true,intersecting=true,lastTime=0,lightTime=0,drawCalls=0,vertices=0,slowFrames=0,resolution=1,frameMs=16.7;
     let idleTimer=0,idleStart=0,idleWeight=0,idleExit=0,idleYaw=0,idlePitch=0,idleTravel=0;
@@ -388,10 +533,12 @@
     const matrices=PLACEMENTS.map(item=>translation(0,item.y,0)),poses=PLACEMENTS.map(()=>({}));
     let projected=null;
     const fail=(reason='WebGL is unavailable')=>{canvas.dataset.coreState='fallback';canvas.dataset.coreError=String(reason);canvas.dispatchEvent(new CustomEvent('pa-core-fallback',{bubbles:true,detail:{reason:String(reason)}}));};
+    if(bareAsset&&!hasL10()){fail('L10 hardware renderer failed to load');return noop;}
     try{gl=canvas.getContext('webgl',{alpha:true,antialias:true,depth:true,premultipliedAlpha:false,powerPreference:'high-performance',preserveDrawingBuffer:false});}catch(error){fail(error.message);return noop;}if(!gl){fail();return noop;}
     function compile(type,source){const shader=gl.createShader(type);shaders.push(shader);gl.shaderSource(shader,source);gl.compileShader(shader);if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS))throw new Error('Core scene shader compilation failed: '+gl.getShaderInfoLog(shader));return shader;}
     function setup(){
       shadowProgress=-1;shadowExplode=-1;
+      if(bareAsset){coolingFailed=false;coolingError='';canvas.dataset.coreState='loading';}
       maxBufferSize=Math.min(4096,Number(gl.getParameter(gl.MAX_RENDERBUFFER_SIZE))||4096);
       program=gl.createProgram();gl.attachShader(program,compile(gl.VERTEX_SHADER,VERTEX));gl.attachShader(program,compile(gl.FRAGMENT_SHADER,FRAGMENT));gl.linkProgram(program);
       if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error('Core scene shader linking failed: '+gl.getProgramInfoLog(program));
@@ -399,25 +546,31 @@
       const built=createParts();shared=built.shared;vertices=0;
       Object.entries(built.meshes).forEach(([name,mesh])=>{const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,mesh.data,gl.STATIC_DRAW);parts[name]={buffer,count:mesh.data.length/12};vertices+=mesh.data.length/12;});
       ['aPosition','aNormal','aColor','aMaterial','aUV','aTangent'].forEach(name=>attributes[name]=gl.getAttribLocation(program,name));
-      ['uViewProjection','uLightViewProjection','uModel','uPart','uOpacity','uEye','uKeyPosition','uLightTheme','uTime','uScan','uScanY','uRack','uQuality','uReveal','uDetail','uShadowMap','uShadowPass','uHasShadow','uShadowTexel','uEnvironment','uHasEnvironment'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
-      ['uAsset','uAssetNormalScale','uAssetRoughness','uAssetAO','uAssetAlphaCutoff','uAssetAlphaMask','uAssetBase','uAssetMR','uAssetNormal','uAssetOcclusion'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
+      ['uViewProjection','uLightViewProjection','uModel','uPart','uOpacity','uEye','uKeyPosition','uLightTheme','uTime','uScan','uScanY','uRack','uQuality','uReveal','uDetail','uSectionX','uShadowMap','uShadowPass','uHasShadow','uShadowTexel','uEnvironment','uHasEnvironment'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
+      ['uAsset','uAssetNormalScale','uAssetRoughness','uAssetAO','uAssetAlphaCutoff','uAssetAlphaMask','uAssetBase','uAssetMR','uAssetNormal','uAssetOcclusion','uAssetFilmStrength','uAssetFilmThickness','uL10Finish','uCoolingFlow','uCoolingTravel','uCoolingRoute','uCoolingPhase','uCoolingFinish'].forEach(name=>uniforms[name]=gl.getUniformLocation(program,name));
       if(assetEnabled&&window.PAL10GLTF&&window.PAL10AssetRuntime){
         assetLoading=true;assetFailed=false;assetError='';canvas.dataset.coreAsset='loading';const generation=++assetGeneration;
-        window.PAL10GLTF.load('/static/models/l10-prototype/compute-board.glb').then(asset=>{
+        window.PAL10GLTF.load('/static/models/l10-prototype/'+(bareAsset?'bare-compute-boards.glb':'compute-board.glb')).then(asset=>{
           if(disposed||contextLost||generation!==assetGeneration){asset.disposeImages();return;}
           let stagedRuntime=null;const stagedParts={};
           try{
             if(environmentFailed)throw new Error('Prototype requires the reference studio environment');
             const plumbing=asset.metadata.extras;
-            const replacement=window.PAL10Hardware.build(window.PAL10Hardware.profile,{omitBoard:0,replaceLeftPlumbing:plumbing.replacesLeftPlumbing===true,supplyOverlayPath:plumbing.supplyOverlayPath});
+            const replaceServiceGeometry=plumbing.replacesServiceGeometry===true;
+            const replaceNetworking=plumbing.replacesNetworking===true;
+            if(replaceServiceGeometry!==asset.metadata.layers.includes('io'))throw new Error('Prototype service replacement requires its matching io layer');
+            if(replaceNetworking!==asset.metadata.layers.includes('network')||(replaceNetworking&&(!bareAsset||JSON.stringify(plumbing.networkCards)!=='["BF3-L","BF3-R","CX7-R"]')))throw new Error('Networking replacement requires all three declared cards and its network layer');
+            if(bareAsset&&(plumbing.bareBoardOnly!==true||JSON.stringify(plumbing.replacesComputeBoards)!=='[0,1]'||asset.metadata.layers.length!==(replaceNetworking?4:3)||!asset.metadata.layers.includes('board')||!asset.metadata.layers.includes('packages')||!replaceServiceGeometry))throw new Error('Bare-board prototype must own two boards, packages and the retained service layer');
+            const replacement=window.PAL10Hardware.build(window.PAL10Hardware.profile,bareAsset?{omitBareBoards:true,replaceServiceGeometry,replaceNetworking}:{omitBoard:0,replaceLeftPlumbing:plumbing.replacesLeftPlumbing===true,supplyOverlayPath:plumbing.supplyOverlayPath,replaceServiceGeometry});
             stagedRuntime=window.PAL10AssetRuntime.upload(gl,asset,attributes,uniforms);
-            for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling','l10-flow-supply']){
+            for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling','l10-flow-supply','l10-io',...(replaceNetworking?['l10-network-cover']:[])]){
               const data=replacement.meshes[name].data,buffer=gl.createBuffer();stagedParts[name]={buffer,count:data.length/12};
               gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
             }
             if(gl.getError()!==gl.NO_ERROR)throw new Error('Prototype replacement buffer upload failed');
-            for(const [name,mesh] of Object.entries(stagedParts)){vertices+=mesh.count-parts[name].count;gl.deleteBuffer(parts[name].buffer);parts[name]=mesh;}
+            for(const [name,mesh] of Object.entries(stagedParts)){vertices+=mesh.count-(parts[name]?.count||0);if(parts[name])gl.deleteBuffer(parts[name].buffer);parts[name]=mesh;}
             assetRuntime=stagedRuntime;
+            if(bareAsset)loadCoolingCompanion(generation);
             vertices+=assetRuntime.metadata.vertices;assetLoading=false;canvas.dataset.coreAsset='ready';canvas.dataset.coreVertices=String(vertices);canvas.dataset.coreGeometryBuffers=String(Object.keys(parts).length+assetRuntime.metadata.primitives);shadowProgress=-1;requestDraw();
           }catch(error){stagedRuntime?.destroy();Object.values(stagedParts).forEach(p=>gl.deleteBuffer(p.buffer));asset.disposeImages();assetLoading=false;assetFailed=true;assetError=error.message;canvas.dataset.coreAsset='failed';requestDraw();}
         }).catch(error=>{if(disposed||generation!==assetGeneration)return;assetLoading=false;assetFailed=true;assetError=error.message;canvas.dataset.coreAsset='failed';requestDraw();});
@@ -437,8 +590,27 @@
           gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,environmentImage);
           gl.activeTexture(gl.TEXTURE0);environmentReady=true;canvas.dataset.coreEnvironment='ready';requestDraw();
         };
-        environmentImage.onerror=()=>{if(disposed||generation!==environmentGeneration)return;environmentFailed=true;canvas.dataset.coreEnvironment='failed';if(assetEnabled)restoreLegacyAsset('Reference studio environment failed; prototype reverted to baseline');requestDraw();};
+        environmentImage.onerror=()=>{if(disposed||generation!==environmentGeneration)return;environmentFailed=true;canvas.dataset.coreEnvironment='failed';if(assetEnabled)restoreLegacyAsset('Reference studio environment failed');requestDraw();};
         environmentImage.src='/static/img/l10/studio-small-09-radiance.png';
+        if(bareAsset){
+          // Same photographic radiance, exposure and rotation; only the offline
+          // convolution is improved. Protected bare/Rack draws use the old atlas.
+          coolingEnvironmentReady=false;coolingEnvironmentFailed=false;
+          coolingEnvironmentTexture=gl.createTexture();gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,coolingEnvironmentTexture);
+          gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,255]));
+          for(const parameter of [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER])gl.texParameteri(gl.TEXTURE_2D,parameter,gl.LINEAR);
+          for(const parameter of [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T])gl.texParameteri(gl.TEXTURE_2D,parameter,gl.CLAMP_TO_EDGE);
+          gl.activeTexture(gl.TEXTURE0);coolingEnvironmentImage=new Image();
+          coolingEnvironmentImage.onload=()=>{
+            if(disposed||contextLost||generation!==environmentGeneration)return;
+            gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,coolingEnvironmentTexture);
+            gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL,gl.NONE);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,false);
+            gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,coolingEnvironmentImage);
+            gl.activeTexture(gl.TEXTURE0);coolingEnvironmentReady=true;requestDraw();
+          };
+          coolingEnvironmentImage.onerror=()=>{if(disposed||generation!==environmentGeneration)return;coolingEnvironmentFailed=true;requestDraw();};
+          coolingEnvironmentImage.src='/static/img/l10/studio-small-09-cooling-radiance.png?v=20261014-v3';
+        }
       }
       // Local RGBA depth target works on WebGL 1 without an extension or a
       // second renderer/context. Shadow resources share context-loss lifecycle.
@@ -459,13 +631,47 @@
       canvas.dataset.coreModel='generic-liquid-cooled-compute';canvas.dataset.coreComputeTrays=String(classCounts.server);canvas.dataset.coreSwitchTrays=String(classCounts.nvlink);
       canvas.dataset.coreGeometryBuffers=String(Object.keys(parts).length);canvas.dataset.coreVertices=String(vertices);
     }
-    function release(){assetGeneration++;assetRuntime?.destroy(contextLost);assetRuntime=null;assetLoading=false;environmentGeneration++;if(environmentImage){environmentImage.onload=null;environmentImage.onerror=null;}environmentImage=null;if(gl&&!contextLost){if(parts)Object.values(parts).forEach(part=>gl.deleteBuffer(part.buffer));if(program)gl.deleteProgram(program);shaders.forEach(shader=>gl.deleteShader(shader));if(shadowFramebuffer)gl.deleteFramebuffer(shadowFramebuffer);if(shadowTexture)gl.deleteTexture(shadowTexture);if(shadowDepthBuffer)gl.deleteRenderbuffer(shadowDepthBuffer);if(environmentTexture)gl.deleteTexture(environmentTexture);}environmentTexture=null;environmentReady=false;shadowFramebuffer=null;shadowTexture=null;shadowDepthBuffer=null;parts=null;program=null;shared=null;shaders.length=0;}
+    function releaseCooling(){
+      if(coolingRuntime){vertices-=coolingRuntime.metadata.vertices;coolingRuntime.destroy(contextLost);coolingRuntime=null;}
+      coolingLoading=false;flowBindings={};canvas.dataset.coreCooling='fallback';
+    }
+    function loadCoolingCompanion(generation){
+      coolingLoading=true;coolingFailed=false;coolingError='';canvas.dataset.coreCooling='loading';
+      window.PAL10GLTF.load('/static/models/l10-cooling-v1/cooling-assembly.glb?v=20261014-final-rc').then(asset=>{
+        if(disposed||contextLost||generation!==assetGeneration){asset.disposeImages();return;}
+        try{
+          const meta=asset.metadata.extras;
+          const expected=['cooling','cooling-channels','cooling-fluid','cooling-frame','cooling-mounts','cooling-plumbing'];
+          if(!assetRuntime||environmentFailed||meta.id!=='l10-cooling-assembly-v1'||
+            meta.sourceBareGLBSHA256!=='6c78c6d9d62415de8e5888986bc5b2cd95d5a4a30d147b861f10ecc4650ecc29'||
+            JSON.stringify([...asset.metadata.layers].sort())!==JSON.stringify(expected)||
+            !Array.isArray(meta.seats)||meta.seats.length!==6||new Set(meta.seats.map(s=>s.id)).size!==6||
+            !Array.isArray(meta.flowRoutes)||meta.flowRoutes.length<6)throw new Error('Cooling companion ownership or six-seat contract is invalid');
+          for(const p of asset.primitives){
+            if(p.bounds.max[1]>.125001||p.bounds.min[1]<-.113||p.bounds.min[0]<-1.98||p.bounds.max[0]>1.98||p.bounds.min[2]<-3.14||p.bounds.max[2]>-.18)
+              throw new Error('Cooling companion exceeds its tray envelope');
+          }
+          const bindings=coolingFlowBindings(meta.flowRoutes);
+          for(const p of asset.primitives)if(p.layer==='cooling-fluid'&&!bindings[p.name.replace(/^Cooling V1 \/ cooling-fluid \/ /,'').replace(/#\d+$/,'')])throw new Error('Cooling fluid primitive lacks its directed route');
+          const staged=window.PAL10AssetRuntime.upload(gl,asset,attributes,uniforms);flowBindings=bindings;
+          coolingRuntime=staged;vertices+=staged.metadata.vertices;coolingLoading=false;
+          canvas.dataset.coreCooling='ready';canvas.dataset.coreVertices=String(vertices);shadowProgress=-1;cameraReady=false;requestDraw();
+        }catch(error){asset.disposeImages();coolingLoading=false;coolingFailed=true;coolingError=error.message;canvas.dataset.coreCooling='fallback';requestDraw();}
+      }).catch(error=>{if(disposed||generation!==assetGeneration)return;coolingLoading=false;coolingFailed=true;coolingError=error.message;canvas.dataset.coreCooling='fallback';requestDraw();});
+    }
+    function release(){assetGeneration++;releaseCooling();assetRuntime?.destroy(contextLost);assetRuntime=null;assetLoading=false;environmentGeneration++;for(const img of [environmentImage,coolingEnvironmentImage])if(img){img.onload=null;img.onerror=null;}environmentImage=null;coolingEnvironmentImage=null;if(gl&&!contextLost){if(parts)Object.values(parts).forEach(part=>gl.deleteBuffer(part.buffer));if(program)gl.deleteProgram(program);shaders.forEach(shader=>gl.deleteShader(shader));if(shadowFramebuffer)gl.deleteFramebuffer(shadowFramebuffer);if(shadowTexture)gl.deleteTexture(shadowTexture);if(shadowDepthBuffer)gl.deleteRenderbuffer(shadowDepthBuffer);if(environmentTexture)gl.deleteTexture(environmentTexture);if(coolingEnvironmentTexture)gl.deleteTexture(coolingEnvironmentTexture);}environmentTexture=null;coolingEnvironmentTexture=null;environmentReady=false;coolingEnvironmentReady=false;shadowFramebuffer=null;shadowTexture=null;shadowDepthBuffer=null;parts=null;program=null;shared=null;shaders.length=0;}
     function restoreLegacyAsset(reason){
       assetGeneration++;assetLoading=false;assetFailed=true;assetError=reason;canvas.dataset.coreAsset='failed';
+      releaseCooling();coolingFailed=true;coolingError=reason;
+      if(coolingEnvironmentImage){coolingEnvironmentImage.onload=null;coolingEnvironmentImage.onerror=null;coolingEnvironmentImage=null;}
+      if(coolingEnvironmentTexture&&!contextLost)gl.deleteTexture(coolingEnvironmentTexture);
+      coolingEnvironmentTexture=null;coolingEnvironmentReady=false;coolingEnvironmentFailed=true;
       if(assetRuntime){
         vertices-=assetRuntime.metadata.vertices;assetRuntime.destroy();assetRuntime=null;
-        const legacy=window.PAL10Hardware.build();
-        for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling','l10-flow-supply']){const mesh=parts[name],data=legacy.meshes[name].data;vertices+=data.length/12-mesh.count;gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);mesh.count=data.length/12;}
+        if(!bareAsset){
+          const legacy=window.PAL10Hardware.build();
+          for(const name of ['l10-board','l10-packages','l10-cooling-frame','l10-cooling','l10-flow-supply','l10-flow-return','l10-io','l10-network-cover']){const mesh=parts[name],data=legacy.meshes[name].data;vertices+=data.length/12-mesh.count;gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);mesh.count=data.length/12;}
+        }
       }
       shadowProgress=-1;
       canvas.dataset.coreVertices=String(vertices);canvas.dataset.coreGeometryBuffers=String(parts?Object.keys(parts).length:0);
@@ -490,6 +696,33 @@
         const pose=placementPose(PLACEMENTS[PRIMARY_INDEX],PRIMARY_INDEX,progress,0),board=inspection==='board';
         camera[0]=-.34;camera[1]=board?1.12:.79;camera[2]=board?5.15:4.80;
         camera[3]=(pose.x-.965)*modelMatrix[0];camera[4]=pose.y+.05;camera[5]=(pose.z-1.68)*modelMatrix[10];
+        // Additional opt-in evidence cameras; never used by the authored film.
+        if(inspection==='fans'){camera[1]=.68;camera[2]=3.5;camera[3]=(pose.x-.85)*modelMatrix[0];camera[5]=(pose.z+.055)*modelMatrix[10];}
+        if(inspection==='power'){camera[1]=1.12;camera[2]=5.3;camera[3]=pose.x*modelMatrix[0];camera[5]=(pose.z+.62)*modelMatrix[10];}
+        if(inspection.startsWith('bare-')||inspection.startsWith('cooling-')){
+          const presets={
+            'cooling-hero':[-.46,.86,11.5,0,.04,.35],
+            'cooling-close':[-.34,.79,4.80,-.965,.05,-1.68],
+            'cooling-rear':[3.02,.54,6.2,0,.04,-2.00],
+            'cooling-section':[-.24,.13,4.60,-.965,.04,-1.68],
+            'cooling-manifold':[-.20,.40,2.80,-.88,.08,-.40],
+            'cooling-connector':[-.24,.48,1.75,-.775,.06,-.97],
+            'bare-front':[0,0,3.0,0,0,3.15],
+            'bare-storage':[0,1.46,3.3,-.075,.01,2.62],
+            'bare-section':[1.38,.095,3.0,.46,.009,2.63],
+            'bare-packages':[-.24,1.05,4.5,-.965,.015,-1.70],
+            'bare-network':[-.12,1.16,5.7,0,.02,1.96],
+            'bare-hero':[-.46,.86,11.5,0,.04,.35]
+          },v=presets[inspection];
+          camera[0]=v[0];camera[1]=v[1];camera[2]=v[2];camera[3]=(pose.x+v[3])*modelMatrix[0];camera[4]=pose.y+v[4];camera[5]=(pose.z+v[5])*modelMatrix[10];
+        }
+        if(inspection.startsWith('rack-blanking-')){
+          // Native-resolution material/geometry evidence only; never part of
+          // the film, focus interaction, or authored Rack camera choreography.
+          camera[0]=-.18;camera[1]=.08;camera[2]=6.2;camera[3]=0;
+          camera[4]=inspection==='rack-blanking-bottom'?-6.60:6.90;
+          camera[5]=3.05*modelMatrix[10];
+        }
         target.set(camera.subarray(3));const ce=Math.cos(camera[1]);
         eye[0]=target[0]+Math.sin(camera[0])*ce*camera[2];eye[1]=target[1]+Math.sin(camera[1])*camera[2];eye[2]=target[2]+Math.cos(camera[0])*ce*camera[2];cameraReady=true;cameraSettling=false;return;
       }
@@ -521,10 +754,28 @@
       if(hasL10()){
         target[0]*=modelMatrix[0];target[2]*=modelMatrix[10];
         const l10=sample.l10,pose=placementPose(PLACEMENTS[PRIMARY_INDEX],PRIMARY_INDEX,progress,0),bridge=interval(.407,.56,progress);
-        const closeYaw=mix(-.52,-.25,interval(0,.38,progress)),closeElevation=mix(.67,.86,interval(.245,.30,progress))-.16*interval(.333,.39,progress);
+        let closeYaw=mix(-.52,-.25,interval(0,.38,progress)),closeElevation=mix(.67,.86,interval(.245,.30,progress))-.16*interval(.333,.39,progress);
         const closeTarget=[pose.x*modelMatrix[0],pose.y+mix(.80,.10,interval(.05,.29,progress)),pose.z*modelMatrix[10]-.12];
+        const coolingCamera=coolingRuntime?coolingAssemblyCamera(progress):{bare:0,detail:0};
+        closeTarget[0]-=.965*modelMatrix[0]*coolingCamera.detail;
+        closeTarget[1]=mix(closeTarget[1],pose.y+.04,coolingCamera.bare);
+        closeTarget[2]=mix(closeTarget[2],(pose.z-1.70)*modelMatrix[10],coolingCamera.detail);
         const lo=[closeTarget[0]-1.47,pose.y-.14,(pose.z-3.1)*modelMatrix[10]],hi=[closeTarget[0]+1.47,pose.y+.22+l10.coolingLift,(pose.z+3.1)*modelMatrix[10]];
-        const closeFit=fittedDistance(lo,hi,closeTarget,closeYaw+yaw,closeElevation+pitch,aspect,.79,.89);
+        // Fit the real, raised cover before it becomes visible. This changes
+        // framing only; the lid transform, closure and Rack bridge stay intact.
+        if(coolingRuntime&&progress<.407){
+          const lidTop=pose.y+.137+.50*(1-l10.lid)+.03;
+          hi[1]+=Math.max(0,lidTop-hi[1])*interval(.35,.37,progress);
+        }
+        let closeFit=mix(fittedDistance(lo,hi,closeTarget,closeYaw+yaw,closeElevation+pitch,aspect,.79,.89),Math.max(4.5,3.7/aspect),coolingCamera.detail);
+        const focus=coolingCamera.cooling||0;
+        if(focus>0){
+          const reveal=coolingCamera.reveal||0,focusTarget=[pose.x*modelMatrix[0],pose.y+.055,(pose.z-1.60)*modelMatrix[10]];
+          closeYaw=mix(closeYaw,-.22,focus);closeElevation=mix(closeElevation,mix(.89,1.02,reveal),focus);
+          const focusLo=[(pose.x-1.96)*modelMatrix[0],pose.y-.13,(pose.z-3.10)*modelMatrix[10]],focusHi=[(pose.x+1.96)*modelMatrix[0],pose.y+.15+l10.coolingLift,(pose.z-.22)*modelMatrix[10]];
+          const focusDistance=fittedDistance(focusLo,focusHi,focusTarget,closeYaw+yaw,closeElevation+pitch,aspect,.83,.83);
+          closeFit=mix(closeFit,focusDistance,focus);for(let axis=0;axis<3;axis++)closeTarget[axis]=mix(closeTarget[axis],focusTarget[axis],focus);
+        }
         azimuth=mix(closeYaw+yaw,azimuth,bridge);elevation=mix(closeElevation+pitch,elevation,bridge);
         distance=mix(closeFit,distance,bridge);
         for(let axis=0;axis<3;axis++)target[axis]=mix(closeTarget[axis],target[axis],bridge);
@@ -542,9 +793,20 @@
       target[0]=camera[3];target[1]=camera[4];target[2]=camera[5];
       eye[0]=target[0]+sy*ce*camera[2];eye[1]=target[1]+se*camera[2];eye[2]=target[2]+cy*ce*camera[2];
     }
+    function bindEnvironment(cooling=false){
+      if(!environmentTexture)return;
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D,cooling&&coolingEnvironmentReady?coolingEnvironmentTexture:environmentTexture);
+      gl.uniform1i(uniforms.uEnvironment,1);gl.activeTexture(gl.TEXTURE0);
+    }
     function part(name,matrix,opacity=1,writeDepth=true){
       if(shadowPass&&(opacity<.96||!writeDepth||name==='floor'||name.includes('flow')))return;
-      const mesh=parts[name];if(!mesh||opacity<=.003)return;
+      const mesh=parts[name];if(!mesh||!mesh.count||opacity<=.003)return;
+      const polishedLid=!!coolingRuntime&&name==='l10-lid';
+      bindEnvironment(polishedLid);
+      gl.uniform1f(uniforms.uL10Finish,polishedLid?2:bareAsset&&assetRuntime&&name==='l10-chassis'?1:0);
+      gl.uniform1f(uniforms.uCoolingFlow,0);
+      gl.uniform1f(uniforms.uCoolingFinish,0);
       gl.uniform1f(uniforms.uAsset,0);gl.disableVertexAttribArray(attributes.aUV);gl.disableVertexAttribArray(attributes.aTangent);
       gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
       gl.enableVertexAttribArray(attributes.aPosition);gl.vertexAttribPointer(attributes.aPosition,3,gl.FLOAT,false,48,0);
@@ -580,6 +842,16 @@
     }
     function draw(now){
       frame=0;if(disposed||contextLost||!program||!parts||!visible)return;
+      if(bareAsset&&(!assetRuntime||!coolingRuntime||!environmentReady||!coolingEnvironmentReady||assetFailed||coolingFailed||environmentFailed||coolingEnvironmentFailed)){
+        // Never present a partially replaced tray as the accepted Cinematic.
+        // Asset callbacks schedule the next draw; failure requires a reload or
+        // successful context recovery rather than a hidden legacy fallback.
+        ready=false;lastTime=0;gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.depthMask(true);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+        if(assetFailed||coolingFailed||environmentFailed||coolingEnvironmentFailed){
+          if(canvas.dataset.coreState!=='fallback')fail(assetError||coolingError||(coolingEnvironmentFailed?'Cooling environment failed':'Reference studio environment failed'));
+        }else canvas.dataset.coreState='loading';
+        return;
+      }
       const elapsed=lastTime?now-lastTime:16.7,dt=Math.min(250,elapsed);lastTime=now;
       if(elapsed<2000&&elapsed>3){frameMs=frameMs*.96+elapsed*.04;if(frameMs>29)slowFrames++;else slowFrames=Math.max(0,slowFrames-1);}
       if(slowFrames>24&&resolution>.7){resolution=Math.max(.7,resolution-.1);slowFrames=0;}
@@ -589,7 +861,9 @@
       const dpr=Math.min(desiredDpr*resolution,maxBufferSize/Math.max(rect.width,rect.height));
       const width=Math.max(1,Math.round(rect.width*dpr)),height=Math.max(1,Math.round(rect.height*dpr));
       if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
-      motion(progress,sample);updateCamera(now,width/height,dt);
+      motion(progress,sample);
+      if(coolingRuntime){sample.l10=coolingAssemblyState(progress);if(progress<.407)sample.phase=sample.l10.phase;}
+      updateCamera(now,width/height,dt);
       const explode=sample.explode+idleTravel*idleWeight;
       PLACEMENTS.forEach((item,index)=>placementPose(item,index,progress,explode,poses[index]));
       gl.viewport(0,0,width,height);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(program);
@@ -597,12 +871,14 @@
       gl.uniformMatrix4fv(uniforms.uViewProjection,false,viewProjection);
       gl.uniform3fv(uniforms.uEye,eye);gl.uniformMatrix4fv(uniforms.uModel,false,modelMatrix);
       gl.uniform1f(uniforms.uLightTheme,light);gl.uniform1f(uniforms.uTime,reduced.matches?0:lightTime);
+      gl.uniform1f(uniforms.uCoolingFlow,0);gl.uniform1f(uniforms.uCoolingTravel,reduced.matches?0:sample.l10?.flowTravel||0);
       gl.uniform1f(uniforms.uScan,reduced.matches?0:sample.scan);gl.uniform1f(uniforms.uScanY,sample.scanY);
       gl.uniform1f(uniforms.uRack,sample.rackOpacity);gl.uniform1f(uniforms.uQuality,resolution);drawCalls=0;
       gl.uniform1f(uniforms.uReveal,sample.reveal);gl.uniform1f(uniforms.uDetail,key[2]);
       gl.uniform1f(uniforms.uHasEnvironment,environmentReady?1:0);
       if(environmentTexture){gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,environmentTexture);gl.uniform1i(uniforms.uEnvironment,1);gl.activeTexture(gl.TEXTURE0);}
       const drawScene=()=>{
+      gl.uniform1f(uniforms.uSectionX,10000);
       gl.uniform1f(uniforms.uRack,sample.rackOpacity);
       part('floor',floorMatrix,sample.rackOpacity,false);
       for(let i=0;i<PLACEMENTS.length;i++){
@@ -620,20 +896,52 @@
       if(hasL10()){
         const l10=sample.l10,base=matrices[PRIMARY_INDEX],m=new Float32Array(base);
         gl.uniform1f(uniforms.uRack,0);
+        gl.uniform1f(uniforms.uSectionX,inspection==='bare-section'?.58:10000);
         const layer=(name,lift=0,opacity=1,depth=true)=>{
           const semantic=name.slice(4);
+          if(inspection?.startsWith('bare-')&&['cooling-frame','cooling','flow-supply','flow-return','lid'].includes(semantic))return;
+          if(semantic==='network-cover'&&inspection?.startsWith('bare-'))return;
           if(inspection==='board'&&['packages','cooling-frame','cooling','flow-supply','flow-return'].includes(semantic))return;
           if(inspection==='packages'&&['cooling-frame','cooling','flow-supply','flow-return'].includes(semantic))return;
           m[13]=base[13]+lift;part(name,m,opacity,depth);
           if(assetRuntime)drawCalls+=assetRuntime.draw(semantic,m,opacity,depth,shadowPass);
         };
         layer('l10-chassis');layer('l10-board',l10.boardLift);layer('l10-packages',l10.packageLift);layer('l10-io',l10.ioLift);
-        layer('l10-cooling-frame',l10.coolingLift);
-        layer('l10-cooling',l10.coolingLift,1-l10.flow*.28,l10.flow<.01);
-        // Conceptual directional overlays sit on the disclosed cold-plate
-        // envelope; they are not invented proprietary internal microchannels.
-        layer('l10-flow-supply',0,l10.flow*.88,false);layer('l10-flow-return',0,l10.flow*.88,false);
+        if(assetRuntime?.metadata.extras.replacesNetworking){layer('l10-network',l10.ioLift);layer('l10-network-cover',l10.ioLift);}
+        if(coolingRuntime){
+          const coolingLayer=(semantic,lift=0,opacity=1,depth=true,fluid=false)=>{
+            if(inspection?.startsWith('bare-')||inspection==='board'||inspection==='packages')return;
+            if(shadowPass&&fluid)return;
+            m[13]=base[13]+lift;m[14]=base[14]+(semantic==='cooling-plumbing'?l10.plumbingZ:0);
+            bindEnvironment(true);
+            gl.uniform1f(uniforms.uL10Finish,0);gl.uniform1f(uniforms.uCoolingFlow,fluid?1:0);
+            drawCalls+=coolingRuntime.draw(semantic,m,opacity,depth,shadowPass,p=>{
+              gl.uniform1f(uniforms.uCoolingFinish,p.material.name==='CPU satin nickel cover'?1:p.material.name==='GPU machined nickel cover'?2:0);
+              if(fluid){
+                const binding=flowBindings[p.name.replace(/^Cooling V1 \/ cooling-fluid \/ /,'').replace(/#\d+$/,'')];
+                gl.uniform4fv(uniforms.uCoolingRoute,binding.route);gl.uniform2fv(uniforms.uCoolingPhase,binding.phase);
+              }
+            });
+            gl.uniform1f(uniforms.uCoolingFlow,0);gl.uniform1f(uniforms.uCoolingFinish,0);
+          };
+          coolingLayer('cooling-mounts',0,l10.coolingVisibility);
+          coolingLayer('cooling-frame',l10.coolingLift,l10.coolingVisibility);
+          coolingLayer('cooling-channels',l10.coolingLift,l10.coolingVisibility);
+          // Fluid is an actual volume inside the passages. Composite ghosted
+          // metal covers afterward; the whole envelope stays in place.
+          coolingLayer('cooling-fluid',0,l10.flow,false,true);
+          coolingLayer('cooling',l10.coolingLift,l10.coolingVisibility*(1-l10.flow*.94),l10.flow<.001);
+          coolingLayer('cooling-plumbing',l10.plumbingLift,l10.plumbingVisibility*(1-l10.flow*.94),l10.flow<.001);
+        }else{
+          layer('l10-cooling-frame',l10.coolingLift);
+          layer('l10-cooling',l10.coolingLift,1-l10.flow*.28,l10.flow<.01);
+          layer('l10-flow-supply',0,l10.flow*.88,false);layer('l10-flow-return',0,l10.flow*.88,false);
+        }
         if(progress>=.37)layer('l10-lid',.50*(1-l10.lid),interval(.37,.376,progress));
+        // A real geometric section through the same tray, with the lid seated
+        // at its unchanged closed height. The cut plane removes the near wall.
+        if(inspection==='bare-section'){m[13]=base[13];part('l10-lid',m,1,true);}
+        gl.uniform1f(uniforms.uSectionX,10000);
       }
       if(sample.scan>.001&&!reduced.matches){moving[13]=sample.scanY;moving[14]=0;part('scanPlane',moving,sample.scan*.55,false);}
       };
@@ -663,7 +971,7 @@
       canvas.dataset.coreIdle=idleStart?'showcase':'waiting';canvas.dataset.coreScan=sample.scan.toFixed(3);
       projected=projectEquipment(multiply(viewProjection,modelMatrix),rect);
       canvas.dispatchEvent(new CustomEvent('pa-core-projection',{bubbles:true,detail:projected}));
-      if(!ready&&!assetLoading&&(!hasL10()||environmentReady||environmentFailed)){const error=gl.getError();if(error!==gl.NO_ERROR){fail('WebGL render error '+error);return;}ready=true;canvas.dataset.coreState='ready';delete canvas.dataset.coreError;canvas.dispatchEvent(new CustomEvent('pa-core-ready',{bubbles:true}));}
+      if(!ready&&!assetLoading&&!coolingLoading&&(!hasL10()||!bareAsset||coolingEnvironmentReady||coolingEnvironmentFailed)&&(!hasL10()||environmentReady||environmentFailed)){const error=gl.getError();if(error!==gl.NO_ERROR){fail('WebGL render error '+error);return;}ready=true;canvas.dataset.coreState='ready';delete canvas.dataset.coreError;canvas.dispatchEvent(new CustomEvent('pa-core-ready',{bubbles:true}));}
       // Settled inspection frames return to native display resolution. Playback
       // owns time and requests its next frame; a paused tray need not burn GPU.
       if(hasL10()&&!cameraSettling&&resolution<1){resolution=1;slowFrames=0;cameraSettling=true;}
@@ -711,15 +1019,16 @@
       return {left,right,bottom,top,heightFraction:(top-bottom)/2,widthFraction:(right-left)/2,nearest,clipped:left< -1||right>1||bottom< -1||top>1||nearest<.15};
     }
     const api={supported:true,
-      setInspection(value){if(!inspectionEnabled)throw new Error('Inspection cameras require l10AssetLab=1');if(value!==null&&!['board','packages','cooling'].includes(value))throw new Error('Unknown asset inspection');inspection=value;cameraReady=false;shadowProgress=-1;requestDraw();},
+      setInspection(value){if(!inspectionEnabled)throw new Error('Inspection cameras require l10AssetLab=1');if(value!==null&&!['board','packages','cooling','fans','power','bare-front','bare-storage','bare-section','bare-hero','bare-packages','bare-network','cooling-hero','cooling-close','cooling-rear','cooling-section','cooling-manifold','cooling-connector','rack-blanking-bottom','rack-blanking-upper'].includes(value))throw new Error('Unknown asset inspection');inspection=value;cameraReady=false;shadowProgress=-1;requestDraw();},
       setProgress(value){const next=reduced.matches?1:clamp(Number(value)||0);if(Math.abs(next-progress)<.00001)return;activity();progress=next;if(manual&&!drag){manual=false;view='authored';yaw=0;pitch=0;syncOrbit();}armIdle();requestDraw();},
       setPointer(x,y){if(manual||drag||reduced.matches)return;pointerX=clamp(Number(x)||0,-1,1);pointerY=clamp(Number(y)||0,-1,1);requestDraw();},
       setOrbit,setView,resetOrbit,setTheme(value){const next=value===true||value==='light'?1:0;if(next===light)return;light=next;requestDraw();},
-      getState(){return {supported:true,ready,contextLost,progress,yaw,pitch,dragging:!!drag,settling:cameraSettling,theme:light?'light':'dark',model:'generic-liquid-cooled-compute',l10:hasL10()?l10State(progress):null,rackProgress:rackProgress(progress),computeTrays:classCounts.server,switchTrays:classCounts.nvlink,networkSwitches:classCounts.switch,powerShelves:classCounts.powershelf,occupiedU:48,componentCount:PLACEMENTS.length,geometryBuffers:parts?Object.keys(parts).length:0,vertices,drawCalls,
+      getState(){return {supported:true,ready,contextLost,progress,yaw,pitch,dragging:!!drag,settling:cameraSettling,theme:light?'light':'dark',model:'generic-liquid-cooled-compute',l10:hasL10()?(coolingRuntime?coolingAssemblyState(progress):l10State(progress)):null,rackProgress:rackProgress(progress),computeTrays:classCounts.server,switchTrays:classCounts.nvlink,networkSwitches:classCounts.switch,powerShelves:classCounts.powershelf,occupiedU:48,componentCount:PLACEMENTS.length,geometryBuffers:parts?Object.keys(parts).length:0,vertices,drawCalls,
         camera:{yaw:camera[0],elevation:camera[1],distance:camera[2],target:Array.from(target),eye:Array.from(eye),fov:.50,view},inspection,asset:{enabled:assetEnabled,loading:assetLoading,failed:assetFailed,error:assetError,metadata:assetRuntime?.metadata||null},bounds:projectionBounds(),callouts:projected?.callouts||[],projection:projected,geometry:shared?.quality||shared?.metadata||null,
-        quality:{resolution,frameMs,pixelCount:canvas.width*canvas.height,adaptive:true,contactShadows:!!shadowFramebuffer,shadowMapSize:shadowFramebuffer?shadowSize:0,environmentReady,environmentFailed,environment:'CC0 photographic studio / GGX log radiance'},idle:{active:!!idleStart,exiting:!!idleExit,weight:idleWeight,delay:6500,lastActivity,disabled:reduced.matches},assembly:assemblySnapshot(progress),disposed};},resize:requestDraw,
+        cooling:{enabled:bareAsset,ready:!!coolingRuntime,loading:coolingLoading,failed:coolingFailed,error:coolingError,metadata:coolingRuntime?.metadata||null},
+        quality:{resolution,frameMs,pixelCount:canvas.width*canvas.height,adaptive:true,contactShadows:!!shadowFramebuffer,shadowMapSize:shadowFramebuffer?shadowSize:0,environmentReady,environmentFailed,coolingEnvironmentReady,coolingEnvironmentFailed,environment:'CC0 photographic studio / GGX log radiance'},idle:{active:!!idleStart,exiting:!!idleExit,weight:idleWeight,delay:6500,lastActivity,disabled:reduced.matches},assembly:assemblySnapshot(progress,{coolingV1:!!coolingRuntime}),disposed};},resize:requestDraw,
       destroy(){if(disposed)return;disposed=true;clearTimeout(idleTimer);if(frame)cancelAnimationFrame(frame);frame=0;drag=null;ro?.disconnect();io?.disconnect();window.removeEventListener('resize',requestDraw);Object.entries(events).forEach(([name,handler])=>canvas.removeEventListener(name,handler));activityEvents.forEach(name=>window.removeEventListener(name,activity));if(typeof document!=='undefined')document.removeEventListener('visibilitychange',onVisibility);reduced.removeEventListener?.('change',onReduced);canvas.style.touchAction=originalTouchAction;release();canvas.dataset.coreState='disposed';delete canvas.paCoreScene;}
     };canvas.paCoreScene=api;return api;
   }
-  window.PACoreScene=Object.freeze({mount,assemblySnapshot});
+  window.PACoreScene=Object.freeze({mount,assemblySnapshot,coolingAssemblyState,coolingAssemblyCamera,coolingFlowBindings});
 })();

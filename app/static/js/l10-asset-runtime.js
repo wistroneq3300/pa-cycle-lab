@@ -3,7 +3,7 @@
  */
 (()=>{
  'use strict';
- const uniformNames=['uAsset','uAssetNormalScale','uAssetRoughness','uAssetAO','uAssetAlphaCutoff','uAssetAlphaMask','uAssetBase','uAssetMR','uAssetNormal','uAssetOcclusion'];
+ const uniformNames=['uAsset','uAssetNormalScale','uAssetRoughness','uAssetAO','uAssetAlphaCutoff','uAssetAlphaMask','uAssetBase','uAssetMR','uAssetNormal','uAssetOcclusion','uAssetFilmStrength','uAssetFilmThickness'];
  function upload(gl,asset,attributes,uniforms){
   const buffers=[],textures=[],images=new Map();let textureBytes=0;
   function texture(image,sampler,fallback){
@@ -36,7 +36,7 @@
   if(gl.getError()!==gl.NO_ERROR)throw new Error('L10 prototype GPU upload failed');
   }catch(error){buffers.forEach(b=>gl.deleteBuffer(b));textures.forEach(t=>gl.deleteTexture(t));asset.disposeImages();gl.activeTexture(gl.TEXTURE0);throw error;}
   gl.activeTexture(gl.TEXTURE0);
-  function draw(layer,matrix,opacity,writeDepth,shadowPass){
+  function draw(layer,matrix,opacity,writeDepth,shadowPass,beforePrimitive=null){
    if(opacity<=.003||shadowPass&&(opacity<.96||!writeDepth))return 0;
    let calls=0;
    for(const p of primitives){if(p.layer!==layer)continue;const m=p.material;
@@ -45,13 +45,14 @@
     gl.disableVertexAttribArray(attributes.aColor);gl.vertexAttrib4fv(attributes.aColor,[...m.baseColorFactor.slice(0,3),1]);
     gl.disableVertexAttribArray(attributes.aMaterial);gl.vertexAttrib2f(attributes.aMaterial,m.metallicFactor,0);
     gl.uniform1f(uniforms.uAsset,1);gl.uniform1f(uniforms.uAssetRoughness,m.roughnessFactor);gl.uniform1f(uniforms.uAssetNormalScale,m.normalTexture?m.normalScale:0);
+    gl.uniform1f(uniforms.uAssetFilmStrength,m.thinFilmStrength);gl.uniform1f(uniforms.uAssetFilmThickness,m.thinFilmThickness);
     gl.uniform1f(uniforms.uAssetAO,m.occlusionTexture?m.occlusionStrength:0);gl.uniform1f(uniforms.uAssetAlphaMask,m.alphaMode==='MASK'?1:0);gl.uniform1f(uniforms.uAssetAlphaCutoff,m.alphaCutoff);
     ['uAssetBase','uAssetMR','uAssetNormal','uAssetOcclusion'].forEach((name,i)=>{gl.activeTexture(gl.TEXTURE2+i);gl.bindTexture(gl.TEXTURE_2D,p.maps[i]);gl.uniform1i(uniforms[name],i+2);});
     gl.uniformMatrix4fv(uniforms.uPart,false,matrix);gl.uniform1f(uniforms.uOpacity,opacity);gl.depthMask(writeDepth);
     if(m.doubleSided)gl.disable(gl.CULL_FACE);else{gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);}
-    gl.drawArrays(gl.TRIANGLES,0,p.count);calls++;
+    beforePrimitive?.(p);gl.drawArrays(gl.TRIANGLES,0,p.count);calls++;
    }
-   gl.disable(gl.CULL_FACE);gl.activeTexture(gl.TEXTURE0);gl.uniform1f(uniforms.uAsset,0);return calls;
+   gl.disable(gl.CULL_FACE);gl.activeTexture(gl.TEXTURE0);gl.uniform1f(uniforms.uAsset,0);gl.uniform1f(uniforms.uAssetFilmStrength,0);return calls;
   }
   return {draw,metadata:{...asset.metadata,primitives:primitives.length,vertices:primitives.reduce((n,p)=>n+p.count,0),bufferBytes:primitives.reduce((n,p)=>n+p.data.byteLength,0),textureBytes,textureObjects:textures.length,layers:[...new Set(primitives.map(p=>p.layer))]},destroy(lost=false){if(!lost){buffers.forEach(b=>gl.deleteBuffer(b));textures.forEach(t=>gl.deleteTexture(t));}asset.disposeImages();}};
  }

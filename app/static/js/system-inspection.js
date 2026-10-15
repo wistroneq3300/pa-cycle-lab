@@ -55,7 +55,7 @@
     <section class="pd-inspection-matrix" aria-labelledby="pd-inspection-matrix-title"><div class="pd-inspection-matrix-head"><div><h3 id="pd-inspection-matrix-title">Inspection Status Matrix</h3><p>依此 Project checker 與已保存 Evidence 呈現；Coverage 與 Hardware Health 分開計算。</p></div><label>節點 <select data-matrix-node><option value="">全部節點</option></select></label></div><div class="pd-matrix-scroll"><table><thead><tr><th>Check Name</th><th>Status</th><th>Expected / Observed</th><th>Last Checked</th><th>Evidence</th></tr></thead><tbody data-matrix></tbody></table></div><p data-matrix-empty hidden>尚無巡檢結果。零項異常不代表 Hardware Health PASS。</p></section>
     <details class="pd-inspection-coverage"><summary>採集來源與原始狀態</summary><div data-coverage></div></details>
     <details class="pd-inspection-coverage"><summary>節點名稱與身分紀錄</summary><div data-identity></div><div data-identity-history></div></details>
-    <section data-issues hidden aria-label="巡檢問題與恢復歷史"><div class="pd-inspection-filters"><label>節點 <select data-node><option value="">全部節點</option></select></label><label>狀態 <select data-filter><option value="current">目前問題與最近恢復</option><option value="ACTIVE">目前問題</option><option value="KNOWN">已知問題</option><option value="RECOVERED">最近恢復</option><option value="ARCHIVED">歷史問題</option><option value="all">全部紀錄</option></select></label><label>搜尋全部符合範圍 <input data-issue-search type="search" placeholder="規則、元件或問題摘要"></label></div><button type="button" class="btn small" data-reload>更新問題</button><span data-history-count></span><div data-list></div><div class="pd-inspection-paging"><button class="btn small" data-prev>上一頁</button><span data-page></span><button class="btn small" data-next>下一頁</button></div></section>
+    <section data-issues hidden aria-label="巡檢問題與恢復歷史"><div class="pd-inspection-filters"><label>節點 <select data-node><option value="">全部節點</option></select></label><label>狀態 <select data-filter><option value="current">目前問題與最近恢復</option><option value="ACTIVE">目前問題</option><option value="KNOWN">已知問題</option><option value="RECOVERED">最近恢復</option><option value="ARCHIVED">歷史問題</option><option value="all">全部紀錄</option></select></label><label>排序 <select data-sort><option value="severity">嚴重程度（FAIL 先）</option><option value="severity-warn">嚴重程度（WARN 先）</option><option value="recent">最近發生</option><option value="oldest">最早發現</option><option value="occurrences">發生次數</option><option value="recurrences">復發次數</option><option value="status">處理狀態</option></select></label><label>搜尋全部符合範圍 <input data-issue-search type="search" placeholder="規則、元件或問題摘要"></label></div><button type="button" class="btn small" data-reload>更新問題</button><span data-history-count></span><div data-list></div><div class="pd-inspection-paging"><button class="btn small" data-prev>上一頁</button><span data-page></span><button class="btn small" data-next>下一頁</button></div></section>
     <dialog class="pd-settings-modal" data-config aria-label="巡檢設定"><div class="pd-settings-body"><h3>此系統巡檢設定</h3><p class="pd-settings-hint">設定只影響巡檢規則，不會變更 Telemetry 收集頻率。</p><div class="pd-inspection-fields">
       <label><input type="checkbox" name="enabled"> 啟用 Project 排程</label><label><input type="checkbox" name="ai_enabled"> 活躍警告與 FAIL 使用 AI 分析</label>
       <label>事件巡檢間隔（秒）<input type="number" name="interval_seconds" min="30" max="3600" required></label>
@@ -71,7 +71,7 @@
     </div>
   </section>`;
   function dispose(){if(!mounted)return;const ctx=mounted,r=ctx.root;
-    lastView={name:ctx.name,offset:ctx.offset,rows:ctx.rows,snapshot:ctx.snapshot,show:!r.querySelector('[data-issues]').hidden,collapsed:r.querySelector('[data-collapse]').getAttribute('aria-expanded')==='false',filter:r.querySelector('[data-filter]').value,search:r.querySelector('[data-issue-search]').value,node:r.querySelector('[data-node]').value,opened:[...r.querySelectorAll('details[data-issue-id][open]')].map(e=>e.dataset.issueId)};
+    lastView={name:ctx.name,offset:ctx.offset,rows:ctx.rows,snapshot:ctx.snapshot,show:!r.querySelector('[data-issues]').hidden,collapsed:r.querySelector('[data-collapse]').getAttribute('aria-expanded')==='false',filter:r.querySelector('[data-filter]').value,sort:r.querySelector('[data-sort]').value,search:r.querySelector('[data-issue-search]').value,node:r.querySelector('[data-node]').value,opened:[...r.querySelectorAll('details[data-issue-id][open]')].map(e=>e.dataset.issueId)};
     clearTimeout(ctx.timer);clearTimeout(ctx.aiTimer);clearTimeout(ctx.searchTimer);ctx.abort.abort();mounted=null;
     closeViewerTimer=setTimeout(()=>window.InspectionEvidence?.close(),0);
   }
@@ -80,7 +80,7 @@
     const ctx={root,name,base:'/api/machine/'+encodeURIComponent(name)+'/inspection',abort:new AbortController(),offset:0,rows:[],snapshot:null,timer:null};mounted=ctx;
     const find=s=>root.querySelector(s);
     if(lastView?.name===name){clearTimeout(closeViewerTimer);ctx.offset=lastView.offset;ctx.rows=lastView.rows;ctx.snapshot=lastView.snapshot;ctx.restoreOpen=lastView.opened;
-      find('[data-issues]').hidden=!lastView.show;find('[data-filter]').value=lastView.filter;find('[data-issue-search]').value=lastView.search;
+      find('[data-issues]').hidden=!lastView.show;find('[data-view]').textContent=lastView.show?'收起問題':'查看問題';find('[data-view]').setAttribute('aria-expanded',lastView.show?'true':'false');find('[data-filter]').value=lastView.filter;find('[data-sort]').value=lastView.sort||'severity';find('[data-issue-search]').value=lastView.search;
       if(lastView.collapsed){find('[data-collapse]').setAttribute('aria-expanded','false');find('#pd-inspection-body').hidden=true;root.classList.add('pd-inspection-collapsed');}
       if(ctx.snapshot){for(const node of ctx.snapshot.nodes){const o=document.createElement('option');o.value=node.node_id;o.textContent=nodeLabel(node);find('[data-node]').append(o);}find('[data-node]').value=lastView.node;if(lastView.show)renderIssues(ctx);}
       if(ctx.rows.some(i=>['QUEUED','RUNNING'].includes(i.analysis?.state)))trackAI(ctx);
@@ -92,7 +92,19 @@
       if(body)body.hidden=open;
       root.classList.toggle('pd-inspection-collapsed',open);
     };
-    find('[data-view]').onclick=async()=>{find('[data-issues]').hidden=!find('[data-issues]').hidden;if(!find('[data-issues]').hidden)await loadIssues(ctx);};
+    find('[data-view]').onclick=async()=>{
+      const issues=find('[data-issues]'),button=find('[data-view]');
+      const opening=issues.hidden;issues.hidden=!opening;
+      button.textContent=opening?'收起問題':'查看問題';
+      button.setAttribute('aria-expanded',opening?'true':'false');
+      if(opening){
+        await loadIssues(ctx);
+        const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+        issues.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'});
+        const first=issues.querySelector('[data-issue-id], [data-list] button');
+        if(first){first.setAttribute('tabindex','-1');first.focus({preventScroll:true});}
+      }
+    };
     find('[data-settings]').onclick=()=>{const dialog=find('[data-config]');populateSettings(ctx,dialog);dialog.showModal();};
     find('[data-run]').onclick=async()=>{try{await request(ctx,'/run',{method:'POST'});find('[data-status]').textContent='巡檢中…';await refresh(ctx);}catch(e){error(ctx,e);}};
     const configCancel=find('[data-config-cancel]');if(configCancel)configCancel.onclick=()=>find('[data-config]').close();
@@ -111,6 +123,7 @@
     find('[data-reload]').onclick=()=>loadIssues(ctx);
     const filter=()=>{ctx.offset=0;void loadIssues(ctx);};
     find('[data-node]').onchange=filter;find('[data-filter]').onchange=filter;
+    find('[data-sort]').onchange=()=>renderIssues(ctx);
     find('[data-issue-search]').oninput=()=>{clearTimeout(ctx.searchTimer);ctx.searchTimer=setTimeout(filter,300);};
     find('[data-prev]').onclick=()=>{ctx.offset=Math.max(0,ctx.offset-50);void loadIssues(ctx);};
     find('[data-next]').onclick=()=>{ctx.offset+=50;void loadIssues(ctx);};
@@ -257,9 +270,29 @@
     if(text(analysis?.error)){const p=document.createElement('p'),category=text(analysis.error_category);p.textContent=category?text(analysis.error)+' · '+category:text(analysis.error);root.append(p);}
     if(analysis?.based_on&&typeof analysis.based_on==='object'){const p=document.createElement('p');p.className='pd-ai-basis';p.textContent='依據觀測：'+stamp(analysis.based_on.last_seen_at)+' · '+(text(analysis.based_on.source)||'已保存證據')+'。AI 建議不改變規則判定。';root.append(p);}
   }
+  function issueSortKey(ctx){
+    const sort=ctx.root.querySelector('[data-sort]')?.value||'severity';
+    const num=v=>typeof v==='number'&&isFinite(v)?v:-1;
+    const rank=issue=>issue.status==='ACTIVE'?0:issue.status==='KNOWN'?1:issue.status==='RECOVERED'?2:3;
+    return {sort,num,rank};
+  }
+  function sortIssues(ctx,rows){
+    const {sort,num,rank}=issueSortKey(ctx);
+    const bySeverity=(a,b)=>(a.severity==='FAIL'?0:1)-(b.severity==='FAIL'?0:1)||num(b.last_seen_at)-num(a.last_seen_at);
+    const comparators={
+      'severity':bySeverity,
+      'severity-warn':(a,b)=>(a.severity==='WARN'?0:1)-(b.severity==='WARN'?0:1)||num(b.last_seen_at)-num(a.last_seen_at),
+      'recent':(a,b)=>num(b.last_seen_at)-num(a.last_seen_at),
+      'oldest':(a,b)=>num(a.first_seen_at)-num(b.first_seen_at),
+      'occurrences':(a,b)=>num(b.occurrences)-num(a.occurrences)||bySeverity(a,b),
+      'recurrences':(a,b)=>num(b.recurrences)-num(a.recurrences)||bySeverity(a,b),
+      'status':(a,b)=>rank(a)-rank(b)||bySeverity(a,b),
+    };
+    return [...rows].sort(comparators[sort]||bySeverity);
+  }
   function renderIssues(ctx){
     const r=ctx.root,list=r.querySelector('[data-list]'),opened=new Set([...(ctx.restoreOpen||[]),...[...list.querySelectorAll('details[open]')].map(e=>e.dataset.issueId)]);ctx.restoreOpen=null;list.replaceChildren();
-    const rows=ctx.rows;
+    const rows=sortIssues(ctx,ctx.rows);
     if(!rows.length){const p=document.createElement('p');p.textContent='此頁沒有符合條件的問題。請同時查看資料涵蓋狀態。';list.append(p);}
     for(const issue of rows){
       const detail=document.createElement('details');detail.className='pd-inspection-issue';detail.dataset.issueId=issue.id;detail.open=opened.has(issue.id);const summary=document.createElement('summary');summary.className='pd-issue-summary';

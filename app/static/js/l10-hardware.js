@@ -17,6 +17,7 @@
     referenceDimensionsMM: Object.freeze({ width: 438, depth: 766, height: 43.6 }),
     editorialSceneScale: Object.freeze({ x: .688, y: 1, z: .802 }),
     counts: Object.freeze({ computeBoards: 2, cpu: 2, gpu: 4, fans: 8, storageBays: 8, networkCards: 2, dpu: 1 }),
+    displayConfiguration: 'Concept: left BF3 dual-port; right BF3 dual-port; upper-right CX7 dual-port. Not a shipping OEM configuration claim.',
     boards: Object.freeze([
       Object.freeze({ x: -.965, z: -1.68, width: 1.73, depth: 2.32 }),
       Object.freeze({ x: .965, z: -1.68, width: 1.73, depth: 2.32 })
@@ -67,7 +68,7 @@
       faces.forEach(f=>quad(p(...f[0]),p(...f[1]),p(...f[2]),p(...f[3]),f[4],color,m));
     }
     // Machined edge breaks catch studio reflections without exaggerated radii.
-    function bevel(x,y,z,w,h,d,color,m=.82,r=.012) {
+    function bevel(x,y,z,w,h,d,color,m=.82,r=.012,negativeXInset=null) {
       r=Math.min(r,w*.15,d*.15,h*.30); const rings=[];
       for(const [dy,inset] of [[-h/2,r],[-h/2+r,0],[h/2-r,0],[h/2,r]]) {
         const X=w/2-inset,Z=d/2-inset,b=Math.max(.002,r-inset*.55);
@@ -75,7 +76,18 @@
       }
       for(let j=0;j<3;j++)for(let i=0;i<8;i++){
         const k=(i+1)%8,a=rings[j][i],b=rings[j+1][i],c=rings[j+1][k],d0=rings[j][k];
-        quad(a,b,c,d0,unit(cross(sub(b,a),sub(c,a))),color,m);
+        const normal=unit(cross(sub(b,a),sub(c,a)));
+        if(negativeXInset&&j===1&&i===6){
+          // A flush insert owns its exposed surface. Retain the enclosure's
+          // exact envelope, but do not emit a second coplanar surface beneath
+          // the insert: different triangle diagonals otherwise fight in depth.
+          const plate=negativeXInset,edge=Math.min(plate.radius,plate.width*.15,plate.depth*.15,plate.height*.30);
+          const halfY=plate.height/2-edge,halfZ=plate.depth/2-Math.max(.002,edge);
+          const lowY=y-halfY,highY=y+halfY,lowZ=z-halfZ,highZ=z+halfZ;
+          const strip=(y0,y1,z0,z1)=>quad([a[0],y0,z1],[a[0],y1,z1],[a[0],y1,z0],[a[0],y0,z0],normal,color,m);
+          strip(a[1],lowY,c[2],a[2]);strip(highY,b[1],c[2],a[2]);
+          strip(lowY,highY,c[2],lowZ);strip(lowY,highY,highZ,a[2]);
+        }else quad(a,b,c,d0,normal,color,m);
       }
       for(let i=0;i<8;i++){const k=(i+1)%8;tri([x,y+h/2,z],rings[3][k],rings[3][i],[0,1,0],color,m);tri([x,y-h/2,z],rings[0][i],rings[0][k],[0,-1,0],color,m);}
     }
@@ -128,10 +140,12 @@
   }
   function build(modelProfile=profile,options={}) {
     const profile=modelProfile;
-    const parts={}; for(const id of ['chassis','board','packages','io','cooling-frame','cooling','flow-supply','flow-return','lid'])parts[id]=mesh();
+    const parts={}; for(const id of ['chassis','board','packages','io','network-cover','cooling-frame','cooling','flow-supply','flow-return','lid'])parts[id]=mesh();
     const ch=parts.chassis,board=parts.board,pkg=parts.packages,io=parts.io,cf=parts['cooling-frame'],cp=parts.cooling,lid=parts.lid;
+    const sharedFront=window.PARackScene?.createComputeFront?.(profile.height);
     // Folded sheet chassis: thin base, upright walls, hemmed flanges and runners.
     ch.bevel(0,-.124,0,3.98,.023,5.98,C.steel,.84,.004);
+    if(sharedFront)ch.bevel(0,-.124,3.045,3.858,.023,.110,C.steel,.84,.002);
     for(const side of [-1,1]){
       ch.bevel(side*1.978,.003,0,.034,.244,5.98,C.darkSteel,.88,.005);
       ch.box(side*1.945,.118,0,.083,.016,5.89,C.steel,.9);
@@ -140,16 +154,20 @@
       for(let i=0;i<10;i++)ch.screw(side*1.937,.127,-2.72+i*.59,.015);
       for(let i=0;i<5;i++)ch.bevel(side*1.909,-.093,-2.6+i*1.1,.052,.036,.15,C.steel,.8,.005);
       // Chassis handles are folded pull tabs, not floating ornamental rails.
+      if(!sharedFront){
       ch.bevel(side*1.906,.018,3.017,.142,.204,.034,C.darkSteel,.85,.008);
       ch.box(side*1.907,.018,3.038,.085,.142,.013,C.black,.1);
       ch.bevel(side*1.907,.013,3.054,.033,.118,.024,C.bright,.9,.005);
       ch.screw(side*1.879,.119,2.89,.02);
+      }
     }
     ch.box(0,-.008,-2.966,3.93,.22,.034,C.steel,.88);
     // Front fascia is assembled around apertures rather than a blank solid slab.
+    if(!sharedFront){
     ch.bevel(0,.118,2.982,3.91,.025,.05,C.darkSteel,.83,.004);
     ch.bevel(0,-.109,2.982,3.91,.030,.05,C.steel,.84,.004);
     for(const x of [-1.78,-.86,.87,1.78])ch.box(x,.004,2.979,.032,.208,.048,C.steel,.88);
+    }
 
     // Board-mounted parts share a real seating plane. The terminations and pads
     // are original representative geometry; no OEM netlist or BOM is asserted.
@@ -221,13 +239,15 @@
     // Asset prototype can replace one semantic board without spatially clipping
     // triangles or removing the shared chassis, piping and flow overlays.
     const omitted=Number.isInteger(options.omitBoard)?options.omitBoard:-1;
+    const omitBareBoards=options.omitBareBoards===true;
     const replaceLeftPlumbing=omitted===0&&options.replaceLeftPlumbing===true;
+    const replaceServiceGeometry=(omitted===0||omitBareBoards)&&options.replaceServiceGeometry===true;
     if(replaceLeftPlumbing&&(!Array.isArray(options.supplyOverlayPath)||options.supplyOverlayPath.length<2||options.supplyOverlayPath.length>512||options.supplyOverlayPath.some(p=>!Array.isArray(p)||p.length!==3||p.some(v=>!Number.isFinite(v)||Math.abs(v)>4))))throw new Error('Invalid prototype supply path');
     const discard=mesh();
-    profile.boards.forEach((p,i)=>pcbDetail(i===omitted?discard:board,p.x,p.z,p.width,p.depth,i*11));
+    profile.boards.forEach((p,i)=>pcbDetail(omitBareBoards||i===omitted?discard:board,p.x,p.z,p.width,p.depth,i*11));
     // Low-profile components are intentionally part of the board, not exploded chips.
     for(const b of profile.boards){
-      if(profile.boards.indexOf(b)===omitted)continue;
+      if(omitBareBoards||profile.boards.indexOf(b)===omitted)continue;
       for(let i=0;i<8;i++){
         const x=b.x-.60+i*.172;
         // A repeated power phase has a molded inductor, two terminated power
@@ -270,7 +290,7 @@
     }
     profile.packages.forEach((p,index)=>{
       const omit=p.board===omitted;
-      const pkg=omit?discard:parts.packages,board=omit?discard:parts.board;
+      const pkg=omit||omitBareBoards?discard:parts.packages,board=omit||omitBareBoards?discard:parts.board;
       const cf=omit?discard:parts['cooling-frame'],cp=omit?discard:parts.cooling;
       // Bonded board-integrated package: underfill meets the board, followed by
       // layered laminate, the bonded spreader flange and its contact cap. Do not
@@ -357,7 +377,7 @@
     });
 
     // Eight compact fan cartridges leave a central power-cable corridor.
-    for(const x of [-1.69,-1.27,-.85,-.43,.43,.85,1.27,1.69]){
+    if(!replaceServiceGeometry)for(const x of [-1.69,-1.27,-.85,-.43,.43,.85,1.27,1.69]){
       io.bevel(x,-.012,.055,.365,.198,.48,C.black,.10,.008);
       io.box(x,.091,.055,.278,.011,.386,C.darkSteel,.42);
       for(const z of [-.192,.302]){
@@ -385,17 +405,47 @@
     }
     // Front I/O boards; their large shield cans match the published zoning.
     for(const x of [-1.29,1.29]){
-      pcbDetail(io,x,1.48,.90,1.82,2);
-      io.bevel(x,-.017,1.47,.80,.080,1.36,C.nickel,.78,.009);
-      io.bevel(x,.029,1.47,.74,.013,1.28,[.47,.51,.52],.76,.003);
-      for(const side of [-1,1]){
-        io.line(x-.32,1.47+side*.54,x+.32,1.47+side*.54,.036,.005,C.darkSteel,.65);
-        for(let i=0;i<10;i++)io.box(x+side*.332,.039,1.09+i*.08,.021,.004,.041,C.darkSteel,.5);
+      const cover=options.replaceNetworking?parts['network-cover']:io;
+      if(!options.replaceNetworking){
+      if(!sharedFront)pcbDetail(io,x,1.48,.90,1.82,2);
+      else{
+        // A single low seat plane carries each lower dual-port adapter. Its
+        // extended nose supports the actual shared front cages; no second PCB
+        // intersects the legacy board underneath the new SSD bank.
+        io.bevel(x,-.098,1.825,.90,.012,2.51,[.028,.041,.034],.065,.002);
+        for(const sx of [-1,1])for(const z of [.65,2.66])io.ring(x+sx*.38,-.091,z,.022,.011,.002,C.gold,.78,16);
       }
-      io.bevel(x,.038,1.77,.39,.004,.16,[.33,.37,.38],.63,.001);
-      for(let i=0;i<6;i++)io.line(x-.16,1.714+i*.020,x+.13-(i%3)*.040,1.714+i*.020,.041,.0025,C.steel,.72);
-      for(const sx of [-1,1])for(const z of [.89,2.07])io.screw(x+sx*.32,.040,z,.018);
-      for(let i=0;i<11;i++)io.box(x-.30+i*.06,.044,.99,.017,.021,.36,C.steel,.82);
+      }
+      if(options.replaceNetworking){
+        // Seated board spacers remain visible when the removable cover is off.
+        for(const side of [-1,1])for(const z of [.65,2.66])io.cylinder([x+side*.38,-.1125,z],[x+side*.38,-.104,z],.018,C.nickel,.84,16);
+        // Hollow removable cover: real components sit underneath its roof.
+        // Same exterior envelope as the legacy shield, with no solid box
+        // occupying the seated package. These faces hide only in inspection.
+        // The upper-right card begins at Z=2.15. Retain a real .005 gap
+        // beside its rear laminate edge; no change to either board position.
+        const coverFront=x>0?2.145:2.15,coverDepth=coverFront-.79,coverZ=(coverFront+.79)/2;
+        cover.bevel(x,.025,coverZ,.80,.005,coverDepth,C.nickel,.78,.001);
+        // Inspection exposes the die; the restored cover has a continuous
+        // die -> TIM -> metal pedestal -> roof contact, not an air gap.
+        // Contact thickness is a visual approximation, not an OEM stackup.
+        cover.box(x,-.0329,1.44,.265,.002,.276,[.29,.30,.29],.08);
+        cover.box(x,-.0047,1.44,.265,.0544,.276,C.nickel,.82);
+        for(const side of [-1,1]){
+          cover.box(x+side*.394,-.01725,coverZ,.012,.0795,coverDepth,C.nickel,.78);
+          cover.box(x,-.01725,coverZ+side*(coverDepth/2-.006),.776,.0795,.012,C.nickel,.78);
+        }
+        for(const side of [-1,1])for(const z of [.89,2.07])cover.cylinder([x+side*.32,-.092,z],[x+side*.32,.0225,z],.011,C.nickel,.84,12);
+      }else cover.bevel(x,-.017,1.47,.80,.080,1.36,C.nickel,.78,.009);
+      cover.bevel(x,.029,1.47,.74,.013,1.28,[.47,.51,.52],.76,.003);
+      for(const side of [-1,1]){
+        cover.line(x-.32,1.47+side*.54,x+.32,1.47+side*.54,.036,.005,C.darkSteel,.65);
+        for(let i=0;i<10;i++)cover.box(x+side*.332,.039,1.09+i*.08,.021,.004,.041,C.darkSteel,.5);
+      }
+      cover.bevel(x,.038,1.77,.39,.004,.16,[.33,.37,.38],.63,.001);
+      for(let i=0;i<6;i++)cover.line(x-.16,1.714+i*.020,x+.13-(i%3)*.040,1.714+i*.020,.041,.0025,C.steel,.72);
+      for(const sx of [-1,1])for(const z of [.89,2.07])cover.screw(x+sx*.32,.040,z,.018);
+      for(let i=0;i<11;i++)cover.box(x-.30+i*.06,.044,.99,.017,.021,.36,C.steel,.82);
     }
     pcbDetail(io,-.34,1.49,.58,1.09,8); // Management controller card.
     io.bevel(-.34,-.022,1.52,.27,.086,.31,C.chip,.08,.006);
@@ -408,15 +458,93 @@
     io.box(.37,.001,1.74,.17,.015,.42,C.chip,.06);io.screw(.37,.015,1.985,.015);
     io.box(.37,-.002,1.45,.20,.041,.055,C.black,.08);
     // Flat, insulated laminated busbar through the central corridor.
+    // Opt-in revision 3 owns the image-guided cable and front termination;
+    // all boards, CMOS, rear socket and unrelated I/O stay in this mesh.
+    if(!replaceServiceGeometry){
     io.bevel(0,-.035,-.73,.16,.063,3.75,C.black,.10,.006);
     io.box(-.033,-.001,-.73,.025,.009,3.63,[.11,.115,.11],.35);
     io.box(.033,-.001,-.73,.025,.009,3.63,[.09,.092,.09],.30);
     io.bevel(0,-.034,1.10,.72,.076,.46,C.darkSteel,.53,.008);
     for(let i=0;i<8;i++)io.box(-.29+i*.083,.020,1.09,.035,.022,.27,C.steel,.74);
+    }
 
     // Front: eight individually framed E1.S carriers with captive latches.
     // Their rear sockets now meet one shared vertical backplane. The public
     // image establishes the relationship; exact connector internals are authored.
+    if(sharedFront){
+      // Rack and articulated tray consume the same actual fascia, not two
+      // separately positioned facades. Match the Rack's 11→12 vertex adapter.
+      const source=sharedFront.data;
+      for(let s=0;s<source.length;s+=11){
+        const color=Array.from(source.subarray(s+6,s+9)),metal=source[s+9];
+        if(metal>.5&&color[0]*.2126+color[1]*.7152+color[2]*.0722<.14)for(let k=0;k<3;k++)color[k]*=1.25;
+        ch.data.push(...source.subarray(s,s+6),...color,metal===-3?.20:1,metal===-3?.65:metal,source[s+10]);
+      }
+      const layout=sharedFront.storageLayout,mm=layout.mmPerUnit,slots=layout.slots;
+      const backplaneZ=layout.bodyRearZ-.040,bankCenter=(slots[0].x+slots[7].x)/2,bankWidth=slots[7].x-slots[0].x+.160;
+      io.bevel(bankCenter,layout.bodyY,backplaneZ,bankWidth,.170,.012,[.032,.049,.038],.06,.002);
+      for(const slot of slots){
+        const {x,y,body}=slot,z=(slot.frontZ+slot.rearZ)/2;
+        // E1.S whole 15 mm thermal enclosure. The broad face lies in YZ;
+        // the 33.75 mm edge is presented at the narrow extraction opening.
+        const sidePlate={width:.004,height:body.height-.013,depth:body.depth-.030,radius:.001};
+        io.bevel(x,y,z,body.width,body.height,body.depth,[.040,.045,.049],.32,.0025,sidePlate);
+        io.bevel(x-body.width/2+.002,y,z,sidePlate.width,sidePlate.height,sidePlate.depth,C.nickel,.82,sidePlate.radius);
+        // Longitudinal shallow extrusion channels, all within the 15 mm envelope.
+        for(let j=0;j<9;j++)io.box(x+body.width/2-.001,y-body.height*.39+j*body.height*.098,z,.0018,.0035,body.depth-.045,[.020,.023,.026],.18);
+        for(const end of [-1,1])io.box(x,y,z+end*(body.depth/2-.007),body.width-.006,body.height-.009,.010,C.darkSteel,.69);
+        // Thin folded runner and bottom carrier consume their own clearance.
+        io.box(x,y-body.height/2-.003,z-.014,body.width+.007,.003,body.depth-.028,C.nickel,.83);
+        for(const side of [-1,1]){
+          io.box(x+side*(body.width/2+.0046),y-body.height/2+.007,z-.014,.0032,.020,body.depth-.028,C.steel,.79);
+          io.box(x+side*(8.18/mm.x),y-.02,z-.030,.0025,.022,body.depth-.048,C.darkSteel,.68);
+        }
+        // One keyed board-edge tongue and one mating socket per drive ID.
+        // Its PCB remains in the same vertical YZ plane as the drive, with
+        // a thin X edge. Contact strokes are illustrative, not a pinout claim.
+        io.box(x,y,slot.rearZ-.010,.007,body.height*.68,.021,C.pcbEdge,.10);
+        io.bevel(x,y,slot.rearZ-.026,.025,body.height*.78,.025,C.black,.08,.002);
+        for(let pin=0;pin<8;pin++)for(const side of [-1,1])io.box(x+side*.0037,y-body.height*.28+pin*body.height*.56/7,slot.rearZ-.010,.0008,.009,.012,C.gold,.85);
+        io.box(x,y+.042,backplaneZ+.008,.038,.018,.003,C.chip,.07);
+      }
+      // Concept display: left BF3 dual-port, right BF3 dual-port, upper-right
+      // CX7 dual-port. Cage bodies follow the shared front port centers.
+      for(const card of [{id:'BF3-L',x:-1.325,y:-.054,z:2.60,w:.84,d:.90,ports:[-1.52,-1.13]},
+        {id:'BF3-R',x:1.1825,y:-.058,z:2.60,w:.84,d:.90,ports:[.995,1.37]},
+        {id:'CX7-R',x:1.3505,y:.064,z:2.60,w:.50,d:.90,ports:[1.235,1.466]}]){
+        const cardY=card.y-.041;
+        if(card.id==='CX7-R'&&!options.replaceNetworking)io.bevel(card.x,cardY,card.z,card.w,.009,card.d,[.028,.041,.034],.065,.002);
+        if(card.id==='CX7-R'&&options.replaceNetworking){
+          const cover=parts['network-cover'];
+          for(const side of [-1,1]){
+            const x=card.x+side*.213;
+            io.cylinder([x,-.092,2.19],[x,.0185,2.19],.0055,C.nickel,.84,16);
+            io.ring(x,.0285,2.19,.014,.008,.002,C.nickel,.84,16);
+          }
+          // Low-profile removable mezzanine spreader, below the original lid.
+          cover.bevel(card.x,.109,2.44,.34,.006,.42,C.nickel,.82,.002);
+          cover.box(card.x,.08135,2.435,.134,.0015,.138,[.29,.30,.29],.08);
+          cover.box(card.x,.09405,2.435,.134,.0239,.138,C.nickel,.82);
+          for(const side of [-1,1]){
+            // Side-controller solder toes stay outside the spreader skirt.
+            cover.box(card.x+side*.158,.06675,2.44,.006,.0785,.42,C.nickel,.82);
+            cover.box(card.x,.06675,2.44+side*.207,.310,.0785,.006,C.nickel,.82);
+          }
+          for(let fin=0;fin<9;fin++)cover.box(card.x-.14+fin*.035,.115,2.44,.006,.006,.36,C.steel,.85);
+        }
+        // Shielded short cages remain distinct from the board and their opening.
+        for(const x of card.ports){
+          const w=card.id.startsWith('CX7')?.187:.244,h=card.id.startsWith('CX7')?.046:.068;
+          const cageZ=2.98625,cageDepth=.3895;
+          for(const side of [-1,1]){
+            io.box(x+side*(w/2-.0025),card.y,cageZ,.005,h,cageDepth,C.nickel,.81);
+            io.box(x,card.y+side*(h/2-.0025),cageZ,w-.010,.005,cageDepth,C.nickel,.81);
+          }
+          io.box(x,card.y,2.793,w-.010,h-.010,.003,C.black,.08);
+          io.box(x,card.y+h/2+.001,2.950,w-.018,.002,.272,C.darkSteel,.69);
+        }
+      }
+    }else{
     io.bevel(0,-.013,2.520,1.74,.176,.025,C.pcb,.06,.003);
     for(const x of [-.842,.842]){
       io.box(x,-.013,2.496,.032,.176,.024,C.nickel,.79);
@@ -456,6 +584,7 @@
     // Perforated front zones carry real geometry so grazing light reads depth.
     for(const x0 of [-1.72,1.59])for(let j=0;j<3;j++)for(let i=0;i<3;i++)io.box(x0+i*.035,-.074+j*.053,3.005,.013,.026,.012,C.black,.1);
 
+    }
     // Rear: coolant fittings, independent data cartridges and central busbar.
     for(const side of [-1,1]){
       const x=side*1.84;
@@ -507,12 +636,15 @@
     }
     // A brushed removable sheet lid closes after the cooling section is shown.
     lid.bevel(0,.131,0,3.858,.012,5.83,C.steel,.86,.003);
+    // Folded front return covers the existing service nose at the same closed
+    // lid height; no taller chassis and no compressed drive body.
+    if(sharedFront)lid.bevel(0,.131,3.0075,3.858,.012,.185,C.steel,.86,.002);
     for(const side of [-1,1])lid.box(side*1.89,.137,.04,.012,.002,5.58,C.bright,.89);
     for(const z of [-2.63,2.63])for(const x of [-1.80,0,1.80])lid.screw(x,.136,z,.017);
     lid.bevel(0,.138,2.47,.58,.002,.27,C.darkSteel,.52,.0005);
     for(let i=0;i<12;i++)lid.line(-.235,2.39+i*.012,.14-(i%3)*.07,2.39+i*.012,.1395,.003,C.steel,.5);
     const meshes=Object.fromEntries(Object.entries(parts).map(([id,m])=>['l10-'+id,{data:new Float32Array(m.data)}]));
-    return {meshes,bounds:{min:[-2,-.137,-3.17],max:[2,.143,3.075]},profile};
+    return {meshes,bounds:{min:[-2.07,-.137,-3.17],max:[2.07,.143,3.30]},profile,storageLayout:sharedFront?.storageLayout||null,front:sharedFront?{slotLayoutId:sharedFront.slotLayoutId,finish:sharedFront.finish}:null};
   }
   const smooth=t=>{t=Math.max(0,Math.min(1,t));return t*t*t*(t*(t*6-15)+10);};
   function sample(progress) {

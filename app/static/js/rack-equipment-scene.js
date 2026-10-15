@@ -16,6 +16,27 @@
   // champagne. Taller compute vent extensions, other device faces, chassis,
   // rack rails and rear fittings remain neutral.
   const C={silver:[.43,.47,.51],lid:[.50,.53,.57],edge:[.66,.69,.71],steel:[.26,.31,.35],dark:[.048,.065,.077],black:[.013,.023,.030],socket:[.026,.038,.044],blue:[0,.28,.39],green:[.40,.62,.16],gold:[.53,.48,.39],goldEdge:[.74,.69,.58],darkGold:[.24,.22,.18],copper:[.38,.23,.13],amber:[.72,.39,.12],unknown:[.24,.30,.34],label:[.54,.59,.61]};
+  const freezeTree=value=>{if(value&&typeof value==='object'){Object.values(value).forEach(freezeTree);Object.freeze(value);}return value;};
+  // One physical slot definition drives both the cinematic SSDs and their rack
+  // facade. 15 mm E1.S is side-standing: thickness X, height Y, length Z.
+  // Carrier/rail dimensions are an original fit study, not a vendor drawing.
+  const storageLayout=(()=>{
+    const mmPerUnit={x:438/4,y:43.6/.274,z:766/6},floorY=-.1125,lidBottomY=.125;
+    const bodyMM={width:15,height:33.75,depth:118.75},carrierMM={width:16.4,height:35.6},apertureMM={width:16.65,height:36};
+    const body={width:bodyMM.width/mmPerUnit.x,height:bodyMM.height/mmPerUnit.y,depth:bodyMM.depth/mmPerUnit.z};
+    const bodyY=floorY+(1.2+bodyMM.height/2)/mmPerUnit.y,bodyFrontZ=3.082,bodyRearZ=bodyFrontZ-body.depth,pitchMM=17;
+    const slots=Array.from({length:8},(_,index)=>{
+      const x=-.075+(index-3.5)*pitchMM/mmPerUnit.x;
+      return {id:'ssd-'+String(index+1).padStart(2,'0'),index,x,y:bodyY,frontZ:bodyFrontZ,rearZ:bodyRearZ,axis:[0,0,-1],
+        body:{...body,min:[x-body.width/2,bodyY-body.height/2,bodyRearZ],max:[x+body.width/2,bodyY+body.height/2,bodyFrontZ]},
+        aperture:{width:apertureMM.width/mmPerUnit.x,height:apertureMM.height/mmPerUnit.y,y:bodyY},
+        carrier:{width:carrierMM.width/mmPerUnit.x,height:carrierMM.height/mmPerUnit.y,y:bodyY}};
+    });
+    return freezeTree({id:'e1s-15mm-eight-bay-v1',mmPerUnit,bodyMM,carrierMM,apertureMM,floorY,lidBottomY,bodyY,bodyFrontZ,bodyRearZ,frontPlaneZ:FRONT+.089,pitchMM,slots,
+      clearancesMM:{bodyToFloor:1.2,bodyToLid:(lidBottomY-bodyY-body.height/2)*mmPerUnit.y,carrierToFloor:(bodyY-carrierMM.height/mmPerUnit.y/2-floorY)*mmPerUnit.y,carrierToLid:(lidBottomY-bodyY-carrierMM.height/mmPerUnit.y/2)*mmPerUnit.y,betweenCarriers:pitchMM-carrierMM.width},
+      approximation:'Original carrier, guide and connector layout; E1.S nominal body dimensions follow Kioxia published 15 mm form factor.'});
+  })();
+  const computeFinish=freezeTree({id:'rack-champagne-v1',base:[...C.gold],edge:[...C.goldEdge],recess:[...C.darkGold]});
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const identity=()=>new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);
   function multiply(a,b){const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++)o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];return o;}
@@ -728,14 +749,31 @@
     for(const depth of [.034,.044,.104])mesh.tube([x,y,z+front*depth*scale],[x,y,z+front*(depth+.002)*scale],(depth>.10?.0515:.0555)*scale,E.fold,24,.63);
     if(identification)mesh.tube([x,y,z+front*.075*scale],[x,y,z+front*.079*scale],.0614*scale,identification<0?[.09,.18,.24]:[.29,.13,.09],24,.40);
   }
-  function editorialPerforation(m,x,y,z,w,h,color=C.gold,front=1,pitch=.028,backing=true){
+  function editorialSheetRects(x,y,w,h,holes=[]){
+    let pieces=[[x-w/2,y-h/2,x+w/2,y+h/2]];
+    for(const hole of holes){
+      const a=hole.x-hole.width/2,b=hole.y-hole.height/2,c=hole.x+hole.width/2,d=hole.y+hole.height/2,next=[];
+      for(const [l,bottom,r,top] of pieces){
+        const il=Math.max(l,a),ib=Math.max(bottom,b),ir=Math.min(r,c),it=Math.min(top,d);
+        if(il>=ir||ib>=it){next.push([l,bottom,r,top]);continue;}
+        if(l<il)next.push([l,bottom,il,top]);if(ir<r)next.push([ir,bottom,r,top]);
+        if(bottom<ib)next.push([il,bottom,ir,ib]);if(it<top)next.push([il,it,ir,top]);
+      }pieces=next;
+    }
+    return pieces;
+  }
+  function editorialOpenSheet(m,x,y,z,w,h,d,color,metal,holes=[]){
+    for(const [l,b,r,t] of editorialSheetRects(x,y,w,h,holes))m.box((l+r)/2,(b+t)/2,z,r-l,t-b,d,color,metal);
+  }
+  function editorialPerforation(m,x,y,z,w,h,color=C.gold,front=1,pitch=.028,backing=true,holes=[]){
     // Punched sheet, with real-depth grille bars over a recessed dark plenum.
     // At inspection distance the aperture edges catch a different highlight
     // from the sheet; no emissive pixels or photographic texture is involved.
     const cols=Math.max(2,Math.round(w/pitch)),rows=Math.max(2,Math.round(h/pitch)),dx=w/cols,dy=h/rows;
-    if(backing)m.box(x,y,z-front*.010,w,h,.010,E.seam,.06);
-    for(let c=0;c<=cols;c++)m.box(x-w/2+c*dx,y,z,dx*.23,h,.010,color,.76);
-    for(let r=0;r<=rows;r++)m.box(x,y-h/2+r*dy,z+front*.001,w,dy*.24,.010,color,.76);
+    const B=(x,y,z,w,h,d,color,metal)=>holes.length?editorialOpenSheet(m,x,y,z,w,h,d,color,metal,holes):m.box(x,y,z,w,h,d,color,metal);
+    if(backing)B(x,y,z-front*.010,w,h,.010,E.seam,.06);
+    for(let c=0;c<=cols;c++)B(x-w/2+c*dx,y,z,dx*.23,h,.010,color,.76);
+    for(let r=0;r<=rows;r++)B(x,y-h/2+r*dy,z+front*.001,w,dy*.24,.010,color,.76);
   }
   function editorialCage(m,x,y,z,w=.224,h=.067,front=1){
     // Nickel-plated connector cage, independent of the bronze carrier plate.
@@ -799,31 +837,99 @@
       quad(p(a,innerRadius,top),p(b,innerRadius,top),p(b,innerRadius,bottom),p(a,innerRadius,bottom),edgeNormal.map(v=>-v));
     }
   }
+  function editorialCarrierStamp(m,x,y,z,w,h,thickness,windows){
+    // A pierced, folded ejector plate. Each window is an actual obround cut
+    // through the thin sheet; the dark interior is the recessed carrier stop,
+    // not a painted hole. Coordinates stay inside the accepted carrier box.
+    const emit=(p,n,c,metal=.82)=>m.data.push(...p,...n,...c,metal,0);
+    const quad=(a,b,c,d,n,color,metal)=>[a,b,c,a,c,d].forEach(p=>emit(p,n,color,metal));
+    const front=z+thickness/2,back=z-thickness/2,left=x-w/2,right=x+w/2;
+    let bottom=y-h/2;
+    for(const cut of windows){
+      const radius=cut.width/2,straight=(cut.height-cut.width)/2,low=cut.y-cut.height/2,high=cut.y+cut.height/2;
+      if(low>bottom)m.box(x,(bottom+low)/2,z,w,low-bottom,thickness,C.gold,.82);
+      // Split the circular end caps into horizontal bands. Real sidewalls have
+      // radial normals, with a small rolled edge catching the studio light.
+      const levels=[low];
+      for(let i=1;i<=6;i++)levels.push(cut.y-straight-radius*Math.cos(i*Math.PI/12));
+      levels.push(cut.y+straight);
+      for(let i=1;i<=6;i++)levels.push(cut.y+straight+radius*Math.sin(i*Math.PI/12));
+      const span=yy=>{const dy=Math.max(0,Math.abs(yy-cut.y)-straight);return Math.sqrt(Math.max(0,radius*radius-dy*dy));};
+      for(let i=1;i<levels.length;i++){
+        const a=levels[i-1],b=levels[i],ra=span(a),rb=span(b),cx=cut.x;
+        for(const side of [-1,1]){
+          const edge=side<0?left:right,pa=cx+side*ra,pb=cx+side*rb;
+          quad([edge,a,front],[pa,a,front],[pb,b,front],[edge,b,front],[0,0,1],C.gold,.82);
+          quad([edge,b,back],[pb,b,back],[pa,a,back],[edge,a,back],[0,0,-1],C.gold,.82);
+          const mid=(a+b)/2,dy=Math.sign(mid-cut.y)*Math.max(0,Math.abs(mid-cut.y)-straight),nx=-side*span(mid)/radius,ny=-dy/radius;
+          quad([pa,a,front],[pa,a,back],[pb,b,back],[pb,b,front],[nx,ny,0],C.darkGold,.76);
+          // Rolled punch rim is a narrow band on the sheet, not a floating wire.
+          const e=.0011,rim=[nx*.24,ny*.24,.97],rimLength=Math.hypot(...rim);
+          quad([pa,a,front+.00015],[pa+side*e,a,front],[pb+side*e,b,front],[pb,b,front+.00015],rim.map(v=>v/rimLength),C.goldEdge,.84);
+        }
+      }
+      bottom=high;
+    }
+    if(bottom<y+h/2)m.box(x,(bottom+y+h/2)/2,z,w,y+h/2-bottom,thickness,C.gold,.82);
+    for(const side of [-1,1])m.bevel(x+side*(w/2-.0017),y,z-.001,.0034,h,thickness+.002,C.gold,.001,.82);
+  }
   function editorialComputeFront(m,h){
-    const B=m.box,V=m.bevel,T=m.tube,z=FRONT+.089;
-    V(0,0,z-.018,3.90,h-.014,.097,C.gold,.019,.85);
+    const B=m.box,V=m.bevel,T=m.tube,z=storageLayout.frontPlaneZ,slots=storageLayout.slots;
+    const cages=[[-1.52,-.054,.244,.068],[-1.13,-.054,.244,.068],[.995,-.058,.244,.068],[1.37,-.058,.244,.068],[1.235,.064,.187,.046],[1.466,.064,.187,.046]];
+    const rj45=[[-.778,-.048,.101,.078,false,.052],[.960,.062,.099,.075,true,.052],[.623,-.051,.092,.071,false,.054],[.623,.042,.092,.071,false,.054]];
+    const serviceHoles=[...cages.map(([x,y,w,h])=>({x,y,width:w+.008,height:h+.006})),...rj45.map(([x,y,w,h])=>({x,y,width:w+.006,height:h+.004})),...[-.061,-.013,.049].map(y=>({x:.737,y,width:.027,height:.021}))];
+    const holes=[...slots.map(s=>({x:s.x,y:s.y,width:s.aperture.width,height:s.aperture.height})),...serviceHoles];
+    // Real punched apertures: no full-width hidden slab seals the occupied
+    // storage mouths. Thin dividers, upper/lower sills and side cheeks remain.
+    editorialOpenSheet(m,0,0,z-.018,3.90,h-.014,.097,C.gold,.85,holes);
     B(0,h/2-.014,z+.036,3.67,.013,.020,C.goldEdge,.88);
-    for(const [x,w] of [[-1.275,1.07],[1.235,1.005]])editorialPerforation(m,x,.006,z+.036,w,h-.064,C.gold);
+    // The central RJ45 / USB service stack has a solid surround. Ventilation
+    // stays in the established left/right NIC zones, clear of the USB stack.
+    for(const [x,w] of [[-1.275,1.07],[1.279,.917]])editorialPerforation(m,x,.006,z+.036,w,h-.064,C.gold,1,.028,true,serviceHoles);
+    // Folded NIC face inserts have a visible seating line and a pressed lip.
+    // These sit over existing grille boundaries, never over the service mouths.
+    for(const [x,w] of [[-1.275,1.07],[1.279,.917]]){
+      for(const sy of [-1,1]){const yy=.006+sy*(h-.064)/2;B(x,yy,z+.043,w,.003,.003,C.darkGold,.53);V(x,yy+sy*.003,z+.047,w,.004,.008,C.goldEdge,.001,.84);}
+      for(const sx of [-1,1])editorialOpenSheet(m,x+sx*w/2,.006,z+.044,.005,h-.062,.012,C.gold,.82,serviceHoles);
+    }
     // Fine mesh is interrupted by genuinely recessed service cages, carriers,
     // ejectors and seams. No branding or exact proprietary port names.
-    V(-.047,0,z+.042,1.14,h-.049,.035,C.darkGold,.008,.70);
-    for(let i=0;i<8;i++){
-      const x=-.535+i*.139;
-      V(x,0,z+.065,.118,h-.055,.040,C.goldEdge,.006,.87);B(x,0,z+.089,.080,h-.097,.012,C.gold,.80);
-      B(x+.044,0,z+.094,.010,h-.071,.009,E.seam,.10);B(x,-h*.28,z+.104,.064,.021,.023,C.goldEdge,.80);B(x,h*.27,z+.102,.072,.008,.008,C.darkGold,.65);
-      B(x-.021,-.007,z+.099,.008,.035,.007,E.polymer,.13);B(x-.020,.003,z+.103,.004,.007,.003,[.15,.23,.10],.2);
-      // Paired carrier sections sit within four removable storage cages.
-      if(i%2===0)B(x-.067,0,z+.096,.009,h-.040,.019,C.darkGold,.67);
+    for(const slot of slots){
+      const {x,y,carrier}=slot,cw=carrier.width,ch=carrier.height,wall=.35/storageLayout.mmPerUnit.x;
+      // Folded gold cheek returns connect the physical SSD stop to its pull
+      // carrier. Their internal width is 15.7 mm around the 15 mm SSD body.
+      const returnFront=z+.045,returnRear=slot.frontZ-.005,returnDepth=returnFront-returnRear;
+      for(const side of [-1,1])B(x+side*(cw-wall)/2,y,(returnFront+returnRear)/2,wall,ch,returnDepth,C.gold,.82);
+      // Accepted outside width/height/depth are unchanged. A thin rolled shell,
+      // inset latch and visible pivot replace the previous solid gold block.
+      const rim=.009,latchX=x+cw*.08,latchW=cw*.58,latchH=ch*.73;
+      for(const side of [-1,1])V(x+side*(cw-rim)/2,y,z+.065,rim,ch,.040,C.goldEdge,.0025,.87);
+      for(const side of [-1,1])V(x,y+side*(ch-rim)/2,z+.065,cw-rim*2,rim,.040,C.goldEdge,.0025,.87);
+      // Stamped backing and a recessed dark stop are behind, and separate from,
+      // the ejector. The eight identical windows are part of each carrier.
+      B(x,y,z+.053,cw-rim*2,ch-rim*2,.009,C.darkGold,.56);
+      V(x-cw*.32,y,z+.082,.022,ch-.037,.010,C.gold,.0015,.82);
+      editorialCarrierStamp(m,latchX,y+.003,z+.091,latchW,latchH,.005,
+        [-.041,.002,.045].map(offset=>({x:latchX+cw*.06,y:y+offset,width:.022,height:.031})));
+      // Two small folded hinge cheeks terminate on the carrier, not in space.
+      const hingeY=y-ch*.34;
+      for(const side of [-1,1])V(latchX+side*latchW*.45,hingeY,z+.085,.010,.016,.017,C.gold,.002,.83);
+      T([latchX-latchW*.47,hingeY,z+.094],[latchX+latchW*.47,hingeY,z+.094],.0055,C.goldEdge,12,.86);
+      V(latchX,y-ch*.41,z+.101,latchW+.006,.018,.017,C.goldEdge,.003,.86);
+      B(latchX,y-ch*.401,z+.110,latchW*.73,.002,.0015,C.darkGold,.52);
+      // Restrained release seam and moulded, non-emissive status light pipe.
+      B(x+cw*.39,y,z+.088,.0025,ch-.028,.004,C.darkGold,.57);
+      V(x-cw*.32,y-ch*.33,z+.095,.018,.020,.011,C.gold,.002,.80);
+      B(x-cw*.32,y-.009,z+.090,.007,.028,.004,E.polymer,.13);
+      B(x-cw*.32,y+.001,z+.093,.0035,.006,.002,[.15,.23,.10],.2);
     }
     // Supplied reference orientation: left lower dual cage with RJ45 to its
     // right; upper-right DPU is reversed (RJ45 to its left); lower-right pair.
     // The photo does not establish a BF3/BF4 SKU; no speculative label is added.
-    for(const [x,y,w,ph] of [[-1.52,-.054,.244,.068],[-1.13,-.054,.244,.068],[.995,-.058,.244,.068],[1.37,-.058,.244,.068],[1.235,.064,.187,.046],[1.466,.064,.187,.046]])editorialCage(m,x,y,z+.054,w,ph);
-    editorialRJ45(m,-.778,-.048,z+.052,.101,.078);
-    editorialRJ45(m,.960,.062,z+.052,.099,.075,1,true);
+    for(const [x,y,w,ph] of cages)editorialCage(m,x,y,z+.054,w,ph);
+    for(const [x,y,w,ph,inverted,dz] of rj45)editorialRJ45(m,x,y,z+dz,w,ph,1,inverted);
     // Silver central management stack, distinct from adjacent storage latches.
-    V(.635,0,z+.047,.149,h-.043,.016,C.gold,.006,.77);
-    for(const y of [-.051,.042])editorialRJ45(m,.623,y,z+.054,.092,.071);
+    editorialOpenSheet(m,.635,0,z+.047,.149,h-.043,.016,C.gold,.77,serviceHoles);
     for(const y of [-.061,-.013,.049]){B(.737,y,z+.070,.027,.021,.014,E.port,.82);B(.737,y,z+.081,.018,.012,.010,E.seam,.06);}
     m.statusLens(.742,.092,z+.082,.005,.010,[.10,.26,.17],E.fold,false);
     for(const x of [-1.723,-.862,.854,1.606]){B(x,-.099,z+.062,.039,.007,.005,C.darkGold,.43);m.disc(x,-.087,z+.071,.005,E.portInner,.8,8);}
@@ -838,6 +944,11 @@
       B(side*1.958,0,z+.088,.021,h-.049,.032,E.edge,.84);
       for(const sy of [-1,1])screw(m,side*1.962,sy*(h/2-.048),z+.117);
     }
+  }
+  function createComputeFront(h=.274){
+    if(!Number.isFinite(h)||h<.26)throw new Error('Compute front requires a valid 1U service envelope');
+    const m=meshBuilder();editorialComputeFront(m,h);
+    return {stride:11,data:new Float32Array(m.data),slotLayoutId:storageLayout.id,storageLayout,finish:computeFinish};
   }
   function editorialNvlinkFront(m,h){
     const B=m.box,V=m.bevel,z=FRONT+.09;
@@ -903,7 +1014,7 @@
   }
   function createEditorialEquipment(item){
     const base=createEquipment(item),m=meshBuilder(),B=m.box,V=m.bevel,T=m.tube,h=item.height,type=item.mgx_type;
-    const depth=type==='blanking'?(item.size>1?5.94:.18):({server:5.85,nvlink:5.95,switch:4.55,powershelf:4.95}[type]||base.depth),rear=FRONT-depth;
+    const depth=type==='blanking'?.18:({server:5.85,nvlink:5.95,switch:4.55,powershelf:4.95}[type]||base.depth),rear=FRONT-depth;
     // Homepage facades are independently authored from the inspected photos;
     // never modify the operational inventory renderer or its port topology.
     if(!['server','nvlink','powershelf','switch'].includes(type))for(let i=0;i<base.mesh.data.length;i+=33)if(base.mesh.data[i+2]>FRONT+.041&&base.mesh.data[i+13]>FRONT+.041&&base.mesh.data[i+24]>FRONT+.041)for(let j=0;j<33;j++)m.data.push(base.mesh.data[i+j]);
@@ -911,7 +1022,9 @@
       V(0,0,FRONT-depth/2,3.94,h,depth,E.skin,.019,.82);
       for(const side of [-1,1]){V(side*2.002,0,FRONT+.016,.126,h+.008,.105,E.rear,.014,.84);for(const sy of [-1,1])screw(m,side*2.004,sy*h*.35,FRONT+.073);}
     }else chassis(m,h,depth,type==='blanking'?E.fold:E.skin);
-    V(0,0,FRONT+.045,3.93,h-.009,.08,type==='server'||type==='nvlink'?C.gold:E.frame,.014,.78);
+    // The compute facade already includes its aperture-safe frame; a second
+    // full-width backing plate would seal all eight physical SSD openings.
+    if(type!=='server')V(0,0,FRONT+.045,3.93,h-.009,.08,type==='nvlink'?C.gold:E.frame,.014,.78);
     if(type==='server')editorialComputeFront(m,h);
     if(type==='nvlink')editorialNvlinkFront(m,h);
     if(type==='powershelf')editorialPowerFront(m,h);
@@ -1020,15 +1133,22 @@
         for(const dx of [-.031,.031])B(x+.126+dx,-.007,rear-.178,.008,.037,.011,E.port,.82);
         B(x+.126,.033,rear-.178,.009,.028,.011,E.port,.82);B(x+.294,0,rear-.144,.015,h-.085,.050,E.edge,.80);
       }
-    }else if(type==='blanking'&&item.size>1){
-      // Neutral utility / structural bay. No CDU, HMI, fluid ports or pump body.
-      V(0,0,rear-.059,3.72,h-.055,.10,E.frame,.022,-.7);
-      for(const x of [-1.20,0,1.20]){B(x,0,rear-.116,.016,h-.17,.020,E.seam,.1);for(const sy of [-1,1])screw(m,x+.34,sy*(h/2-.095),rear-.12,-1);}
-      for(const side of [-1,1]){B(side*1.72,0,rear-.127,.075,Math.min(.45,h*.55),.040,E.fold,.7);B(side*1.72,0,rear-.151,.026,Math.min(.30,h*.38),.022,E.edge,.8);}
     }
     const min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
     for(let i=0;i<m.data.length;i+=11)for(let axis=0;axis<3;axis++){min[axis]=Math.min(min[axis],m.data[i+axis]);max[axis]=Math.max(max[axis],m.data[i+axis]);}
     return {mesh:m,depth,rear,min,max};
+  }
+  function createEditorialBlankingGroup(panel,size){
+    if(size===1)return panel;
+    // Inventory groups describe occupied U, not a physical multi-U enclosure.
+    // Repeat the very same upper 1U panel, including its normals, finish, ears
+    // and fasteners. Only local Y changes; the group's existing pose remains.
+    const mesh=meshBuilder(),source=panel.mesh.data,extent=(size-1)*U/2;
+    for(let unit=0;unit<size;unit++){
+      const offset=(unit-(size-1)/2)*U;
+      for(let i=0;i<source.length;i+=11)for(let field=0;field<11;field++)mesh.data.push(field===1?source[i+field]+offset:source[i+field]);
+    }
+    return {mesh,depth:panel.depth,rear:panel.rear,min:[panel.min[0],panel.min[1]-extent,panel.min[2]],max:[panel.max[0],panel.max[1]+extent,panel.max[2]]};
   }
   function createEditorialStructure(items){
     const frame=createFrame(),infrastructure=meshBuilder(),connections=meshBuilder(),routes=[],sockets=[],F=frame.box,FV=frame.bevel,B=infrastructure.box,V=infrastructure.bevel,T=infrastructure.tube;
@@ -1179,10 +1299,13 @@
   function buildEditorialParts(records){
     const inspected=inspectPlacement(records.filter(i=>i.rack_mount!=='external'&&i.mgx_type!=='cdu'));
     if(inspected.invalid.length||inspected.unplaced.length)throw new Error('Editorial rack requires valid, non-overlapping placed components');
+    let blankingPanel;
     const equipment={},placements=inspected.valid.map(item=>{
       const meshKey=item.mgx_type+':'+item.size;
       if(!equipment[meshKey]){
-        const built=createEditorialEquipment(item);
+        const built=item.mgx_type==='blanking'
+          ?createEditorialBlankingGroup(blankingPanel||(blankingPanel=createEditorialEquipment({...item,size:1,height:U-.026})),item.size)
+          :createEditorialEquipment(item);
         equipment[meshKey]=Object.freeze({data:new Float32Array(built.mesh.data),depth:built.depth,min:Object.freeze([...built.min]),max:Object.freeze([...built.max])});
       }
       return Object.freeze({name:item.name,type:item.mgx_type,top:item.top,bottom:item.bottom,size:item.size,y:item.y,height:item.height,meshKey});
@@ -1198,5 +1321,5 @@
       frame:Object.freeze({data:new Float32Array(structure.frame.data)}),infrastructure:Object.freeze({data:new Float32Array(structure.infrastructure.data)}),connections:Object.freeze({data:new Float32Array(structure.connections.data)}),equipment:Object.freeze(equipment),placements:Object.freeze(placements),occupiedU:inspected.occupiedU,quality,metadata:quality,routes:Object.freeze(structure.routes),sockets:Object.freeze(structure.sockets),
       bounds:Object.freeze({min:Object.freeze(min),max:Object.freeze(max)})});
   }
-  window.PARackScene=Object.freeze({mount,inspectPlacement,inspectNetworkCabling,buildEditorialParts});
+  window.PARackScene=Object.freeze({mount,inspectPlacement,inspectNetworkCabling,buildEditorialParts,createComputeFront,storageLayout,computeFinish});
 })();
