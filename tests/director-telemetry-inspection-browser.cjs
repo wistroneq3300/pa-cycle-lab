@@ -197,23 +197,24 @@ async function json(route, body, status = 200) {
     await page.locator('#pd-tab-telemetry').click();
     await page.locator('.tp-workspace [data-node]').waitFor();
     await selectTelemetry('node-ready');
+    assert.equal(await page.locator('.tn-ai [data-ai-state]').innerText(), '尚未執行');
+    await page.locator('.tn-ai [data-ai-run]').click();
+    await page.waitForFunction(() => document.querySelector('.tn-ai [data-ai-state]')?.dataset.state === 'COMPLETE');
     await setViewport(1920, 'light');
     await shot('telemetry-ready-1920-light', page.locator('.tp-workspace'));
     assert.equal(await page.locator('.tn-ai [data-ai-state]').innerText(), '分析完成');
-    assert.match(await page.locator('[data-health-scope]').innerText(), /Node Scope · N1/);
-    assert.equal(await page.locator('[data-health-counts]').innerText(), '3 FAIL / 0 WARN');
+    assert.equal(await page.locator('.tn-health').count(), 0, 'Inspection remains an independent tab, not a Telemetry child card');
 
     await selectTelemetry('node-stale');
-    await page.waitForFunction(() => document.querySelector('[data-health-scope]')?.textContent.includes('N2'));
-    assert.equal(await page.locator('[data-health-counts]').innerText(), '0 FAIL / 0 WARN', 'N2 must not inherit N1/N3 findings');
-    await shot('telemetry-node-scope-n2-1920-light', page.locator('.tn-health'));
+    assert.match(await page.locator('.tn-toolbar [data-freshness]').innerText(), /資料過舊/);
+    await shot('telemetry-node-n2-1920-light', page.locator('.tp-workspace'));
     await selectTelemetry('node-nodata');
-    await page.waitForFunction(() => document.querySelector('[data-health-scope]')?.textContent.includes('N3'));
-    assert.equal(await page.locator('[data-health-counts]').innerText(), '0 FAIL / 2 WARN');
+    assert.match(await page.locator('.tn-toolbar [data-freshness]').innerText(), /尚無資料/);
     inspectionMode='disabled';await selectTelemetry('node-ready');
-    await page.waitForFunction(() => document.querySelector('[data-health-state]')?.textContent==='NOT MONITORED');
-    assert.equal(await page.locator('[data-health-counts]').innerText(), '3 FAIL / 0 WARN', 'disabled Inspection must retain historical Node findings');
-    assert.equal(await page.locator('.tn-ai [data-ai-state]').innerText(), '分析完成', 'Inspection disablement must not block Telemetry AI');
+    assert.equal(await page.locator('.tn-ai [data-ai-state]').innerText(), '尚未執行');
+    await page.locator('.tn-ai [data-ai-run]').click();
+    await page.waitForFunction(() => document.querySelector('.tn-ai [data-ai-state]')?.dataset.state === 'COMPLETE');
+    assert.equal(await page.locator('.tn-ai [data-ai-state]').innerText(), '分析完成', 'Telemetry AI remains independent of Inspection configuration');
     inspectionMode='current';
 
     await setViewport(1366, 'dark');
@@ -257,8 +258,12 @@ async function json(route, body, status = 200) {
       await page.locator(`#pd-inspection [data-issue-id="issue-${mode}"]`).waitFor();
       await page.locator('#pd-inspection [data-issue-id]').first().evaluate(element => { element.open = true; });
       await shot(`inspection-${mode}-1920-light`, page.locator('#pd-inspection'));
-      assert.equal(await page.locator('#pd-inspection [data-matrix] tr').count(),8);
-      assert.match(await page.locator('#pd-inspection [data-matrix]').innerText(),/Expected 8 \/ Observed 7[\s\S]*NOT APPLICABLE/);
+      assert.equal(await page.locator('#pd-inspection [data-matrix] tr').count(),7, 'two PCIe source checks render as the approved merged row');
+      const mergedPcie=page.locator('#pd-inspection [data-matrix] details').filter({hasText:'PCIe（合併 2 項）'});
+      await mergedPcie.evaluate(element => { element.open = true; });
+      assert.match(await mergedPcie.innerText(),/Expected 8 \/ Observed 7/);
+      const matrixText=await page.locator('#pd-inspection [data-matrix]').innerText();
+      assert.match(matrixText,/PCIe（合併 2 項）/);assert.match(matrixText,/NOT APPLICABLE/);
       const text = await page.locator('#pd-inspection [data-issue-id]').first().innerText();
       assert.doesNotMatch(text, /undefined|null|NaN/);
     }

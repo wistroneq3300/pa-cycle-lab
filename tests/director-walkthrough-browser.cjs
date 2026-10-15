@@ -364,6 +364,10 @@ async function runRound(browser, base, round, cycleSeed) {
       await page.locator("#pd-panel-telemetry select[data-node]").selectOption("director-walkthrough-node");
       await page.waitForFunction(() => document.querySelector("#pd-panel-telemetry .tp-state")?.dataset.state === "READY");
       assert(await page.locator(".tn-panel").count() > 0);
+      assert.equal(await page.locator(".tn-ai [data-ai-state]").innerText(), "尚未執行");
+      assert.equal((await page.evaluate(() => window.__DIRECTOR_WALKTHROUGH.requests.filter(value => value.includes("/telemetry/analyze")).length)), 0);
+      await page.locator(".tn-ai [data-ai-run]").click();
+      await page.waitForFunction(() => document.querySelector(".tn-ai [data-ai-state]")?.dataset.state === "COMPLETE");
     });
     let caseVariant = "";
     await step("test-case-single-agent-go-done", async () => {

@@ -105,6 +105,10 @@ async function telemetryTruth(browser) {
       document.body.append(root);
       window.__telemetry = new window.PANativeTelemetry.Dashboard(root, nodeArg, "director");
     }, node);
+    await page.waitForFunction(() => document.querySelector("#telemetry-one .tn-stats")?.children.length > 0);
+    assert.equal(analysisCalls, 0, "Telemetry AI must not run until the engineer requests it");
+    assert.equal(await page.locator("#telemetry-one [data-ai-state]").innerText(), "尚未執行");
+    await page.locator("#telemetry-one [data-ai-run]").click();
     await page.waitForFunction(() => document.querySelector("#telemetry-one [data-ai-state]")?.dataset.state === "ERROR");
     assert.equal(await page.locator("#telemetry-one [data-ai-state]").innerText(), "分析未完成");
     assert.equal(await page.locator("#telemetry-one [data-ai]").innerText(), "analysis provider rejected the request");
@@ -120,6 +124,9 @@ async function telemetryTruth(browser) {
       document.body.append(root);
       window.__telemetry2 = new window.PANativeTelemetry.Dashboard(root, nodeArg, "director");
     }, node);
+    await page.waitForFunction(() => document.querySelector("#telemetry-two .tn-stats")?.children.length > 0);
+    assert.equal(analysisCalls, 1, "background chart loading must not start AI analysis");
+    await page.locator("#telemetry-two [data-ai-run]").click();
     await page.waitForFunction(() => document.querySelector("#telemetry-two [data-ai-state]")?.dataset.state === "EMPTY");
     assert.equal(await page.locator("#telemetry-two [data-ai-state]").innerText(), "尚無分析結果");
     assert.equal(await page.locator("#telemetry-two [data-ai]").innerText(), "此範圍尚無可用的 AI 分析結果。");

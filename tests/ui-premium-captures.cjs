@@ -136,7 +136,7 @@ async function verifyTestCaseContract(page, report, width, theme) {
   const suffix = `${width}-${theme}`;
   const action = page.locator("#rm-dialog-foot .primary");
   addCheck(report, `no-selection-action-${suffix}`,
-    await action.textContent() === "選擇測項" && await action.isDisabled());
+    await action.textContent() === "選擇 Test Case" && await action.isDisabled());
   const targetText = await page.locator(".assign-target-bar").innerText();
   addCheck(report, `canonical-operation-target-${suffix}`,
     targetText.includes(NODE) && targetText.includes("192.0.2.21") && !targetText.includes("192.0.2.99"),

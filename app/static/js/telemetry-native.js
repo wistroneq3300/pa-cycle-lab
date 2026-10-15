@@ -12,10 +12,10 @@
       this.root=root;this.node=node;this.name=name||'';this.charts=new Map();this.seriesVisibility=seriesVisibility;this.period=periods.get(node.node_id)||'1h';this.abort=new AbortController();this.closed=false;
       const ranges=[['10m','10 分鐘'],['30m','30 分鐘'],['1h','1 小時'],['6h','6 小時'],['12h','12 小時'],['24h','24 小時'],['2d','2 天'],['7d','7 天'],['30d','30 天']];
       root.innerHTML='<div class="tn-toolbar"><div><h3>效能趨勢</h3><p data-sample>正在載入資料…</p><p data-freshness></p></div><label>時間範圍 <select aria-label="Telemetry 時間範圍">'+ranges.map(([v,t])=>'<option value="'+v+'">'+t+'</option>').join('')+'</select></label></div>'
-        +'<section class="tn-ai" aria-label="Telemetry AI Analysis"><div class="tn-ai-head"><h4>Telemetry AI Analysis</h4><div class="tn-ai-actions"><span data-ai-state>等待分析</span><button class="btn small" type="button" data-ai-retry hidden>重新分析</button></div></div><div class="tn-ai-body" data-ai>正在分析此範圍的監控趨勢…</div></section>'
+        +'<section class="tn-ai" aria-label="Telemetry AI Analysis"><div class="tn-ai-head"><h4>Telemetry AI Analysis</h4><div class="tn-ai-actions"><span data-ai-state>尚未執行</span><button class="btn small" type="button" data-ai-run>執行 AI Analysis</button></div></div><div class="tn-ai-body" data-ai>選擇時間範圍後，按下「執行 AI Analysis」取得輔助判讀。</div></section>'
         +'<div class="tn-stats" aria-label="節點資訊"></div><p data-chart-error role="status"></p><div class="tn-grid"></div>';
-      root.querySelector('select').value=this.period;root.querySelector('select').onchange=e=>{this.period=e.target.value;periods.set(this.node.node_id,this.period);this.load();};
-      root.querySelector('[data-ai-retry]').onclick=()=>{this.analysisKey=null;this.analysisDone=null;this.analyze();};
+      root.querySelector('select').value=this.period;root.querySelector('select').onchange=e=>{this.period=e.target.value;periods.set(this.node.node_id,this.period);this.resetAnalysis();this.load();};
+      root.querySelector('[data-ai-run]').onclick=()=>{this.analysisKey=null;this.analysisDone=null;this.analyze();};
       const help=document.createElement('section');help.className='tn-gpu-help';help.hidden=true;help.innerHTML='<strong>GPU 監控尚未就緒</strong><p data-gpu-detail></p><button type="button" class="btn" data-gpu-settings>前往 GPU 監控設定</button>';help.querySelector('[data-gpu-settings]').onclick=()=>document.querySelector('.tp-component[data-component="gpu"]')?.scrollIntoView({behavior:'smooth',block:'center'});root.querySelector('.tn-grid').before(help);this.manualHelp();
       this.theme=new MutationObserver(()=>this.repaint());this.theme.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
       this.load();
@@ -26,12 +26,13 @@
       if(this.analysisKey===key)return;         // already requested for this node+range
       if(this.analysisDone===key)return;        // completed; keep the rendered text
       this.analysisKey=key;this.analysisDone=null;
-      const retry=this.root.querySelector('[data-ai-retry]');retry.hidden=true;state.textContent='分析中…';state.dataset.state='LOADING';box.textContent='正在分析此範圍的監控趨勢…';
+      const run=this.root.querySelector('[data-ai-run]');run.disabled=true;run.textContent='分析中…';state.textContent='分析中…';state.dataset.state='LOADING';box.textContent='正在分析此範圍的監控趨勢…';
       fetch('/api/machine/'+encodeURIComponent(this.name||'')+'/telemetry/analyze?minutes='+this.periodMinutes()+(nodeId?'&node_id='+encodeURIComponent(nodeId):''))
         .then(async r=>{if(!r.ok)throw await responseError(r,'無法完成趨勢分析，請稍後重試。');return r.json();})
-        .then(data=>{if(this.closed||this.analysisKey!==key)return;this.analysisDone=key;const payload=data&&typeof data==='object'?data:{},result=[payload.analysis,payload.summary].find(value=>typeof value==='string'&&value.trim())?.trim()||'';if(payload.ok===false){state.textContent='分析未完成';state.dataset.state='ERROR';box.textContent=payload.error||payload.detail||'AI 分析暫不可用。';retry.hidden=false;return;}if(!result){state.textContent='尚無分析結果';state.dataset.state='EMPTY';box.textContent='此範圍尚無可用的 AI 分析結果。';retry.hidden=false;return;}state.textContent='分析完成';state.dataset.state='COMPLETE';const structured=payload.analysis_result||{},section=(title,value)=>{const area=document.createElement('section'),h=document.createElement('h5'),p=document.createElement('p');h.textContent=title;p.textContent=value||'證據不足';area.append(h,p);return area;};box.replaceChildren(section('Finding',structured.finding||result),section('直接觀測 Evidence',structured.evidence||payload.summary),section('Possible Cause · AI 推論',structured.possible_cause),section('Suggested Action',structured.suggested_action),section('證據來源與限制',[structured.evidence_source,structured.evidence_limit].filter(Boolean).join(' · ')));})
-        .catch(error=>{if(this.closed||this.analysisKey!==key||error.name==='AbortError')return;this.analysisDone=key;state.textContent='分析未完成';state.dataset.state='ERROR';box.textContent=error.message||'AI 分析暫不可用，請稍後重試。';retry.hidden=false;});
+        .then(data=>{if(this.closed||this.analysisKey!==key)return;this.analysisDone=key;run.disabled=false;run.textContent='重新分析';const payload=data&&typeof data==='object'?data:{},result=[payload.analysis,payload.summary].find(value=>typeof value==='string'&&value.trim())?.trim()||'';if(payload.ok===false){state.textContent='分析未完成';state.dataset.state='ERROR';box.textContent=payload.error||payload.detail||'AI 分析暫不可用。';return;}if(!result){state.textContent='尚無分析結果';state.dataset.state='EMPTY';box.textContent='此範圍尚無可用的 AI 分析結果。';return;}state.textContent='分析完成';state.dataset.state='COMPLETE';const structured=payload.analysis_result||{},section=(title,value)=>{const area=document.createElement('section'),h=document.createElement('h5'),p=document.createElement('p');h.textContent=title;p.textContent=value||'證據不足';area.append(h,p);return area;};box.replaceChildren(section('Finding',structured.finding||result),section('直接觀測 Evidence',structured.evidence||payload.summary),section('Possible Cause · AI 推論',structured.possible_cause),section('Suggested Action',structured.suggested_action),section('證據來源與限制',[structured.evidence_source,structured.evidence_limit].filter(Boolean).join(' · ')));})
+        .catch(error=>{if(this.closed||this.analysisKey!==key||error.name==='AbortError')return;this.analysisDone=key;run.disabled=false;run.textContent='重新分析';state.textContent='分析未完成';state.dataset.state='ERROR';box.textContent=error.message||'AI 分析暫不可用，請稍後重試。';});
     }
+    resetAnalysis(){const state=this.root.querySelector('[data-ai-state]'),box=this.root.querySelector('[data-ai]'),run=this.root.querySelector('[data-ai-run]');this.analysisKey=null;this.analysisDone=null;if(state){state.textContent='尚未執行';delete state.dataset.state;}if(box)box.textContent='選擇時間範圍後，按下「執行 AI Analysis」取得輔助判讀。';if(run){run.disabled=false;run.textContent='執行 AI Analysis';}}
     update(node){this.node=node;this.manualHelp();}
     manualHelp(){
       const section=this.root.querySelector('.tn-gpu-help'),gpu=this.node.components?.gpu;
@@ -41,7 +42,7 @@
     periodMinutes(){const m={'10m':10,'30m':30,'1h':60,'6h':360,'12h':720,'24h':1440,'2d':2880,'7d':10080,'30d':43200};return m[this.period]||60;}
     async load(){
       clearTimeout(this.timer);this.request?.abort();this.request=new AbortController();const period=this.period;
-      this.root.setAttribute('aria-busy','true');this.analyze();
+      this.root.setAttribute('aria-busy','true');
       try{
         const response=await fetch('/api/telemetry/nodes/'+encodeURIComponent(this.node.node_id)+'/charts?period='+period,{signal:this.request.signal});
         if(!response.ok)throw await responseError(response,'無法取得中央監控資料，請稍後重試。');

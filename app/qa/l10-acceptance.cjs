@@ -148,11 +148,11 @@ function analyzeRun(trace){
 
     const skip=page.locator('[data-vo-skip]');
     report.skip={available:await skip.count()>0};
-    assert.equal(report.skip.available,true,'Skip UI is required for the acceptance task');
+    assert.equal(report.skip.available,false,'HERO-01 removes the Skip Intro control');
     await page.locator('[data-vo-replay]').click();await page.waitForFunction(()=>document.querySelector('#core-story').paHeroPlayback.getState().progress>.005);
-    await skip.click();await page.waitForFunction(()=>document.querySelector('#core-story').paHeroPlayback.getState().progress===1&&document.querySelector('#core-story').paHeroPlayback.getState().mode==='stopped');await settle();
-    const skipped=await state();assert.equal(skipped.scene.l10.cooling,1);assert.equal(skipped.scene.l10.lid,1);assert.equal(skipped.scene.assembly.primaryPose.scale,1);assert.equal(skipped.scene.l10.flow,0);
-    report.skip={available:true,passed:true,progress:skipped.scene.progress,mode:skipped.playback.mode};report.checks.push('Skip UI lands at complete final rack with no active film or cooling overlay');
+    await page.evaluate(()=>document.querySelector('#core-story').paHeroPlayback.seek(1));await page.waitForFunction(()=>document.querySelector('#core-story').paHeroPlayback.getState().progress===1&&document.querySelector('#core-story').paHeroPlayback.getState().mode==='stopped');await settle();
+    const completed=await state();assert.equal(completed.scene.l10.cooling,1);assert.equal(completed.scene.l10.lid,1);assert.equal(completed.scene.assembly.primaryPose.scale,1);assert.equal(completed.scene.l10.flow,0);
+    report.skip={available:false,passed:true,progress:completed.scene.progress,mode:completed.playback.mode};report.checks.push('Skip Intro UI is absent; deterministic QA seek still lands at the final rack state');
     await page.locator('[data-vo-replay]').click();await page.waitForFunction(()=>document.querySelector('#core-story').paHeroPlayback.getState().mode==='film');
     await page.locator('#system-core').press('ArrowRight');await settle();assert.equal((await state()).playback.mode,'stopped');
     await seek(1);await page.locator('#system-core').press('ArrowRight');await settle();assert.notEqual((await state()).scene.yaw,0);

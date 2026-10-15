@@ -58,9 +58,12 @@ The Top 5 remains global and continues to use the backend ordering. Only the exi
 | Cycle Evidence button | `載入中…` | `正在載入資料…` |
 | Inspection Evidence modal | `載入中…` | `正在載入資料…` |
 | Telemetry analysis loading | `載入中…` | `正在載入資料…` |
+| Telemetry AI trigger | Opening or polling the Telemetry view automatically started analysis | `尚未執行` with an explicit `執行 AI Analysis` action; chart polling never starts AI analysis |
+| Telemetry AI repeat action | Retry appeared only after an empty/error response | `重新分析` appears after an engineer-requested analysis completes, returns empty, or fails |
 | Missing data in refreshed surfaces | Mixed wording | `尚無資料` |
 | Cinematic unavailable | `展示載入失敗` | `資料載入失敗` while explicitly noting management functions remain available |
 | Cinematic loading | `展示載入中` | `正在載入資料…` |
+| Cinematic opening control | `略過開場` | Removed per HERO-01; `重播` and 3D view controls remain |
 | Telemetry overall installation state | Mixed job state only | `READY`, `PARTIAL`, or `FAIL`; Node Exporter and DCGM Exporter keep independent states |
 
 ## Semantic boundaries
