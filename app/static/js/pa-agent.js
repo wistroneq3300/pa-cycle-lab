@@ -133,7 +133,7 @@
     PENDING: { label: "準備中", tone: "idle" },
     RUNNING: { label: "執行中", tone: "busy" },
     WAITING_FOR_USER: { label: "等待工程師確認", tone: "wait" },
-    DONE: { label: "PA Agent 已完成 · 等待工程師判定", tone: "done" },
+    DONE: { label: "執行完成", tone: "done" },
     ERROR: { label: "錯誤", tone: "err" },
   };
   // 訊息角色標籤：工程師 / PA Agent / 系統 / 工具活動 視覺分離。
@@ -153,6 +153,10 @@
     // 對話剛建立、PA Agent 還沒說第一句之前，先鎖住輸入，避免工程師的話被塞進
     // 進行中的那一輪。agent 講完第一句（或 run 進入終端狀態）就解鎖。
     awaitingFirstReply: false,
+    // Thinking is a conversation-turn state, not a Run execution state. A Run
+    // may remain RUNNING while the engineer is reading an already delivered
+    // reply, so polling must never infer this value from run.status.
+    awaitingAgentReply: false,
   };
 
   // Every drawer open owns an immutable frontend session.  The backend run is
@@ -315,6 +319,7 @@
     state.lastSync = 0; state.stickBottom = true; state.unread = 0; state.uploads = []; state._attachments = [];
     state.pendingUser = [];
     state.sending = false;
+    state.awaitingAgentReply = false;
     state._finalShown = null; state._doneNoteShown = null; state._errorShown = null;
     ensureRoot();
     root.classList.add("open");
@@ -338,7 +343,7 @@
     });
     if (!state.context.case_variant_id) {
       setStatus("ERROR");
-      body().innerHTML = `<div class="pa-empty">未提供 case_variant_id，無法建立 AgentRun。請從指派結果視窗以該用例開啟。</div>`;
+      body().innerHTML = `<div class="pa-empty">未提供 case_variant_id，無法建立 AgentRun。請從指派結果視窗以該 Test Case 開啟。</div>`;
       return;
     }
     // P1-5：關閉抽屜 ≠ 結束任務。重新開啟同一 Test Case 時，先找進行中的 run，
@@ -436,7 +441,7 @@
   // 測試任務摘要（名稱 / code / variant / node / 測試集）。缺欄位一律顯示「—」。
   function taskMeta(c) {
     const rows = [
-      ["測試案例", c.title || "—", false],
+      ["Test Case", c.title || "—", false],
       ["Variant", c.case_variant_id || "—", true],
       ["目標節點", c.node_id || "—", true],
       ["測試集", c.branch || "—", false],
@@ -685,6 +690,7 @@
     // Agent 講了第一句（真正有內容，不是「（處理中…）」佔位）就解鎖輸入框，
     // 並收掉「思考中」提示 —— 它已經開口了。
     if ((msg.role === "agent" || msg.role === "assistant") && (msg.text || "").trim()) {
+      state.awaitingAgentReply = false;
       setThinking(false);
       unlockComposer();
     }
@@ -810,6 +816,10 @@
   // 啟動對話：mode="plan" 先出計畫等工程師；mode="execute" 維持舊行為直接執行。
   async function startRun(session, runId, mode, detached = false) {
     try {
+      if (!detached && isCurrentSession(session, runId)) {
+        state.awaitingAgentReply = true;
+        setThinking(true);
+      }
       const url = `${API}/runs/${encodeURIComponent(runId)}/start`;
       const options = {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -820,6 +830,8 @@
       if (!isCurrentSession(session, runId)) return;
       if (!r.ok) {
         // gateway 未接（502）等：run 仍在，訊息可續讀；誠實提示，不假裝成功。
+        state.awaitingAgentReply = false;
+        setThinking(false);
         setStatus("ERROR");
         addError("啟動 PA Agent 失敗：" + (d.detail || d.error || ("HTTP " + r.status)));
         return;
@@ -829,6 +841,8 @@
       beginPolling(session, runId);
     } catch (e) {
       if (staleSession(session, e, runId)) return;
+      state.awaitingAgentReply = false;
+      setThinking(false);
       setStatus("ERROR");
       addError("啟動 PA Agent 失敗：" + e.message);
     }
@@ -852,6 +866,10 @@
     const optimisticAtts = (state.uploads || []).filter(a => a.status !== "failed");
     addMessage({ seq: Date.now(), role: "user", kind: "message", text: t, pending: true,
       attachments: optimisticAtts, created_at: new Date().toISOString() });
+    // Show feedback for this specific user turn before waiting on the network.
+    // The first real Agent message removes it; Run polling does not recreate it.
+    state.awaitingAgentReply = true;
+    setThinking(true);
     const sendBtn = root?.querySelector("#pa-msg-send");
     let sent = false;
     if (input) input.disabled = true;
@@ -873,8 +891,6 @@
         state.uploads = [];
         void refreshStrip(session, runId);
         setStatus(state.run?.status || "RUNNING");
-        // 立即顯示「思考中」，不用等下一次輪詢才有回饋。
-        setThinking(true);
         // 補充訊息會建立新的計畫版本；提示工程師 GO 將採用最新版（P0-2）。
         if (d.intent === "question") {
           appendSystemNote("已記錄為本次計畫的補充內容；輸入 OK / GO 時會採用最新版本的計畫。");
@@ -892,6 +908,8 @@
       // drop its pending marker: a later poll will never adopt it, and the next
       // successful send of the same text must not remove the wrong row.
       if (!sent) {
+        state.awaitingAgentReply = false;
+        setThinking(false);
         const i = state.pendingUser.indexOf(t);
         if (i !== -1) state.pendingUser.splice(i, 1);
         const el = body()?.querySelector('[data-pending="1"]');
@@ -929,9 +947,7 @@
     scrollBottom();
   }
 
-  // 「思考中」提示：agent 還在跑（RUNNING）且尚未吐出下一則訊息時，在對話底部
-  // 顯示一個動畫泡泡，讓工程師知道它正在忙、不是卡住。離開 RUNNING 或 agent
-  // 一開口就移除。
+  // 「思考中」只代表目前這一輪正在等待 Agent 回覆；它與 Run 執行狀態分離。
   function setThinking(on, label) {
     const b = body();
     if (!b) return;
@@ -1002,9 +1018,10 @@
     const st = run.status || "PENDING";
     setStatus(st);
     setApproval(run);
-    // 思考中提示：run 在跑就顯示；一旦進入等待確認 / 終端 / 錯誤就收掉。
-    const busy = st === "RUNNING" || st === "PENDING";
-    setThinking(busy);
+    if (TERMINAL.has(st) || st === "ERROR") {
+      state.awaitingAgentReply = false;
+    }
+    setThinking(state.awaitingAgentReply);
     // 安全解鎖：run 進入終端狀態或出錯時，就算 agent 沒正常開口，也要讓工程師
     // 能輸入／追問，不能把輸入框永久鎖住。
     if (TERMINAL.has(st) || st === "ERROR" || st === "WAITING_FOR_USER") unlockComposer();

@@ -1,7 +1,7 @@
 # PA Manager Premium UI / UX — Phase 0 Baseline
 
-Date: 2026-10-16 (Asia/Taipei)  
-Branch: `codex/premium-ui-impeccable-safe-polish`  
+Date: 2026-10-16 (Asia/Taipei)
+Branch: `codex/premium-ui-impeccable-safe-polish`
 Baseline commit: `27324648ede1d60e9f862858fd530ce4a8d9519a`
 
 ## Repository safety check

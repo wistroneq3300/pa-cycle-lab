@@ -273,8 +273,14 @@ class ProvisionService:
                 components=dict(host=state,prometheus=state)
             elif state in ('ERROR','UNREACHABLE','INTERRUPTED'):
                 components=dict(host=state)
+        component_states=[components.get('host'),components.get('prometheus')]
+        gpu=components.get('gpu') or {}
+        component_states.append(gpu.get('state') if isinstance(gpu,dict) else gpu)
+        if state=='READY': overall_state='READY'
+        elif state in ('PROVISIONING','VERIFYING','DEGRADED') or any(value=='READY' for value in component_states): overall_state='PARTIAL'
+        else: overall_state='FAIL'
         return dict(node_id=node_id,chassis_id=target['chassis_id'],label=target.get('display_name'),hostname=target.get('os_hostname'),
-                    slot=target['slot_key'],os_ip=target['os_ip'],binding_revision=target['revision'],state=state,detail=detail,stale=stale,
+                    slot=target['slot_key'],os_ip=target['os_ip'],binding_revision=target['revision'],state=state,overall_state=overall_state,detail=detail,stale=stale,
                     checked_at=checked,job=job,host_job=host_job,components=components,configured=self.config.ready(),dashboard_url=self.config.dashboard(node_id),
                     host_setup=self.host_setup(target),gpu_setup=self.gpu_setup(target))
 

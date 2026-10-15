@@ -262,7 +262,49 @@ async function sameCaseResume(browser) {
     assert.equal(activeReads, 2);
     assert.equal(historyReads, 2);
     assert.equal(attachmentReads, 2);
-    assert.match(await page.locator("#pa-drawer-status-text").innerText(), /已完成/);
+    assert.equal(await page.locator("#pa-drawer-status-text").innerText(), "執行完成");
+    await close(page);
+  });
+}
+
+async function thinkingLifecycle(browser) {
+  const sent = delayedResponse();
+  let messageSent = false;
+  await harness(browser, "thinking indicator follows the reply turn, not RUNNING polling", async ({ route, url, method }) => {
+    if (method === "GET" && url.pathname === "/api/agent/active" && url.searchParams.get("case_variant_id") === "case-thinking") {
+      await json(route, { run: run("run-thinking", "RUNNING") }); return true;
+    }
+    if (method === "GET" && url.pathname === "/api/agent/runs/run-thinking/messages") {
+      const messages = [{ seq: 1, role: "agent", kind: "message", text: "READY-FOR-QUESTION" }];
+      if (messageSent) messages.push(
+        { seq: 2, role: "user", kind: "message", text: "CHECK-STATUS" },
+        { seq: 3, role: "agent", kind: "message", text: "STATUS-REPLY" },
+      );
+      await json(route, { messages }); return true;
+    }
+    if (method === "GET" && url.pathname === "/api/agent/runs/run-thinking") {
+      await json(route, { run: run("run-thinking", "RUNNING") }); return true;
+    }
+    if (method === "GET" && url.pathname === "/api/agent/runs/run-thinking/attachments/unconsumed") {
+      await json(route, { attachments: [] }); return true;
+    }
+    if (method === "POST" && url.pathname === "/api/agent/runs/run-thinking/messages") {
+      await sent.reply(route, { intent: "question" }); messageSent = true; return true;
+    }
+    return false;
+  }, async page => {
+    await open(page, "case-thinking", "THINKING-TITLE");
+    await waitForText(page, "READY-FOR-QUESTION");
+    assert.equal(await page.locator(".pa-typing").count(), 0, "RUNNING resume must not create a thinking bubble");
+    await page.locator("#pa-msg-input").fill("CHECK-STATUS");
+    await page.locator("#pa-msg-send").click();
+    await sent.seen;
+    assert.equal(await page.locator(".pa-typing").count(), 1, "user send must immediately show thinking");
+    sent.release(); await sent.done;
+    await waitForText(page, "STATUS-REPLY");
+    assert.equal(await page.locator(".pa-typing").count(), 0, "first Agent reply must remove thinking");
+    await page.waitForTimeout(1800);
+    assert.equal(await page.locator(".pa-typing").count(), 0, "RUNNING background polling must not recreate thinking");
     await close(page);
   });
 }
@@ -282,6 +324,7 @@ async function sameCaseResume(browser) {
     await staleHistoryAndAttachment(browser);
     await stalePollAndAttachment(browser);
     await sameCaseResume(browser);
+    await thinkingLifecycle(browser);
     console.log("PASS pa-agent session race browser suite");
   } finally {
     await browser.close();

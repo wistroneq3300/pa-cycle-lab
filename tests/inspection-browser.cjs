@@ -52,6 +52,23 @@ const m=window.__INSPECTION_FIXTURE.machines.find(m=>m.name==='host_a');m.id='ch
    await page.locator('.pd-power-group summary').focus();await page.keyboard.press('Enter');
    assert.equal(await page.locator('.pd-power-group').getAttribute('open'),'');assert.equal(writes.length,0);
    await page.keyboard.press('Escape');assert.equal(await page.locator('.pd-power-group').getAttribute('open'),null);
+   if(theme==='light'&&width===1366){
+    await page.evaluate(()=>productDetailTab('osslots'));
+    const draft=page.locator('#pd-os-new-label');await draft.fill('保留中的節點標籤');await draft.focus();
+    assert.equal(await page.evaluate(()=>refreshMachineViewPreservingUi()),false,'focused user input must defer background rerender');
+    assert.equal(await draft.inputValue(),'保留中的節點標籤');assert.equal(await draft.evaluate(node=>node===document.activeElement),true);
+    await page.evaluate(()=>productDetailTab('hardware'));
+    const firmware=page.locator('[data-fw-disclosure]');
+    if(await firmware.count())await firmware.locator(':scope > summary').click();
+    const focused=await firmware.count()?firmware.locator(':scope > summary'):page.locator('#pd-tab-hardware');await focused.focus();
+    await page.evaluate(()=>{window.__pdBeforeRefresh=document.querySelector('.pd-workspace');window.scrollTo(0,180);refreshMachineViewPreservingUi();});
+    await page.waitForFunction(()=>document.querySelector('.pd-workspace')!==window.__pdBeforeRefresh);
+    assert.equal(await page.locator('#pd-tab-hardware').getAttribute('aria-selected'),'true');
+    if(await firmware.count())assert.equal(await firmware.getAttribute('open'),'');
+    assert.equal(await focused.evaluate(node=>node===document.activeElement),true);
+    assert((await page.evaluate(()=>scrollY))>=150,'background rerender must retain page scroll');
+    await page.evaluate(()=>productDetailTab('sensors'));
+   }
    await page.screenshot({path:path.join(out,`after-${width}-${theme}.png`)});
    for(state of ['disabled','warning','fail','stale']){
     config.enabled=state!=='disabled';await page.evaluate(()=>{document.querySelector('#pd-inspection [data-issues]').hidden=true;SystemInspection.mount('host_a');});
@@ -64,7 +81,7 @@ const m=window.__INSPECTION_FIXTURE.machines.find(m=>m.name==='host_a');m.id='ch
    }
    malicious=true;await page.locator('[data-reload]').click();await page.waitForTimeout(100);assert.equal(await page.locator('.pd-inspection-issue img').count(),0);assert.equal(await page.evaluate(()=>!!window.unsafe),false);
    await page.locator('[data-settings]').click();await page.locator('[name=interval_seconds]').fill('180');
-   await page.locator('[data-config] [type=submit]').click();await page.waitForTimeout(100);
+   await page.locator('[data-config-save]').click();await page.waitForTimeout(100);
    assert.equal(writes[0].body.interval_seconds,180);
    await page.locator('[data-run]').click();await page.waitForTimeout(100);
    assert(writes.every(w=>w.path.includes('/inspection/')));

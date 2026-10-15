@@ -61,7 +61,9 @@ def execute(r,job):
     ('occupied','ERROR',0,0),('unreachable','UNREACHABLE',0,0),('degraded','DEGRADED',1,1),('lost','INTERRUPTED',1,0)])
 def test_provision_paths_real_service(rig,scenario,expected,installs,starts):
     r=rig;nid=r.nodes[0]['node_id'];r.monitor.scenarios[nid]=scenario
+    assert r.svc.snapshot(nid)['overall_state']=='FAIL'
     job=execute(r,enqueue(r));assert job['state']==expected
+    assert r.svc.snapshot(nid)['overall_state']==({'READY':'READY','DEGRADED':'PARTIAL'}.get(expected,'FAIL'))
     commands=[c[2] for c in r.monitor.calls if c[0]=='ssh']
     assert sum('apt-get' in c for c in commands)==installs
     assert sum(c.startswith('systemctl ') for c in commands)==starts

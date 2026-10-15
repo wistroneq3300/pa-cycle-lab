@@ -4,27 +4,27 @@
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const replayKey='pa_dashboard_cinematic_l10_v1_played';
   const REFRESH_MS=30000;
-  let overview=null,selectedProject='',loading=null,teardown=()=>{};
+  let overview=null,selectedProject='',loading=null,overviewError='',teardown=()=>{};
   const quote=value=>esc(JSON.stringify(String(value)));
-  const fmt=value=>value?new Date(value*1000).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'尚無紀錄';
+  const fmt=value=>value?new Date(value*1000).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'尚無資料';
   const projectByName=name=>overview?.projects?.find(project=>project.name===name);
 
   RENDERERS.dashboard=()=>`<main class="vo-overview" aria-label="Product Assurance Overview">
     <section class="vo-hero" id="core-story" aria-label="專案驗證總覽與 AI infrastructure 整櫃組裝展示">
       <div class="vo-hero-copy">
-        <span class="vo-kicker">PRODUCT ASSURANCE OVERVIEW</span>
-        <label class="vo-project-select">專案範圍<select data-vo-select aria-label="Dashboard 專案範圍"><option value="">所有專案</option></select></label>
-        <div class="vo-hero-heading"><span data-vo-level>全域驗證狀態</span><h1 data-vo-title>正在取得驗證狀態…</h1></div>
+        <span class="vo-kicker">PRODUCT ASSURANCE</span>
+        <label class="vo-project-select">Project Scope<select data-vo-select aria-label="Dashboard 專案範圍"><option value="">所有專案</option></select></label>
+        <div class="vo-hero-heading"><span data-vo-level>Validation Overview</span><h1 data-vo-title>正在載入資料…</h1></div>
         <div class="vo-hero-summary">
         <div class="vo-hero-counts"><span><b data-vo-hero-projects>—</b> Projects</span><span><b data-vo-systems>—</b> Systems</span><span><b data-vo-nodes>—</b> Nodes</span></div>
         <p class="vo-hero-issues"><strong data-vo-fail>— FAIL</strong><span data-vo-warn>— WARN</span></p>
-        <p class="vo-hero-note" data-vo-summary>巡檢、Cycle 與監控狀態載入中。</p>
+        <p class="vo-hero-note" data-vo-summary>正在載入資料…</p>
         </div>
         <button class="btn primary" type="button" data-vo-enter>進入系統與專案</button>
       </div>
       <div class="cine-stage vo-scene" id="core-stage" data-phase="system">
         <div class="cine-core" id="core-visual"><img class="cine-fallback" src="/static/img/server-hero.png" alt="伺服器設備視圖"><canvas id="system-core" data-core-profile="coolingV2" tabindex="0" role="img" aria-label="L10 分解與組裝、CPU 與 GPU 封裝、液冷示意、連續機櫃整合與 System Overview" aria-describedby="core-interaction-help"></canvas><svg class="vo-device-callouts" data-vo-callouts aria-hidden="true"></svg></div>
-        <div class="vo-phase"><span data-vo-phase-number>01</span><div><b data-vo-phase-title>L10 SYSTEM</b><small data-vo-phase-detail>SERVER FOCUS</small></div></div>
+        <div class="vo-phase"><span data-vo-phase-number>01</span><div><b data-vo-phase-title>L10 System Assembly</b><small data-vo-phase-detail>SERVER FOCUS</small></div></div>
         <div class="vo-l10-note" data-vo-l10-note></div>
         <div class="vo-cinematic-progress" aria-hidden="true"><i data-vo-progress></i></div>
         <div class="vo-playback-controls"><button class="vo-skip" type="button" data-vo-skip aria-label="略過開場，進入 System Overview">略過開場</button><button class="vo-replay" type="button" data-vo-replay aria-label="重播 L10 與 Rack 展示">↻ 重播</button></div>
@@ -32,9 +32,9 @@
         <div id="core-system-copy" class="vo-a11y-state" aria-hidden="false">L10 System</div><div id="core-rack-copy" class="vo-a11y-state" inert aria-hidden="true">L11 Rack</div>
       </div>
     </section>
-    <section class="vo-key-status" aria-labelledby="vo-key-title"><header><span class="vo-kicker">KEY STATUS</span><h2 id="vo-key-title">驗證狀態</h2></header><div data-vo-status><p class="vo-loading">正在取得狀態…</p></div></section>
-    <section class="vo-attention" aria-labelledby="vo-attention-title"><header><div><span class="vo-kicker">ATTENTION REQUIRED</span><h2 id="vo-attention-title">需要處理</h2></div><span data-vo-attention-count>—</span></header><div data-vo-attention><p class="vo-loading">正在取得巡檢問題…</p></div></section>
-    <section class="vo-projects" aria-labelledby="vo-projects-title"><header><div><span class="vo-kicker">INSPECTION HEALTH</span><h2 id="vo-projects-title">Project Inspection Health — Top 5</h2></div><span data-vo-project-count>—</span></header><div class="vo-project-health" data-vo-projects><p class="vo-loading">正在取得專案巡檢狀態…</p></div></section>
+    <section class="vo-key-status" aria-labelledby="vo-key-title"><header><div><span class="vo-kicker">KEY STATUS</span><h2 id="vo-key-title">Validation Overview</h2></div><span data-vo-freshness>正在載入資料…</span></header><div data-vo-status><p class="vo-loading">正在載入資料…</p></div></section>
+    <section class="vo-attention" aria-labelledby="vo-attention-title"><header><div><span class="vo-kicker">ATTENTION REQUIRED</span><h2 id="vo-attention-title">Active Issues</h2></div><span data-vo-attention-count>—</span></header><div data-vo-attention><p class="vo-loading">正在載入資料…</p></div></section>
+    <section class="vo-projects" aria-labelledby="vo-projects-title"><header><div><span class="vo-kicker">INSPECTION HEALTH</span><h2 id="vo-projects-title">Project Inspection Health — Top 5</h2><p class="vo-sort-note">依 FAIL 數、受影響 Node、FAIL Rate、Coverage 依序排序</p></div><span data-vo-project-count>—</span></header><div class="vo-project-health" data-vo-projects><p class="vo-loading">正在載入資料…</p></div></section>
   </main>`;
 
   function selectedSummary(){return selectedProject?projectByName(selectedProject):overview?.totals;}
@@ -47,32 +47,37 @@
     }
     select.value=selectedProject;
     const item=selectedSummary(),isProject=!!selectedProject;
-    root.querySelector('[data-vo-level]').textContent=isProject?(item.level==='L11'?'L11 Validation':'L10 Validation'):'全域驗證狀態';
+    root.querySelector('[data-vo-level]').textContent='Validation Overview';
     root.querySelector('[data-vo-title]').textContent=isProject?item.name:'所有專案';
     root.querySelector('[data-vo-hero-projects]').textContent=isProject?1:overview.projects.length;
     root.querySelector('[data-vo-systems]').textContent=item.systems;root.querySelector('[data-vo-nodes]').textContent=item.nodes;
     root.querySelector('[data-vo-fail]').textContent=`${item.issues.fail} FAIL`;root.querySelector('[data-vo-warn]').textContent=`${item.issues.warning} WARN`;
     root.querySelector('[data-vo-summary]').textContent=`Cycle ${item.cycle.running} Running · Telemetry ${item.monitoring.reporting} / ${item.monitoring.total}`;
+    root.querySelector('[data-vo-freshness]').textContent=overviewError
+      ? `更新失敗 · 保留舊資料 · 最後更新 ${fmt(overview.generated_at)}`
+      : `最後更新 ${fmt(overview.generated_at)}`;
     root.querySelector('[data-vo-enter]').textContent=isProject?'進入專案':'進入系統與專案';
     const cards=[
-      ['Active Issues',`${item.issues.fail} FAIL · ${item.issues.warning} WARN`,'需要檢視的巡檢問題',item.issues.fail?'fail':item.issues.warning?'warn':'ok'],
-      ['Validation',`${item.validation.checked} / ${item.validation.total}`,'Nodes checked',item.validation.checked<item.validation.total?'warn':'ok'],
-      ['Cycle',`${item.cycle.running} Running · ${item.cycle.completed} Completed`,'Cycle validation runs',item.cycle.running?'active':'ok'],
-      ['Telemetry',`${item.monitoring.reporting} / ${item.monitoring.total}`,'Nodes reporting',item.monitoring.reporting<item.monitoring.total?'warn':'ok']
+      ['Active Issues',`${item.issues.fail} FAIL · ${item.issues.warning} WARN`,'需要檢視的巡檢異常',item.issues.fail?'fail':item.issues.warning?'warn':'ok'],
+      ['Validation',`${item.validation.checked} / ${item.validation.total}`,'已完成檢查的 Node',item.validation.checked<item.validation.total?'warn':'ok'],
+      ['Cycle',`${item.cycle.running} Running · ${item.cycle.completed} Completed`,'執行中與已完成的 Cycle',item.cycle.running?'active':'ok'],
+      ['Telemetry',`${item.monitoring.reporting} / ${item.monitoring.total}`,'持續回報資料的 Node',item.monitoring.reporting<item.monitoring.total?'warn':'ok']
     ];
     root.querySelector('[data-vo-status]').innerHTML=cards.map(([label,value,detail,state])=>`<article data-state="${state}"><span>${label}</span><strong>${value}</strong><small>${detail}</small></article>`).join('');
     const issues=overview.issues.filter(issue=>!selectedProject||issue.project===selectedProject).slice(0,6);
     root.querySelector('[data-vo-attention-count]').textContent=`${issues.length} 項`;
-    root.querySelector('[data-vo-attention]').innerHTML=issues.length?issues.map(issue=>`<button type="button" class="vo-issue" data-severity="${issue.severity}" onclick="openMachine(${quote(issue.system)})"><span>${issue.severity}</span><div><b>${esc(issue.system)}${issue.node?' / '+esc(issue.node):''}</b><strong>${esc(issue.component||issue.rule||'巡檢問題')}</strong><small>${esc(issue.facts||'請查看巡檢證據與分析依據')}</small></div><i aria-hidden="true">查看 →</i></button>`).join(''):'<div class="vo-empty"><strong>目前沒有待處理的巡檢問題</strong><span>仍請連同資料涵蓋率與最近巡檢時間判讀。</span></div>';
+    const hasInspectionData=Number(item.validation.checked||0)>0;
+    root.querySelector('[data-vo-attention]').innerHTML=issues.length?issues.map(issue=>`<button type="button" class="vo-issue" data-severity="${issue.severity}" onclick="openMachine(${quote(issue.system)})"><span>${issue.severity}</span><div><b>${esc(issue.system)}${issue.node?' / '+esc(issue.node):''}</b><strong>${esc(issue.component||issue.rule||'巡檢問題')}</strong><small>${esc(issue.facts||'請查看巡檢證據與分析依據')}</small></div><i aria-hidden="true">查看詳情 →</i></button>`).join(''):hasInspectionData?'<div class="vo-empty"><strong>目前無異常</strong><span>最近一次有效巡檢沒有待處理項目；仍請核對資料涵蓋率與更新時間。</span></div>':'<div class="vo-empty"><strong>尚無資料</strong><span>尚未取得有效巡檢結果，不能判定為無異常。</span></div>';
     const healthProjects=overview.projects.slice(0,5);root.querySelector('[data-vo-project-count]').textContent=`Top ${healthProjects.length} / ${overview.projects.length} Projects`;
-    root.querySelector('[data-vo-projects]').innerHTML=healthProjects.length?`<div class="vo-health-table" role="table" aria-label="Project Inspection Health"><div class="vo-health-row vo-health-head" role="row"><span>Project Name</span><span>Affected Nodes</span><span>FAIL Count</span><span>FAIL Rate</span><span>Inspection Coverage</span><span>Last Inspection</span><span>Health Status</span></div>${healthProjects.map(project=>{const inspection=project.inspection||{},rate=inspection.fail_rate==null?'NO DATA':inspection.fail_rate.toFixed(1)+'%',coverage=(inspection.coverage??0).toFixed(1)+'%';return `<button type="button" class="vo-health-row" role="row" onclick="openProjectInspection(${quote(project.name)})"><b>${esc(project.name)}</b><span>${inspection.affected_nodes??0} / ${project.nodes}</span><strong>${inspection.fail_count??0}</strong><span>${rate}</span><span>${coverage}</span><span>${fmt(inspection.last_inspection)}</span><em data-health="${esc(inspection.health_status||'UNKNOWN')}">${esc(inspection.health_status||'UNKNOWN')}</em></button>`;}).join('')}</div>`:'<div class="vo-empty"><strong>尚無可顯示的專案</strong><span>新增專案與系統後，Inspection Health 會顯示在這裡。</span></div>';
+    root.querySelector('[data-vo-projects]').innerHTML=healthProjects.length?`<div class="vo-health-table" role="table" aria-label="Project Inspection Health"><div class="vo-health-row vo-health-head" role="row"><span>Project Name</span><span>Affected Nodes</span><span>FAIL Count</span><span>FAIL Rate</span><span>Inspection Coverage</span><span>Last Inspection</span><span>Health Status</span></div>${healthProjects.map(project=>{const inspection=project.inspection||{},rate=inspection.fail_rate==null?'NO DATA':inspection.fail_rate.toFixed(1)+'%',coverage=(inspection.coverage??0).toFixed(1)+'%';return `<button type="button" class="vo-health-row" role="row" onclick="openProjectInspection(${quote(project.name)})"><b>${esc(project.name)}</b><span>${inspection.affected_nodes??0} / ${project.nodes}</span><strong>${inspection.fail_count??0}</strong><span>${rate}</span><span>${coverage}</span><span>${fmt(inspection.last_inspection)}</span><em data-health="${esc(inspection.health_status||'UNKNOWN')}">${esc(inspection.health_status||'UNKNOWN')}</em></button>`;}).join('')}</div>`:'<div class="vo-empty"><strong>尚無資料</strong><span>新增專案與系統後，Inspection Health 會顯示在這裡。</span></div>';
   }
 
   async function loadOverview(force=false,silent=false){
     if(overview&&!force){renderData();return;}if(loading)return loading;
-    loading=fetch('/api/validation/overview',{cache:'no-store'}).then(async response=>{if(!response.ok)throw new Error('驗證總覽暫時無法取得');overview=await response.json();renderData();}).catch(error=>{
-      if(silent&&overview)return;
-      const root=document.querySelector('.vo-overview');if(root)root.querySelectorAll('.vo-loading').forEach(node=>node.textContent=error.message+'，請稍後重新整理。');
+    loading=fetch('/api/validation/overview',{cache:'no-store'}).then(async response=>{if(!response.ok)throw new Error('資料載入失敗');overview=await response.json();overviewError='';renderData();}).catch(error=>{
+      overviewError=error.message||'資料載入失敗';
+      if(silent&&overview){renderData();return;}
+      const root=document.querySelector('.vo-overview');if(root)root.querySelectorAll('.vo-loading').forEach(node=>node.textContent='資料載入失敗，請稍後重新整理。');
     }).finally(()=>{loading=null;});return loading;
   }
 
@@ -85,20 +90,20 @@
   const timelineMode=canvas=>canvas.dataset.coreProfile==='coolingV2'||canvas.dataset.coreCooling==='ready'?'coolingV2':'legacy';
   const shots=[
     [0,'l10-exploded','01','L10 Exploded View','COMPUTE / COOLING / ENCLOSURE'],
-    [.065,'compute-board','02','L10 Assembly','COMPUTE BOARD'],
+    [.065,'compute-board','02','L10 System Assembly','COMPUTE BOARD'],
     [.135,'cpu-gpu-assembly','03','CPU / GPU Assembly','BOARD-INTEGRATED PACKAGES'],
-    [.202,'network-storage','04','L10 Assembly','NETWORKING / STORAGE / MANAGEMENT'],
+    [.202,'network-storage','04','L10 System Assembly','NETWORKING / STORAGE / MANAGEMENT'],
     [.248,'cooling-install','05','Cooling Assembly','COLD PLATES / FITTINGS'],
     [.292,'cooling-reveal','06','Cooling Flow Reveal','CONCEPTUAL THERMAL FLOW OVERLAY'],
-    [.333,'l10-hero','07','L10 Assembly View','LIQUID-COOLED COMPUTE TRAY'],
-    [.376,'chassis-close','08','L10 Assembly','ENCLOSURE CLOSURE'],
-    [.407,'camera-bridge','09','Rack Integration','CONTINUOUS CAMERA TRANSITION'],
-    [.56,'convergence','10','Rack Integration','COORDINATED EQUIPMENT ASSEMBLY'],
-    [.653333,'insertion','11','Rack Integration','U40 / RAIL ENGAGEMENT'],
-    [.733333,'pullback','12','System Overview','COMPUTE / INTERCONNECT / POWER'],
-    [.84,'exploded','13','System Overview','ARCHITECTURE LAYERS'],
-    [.906667,'return','14','System Overview','RETURN / EXACT SEATING'],
-    [.96,'final','15','System Overview','RACK-SCALE COMPUTING']
+    [.333,'l10-hero','07','L10 System Assembly','LIQUID-COOLED COMPUTE TRAY'],
+    [.376,'chassis-close','08','L10 System Assembly','ENCLOSURE CLOSURE'],
+    [.407,'camera-bridge','09','L11 Rack Integration','CONTINUOUS CAMERA TRANSITION'],
+    [.56,'convergence','10','L11 Rack Integration','COORDINATED EQUIPMENT ASSEMBLY'],
+    [.653333,'insertion','11','L11 Rack Integration','U40 / RAIL ENGAGEMENT'],
+    [.733333,'pullback','12','L10 System Overview','COMPUTE / INTERCONNECT / POWER'],
+    [.84,'exploded','13','L10 System Overview','ARCHITECTURE LAYERS'],
+    [.906667,'return','14','L10 System Overview','RETURN / EXACT SEATING'],
+    [.96,'final','15','L10 System Overview','RACK-SCALE COMPUTING']
   ];
   function applyProgress(value){
     const stage=document.getElementById('core-stage'),canvas=document.getElementById('system-core');if(!stage||!canvas)return;
@@ -147,7 +152,7 @@
       const available=sceneReady(),failed=sceneFailed();
       replay.disabled=!available||reduced.matches;replay.setAttribute('aria-disabled',String(replay.disabled));
       skip.disabled=!available;skip.setAttribute('aria-disabled',String(skip.disabled));
-      replay.title=!available?(failed?'展示載入失敗，請重新整理頁面':'展示載入中'):reduced.matches?'已依減少動態效果偏好停用重播':'重播 L10 與 Rack 展示';
+      replay.title=!available?(failed?'資料載入失敗，請重新整理頁面':'正在載入資料…'):reduced.matches?'已依減少動態效果偏好停用重播':'重播 L10 與 Rack 展示';
       story.querySelectorAll('[data-core-view]').forEach(button=>button.disabled=!available);
       const help=document.getElementById('core-interaction-help');
       if(help){help.setAttribute('role','status');help.textContent=available?'按住拖曳旋轉 · 方向鍵查看 · Home 重設':failed?'L10 展示載入失敗，請重新整理頁面；管理功能不受影響。':'正在載入 L10 展示…';}

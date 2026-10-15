@@ -2252,6 +2252,15 @@ async function rackDemote(name) {
 // 若每次都整頁重繪會造成 chart 反覆重建 + telemetry 重抓 → 狂跳卡死。
 // 已在 machine view 時的重複請求，於一短暫視窗內合併為一次。從其他 view 切入則立即渲染。
 let _machineRenderTimer = null;
+let _machineRefreshUiState = null;
+function refreshMachineViewPreservingUi() {
+  if (typeof window.productDetailRefreshCanRender === "function" && !window.productDetailRefreshCanRender()) return false;
+  _machineRefreshUiState = typeof window.productDetailCaptureRefreshState === "function"
+    ? window.productDetailCaptureRefreshState()
+    : { scrollX: window.scrollX, scrollY: window.scrollY };
+  setView("machine");
+  return true;
+}
 function setView(view) {
   if (view === "machine" && state.view === "machine") {
     if (_machineRenderTimer) clearTimeout(_machineRenderTimer);
@@ -2265,6 +2274,8 @@ function setView(view) {
   _renderMachine(view);
 }
 function _renderMachine(view) {
+  const refreshUiState = view === "machine" ? _machineRefreshUiState : null;
+  _machineRefreshUiState = null;
   window.CycleWorkspace?.dispose();
   window.SystemInspection?.dispose();
   window.TelemetryProvision?.dispose();
@@ -2294,6 +2305,10 @@ function _renderMachine(view) {
   }
   syncHash();
   if(view === "cycle") window.CycleWorkspace.mount();
+  if (view === "machine" && refreshUiState) requestAnimationFrame(() => {
+    if (typeof window.productDetailRestoreRefreshState === "function") window.productDetailRestoreRefreshState(refreshUiState);
+    else window.scrollTo(refreshUiState.scrollX || 0, refreshUiState.scrollY || 0);
+  });
 }
 
 /* ---- URL 分頁路由（hash）：重新整理不回首頁 ---- */
@@ -2803,7 +2818,7 @@ async function machineLoadDetail(name, refresh = false, silent = false) {
       const changed = JSON.stringify(before?.fw) !== JSON.stringify(result?.fw)
                    || JSON.stringify(before?.power) !== JSON.stringify(result?.power)
                    || !!before?.bmc_loading !== !!result?.bmc_loading;
-      if (changed) setView("machine");
+      if (changed) refreshMachineViewPreservingUi();
     } else {
       setView("machine");
     }
@@ -3240,7 +3255,7 @@ const _assignTask = {
 function assignTaskActionMeta(count = _assignTask.sel.size) {
   const n = Number(count || 0);
   const agentAvailable = n === 1 && window.PA_Agent && typeof window.PA_Agent.open === "function";
-  if (!n) return { kind: "empty", label: "選擇測項", note: "請先勾選至少一筆測試案例。" };
+  if (!n) return { kind: "empty", label: "選擇 Test Case", note: "請先選擇一筆 Test Case。" };
   if (agentAvailable) return { kind: "agent", label: "交給 PA Agent", note: "PA Agent 會先說明計畫，並等待工程師輸入 OK 或 GO。" };
   if (n > 1) return { kind: "batch", label: `產生批次指令 (${n})`, note: "目前未啟動 Agent；將產生所有已選測項的批次指令。" };
   return { kind: "instruction", label: "產生指令", note: "PA Agent 入口目前不可用；只會產生可複製指令。" };
@@ -3306,7 +3321,7 @@ function assignTaskBack() {
 function assignTaskMetaHtml() {
   const head = assignTaskTargetHtml();
   if (!_assignTask.meta.length) {
-    return head + `<div class="empty">無法載入測試案例，請重試或聯絡管理者。</div>`;
+    return head + `<div class="empty">Test Case Library 載入失敗，請重試或聯絡管理者。</div>`;
   }
   const cards = _assignTask.meta.map(s => `
     <div class="assign-sheet-card" onclick="assignTaskOpenSheet('${s.sheet}')">
@@ -3796,7 +3811,7 @@ function assignResultRichHtml(chosen, mm, sname, ip, user, dupSet) {
     const body = [
       code("目標機台", [mm && mm.label, sname, ip, user].filter(Boolean).join(" · ")),
       kv([
-        ["測試案例變體", variant],
+        ["Test Case Variant", variant],
         ["測試代碼", (r.code || "") + (r.test_set ? ` (${r.test_set})` : "")],
         ["分類", cls],
         ["風險", rev.risk_level || ""],
@@ -3995,7 +4010,7 @@ const AssignResultWin = (() => {
     hint.textContent = copied
       ? (multi
         ? "批次指令已產生並複製；目前未啟動 Agent，也尚未執行測試。"
-        : "指令已複製。請確認完整測試案例、風險與目標；本頁尚未執行測試。")
+        : "指令已複製。請確認完整 Test Case、風險與目標；本頁尚未執行測試。")
       : (multi
         ? "批次指令已產生，但剪貼簿寫入失敗；目前未啟動 Agent，也尚未執行測試。"
         : "指令已產生，但剪貼簿寫入失敗；內容仍保留在視窗內。");

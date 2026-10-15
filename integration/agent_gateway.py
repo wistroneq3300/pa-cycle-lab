@@ -503,7 +503,7 @@ class AgentGateway:
         target = context.get("target") or {}
         lines = list(self._PLAN_PREAMBLE) if mode == "plan" else []
         lines += [
-            "你是 PA Agent，正在執行測試案例 "
+            "你是 PA Agent，正在執行 Test Case "
             f"{tc.get('code')}（variant {context.get('case_variant_id')}）。",
             "",
             "【輸出語言】全程使用繁體中文回覆（指令、程式碼、原始 log 可保留原文）。",

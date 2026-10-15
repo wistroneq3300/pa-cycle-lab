@@ -9,15 +9,27 @@
   const scopeName = scope => ({host:'Node Exporter',gpu:'DCGM Exporter',all:'Telemetry'}[scope] || 'Telemetry');
   const scopeTitle = scope => `${scopeName(scope)} 啟用紀錄`;
   const stateLabel = value => ({READY:'已就緒',NOT_CONFIGURED:'尚未啟用',PROVISIONING:'啟用中',DEGRADED:'需要處理',ERROR:'啟用失敗',UNREACHABLE:'無法連線',INTERRUPTED:'作業中斷',NOT_APPLICABLE:'不適用',VERIFYING:'驗證中'}[value] || value || '尚未檢查');
+  const phases=['Identity','Detect','Install','Start','Register','Verify'];
+  const phaseForStep=value=>{
+    if(!value)return null;
+    if(value==='IDENTITY')return 'Identity';
+    if(['DETECT','GPU_DETECT','GPU_EXPORTER'].includes(value))return 'Detect';
+    if(['INSTALL','GPU_DIAGNOSE','GPU_INSTALL'].includes(value))return 'Install';
+    if(['START','GPU_SERVICE'].includes(value))return 'Start';
+    if(value==='REGISTER')return 'Register';
+    if(['EXPORTER','VERIFY','READY','GPU_METRICS','GPU_VERIFY'].includes(value))return 'Verify';
+    return null;
+  };
   let current,lastView;
   const choices=new Map();
+  const logViews=new Map();
 
   class View {
     constructor(root) {
       this.root=root;this.abort=new AbortController();this.cursor=0;this.rows=[];this.follow=true;this.pipeline={};this.unread=0;
       this.closed=false;this.consoleOpen=false;this.name=root.dataset.system;this.node=null;this.job=null;
       this.stageQueue=[];this.stageTimer=null;
-      root.innerHTML=`<header class="tp-heading"><div><h3>Node Telemetry <span data-state class="tp-state">載入中</span></h3><p data-detail aria-live="polite">正在取得節點設定…</p></div><label class="tp-node">監控節點<select aria-label="Telemetry 節點" data-node><option value="">選擇節點</option></select></label></header>
+      root.innerHTML=`<header class="tp-heading"><div><h3>Node Telemetry <span data-state class="tp-state">正在載入資料…</span></h3><p data-detail aria-live="polite">正在載入資料…</p></div><label class="tp-node">監控節點<select aria-label="Telemetry 節點" data-node><option value="">選擇節點</option></select></label></header>
         <div class="tp-context"><span data-target></span><span data-time></span></div>
         <div class="tp-components">
           <section class="tp-component" data-component="host"><div><span class="tp-kicker">HOST</span><h4>主機監控 · Node Exporter</h4><p>CPU / Memory / Disk / Network</p></div><strong data-component-state>尚未檢查</strong><div class="tp-component-actions"><button class="btn primary" data-enable-scope="host" disabled>安裝 / 啟用</button><button class="btn" data-console-scope="host" hidden>查看安裝紀錄</button><details><summary>手動安裝說明</summary><div class="tp-manual" data-host-manual><p>請先選擇節點以取得此節點的安裝與連線資訊。</p></div></details></div></section>
@@ -56,16 +68,14 @@
       // Prefer the job matching the requested scope; fall back to the latest job.
       const job=(scope==='host'?this.hostJob:null)||(scope==='gpu'?this.gpuJob:null)||this.job;
       if(!job)return;
+      if(this.consoleJob?.job_id!==job.job_id){this.saveLogState();this.restoreLogState(job);}
       this.consoleJob=job;
       if(!this.$('.tp-console').open){this.restoreFocus=document.activeElement;this.$('.tp-console').showModal();this.$('[data-close]').focus();}
       this.consoleOpen=true;
-      // Always reopen from the top so the messages appear first and the pipeline
-      // lights follow. Resetting follow guarantees the log is drawn and scrolled to
-      // the bottom even if the previous session was scrolled up (follow=false).
-      if(this.job){this.cursor=0;this.rows=[];this.stageQueue=[];this.pipeline={};this.follow=true;this.unread=0;this.$('.tp-log').replaceChildren();}
-      this.renderPipeline(this.job);this.pumpStage();this.pollEvents();
+      this.renderPipeline(job);this.renderLog();this.pumpStage();this.pollEvents();
     }
     closeConsole(){
+      this.saveLogState();
       this.consoleOpen=false;
       if(this.$('.tp-console').open)this.$('.tp-console').close();
       if(this.restoreFocus?.isConnected&&!this.restoreFocus.disabled&&!this.restoreFocus.hidden)this.restoreFocus.focus();
@@ -77,9 +87,10 @@
       if(atBottom){this.unread=0;this.$('[data-latest]').hidden=true;}
     }
     observeStage(row){
-      const phase=row.step.startsWith('GPU_')?'GPU':{IDENTITY:'Identity',DETECT:'Exporter',INSTALL:'Service',START:'Service',EXPORTER:'Metrics',REGISTER:'Prometheus',VERIFY:'Prometheus',READY:'Ready'}[row.step];
+      const phase=phaseForStep(row.step);
       if(!phase)return;
-      if(phase==='Service')this.pipeline.Exporter='PASS';
+      const index=phases.indexOf(phase);
+      phases.slice(0,index).forEach(previous=>{if(!this.pipeline[previous]||this.pipeline[previous]==='PENDING')this.pipeline[previous]='PASS';});
       this.pipeline[phase]=row.level==='PASS'&&row.step!=='REGISTER'?'PASS':['FAIL','ERROR'].includes(row.level)?'FAIL':row.level==='WARN'?'WARN':this.pipeline[phase]==='PASS'?'PASS':'ACTIVE';
     }
     // Light pipeline stages progressively instead of all-at-once when a burst of
@@ -98,17 +109,16 @@
     }
     renderPipeline(job){
       const scope=job?.scope||'all';
-      const phases=scope==='gpu'?['Identity','GPU','Ready']:scope==='host'?['Identity','Exporter','Service','Metrics','Prometheus','Ready']:['Identity','Exporter','Service','Metrics','Prometheus','GPU','Ready'];
       const failed=job&&!active(job)&&job.state!=='READY';
       // While queued stage events are still animating, let them light the pipeline one by
       // one instead of snapping everything to the final READY verdict at once.
       const animating=this.stageQueue.length>0;
-      const current=job?.current_step?.startsWith('GPU_')?'GPU':{IDENTITY:'Identity',DETECT:'Exporter',INSTALL:'Service',START:'Service',EXPORTER:'Metrics',REGISTER:'Prometheus',VERIFY:'Prometheus'}[job?.current_step];
+      const current=phaseForStep(job?.current_step);
       const fragment=document.createDocumentFragment();
       for(const phase of phases){
-        const el=document.createElement('span'),na=phase==='GPU'&&this.node?.components?.gpu?.state==='NOT_APPLICABLE';
+        const el=document.createElement('span'),na=false;
         const lit=this.pipeline[phase];
-        const state=na?'NOT_APPLICABLE':(!animating&&job?.state==='READY')?'PASS':failed&&phase===current?'FAIL':lit||(!animating&&phase==='Ready'&&current?'ACTIVE':'PENDING');
+        const state=na?'NOT_APPLICABLE':(!animating&&job?.state==='READY')?'PASS':failed&&phase===current?'FAIL':lit||'PENDING';
         el.dataset.state=state;el.textContent=phase+(na?' · N/A':'');el.title=state;el.setAttribute('aria-label',phase+': '+state);fragment.append(el);
       }
       this.$('.tp-pipeline').replaceChildren(fragment);
@@ -148,13 +158,12 @@
     }
     select(nodeId){
       clearTimeout(this.timer);this.generation=(this.generation||0)+1;this.node=this.nodes.find(n=>n.node_id===nodeId);
-      choices.set(this.name,{nodeId,activeSlot:this.root.dataset.slot});this.job=null;this.resetLog();this.requestKey=null;this.eventsBusy=false;this.closeConsole();
+      this.saveLogState();choices.set(this.name,{nodeId,activeSlot:this.root.dataset.slot});this.job=null;this.consoleJob=null;this.resetLog();this.requestKey=null;this.eventsBusy=false;this.closeConsole();
       this.$('.tp-dashboard').replaceChildren();this.$('.tp-dashboard').hidden=true;this.native?.dispose();this.native=null;
       if(this.node){
         this.update(this.node);
         if(lastView?.name===this.name&&lastView.nodeId===nodeId){
-          if(lastView.jobId===this.job?.job_id){this.pipeline=lastView.pipeline||{};this.rows=lastView.rows;this.cursor=lastView.cursor;this.follow=lastView.follow;this.unread=lastView.unread||0;this.renderLog();if(!this.follow)this.$('.tp-log').scrollTop=lastView.top;}
-          if(lastView.open)this.openConsole();
+          if(lastView.open)this.openConsole(lastView.scope);
         }
         this.poll(this.generation);
       }else this.setButtons(true);
@@ -211,7 +220,7 @@
       }
     }
     update(node){
-      this.node=node;this.$('[data-state]').textContent=stateLabel(node.state);this.$('[data-state]').dataset.state=node.state;
+      this.node=node;this.$('[data-state]').textContent=node.overall_state||stateLabel(node.state);this.$('[data-state]').dataset.state=node.state;this.$('[data-state]').dataset.overall=node.overall_state||'';
       if(node.stale){this.$('[data-state]').dataset.stale='1';}else{delete this.$('[data-state]').dataset.stale;}
       this.$('[data-detail]').textContent=node.state==='NOT_CONFIGURED'?'此節點尚未連接中央效能監控。Host 與 GPU 監控可分別啟用。':node.detail;
       this.$('[data-target]').textContent=`${node.slot} · ${node.hostname||'尚未取得 hostname'} · ${node.os_ip}`;this.$('[data-time]').textContent='最後確認 '+time(node.checked_at);
@@ -224,10 +233,11 @@
       gpuCard.querySelector('[data-component-state]').textContent=stateLabel(gpu.state);gpuCard.dataset.state=gpu.state;
       this.manualHelp(node);
       this.$('[data-notice]').textContent=node.configured?'安裝與啟用只針對所選節點。關閉紀錄或離開頁面不會停止作業。':'中央監控連線尚未設定；既有效能資料仍可使用。';
-      const watchedJob=this.consoleJob||this.job;
-      const newJob=watchedJob&&node.job?.job_id!==watchedJob.job_id&&watchedJob.scope==='gpu'||watchedJob&&node.host_job?.job_id!==watchedJob.job_id&&watchedJob.scope==='host'||(!this.consoleJob&&node.job?.job_id!==this.job?.job_id);
-      if(newJob){this.resetLog();this.requestKey=null;}
       this.job=node.job;this.hostJob=node.host_job||null;this.gpuJob=(node.job&&node.job.scope==='gpu')?node.job:null;
+      if(this.consoleJob){
+        const fresh=[this.job,this.hostJob,this.gpuJob].find(job=>job?.job_id===this.consoleJob.job_id);
+        if(fresh)this.consoleJob=fresh;
+      }
       this.$('[data-console]').hidden=!this.job;
       this.$('[data-console-scope="host"]').hidden=!this.hostJob;
       this.$('[data-console-scope="gpu"]').hidden=!this.gpuJob;
@@ -239,7 +249,7 @@
         this.$('[data-stage]').textContent=stage(this.job.state==='READY'?'READY':this.job.current_step);this.$('[data-log-date]').textContent=time(this.job.created_at).split(' ')[0];
       }
       this.renderPipeline(this.job);this.dashboard(node);this.setButtons();
-      if(newJob&&this.consoleOpen)this.pollEvents();
+      if(this.consoleOpen)this.pollEvents();
     }
     dashboard(node){
       const container=this.$('.tp-dashboard'),link=this.$('[data-grafana]');link.hidden=true;
@@ -254,7 +264,7 @@
       try{
         const job=await this.request('/nodes/'+encodeURIComponent(node.node_id)+'/enable',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idempotency_key:this.requestKey,expected_binding_revision:node.binding_revision,scope})});
         if(this.closed||generation!==this.generation)return;
-        this.consoleJob=job;this.update({...node,state:'PROVISIONING',detail:'啟用作業已排入背景執行。',job});clearTimeout(this.timer);this.poll(generation);
+        this.consoleJob=job;this.update({...node,state:'PROVISIONING',overall_state:'PARTIAL',detail:'啟用作業已排入背景執行。',job});this.openConsole(scope);clearTimeout(this.timer);this.poll(generation);
       }catch(error){if(generation===this.generation){this.error(error);this.setButtons();}}
     }
     async pollEvents(){
@@ -269,7 +279,7 @@
           this.rows.push(row);this.cursor=row.sequence;if(!this.follow)this.unread++;this.stageQueue.push(row);
         }
         this.rows=this.rows.slice(-2000);this.$('[data-connection]').textContent=data.has_more?'正在補讀較早紀錄…':active(data.job)?'已連線 · 唯讀':'紀錄已更新 · '+data.job.state;
-        this.renderPipeline(data.job);this.pumpStage();this.renderLog();if(data.has_more)setTimeout(()=>this.pollEvents(),50);
+        this.renderPipeline(data.job);this.pumpStage();this.renderLog();this.saveLogState(data.job);if(data.has_more)setTimeout(()=>this.pollEvents(),50);
       }catch(error){
         if(!this.closed&&generation===this.generation&&error.name!=='AbortError'){
           this.$('[data-connection]').textContent='讀取紀錄失敗：'+(error?.message||'未知錯誤');
@@ -277,6 +287,17 @@
         }
       }
       finally{if(generation===this.generation)this.eventsBusy=false;}
+    }
+    logStateKey(job=this.consoleJob){return job?.job_id?`${this.node?.node_id||'node'}:${job.job_id}`:'';}
+    saveLogState(job=this.consoleJob){
+      const stateKey=this.logStateKey(job);if(!stateKey)return;
+      logViews.set(stateKey,{cursor:this.cursor,rows:[...this.rows],follow:this.follow,pipeline:{...this.pipeline},unread:this.unread,top:this.$('.tp-log').scrollTop});
+      while(logViews.size>24)logViews.delete(logViews.keys().next().value);
+    }
+    restoreLogState(job){
+      this.resetLog();const saved=logViews.get(this.logStateKey(job));if(!saved)return;
+      this.cursor=saved.cursor;this.rows=[...saved.rows];this.follow=saved.follow;this.pipeline={...saved.pipeline};this.unread=saved.unread||0;this.renderLog();
+      if(!this.follow)this.$('.tp-log').scrollTop=saved.top||0;
     }
     resetLog(){this.pipeline={};this.unread=0;this.cursor=0;this.rows=[];this.follow=true;this.stageQueue=[];if(this.stageTimer){clearTimeout(this.stageTimer);this.stageTimer=null;}this.$('.tp-log').replaceChildren();this.$('[data-latest]').hidden=true;}
     line(row){return `${time(row.timestamp)} [${row.level}] [${stage(row.step)}] ${row.message}`;}
@@ -294,7 +315,8 @@
     bottom(){this.unread=0;const log=this.$('.tp-log');log.scrollTop=log.scrollHeight;this.$('[data-latest]').hidden=true;}
     error(error){if(error.name==='AbortError'||this.closed)return;this.$('[data-detail]').textContent=error.message;this.$('[data-state]').textContent='連線未完成';}
     dispose(){
-      if(this.node)lastView={name:this.name,nodeId:this.node.node_id,jobId:this.job?.job_id,pipeline:this.pipeline,rows:this.rows,cursor:this.cursor,open:this.consoleOpen,follow:this.follow,unread:this.unread,top:this.$('.tp-log').scrollTop};
+      this.saveLogState();
+      if(this.node)lastView={name:this.name,nodeId:this.node.node_id,jobId:this.consoleJob?.job_id,scope:this.consoleJob?.scope||this.job?.scope||'all',open:this.consoleOpen};
       if(this.$('.tp-console').open)this.$('.tp-console').close();this.closed=true;clearTimeout(this.timer);if(this.stageTimer){clearTimeout(this.stageTimer);this.stageTimer=null;}this.abort.abort();this.native?.dispose();
     }
   }

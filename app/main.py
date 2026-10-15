@@ -2760,6 +2760,10 @@ def machine_detail(name: str, refresh: int = 0):
     # ---- BMC：FW + 電源（有快取秒回；refresh=1 強制重抓；首次背景非同步） ----
     if base.get("bmc_alive"):
         nowts = time.time()
+        # Keep extracted/offline regression harnesses and rolling upgrades safe
+        # when the pending timestamp map was not initialized by an older worker.
+        pending_since = globals().setdefault("_bmc_pending_since", {})
+        pending_ttl = globals().get("_BMC_PENDING_TTL", 90)
         fw_ts, fw = _bmc_fw_cache.get(name, (0, []))
         pwr_ts, pwr = _bmc_pwr_cache.get(name, (0, ""))
         fw_fresh = (nowts - fw_ts) < _BMC_TTL
@@ -2769,9 +2773,9 @@ def machine_detail(name: str, refresh: int = 0):
         elif name in _bmc_pending:
             # refresh 明確要求，或背景抓取已進行中 → 回目前快取（可能為空）
             # 但若背景抓取卡住超過 TTL，視為失敗：清 pending，停止前端無限輪詢。
-            if time.time() - _bmc_pending_since.get(name, nowts) > _BMC_PENDING_TTL:
+            if time.time() - pending_since.get(name, nowts) > pending_ttl:
                 _bmc_pending.discard(name)
-                _bmc_pending_since.pop(name, None)
+                pending_since.pop(name, None)
                 out["fw"], out["power"] = fw, pwr
                 out["bmc_loading"] = False
             else:
@@ -2780,7 +2784,7 @@ def machine_detail(name: str, refresh: int = 0):
         else:
             # 首次進入：背景抓取，先回空 + bmc_loading，前端稍後輪詢
             _bmc_pending.add(name)
-            _bmc_pending_since[name] = time.time()
+            pending_since[name] = time.time()
             out["fw"], out["power"] = fw, pwr
             out["bmc_loading"] = True
             snapshot = copy.deepcopy(m)
@@ -2789,7 +2793,9 @@ def machine_detail(name: str, refresh: int = 0):
                     nf = ipmi_fw_list(snapshot)
                     ok, npwr = ipmi_power(snapshot, "status")
                     cur = machines.get(name)
-                    if cur is None or cur.get("os_ip") != snapshot.get("os_ip"):
+                    if (cur is None or cur.get("active_os") != snapshot.get("active_os")
+                            or cur.get("os_ip") != snapshot.get("os_ip")
+                            or cur.get("bmc_ip") != snapshot.get("bmc_ip")):
                         return
                     _bmc_fw_cache[name] = (time.time(), nf)
                     _bmc_pwr_cache[name] = (time.time(), npwr)
@@ -2797,7 +2803,7 @@ def machine_detail(name: str, refresh: int = 0):
                     pass
                 finally:
                     _bmc_pending.discard(name)
-                    _bmc_pending_since.pop(name, None)
+                    pending_since.pop(name, None)
             threading.Thread(target=_background_target(_bg), daemon=True).start()
         # 感測器（sdr list）很慢，由前端呼叫 /sensors 非同步載入。
     out["ssh_observation"] = _os_access_cache.get(name)
