@@ -119,10 +119,20 @@
   }
   function motion(progress,out={}){
     rackMotion(rackProgress(progress),out);out.progress=progress;out.rackProgress=rackProgress(progress);
+    out.calloutProgress=out.rackProgress;
     if(hasL10()){
       out.l10=l10State(progress);out.rackOpacity=interval(.405,.54,progress);
       out.reveal=1;out.deviceReveal=interval(.44,.49,progress);
-      if(progress<.56){out.phase=out.l10.phase;out.calloutVisibility=0;}
+      // Restore the original engineering captions during the existing bridge.
+      // Give only their fade clock a linear 19.7–22 s window: the nested Rack
+      // easing otherwise compresses all four readable labels to half a second.
+      // No camera, placement, timeline key or total runtime changes. The legacy
+      // L10 bridge has the same 4.5 s timing, merely shifted 4.5 s earlier.
+      if(window.PAL10Timeline){
+        out.calloutProgress=.19+.137*clamp((window.PAL10Timeline.timeAt(progress,'coolingV2')-19700)/2300);
+        out.calloutVisibility=interval(.19,.216,out.calloutProgress)*(1-interval(.289,.326,out.calloutProgress));
+      }
+      if(progress<.56)out.phase=out.l10.phase;
     }
     return out;
   }
@@ -838,7 +848,7 @@
         const anchors=Array.from({length:8},(_,corner)=>({...projectPoint(matrix,[(corner&1?mesh.max[0]:mesh.min[0])+pose.x,(corner&2?mesh.max[1]:mesh.min[1])+pose.y,(corner&4?mesh.max[2]:mesh.min[2])+pose.z]),side:corner&1?'right':'left',surface:corner&4?'front':'rear',height:corner&2?'top':'bottom'}));
         return {type,name:item.name,count:classCounts[type],label:info[0],description:info[1],anchor:anchors[type==='server'?2:7],anchors,bounds:equipmentBounds[index],opacity:pose.opacity};
       });
-      return {progress,rackProgress:sample.rackProgress,phase:sample.phase,calloutVisibility:sample.calloutVisibility,callouts,equipmentBounds,rackBounds:projectBox(matrix,shared.bounds.min,shared.bounds.max),width:rect.width,height:rect.height};
+      return {progress,rackProgress:sample.rackProgress,calloutProgress:sample.calloutProgress,phase:sample.phase,calloutVisibility:sample.calloutVisibility,callouts,equipmentBounds,rackBounds:projectBox(matrix,shared.bounds.min,shared.bounds.max),width:rect.width,height:rect.height};
     }
     function draw(now){
       frame=0;if(disposed||contextLost||!program||!parts||!visible)return;

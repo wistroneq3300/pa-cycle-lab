@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L10：介紹文字與 Busbar 接頭修復</title>
+<style>body{font:16px/1.65 system-ui,sans-serif;max-width:1100px;margin:40px auto;padding:0 24px;color:#20272c}h1{font-size:28px}h2{font-size:21px;margin-top:36px}table{border-collapse:collapse;width:100%}th,td{text-align:left;vertical-align:top;border-bottom:1px solid #ccd3d7;padding:12px}video,img{width:100%;height:auto}code{overflow-wrap:anywhere}.pair{display:grid;grid-template-columns:1fr 1fr;gap:20px}a{color:#075776}@media(max-width:700px){.pair{grid-template-columns:1fr}}small{color:#4d5961}</style>
+<h1>L10：介紹文字與 Busbar 接頭修復</h1>
+<p>2026-10-15 · 原分支 <code>codex/cinematic-l10-assembly-intro</code><br>Before：<code>1005e3033c206be9cae0d84089e9ba786af4bff0</code>（保留前次水流／SSD 修復）</p>
+<table><thead><tr><th>項目</th><th>Root cause</th><th>修復與結果</th></tr></thead><tbody>
+<tr><td>Rack 組裝前介紹</td><td><code>32cd4f91</code> 加入 L10 前段時，global progress &lt; .56 強制隱藏；到 .56 時 rackProgress 已超過文字的 .327 截止點，兩個條件讓文字永遠不顯示。</td><td>恢復 <code>63f01d1b</code> 的四組原文、數量與實際模型投影。只將文字淡入淡出映射至既有 19.7–22 秒轉場，避免巢狀 easing 壓成半秒。實播顯示約 2.28 秒，四主標同時 opacity &gt; .8 約 1.47 秒。</td></tr>
+<tr><td>系統後端 Busbar 接頭閃爍</td><td><code>l10-chassis</code> 後壁內面與 <code>l10-io</code> 黑色插座正面同在 z=-2.949；四組正面積三角形重疊，共 0.043143 平方場景單位，造成 Z-fighting。</td><td>僅將後壁內面分成四個邊條，插座原面填滿中央範圍。重疊 4→0，無缺口；外側後壁、接頭、尺寸、法線、透明度與 PBR 不變。</td></tr>
+</tbody></table>
+<h2>恢復的原版內容</h2>
+<ul><li>COMPUTE TRAY · AI COMPUTE NODE · ×18</li><li>NVLINK SWITCH TRAY · HIGH-SPEED GPU FABRIC · ×9</li><li>NETWORK SWITCH · RACK NETWORK FABRIC · ×2</li><li>POWER SHELF · RACK POWER DELIVERY · ×8</li></ul>
+<p>窄桌面沿用舊版精簡數量副標；未改文案、字型或配色。沒有改 Rack、GLB、冷卻管路、Shader、Camera、Lighting、Timeline 或其他設備動作，總長仍為 39.7 秒。</p>
+<h2>正式入口完整播放</h2>
+<video controls preload="metadata" src="screenshots/l10-cinematic/rack-followup/callouts/after/captions-playback.webm"></video>
+<p><small>Chromium／RTX 4070／ANGLE D3D11，正式 Dashboard 入口、既有合成後端 fixture；無實機連線。錄影含載入前導，片中的時間不等於播放器時鐘；介紹位於動畫的 19.7–22 秒。全片 2,370 個 WebGL 投影事件，沒有 JavaScript／WebGL 錯誤。</small></p>
+<div class="pair"><figure><figcaption>Before · 同一播放器時刻 20.076 秒</figcaption><img src="screenshots/l10-cinematic/rack-followup/callouts/before/1920-dark-identify.png" alt="修復前沒有元件介紹"></figure><figure><figcaption>After · 四組介紹</figcaption><img src="screenshots/l10-cinematic/rack-followup/callouts/after/1920-dark-identify.png" alt="修復後四組介紹出現"></figure></div>
+<p><small>兩次獨立瀏覽器執行的阻尼停止精度造成相機數值最大差 0.000107 場景單位，非逐位元相同矩陣；相機程式與時間點不變。Busbar 對照的初始相機及追蹤座標則完全一致。</small></p>
+<h2>Busbar：連續動態 Before／After</h2>
+<div class="pair"><figure><figcaption>Before · 接頭表面反覆出現鋼板斑點</figcaption><video controls preload="metadata" src="screenshots/l10-cinematic/rack-followup/busbar/before/busbar-orbit.webm"></video><img src="screenshots/l10-cinematic/rack-followup/busbar/before/busbar-sequence.png" alt="修復前連續幀接頭閃爍"></figure><figure><figcaption>After · 穩定的黑色插座表面</figcaption><video controls preload="metadata" src="screenshots/l10-cinematic/rack-followup/busbar/after/busbar-orbit.webm"></video><img src="screenshots/l10-cinematic/rack-followup/busbar/after/busbar-sequence.png" alt="修復後連續幀接頭穩定"></figure></div>
+<p>使用既有 orbit 控制，各錄製 8 秒診斷鏡頭（不是正式影片相機），未修改渲染。115 個取樣幀 × 15 個表面追蹤點：亮度差 P95 <strong>124.80 → 5.07</strong>；亮度跳變 &gt;35 的次數 <strong>702 → 0</strong>。保留正常 PBR 明暗變化，解析度全程 1.0，無關閉光照或降低畫質。</p>
+<h2>修改與驗收</h2>
+<ul><li><code>app/static/js/core-scene.js</code>：caption 專屬時鐘與投影欄位。</li><li><code>app/static/js/hero-callouts.js</code>：讀取 caption 時鐘；保留原文與投影佈局。</li><li><code>app/static/js/l10-hardware.js</code>：後壁單一內面開口，消除與插座的共面面片。</li><li>正式入口與三個 review HTML：只更新對應 JS cache key。</li><li>新增 caption timing／Chromium、busbar geometry／Chromium 與 evidence regression；SSD 既有回歸只精確豁免已由 busbar 測試覆蓋的單一後壁面。</li></ul>
+<p>4,004 組動畫狀態比對：除兩個 caption 欄位外不變。所有其他 L10 Mesh 與 I/O（含 SSD、插座）位元組相同；其餘機箱面也相同。1366×768、1920×1080、3440×1440 的明暗主題共六組通過。Runtime manifest 225 檔一致；設計檢查無新增問題。</p>
+<p>重現／驗證：<code>node app/qa/l10-callout-timing.cjs</code>、<code>node app/qa/l10-busbar.cjs</code>、<code>node app/qa/l10-p1-ssd.cjs</code>、<code>node app/qa/l10-followup-evidence.cjs</code>。原生錄影腳本為 <code>l10-rack-callouts.cjs video</code> 與 <code>l10-busbar-playback.cjs before|after</code>，需要 Playwright、Chrome 與錄影用 FFmpeg。</p>
+<p>原始紀錄與載入資源 SHA256：<a href="screenshots/l10-cinematic/rack-followup/callouts/after/report.json">正式播放</a> · <a href="screenshots/l10-cinematic/rack-followup/busbar/comparison.json">Busbar 對照</a> · <a href="screenshots/l10-cinematic/rack-followup/busbar/after/busbar-playback.json">Busbar WebGL 追蹤</a>。Busbar 錄影早於 caption 最終時序調整，資源紀錄保留當時實際 hash；其中硬體來源與最終版一致。</p>
+</html>

@@ -76,13 +76,28 @@ function withoutBodySide(data,slots){
   return new Float32Array(result);
 }
 const bytes=data=>Buffer.from(data.buffer,data.byteOffset,data.byteLength);
+function withoutRearSocketWallFace(data){
+  // Independently covered by l10-busbar.cjs: only the rear wall's inner +Z
+  // surface now has the exact flush-socket aperture. Every other triangle
+  // must still match the accepted SSD reference byte-for-byte.
+  const result=[];
+  for(let i=0;i<data.length;i+=36){
+    const rearFace=[0,12,24].every(o=>data[i+o+2]===Math.fround(-2.949)&&
+      data[i+o+3]===0&&data[i+o+4]===0&&data[i+o+5]===1&&
+      data[i+o+6]===Math.fround(.40)&&data[i+o+7]===Math.fround(.44)&&
+      data[i+o+8]===Math.fround(.46)&&data[i+o+10]===Math.fround(.88));
+    if(!rearFace)result.push(...data.subarray(i,i+36));
+  }
+  return new Float32Array(result);
+}
 const results=[];
 for(const [mode,options] of [['procedural',{}],['coolingV2-runtime',{omitBareBoards:true,replaceServiceGeometry:true,replaceNetworking:true}]]){
   const before=build(baseline,options),after=build(source,options),slots=after.storageLayout.slots;
   assert.equal(JSON.stringify(before.storageLayout),JSON.stringify(after.storageLayout),'Accepted 15 mm envelope, layout and clearances remain unchanged');
   for(const [name,mesh] of Object.entries(before.meshes)){
     if(name==='l10-io')continue;
-    assert.deepEqual(bytes(mesh.data),bytes(after.meshes[name].data),`${mode}: ${name} remains byte-identical`);
+    const unchanged=name==='l10-chassis'?withoutRearSocketWallFace:data=>data;
+    assert.deepEqual(bytes(unchanged(mesh.data)),bytes(unchanged(after.meshes[name].data)),`${mode}: ${name} remains byte-identical outside the separately tested busbar wall face`);
   }
   assert.deepEqual(bytes(withoutBodySide(before.meshes['l10-io'].data,slots)),bytes(withoutBodySide(after.meshes['l10-io'].data,slots)),'Every I/O triangle outside the eight corrected enclosure faces remains byte-identical');
   const bodies=model=>model.bevels.filter(p=>sameColor(p,[.040,.045,.049])&&near(p.args[7],.32));
@@ -106,4 +121,4 @@ for(const [mode,options] of [['procedural',{}],['coolingV2-runtime',{omitBareBoa
   }
   results.push({mode,drives});
 }
-console.log(JSON.stringify({pass:true,reference,checks:['Eight SSDs retain exact envelope and material data','Baseline reproduces the coplanar overlap','No body/insert or border self-overlap after repair','No gaps in the corrected side','Every other mesh and I/O triangle remains byte-identical','Procedural and actual coolingV2 replacement builds'],results},null,2));
+console.log(JSON.stringify({pass:true,reference,checks:['Eight SSDs retain exact envelope and material data','Baseline reproduces the coplanar overlap','No body/insert or border self-overlap after repair','No gaps in the corrected side','All other geometry remains byte-identical except the separately tested busbar rear-wall face','Procedural and actual coolingV2 replacement builds'],results},null,2));
