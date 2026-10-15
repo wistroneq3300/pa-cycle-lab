@@ -1,0 +1,262 @@
+{
+  "phase": "premium-final-phase3-preflight",
+  "base": "http://127.0.0.1:19530",
+  "browser": "131.0.6778.205",
+  "captures": [
+    {
+      "width": 1366,
+      "height": 768,
+      "theme": "light",
+      "errors": [],
+      "unknownRequests": []
+    },
+    {
+      "width": 1366,
+      "height": 768,
+      "theme": "dark",
+      "errors": [],
+      "unknownRequests": []
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "theme": "light",
+      "errors": [],
+      "unknownRequests": []
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "theme": "dark",
+      "errors": [],
+      "unknownRequests": []
+    },
+    {
+      "width": 3440,
+      "height": 1440,
+      "theme": "light",
+      "errors": [],
+      "unknownRequests": []
+    },
+    {
+      "width": 3440,
+      "height": 1440,
+      "theme": "dark",
+      "errors": [],
+      "unknownRequests": []
+    }
+  ],
+  "checks": [
+    {
+      "name": "no-selection-action-1366-light",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "canonical-operation-target-1366-light",
+      "passed": true,
+      "details": "The active node identity must win over the machine-level compatibility IP."
+    },
+    {
+      "name": "inspected-not-selected-1366-light",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "criteria-visible-1366-light",
+      "passed": true,
+      "details": "The complete criteria block must be inside the initial detail viewport."
+    },
+    {
+      "name": "search-ime-1366-light",
+      "passed": true,
+      "details": "{\"compositionWiring\":true,\"heldDuringComposition\":true,\"sameFieldDuringComposition\":true,\"composingFlagDuringComposition\":true,\"rowCountDuringComposition\":2,\"restoredAfterSearch\":true}"
+    },
+    {
+      "name": "single-selection-action-1366-light",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "selection-replacement-1366-light",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "agent-error-reason-1366-light",
+      "passed": true,
+      "details": "A new run must show its failure reason without retaining the previous run's attachments."
+    },
+    {
+      "name": "no-selection-action-1366-dark",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "canonical-operation-target-1366-dark",
+      "passed": true,
+      "details": "The active node identity must win over the machine-level compatibility IP."
+    },
+    {
+      "name": "inspected-not-selected-1366-dark",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "criteria-visible-1366-dark",
+      "passed": true,
+      "details": "The complete criteria block must be inside the initial detail viewport."
+    },
+    {
+      "name": "search-ime-1366-dark",
+      "passed": true,
+      "details": "{\"compositionWiring\":true,\"heldDuringComposition\":true,\"sameFieldDuringComposition\":true,\"composingFlagDuringComposition\":true,\"rowCountDuringComposition\":2,\"restoredAfterSearch\":true}"
+    },
+    {
+      "name": "single-selection-action-1366-dark",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "selection-replacement-1366-dark",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "agent-error-reason-1366-dark",
+      "passed": true,
+      "details": "A new run must show its failure reason without retaining the previous run's attachments."
+    },
+    {
+      "name": "no-selection-action-1920-light",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "canonical-operation-target-1920-light",
+      "passed": true,
+      "details": "The active node identity must win over the machine-level compatibility IP."
+    },
+    {
+      "name": "inspected-not-selected-1920-light",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "search-ime-1920-light",
+      "passed": true,
+      "details": "{\"compositionWiring\":true,\"heldDuringComposition\":true,\"sameFieldDuringComposition\":true,\"composingFlagDuringComposition\":true,\"rowCountDuringComposition\":2,\"restoredAfterSearch\":true}"
+    },
+    {
+      "name": "single-selection-action-1920-light",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "selection-replacement-1920-light",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "agent-error-reason-1920-light",
+      "passed": true,
+      "details": "A new run must show its failure reason without retaining the previous run's attachments."
+    },
+    {
+      "name": "no-selection-action-1920-dark",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "canonical-operation-target-1920-dark",
+      "passed": true,
+      "details": "The active node identity must win over the machine-level compatibility IP."
+    },
+    {
+      "name": "inspected-not-selected-1920-dark",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "search-ime-1920-dark",
+      "passed": true,
+      "details": "{\"compositionWiring\":true,\"heldDuringComposition\":true,\"sameFieldDuringComposition\":true,\"composingFlagDuringComposition\":true,\"rowCountDuringComposition\":2,\"restoredAfterSearch\":true}"
+    },
+    {
+      "name": "single-selection-action-1920-dark",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "selection-replacement-1920-dark",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "agent-error-reason-1920-dark",
+      "passed": true,
+      "details": "A new run must show its failure reason without retaining the previous run's attachments."
+    },
+    {
+      "name": "no-selection-action-3440-light",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "canonical-operation-target-3440-light",
+      "passed": true,
+      "details": "The active node identity must win over the machine-level compatibility IP."
+    },
+    {
+      "name": "inspected-not-selected-3440-light",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "search-ime-3440-light",
+      "passed": true,
+      "details": "{\"compositionWiring\":true,\"heldDuringComposition\":true,\"sameFieldDuringComposition\":true,\"composingFlagDuringComposition\":true,\"rowCountDuringComposition\":2,\"restoredAfterSearch\":true}"
+    },
+    {
+      "name": "single-selection-action-3440-light",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "selection-replacement-3440-light",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "no-selection-action-3440-dark",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "canonical-operation-target-3440-dark",
+      "passed": true,
+      "details": "The active node identity must win over the machine-level compatibility IP."
+    },
+    {
+      "name": "inspected-not-selected-3440-dark",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "search-ime-3440-dark",
+      "passed": true,
+      "details": "{\"compositionWiring\":true,\"heldDuringComposition\":true,\"sameFieldDuringComposition\":true,\"composingFlagDuringComposition\":true,\"rowCountDuringComposition\":2,\"restoredAfterSearch\":true}"
+    },
+    {
+      "name": "single-selection-action-3440-dark",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "selection-replacement-3440-dark",
+      "passed": true,
+      "details": ""
+    }
+  ],
+  "unknownRequests": []
+}
