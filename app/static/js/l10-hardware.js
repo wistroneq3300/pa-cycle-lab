@@ -55,7 +55,7 @@
     function vertex(p,n,c,m=.82,e=0,a=1){data.push(...p,...n,...c,a,m,e);}
     function tri(a,b,c,n,color,m=.82){vertex(a,n,color,m);vertex(b,n,color,m);vertex(c,n,color,m);}
     function quad(a,b,c,d,n,color,m=.82){tri(a,b,c,n,color,m);tri(a,c,d,n,color,m);}
-    function box(x,y,z,w,h,d,color,m=.82) {
+    function box(x,y,z,w,h,d,color,m=.82,positiveZInset=null) {
       const X=w/2,Y=h/2,Z=d/2,p=(a,b,c)=>[x+a,y+b,z+c];
       const faces=[
         [[-X,-Y,Z],[X,-Y,Z],[X,Y,Z],[-X,Y,Z],[0,0,1]],
@@ -65,7 +65,16 @@
         [[-X,Y,Z],[X,Y,Z],[X,Y,-Z],[-X,Y,-Z],[0,1,0]],
         [[-X,-Y,-Z],[X,-Y,-Z],[X,-Y,Z],[-X,-Y,Z],[0,-1,0]]
       ];
-      faces.forEach(f=>quad(p(...f[0]),p(...f[1]),p(...f[2]),p(...f[3]),f[4],color,m));
+      faces.forEach((f,i)=>{
+        if(i===0&&positiveZInset){
+          // The flush busbar socket owns this surface, not the sheet beneath
+          // it. Split only the inner face; keep the wall's other five faces.
+          const q=positiveZInset,faceZ=z+Z;
+          const strip=(x0,x1,y0,y1)=>quad([x0,y0,faceZ],[x1,y0,faceZ],[x1,y1,faceZ],[x0,y1,faceZ],f[4],color,m);
+          strip(x-X,x+X,y-Y,q.minY);strip(x-X,x+X,q.maxY,y+Y);
+          strip(x-X,q.minX,q.minY,q.maxY);strip(q.maxX,x+X,q.minY,q.maxY);
+        }else quad(p(...f[0]),p(...f[1]),p(...f[2]),p(...f[3]),f[4],color,m);
+      });
     }
     // Machined edge breaks catch studio reflections without exaggerated radii.
     function bevel(x,y,z,w,h,d,color,m=.82,r=.012,negativeXInset=null) {
@@ -161,7 +170,10 @@
       ch.screw(side*1.879,.119,2.89,.02);
       }
     }
-    ch.box(0,-.008,-2.966,3.93,.22,.034,C.steel,.88);
+    // At z=-2.949 the black socket's flat front used to coincide exactly
+    // with the steel wall, causing depth substitutions during camera motion.
+    // Its existing flat face fills this aperture without changing any bounds.
+    ch.box(0,-.008,-2.966,3.93,.22,.034,C.steel,.88,{minX:-.235/2+.008,maxX:.235/2-.008,minY:-.016-.213/2+.008,maxY:-.016+.213/2-.008});
     // Front fascia is assembled around apertures rather than a blank solid slab.
     if(!sharedFront){
     ch.bevel(0,.118,2.982,3.91,.025,.05,C.darkSteel,.83,.004);
