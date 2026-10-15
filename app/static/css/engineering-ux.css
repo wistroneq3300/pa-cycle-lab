@@ -69,7 +69,7 @@
 .eng-case-detail{padding:20px 22px;scrollbar-gutter:stable;min-width:0;overflow-wrap:anywhere}
 .eng-case-row{position:relative;min-height:96px;border-radius:9px!important;transition:border-color .16s,background-color .16s,box-shadow .16s}
 .eng-case-row>label{display:grid;place-items:start center;width:28px;min-height:44px;padding-top:7px;cursor:pointer}
-.eng-case-row input[type=checkbox]{width:18px;height:18px;margin:0;transform:none}
+.eng-case-row input[type=radio]{width:18px;height:18px;margin:0;transform:none}
 .eng-case-row.is-selected{border-color:color-mix(in srgb,var(--ew-green) 68%,var(--ew-line))!important;background:color-mix(in srgb,var(--ew-green) 9%,var(--ew-surface))!important}
 .eng-case-row.is-inspected{box-shadow:inset 0 0 0 1px var(--ew-blue)}
 .eng-case-row.is-inspected .eng-case-open{border-color:transparent;background:var(--ew-raised)}

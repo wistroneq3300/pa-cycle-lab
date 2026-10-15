@@ -3256,8 +3256,8 @@ function assignTaskActionMeta(count = _assignTask.sel.size) {
   const n = Number(count || 0);
   const agentAvailable = n === 1 && window.PA_Agent && typeof window.PA_Agent.open === "function";
   if (!n) return { kind: "empty", label: "選擇 Test Case", note: "請先選擇一筆 Test Case。" };
+  if (n !== 1) return { kind: "invalid", label: "重新選擇 Test Case", note: "一次只能指派一筆 Test Case。" };
   if (agentAvailable) return { kind: "agent", label: "交給 PA Agent", note: "PA Agent 會先說明計畫，並等待工程師輸入 OK 或 GO。" };
-  if (n > 1) return { kind: "batch", label: `產生批次指令 (${n})`, note: "目前未啟動 Agent；將產生所有已選測項的批次指令。" };
   return { kind: "instruction", label: "產生指令", note: "PA Agent 入口目前不可用；只會產生可複製指令。" };
 }
 
@@ -3334,7 +3334,7 @@ function assignTaskMetaHtml() {
       </div>
     </div>`).join("");
   return head + `<div class="assign-sheet-grid">${cards}</div>
-    <div style="margin-top:12px;font-size:12px;color:var(--text-faint)">\u9ede\u9078\u5206\u985e\u5f8c\uff0c\u53ef\u8907\u9078\u6e2c\u9805\u5f85\u767c\u9001</div>`;
+    <div style="margin-top:12px;font-size:12px;color:var(--text-faint)">選擇新的 Test Case 時會自動取消前一筆。</div>`;
 }
 
 const assignSheetCache = {};
@@ -3391,9 +3391,8 @@ function assignTaskListHtml() {
       <input id="assign-q" class="assign-search" type="text" placeholder="\u641c\u5c0b code / items / test set"
         value="${esc(_assignTask.q)}" oninput="assignTaskSearch(this)"
         oncompositionstart="this.dataset.composing='1'" oncompositionend="delete this.dataset.composing;assignTaskSearch(this)" />
-      <button class="btn small" onclick="assignTaskSelAll()">\u2713 \u5168\u9078\u672c\u9801</button>
       <button class="btn small" onclick="assignTaskSelClear()">\u7a7a \u6e05\u7a7a</button>
-      <span class="hint">\u5df2\u9078 <b id="assign-selcount">${selCount}</b> /\u5171 ${_assignTask.items.length}</span>
+      <span class="hint">已選 <b id="assign-selcount">${selCount}</b> / 1 · 共 ${_assignTask.items.length} 筆</span>
     </div>
     <div class="assign-pagination">
       <button class="btn small" ${pg<=0?"disabled":""} onclick="assignTaskPage(-1)">\u2039 \u4e0a\u4e00\u9801</button>
@@ -3425,7 +3424,7 @@ function assignTaskRow(r, dup) {
   const pkg = r.ai_packages_needed ? `<span class="hint">\ud83d\udce6 ${esc(r.ai_packages_needed)}</span>` : "";
   return `
     <label class="assign-row">
-      <input type="checkbox" ${checked} onchange="assignTaskToggle('${esc(assignTaskKey(r))}', this.checked)" />
+      <input type="radio" name="assign-test-case" ${checked} onchange="assignTaskToggle('${esc(assignTaskKey(r))}', this.checked)" />
       <div class="assign-row-body">
         <div class="assign-row-title">${badge} <span class="mono">${esc(r.code)}</span>
           <span class="assign-items">${esc(r.items)}${dup && dup.has(r.code) ? ` [${esc(r.test_set||"")}]` : ""}</span></div>
@@ -3473,19 +3472,10 @@ function assignTaskPage(dir) {
   ]);
 }
 function assignTaskToggle(code, on) {
-  if (on) _assignTask.sel.add(code); else _assignTask.sel.delete(code);
+  _assignTask.sel.clear();
+  if (on) _assignTask.sel.add(code);
   const c = $("assign-selcount");
   if (c) c.textContent = _assignTask.sel.size;
-}
-function assignTaskSelAll() {
-  const q = _assignTask.q.trim().toLowerCase();
-  const rows = _assignTask.items;
-  let filt = q ? rows.filter(r => String(r.code||"").toLowerCase().includes(q) ||
-      String(r.items||"").toLowerCase().includes(q) || String(r.test_set||"").toLowerCase().includes(q)) : rows;
-  const pg = _assignTask.page;
-  const slice = filt.slice(pg * _assignTask.perPage, (pg + 1) * _assignTask.perPage);
-  slice.forEach(r => _assignTask.sel.add(assignTaskKey(r)));
-  assignTaskReRender();
 }
 function assignTaskSelClear() {
   _assignTask.sel.clear();
@@ -3505,7 +3495,7 @@ function assignTaskReRender() {
 
 async function assignTaskCopy() {
   const sel = _assignTask.sel;
-  if (!sel.size) { notifyUser("\u8acb\u5148\u52fe\u9078\u81f3\u5c11\u4e00\u9805\u6e2c\u9805\uff01"); return; }
+  if (sel.size !== 1) { notifyUser("一次只能指派一筆 Test Case，請重新選擇。"); return; }
   const mm = _assignTask.sheet || {};
   const m = assignTaskMach();
   const operation = typeof operationTarget === "function" ? (operationTarget(m?.name || _assignTask.name) || {}) : {};
@@ -3516,11 +3506,10 @@ async function assignTaskCopy() {
   const items = _assignTask.items;
   const dupSet = dupCodeSet();
   const chosen = items.filter(r => sel.has(assignTaskKey(r)));
-  if (!chosen.length) { notifyUser("\u6e2c\u9805\u6e05\u55ae\u5df2\u5207\u63db\uff0c\u8acb\u91cd\u65b0\u52fe\u9078"); return; }
+  if (chosen.length !== 1) { notifyUser("Test Case 清單已切換，請重新選擇一筆 Test Case。"); return; }
 
   // \u6e05\u7406\u539f\u59cb\u8cc4\u6599\u91cc\u591a\u990a\u7684\u7a7a\u884c\uff082 \u500b\u4ee5\u4e0a\u9023\u7e8c blank line \u5168\u7e2e\u6210 1 \u500b\uff09\uff0c\u7559\u4e0b\u6b63\u5e38\u6bb5\u843d\u9593\u8ddd
-  // P3-e：抽出共用指令產生器，讓「單一測項」與「多測項」兩條路徑都產生
-  //   同構的 plain text（複製用）＋ rich HTML（結果窗/對話左欄用）。
+  // 共用產生器提供 plain text（複製用）與 rich HTML（結果窗／對話左欄用）。
   const buildAssignment = () => {
   const collapseBlank = (s) => String(s || "").replace(/\n{3,}/g, "\n\n");
   // Hard-wrap long English lines at word boundaries so dense command/note text
@@ -3640,10 +3629,7 @@ async function assignTaskCopy() {
   return { text, summary, rich };
   };
 
-  // P3-e：選取「單一」測項時，交接給 PA Agent 對話視窗（P3-c 後端）。
-  // 左欄沿用與多測項同構的指令區塊（完整原始命令 + rich HTML），而非簡短提示。
-  // P0-1：PA Agent 一次只處理一條 Test Case。多選時不進 PA Agent（避免「UI 顯示
-  //   多條、Agent 實際只收到第一條」的落差），只走原本的批次指令複製路徑。
+  // AG-01：單一選取可交接給 PA Agent；前後端都拒絕多筆指派。
   if (chosen.length === 1) {
     const row = chosen[0];
     const variant = row.case_variant_id || "";
@@ -3733,7 +3719,7 @@ function arHlAssignText(text) {
 }
 // [AR-HL v1 END]
 
-// 指派任務結果浮動視窗：單選可交給 Agent；多選只提供完整批次指令。
+// 指派任務結果浮動視窗：單一 Test Case 可交給 Agent。
 // ============================================================
 // Rich, sectioned HTML for the assign-result window. Mirrors the Test Case detail
 // panel (same eng-* classes) so the generated command reads as nicely as the
@@ -3921,10 +3907,8 @@ const AssignResultWin = (() => {
       if (!window.PA_Agent) return;
       const inst = win.querySelector("#ar-pa-agent");
       const cases = (win._cases || []);
-      // P0-1：PA Agent 一次只處理一條 Test Case。多選視窗不可用 PA Agent，
-      //   否則會出現「UI 顯示多條、Agent 實際只收到第一條」的落差。
-      if (cases.length > 1) {
-        window.uxNotify?.("PA Agent 一次只處理一條 Test Case，請改為只勾選一條後再進入 PA Agent", true);
+      if (cases.length !== 1) {
+        window.uxNotify?.("PA Agent 一次只處理一條 Test Case，請重新選擇。", true);
         return;
       }
       const title = win.querySelector("#ar-title")?.textContent || "";
@@ -4005,6 +3989,8 @@ const AssignResultWin = (() => {
     win.querySelector("#ar-title").textContent = title;
     const agentButton = win.querySelector("#ar-pa-agent");
     const multi = win._cases.length > 1;
+    const agentAvailable = win._cases.length === 1
+      && window.PA_Agent && typeof window.PA_Agent.open === "function";
     const hint = win.querySelector("#ar-hint");
     hint.dataset.state = copied ? "success" : "error";
     hint.textContent = copied
@@ -4015,7 +4001,7 @@ const AssignResultWin = (() => {
         ? "批次指令已產生，但剪貼簿寫入失敗；目前未啟動 Agent，也尚未執行測試。"
         : "指令已產生，但剪貼簿寫入失敗；內容仍保留在視窗內。");
     if (agentButton) {
-      agentButton.hidden = multi;
+      agentButton.hidden = !agentAvailable;
       agentButton.disabled = false;
     }
     const pre = win.querySelector("#ar-pre");

@@ -196,6 +196,7 @@
     "integration/domain.py",
     "integration/enrollment.py",
     "integration/events.py",
+    "integration/formal_test_locks.py",
     "integration/full_zip.py",
     "integration/identity_sync.py",
     "integration/inspection.py",

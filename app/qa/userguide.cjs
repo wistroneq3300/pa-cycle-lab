@@ -54,7 +54,7 @@ const root=path.resolve(__dirname,'..'),out=path.join(__dirname,'artifacts/userg
     return required.every(id=>ids.includes(id))&&new Set(ids).size===ids.length&&[...document.querySelectorAll('.ug-doc a[href^="#ug-"]')].every(a=>document.querySelector(a.getAttribute('href')));
   }));
    const guideText=await page.locator('.ug-body').innerText();
-   for(const term of ['交給 PA Agent','產生批次指令 (N)','OK','GO','等待工程師判定','Node Exporter','DCGM Exporter','停止：不再派送新動作','Recovery','下載完整證據','下載完整紀錄'])assert.ok(guideText.includes(term),term+' guide contract missing');
+   for(const term of ['交給 PA Agent','一次只會送出一筆 Test Case','OK','GO','執行完成','Node Exporter','DCGM Exporter','停止：不再派送新動作','Recovery','下載完整證據','下載完整紀錄'])assert.ok(guideText.includes(term),term+' guide contract missing');
    for(const stale of ['不是模擬','會在真實設備執行'])assert.equal(guideText.includes(stale),false,stale+' stale claim remains');
    for(const term of ['OS Slot','PA Agent','PRE','DCGM Exporter','Evidence']){
    await input.fill(term);

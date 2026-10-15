@@ -532,13 +532,13 @@ class AgentGateway:
             lines += [
                 "",
                 "【重要：本測項為「人工檢查」(MANUAL ONLY)】",
-                "此測項由工程師以目視／物理方式檢查，沒有可由指令自動驗證的項目。",
-                "請勿 SSH 到 DUT 執行任何指令，也不要嘗試模擬或聲稱已完成物理檢查。",
-                "你只需要：",
-                "  1) 列出此測項需要工程師提供的證據（照片、檢查清單、blackbox 狀態等）；",
-                "  2) 說明判定所需的資訊；",
-                "  3) 等待工程師提供證據後，再依其內容整理紀錄。",
-                "PASS／FAIL／BLOCKED 一律由工程師裁定。",
+                "實體操作與目視／物理確認必須由工程師完成；不要模擬或聲稱已完成物理檢查。",
+                "你可擔任人工測試助手：",
+                "  1) 以繁體中文逐步說明 SOP 與工程師需要完成的實體操作；",
+                "  2) 在核准範圍內以安全唯讀方式收集 PRE／POST Evidence；",
+                "  3) 分析工程師提供的 Log、照片說明與檢查清單；",
+                "  4) 整理判定依據、限制與 Execution Summary。",
+                "不得代替工程師做實體操作，也不得自行修改 DUT。正式結果由工程師記錄。",
             ]
         elif cls == "BLOCKED":
             lines += [
@@ -577,10 +577,21 @@ class AgentGateway:
             "",
             "【執行原則】",
             "- 動手前先確認測試步驟；有疑慮時先停下詢問，不要自行假設。",
-            "- 指令輸出只需摘要重點，勿將整包原始輸出貼回；避免累積過長內容。",
+            "- 對話只摘要重點；完整原始 Log 與 Evidence 必須保存在 DUT 的指定目錄。",
             "- 不得捏造指令輸出；SSH 失敗就據實回報。",
             "- 不要自行增加原測項未要求的壓力測試或破壞性操作。",
             "- 不要自行改變測試範圍（scope）。",
+            "- 遇到異常時可自主分析並收集安全唯讀 Evidence，但不要自動重試失敗指令、",
+            "  不要自行修改 DUT；超出已核准範圍的操作必須先取得工程師確認。",
+            "- 缺少工具時，不得自行安裝。先提出工具名稱、來源、版本、完整 Command、",
+            "  對 DUT 的影響與風險；只有工程師明確批准後才可安裝。",
+            "- 工程師可在執行中繼續聊天、查進度或要求受控唯讀檢查；不得因此暗中改變",
+            "  已核准的測試計畫。若工程師要求停止並更換方法，先停止原測試並確認遠端狀態，",
+            "  再提出新計畫並等待批准。",
+            "- 已核准的 Reboot 只能派送一次。派送後等待 DUT 恢復連線，核對 Node Identity、",
+            "  Binding 與必要 Boot 資訊後才繼續；狀態不明時暫停，不得重送 Reboot。",
+            "- 此 Run 只操作指派的 Node。Node 或共用 Power Domain／BMC 忙碌時不得排隊；",
+            "  資源釋放後仍須等待工程師重新確認。Terminal／Broadcast 不屬於此限制。",
             "",
             "【資料取得原則（P0-3：不要因為缺文件就拒絕測試）】",
             "- 「沒有文件」不等於「不能測」。資料足夠就做；能安全收集的就先收集。",
@@ -599,8 +610,10 @@ class AgentGateway:
             "- 依本測項的 logs_to_collect / 證據需求決定要收集哪些檔案，不要所有測項都套用",
             "  相同的固定檔名（例如不要硬用 lspci_vvv_pre.txt 這種 PCIe 專屬命名）。",
             "- 同類證據盡量合併、避免產生大量碎檔；原始輸出若很長，摘要重點即可。",
-            "- 產出一個 test_record 摘要檔，說明完成了哪些步驟、哪些沒完成、哪些被跳過、",
-            "  哪些發生錯誤，以及限制（limitations）。",
+            "- 必須保留 commands.txt、原始 Log、Evidence，以及簡潔的 Execution Summary；",
+            "  說明完成、未完成、跳過、錯誤與限制（limitations）。主要測試證據保存在 DUT。",
+            "- 可依 Expected Result、SPEC 與 Log 提出 PASS／FAIL 建議，但必須逐項附上",
+            "  判定依據與 Evidence；這只是建議，正式結果仍由工程師自行記錄。",
             "",
             "【紀錄檔案語言：一律使用英文】",
             "- 你寫入檔案的所有內容（test_record、log 摘要、註解、欄位名稱、說明文字）",
@@ -851,6 +864,8 @@ class AgentGateway:
     # integration detail that must be verified against the live 18010 server.
     _MESSAGE_ENDPOINT = os.environ.get(
         "PA_AGENT_MESSAGE_ENDPOINT", "/api/conversations/{cid}/events")
+    _PAUSE_ENDPOINT = os.environ.get(
+        "PA_AGENT_PAUSE_ENDPOINT", "/api/conversations/{cid}/pause")
 
     def send_user_message(self, run_id, text, attachments=None):
         """Append an engineer chat turn to the run's conversation and let it run.
@@ -887,6 +902,24 @@ class AgentGateway:
             "run": True,
         }
         response = self._http().post(self._MESSAGE_ENDPOINT.format(cid=cid), json=payload)
+        response.raise_for_status()
+        return cid
+
+    def pause_run(self, run_id):
+        """Request one remote pause for an engineer STOP action.
+
+        The caller must independently ingest and confirm the remote paused state
+        before marking the formal test stopped or releasing its reservation.
+        This method never retries, so an ambiguous response cannot dispatch a
+        second stop request behind the engineer's back.
+        """
+        run = self.store.get_run(run_id)
+        if run is None:
+            raise KeyError("unknown run_id")
+        cid = run.get("conversation_ref")
+        if not cid:
+            raise ValueError("run has no conversation; start it first")
+        response = self._http().post(self._PAUSE_ENDPOINT.format(cid=cid))
         response.raise_for_status()
         return cid
 

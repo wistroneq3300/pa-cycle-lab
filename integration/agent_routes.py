@@ -21,7 +21,7 @@ import uuid
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from . import targets as targets_module
 from .agent_gateway import AgentGateway, classify_user_intent, is_substantive_revision
@@ -29,6 +29,7 @@ from .agent_runs import (
     AgentRunStore, STATUS_DONE, STATUS_PASS, STATUS_FAIL, STATUS_BLOCKED,
     STATUS_ERROR, STATUS_WAITING_FOR_USER,
 )
+from .formal_test_locks import FormalTestBusy, FormalTestCoordinator
 
 # Terminal run statuses: once a run is in one of these, its OpenHands conversation
 # has finished producing new events and the background sync can stop. PASS/FAIL/
@@ -45,14 +46,28 @@ _SYNC_MAX_ITERS = int(os.environ.get("PA_AGENT_SYNC_MAX_ITERS", "3600"))
 _SYNC_IDLE_STOP = int(os.environ.get("PA_AGENT_SYNC_IDLE_STOP", "3"))
 
 
-def _spawn_sync(store, gateway, run_id):
+def _formal_owner(run_id):
+    return "agent:" + str(run_id)
+
+
+def _release_if_terminal(store, formal_tests, run_id):
+    if formal_tests is None:
+        return False
+    run = store.get_run(run_id)
+    if run and run.get("status") in _TERMINAL_STATUSES:
+        formal_tests.release(_formal_owner(run_id))
+        return True
+    return False
+
+
+def _spawn_sync(store, gateway, run_id, formal_tests=None):
     threading.Thread(
-        target=_sync_run_loop, args=(store, gateway, run_id),
+        target=_sync_run_loop, args=(store, gateway, run_id, formal_tests),
         name=f"pa-agent-sync-{run_id}", daemon=True,
     ).start()
 
 
-def _sync_run_loop(store, gateway, run_id):
+def _sync_run_loop(store, gateway, run_id, formal_tests=None):
     """Background sync: fold the run's OpenHands events into run state.
 
     Execution-aware (P0-6): the loop keeps ingesting while the run is RUNNING and
@@ -78,6 +93,7 @@ def _sync_run_loop(store, gateway, run_id):
             return
         status = run.get("status")
         if status in _TERMINAL_STATUSES or status == STATUS_WAITING_FOR_USER:
+            _release_if_terminal(store, formal_tests, run_id)
             return
         # While the run is still RUNNING the agent may be mid-execution (a long
         # FIO run talks once and then works for minutes), so keep ingesting until
@@ -132,7 +148,8 @@ def _ask_with_images_loop(store, gateway, run_id, text, images, *, max_iters=Non
     _sync_messages_loop(store, gateway, run_id, min_seq=min_seq)
 
 
-def _sync_messages_loop(store, gateway, run_id, *, min_seq=0, max_iters=None):
+def _sync_messages_loop(store, gateway, run_id, *, min_seq=0, max_iters=None,
+                        formal_tests=None):
     """Ingest after an engineer chat turn until the agent's turn is delivered.
 
     Unlike the old version, this does NOT stop at the first agent message: a long
@@ -157,6 +174,7 @@ def _sync_messages_loop(store, gateway, run_id, *, min_seq=0, max_iters=None):
         if any(m.get("seq", 0) > min_seq and m.get("role") == "agent" for m in messages):
             seen_agent_reply = True
         if status in _TERMINAL_STATUSES or status == STATUS_WAITING_FOR_USER:
+            _release_if_terminal(store, formal_tests, run_id)
             return
         # A delivered reply while no longer RUNNING means the turn is complete
         # (e.g. a question answered without an agent loop). Do not idle forever.
@@ -191,12 +209,14 @@ def _run_retention_purge(store):
 
 
 class AgentRunCreateReq(BaseModel):
-    case_variant_id: str = Field(..., description="Test-library variant identity (not `code`)")
+    model_config = ConfigDict(extra="forbid")
+
+    case_variant_id: str = Field(..., min_length=1, max_length=256,
+                                 description="Single Test Case variant identity (not `code`)")
     node_id: str = Field("", description="Installed node identity to run against (optional)")
     expected_binding_revision: str = Field("", description="Bind the run to this revision (optional)")
     required_documents: list = Field(default_factory=list)
     user_attachments: list = Field(default_factory=list)
-
 
 class AgentRunStartReq(BaseModel):
     auto_run: bool = Field(True, description="Start the agent immediately after creating the conversation")
@@ -239,6 +259,9 @@ def _target_snapshot(pa, node_id, expected_revision):
         "bmc_ip": target.get("bmc_ip") or "",
         "bmc_user": target.get("bmc_user") or "",
         "bmc_password": target.get("bmc_password") or "",
+        "controller_id": target.get("controller_id") or "",
+        "power_domain": target.get("power_domain") or "",
+        "aux_domain": target.get("aux_domain") or "",
     }
 
 
@@ -246,6 +269,28 @@ def install(app, pa, store_getter=None):
     router = APIRouter()
     store = AgentRunStore()
     gateway = AgentGateway(store)
+    cycle_store = store_getter() if callable(store_getter) else None
+    formal_tests = (getattr(cycle_store, "formal_tests", None)
+                    or FormalTestCoordinator(store.path.with_name(
+                        store.path.stem + "-formal-test-locks.sqlite3")))
+    live_agent_owners = {
+        _formal_owner(row["run_id"]) for row in store.list_runs(limit=100000)
+        if row.get("status") not in _TERMINAL_STATUSES
+    }
+    formal_tests.prune("agent:", live_agent_owners)
+
+    def _acquire_execution(run_id):
+        run = store.get_run(run_id)
+        if run is None:
+            raise HTTPException(404, "unknown run_id")
+        target = (run.get("context") or {}).get("target") or {}
+        try:
+            formal_tests.acquire(_formal_owner(run_id), "AGENT", [target])
+        except FormalTestBusy as exc:
+            raise HTTPException(409, str(exc))
+        except ValueError as exc:
+            raise HTTPException(409, f"無法建立正式測試 reservation：{exc}")
+        return run
 
     # Whether uploaded images can actually be read by the agent is a property of
     # the wired vision profile, not a bare env flag. Deriving it from the gateway
@@ -268,6 +313,9 @@ def install(app, pa, store_getter=None):
     @router.post("/api/agent/runs")
     def create_run(req: AgentRunCreateReq, request: Request):
         library = _library()
+        variant_id = (req.case_variant_id or "").strip()
+        if not variant_id:
+            raise HTTPException(422, "case_variant_id must identify exactly one Test Case")
         target = _target_snapshot(pa, req.node_id, req.expected_binding_revision)
         actor = getattr(request.state, "actor", None)
         if isinstance(actor, dict):
@@ -276,12 +324,12 @@ def install(app, pa, store_getter=None):
             created_by = actor if isinstance(actor, str) else None
         try:
             context = store.build_context(
-                library, req.case_variant_id, target=target,
+                library, variant_id, target=target,
                 required_documents=req.required_documents,
                 user_attachments=req.user_attachments,
             )
         except KeyError:
-            raise HTTPException(404, f"unknown case_variant_id: {req.case_variant_id}")
+            raise HTTPException(404, f"unknown case_variant_id: {variant_id}")
         try:
             run_id = store.create_run(context, created_by=created_by)
         except ValueError:
@@ -329,29 +377,42 @@ def install(app, pa, store_getter=None):
         """
         if store.get_run(run_id) is None:
             raise HTTPException(404, "unknown run_id")
+        if formal_tests.owns(_formal_owner(run_id)):
+            raise HTTPException(409, "Agent 正式測試仍在執行或遠端狀態尚未確認；請先停止並確認遠端狀態。")
         _cleanup_expired_attachments(run_id)
         store.delete_run(run_id)
+        formal_tests.release(_formal_owner(run_id))
         return {"ok": True, "run_id": run_id, "deleted": True}
 
     @router.post("/api/agent/runs/{run_id}/start")
     def start_run(run_id: str, req: AgentRunStartReq):
-        if store.get_run(run_id) is None:
+        run = store.get_run(run_id)
+        if run is None:
             raise HTTPException(404, "unknown run_id")
+        mode = (req.mode or "execute").strip().lower()
+        if mode not in {"plan", "execute"}:
+            raise HTTPException(422, "mode must be plan or execute")
+        acquired = False
+        if req.auto_run and mode == "execute" and not run.get("conversation_ref"):
+            _acquire_execution(run_id)
+            acquired = True
         try:
             conversation_id = gateway.start_run(
                 run_id, workspace_dir=req.workspace_dir or None, auto_run=req.auto_run,
-                user_note=req.user_note or "", mode=req.mode or "execute")
+                user_note=req.user_note or "", mode=mode)
         except KeyError:
             raise HTTPException(404, "unknown run_id")
         except Exception as exc:  # agent-server unreachable / rejected
             store.update_state(run_id, status="ERROR", failure_reason=str(exc))
+            if acquired:
+                formal_tests.release(_formal_owner(run_id))
             raise HTTPException(502, f"agent gateway failed: {exc}")
         # Kick off the background event sync so the Chat Drawer's /messages poll
         # actually receives the run's output. Without this, agent_run_messages
         # stays empty (only a manual POST /ingest would fill it) and the drawer
         # shows "執行中…" with a blank body.
         if req.auto_run:
-            _spawn_sync(store, gateway, run_id)
+            _spawn_sync(store, gateway, run_id, formal_tests)
         return {"ok": True, "run_id": run_id, "conversation_ref": conversation_id,
                 "run": store.get_run(run_id)}
 
@@ -365,6 +426,7 @@ def install(app, pa, store_getter=None):
             raise HTTPException(409, str(exc))
         except Exception as exc:
             raise HTTPException(502, f"agent gateway failed: {exc}")
+        _release_if_terminal(store, formal_tests, run_id)
         return {"ok": True, "summary": summary, "run": store.get_run(run_id)}
 
     @router.get("/api/agent/runs/{run_id}/messages")
@@ -400,7 +462,7 @@ def install(app, pa, store_getter=None):
         if node_id:
             live = [r for r in live
                     if (store.get_run(r["run_id"]) or {}).get("context", {})
-                    .get("target", {}).get("node_id") == node_id] or live
+                    .get("target", {}).get("node_id") == node_id]
         if not live:
             return {"ok": True, "run": None}
         return {"ok": True, "run": store.get_run(live[0]["run_id"])}
@@ -440,7 +502,7 @@ def install(app, pa, store_getter=None):
         # agent-server reports "finished") while our background sync missed it, so
         # the status here is behind reality. Converge first by ingesting pending
         # events, else a legitimate GO is silently swallowed as "ignored_running".
-        if intent == "go" and status == "RUNNING":
+        if intent in ("go", "rerun") and status == "RUNNING":
             try:
                 gateway.ingest(run_id)
             except Exception:
@@ -453,6 +515,19 @@ def install(app, pa, store_getter=None):
                 return {"ok": True, "run_id": run_id, "intent": "ignored_running",
                         "messages": store.list_messages(run_id)}
 
+        if intent == "go" and status != STATUS_WAITING_FOR_USER:
+            raise HTTPException(
+                409,
+                "GO 只能確認目前等待中的最新計畫；若要重跑已完成的 Run，請明確提出 rerun。",
+            )
+
+        acquired_now = False
+        if intent in ("go", "rerun"):
+            owner = _formal_owner(run_id)
+            already_owned = formal_tests.owns(owner)
+            _acquire_execution(run_id)
+            acquired_now = not already_owned
+
         before = store.list_messages(run_id)
         min_seq = max([m.get("seq", 0) for m in before] or [0])
         # Claim only the attachments uploaded since the last turn, so the image
@@ -463,8 +538,25 @@ def install(app, pa, store_getter=None):
         if intent == "cancel":
             store.record_approval(run_id, {"kind": "cancel", "status": "approved",
                                            "text": text, "created_at": None})
-            store.update_state(run_id, status="ERROR", failure_reason="Cancelled by engineer")
+            try:
+                gateway.pause_run(run_id)
+                confirmed = False
+                for _ in range(5):
+                    summary = gateway.ingest(run_id)
+                    if (summary.get("status") == STATUS_WAITING_FOR_USER
+                            or (store.get_run(run_id) or {}).get("status") == STATUS_WAITING_FOR_USER):
+                        confirmed = True
+                        break
+                    time.sleep(0.1)
+            except Exception as exc:
+                raise HTTPException(502, f"停止要求未能送達 Agent Gateway：{exc}")
+            if not confirmed:
+                raise HTTPException(409, "停止要求已送出，但遠端狀態尚未確認；reservation 仍保留，且不會自動重送。")
+            store.update_state(run_id, status="ERROR",
+                               failure_reason="Stopped by engineer; remote pause confirmed")
+            formal_tests.release(_formal_owner(run_id))
             return {"ok": True, "run_id": run_id, "intent": intent,
+                    "remote_state": "PAUSED_CONFIRMED",
                     "messages": store.list_messages(run_id)}
 
         if intent in ("go", "rerun"):
@@ -472,10 +564,13 @@ def install(app, pa, store_getter=None):
             try:
                 gateway.run_execution(run_id, trigger=intent)
             except Exception as exc:  # agent-server unreachable / rejected
+                if acquired_now:
+                    formal_tests.release(_formal_owner(run_id))
                 raise HTTPException(502, f"agent gateway failed: {exc}")
             threading.Thread(
                 target=_sync_messages_loop, args=(store, gateway, run_id),
-                kwargs={"min_seq": min_seq}, name=f"pa-agent-msg-{run_id}", daemon=True,
+                kwargs={"min_seq": min_seq, "formal_tests": formal_tests},
+                name=f"pa-agent-msg-{run_id}", daemon=True,
             ).start()
         else:
             # Non-approval turn. A *substantive* addition (a SPEC value, a scope

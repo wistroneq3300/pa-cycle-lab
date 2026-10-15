@@ -36,9 +36,15 @@ def create_app():
         doc=fixture(chassis=max(1,count//4),nodes=min(4,count))
         targets=inventory(SimpleNamespace(**doc))
         token=uuid.uuid4().hex[:8]
+        # Every synthetic campaign represents a separate lab. Give its BMC
+        # endpoints a campaign-specific TEST-NET address so AG-06 correctly
+        # permits independent walkthrough rounds while still detecting a shared
+        # BMC inside one campaign.
+        bmc_second=18+(int(token[:2],16)&1)
+        bmc_third=int(token[2:4],16)
         for i,t in enumerate(targets):
             t['name']=token+'-'+t['name'];t['node_id']=token+'-'+t['node_id'];t['chassis_id']=token+'-'+str(t['chassis_id'])
-            t['os_ip']=f'192.0.{count}.{i+1}';t['bmc_ip']=f'198.18.{count}.{i+1}'
+            t['os_ip']=f'192.0.{count}.{i+1}';t['bmc_ip']=f'198.{bmc_second}.{bmc_third}.{i+1}'
             t['controller_id']=token+'-controller-'+str(i)
             t['power_domain']=token+'-p-'+str(i);t['aux_domain']=token+'-a-'+str(i)
         job=web.store.create('Neutrino Demo',dict(idempotency_key=token,cycle_mode='power_cycle',channel='outband',limits={'loops':100},parallelism=4),targets,'fixture',mode='synthetic')

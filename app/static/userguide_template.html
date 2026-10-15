@@ -9,7 +9,7 @@
 <li>進入「網路拓樸」，匯入設備、設定節點與實體埠、配對接線，再儲存拓樸。</li>
 <li>用「檢查 IP」確認節點可達，用「整櫃連線檢查」查看整櫃摘要及 3D 指示燈。</li>
 <li>需要操作設備時，先核對「目前操作目標」的 Node、OS Slot 與位址，再開 Terminal、KVM 或執行電源操作。</li>
-<li>進行驗證時，先分辨 Test Library 的單選 PA Agent 流程、多選批次指令，以及需要 PRE 確認的 Cycle 流程。</li></ol>
+<li>進行驗證時，先分辨 Test Case Library 的單筆指派流程，以及需要 PRE 確認的 Cycle 流程。</li></ol>
 <p><b>先分清楚：</b>規劃接線是設計；已確認連線是人工確認；Ping 是 IP 可達性；SSH 認證成功是帳號登入成功；它們都不能單獨證明設備健康或實際電源狀態。</p>
 <nav aria-label="手冊目錄"><h3>章節目錄</h3><ol class="ug-toc" start="2"><li><a href="#ug-nav">首頁、搜尋與專案管理</a></li>
 <li><a href="#ug-add">新增系統與設備分類</a></li>
@@ -209,14 +209,14 @@
 <p>候選設備數不等於已連線數。同步僅適用實際相容並已連線的 RFB 面板；不相容設備會顯示原因。目前 SP-X／MegaRAC IVTP 在此介面不支援。</p>
 <p>一般連線錯誤會有限次重試；認證失敗要先修正認證，手動重新連線即可。黑畫面或超時請確認 BMC、協定與 KVM 橋接服務，不代表 OS 一定離線。</p>
 </section>
-<section class="ug-sec" id="ug-tasks"><h2>22. Test Library：PA Agent 與 Batch Instructions</h2>
-<ol><li>從系統詳情的「驗證」頁開啟 Test Library，先核對上方目前指派目標的專案、系統、Node 與 OS IP。</li>
+<section class="ug-sec" id="ug-tasks"><h2>22. Test Case Library：PA Agent 指派</h2>
+<ol><li>從系統詳情的「驗證」頁開啟 Test Case Library，先核對上方目前指派目標的專案、系統、Node 與 OS IP。</li>
 <li>選分類／工作表，搜尋測項並翻頁；閱讀套件、前置條件、步驟、指令、預期證據、恢復程序與判定標準。</li>
 <li><b>只選一筆：</b>主要動作是「交給 PA Agent」。開窗後 PA Agent 先提出執行計畫並停在等待確認，不會因開窗就執行。</li>
 <li>審閱計畫後，由工程師在對話框<b>手動輸入 <code>OK</code> 或 <code>GO</code> 並按 Enter</b>才開始；Shift＋Enter 換行。若輸入補充或問題，Agent 會更新計畫並繼續等待最新版本的確認。</li>
-<li><b>選兩筆以上：</b>主要動作改為「產生批次指令 (N)」（Batch Instructions）。它只整理並複製全部已選測項，不會開 PA Agent，也不會執行命令。</li>
+<li><b>改選另一筆：</b>系統會自動取消前一筆選取；一次只會送出一筆 Test Case。</li>
 <li>若單選時 PA Agent 入口不可用，介面只產生可複製指令。請在選定的 Terminal 或外部工具操作並保存輸出。</li></ol>
-<p><b>PA Agent 顯示 DONE，只表示 Agent 已停止工作並產出記錄，狀態仍是「等待工程師判定」，不是 PASS。</b>工程師必須依命令紀錄、證據、預期結果與例外情況判定 PASS／FAIL／BLOCKED。指派、複製或送出 OK／GO 也都不等於測試通過。</p>
+<p><b>PA Agent 顯示「執行完成」，只表示 Agent 已停止工作並產出記錄，不是 PASS。</b>工程師必須依命令紀錄、證據、預期結果與例外情況記錄正式結果。指派、複製或送出 OK／GO 也都不等於測試通過。</p>
 <p>切換分類或工作表會更新選取範圍，送出前重新核對。Test Case 無法載入時請重試；不要用空白清單推斷該系統沒有測項。</p>
 </section>
 <section class="ug-sec" id="ug-cycle"><h2>23. Cycle：PRE、停止與 Recovery</h2>

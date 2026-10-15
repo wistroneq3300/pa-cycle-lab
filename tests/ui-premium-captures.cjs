@@ -224,10 +224,12 @@ async function verifyTestCaseContract(page, report, width, theme) {
           && await page.locator(".eng-case-row").nth(0).evaluate((row) => row.classList.contains("is-selected") && row.classList.contains("is-inspected")));
         await capture(page, `test-case-single-${width}x${height}-${theme}.png`);
         await page.locator(".eng-case-row input").nth(1).check();
-        addCheck(report, `multi-selection-action-${width}-${theme}`,
-          await page.locator("#rm-dialog-foot .primary").textContent() === "產生批次指令 (2)"
+        addCheck(report, `selection-replacement-${width}-${theme}`,
+          await page.locator("#rm-dialog-foot .primary").textContent() === "交給 PA Agent"
+          && !(await page.locator(".eng-case-row input").nth(0).isChecked())
+          && await page.locator(".eng-case-row input").nth(1).isChecked()
           && await page.locator(".eng-case-row").nth(1).evaluate((row) => row.classList.contains("is-selected") && !row.classList.contains("is-inspected")));
-        await capture(page, `test-case-multiple-${width}x${height}-${theme}.png`);
+        await capture(page, `test-case-replaced-${width}x${height}-${theme}.png`);
         await page.evaluate(() => window.closeDialog());
 
         const agentContext = { c: cases[0], machine: MACHINE, node: NODE };
@@ -261,7 +263,7 @@ async function verifyTestCaseContract(page, report, width, theme) {
         }
 
         state.agentStatus = "DONE";
-        await page.waitForFunction(() => document.querySelector("#pa-drawer-status-text")?.textContent.includes("等待工程師判定"), null, { timeout: 6000 });
+        await page.waitForFunction(() => document.querySelector("#pa-drawer-status-text")?.textContent.includes("執行完成"), null, { timeout: 6000 });
         await capture(page, `pa-agent-done-${width}x${height}-${theme}.png`);
 
         if (riskSample) {

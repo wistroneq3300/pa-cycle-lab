@@ -198,6 +198,10 @@ async function installProvider(page, cycleSeed, round) {
           { id: "gpu", title: "GPU Utilization", state: "READY", unit: "%", series: [{ label: "GPU 0", points: points(72, 4), latest: 74 }] },
         ],
       });
+      if (method === "GET" && path === "/api/machine/host_a/telemetry/analyze") return json({
+        ok: true,
+        analysis: "Synthetic read-only Telemetry summary for UI acceptance; not a hardware verdict.",
+      });
       if (method === "GET" && path === "/api/machine/host_a/inspection") return json(inspection);
       if (method === "GET" && path === "/api/machine/host_a/inspection/issues") return json(issues);
       if (method === "GET" && path === "/api/machine/host_a/inspection/evidence/director-walkthrough-evidence/view") {
@@ -367,7 +371,7 @@ async function runRound(browser, base, round, cycleSeed) {
       await page.locator(".pd-library-card").first().waitFor();
       await page.evaluate(() => window.openAssignTask("host_a"));
       await page.locator(".assign-sheet-card").first().click();
-      await page.locator('.assign-row input[type="checkbox"]').first().check();
+      await page.locator('.assign-row input[type="radio"]').first().check();
       caseVariant = await page.locator(".assign-row").first().evaluate(row => row.querySelector("input")?.getAttribute("onchange") || "");
       assert.match(await page.locator("#rm-dialog-foot .primary").innerText(), /PA Agent/, `single-select CTA mismatch; ${caseVariant}`);
       await page.locator("#rm-dialog-foot .primary").click();
@@ -391,8 +395,8 @@ async function runRound(browser, base, round, cycleSeed) {
       await page.waitForFunction(() => document.querySelector("#pa-drawer-status-text")?.textContent.includes("等待工程師"));
       await page.locator("#pa-msg-input").fill("GO");
       await page.locator("#pa-msg-send").click();
-      await page.waitForFunction(() => document.querySelector("#pa-drawer-status-text")?.textContent.includes("等待工程師判定"));
-      assert.match(await page.locator("#pa-agent-drawer").innerText(), /不代表測試通過|等待工程師判定/);
+      await page.waitForFunction(() => document.querySelector("#pa-drawer-status-text")?.textContent.includes("執行完成"));
+      assert.match(await page.locator("#pa-agent-drawer").innerText(), /不代表測試通過|執行完成/);
       await shot("agent-done");
     });
     await step("agent-close-reopen", async () => {
@@ -400,43 +404,22 @@ async function runRound(browser, base, round, cycleSeed) {
       await page.evaluate(() => window.PA_Agent.close());
       await page.waitForSelector("#pa-agent-drawer", { state: "detached" });
       await page.evaluate(run => window.PA_Agent.open({ case_variant_id: run.case_variant_id, node_id: run.node_id, expected_binding_revision: "director-walkthrough-rev", branch: "walkthrough", title: "Reopen completed run", task: "Read-only walkthrough fixture", mode: "plan" }), state.run);
-      await page.waitForFunction(() => document.querySelector("#pa-drawer-status-text")?.textContent.includes("等待工程師判定"));
+      await page.waitForFunction(() => document.querySelector("#pa-drawer-status-text")?.textContent.includes("執行完成"));
       await page.evaluate(() => window.PA_Agent.close());
       await page.waitForSelector("#pa-agent-drawer", { state: "detached" });
     });
-    await step("test-case-multi-batch-no-agent", async () => {
+    await step("test-case-selection-replacement", async () => {
       await page.evaluate(() => window.openAssignTask("host_a"));
       await page.locator(".assign-sheet-card").first().click();
-      const boxes = page.locator('.assign-row input[type="checkbox"]');
-      await boxes.nth(0).check(); await boxes.nth(1).check();
-      assert.match(await page.locator("#rm-dialog-foot .primary").innerText(), /批次指令/);
-      await page.locator("#rm-dialog-foot .primary").click();
-      let nextSurface;
-      try {
-        nextSurface = await page.waitForFunction(() => {
-          const result = document.querySelector(".ar-window");
-          if (result && getComputedStyle(result).display !== "none") return "result";
-          const title = document.getElementById("rm-dialog-title")?.textContent || "";
-          if (title.includes("確認測項") || title.includes("確認批次指令範圍")) return "confirm";
-          return false;
-        }).then(handle => handle.jsonValue());
-      } catch (error) {
-        const diagnostic = await page.evaluate(() => ({
-          title: document.getElementById("rm-dialog-title")?.textContent || "",
-          footer: document.getElementById("rm-dialog-foot")?.innerText || "",
-          resultDisplay: document.querySelector(".ar-window") ? getComputedStyle(document.querySelector(".ar-window")).display : "missing",
-        }));
-        throw new Error(`Batch transition was not recognized: ${JSON.stringify(diagnostic)}`, { cause: error });
-      }
-      if (nextSurface === "confirm") {
-        assert.match(await page.locator("#rm-dialog-foot .primary").innerText(), /批次指令/);
-        await page.locator("#rm-dialog-foot .primary").click();
-      }
-      await page.locator(".ar-window").waitFor({ state: "visible" });
-      assert.match(await page.locator("#ar-title").innerText(), /批次指令/);
-      assert.equal(await page.locator("#ar-pa-agent").isHidden(), true);
+      const radios = page.locator('.assign-row input[type="radio"]');
+      await radios.nth(0).check();
+      await radios.nth(1).check();
+      assert.equal(await radios.nth(0).isChecked(), false);
+      assert.equal(await radios.nth(1).isChecked(), true);
+      assert.equal(await page.evaluate(() => _assignTask.sel.size), 1);
+      assert.match(await page.locator("#rm-dialog-foot .primary").innerText(), /PA Agent/);
       assert.equal(await page.locator("#pa-agent-drawer").count(), 0);
-      await page.locator('.ar-window [data-act="close"]').click();
+      await page.keyboard.press("Escape");
     });
     await step("cycle-pre-confirm-console-report", async () => {
       await harvestTrace("before-cycle-navigation");

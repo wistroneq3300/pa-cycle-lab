@@ -74,6 +74,21 @@ def context_hash(context: dict) -> str:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+class _ClosingConnection(sqlite3.Connection):
+    """Commit/rollback like sqlite3's context manager, then close the handle.
+
+    The standard sqlite3 context manager leaves the connection open. That kept
+    WAL handles alive across every request and made Windows unable to clean up
+    isolated run databases after tests or retired instances.
+    """
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        try:
+            return super().__exit__(exc_type, exc_value, traceback)
+        finally:
+            self.close()
+
+
 class AgentRunStore:
     """SQLite-backed store for AgentRun contexts and their mutable state."""
 
@@ -85,7 +100,7 @@ class AgentRunStore:
         self._init_schema()
 
     def _connect(self):
-        conn = sqlite3.connect(self.path, timeout=30)
+        conn = sqlite3.connect(self.path, timeout=30, factory=_ClosingConnection)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA journal_mode=WAL")
         conn.execute("PRAGMA foreign_keys=ON")

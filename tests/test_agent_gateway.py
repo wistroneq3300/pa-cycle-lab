@@ -8,6 +8,7 @@ Two layers, both against real code (no mocks of our own logic):
   mutable state, verifying chat vs commands/evidence separation and status maps.
 """
 import os
+import json
 import sys
 import tempfile
 import unittest
@@ -255,9 +256,14 @@ class GatewayMessageTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.store = AgentRunStore(path=os.path.join(self.tmp.name, 'r.sqlite3'))
+        profiles = os.path.join(self.tmp.name, 'settings', 'profiles')
+        os.makedirs(profiles)
+        with open(os.path.join(profiles, 'qwen3.8-27b.json'), 'w', encoding='utf-8') as fh:
+            json.dump({'model': 'fixture/model', 'reasoning_effort': 'medium'}, fh)
         self.client = _RecordingClient()
         self.gateway = AgentGateway(self.store, base_url="http://unused",
-                                    client=self.client)
+                                    client=self.client,
+                                    settings_dir=os.path.join(self.tmp.name, 'settings'))
         ctx = {"run_id": "run-1", "case_variant_id": "case-x",
                "library_version": "v1", "code": "C1",
                "testcase": {"code": "C1", "procedure": "do it"},
@@ -283,6 +289,14 @@ class GatewayMessageTests(unittest.TestCase):
         self.assertEqual(payload["role"], "user")
         self.assertEqual(payload["content"][0]["text"], "請補充 PCIe SPEC")
         self.assertTrue(payload["run"])
+
+    def test_pause_run_dispatches_exactly_once(self):
+        self.store.update_state("run-1", conversation_ref="conv-1", status="RUNNING")
+        cid = self.gateway.pause_run("run-1")
+        self.assertEqual(cid, "conv-1")
+        self.assertEqual(self.client.calls[-1],
+                         ("/api/conversations/conv-1/pause", None))
+        self.assertEqual(sum(url.endswith("/pause") for url, _ in self.client.calls), 1)
 
     def test_start_run_plan_mode_sends_plan_preamble(self):
         self.gateway.start_run("run-1", mode="plan")

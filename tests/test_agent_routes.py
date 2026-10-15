@@ -5,6 +5,7 @@ library loader are exercised rather than mocked. Runs against an isolated data
 directory so the checked-in datasets are never touched.
 """
 import os
+import json
 import shutil
 import sys
 import tempfile
@@ -18,6 +19,9 @@ def _dataset_dir():
     data = os.path.join(ROOT, 'data')
     if not os.path.isdir(data):
         return None
+    preferred = os.path.join(data, 'native-desktop')
+    if os.path.exists(os.path.join(preferred, 'tests.json')):
+        return preferred
     for name in sorted(os.listdir(data)):
         if os.path.exists(os.path.join(data, name, 'tests.json')):
             return os.path.join(data, name)
@@ -30,8 +34,21 @@ def _build_client(tmp_dir):
     # isolated instance *under* ROOT/data rather than in the system temp dir.
     rel = os.path.relpath(tmp_dir, ROOT)
     os.makedirs(tmp_dir, exist_ok=True)
-    shutil.copy(os.path.join(_dataset_dir(), 'tests.json'),
-                os.path.join(tmp_dir, 'tests.json'))
+    fixture_path = os.path.join(tmp_dir, 'tests.json')
+    shutil.copy(os.path.join(_dataset_dir(), 'tests.json'), fixture_path)
+    # Route tests need one reviewed row but must not depend on mutable local
+    # runtime data having already passed the AI review pipeline.
+    with open(fixture_path, encoding='utf-8') as handle:
+        fixture = json.load(handle)
+    first = next(item for sheet in fixture.get('sheets', {}).values()
+                 for item in sheet.get('items', []))
+    first['ai_review'] = first.get('ai_review') or {
+        'automation_classification': 'MANUAL ONLY',
+        'purpose': 'Isolated HTTP contract fixture.',
+        'user_confirmation_required': True,
+    }
+    with open(fixture_path, 'w', encoding='utf-8') as handle:
+        json.dump(fixture, handle, ensure_ascii=False)
     os.environ['CYCLE_MODE'] = 'synthetic'
     os.environ['CYCLE_INSTANCE'] = rel
     os.environ['PA_DATA_DIR'] = tmp_dir
@@ -89,6 +106,14 @@ class AgentRunRoutes(unittest.TestCase):
 
     def test_missing_variant_field_is_422(self):
         self.assertEqual(self.client.post('/api/agent/runs', json={}).status_code, 422)
+
+    def test_batch_variant_payload_is_rejected(self):
+        """AG-01: the backend rejects legacy or forged multi-case payloads."""
+        r = self.client.post('/api/agent/runs', json={
+            'case_variant_id': self.item['case_variant_id'],
+            'case_variant_ids': [self.item['case_variant_id'], 'another-case'],
+        })
+        self.assertEqual(r.status_code, 422)
 
     def test_post_message_unknown_run_is_404(self):
         r = self.client.post('/api/agent/runs/does-not-exist/messages', json={'text': 'hi'})
@@ -155,7 +180,9 @@ class AgentRunRoutes(unittest.TestCase):
         store.update_state(rid, status='WAITING_FOR_USER', final_result='log: all good')
         active = self.client.get('/api/agent/active', params={'case_variant_id': vid})
         self.assertEqual(active.status_code, 200)
-        self.assertIsNone(active.json()['run'])
+        # Other test-created runs may share this isolated class-level store; the
+        # completed run itself must never be selected as the resumable run.
+        self.assertNotEqual((active.json().get('run') or {}).get('run_id'), rid)
 
     def test_supplemental_records_a_revision(self):
         vid = self.item['case_variant_id']

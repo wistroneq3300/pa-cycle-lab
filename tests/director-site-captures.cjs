@@ -774,7 +774,7 @@ async function runViewport(browser, base, serverUnknown, browserVersion, width, 
       await page.locator(".assign-sheet-card").first().waitFor();
       await page.locator(".assign-sheet-card").first().click();
       await page.locator(".eng-case-row").first().waitFor();
-      const firstCase = page.locator('.eng-case-row input[type="checkbox"]').first();
+      const firstCase = page.locator('.eng-case-row input[type="radio"]').first();
       await firstCase.check();
       await page.locator(".eng-case-open").first().click();
       await page.evaluate(() => window.scrollTo(0, 0));

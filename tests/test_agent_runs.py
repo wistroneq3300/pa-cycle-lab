@@ -19,6 +19,9 @@ from test_library_contract import prepare_library  # noqa: E402
 
 
 def _dataset_path():
+    preferred = os.path.join(ROOT, 'data', 'native-desktop', 'tests.json')
+    if os.path.exists(preferred):
+        return preferred
     for name in sorted(os.listdir(os.path.join(ROOT, 'data'))):
         candidate = os.path.join(ROOT, 'data', name, 'tests.json')
         if os.path.exists(candidate):
@@ -82,13 +85,17 @@ class AgentRunStoreTests(unittest.TestCase):
         self.assertTrue(self.store.verify_context(run_id))
         # Tampering with the stored blob must break the sealed hash.
         import sqlite3
-        with sqlite3.connect(self.store.path) as db:
+        db = sqlite3.connect(self.store.path)
+        try:
             row = db.execute('SELECT context_json FROM agent_runs WHERE run_id=?',
                              (run_id,)).fetchone()
             tampered = json.loads(row[0])
             tampered['target'] = {'node_id': 'evil'}
             db.execute('UPDATE agent_runs SET context_json=? WHERE run_id=?',
                        (json.dumps(tampered), run_id))
+            db.commit()
+        finally:
+            db.close()
         self.assertFalse(self.store.verify_context(run_id))
 
     def test_duplicate_run_id_rejected(self):

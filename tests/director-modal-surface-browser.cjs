@@ -398,11 +398,11 @@ const mark = (name, status, detail = "") => trace.checks.push({ name, status, de
         task: "Criteria：保留 DONE 待工程師判定，不得顯示 PASS。\n".repeat(12),
       });
     });
-    await page.waitForFunction(() => document.querySelector("#pa-drawer-status-text")?.textContent.includes("等待工程師判定"));
+    await page.waitForFunction(() => document.querySelector("#pa-drawer-status-text")?.textContent.includes("執行完成"));
     const agent = page.locator("#pa-agent-drawer .pa-drawer-panel");
     assert.equal(await agent.getAttribute("role"), "dialog");
     assert.equal(await agent.getAttribute("aria-modal"), "true");
-    assert.match(await page.locator("#pa-drawer-status-text").innerText(), /等待工程師判定/);
+    assert.match(await page.locator("#pa-drawer-status-text").innerText(), /執行完成/);
     await capture("09-agent-drawer-long-done.png", "PA Agent drawer", "DONE-awaiting-engineer-long-content", "#pa-agent-drawer .pa-drawer-panel");
     await page.evaluate(() => document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, isComposing: true })));
     assert.equal(await page.locator("#pa-agent-drawer.open").count(), 1);

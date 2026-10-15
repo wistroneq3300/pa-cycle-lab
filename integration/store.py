@@ -15,6 +15,7 @@ import threading
 from .settings import DATA, MODE, ENGINE, ROOT
 from .events import structured
 from .profiles import checker_script_path, checker_missing_message
+from .formal_test_locks import FormalTestCoordinator
 from cycle_core import LOG_TIMEZONE
 
 TERMINAL = {'COMPLETE', 'INCOMPLETE', 'CANCELLED', 'BLOCKED', 'ERROR', 'RECONCILIATION_REQUIRED'}
@@ -109,6 +110,8 @@ class Store:
         self._transactions=threading.local()
         self.path = Path(path or DATA / 'jobs.sqlite3')
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        lock_name = self.path.stem + '-formal-test-locks.sqlite3'
+        self.formal_tests = FormalTestCoordinator(self.path.with_name(lock_name))
         with self.tx() as db:
             db.executescript('''
                 CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY, project TEXT NOT NULL,
@@ -130,7 +133,13 @@ class Store:
                 CREATE TABLE IF NOT EXISTS cycle_exports(job_id TEXT PRIMARY KEY, updated REAL NOT NULL, data TEXT NOT NULL);
                 CREATE INDEX IF NOT EXISTS events_job_sequence ON events(job_id,seq);
                 CREATE INDEX IF NOT EXISTS events_job_machine_sequence ON events(job_id,json_extract(data,'$.machine_id'),seq);
-            ''')
+                ''')
+        with self.tx(write=False) as db:
+            active={
+                'cycle:'+row['id'] for row in db.execute('SELECT id,state,data FROM jobs')
+                if row['state'] in IN_PROGRESS or row['state']=='RECONCILIATION_REQUIRED'
+            }
+        self.formal_tests.prune('cycle:', active)
 
     @contextmanager
     def tx(self, write=True):
@@ -387,28 +396,36 @@ class Store:
         targets=[snapshot_target(m) for m in targets]
         request_hash = fingerprint(request)
         keys = [k for m in targets for k in scopes(m)]
-        with self.tx() as db:
-            row = db.execute('SELECT id,request_hash FROM jobs WHERE project=? AND idem=?',
-                             (project,request['idempotency_key'])).fetchone()
-            if row:
-                if row['request_hash'] != request_hash:
-                    raise Conflict('重試識別碼已用於不同設定')
-                return self._get(db,row['id'])
-            job_id = readable_job_id(project, request)
-            self.reserve(db,job_id,keys)
-            job = dict(id=job_id,project=project,state='CREATED',mode=mode,synthetic=mode=='synthetic',
-                       config=request,targets=targets,created_by=actor,created_at=time.time(),
-                       updated_at=time.time(),engine_hash=engine_hash(),nodes=[],health='PENDING',
-                       stop_requested=False,stop_reason='',pre=None,run_id='cycle-'+job_id)
-            job['source_versions']=json.loads((ROOT/'SOURCE_BASELINES.json').read_text(encoding='utf-8'))
-            job['integration_version']=(ROOT/'VERSION').read_text().strip()
-            job['ui_build_hash']=ui_build_hash()
-            if profile_snapshot is not None:
-                job['profile_snapshot']=profile_snapshot
-            db.execute('INSERT INTO jobs VALUES(?,?,?,?,?,?,?)',
-                       (job_id,project,request['idempotency_key'],request_hash,'CREATED',time.time(),encode(job)))
-            self._save(db,job,{'phase':'CREATED','actor':actor})
-            return job
+        formal_owner = None
+        try:
+            with self.tx() as db:
+                row = db.execute('SELECT id,request_hash FROM jobs WHERE project=? AND idem=?',
+                                 (project,request['idempotency_key'])).fetchone()
+                if row:
+                    if row['request_hash'] != request_hash:
+                        raise Conflict('重試識別碼已用於不同設定')
+                    return self._get(db,row['id'])
+                job_id = readable_job_id(project, request)
+                formal_owner = 'cycle:'+job_id
+                self.formal_tests.acquire(formal_owner, 'CYCLE', targets)
+                self.reserve(db,job_id,keys)
+                job = dict(id=job_id,project=project,state='CREATED',mode=mode,synthetic=mode=='synthetic',
+                           config=request,targets=targets,created_by=actor,created_at=time.time(),
+                           updated_at=time.time(),engine_hash=engine_hash(),nodes=[],health='PENDING',
+                           stop_requested=False,stop_reason='',pre=None,run_id='cycle-'+job_id)
+                job['source_versions']=json.loads((ROOT/'SOURCE_BASELINES.json').read_text(encoding='utf-8'))
+                job['integration_version']=(ROOT/'VERSION').read_text().strip()
+                job['ui_build_hash']=ui_build_hash()
+                if profile_snapshot is not None:
+                    job['profile_snapshot']=profile_snapshot
+                db.execute('INSERT INTO jobs VALUES(?,?,?,?,?,?,?)',
+                           (job_id,project,request['idempotency_key'],request_hash,'CREATED',time.time(),encode(job)))
+                self._save(db,job,{'phase':'CREATED','actor':actor})
+                return job
+        except Exception:
+            if formal_owner:
+                self.formal_tests.release(formal_owner)
+            raise
 
     def claim(self, job_id, worker):
         with self.tx() as db:
@@ -472,32 +489,45 @@ class Store:
             return job
 
     def stop(self, job_id, actor):
+        release_formal=False
         with self.tx() as db:
             job = self._get(db,job_id)
-            if job['state'] in TERMINAL or job['stop_requested']:
-                return job
-            job.update(stop_requested=True,stopped_by=actor)
-            if job['state'] == 'CREATED':
-                job['state']='CANCELLED'
-                db.execute('DELETE FROM locks WHERE owner=?',(job_id,))
-            elif job['state'] == 'RUNNING':
-                job['state']='STOP_REQUESTED'
-            self._save(db,job,{'phase':'STOP_REQUESTED','actor':actor})
-            if job['state']=='STOP_REQUESTED':
-                self._event(db,job_id,job.get('run_id'),{'phase':'STOPPING_AFTER_ROUND'})
-            return job
+            if job['state'] in TERMINAL:
+                release_formal=job['state']!='RECONCILIATION_REQUIRED'
+            elif not job['stop_requested']:
+                job.update(stop_requested=True,stopped_by=actor)
+                if job['state'] == 'CREATED':
+                    job['state']='CANCELLED'
+                    db.execute('DELETE FROM locks WHERE owner=?',(job_id,))
+                    release_formal=True
+                elif job['state'] == 'RUNNING':
+                    job['state']='STOP_REQUESTED'
+                self._save(db,job,{'phase':'STOP_REQUESTED','actor':actor})
+                if job['state']=='STOP_REQUESTED':
+                    self._event(db,job_id,job.get('run_id'),{'phase':'STOPPING_AFTER_ROUND'})
+            result=job
+        if release_formal:
+            self.formal_tests.release('cycle:'+job_id)
+        return result
 
     def finish(self, job_id, state, reason='', **fields):
         if state not in TERMINAL:
             raise ValueError(state)
+        release_formal=False
         with self.tx() as db:
             job = self._get(db,job_id)
             if job['state'] in TERMINAL:
-                return job
-            job.update(fields,state=state,stop_reason=reason,finished_at=time.time())
-            self._save(db,job,{'phase':state,'reason':reason})
-            if state!='RECONCILIATION_REQUIRED': db.execute('DELETE FROM locks WHERE owner=?',(job_id,))
-            return job
+                release_formal=job['state']!='RECONCILIATION_REQUIRED'
+            else:
+                job.update(fields,state=state,stop_reason=reason,finished_at=time.time())
+                self._save(db,job,{'phase':state,'reason':reason})
+                if state!='RECONCILIATION_REQUIRED':
+                    db.execute('DELETE FROM locks WHERE owner=?',(job_id,))
+                    release_formal=True
+            result=job
+        if release_formal:
+            self.formal_tests.release('cycle:'+job_id)
+        return result
 
     def node_update(self, job_id, node):
         with self.tx() as db:
@@ -533,7 +563,9 @@ class Store:
             job.update(state='INCOMPLETE',reconciliation=dict(actor=actor,reason=reason,actions_hash=reviewed_hash,at=time.time()))
             self._save(db,job,dict(phase='INCOMPLETE',message='Explicit reconciliation completed; no replay',detail=reason))
             db.execute('DELETE FROM locks WHERE owner=?',(job_id,))
-            return job
+            result=job
+        self.formal_tests.release('cycle:'+job_id)
+        return result
 
     def delete_job(self, job_id):
         """Permanently remove a terminal job and every row keyed to it.
@@ -549,7 +581,9 @@ class Store:
                 db.execute(f'DELETE FROM {table} WHERE job_id=?',(job_id,))
             db.execute('DELETE FROM locks WHERE owner=?',(job_id,))
             db.execute('DELETE FROM jobs WHERE id=?',(job_id,))
-            return project
+            result=project
+        self.formal_tests.release('cycle:'+job_id)
+        return result
 
     def event_page(self, job_id, after=0, limit=500, before=None, tail=False, machine_id=None, errors_only=False, search='', until=None):
         """Read-only, indexed keyset pages. No writer reservation during polling/export."""

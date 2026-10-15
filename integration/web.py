@@ -28,6 +28,7 @@ from .events import log_line
 from .targets import inventory as node_inventory, resolve_target, resolve_control_target, public
 from .authorization import authorize, configured_provider
 from .profiles import CheckerMissing
+from .formal_test_locks import FormalTestBusy
 from . import coordinator
 
 sys.path.insert(0,str(ROOT/'app'))
@@ -118,6 +119,7 @@ def fail(exc):
     from .profiles import CheckerMissing
     if isinstance(exc,CheckerMissing): return HTTPException(404,str(exc))
     if isinstance(exc,Conflict): return HTTPException(409,str(exc))
+    if isinstance(exc,FormalTestBusy): return HTTPException(409,str(exc))
     if isinstance(exc,KeyError): return HTTPException(404,'找不到專案、機台或任務')
     return HTTPException(422,str(exc))
 
@@ -754,7 +756,7 @@ telemetry_provision_service = install_telemetry_provision(app, pa)
 
 # PA Agent runs (P3-b): create/read formal AgentRun records. No OpenHands here.
 from .agent_routes import install as install_agent_runs
-agent_run_store = install_agent_runs(app, pa)
+agent_run_store = install_agent_runs(app, pa, lambda: store)
 
 
 @app.get('/api/validation/overview')

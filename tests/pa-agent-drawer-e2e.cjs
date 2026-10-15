@@ -267,31 +267,25 @@ async function waitForServer() {
   await page.waitForSelector(".assign-sheet-card", { timeout: 10000 });
   await page.locator(".assign-sheet-card").first().click();
 
-  // Multi-selection must produce a batch instruction and must not start Agent.
-  await page.waitForSelector(".eng-case-row input[type=checkbox]", { timeout: 10000 });
-  const boxes = page.locator(".eng-case-row input[type=checkbox]");
-  await boxes.nth(0).check();
-  await boxes.nth(1).check();
-  const batchBtn = page.locator('#rm-dialog-foot .primary:has-text("產生批次指令 (2)")').first();
-  await batchBtn.waitFor({ state: "visible", timeout: 10000 });
-  await batchBtn.click();
-  const batchConfirm = page.locator('#rm-dialog-foot .primary:has-text("產生批次指令 (2)")').first();
-  await batchConfirm.waitFor({ state: "visible", timeout: 10000 });
-  await batchConfirm.click();
-  await page.waitForSelector(".ar-window", { state: "visible", timeout: 10000 });
-  const multiContract = {
-    agentButtonHidden: await page.locator("#ar-pa-agent").isHidden(),
+  // AG-01: selecting a new Test Case replaces the previous selection and must
+  // not start Agent until the engineer confirms the remaining single item.
+  await page.waitForSelector(".eng-case-row input[type=radio]", { timeout: 10000 });
+  const radios = page.locator(".eng-case-row input[type=radio]");
+  await radios.nth(0).check();
+  await radios.nth(1).check();
+  const replacementContract = {
+    firstCleared: !(await radios.nth(0).isChecked()),
+    secondSelected: await radios.nth(1).isChecked(),
+    selectedCount: await page.evaluate(() => _assignTask.sel.size),
+    actionIsAgent: /交給 PA Agent/.test(await page.locator("#rm-dialog-foot .primary").innerText()),
     drawerClosed: await page.locator("#pa-agent-drawer.open").count() === 0,
-    saysNotStarted: /\u672a\u555f\u52d5 Agent/.test(await page.locator("#ar-hint").textContent()),
-    headingIsBatch: (await page.locator(".ar-rich .eng-case-sec h4").first().textContent()) === "批次指令",
-    introIsBatch: /2 筆已選測項/.test(await page.locator(".ar-rich .eng-case-sec .eng-case-prose").nth(1).textContent()),
   };
-  await page.locator(".ar-close").click();
+  await page.keyboard.press("Escape");
 
   // Reopen the same real flow and select one case. Only this path may hand off to Agent.
   await page.evaluate((m) => window.openAssignTask(m), MACHINE);
   await page.locator(".assign-sheet-card").first().click();
-  await page.locator(".eng-case-row input[type=checkbox]").first().check();
+  await page.locator(".eng-case-row input[type=radio]").first().check();
   const agentBtn = page.locator('#rm-dialog-foot .primary:has-text("交給 PA Agent")').first();
   await agentBtn.waitFor({ state: "visible", timeout: 10000 });
   await agentBtn.click();
@@ -365,14 +359,14 @@ async function waitForServer() {
     };
   }, NOTE);
   // 尚未同意：run 不應是 DONE（仍在等待或執行中）。
-  const notDoneYet = !noteResult.status.includes("工程師判定");
+  const notDoneYet = !noteResult.status.includes("執行完成");
 
   // 明確同意：輸入 GO 送出 → run 依計畫執行並收尾為 DONE。
   await page.fill("#pa-msg-input", "GO");
   await page.focus("#pa-msg-input");
   await page.keyboard.press("Enter");
   await page.waitForFunction(
-    () => ((document.getElementById("pa-drawer-status") || {}).textContent || "").includes("工程師判定"),
+    () => ((document.getElementById("pa-drawer-status") || {}).textContent || "").includes("執行完成"),
     null, { timeout: 15000 },
   ).catch(() => {});
   const msgInfo = await page.evaluate(() => {
@@ -384,7 +378,7 @@ async function waitForServer() {
   });
   // Let the poll settle the run to DONE before reading the final status.
   await page.waitForFunction(
-    () => ((document.getElementById("pa-drawer-status") || {}).textContent || "").includes("工程師判定"),
+    () => ((document.getElementById("pa-drawer-status") || {}).textContent || "").includes("執行完成"),
     null, { timeout: 10000 },
   ).catch(() => {});
 
@@ -408,13 +402,14 @@ async function waitForServer() {
     const el = document.getElementById("pa-drawer-status");
     return el ? el.textContent : "";
   });
-  const doneStatus = finalStatusText.includes("工程師判定");
+  const doneStatus = finalStatusText.includes("執行完成");
 
   const checks = [
-    ["multi-select batch action does not expose Agent button", multiContract.agentButtonHidden],
-    ["multi-select batch action does not open Agent", multiContract.drawerClosed],
-    ["multi-select result states Agent was not started", multiContract.saysNotStarted],
-    ["multi-select result is labelled as batch instructions", multiContract.headingIsBatch && multiContract.introIsBatch],
+    ["new Test Case clears prior selection", replacementContract.firstCleared],
+    ["replacement Test Case remains selected", replacementContract.secondSelected],
+    ["selection is limited to one Test Case", replacementContract.selectedCount === 1],
+    ["single selection keeps the Agent action", replacementContract.actionIsAgent],
+    ["selection alone does not open Agent", replacementContract.drawerClosed],
     ["PA_Agent.open captured", !!opened],
     ["single selected case_variant_id", opened && opened.case_variant_id === VARIANT],
     ["node_id", opened && opened.node_id === NODE_ID],
@@ -439,8 +434,8 @@ async function waitForServer() {
     ["centered two-column modal", !!modal && modal.cx <= 2 && modal.cy <= 2],
     ["two columns side-by-side (row)", !!modal && modal.cols === "row"],
     ["scrim present + interactive", !!modal && modal.hasScrim],
-    // Retired verdict: DONE card carries the agent's log, status says 待工程師判定.
-    ["DONE status: 待工程師判定", doneStatus],
+    // AG-COPY-01: DONE is execution completion, never an automatic PASS verdict.
+    ["DONE status: 執行完成", doneStatus],
     ["agent log card rendered", msgInfo.roles.includes("PA Agent")],
   ];
 

@@ -130,7 +130,7 @@ async function telemetryTruth(browser) {
 }
 
 async function assignmentAndSensorTruth(browser) {
-  await harness(browser, "D02/D08/D10 batch clipboard, workflow copy, sensor counts", null, async page => {
+  await harness(browser, "D02/D08/D10 single assignment clipboard, workflow copy, sensor counts", null, async page => {
     await page.addScriptTag({ path: JS("app.js") });
     const result = await page.evaluate(async () => {
       Object.defineProperty(navigator, "clipboard", {
@@ -141,6 +141,10 @@ async function assignmentAndSensorTruth(browser) {
       window.__notices = [];
       window.uxNotify = (message, isError) => window.__notices.push({ message, isError });
       window.PA_Agent = { open() {} };
+      window.operationTarget = () => ({
+        node_id: "node-director", os_ip: "192.0.2.10",
+        expected_binding_revision: "rev-1",
+      });
 
       const zeroSensors = machineSensorsHtml({ sensors: {
         critical: 0, warning: 0, ok: 0, ns: 0,
@@ -161,11 +165,16 @@ async function assignmentAndSensorTruth(browser) {
         { case_variant_id: "director-a", code: "DIR-A", items: "First truth case", test_set: "Truth", ai_can_execute: "YES", ai_commands: "printf first" },
         { case_variant_id: "director-b", code: "DIR-B", items: "Second truth case", test_set: "Truth", ai_can_execute: "PARTIAL", ai_commands: "printf second" },
       ];
-      _assignTask.sel = new Set(["director-a", "director-b"]);
+      _assignTask.sel = new Set(["director-a"]);
+      assignTaskToggle("director-b", true);
       const one = assignTaskActionMeta(1);
       const two = assignTaskActionMeta(2);
+      window.PA_Agent = null;
       await assignTaskCopy();
-      return { zeroSensors, missingSensors, one, two, notices: window.__notices };
+      return {
+        zeroSensors, missingSensors, one, two, notices: window.__notices,
+        selected: Array.from(_assignTask.sel),
+      };
     });
 
     assert.match(result.zeroSensors, />0<\/b><span>Critical/);
@@ -175,16 +184,16 @@ async function assignmentAndSensorTruth(browser) {
     assert.match(result.missingSensors, /不能判定為無異常/);
     assert.equal(result.one.kind, "agent");
     assert.equal(result.one.label, "交給 PA Agent");
-    assert.equal(result.two.kind, "batch");
-    assert.match(result.two.label, /產生批次指令 \(2\)/);
-    assert.match(result.two.note, /未啟動 Agent/);
+    assert.equal(result.two.kind, "invalid");
+    assert.match(result.two.note, /一次只能指派一筆 Test Case/);
+    assert.deepEqual(result.selected, ["director-b"]);
 
     const hint = page.locator("#ar-hint");
     assert.equal(await hint.getAttribute("data-state"), "error");
-    assert.match(await hint.innerText(), /批次指令已產生，但剪貼簿寫入失敗/);
+    assert.match(await hint.innerText(), /剪貼簿寫入失敗/);
     assert.equal(await page.locator("#ar-pa-agent").isHidden(), true);
     const generated = await page.locator("#ar-pre").innerText();
-    assert.match(generated, /First truth case/);
+    assert.doesNotMatch(generated, /First truth case/);
     assert.match(generated, /Second truth case/);
     assert(result.notices.some(item => item.isError && /剪貼簿無法寫入/.test(item.message)));
 
@@ -281,7 +290,7 @@ async function evidenceTruth(browser) {
     assert.equal(await page.locator("dialog [data-copy]").isDisabled(), true);
     assert.equal(await page.locator("dialog input[type=search]").isDisabled(), true);
     assert.equal(await page.locator("dialog [data-next]").isDisabled(), true);
-    assert.equal(await page.locator("dialog [data-status]").innerText(), "載入中…");
+    assert.equal(await page.locator("dialog [data-status]").innerText(), "正在載入資料…");
     await page.waitForFunction(() => document.querySelector("dialog [data-status]")?.dataset.state === "loaded");
     assert.equal(await page.locator("dialog [data-copy]").isEnabled(), true);
     await page.locator("dialog [data-copy]").click();
@@ -383,6 +392,14 @@ async function cycleTruth(browser) {
         targets: [{ name: "node-director", parent_name: "Director rack", node: "Node A", slot_key: "slot-a", os_ip: "192.0.2.10", os_port: 22, node_id: "node-id-a" }],
         nodes: [{ machine_id: "node-director", stage: "COMPLETE", loop: 0, attempts: 0, completed: null, boot_confirmed: 0, valid_cycles: null, health: "OK", cumulative_health: "OK", first_this_round: 0, unique_issues: null }],
       });
+      return true;
+    }
+    if (method === "GET" && url.pathname.endsWith("/artifacts") && phase === "run") {
+      await json(route, { files: [], manifest: [], offset: 0, limit: 200, total: 0, has_more: false });
+      return true;
+    }
+    if (method === "GET" && url.pathname.endsWith("/full-zip") && phase === "run") {
+      await json(route, { state: "NOT_REQUESTED" });
       return true;
     }
     return false;

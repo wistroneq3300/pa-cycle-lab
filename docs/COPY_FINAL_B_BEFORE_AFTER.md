@@ -42,6 +42,8 @@ The Top 5 remains global and continues to use the backend ordering. Only the exi
 | Task metadata | `測試案例` | `Test Case` |
 | Empty selection action | `選擇測項` | `選擇 Test Case` |
 | Empty selection hint | `請先勾選至少一筆測試案例。` | `請先選擇一筆 Test Case。` |
+| Assignment selection | Multiple checkboxes and `產生批次指令 (N)` | Single-choice radio control; selecting a new Test Case clears the previous selection |
+| Selection counter | `N / total` | `N / 1` with `一次只會送出一筆 Test Case` |
 | Library load error | `無法載入測試案例` | `Test Case Library 載入失敗` |
 | Variant label | `測試案例變體` | `Test Case Variant` |
 | Copy confirmation | `請確認完整測試案例…` | `請確認完整 Test Case…` |

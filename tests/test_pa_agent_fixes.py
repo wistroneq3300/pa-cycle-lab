@@ -141,10 +141,13 @@ class ClassificationTests(_Base):
         tc = {"code": "C1", "ai_automation_classification": classification}
         return self.gateway.build_instruction(_ctx(tc=tc))
 
-    def test_manual_only_blocks_ssh(self):
+    def test_manual_only_is_a_read_only_test_assistant(self):
         text = self._instruction("MANUAL ONLY")
         self.assertIn("人工檢查", text)
-        self.assertIn("請勿 SSH", text)
+        self.assertIn("人工測試助手", text)
+        self.assertIn("PRE／POST Evidence", text)
+        self.assertIn("實體操作", text)
+        self.assertNotIn("Execution target (DUT)", text)
 
     def test_fully_automatable_has_no_manual_block(self):
         text = self._instruction("FULLY AUTOMATABLE")
@@ -210,6 +213,19 @@ class InstructionTests(_Base):
         self.assertNotIn("寫入 lspci_vvv_pre.txt", text)
         self.assertIn("不要硬用 lspci_vvv_pre.txt", text)
         self.assertIn("test_record", text)
+
+    def test_approved_agent_execution_policy_is_explicit(self):
+        tc = {"code": "C1", "ai_automation_classification": "FULLY AUTOMATABLE"}
+        text = self.gateway.build_instruction(_ctx(tc=tc))
+        for required in (
+            "不要自動重試", "安全唯讀 Evidence", "不得自行安裝",
+            "來源、版本、完整 Command", "commands.txt", "原始 Log",
+            "Execution Summary", "正式結果仍由工程師自行記錄",
+            "Reboot 只能派送一次", "Node Identity", "不得重送 Reboot",
+            "不得排隊", "Terminal／Broadcast 不屬於此限制",
+            "先停止原測試並確認遠端狀態",
+        ):
+            self.assertIn(required, text)
 
 
 # --------------------------------------------------------------------------
